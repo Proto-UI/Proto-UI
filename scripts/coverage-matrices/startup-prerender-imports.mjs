@@ -127,7 +127,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // The build-time style snapshot uses this exact Feedback implementation.
   'packages/modules/feedback/src/create.ts': Object.freeze({
-    sourceSha256: '7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9',
+    sourceSha256: 'c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0',
     specifiers: Object.freeze([
       './caps',
       './material/declaration-id',
@@ -382,7 +382,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/runtime/src/instance/session.ts': Object.freeze({
-    sourceSha256: '82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a',
+    sourceSha256: 'c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb',
     specifiers: Object.freeze([
       '../kernel',
       '../kernel/event',

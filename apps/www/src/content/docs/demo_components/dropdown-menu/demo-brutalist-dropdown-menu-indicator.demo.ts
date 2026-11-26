@@ -70,20 +70,26 @@ export default {
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'brutalist-dropdown-label',
-                children: ['Switch workspace'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'brutalist-dropdown-item',
-                props: { value: 'personal', textValue: 'Personal' },
-                children: ['Personal'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'brutalist-dropdown-item',
-                props: { value: 'studio', textValue: 'Design Studio' },
-                children: ['Design Studio'],
+                prototypeId: 'brutalist-dropdown-group',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-label',
+                    children: ['Switch workspace'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-item',
+                    props: { value: 'personal', textValue: 'Personal' },
+                    children: ['Personal'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-item',
+                    props: { value: 'studio', textValue: 'Design Studio' },
+                    children: ['Design Studio'],
+                  },
+                ],
               },
             ],
           },

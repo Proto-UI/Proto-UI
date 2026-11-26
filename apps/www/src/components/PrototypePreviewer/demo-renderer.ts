@@ -289,6 +289,7 @@ function renderDemoNodeWc(
   parent: HTMLElement,
   instances: HTMLElement[],
   associations: ReturnType<typeof createDemoAssociationScope>,
+  owner: string,
   isCurrent: () => boolean
 ) {
   if (!isCurrent()) return;
@@ -307,9 +308,13 @@ function renderDemoNodeWc(
     }
     if (node.className) el.className = node.className;
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
+    // An initially open portal can leave the preview during connection. Mark
+    // authored native refs before that move, just like prototype instances.
+    el.setAttribute('data-demo-owner', owner);
     parent.appendChild(el);
     const kids = node.children ?? [];
-    for (const child of kids) renderDemoNodeWc(child, el, instances, associations, isCurrent);
+    for (const child of kids)
+      renderDemoNodeWc(child, el, instances, associations, owner, isCurrent);
     return;
   }
 
@@ -319,6 +324,7 @@ function renderDemoNodeWc(
   const el = document.createElement(wcName);
   instances.push(el);
   if (node.ref) el.setAttribute('data-demo-ref', node.ref);
+  el.setAttribute('data-demo-owner', owner);
   const surfaceProps = {
     surfaceClassName: node.className,
     surfaceStyle: node.surfaceStyle,
@@ -334,7 +340,7 @@ function renderDemoNodeWc(
   // Materialize authored children before connecting the custom element so the
   // Web Component adapter can project slots or reject contentless children.
   const kids = node.children ?? [];
-  for (const child of kids) renderDemoNodeWc(child, el, instances, associations, isCurrent);
+  for (const child of kids) renderDemoNodeWc(child, el, instances, associations, owner, isCurrent);
   if (isCurrent()) parent.appendChild(el);
 }
 
@@ -503,11 +509,8 @@ async function renderDemoWc(
   )
     return EMPTY_DEMO_RENDER;
 
-  renderDemoNodeWc(demo.root, host, instances, associations, () => ownsLease(opt, lease));
+  renderDemoNodeWc(demo.root, host, instances, associations, owner, () => ownsLease(opt, lease));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
-  for (const instance of instances) instance.setAttribute('data-demo-owner', owner);
-  for (const element of host.querySelectorAll('[data-demo-ref]'))
-    element.setAttribute('data-demo-owner', owner);
   refs = ownedDemoRefs(host, owner);
   const api: DemoRuntimeApi = {
     subscribePublicInstances(refs, listener) {

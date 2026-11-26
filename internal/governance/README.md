@@ -15,6 +15,7 @@ These maintained documents describe contribution and delivery procedures. They d
 ## Contribution and operation
 
 - [Collaboration model](collaboration-model.md) and [contribution provenance](contribution-provenance.md): roles, review, attribution, licensing, and DCO.
+- [Engineering writing guide](engineering-writing-guide.md) and [prototype docs style guide](prototype-docs-style-guide.md): concise human-readable writing standards for `internal/**` and public `ui-libraries/` pages.
 - [CI/CD](ci-cd.md) / [中文](ci-cd.zh-CN.md): the actual workflow inventory and regression cadence.
 - [Module capability index](module-capability-index.md) / [中文](module-capability-index.zh-CN.md): navigation into Module and host responsibilities.
 - [Project V2 design](project-v2-design.md): board design; a proposed board model is not evidence that a live board or automation is operating.

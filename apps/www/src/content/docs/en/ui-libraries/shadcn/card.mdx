@@ -70,7 +70,7 @@ ShadcnCardRoot
 ```
 
 - **Structure and typography**: `Header`, `Content`, and `Footer` manage horizontal insets and section rhythm. Render native headings and paragraphs inside them, or compose [Text](../text/) with `size="base"`, `weight="medium"`, `tone="inherit"` for titles and `size="sm"`, `tone="muted"` for secondary descriptions.
-- **Style presets**: Without an explicit selection, `Root` inherits the nearest [Style Scope](../style-scope/) and falls back to `new-york-v4` (`rounded-xl`, border, 24px spacing, 8px Header gap). Under **Shadcn Rhea**, it uses a hairline foreground ring, theme-capped 24px radius, 20px default spacing, and compact 16px `sm` density.
+- **Style presets**: Without an explicit selection, `Root` inherits the nearest [Style Scope](../style-scope/) and falls back to `new-york-v4` (`rounded-xl`, border, 24px spacing, 8px Header gap). Under **Shadcn Rhea**, it uses a hairline foreground ring, theme-capped 24px radius, 20px default spacing, and compact 16px `sm` density. Under **Shadcn Luma**, it uses `rounded-4xl` corners, `shadow-md`, a subtle `ring-foreground/5` (`ring-foreground/10` in dark mode) hairline ring, and 24px default spacing (`16px` for `sm`).
 - **Passive semantics**: All four parts are purely presentational with no extra ARIA roles, focus stops, or events; links, inputs, and buttons inside the card keep their own behavior.
 
 ## Examples
@@ -87,7 +87,7 @@ Compose `Header` actions, paired `Label` / `Input` fields, and full-width `Foote
 
 ### Size
 
-Set `size="sm"` on `Root` under **Shadcn Rhea** to switch every card section to compact 16px spacing and insets.
+Set `size="sm"` on `Root` under **Shadcn Rhea** or **Shadcn Luma** to switch every card section to compact 16px spacing and insets (down from 20px in Rhea and 24px in Luma).
 
 <PrototypePreviewer
   demoId="demo-shadcn-card-small"
@@ -146,7 +146,7 @@ Root card container that also defines the style and density boundary for nested 
   rows={[
     {
       name: 'styleProfile',
-      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      type: "'luma' | 'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
       default: "'inherit' → nearest scope → 'new-york-v4'",
     },
     { name: 'size', type: "'default' | 'sm'", default: "'default'" },
@@ -162,7 +162,7 @@ Header region for titles, descriptions, and header actions.
   rows={[
     {
       name: 'styleProfile',
-      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      type: "'luma' | 'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
       default: "'inherit'",
     },
     { name: 'divider', type: 'boolean', default: 'false' },
@@ -178,7 +178,7 @@ Main body region providing horizontal padding aligned with header and footer.
   rows={[
     {
       name: 'styleProfile',
-      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      type: "'luma' | 'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
       default: "'inherit'",
     },
   ]}
@@ -193,7 +193,7 @@ Footer region for actions and secondary metadata.
   rows={[
     {
       name: 'styleProfile',
-      type: "'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
+      type: "'luma' | 'rhea' | 'new-york-v4' | 'new-york' | 'inherit'",
       default: "'inherit'",
     },
     { name: 'divider', type: 'boolean', default: 'false' },

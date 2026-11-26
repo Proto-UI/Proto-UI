@@ -630,9 +630,23 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             await viewport.evaluate((el) => el.scrollTo(el.scrollWidth, el.scrollHeight));
             await expect
               .poll(() =>
-                viewport.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop)
+                viewport.evaluate((el) =>
+                  Math.max(
+                    el.scrollHeight - el.clientHeight - el.scrollTop,
+                    el.scrollWidth - el.clientWidth - el.scrollLeft
+                  )
+                )
               )
               .toBeLessThanOrEqual(1);
+            for (const thumb of [vThumb, hThumb]) {
+              await expect
+                .poll(() =>
+                  thumb.evaluate((el) =>
+                    parseFloat(el.style.getPropertyValue('--proto-ui-scroll-thumb-offset'))
+                  )
+                )
+                .toBeGreaterThan(0);
+            }
             const [v, h, vt, ht] = await Promise.all([
               rect(vertical),
               rect(horizontal),

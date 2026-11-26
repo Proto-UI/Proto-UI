@@ -209,6 +209,70 @@ describe('real WC Copy command composition', () => {
     await next.ready;
     expect(root.querySelectorAll('[data-demo-ref="copy-button"]')).toHaveLength(1);
   });
+
+  it('uses opaque single-owner family surfaces for floating code overlays and keeps ghost in dedicated header/collapsible=false slots', async () => {
+    const { root } = fixture();
+    const wrapper = document.createElement('div');
+    root.before(wrapper);
+    wrapper.append(root);
+    root.className = 'site-code-copy-overlay';
+    const handle = initCopyCommand(root, () => 'const a = 1;');
+    mounted.push(handle);
+    await handle.ready;
+    expect(root.querySelector('[data-demo-ref="copy-backplate"]')).toBeNull();
+    const shadcnOverlay = root.querySelector<HTMLElement>('[data-demo-ref="copy-button"]')!;
+    expect(shadcnOverlay.classList.contains('site-copy-floating-overlay')).toBe(true);
+    expect(shadcnOverlay.getAttribute('data-pui-style')).toContain('bg-background');
+    expect(shadcnOverlay.getAttribute('data-pui-style')).toContain('border-border');
+    expect(shadcnOverlay.getAttribute('data-pui-style')).not.toContain('bg-transparent');
+
+    for (const [family, expectedTag, expectedToken] of [
+      ['brutalist', 'BRUTALIST-BUTTON', 'bg-secondary-background'],
+      ['bootstrap-2-3-2', 'BOOTSTRAP-2-3-2-BUTTON', 'border-'],
+      ['liquid-glass', 'LIQUID-GLASS-BUTTON', 'bg-secondary'],
+    ] as const) {
+      wrapper.dataset.projectionFamily = family;
+      await vi.waitFor(() => expect(root.dataset.copyFamily).toBe(family));
+      const button = root.querySelector<HTMLElement>('[data-demo-ref="copy-button"]')!;
+      expect(button.tagName).toContain(expectedTag);
+      expect(button.getAttribute('data-pui-style')).toContain(expectedToken);
+    }
+
+    // Preview control family beats an enclosing site-level shadcn scope on non-fixed-family pages.
+    delete wrapper.dataset.projectionFamily;
+    wrapper.dataset.siteLibraryFamily = 'shadcn';
+    const previewScope = document.createElement('div');
+    previewScope.dataset.previewControlFamily = 'liquid-glass';
+    const lgRoot = document.createElement('div');
+    lgRoot.className = 'site-code-copy-overlay';
+    lgRoot.dataset.siteCopy = '';
+    previewScope.append(lgRoot);
+    wrapper.append(previewScope);
+    const lgHandle = initCopyCommand(lgRoot, () => 'const glass = true;');
+    mounted.push(lgHandle);
+    await lgHandle.ready;
+    expect(lgRoot.dataset.copyFamily).toBe('liquid-glass');
+    expect(lgRoot.querySelector<HTMLElement>('[data-demo-ref="copy-button"]')?.tagName).toContain(
+      'LIQUID-GLASS-BUTTON'
+    );
+    expect(lgRoot.querySelector('[data-material-scene], [data-material-backdrop]')).toBeNull();
+
+    // Dedicated non-collapsible column returns Shadcn Copy to ghost.
+    delete wrapper.dataset.siteLibraryFamily;
+    const figure = document.createElement('figure');
+    figure.dataset.codeCollapsible = 'false';
+    wrapper.append(figure);
+    const secondRoot = document.createElement('div');
+    secondRoot.className = 'site-code-copy-overlay';
+    secondRoot.dataset.siteCopy = '';
+    figure.append(secondRoot);
+    const secondHandle = initCopyCommand(secondRoot, () => 'const b = 2;');
+    mounted.push(secondHandle);
+    await secondHandle.ready;
+    const nonFloating = secondRoot.querySelector<HTMLElement>('[data-demo-ref="copy-button"]')!;
+    expect(nonFloating.classList.contains('site-copy-floating-overlay')).toBe(false);
+    expect(nonFloating.getAttribute('data-pui-style')).toContain('bg-transparent');
+  }, 20000);
 });
 
 describe('Copy source and page lifetime', () => {

@@ -54,9 +54,16 @@ export function createRuntimeTabs(options: {
   let value = options.value;
   let disabled = false;
   let disposed = false;
-  const root = element('root', { value, orientation: 'horizontal', activationMode: 'manual' });
+  const rootProps = (nextValue: RuntimeId) => ({
+    value: nextValue,
+    orientation: 'horizontal',
+    activationMode: 'manual',
+    ...(family === 'shadcn' ? { styleProfile: 'rhea' } : {}),
+    surfaceStyle: { width: '100%', minWidth: '0', gap: '0.75rem' },
+  });
+  const root = element('root', rootProps(value));
   root.dataset.runtimeTabsRoot = '';
-  const list = element('list', { appearance: 'underline', a11yLabel: 'Runtime', loop: true });
+  const list = element('list', { variant: 'line', a11yLabel: 'Runtime', loop: true });
   root.append(list);
   const panels = new Map<RuntimeId, HTMLElement>();
   const triggers = new Map<RuntimeId, RuntimeTab>();
@@ -66,7 +73,7 @@ export function createRuntimeTabs(options: {
     beforeUnlock(): void;
   } | null = null;
   for (const runtime of runtimes) {
-    const trigger = element('trigger', { value: runtime, appearance: 'underline', disabled });
+    const trigger = element('trigger', { value: runtime, disabled });
     trigger.textContent = labels[runtime] ?? runtime;
     trigger.dataset.runtimeTab = runtime;
     list.append(trigger);
@@ -197,7 +204,7 @@ export function createRuntimeTabs(options: {
       if (disposed || !panels.has(next)) return;
       value = next;
       if (panel.parentElement !== panels.get(next)) panels.get(next)!.append(panel);
-      setElementProps(root, { value, orientation: 'horizontal', activationMode: 'manual' });
+      setElementProps(root, rootProps(value));
     },
     setDisabled(next: boolean) {
       if (disposed) return;

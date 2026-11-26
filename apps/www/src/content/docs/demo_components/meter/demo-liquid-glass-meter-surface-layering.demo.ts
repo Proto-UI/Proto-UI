@@ -4,8 +4,7 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'w-full',
     children: [
       {
         kind: 'box',
@@ -64,6 +63,7 @@ const demo: DemoSpec = {
                   {
                     kind: 'proto',
                     prototypeId: 'liquid-glass-meter-track',
+                    props: { material: 'opaque' },
                     children: [{ kind: 'proto', prototypeId: 'liquid-glass-meter-indicator' }],
                   },
                 ],
@@ -97,6 +97,7 @@ const demo: DemoSpec = {
                   {
                     kind: 'proto',
                     prototypeId: 'liquid-glass-meter-track',
+                    props: { material: 'opaque' },
                     children: [{ kind: 'proto', prototypeId: 'liquid-glass-meter-indicator' }],
                   },
                 ],

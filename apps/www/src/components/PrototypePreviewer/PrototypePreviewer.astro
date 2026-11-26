@@ -3,8 +3,10 @@ import { AdapterIds, InternalAdapterIds, selectRuntimeIds, type RuntimeId } from
 import CodePanel from './CodePanel.astro';
 import BrowserCompilerPanel from './BrowserCompilerPanel.astro';
 import type { CompiledPreviewItem } from './compiled-preview-sandbox';
+import { formatPreviewCode } from './code-format';
 import { highlightCode, type CodeLang } from './code-highlight';
 import { tryResolveProjectionRecipe } from './projection-families';
+import { resolvePreviewControlFamily } from '../site-library-family';
 
 function codeLangForRuntime(runtime: RuntimeId): CodeLang {
   if (runtime === 'vue' || runtime === 'vue2') return 'vue';
@@ -112,13 +114,34 @@ const effectiveInitialRuntime = effectiveRuntimes.includes(initialRuntime)
   ? initialRuntime
   : effectiveRuntimes[0]!;
 const autoCodeMap = demoId && codePanel ? findCodeMapForDemo(demoId) : undefined;
-const effectiveHasCode = codePanel && (hasCode || !!autoCodeMap || !!codeSnippet);
-const effectiveCode = autoCodeMap ? autoCodeMap[effectiveInitialRuntime] : codeSnippet;
+const formattedCodeMap: Partial<Record<RuntimeId, string>> | undefined = autoCodeMap
+  ? {}
+  : undefined;
+if (autoCodeMap && formattedCodeMap) {
+  for (const [runtime, raw] of Object.entries(autoCodeMap)) {
+    formattedCodeMap[runtime as RuntimeId] = await formatPreviewCode(
+      raw,
+      codeLangForRuntime(runtime as RuntimeId)
+    );
+  }
+}
+const formattedSnippet =
+  codeSnippet !== undefined
+    ? await formatPreviewCode(codeSnippet, codeLangForRuntime(effectiveInitialRuntime))
+    : undefined;
+const effectiveHasCode = codePanel && (hasCode || !!formattedCodeMap || !!formattedSnippet);
+const effectiveCode = formattedCodeMap
+  ? formattedCodeMap[effectiveInitialRuntime]
+  : formattedSnippet;
 const projectionRecipe = demoId ? tryResolveProjectionRecipe(demoId) : null;
+const controlFamily = resolvePreviewControlFamily(
+  Astro.url.pathname,
+  projectionRecipe?.projectionFamilyId
+);
 
 const highlights: Record<string, string> = {};
-if (autoCodeMap) {
-  for (const [runtime, raw] of Object.entries(autoCodeMap)) {
+if (formattedCodeMap) {
+  for (const [runtime, raw] of Object.entries(formattedCodeMap)) {
     highlights[runtime] = await highlightCode(raw, codeLangForRuntime(runtime as RuntimeId));
   }
 }
@@ -151,11 +174,12 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
   data-initial-runtime={effectiveInitialRuntime}
   data-props={JSON.stringify(protoProps)}
   data-runtimes={JSON.stringify(effectiveRuntimes)}
-  data-code-map={autoCodeMap ? JSON.stringify(autoCodeMap) : ''}
+  data-code-map={formattedCodeMap ? JSON.stringify(formattedCodeMap) : ''}
   data-code-highlights={Object.keys(highlights).length ? JSON.stringify(highlights) : ''}
   data-lazy={lazy ? 'true' : 'false'}
   data-projection-mode={projectionRecipe ? 'fixed-family' : undefined}
   data-projection-family={projectionRecipe?.projectionFamilyId}
+  data-preview-control-family={controlFamily}
   data-projection-component={projectionRecipe?.familyId}
   data-projection-toolbar={projectionRecipe ? String(toolbar) : undefined}
 >
@@ -176,6 +200,22 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
   <div id={`${rid}-preview`} class="proto-previewer__preview-panel" data-panel="preview">
     <div class="proto-previewer__preview" role="region" aria-live="polite">
       <div class="host">
+        {
+          toolbar && projectionRecipe && (
+            <div
+              class="proto-previewer__runtime-tabs proto-previewer__startup-tabs"
+              data-previewer-startup-tabs
+            >
+              <div class="proto-previewer__runtime-fallback" aria-label="Runtime">
+                {effectiveRuntimes.map((runtime) => (
+                  <span aria-current={runtime === effectiveInitialRuntime ? 'true' : undefined}>
+                    {runtimeLabels[runtime] ?? runtime}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )
+        }
         <div class="proto-previewer__skeleton" role="status">
           <span class="proto-previewer__loading-title">
             {isZh ? '正在加载交互示例…' : 'Loading interactive preview…'}
@@ -217,6 +257,7 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
         lang={codeLangForRuntime(effectiveInitialRuntime)}
         framed={false}
         scrollLimit="preview"
+        controlFamily={controlFamily}
       />
     )
   }
@@ -231,12 +272,22 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
 
     .proto-previewer__runtime-tabs {
       min-width: 0;
+      overflow-x: auto;
+      padding-bottom: 0.375rem;
+      margin-bottom: -0.375rem;
+    }
+    .proto-previewer__startup-tabs {
+      margin-bottom: calc(1rem - 0.375rem);
     }
     .proto-previewer__runtime-fallback {
       display: flex;
-      gap: 1.5rem;
+      min-height: 2rem;
+      align-items: center;
+      gap: 1rem;
       overflow-x: auto;
       color: var(--sl-color-gray-2);
+      font-size: 0.875rem;
+      font-weight: 500;
       white-space: nowrap;
     }
     .proto-previewer__runtime-fallback [aria-current] {
@@ -275,9 +326,9 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
     .proto-previewer__preview {
       padding: 0;
       min-height: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      min-width: 0;
+      width: 100%;
+      display: block;
     }
 
     .proto-previewer__preview .host {
@@ -339,6 +390,9 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-runtime-tabs-control) {
       width: 100%;
       max-width: 100%;
+      overflow-x: auto;
+      padding-bottom: 0.375rem;
+      margin-bottom: -0.375rem;
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-content) {

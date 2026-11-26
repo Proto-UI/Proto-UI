@@ -86,9 +86,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
   let dirty = false;
   let children: TemplateChildren = [];
   let updateState: { inFlight: boolean; queued: boolean };
-  let mountPending:
-    | { promise: Promise<void>; resolve: () => void; reject: (error: unknown) => void }
-    | undefined;
+  let mountPending: { observe: () => Promise<void>; invalidate: () => void } | undefined;
   let unmountPending: Promise<void> | undefined;
   let unmountVersion = 0;
   let unmountWaitingForPresence = false;
@@ -217,7 +215,9 @@ export function createRuntimeSession<P extends PropsBaseType>(
     kind: 'mount' | 'update',
     epoch: number,
     updateRevision: number,
-    onCommitted: () => void
+    onCommitted: () => void,
+    onDoneError?: (error: unknown) => void,
+    mountTicket?: { handoffDepth: number }
   ) => {
     propsPort.syncFromHost();
     children = inst.renderOnce();
@@ -230,30 +230,36 @@ export function createRuntimeSession<P extends PropsBaseType>(
     }
 
     let commitDone = false;
+    const isActive = () =>
+      instancePhase === 'alive' &&
+      epoch === mountEpoch &&
+      (kind === 'mount'
+        ? mountPhase === 'mounting' || mountPhase === 'mounted'
+        : mountPhase === 'mounted');
     host.commit(children, {
       done() {
         if (commitDone) return;
         commitDone = true;
-
-        const activeCommit =
-          instancePhase === 'alive' &&
-          epoch === mountEpoch &&
-          (kind === 'mount'
-            ? mountPhase === 'mounting' || mountPhase === 'mounted'
-            : mountPhase === 'mounted');
-
-        if (activeCommit) {
-          if (kind === 'mount') {
-            emit({ type: 'mount.commit.done', epoch });
-          } else {
-            emit({ type: 'update.commit.done', epoch, revision: updateRevision });
+        if (mountTicket) mountTicket.handoffDepth++;
+        try {
+          if (isActive()) {
+            emit(
+              kind === 'mount'
+                ? { type: 'mount.commit.done', epoch }
+                : { type: 'update.commit.done', epoch, revision: updateRevision }
+            );
+            if (isActive()) {
+              bindEvents();
+              moduleHub.afterRenderCommit();
+            }
           }
-
-          bindEvents();
-          moduleHub.afterRenderCommit();
+          onCommitted();
+        } catch (error) {
+          if (onDoneError) onDoneError(error);
+          else throw error;
+        } finally {
+          if (mountTicket) mountTicket.handoffDepth--;
         }
-
-        onCommitted();
       },
     });
   };
@@ -289,25 +295,34 @@ export function createRuntimeSession<P extends PropsBaseType>(
     const currentRevision = ++revision;
 
     try {
-      renderCommit('update', epoch, currentRevision, () => {
-        update.inFlight = false;
+      renderCommit(
+        'update',
+        epoch,
+        currentRevision,
+        () => {
+          update.inFlight = false;
 
-        if (instancePhase !== 'alive' || mountPhase !== 'mounted' || epoch !== mountEpoch) {
-          dirty = true;
+          if (instancePhase !== 'alive' || mountPhase !== 'mounted' || epoch !== mountEpoch) {
+            dirty = true;
+            update.queued = false;
+            return;
+          }
+
+          moduleHub.setProtoPhase('updated');
+          emit({ type: 'update.updated', epoch, revision: currentRevision });
+          callbackScope.run(run, () => {
+            for (const cb of lifecycle.updated) cb(run);
+          });
+
+          if (!update.queued || epoch !== mountEpoch) return;
           update.queued = false;
-          return;
+          startUpdate();
+        },
+        (error) => {
+          update.inFlight = false;
+          throw error;
         }
-
-        moduleHub.setProtoPhase('updated');
-        emit({ type: 'update.updated', epoch, revision: currentRevision });
-        callbackScope.run(run, () => {
-          for (const cb of lifecycle.updated) cb(run);
-        });
-
-        if (!update.queued || epoch !== mountEpoch) return;
-        update.queued = false;
-        startUpdate();
-      });
+      );
     } catch (error) {
       update.inFlight = false;
       update.queued = false;
@@ -351,7 +366,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       );
     }
     if (mountPhase === 'mounted') return Promise.resolve();
-    if (mountPhase === 'mounting' && mountPending) return mountPending.promise;
+    if (mountPhase === 'mounting' && mountPending) return mountPending.observe();
     if (mountPhase === 'unmounting' && unmountPending) {
       return unmountPending.then(() => mount());
     }
@@ -359,7 +374,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
     const epoch = ++mountEpoch;
     updateState = { inFlight: false, queued: false };
     const version = ++transitionVersion;
-    setMountPhase('mounting', epoch);
 
     let resolveMount!: () => void;
     let rejectMount!: (error: unknown) => void;
@@ -367,66 +381,132 @@ export function createRuntimeSession<P extends PropsBaseType>(
       resolveMount = resolve;
       rejectMount = reject;
     });
-    mountPending = { promise, resolve: resolveMount, reject: rejectMount };
+    let promiseObserved = false;
+    const pending = {
+      handoffDepth: 0,
+      observe() {
+        promiseObserved = true;
+        return promise;
+      },
+      invalidate() {
+        // A reentrant unmount releases the slot immediately. Let an active
+        // notification/submission report its own outcome before settling it.
+        if (pending.handoffDepth === 0) resolveMount();
+      },
+    };
+    mountPending = pending;
+    let mountReturned = false;
+    const isStale = (phase?: MountPhase) =>
+      transitionVersion !== version ||
+      instancePhase !== 'alive' ||
+      mountEpoch !== epoch ||
+      (phase !== undefined && mountPhase !== phase);
+    const clearPending = () => {
+      if (mountPending === pending) mountPending = undefined;
+    };
+    const failMount = (error: unknown) => {
+      clearPending();
+      if (transitionVersion === version && mountEpoch === epoch && mountPhase === 'mounting') {
+        try {
+          setMountPhase('detached', epoch);
+        } catch {
+          // Retain the initiating mount error even if a phase observer throws during rollback.
+        }
+      }
+      // Preserve fail-fast without unhandled rejections when no caller observed the promise yet;
+      // reject whenever a reentrant or async caller already holds this mount ticket.
+      if (mountReturned || promiseObserved) rejectMount(error);
+      else resolveMount();
+      if (!mountReturned) throw error;
+    };
 
     const finishMount = () => {
-      if (
-        transitionVersion !== version ||
-        instancePhase !== 'alive' ||
-        mountPhase !== 'mounted' ||
-        mountEpoch !== epoch
-      ) {
-        resolveMount();
-        return;
-      }
+      if (isStale('mounted')) return;
 
       emit({ type: 'mount.mounted', epoch });
       callbackScope.run(run, () => {
         for (const cb of lifecycle.mounted) cb(run);
       });
       dirty = false;
-      mountPending = undefined;
-      resolveMount();
+      clearPending();
     };
 
+    pending.handoffDepth++;
     try {
-      renderCommit('mount', epoch, 0, () => {
-        const presence = moduleHub.getPort<PresencePort>('presence')?.awaitMount();
-        const scheduleFinish = () => {
-          if (transitionVersion !== version) {
-            resolveMount();
-            return;
-          }
-          // The view is mounted once commit and presence approval complete.
-          // The author callback remains host-scheduled and can still be
-          // invalidated by an intervening unmount.
-          moduleHub.setProtoPhase('mounted');
-          setMountPhase('mounted', epoch);
-          let scheduleReturned = false;
-          host.schedule(() => {
-            try {
-              finishMount();
-            } catch (error) {
-              mountPending = undefined;
-              if (!scheduleReturned) throw error;
-              rejectMount(error);
+      setMountPhase('mounting', epoch);
+      if (!isStale('mounting')) {
+        renderCommit(
+          'mount',
+          epoch,
+          0,
+          () => {
+            if (isStale('mounting')) {
+              clearPending();
+              resolveMount();
+              return;
             }
-          });
-          scheduleReturned = true;
-        };
-        if (presence) presence.then(scheduleFinish, scheduleFinish);
-        else scheduleFinish();
-      });
+            const presence = moduleHub.getPort<PresencePort>('presence')?.awaitMount();
+            const scheduleFinish = () => {
+              if (isStale()) {
+                clearPending();
+                resolveMount();
+                return;
+              }
+              let scheduleReturned = false;
+              let finishedInline = false;
+              pending.handoffDepth++;
+              try {
+                // Presence may finish after mount() returns. Phase observers and scheduler
+                // submission then both report their failures through this epoch's promise.
+                moduleHub.setProtoPhase('mounted');
+                setMountPhase('mounted', epoch);
+                if (isStale()) {
+                  clearPending();
+                  resolveMount();
+                  return;
+                }
+                host.schedule(() => {
+                  try {
+                    finishMount();
+                    if (scheduleReturned) resolveMount();
+                    else finishedInline = true;
+                  } catch (error) {
+                    clearPending();
+                    if (!scheduleReturned) throw error;
+                    rejectMount(error);
+                  }
+                });
+                scheduleReturned = true;
+                if (finishedInline || isStale()) resolveMount();
+              } catch (error) {
+                clearPending();
+                if (!mountReturned) throw error;
+                rejectMount(error);
+              } finally {
+                pending.handoffDepth--;
+              }
+            };
+            if (presence) presence.then(scheduleFinish, scheduleFinish);
+            else scheduleFinish();
+          },
+          (error) => {
+            if (!mountReturned) throw error;
+            failMount(error);
+          },
+          pending
+        );
+      }
+      if (isStale()) {
+        clearPending();
+        resolveMount();
+      }
     } catch (error) {
-      mountPending = undefined;
-      setMountPhase('detached', epoch);
-      // Preserve fail-fast behavior for synchronous setup/render/commit
-      // violations. The promise was not returned yet, so rejecting it here
-      // would create an unhandled rejection in legacy eager callers.
-      resolveMount();
-      throw error;
+      failMount(error);
+    } finally {
+      pending.handoffDepth--;
     }
 
+    mountReturned = true;
     return promise;
   };
 
@@ -449,7 +529,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
     const epoch = mountEpoch;
     const currentUnmountVersion = ++unmountVersion;
     ++transitionVersion;
-    mountPending?.resolve();
+    mountPending?.invalidate();
     mountPending = undefined;
     let callbackFailed = false;
     let callbackError: unknown;

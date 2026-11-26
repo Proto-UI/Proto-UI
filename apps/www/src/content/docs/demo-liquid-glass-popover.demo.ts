@@ -1,15 +1,16 @@
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
-const inputClass =
-  'col-span-2 h-8 w-full rounded-xl border border-border bg-background/80 flex items-center px-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring';
-const labelClass = 'text-sm font-medium text-secondary-foreground';
+const DEFAULTS = [
+  { ref: 'width', key: 'lg-popover-width', label: 'Width', value: '100%' },
+  { ref: 'maxWidth', key: 'lg-popover-max-width', label: 'Max. width', value: '300px' },
+  { ref: 'height', key: 'lg-popover-height', label: 'Height', value: '25px' },
+] as const;
 
 export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex min-w-0 flex-wrap items-center justify-center gap-4',
+    className: 'flex min-w-0 flex-wrap items-center justify-center gap-4',
     children: [
       {
         kind: 'proto',
@@ -47,65 +48,35 @@ export default {
               {
                 kind: 'box',
                 className: 'grid gap-2',
-                children: [
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Width'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'width',
-                        className: inputClass,
-                        attrs: { id: 'lg-popover-width', type: 'text', value: '100%' },
-                      },
-                    ],
-                  },
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Max. width'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'maxWidth',
-                        className: inputClass,
-                        attrs: { id: 'lg-popover-max-width', type: 'text', value: '300px' },
-                      },
-                    ],
-                  },
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Height'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'height',
-                        className: inputClass,
-                        attrs: { id: 'lg-popover-height', type: 'text', value: '25px' },
-                      },
-                    ],
-                  },
-                ],
+                children: DEFAULTS.map((field) => ({
+                  kind: 'box' as const,
+                  className: 'grid grid-cols-3 items-center gap-3',
+                  children: [
+                    {
+                      kind: 'proto' as const,
+                      prototypeId: 'liquid-glass-label-root',
+                      associations: { controlLabel: field.key },
+                      children: [field.label],
+                    },
+                    {
+                      kind: 'box' as const,
+                      className: 'col-span-2 min-w-0',
+                      children: [
+                        {
+                          kind: 'proto' as const,
+                          prototypeId: 'liquid-glass-input-root',
+                          ref: field.ref,
+                          className: 'w-full min-w-0',
+                          associations: { controlLabel: field.key },
+                          props: {
+                            defaultValue: field.value,
+                            material: 'opaque',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                })),
               },
               {
                 kind: 'box',
@@ -131,21 +102,13 @@ export default {
       },
     ],
   },
-  setup({ refs }) {
-    const defaults: Record<string, string> = {
-      width: '100%',
-      maxWidth: '300px',
-      height: '25px',
-    };
-    const onReset = () => {
-      for (const [key, value] of Object.entries(defaults)) {
-        const node = refs[key];
-        if (node instanceof HTMLInputElement) node.value = value;
-      }
-    };
-    refs.reset?.addEventListener('click', onReset);
-    return () => {
-      refs.reset?.removeEventListener('click', onReset);
-    };
+  setup({ api }) {
+    api.setProps('reset', {
+      onClick: () => {
+        for (const field of DEFAULTS) {
+          api.call(field.ref, 'resetValue', field.value);
+        }
+      },
+    });
   },
 } satisfies DemoSpec;

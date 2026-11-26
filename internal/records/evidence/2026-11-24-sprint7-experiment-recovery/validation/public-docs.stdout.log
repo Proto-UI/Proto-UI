@@ -1,5 +1,0 @@
-
-> proto-ui@ check:public-docs /tmp/proto-ui-s7-recovery-456f
-> node scripts/docs/check-public-docs.mjs
-
-[public-docs] OK: stable 0.2.0 from spec/versions/V-PROTO-UI-0008.yaml; workspace 0.3.0-alpha.2; 305 bilingual primary routes; 4 library inventories; 445 maintained repository documents.

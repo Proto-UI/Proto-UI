@@ -151,6 +151,14 @@ async function mount(
   await vi.waitFor(() => {
     expect(value(context.api, 'root', 'open')).toBe(true);
     expect(value(context.api, 'content', 'transitionState')).toBe('entered');
+    // Input must reach the current materialized Close in the committed portal.
+    const { close, closeAppearance, closeLabel, content } = context.refs;
+    expect(close?.isConnected).toBe(true);
+    expect(close?.getAttribute('role')).toBe('button');
+    expect(closeAppearance?.isConnected).toBe(true);
+    expect(closeLabel?.isConnected).toBe(true);
+    expect(content?.contains(close ?? null)).toBe(true);
+    expect(context.api.getPublicInstance?.('close')).toBeDefined();
   });
   // Content's entered state can precede React's committed passive children.
   // Wait for the actual Close view and its authored appearance before input.

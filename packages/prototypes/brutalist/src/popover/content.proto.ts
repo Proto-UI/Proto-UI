@@ -12,13 +12,14 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       presentation: { type: 'enum', empty: 'fallback', options: ['default', 'navigation'] },
     });
     def.props.setDefaults({ presentation: 'default' });
+    def.feedback.style.use(tw('shadow-[3px_3px_0_0_var(--pui-foreground)]'));
     def.rule({
       when: (w) => w.prop('presentation').eq('default'),
       intent: (i) =>
         i.feedback.style.use(
           tw(
             BRUTALIST_PANEL_TOKENS,
-            'shadow-[3px_3px_0_0_var(--pui-foreground)] p-4 z-50 w-72 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto flex flex-col gap-4 outline-none'
+            'p-4 z-50 w-72 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto flex flex-col gap-4 outline-none'
           )
         ),
     });

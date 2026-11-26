@@ -148,6 +148,9 @@
     white-space: pre;
     padding-inline-end: 2.75rem;
   }
+  [data-code-expanded='false'] .proto-previewer__code {
+    overflow: hidden;
+  }
   [data-code-expanded='true'] .proto-previewer__code {
     /* A readable window into long examples, bounded by the current viewport. */
     max-height: min(36rem, 65svh);
@@ -173,5 +176,17 @@
   }
   [data-code-shell] :is([data-site-button], [data-site-shadcn-button])[hidden] {
     display: none;
+  }
+  /* Shadcn Rhea/Luma dark outline uses upstream bg-transparent by contract.
+     Floating code-overlay controls (Copy and collapsed Expand) sit directly
+     over syntax-highlighted code, so keep the single-owner Button opaque in
+     dark mode without introducing a second backplate node. */
+  [data-theme='dark']
+    :is(.site-copy-floating-overlay, [data-code-toggle][data-site-control-family='shadcn']) {
+    background-color: var(--pui-background);
+  }
+  [data-theme='dark']
+    :is(.site-copy-floating-overlay, [data-code-toggle][data-site-control-family='shadcn']):hover {
+    background-color: var(--pui-muted);
   }
 }

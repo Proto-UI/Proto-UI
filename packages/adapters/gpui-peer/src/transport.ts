@@ -12,6 +12,7 @@ const MAX_FRAME_BYTES = 16 * 1024 * 1024;
 export type FrameDecoder<T> = {
   push(chunk: Uint8Array): T[];
   pendingBytes(): number;
+  reset(): void;
 };
 
 export function encodeFrame(message: unknown): Uint8Array {
@@ -55,6 +56,9 @@ export function createFrameDecoder<T>(): FrameDecoder<T> {
     pendingBytes() {
       return buffer.byteLength;
     },
+    reset() {
+      buffer = new Uint8Array(0);
+    },
   };
 }
 
@@ -67,6 +71,10 @@ export type PeerTransport = {
 type StreamLike = {
   on(event: 'data', listener: (chunk: Uint8Array) => void): unknown;
   on(event: 'end' | 'close', listener: () => void): unknown;
+  off?(event: 'data', listener: (chunk: Uint8Array) => void): unknown;
+  off?(event: 'end' | 'close', listener: () => void): unknown;
+  removeListener?(event: 'data', listener: (chunk: Uint8Array) => void): unknown;
+  removeListener?(event: 'end' | 'close', listener: () => void): unknown;
 };
 
 type WritableLike = {
@@ -79,12 +87,36 @@ export function createStreamTransport(input: StreamLike, output: WritableLike): 
   const decoder = createFrameDecoder<HostToPeerMessage>();
   let closed = false;
 
-  input.on('data', (chunk) => {
+  const detach = () => {
+    const unbind = input.off?.bind(input) ?? input.removeListener?.bind(input);
+    if (!unbind) return;
+    unbind('data', onData);
+    unbind('end', onEof);
+    unbind('close', onEof);
+  };
+
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    detach();
+    decoder.reset();
+    listeners.clear();
+  };
+
+  const onData = (chunk: Uint8Array) => {
     if (closed) return;
     for (const message of decoder.push(chunk)) {
       for (const listener of [...listeners]) listener(message);
     }
-  });
+  };
+
+  const onEof = () => {
+    close();
+  };
+
+  input.on('data', onData);
+  input.on('end', onEof);
+  input.on('close', onEof);
 
   return {
     send(message) {
@@ -92,13 +124,11 @@ export function createStreamTransport(input: StreamLike, output: WritableLike): 
       output.write(encodeFrame(message));
     },
     onMessage(listener) {
+      if (closed) return () => {};
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    close() {
-      closed = true;
-      listeners.clear();
-    },
+    close,
   };
 }
 

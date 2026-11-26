@@ -2,7 +2,9 @@
 
 The independent prototype/projection portfolio is [documented here](../../internal/coverage-matrices/README.md). Validate its JSON/source/consumer links with `node scripts/coverage-matrices/prototype-coverage.mjs --check`; regenerate the readable view with `--write`. Its negative controls run with the existing test glob. This source inventory is separate from the Website/Harness runtime ownership checks below.
 
-`node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
+`node scripts/coverage-matrices/render-consumer-matrices.mjs --check` verifies that `internal/website/self-hosting-coverage-matrix.md` and `internal/agent-harness/dogfood-coverage-matrix.md` stay byte-synced with their canonical JSON sources (`*.json`, regenerating with `--write` / `pnpm coverage:matrices:render`).
+
+`node scripts/coverage-matrices/check-coverage-matrices.mjs` (modularized with `website-raw-import-allowlist.mjs` and `matrix-configs.mjs`) validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
 
 The [#834 browser study](https://github.com/Proto-UI/Proto-UI/issues/834) uses the [current source reference](test/fixtures/website-markup-provenance-current.json) for its sampled routes. The [original reference](test/fixtures/website-markup-provenance-source.json) preserves the earlier review baseline. The suite rejects changed bytes before launching the Website. Review any changes to the sampled inputs and their ownership before updating the current reference. Both references record unverified source admission. The served build and transitive source closure require separate evidence.
 
@@ -80,7 +82,7 @@ Every current-profile input below must be a regular file at its exact authored p
 | `apps/www/scripts/runtime-retry-urls.mjs` | `510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224` |
 | `apps/www/scripts/contrast-provenance.mjs` | `a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a` |
 | `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
-| `apps/www/scripts/accordion-activation-probe.mjs` | `9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b` |
+| `apps/www/scripts/accordion-activation-probe.mjs` | `1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642` |
 
 This current config remains unrecognized by `promotionBarePackageTargets` for general bare-package promotion. Its extracted resolver and optional activation probe are bound as source inputs, without certifying general resolver parity, probe activation, transformed Adapter bytes, installed framework bytes, emitted URLs, or runtime behavior. The virtual edge remains terminal in source traversal; the separate production module-graph checks retain their existing responsibility.
 

@@ -24,7 +24,7 @@ const BROWSER_COMPILER_OWNER = Object.freeze({
 
 export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
   'packages/compiler/src/core-value-types.ts': Object.freeze({
-    sourceSha256: '95d2852d40d97b570e75a3f095b25a7ce633e81606f21148557266795ff2842e',
+    sourceSha256: 'f94e6acaea151b7046c57ec4a537202ef903f79264df1e437d749cb502ab8b8d',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/control-label']),
   }),
@@ -34,7 +34,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/gpui-source.ts': Object.freeze({
-    sourceSha256: '897cd8622b7bd9353e6bf8cd28e43a6a2e556e080ad15ac8e115fc408adb5089',
+    sourceSha256: '99f3d5fb720a685846b2deb32af5ab0ae54193a098be79ac1e5fb9cf96b34195',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
@@ -105,7 +105,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
     // The 0.3.0 release stamp updates the six React runtime dependency and helper versions.
-    sourceSha256: 'f008f1b302f0d45adeedeeb8c4163b18c92c89057302f773e237c4c247be6843',
+    sourceSha256: 'f4d2699fdfe005c9f1781250651f6f06bc4af3383750cf228ab219de9e849b15',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -155,7 +155,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./handles', './internal', './spec', './state']),
   }),
   'packages/core/src/spec/feedback/application-role.ts': Object.freeze({
-    sourceSha256: '2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab',
+    sourceSha256: '038d2b3b8ceb22078101be158eb06720c1658e76d0e636ddc3be1b705146d7d0',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./placeholder']),
   }),

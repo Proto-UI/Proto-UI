@@ -1,6 +1,0 @@
-
-> @proto.ui/cli@0.3.0-alpha.2 build /var/tmp/proto-ui-native-456f/packages/cli
-> node ../../scripts/build/public-packages.mjs --package @proto.ui/cli
-
-[build:packages] @proto.ui/cli 3359ms 62 files
-[build:packages] complete: 1/47 public packages

@@ -1,5 +1,0 @@
-
-> proto-ui@ check:public-docs /workspace/scratch/0d7d81e85daf/proto-ui-s7
-> node scripts/docs/check-public-docs.mjs
-
- ELIFECYCLE  Command failed with exit code 1.

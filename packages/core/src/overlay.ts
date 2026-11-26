@@ -33,6 +33,8 @@ export type OverlayConfigPatch = Readonly<{
   closeOnFocusOutside?: boolean;
   closeOnAnchorPress?: boolean;
   closeOnTriggerPress?: boolean;
+  /** Participate in Boundary outside arbitration while logically open. Defaults to true. */
+  boundaryStack?: boolean;
   placement?: OverlayPlacement;
   align?: OverlayAlign;
   sideOffset?: number;
@@ -62,6 +64,7 @@ export type OverlayConfig = Readonly<{
   closeOnFocusOutside: boolean;
   closeOnAnchorPress: boolean;
   closeOnTriggerPress: boolean;
+  boundaryStack: boolean;
   placement: OverlayPlacement;
   align: OverlayAlign;
   sideOffset: number;

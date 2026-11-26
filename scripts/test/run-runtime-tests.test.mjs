@@ -379,7 +379,7 @@ describe('runtime test plan', () => {
       readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
         const file = path.join(directory, entry.name);
         return entry.isDirectory()
-          ? ['node_modules', 'dist', '.astro'].includes(entry.name)
+          ? ['node_modules', 'dist', '.astro'].includes(entry.name) || entry.name.startsWith('dist.')
             ? []
             : scan(file)
           : file.endsWith('.browser.test.ts')

@@ -170,9 +170,9 @@ Rule Meta 从原始 `RulePort.exportIR().deps` 判断是否存在 `meta:colorSch
 
 在上述基线，以 Node 22.23.2、pnpm 10.32.1、Chromium 152.0.7977.83 重新运行已合入的 `2026-09-13-rule-meta/browser-observations.mjs`：四个 Button journey、十二个相邻控件 journey、六个 Transition journey 完成。Button 和其它控件样本与原始数据一致，确认问题仍存在；没有把旧研究重新算成本次方案。
 
-新增的 [scope 观察工具](./evidence/2026-09-14-color-scheme-proposal/scope-observations.mjs)通过现有 Web Component Adapter 与真实 Shadcn Textarea 构造四个 App-owned 样本，保留默认 getter 或明确传入 constant-dark 自定义 getter。局部 marker 属于测试 App 容器，读取器函数的记录也放在该容器上；没有克隆组件 DOM、改 Proto 规则或把测试 reader 当新的协议状态。
+新增的 [scope 观察工具](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-14-color-scheme-proposal/scope-observations.mjs)通过现有 Web Component Adapter 与真实 Shadcn Textarea 构造四个 App-owned 样本，保留默认 getter 或明确传入 constant-dark 自定义 getter。局部 marker 属于测试 App 容器，读取器函数的记录也放在该容器上；没有克隆组件 DOM、改 Proto 规则或把测试 reader 当新的协议状态。
 
-[原始 JSON](./evidence/2026-09-14-color-scheme-proposal/observations.json)记录四种 root 状态下的十六个样本。默认样本通过同一共享默认 resolver 重新读取，custom 样本调用其实际传入的 getter；`declaredScheme` 是这些 fixture 采样值，不声称被优化的 Rule 当时调用了 getter。
+[原始 JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-14-color-scheme-proposal/observations.json)记录四种 root 状态下的十六个样本。默认样本通过同一共享默认 resolver 重新读取，custom 样本调用其实际传入的 getter；`declaredScheme` 是这些 fixture 采样值，不声称被优化的 Rule 当时调用了 getter。
 
 | 现状样本 | getter 值 | 实际背景 |
 | --- | --- | --- |
@@ -183,7 +183,7 @@ Rule Meta 从原始 `RulePort.exportIR().deps` 判断是否存在 `meta:colorSch
 | 无 root 明确标记 / system dark / 默认 reader | dark | dark input tint |
 | 无 root 明确标记 / system light / 默认 reader | light | transparent |
 
-已检查[显式 light 截图](./evidence/2026-09-14-color-scheme-proposal/explicit-light.png)与[显式 dark 截图](./evidence/2026-09-14-color-scheme-proposal/explicit-dark.png)。它们证明当前 reader/selector 的作用域差异，不能算作拟议通知机制已经成功的证据。新反例矩阵是 WC/Web 的证据；四运行时根主题基线来自前述独立的二十二个 journey，不把一个 WC 反例扩写为完整非 Web conformance。
+已检查[显式 light 截图](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-14-color-scheme-proposal/explicit-light.png)与[显式 dark 截图](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-14-color-scheme-proposal/explicit-dark.png)。它们证明当前 reader/selector 的作用域差异，不能算作拟议通知机制已经成功的证据。新反例矩阵是 WC/Web 的证据；四运行时根主题基线来自前述独立的二十二个 journey，不把一个 WC 反例扩写为完整非 Web conformance。
 
 复现命令：
 

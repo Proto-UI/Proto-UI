@@ -19,7 +19,7 @@ export type ToastType = 'default' | 'success' | 'info' | 'warning' | 'error' | '
 
 export type ToastSwipeDirection = 'right' | 'left' | 'up' | 'down' | 'none';
 
-export type ToastStackTier = 'front' | 'second' | 'third' | 'overflow';
+export type ToastStackTier = 'front' | 'second' | 'third' | 'back' | 'overflow';
 
 export interface ToastViewportProps {
   a11yLabel?: string;
@@ -39,6 +39,7 @@ export type ToastViewportExposes = {
   position: ExposeState<ToastPosition>;
   expanded: ExposeState<boolean>;
   paused: ExposeState<boolean>;
+  hasOpen: ExposeState<boolean>;
 };
 
 export type ToastViewportAsHookContract = {
@@ -46,6 +47,7 @@ export type ToastViewportAsHookContract = {
     position: State<ToastPosition>;
     expanded: State<boolean>;
     paused: State<boolean>;
+    hasOpen: State<boolean>;
   };
 };
 
@@ -67,6 +69,10 @@ export type ToastRootExposes = TransitionExposes & {
   position: ExposeState<ToastPosition>;
   expanded: ExposeState<boolean>;
   stackTier: ExposeState<ToastStackTier>;
+  /** Zero-based opening chronology, newest first; -1 while outside the open stack. */
+  stackIndex: ExposeState<number>;
+  /** Outside the configured visible window, without closing or restarting its timer. */
+  limited: ExposeState<boolean>;
   openToast: ExposeMethod<() => void>;
   close: ExposeMethod<(reason?: string) => void>;
   pause: ExposeMethod<() => void>;
@@ -83,6 +89,8 @@ export type ToastRootAsHookContract = {
     position: State<ToastPosition>;
     expanded: State<boolean>;
     stackTier: State<ToastStackTier>;
+    stackIndex: State<number>;
+    limited: State<boolean>;
   };
 };
 

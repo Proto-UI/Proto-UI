@@ -2,7 +2,6 @@ import {
   COMMAND_HOVER,
   COMMAND_PRESS,
   COMMAND_FOCUS,
-  COMMAND_DISABLED,
   COMMAND_BLOCKED,
 } from '../interactive-surface';
 import { definePrototype, tw, delay, type RunHandle } from '@proto.ui/core';
@@ -122,7 +121,7 @@ export default definePrototype<LiquidGlassAccordionTriggerProps, AccordionTrigge
     // Disabled withdraws optical elevation and pointer interaction without dimming fallback contrast.
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
     });
     def.rule({
       when: (w) => w.state(state.collapseBlocked).eq(true),

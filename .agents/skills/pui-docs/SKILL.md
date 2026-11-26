@@ -10,11 +10,11 @@ Apply the [current release stages and completion policy](../../../internal/gover
 1. Read the target document completely, including its original purpose, neighboring navigation, other locale, linked entities, and real implementation surface.
 2. Require a `pui-trace` map. State which source owns every behavioral claim.
 3. Preserve the document's role: entry pages route readers, governance pages define stable process, dated records preserve current observations, and public pages explain governed behavior.
-4. Write for the intended reader. Use direct sentences, define necessary terms, remove stale relative time and mutable counts, and avoid defensive or promotional prose.
+4. Write for the intended reader. Follow [the internal engineering writing guide](../../../internal/governance/engineering-writing-guide.md) for `internal/**` docs and [the prototype documentation style guide](../../../internal/governance/prototype-docs-style-guide.md) for public `ui-libraries/` pages: state conclusions first, put authority/evidence limits once in a single `## Scope & Limits` slot, split large inventories into `.json`/`.yaml`, keep paragraphs concise, remove stale relative time and mutable counts, and avoid defensive or promotional prose.
 5. Keep locales semantically aligned without forcing identical phrasing. Keep identifiers and API names canonical.
 6. Use real public exports and routes for demos. Do not add page-level behavior that pretends to be package behavior.
 7. Change generated docs through their generator. For illustrations, use `internal/agent-operations/diagram-design.md` to inventory existing assets, preserve source-grounded meaning, choose a suitable topology, and inspect actual localized/theme renders before publication.
-8. Record the proportional validation boundary and propose `pui-validate` in the handoff without loading it.
+8. Record the proportional validation boundary (including `corepack pnpm@10.32.1 check:internal-docs` for `internal/**` changes) and propose `pui-validate` in the handoff without loading it.
 
 Stop if the text requires a new guarantee, public API advice, compatibility promise, unresolved Adapter path, or hidden implementation fix.
 

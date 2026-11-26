@@ -43,8 +43,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'min-w-0 w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex flex-wrap items-center justify-center gap-2',
+    className: 'min-w-0 w-full flex flex-wrap items-center justify-center gap-2',
     children: [
       ...TIERS.map((item) => ({
         kind: 'proto' as const,
@@ -55,6 +54,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'liquid-glass-toast-viewport',
+        previewTheme: 'portal',
+        ref: 'viewport',
         props: {
           a11yLabel: 'Liquid Glass notifications',
         },

@@ -2055,7 +2055,7 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
     },
   };
   await mkdir(path.dirname(output), { recursive: true });
-  await writeFile(output, JSON.stringify(inventory, null, 2) + '\n');
+  await writeFile(output, JSON.stringify(inventory) + '\n');
   console.log(
     JSON.stringify({
       output: relative(output),

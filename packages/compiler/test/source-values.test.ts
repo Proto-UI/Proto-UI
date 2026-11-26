@@ -102,9 +102,14 @@ describe('ordinary source value types', () => {
       new URL('../../prototypes/shadcn/src/style-scope/context.ts', import.meta.url),
       'utf8'
     );
+    const ids = readFileSync(
+      new URL('../../prototypes/shadcn/src/style-scope/ids.ts', import.meta.url),
+      'utf8'
+    );
     expect(
       parse(`import type {ShadcnStyleId} from './context'; type Result=ShadcnStyleId;`, {
         'context.ts': context,
+        'ids.ts': ids,
       })
     ).toEqual(
       parse(`type Result='vega'|'nova'|'maia'|'lyra'|'mira'|'luma'|'sera'|'rhea'|'new-york-v4';`)

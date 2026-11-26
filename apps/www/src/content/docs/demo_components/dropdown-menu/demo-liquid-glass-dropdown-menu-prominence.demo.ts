@@ -2,8 +2,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex min-w-0 flex-wrap items-center justify-center gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex min-w-0 flex-wrap items-center justify-center gap-4',
     children: [
       {
         kind: 'proto',
@@ -55,20 +54,26 @@ export default {
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-label',
-                children: ['New item'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-item',
-                props: { value: 'note', textValue: 'Note' },
-                children: ['Note'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-item',
-                props: { value: 'folder', textValue: 'Folder' },
-                children: ['Folder'],
+                prototypeId: 'liquid-glass-dropdown-group',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-label',
+                    children: ['New item'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: { value: 'note', textValue: 'Note' },
+                    children: ['Note'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: { value: 'folder', textValue: 'Folder' },
+                    children: ['Folder'],
+                  },
+                ],
               },
             ],
           },

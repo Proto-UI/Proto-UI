@@ -14,6 +14,57 @@ const SITE_CONTENTS_OPEN_EVENT = 'site-contents:open';
 const disclosures = new WeakMap<HTMLElement, SiteHeaderDisclosure>();
 const contentsNavigations = new WeakMap<HTMLElement, SiteContentsNavigation>();
 const FOCUSABLE = 'a[href], button, [role="button"], [role="combobox"], [tabindex="0"]';
+const PORTAL_HEADER_HEIGHT = '--docs-preview-header-height';
+const portalHeaderMeasurements = new WeakMap<
+  Document,
+  { owners: Map<HTMLElement, string>; active: HTMLElement; original: string; priority: string }
+>();
+
+function publishPortalHeaderHeight(root: HTMLElement, height: string) {
+  const document = root.ownerDocument;
+  const style = document.documentElement.style;
+  let measurements = portalHeaderMeasurements.get(document);
+  if (!measurements) {
+    measurements = {
+      owners: new Map(),
+      active: root,
+      original: style.getPropertyValue(PORTAL_HEADER_HEIGHT),
+      priority: style.getPropertyPriority(PORTAL_HEADER_HEIGHT),
+    };
+    portalHeaderMeasurements.set(document, measurements);
+  }
+  if (!measurements.owners.has(root)) measurements.active = root;
+  measurements.owners.set(root, height);
+  if (
+    measurements.active === root &&
+    (style.getPropertyValue(PORTAL_HEADER_HEIGHT) !== height ||
+      style.getPropertyPriority(PORTAL_HEADER_HEIGHT) !== '')
+  )
+    style.setProperty(PORTAL_HEADER_HEIGHT, height);
+}
+
+function releasePortalHeaderHeight(root: HTMLElement) {
+  const document = root.ownerDocument;
+  const measurements = portalHeaderMeasurements.get(document);
+  const current = measurements?.owners.get(root);
+  if (!measurements || current === undefined) return;
+  measurements.owners.delete(root);
+  if (measurements.active !== root) return;
+  const next = Array.from(measurements.owners.entries()).at(-1);
+  if (next) measurements.active = next[0];
+  else portalHeaderMeasurements.delete(document);
+  const style = document.documentElement.style;
+  if (
+    style.getPropertyValue(PORTAL_HEADER_HEIGHT) !== current ||
+    style.getPropertyPriority(PORTAL_HEADER_HEIGHT) !== ''
+  )
+    return;
+  if (next) {
+    if (next[1] !== current) style.setProperty(PORTAL_HEADER_HEIGHT, next[1]);
+  } else if (measurements.original)
+    style.setProperty(PORTAL_HEADER_HEIGHT, measurements.original, measurements.priority);
+  else style.removeProperty(PORTAL_HEADER_HEIGHT);
+}
 
 /**
  * IDREF and expanded state alone do not make an overlay an Escape owner.
@@ -91,6 +142,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     const height = root.offsetHeight;
     if (!Number.isFinite(height) || height <= 0) return;
     const next = `${height}px`;
+    publishPortalHeaderHeight(root, next);
     if (frame.style.getPropertyValue('--header-height') === next) return;
     frame.style.setProperty('--header-height', next);
     measuredHeight = next;
@@ -385,6 +437,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
           : null
       );
     for (const property of panelProperties) panel?.style.removeProperty(property);
+    releasePortalHeaderHeight(root);
     if (
       frame &&
       measuredHeight !== null &&

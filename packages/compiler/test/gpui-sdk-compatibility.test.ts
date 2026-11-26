@@ -67,6 +67,23 @@ afterEach(async () => {
 });
 
 describe('shared GPUI SDK compatibility', () => {
+  it('allows generated-code lints as an inner attribute before the first item', () => {
+    const code = component().output.code;
+    const lines = code.split('\n').map((line) => line.trim());
+    const allow = lines.findIndex((line) => line.startsWith('#![allow('));
+    const firstItem = lines.findIndex((line) =>
+      /^(pub |use |#\[|fn |struct |impl |mod )/.test(line)
+    );
+    expect(allow).toBeGreaterThanOrEqual(0);
+    expect(allow).toBeLessThan(firstItem);
+    // Exactly the reproduced lowering noise; diagnostics that can reveal a
+    // lowering defect (dead_code, unreachable_code, unused_mut, ...) stay on.
+    expect(lines[allow]).toBe('#![allow(unused_parens, unused_variables, non_upper_case_globals)]');
+    expect(
+      lines.filter((line) => line.startsWith('#![allow(') || line.startsWith('#[allow('))
+    ).toEqual([lines[allow]]);
+  });
+
   it.each([false, true])(
     'emits one ControlLabel owner and one module field (workspace=%s)',
     (workspace) => {

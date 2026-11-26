@@ -46,14 +46,18 @@ const EXPECTED_TASK_PROTOTYPES = {
 // change without changing a task, but must still retain its owner/coordinate.
 const GALLERY_TASK_PARTS = {
   controls: {
-    button: 4,
+    button: 5,
     toggle: 2,
-    'separator-root': 1,
     'checkbox-root': 1,
     'checkbox-indicator': 1,
+    'input-root': 1,
     'label-root': 1,
+    'radio-group-root': 1,
+    'radio-group-item': 2,
+    'radio-group-indicator': 2,
     'switch-root': 1,
     'switch-thumb': 1,
+    'textarea-root': 1,
   },
   hover: { 'hover-card-root': 1, 'hover-card-trigger': 1, 'hover-card-content': 1 },
   'workspace-command': {
@@ -91,9 +95,9 @@ const GALLERY_TASK_PARTS = {
     'slider-track': 1,
     'slider-indicator': 1,
     'slider-thumb': 1,
-    button: 1,
+    button: 2,
   },
-  'workspace-analytics': { 'separator-root': 1 },
+  'workspace-analytics': { 'separator-root': 1, button: 1 },
   editor: {
     'tabs-root': 1,
     'tabs-list': 1,
@@ -118,10 +122,11 @@ const GALLERY_TASK_PARTS = {
     'dropdown-trigger': 1,
     'dropdown-content': 1,
     'dropdown-item': 2,
-    'separator-root': 1,
     button: 2,
   },
   choices: { 'checkbox-root': 3, 'checkbox-indicator': 3, 'label-root': 3, button: 1 },
+  shortcuts: {},
+  spark: { button: 1 },
 } as const;
 const TASK_PART_REFS = {
   'settings-view': 'select',
@@ -520,7 +525,7 @@ async function assertTaskPartInventory(
   const passiveIds = [
     `${family}-text-root`,
     `${family}-surface-root`,
-    ...['root', 'header', 'content'].map((part) => `shadcn-card-${part}`),
+    ...['root', 'header', 'content'].map((part) => `${family}-card-${part}`),
   ];
   const actualIds = await parts.evaluateAll(
     (elements, passive) =>
@@ -530,9 +535,11 @@ async function assertTaskPartInventory(
         .sort(),
     passiveIds
   );
-  const taskIds = await content.locator('[data-gallery-demo]').evaluateAll((elements) =>
-    elements.map((element) => element.getAttribute('data-gallery-demo')).sort()
-  );
+  const taskIds = await content
+    .locator('[data-gallery-demo]')
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute('data-gallery-demo')).sort()
+    );
   expect(taskIds, 'each intended gallery task occurs once').toEqual(
     Object.keys(GALLERY_TASK_PARTS).sort()
   );
@@ -540,8 +547,9 @@ async function assertTaskPartInventory(
   for (const [taskId, anatomy] of Object.entries(GALLERY_TASK_PARTS)) {
     const task = content.locator(attributeEquals('data-gallery-demo', taskId));
     const expectedIds = Object.entries(anatomy).flatMap(([suffix, count]) =>
-      Array(suffix === 'accordion-content' && expected.runtimeId !== 'wc' ? 1 : count)
-        .fill(`${family}-${suffix}`)
+      Array(suffix === 'accordion-content' && expected.runtimeId !== 'wc' ? 1 : count).fill(
+        `${family}-${suffix}`
+      )
     );
     if (family === 'shadcn') {
       if (taskId === 'preferences') {
@@ -654,10 +662,10 @@ async function assertSelectFingerprint(
   } else {
     expect(restingTokens).toEqual(
       expect.arrayContaining([
-        'rounded-[var(--pui-radius-2xl)]',
+        'rounded-[var(--pui-radius-3xl)]',
         'border-transparent',
         'bg-input/50',
-        'h-8',
+        'h-9',
       ])
     );
   }

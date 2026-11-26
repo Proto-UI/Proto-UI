@@ -145,7 +145,10 @@ describe('Liquid content: inherited Scroll Area sessions, not a glass container'
     expect(root.contains(content)).toBe(true);
     expect(track.style.display).toBe('none');
     expect(thumb.tabIndex).toBe(-1);
-    expectNeutral(root, viewport, track, thumb);
+    expectNeutral(root, viewport, track);
+    expect(latest(thumb).material.candidates).toEqual([
+      { intent: 'liquid-glass', variant: 'regular' },
+    ]);
 
     viewport.scrollTop = 150;
     viewport.dispatchEvent(new Event('scroll'));
@@ -220,7 +223,13 @@ describe('Liquid content: inherited Scroll Area sessions, not a glass container'
     replacement.dispatchEvent(pointer('pointermove', { clientY: 45 }));
     replacement.dispatchEvent(pointer('pointerup', { clientY: 45 }));
     expect(viewport.scrollTop).toBeGreaterThan(0);
-    expectNeutral(root, viewport, vertical, horizontal, replacement, horizontalThumb);
+    expectNeutral(root, viewport, vertical, horizontal);
+    expect(latest(replacement).material.candidates).toEqual([
+      { intent: 'liquid-glass', variant: 'regular' },
+    ]);
+    expect(latest(horizontalThumb).material.candidates).toEqual([
+      { intent: 'liquid-glass', variant: 'regular' },
+    ]);
     root.remove();
     await flush();
     const retiredOffset = viewport.scrollTop;
@@ -366,6 +375,7 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     const next = make(carousel.carouselNext);
     first.textContent = 'First scene';
     second.textContent = 'Second scene';
+    previous.textContent = 'Previous';
     next.textContent = 'Next';
     viewport.append(first, second);
     root.append(viewport, previous, next);
@@ -373,44 +383,142 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     root.addEventListener('indexChange', (event) => requests.push((event as CustomEvent).detail));
     document.body.append(root);
     await flush();
-    const navigationCandidate = [
-      {
-        intent: 'liquid-glass',
-        variant: 'regular',
-        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
-      },
-    ];
+
+    const navigationCandidate = {
+      intent: 'liquid-glass',
+      variant: 'regular',
+      deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+    };
+    const expectNavigation = (
+      element: Subject,
+      disabled: boolean,
+      material: 'auto' | 'opaque' = 'auto'
+    ) => {
+      expect(element.getExposes().disabled.get()).toBe(disabled);
+      // Controls retain their declared slot when an endpoint, disabled owner or
+      // explicit opaque prop withdraws the candidate. Only slide content is neutral.
+      expect(latest(element).material).toEqual({
+        slot: {
+          version: 2,
+          shape: { kind: 'rounded-rect', geometry: 'style' },
+          source: { kind: 'in-app-backdrop' },
+          fallback: { fill: 'style', foreground: 'style' },
+        },
+        candidates: !disabled && material === 'auto' ? [navigationCandidate] : [],
+      });
+      const tokens = latest(element).style.tokens;
+      expect(tokens).toEqual(
+        expect.arrayContaining(
+          disabled
+            ? ['bg-muted', 'text-muted-foreground']
+            : ['bg-secondary', 'text-secondary-foreground']
+        )
+      );
+      for (const token of disabled
+        ? ['bg-secondary', 'text-secondary-foreground']
+        : ['bg-muted', 'text-muted-foreground'])
+        expect(tokens).not.toContain(token);
+    };
+    const expectOwner = (index: 0 | 1) => {
+      expect(root.getExposes().index.get()).toBe(index);
+      expect(root.getExposes().slideCount.get()).toBe(2);
+      expect(first.getExposes().current.get()).toBe(index === 0);
+      expect(second.getExposes().current.get()).toBe(index === 1);
+      expect(first.getExposes().hidden.get()).toBe(index !== 0);
+      expect(second.getExposes().hidden.get()).toBe(index !== 1);
+      expect(first.parentElement).toBe(viewport);
+      expect(second.parentElement).toBe(viewport);
+      expect(first.textContent).toBe('First scene');
+      expect(second.textContent).toBe('Second scene');
+      expectNeutral(root, viewport, first, second);
+    };
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
     expect(latest(first).style.tokens).toContain('px-2');
+    expect(latest(first).style.tokens).not.toContain('py-2');
     expect(latest(previous).style.tokens).toContain('left-3');
     expect(latest(next).style.tokens).toContain('right-3');
-    expect(latest(previous).material.candidates).toEqual([]);
-    expect(latest(next).material.candidates).toEqual(navigationCandidate);
+    click(previous);
+    await flush();
+    expect(requests).toEqual([]);
     click(next);
     await flush();
     expect(requests).toEqual([{ index: 1 }]);
-    expect(root.getExposes().index.get()).toBe(0);
-    expect(second.getExposes().hidden.get()).toBe(true);
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+
     setElementProps(root, { index: 1, orientation: 'vertical', direction: 'rtl' });
     await flush();
-    expect(first.getExposes().hidden.get()).toBe(true);
-    expect(second.getExposes().hidden.get()).toBe(false);
-    expect(second.textContent).toBe('Second scene');
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
     expect(latest(first).style.tokens).toContain('py-2');
     expect(latest(first).style.tokens).not.toContain('px-2');
     expect(latest(previous).style.tokens).toContain('top-3');
+    expect(latest(previous).style.tokens).not.toContain('left-3');
     expect(latest(next).style.tokens).toContain('bottom-3');
+    expect(latest(next).style.tokens).not.toContain('right-3');
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }]);
+
     setElementProps(root, { index: 1, direction: 'rtl' });
     await flush();
+    expectOwner(1);
     expect(latest(first).style.tokens).toContain('px-2');
     expect(latest(first).style.tokens).not.toContain('py-2');
     expect(latest(previous).style.tokens).toContain('right-3');
     expect(latest(previous).style.tokens).not.toContain('top-3');
     expect(latest(next).style.tokens).toContain('left-3');
     expect(latest(next).style.tokens).not.toContain('bottom-3');
-    expect(requests).toEqual([{ index: 1 }]);
-    expectNeutral(root, viewport, first, second);
-    expect(latest(previous).material.candidates).toEqual(navigationCandidate);
-    expect(latest(next).material.candidates).toEqual([]);
+    click(previous);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }]);
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+
+    setElementProps(root, { index: 0, direction: 'rtl' });
+    await flush();
+    expectOwner(0);
+    expectNavigation(previous, true);
+    expectNavigation(next, false);
+    setElementProps(root, { index: 0, direction: 'rtl', disabled: true });
+    await flush();
+    expectNavigation(previous, true);
+    expectNavigation(next, true);
+    click(previous);
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }]);
+    expectOwner(0);
+
+    setElementProps(root, { index: 0, direction: 'rtl' });
+    await flush();
+    expectNavigation(next, false);
+    setElementProps(next, { material: 'opaque' });
+    await flush();
+    expectNavigation(next, false, 'opaque');
+    click(next);
+    await flush();
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }, { index: 1 }]);
+    expectOwner(0);
+    setElementProps(next, {});
+    await flush();
+    expectNavigation(next, false);
+
+    setElementProps(root, { index: 1 });
+    await flush();
+    expectOwner(1);
+    expectNavigation(previous, false);
+    expectNavigation(next, true);
+    expect(latest(previous).style.tokens).toContain('left-3');
+    expect(latest(previous).style.tokens).not.toContain('right-3');
+    expect(latest(next).style.tokens).toContain('right-3');
+    expect(latest(next).style.tokens).not.toContain('left-3');
+    expect(requests).toEqual([{ index: 1 }, { index: 0 }, { index: 1 }]);
   });
 
   it('retains the complete Virtual List collection and rejects stale bounded work after owner changes', async () => {
@@ -511,7 +619,14 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     await flush();
     expect(jump.getExposes().newContentCount.get()).toBe(7);
     expect(viewport.querySelector('p')).toBe(payload);
-    expectNeutral(root, viewport, jump);
+    expectNeutral(root, viewport);
+    expect(latest(jump).material.candidates).toEqual([
+      {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      },
+    ]);
     root.remove();
     await flush();
     expect(releases.get(viewport)).toBeGreaterThan(0);
@@ -524,7 +639,14 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     expect(viewport.getExposes().following.get()).toBe('following');
     expect(viewport.getExposes().atEnd.get()).toBe(true);
     expect(jump.getExposes().newContentCount.get()).toBe(7);
-    expectNeutral(root, viewport, jump);
+    expectNeutral(root, viewport);
+    expect(latest(jump).material.candidates).toEqual([
+      {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      },
+    ]);
   });
 });
 
@@ -602,15 +724,18 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
       'w-[calc(var(--pui-percentage)*1%)]'
     );
     expect(frames.get(progressIndicator) ?? []).toEqual([]);
-    expectNeutral(
-      progressRoot,
-      progressTrack,
-      progressValue,
-      meterRoot,
-      meterTrack,
-      meterIndicator,
-      meterValue
-    );
+    expectNeutral(progressRoot, progressValue, meterRoot, meterIndicator, meterValue);
+    expect(latest(progressTrack).material.candidates).toEqual([
+      { intent: 'liquid-glass', variant: 'regular' },
+    ]);
+    expect(latest(meterTrack).material.candidates).toEqual([
+      { intent: 'liquid-glass', variant: 'regular' },
+    ]);
+    setElementProps(progressTrack, { material: 'opaque' });
+    setElementProps(meterTrack, { material: 'opaque' });
+    await flush();
+    expect(latest(progressTrack).material.candidates).toEqual([]);
+    expect(latest(meterTrack).material.candidates).toEqual([]);
   });
 
   it('preserves Calendar computed days, heading and controlled refusal without a nested material owner', async () => {
@@ -643,7 +768,13 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(day.getExposes().selected.get()).toBe(true);
     expect(day.getAttribute('aria-selected')).toBe('true');
     expect(root.getExposes().direction.get()).toBe('ltr');
-    expectNeutral(root, caption, heading, grid, row, day);
+    expectNeutral(caption, heading, grid, row, day);
+    expect(latest(root).material.candidates).toEqual([
+      { intent: 'liquid-glass', variant: 'regular' },
+    ]);
+    setElementProps(root, { ...props, value: '2026-10-10', direction: 'ltr', material: 'opaque' });
+    await flush();
+    expect(latest(root).material.candidates).toEqual([]);
   });
 
   it('gives DatePicker Content the sole open-gated material while preserving inherited date/value renderers', async () => {
@@ -660,7 +791,14 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     await flush();
     expect(value.textContent).toBe('2026-10-09');
     expect(day.textContent).toBe('10');
-    expectNeutral(root, trigger, value, day);
+    expectNeutral(root, value, day);
+    expect(latest(trigger).material.candidates).toEqual([
+      {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      },
+    ]);
     expect(latest(content).material.candidates).toEqual([
       { intent: 'liquid-glass', variant: 'regular' },
     ]);
@@ -688,8 +826,8 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     document.body.append(root);
     await flush();
     expect(all.getAttribute('aria-checked')).toBe('mixed');
-    expect(all.querySelector('svg path')?.getAttribute('d')).toBe('M5 12h14');
-    expect(a.querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(all.querySelector('svg path')?.getAttribute('d')).toBe('M6 8h4');
+    expect(a.querySelector('svg path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(b.querySelector('svg path')).toBeNull();
     const proposals: unknown[] = [];
     root.addEventListener('valueChange', (event) => proposals.push((event as CustomEvent).detail));
@@ -700,7 +838,7 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     setElementProps(root, { value: ['a', 'b'] });
     await flush();
     expect(all.getAttribute('aria-checked')).toBe('true');
-    expect(b.querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
+    expect(b.querySelector('svg path')?.getAttribute('d')).toBe('M4.5 8 7 11 11.5 5');
     expect(b.textContent).toBe('Messages');
     expectNeutral(root, all, a, b);
   });
@@ -730,7 +868,13 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(root.getExposes().complete.get()).toBe(true);
     expect(slots.map((slot) => slot.textContent)).toEqual(['1', '2', '3', '4']);
     expect(input.querySelector('input')).toBe(editor);
-    expectNeutral(root, input, ...slots);
+    expectNeutral(root, input);
+    for (const slot of slots) {
+      expect(latest(slot).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+    }
+    setElementProps(slots[0]!, { index: 0, material: 'opaque' });
+    await flush();
+    expect(latest(slots[0]!).material.candidates).toEqual([]);
   });
 
   it('preserves the NumberField draft and actual editor when owner updates are unrelated', async () => {
@@ -758,7 +902,22 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     expect(input.querySelector('input')).toBe(editor);
     expect(root.querySelectorAll('input,textarea')).toHaveLength(1);
     expect(editor.value).toBe('5');
-    expectNeutral(root, input, increment, decrement);
+    expectNeutral(root);
+    expect(latest(input).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+    expect(latest(increment).material.candidates).toEqual([
+      {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      },
+    ]);
+    expect(latest(decrement).material.candidates).toEqual([
+      {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      },
+    ]);
   });
 
   it('retains Field-bound OTP/Number editors, typed Form serialization and the real Reset action', async () => {
@@ -795,7 +954,9 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     click(reset);
     await flush();
     expect(root.getExposes().getValues()).toEqual({ quantity: 2, code: '12' });
-    expectNeutral(root, numberRoot, numberControl, otpRoot, otpControl);
+    expectNeutral(root, numberRoot, otpRoot);
+    expect(latest(numberControl).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
+    expect(latest(otpControl).material.candidates).toEqual([{ intent: 'liquid-glass' }]);
     expect(latest(reset).material.candidates).toEqual([]);
   });
 

@@ -87,14 +87,52 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
 <style>
   /* App-owned layout only. Text and Interactive surfaces belong to the selected PUI library. */
   .home-demo-previewer {
-    --homepage-gallery-column-gap: 2rem;
-    --homepage-gallery-row-gap: 1.25rem;
+    /* Upstream shadcn apps/v4 CardsDemo rhythm: --gap 2rem, lg 1.5rem,
+       >=1900px 2.5rem; top inset p-12, lg p-6, >=1900px p-12, pb-0. */
+    --homepage-gallery-gap: 2rem;
+    --homepage-gallery-inset-block-start: 3rem;
+    /* Upstream bottom fade h-48 / lg:h-80 / xl:h-64, bounded for short stages. */
+    --homepage-gallery-fade: min(12rem, 28%);
+    --homepage-gallery-column-gap: var(--homepage-gallery-gap);
+    --homepage-gallery-row-gap: var(--homepage-gallery-gap);
     --homepage-gallery-wide-columns: 5;
     position: relative;
-    width: min(100%, 104rem);
+    width: min(100%, 116rem);
     margin: 0 auto;
-    padding: 0;
+    padding: var(--homepage-gallery-inset-block-start) 0 0;
     scroll-margin-block: 8rem;
+  }
+  @media (min-width: 64rem) {
+    .home-demo-previewer {
+      --homepage-gallery-gap: 1.5rem;
+      --homepage-gallery-inset-block-start: 1.5rem;
+      --homepage-gallery-fade: min(20rem, 28%);
+    }
+  }
+  @media (min-width: 80rem) {
+    .home-demo-previewer {
+      --homepage-gallery-fade: min(16rem, 28%);
+    }
+  }
+  @media (min-width: 118.75rem) {
+    .home-demo-previewer {
+      --homepage-gallery-gap: 2.5rem;
+      --homepage-gallery-inset-block-start: 3rem;
+    }
+  }
+  /* Shadcn page style only: the full-bleed bg-muted stage with its upstream
+     top fade (background -> muted) and bottom fade back to background. Dark
+     mode keeps bg-background, as upstream does. border-image outset paints
+     edge to edge without creating horizontal scroll overflow. */
+  :global(html[data-site-library-family='shadcn']:not([data-theme='dark'])) .home-demo-previewer {
+    border-image: linear-gradient(
+        to bottom,
+        var(--color-background),
+        var(--color-muted) min(15rem, 30%),
+        var(--color-muted) calc(100% - var(--homepage-gallery-fade)),
+        var(--color-background)
+      )
+      fill 0 / 0 / 0 100vw;
   }
   /* Decorative continuation is clipped independently, never the live controls
      or their focus outlines. These are deliberately inert artwork, not demos. */
@@ -123,15 +161,15 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     width: 100%;
     height: 100%;
     color: var(--color-muted-foreground);
-    opacity: 0.18;
+    opacity: 0.24;
   }
   .home-demo-previewer__rail {
     /* The padded mask admits outside family paint. Equal negative margins
-       retain card tracks; fade stops remain at 65%/100% of their content height. */
+       retain card tracks; fade stops remain at 68%/100% of their content height. */
     mask-image: linear-gradient(
       to bottom,
       black,
-      black calc(65% - var(--homepage-gallery-paint-gutter) * 0.3),
+      black calc(68% - var(--homepage-gallery-paint-gutter) * 0.3),
       transparent calc(100% - var(--homepage-gallery-paint-gutter))
     );
     box-sizing: content-box;
@@ -152,7 +190,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   .home-demo-previewer__rail--right {
     inset-inline-start: calc(100% + var(--homepage-gallery-column-gap));
   }
-  @media (min-width: 116rem) {
+  @media (min-width: 124rem) {
     .home-demo-previewer__viewport {
       display: block;
     }
@@ -201,7 +239,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       display: grid;
     }
   }
-  @media (min-width: 100rem) {
+  @media (min-width: 96rem) {
     .home-demo-previewer__skeleton {
       grid-template-columns: repeat(5, minmax(0, 1fr));
     }
@@ -255,35 +293,31 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     min-width: 0;
-    gap: 1.5rem;
-  }
-  .home-demo-previewer :global(.home-settings__title) {
+    gap: 1rem;
   }
   .home-demo-previewer :global(.home-settings__fields) {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
   }
   .home-demo-previewer :global(.home-settings__preferences) {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.875rem;
     min-width: 0;
   }
   .home-demo-previewer :global(.home-settings__field) {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 0.5rem;
     min-width: 0;
-  }
-  .home-demo-previewer :global(.home-settings__label) {
   }
   .home-demo-previewer :global(.home-settings__switch-row) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem;
   }
   .home-demo-previewer :global(.home-settings__muted) {
     text-align: right;
@@ -292,20 +326,19 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     min-width: 0;
-    gap: 0.875rem;
+    gap: 0.625rem;
   }
   .home-demo-previewer :global(.home-settings__actions) {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
   }
   .home-demo-previewer :global(.home-settings__feedback) {
-    min-height: 1.5em;
-
+    min-height: 1.25em;
     overflow-wrap: anywhere;
   }
   .home-demo-previewer :global(.home-gallery) {
-    --homepage-gallery-compact-row-gap: 0.875rem;
+    --homepage-gallery-compact-row-gap: var(--homepage-gallery-gap);
   }
   .home-demo-previewer :global(.home-gallery__viewport) {
     position: relative;
@@ -331,9 +364,17 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     background-image: linear-gradient(
       to top,
       var(--color-background),
-      color-mix(in srgb, var(--color-background) 70%, transparent) 30%,
+      color-mix(in srgb, var(--color-background) 65%, transparent) 30%,
       transparent
     );
+  }
+  /* Shadcn: the card fade shares the stage's fade length and ends in the same
+     background, so cards and the full-bleed band dissolve together. */
+  :global(html[data-site-library-family='shadcn'])
+    .home-demo-previewer
+    :global(.home-gallery__viewport)::after {
+    height: var(--homepage-gallery-fade);
+    background-image: linear-gradient(to top, var(--color-background), transparent);
   }
   .home-demo-previewer :global(.home-gallery__viewport:focus-within)::after {
     visibility: hidden;
@@ -348,7 +389,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
-    gap: 1rem;
+    gap: 0.875rem;
     min-width: 0;
   }
   /* Keep the authored reading/tab order while allowing cards, not fixed
@@ -372,7 +413,15 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   .home-demo-previewer :global(.home-gallery__item--accent .home-gallery__card-body),
   .home-demo-previewer :global(.home-gallery__item--accent .home-gallery__stack) {
-    gap: 1.25rem;
+    gap: 1rem;
+  }
+  .home-demo-previewer :global(.home-gallery__header-split) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    min-width: 0;
   }
   .home-demo-previewer :global(.home-gallery__title-row) {
     display: flex;
@@ -386,26 +435,51 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     align-items: center;
     color: inherit;
   }
-  /* The media is already outside CardContent. Negative margins here used to
-     subtract padding a second time and push both end bars outside the card. */
   .home-demo-previewer :global(.home-gallery__media) {
     width: 100%;
     min-width: 0;
     padding-inline: 1.25rem;
     box-sizing: border-box;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .home-demo-previewer :global(.home-gallery__card-body .home-gallery__media) {
+    padding-inline: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__media--bleed) {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 0;
+    display: block;
   }
   .home-demo-previewer :global(.home-gallery__chart) {
     display: block;
-    color: var(--pui-muted-foreground, currentColor);
+    color: var(--pui-foreground, currentColor);
   }
-  .home-demo-previewer :global(.home-gallery__chart-bars svg) {
+  .home-demo-previewer :global(.home-gallery__chart-bars svg),
+  .home-demo-previewer :global(.home-gallery__spark-chart svg) {
     display: block;
     width: 100%;
+  }
+  .home-demo-previewer :global(.home-gallery__spark-kpi) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__spark-chart) {
+    display: block;
+    width: 100%;
+    color: var(--pui-foreground, currentColor);
+    margin-block-start: 0.25rem;
   }
   .home-demo-previewer :global(.home-gallery__metric) {
     font-variant-numeric: tabular-nums;
   }
   .home-demo-previewer :global(.home-gallery__metric-row),
+  .home-demo-previewer :global(.home-gallery__meta-row),
+  .home-demo-previewer :global(.home-gallery__range-bounds),
   .home-demo-previewer :global(.home-gallery__chart-labels) {
     display: flex;
     justify-content: space-between;
@@ -413,8 +487,19 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.5rem;
     min-width: 0;
   }
+  .home-demo-previewer :global(.home-gallery__slider-group) {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__stacked-actions) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    min-width: 0;
+  }
   .home-demo-previewer :global(.home-gallery__chart-labels) {
-    padding-inline: 0.375rem;
+    padding-inline: 0.25rem;
   }
   .home-demo-previewer :global(.home-gallery__chart-label) {
     flex: 1 1 0;
@@ -428,7 +513,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   .home-demo-previewer :global(.home-gallery__stat) {
     display: grid;
-    gap: 0.25rem;
+    gap: 0.2rem;
     min-width: 0;
   }
   /* The icon-free Shadcn example keeps the 4px wrapper inset. Its native
@@ -442,16 +527,73 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     ) {
     padding-inline-start: 0.25rem;
   }
-  .home-demo-previewer :global(.home-gallery__profile) {
+  .home-demo-previewer :global(.home-gallery__profile),
+  .home-demo-previewer :global(.home-gallery__release) {
     display: grid;
     justify-items: center;
     gap: 0.875rem;
-    padding-block: 1rem;
+    padding-block: 0.5rem;
     text-align: center;
+  }
+  .home-demo-previewer :global(.home-gallery__profile-copy),
+  .home-demo-previewer :global(.home-gallery__release-copy) {
+    display: grid;
+    gap: 0.375rem;
+    justify-items: center;
+    max-width: 24ch;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__qr) {
+    display: grid;
+    place-items: center;
+    padding-block: 0.25rem;
+    color: var(--pui-foreground, currentColor);
+  }
+  .home-demo-previewer :global(.home-gallery__qr svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  .home-demo-previewer :global(.home-gallery__release-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .home-demo-previewer :global(.home-gallery__shortcuts-grid) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__shortcut-list) {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__shortcut-item) {
+    padding: 0.25rem 0.5rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__shortcut-row) {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__control-bar) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-width: 0;
   }
   /* Explicit five-column composition on large displays. Narrow layouts retain
      the same authored reading order and flow cards instead of empty tracks. */
-  @media (min-width: 108rem) {
+  @media (min-width: 96rem) {
     .home-demo-previewer :global(.home-gallery__stage) {
       display: grid;
       grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
@@ -486,14 +628,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     min-width: 0;
     gap: 0.25rem;
   }
-  .home-demo-previewer :global(.home-gallery__title) {
-  }
-  .home-demo-previewer :global(.home-gallery__caption) {
-  }
-  .home-demo-previewer :global(.home-gallery__copy),
-  .home-demo-previewer :global(.home-gallery__status),
-  .home-demo-previewer :global(.home-gallery__choice-label) {
-  }
   .home-demo-previewer :global(.home-gallery__row) {
     display: flex;
     gap: 0.5rem;
@@ -506,29 +640,31 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     align-items: center;
     min-width: 0;
   }
+  .home-demo-previewer :global(.home-gallery__choice--detailed) {
+    align-items: flex-start;
+    gap: 0.625rem;
+  }
+  .home-demo-previewer :global(.home-gallery__choice--detailed > :first-child) {
+    margin-block-start: 0.125rem;
+  }
+  .home-demo-previewer :global(.home-gallery__choice-copy) {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
   .home-demo-previewer :global(.home-gallery__text-preview) {
-    min-height: 11rem;
+    min-height: 9rem;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-  }
-  .home-demo-previewer :global(.home-settings),
-  .home-demo-previewer :global(.home-settings__fields),
-  .home-demo-previewer :global(.home-settings__preferences) {
-    gap: 1rem;
-  }
-  .home-demo-previewer :global(.home-settings__field) {
-    gap: 0.5rem;
-  }
-  .home-demo-previewer :global(.home-settings__actions) {
-    gap: 0.5rem;
-  }
-  .home-demo-previewer :global(.home-settings__label) {
   }
   /* Let intrinsic English labels reflow inside a resized text layout rather
      than widening an implicit grid track. Surface paint stays in Proto UI. */
   .home-demo-previewer :global(.home-gallery__title),
   .home-demo-previewer :global(.home-gallery__caption),
   .home-demo-previewer :global(.home-gallery__choice-label),
+  .home-demo-previewer :global(.home-gallery__choice-desc),
+  .home-demo-previewer :global(.home-gallery__shortcut-title),
+  .home-demo-previewer :global(.home-gallery__shortcut-label),
   .home-demo-previewer :global(.home-gallery__chart-label),
   .home-demo-previewer :global(.home-gallery__stat-value),
   .home-demo-previewer :global(.home-gallery__eyebrow),
@@ -537,10 +673,14 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     overflow-wrap: anywhere;
   }
   @media (max-width: 767px) {
-    .home-demo-previewer :global(.home-gallery) {
-      --homepage-gallery-column-gap: 1.5rem;
+    .home-demo-previewer {
+      --homepage-gallery-column-gap: 1rem;
       --homepage-gallery-row-gap: 1rem;
-      --homepage-gallery-compact-row-gap: 0.75rem;
+    }
+    .home-demo-previewer :global(.home-gallery) {
+      --homepage-gallery-column-gap: 1rem;
+      --homepage-gallery-row-gap: 1rem;
+      --homepage-gallery-compact-row-gap: 1rem;
     }
   }
   @media (width < 768px) {

@@ -4,8 +4,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex w-full flex-col items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex w-full flex-col items-center justify-center gap-3',
     children: [
       {
         kind: 'box',
@@ -66,7 +65,11 @@ export default {
                   {
                     kind: 'proto',
                     prototypeId: 'liquid-glass-command-item',
-                    props: { value: 'settings', textValue: 'Settings', keywords: 'preferences config' },
+                    props: {
+                      value: 'settings',
+                      textValue: 'Settings',
+                      keywords: 'preferences config',
+                    },
                     children: [
                       { kind: 'box', tag: 'span', children: ['Settings'] },
                       {

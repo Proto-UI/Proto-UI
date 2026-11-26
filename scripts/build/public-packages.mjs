@@ -5,11 +5,14 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { protoSourceEntries, protoSourceFiles } from './proto-source.mjs';
@@ -118,25 +121,47 @@ function resolveRelativeRuntimeSpecifier(outputFile, specifier) {
 }
 
 function rewriteRelativeRuntimeSpecifiers(distDir) {
+  // Package planning and manifest inspection also import this module before
+  // dependencies are installed. Only the actual build needs TypeScript.
+  const ts = createRequire(import.meta.url)('typescript');
   for (const file of listFiles(distDir).filter(
     (path) => path.endsWith('.js') || path.endsWith('.d.ts')
   )) {
     const original = readFileSync(file, 'utf8');
-    let next = original.replace(
-      /(\bfrom\s*)(['"])(\.{1,2}(?:\/[^'"]*)?)\2/g,
-      (_match, prefix, quote, specifier) =>
-        `${prefix}${quote}${resolveRelativeRuntimeSpecifier(file, specifier)}${quote}`
+    const source = ts.createSourceFile(
+      file,
+      original,
+      ts.ScriptTarget.Latest,
+      true,
+      file.endsWith('.d.ts') ? ts.ScriptKind.TS : ts.ScriptKind.JS
     );
-    next = next.replace(
-      /(\bimport\s*\(\s*)(['"])(\.{1,2}(?:\/[^'"]*)?)\2/g,
-      (_match, prefix, quote, specifier) =>
-        `${prefix}${quote}${resolveRelativeRuntimeSpecifier(file, specifier)}${quote}`
-    );
-    next = next.replace(
-      /(\bimport\s*)(['"])(\.{1,2}(?:\/[^'"]*)?)\2/g,
-      (_match, prefix, quote, specifier) =>
-        `${prefix}${quote}${resolveRelativeRuntimeSpecifier(file, specifier)}${quote}`
-    );
+    const edits = [];
+    function specifier(literal) {
+      if (!literal || !ts.isStringLiteralLike(literal)) return;
+      const next = resolveRelativeRuntimeSpecifier(file, literal.text);
+      if (next !== literal.text)
+        edits.push({
+          start: literal.getStart(source),
+          end: literal.end,
+          text: JSON.stringify(next),
+        });
+    }
+    function visit(node) {
+      if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
+        specifier(node.moduleSpecifier);
+      else if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword)
+        specifier(node.arguments[0]);
+      else if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument))
+        specifier(node.argument.literal);
+      else if (ts.isExternalModuleReference(node)) specifier(node.expression);
+      ts.forEachChild(node, visit);
+    }
+    visit(source);
+    // Apply exact syntax spans backwards; prose, comments and template bodies
+    // keep their original bytes even when they resemble import/export syntax.
+    let next = original;
+    for (const edit of edits.sort((a, b) => b.start - a.start))
+      next = next.slice(0, edit.start) + edit.text + next.slice(edit.end);
     if (next !== original) writeFileSync(file, next);
   }
 }
@@ -203,8 +228,11 @@ export function buildPublicPackage(pkg, options = {}) {
   const sourceEntries = publicPackageSourceEntries(pkg);
   // Validate the source/type closure that will accompany explicit proto exports.
   protoSourceFiles(pkg);
-  rmSync(distDir, { recursive: true, force: true });
-  mkdirSync(distDir, { recursive: true });
+  mkdirSync(dirname(distDir), { recursive: true });
+  const stageSuffix = `.staging-${process.pid}-${randomUUID().slice(0, 8)}`;
+  const stagingDir = `${distDir}${stageSuffix}`;
+  const backupDir = `${distDir}.previous-${process.pid}-${randomUUID().slice(0, 8)}`;
+  mkdirSync(stagingDir, { recursive: true });
 
   const tscBin = join(ROOT_DIR, 'node_modules', 'typescript', 'bin', 'tsc');
   const args = [
@@ -223,7 +251,7 @@ export function buildPublicPackage(pkg, options = {}) {
     '--rootDir',
     join(pkg.dir, 'src'),
     '--outDir',
-    distDir,
+    stagingDir,
     '--module',
     'ES2022',
     '--moduleResolution',
@@ -237,16 +265,38 @@ export function buildPublicPackage(pkg, options = {}) {
     ...sourceEntries,
   ];
   const started = performance.now();
-  const result = spawnSync(process.execPath, args, {
-    cwd: ROOT_DIR,
-    encoding: 'utf8',
-    timeout: 180000,
-  });
-  if (result.status !== 0) {
-    throw new Error(`${pkg.name}: TypeScript build failed\n${result.stdout}\n${result.stderr}`);
+  try {
+    const result = spawnSync(process.execPath, args, {
+      cwd: ROOT_DIR,
+      encoding: 'utf8',
+      timeout: 180000,
+    });
+    if (result.status !== 0) {
+      throw new Error(`${pkg.name}: TypeScript build failed\n${result.stdout}\n${result.stderr}`);
+    }
+    rewriteRelativeRuntimeSpecifiers(stagingDir);
+    if (options.validate !== false) validateBuiltPackage(pkg, stagingDir);
+
+    let movedExisting = false;
+    if (existsSync(distDir)) {
+      renameSync(distDir, backupDir);
+      movedExisting = true;
+    }
+    try {
+      renameSync(stagingDir, distDir);
+    } catch (swapError) {
+      if (movedExisting && !existsSync(distDir) && existsSync(backupDir)) {
+        try {
+          renameSync(backupDir, distDir);
+        } catch {}
+      }
+      throw swapError;
+    }
+    if (movedExisting) rmSync(backupDir, { recursive: true, force: true });
+  } finally {
+    rmSync(stagingDir, { recursive: true, force: true });
+    rmSync(backupDir, { recursive: true, force: true });
   }
-  rewriteRelativeRuntimeSpecifiers(distDir);
-  if (options.validate !== false) validateBuiltPackage(pkg, distDir);
   return {
     name: pkg.name,
     durationMs: Math.round(performance.now() - started),

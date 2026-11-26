@@ -1,0 +1,37 @@
+extends: substitution
+message: "Prefer the direct verb '%s' instead of bureaucratic phrasing '%s'."
+level: warning
+ignorecase: true
+swap:
+  perform reconciliation: reconcile
+  performs reconciliation: reconciles
+  performed reconciliation: reconciled
+  perform verification: verify
+  performs verification: verifies
+  performed verification: verified
+  conduct verification: verify
+  conducts verification: verifies
+  conducted verification: verified
+  perform validation: validate
+  performs validation: validates
+  performed validation: validated
+  perform inspection: inspect
+  performs inspection: inspects
+  performed inspection: inspected
+  perform mutation: mutate
+  performs mutation: mutates
+  performed mutation: mutated
+  make a determination: decide
+  makes a determination: decides
+  provide an explanation: explain
+  provides an explanation: explains
+  achieve completion: complete
+  carry out execution: run
+  supply evidence of: show
+  supplies evidence of: shows
+  perform an audit: audit
+  performs an audit: audits
+  perform a comparison: compare
+  performs a comparison: compares
+  perform a check: check
+  performs a check: checks

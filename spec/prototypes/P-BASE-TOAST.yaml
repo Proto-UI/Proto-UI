@@ -11,6 +11,22 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-BASE-TOAST-OPENING-ORDER
+    text:
+      zh-CN: Viewport 按已接纳的 opening 保存独立 Toast 身份，新 opening 位于索引 0。已打开 Toast 的 props 更新及重复 openToast 不改变顺序；实际关闭后重新打开才产生新的位置。公开 stackIndex 为完整索引，未在 open stack 中为 -1。
+      en: The Viewport retains independent Toast identities in accepted-opening order, with each new opening at index zero. Updating props or repeating openToast on an open Toast does not reorder it; an accepted close followed by reopen gives it a new position. Exposed stackIndex is the complete index, or -1 when absent from the open stack.
+  - id: P-BASE-TOAST-VISIBLE-WINDOW
+    text:
+      zh-CN: visibleToasts 默认为 3，可配置其他正整数。超出窗口的逻辑 open 消息保留自身计时与身份，并以 limited 事实退出布局和可访问树；它们关闭或前方消息关闭后重新计算窗口，不复用前三个实例。stackTier 保留 front、second、third 与 overflow，并以 back 表示窗口内的更深层消息。
+      en: visibleToasts defaults to three and accepts other positive integers. Logically open messages beyond the window retain their identity and timers while limited withdraws them from layout and the accessibility tree. Closing messages recomputes the window without recycling the first three instances. stackTier retains front, second, third and overflow, with back representing deeper visible messages.
+  - id: P-BASE-TOAST-PASSIVE-PORTAL
+    text:
+      zh-CN: Web Viewport 默认通过 Overlay 的 portal 迁移到页面级宿主，保留 logical Context、Anatomy 与 owner 生命周期。该常驻通知区域不参与 dismissal Boundary 栈、不自动获取或恢复焦点，也不拦截较早弹层的 outside 或 Escape 关闭。
+      en: A Web Viewport uses the Overlay portal by default to reach a page-level host while retaining logical Context, Anatomy and owner lifetime. This persistent notification region does not join the dismissal Boundary stack, acquire or restore focus automatically, or intercept outside or Escape dismissal of earlier overlays.
+  - id: P-BASE-TOAST-HOVER-STABILITY
+    text:
+      zh-CN: Viewport 必须实时暴露当前是否存在已打开 Toast 的公开状态事实（`hasOpen`）。当 `openIds` 清空时必须清除悬停展开态，确保空 Viewport 不会残留悬停/拦截状态；在存在打开消息且因悬停展开期间，供各家族投影保持连续命中区域，避免卡片间距造成展开与折叠之间的反复抖动。
+      en: The Viewport exposes whether any open Toast is currently present (`hasOpen`). When `openIds` becomes empty, hover expansion must clear so an empty Viewport never retains a sticky hover or hit-capture state; while open messages are expanded by hover, family projections consume this fact to maintain a continuous hit surface across inter-toast gaps without expand/collapse oscillation.
   - id: P-BASE-TOAST-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -19,8 +35,9 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-AS-OVERLAY-0001
 verifies:
-  tests: []
+  tests: [{ id: T-TOAST-STACK-0001, since: 0.3.0 }]
 sources:
   - path: packages/prototypes/base/src/toast/
 openQuestions:
@@ -31,6 +48,12 @@ openQuestions:
     blocks:
       - activation:P-BASE-TOAST
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Expose open-stack presence (`hasOpen`) on Viewport and clear hover expansion when empty so family projections can maintain oscillation-free hover hit surfaces.
+  - version: 0.3.0
+    change: refined
+    summary: Define stable opening chronology, a configurable visible window and a passive page-level Web portal while retaining draft lifecycle.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base toast family as draft.

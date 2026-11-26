@@ -389,7 +389,7 @@ fn reports_a_property_it_cannot_express() {
     assert!(!mapped.is_complete());
 }
 
-/// The inventory of properties this layer does not implement at all.
+/// The inventory of currently emitted properties this layer does not implement.
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
@@ -1045,6 +1045,28 @@ fn text_transform_remains_unknown_when_not_emitted_by_current_prototypes() {
     assert!(mapped.unmapped.iter().any(|(property, value, reason)| {
         property == "text-transform" && value == "uppercase" && *reason == Unmapped::UnknownProperty
     }));
+    assert!(!mapped.is_complete());
+}
+
+#[test]
+fn logical_start_inset_remains_unknown_when_not_emitted_by_current_prototypes() {
+    // The refreshed source vocabulary no longer emits start-4. Preserve the
+    // native gap directly instead of retaining a fake source-inventory entry.
+    let mapped = map(
+        &declared(&[("position", "relative"), ("inset-inline-start", "1rem")]),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        mapped.unmapped,
+        vec![(
+            "inset-inline-start".into(),
+            "1rem".into(),
+            Unmapped::UnknownProperty,
+        )]
+    );
+    assert_eq!(mapped.refinement.position, Some(Position::Relative));
+    assert_eq!(mapped.refinement.inset.left, None);
+    assert_eq!(mapped.refinement.inset.right, None);
     assert!(!mapped.is_complete());
 }
 

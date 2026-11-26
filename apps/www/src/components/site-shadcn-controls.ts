@@ -1,7 +1,11 @@
 import { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
 import { headerButtonProps, headerIconButtonLayout } from './site-header-control-recipes';
 import { bindSiteSelectDismissal } from './site-select-dismissal';
-import { siteControlTags, type SiteLibraryFamily } from './site-library-family';
+import {
+  siteControlTags,
+  type PreviewControlFamily,
+  type SiteLibraryFamily,
+} from './site-library-family';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import bootstrapButton from '@proto.ui/prototypes-bootstrap-2-3-2/button';
 import {
@@ -23,6 +27,7 @@ import {
   selectTrigger as brutalistSelectTrigger,
   selectValue as brutalistSelectValue,
 } from '@proto.ui/prototypes-brutalist/select';
+import liquidGlassButton from '@proto.ui/prototypes-liquid-glass/button';
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import {
   selectContent as shadcnSelectContent,
@@ -58,6 +63,7 @@ const siteProjections = [
   ['wc-brutalist-select-value', brutalistSelectValue],
   ['wc-brutalist-select-content', brutalistSelectContent],
   ['wc-brutalist-select-item', brutalistSelectItem],
+  ['wc-liquid-glass-button', liquidGlassButton],
   ['wc-shadcn-button', shadcnButton],
   ['wc-shadcn-select-root', shadcnSelectRoot],
   ['wc-shadcn-select-trigger', shadcnSelectTrigger],
@@ -84,6 +90,12 @@ export type SiteSelectRoot = HTMLElement & {
 const siteSelectProps = new WeakMap<SiteSelectRoot, Record<string, unknown>>();
 const pendingSelectReplays = new WeakSet<SiteSelectRoot>();
 
+function buttonControlFamily(element: HTMLElement): PreviewControlFamily {
+  if (element.localName.startsWith('wc-liquid-glass-')) return 'liquid-glass';
+  if (element.localName.startsWith('wc-bootstrap-2-3-2-')) return 'bootstrap-2-3-2';
+  return element.localName.startsWith('wc-brutalist-') ? 'brutalist' : 'shadcn';
+}
+
 function siteControlFamily(element: HTMLElement): SiteLibraryFamily {
   if (element.localName.startsWith('wc-bootstrap-2-3-2-')) return 'bootstrap-2-3-2';
   return element.localName.startsWith('wc-brutalist-') ? 'brutalist' : 'shadcn';
@@ -106,7 +118,9 @@ export function isSiteButtonActivation(event: Event): boolean {
   return (
     !(
       currentTarget instanceof HTMLElement &&
-      currentTarget.matches('wc-shadcn-button, wc-brutalist-button, wc-bootstrap-2-3-2-button')
+      currentTarget.matches(
+        'wc-shadcn-button, wc-brutalist-button, wc-bootstrap-2-3-2-button, wc-liquid-glass-button'
+      )
     ) || event instanceof CustomEvent
   );
 }
@@ -231,21 +245,64 @@ function headerSurfaceStyle(element: HTMLElement, kind: 'button' | 'root' | 'tri
   return headerIconButtonLayout();
 }
 
+function mapSiteButtonProps(
+  family: PreviewControlFamily,
+  rawVariant?: string,
+  rawSize?: string
+): Record<string, unknown> {
+  const props: Record<string, unknown> = {};
+  if (family === 'brutalist') {
+    if (rawVariant) {
+      props.variant = ['ghost', 'outline', 'secondary'].includes(rawVariant)
+        ? 'surface'
+        : rawVariant;
+    }
+    if (rawSize) props.size = rawSize;
+    return props;
+  }
+  if (family === 'bootstrap-2-3-2') {
+    if (rawVariant) {
+      props.variant = ['ghost', 'outline', 'secondary'].includes(rawVariant)
+        ? 'default'
+        : rawVariant;
+    }
+    if (rawSize) {
+      props.size =
+        rawSize === 'sm' || rawSize === 'icon'
+          ? 'small'
+          : rawSize === 'lg'
+            ? 'large'
+            : rawSize === 'xs'
+              ? 'mini'
+              : rawSize;
+    }
+    return props;
+  }
+  if (family === 'liquid-glass') {
+    if (rawVariant) {
+      props.variant = ['ghost', 'outline', 'secondary', 'default'].includes(rawVariant)
+        ? 'regular'
+        : rawVariant;
+    }
+    if (rawSize) props.size = rawSize === 'xs' ? 'sm' : rawSize;
+    props.material = 'opaque';
+    return props;
+  }
+  if (rawVariant) props.variant = rawVariant;
+  if (rawSize) props.size = rawSize;
+  return props;
+}
+
 function initializeButton(button: HTMLElement): void {
-  const family = siteControlFamily(button);
+  const family = buttonControlFamily(button);
   button.dataset.siteControlFamily = family;
   if (button.dataset.siteShadcnInitialized === '1') return;
-  const props: Record<string, unknown> = {};
-  if (button.dataset.variant) {
-    // Family-specific public variants, never recolor a foreign Button.
-    props.variant =
-      button.localName === 'wc-brutalist-button' &&
-      ['ghost', 'outline', 'secondary'].includes(button.dataset.variant)
-        ? 'surface'
-        : button.dataset.variant;
-  }
-  if (button.dataset.size) props.size = button.dataset.size;
-  if (button.closest('[data-site-header]'))
+  const props: Record<string, unknown> = mapSiteButtonProps(
+    family,
+    button.dataset.variant,
+    button.dataset.size
+  );
+  if (button.closest('[data-site-header]') && family !== 'liquid-glass')
     // Preserve the authored command purpose separately from the public family
     // size. Bootstrap maps the icon command to size=default, so feeding that
     // normalized output back into the recipe would lose its navbar context.
@@ -352,7 +409,7 @@ function initializeSelect(root: SiteSelectRoot): void {
       disabled: root.dataset.disabled === 'true',
       closeOnSelect: true,
       ...(family === 'shadcn' && root.closest('[data-site-header]')
-        ? { styleProfile: 'rhea' }
+        ? { styleProfile: 'luma' }
         : {}),
       ...(selectSurfaceStyle(root, 'root')
         ? { surfaceStyle: selectSurfaceStyle(root, 'root') }
@@ -367,7 +424,7 @@ function initializeSelect(root: SiteSelectRoot): void {
       ...(root.closest('[data-site-header]')
         ? {
             appearance: family === 'brutalist' ? (trigger.dataset.appearance ?? 'flat') : 'default',
-            ...(family === 'shadcn' ? { styleProfile: 'rhea' } : {}),
+            ...(family === 'shadcn' ? { styleProfile: 'luma' } : {}),
           }
         : {}),
       ...(family === 'brutalist' &&

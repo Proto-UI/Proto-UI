@@ -4,7 +4,6 @@
     "apps/www",
     "node_modules",
     "dist",
-    "internal/records/evidence",
     "scripts/analysis/declarative-agent-ui",
     "scripts/analysis/invisible-consumption/starter",
     "scripts/release/consumer-smoke",

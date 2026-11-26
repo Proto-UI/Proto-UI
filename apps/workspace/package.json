@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "generate:spec": "tsx scripts/generate-spec-dataset.ts",
-    "dev": "pnpm run generate:spec && vite",
-    "build": "pnpm run generate:spec && vite build",
+    "dev": "corepack pnpm@10.32.1 run generate:spec && vite",
+    "build": "corepack pnpm@10.32.1 run generate:spec && vite build",
     "preview": "vite preview",
     "check": "tsc -p tsconfig.json --noEmit"
   },

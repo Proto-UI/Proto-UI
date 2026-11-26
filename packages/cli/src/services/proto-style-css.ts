@@ -151,6 +151,7 @@ const staticUtilities: Record<string, string[]> = {
     'transition-duration: 150ms;',
   ],
   'ease-linear': ['transition-timing-function: linear;'],
+  'ease-out': ['transition-timing-function: cubic-bezier(0, 0, 0.2, 1);'],
   'list-none': ['list-style-type: none;'],
   'opacity-80': ['opacity: 0.8;'],
   'text-black': ['color: #000;'],
@@ -249,11 +250,14 @@ const staticUtilities: Record<string, string[]> = {
     'transition-duration: 150ms;',
   ],
   'z-[1000]': ['z-index: 1000;'],
+  'z-[calc(1000_-_var(--pui-stack-index))]': ['z-index: calc(1000 - var(--pui-stack-index));'],
+  'order-[var(--pui-stack-index)]': ['order: var(--pui-stack-index);'],
   'z-[1051]': ['z-index: 1051;'],
   'z-[2]': ['z-index: 2;'],
   '-z-10': ['z-index: -10;'],
   'font-[100]': ['font-weight: 100;'],
   'opacity-90': ['opacity: 0.9;'],
+  'opacity-95': ['opacity: 0.95;'],
   'rounded-[23px]': ['border-radius: 23px;'],
   'rounded-xs': ['border-radius: 0.125rem;'],
   'rounded-3xl': ['border-radius: var(--pui-radius-3xl);'],
@@ -321,6 +325,10 @@ const staticUtilities: Record<string, string[]> = {
   'border-[rgb(0_0_0/30%)]': ['border-color: rgb(0 0 0 / 0.3);'],
   'shadow-[0_1px_3px_rgb(0_0_0/10%)]': [
     '--pui-shadow: 0 1px 3px rgb(0 0 0 / 0.1);',
+    ...composedShadow(),
+  ],
+  'shadow-[0_4px_12px_rgb(0_0_0/10%)]': [
+    '--pui-shadow: 0 4px 12px rgb(0 0 0 / 0.1);',
     ...composedShadow(),
   ],
   'shadow-[0_3px_7px_rgb(0_0_0/30%)]': [
@@ -503,6 +511,11 @@ const staticUtilities: Record<string, string[]> = {
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
+  'transition-[width,top,bottom,opacity]': [
+    'transition-property: width, top, bottom, opacity;',
+    'transition-duration: 150ms;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+  ],
   'transition-[color,border-color]': [
     'transition-property: color, border-color;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
@@ -545,7 +558,6 @@ const staticUtilities: Record<string, string[]> = {
   'duration-200': ['transition-duration: 200ms;', '--pui-animation-duration: 200ms;'],
   'duration-300': ['transition-duration: 300ms;', '--pui-animation-duration: 300ms;'],
   'ease-in-out': ['transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);'],
-  'ease-out': ['transition-timing-function: cubic-bezier(0, 0, 0.2, 1);'],
   'font-normal': ['font-weight: 400;'],
   'font-medium': ['font-weight: 500;'],
   'font-black': ['font-weight: 900;'],
@@ -645,7 +657,6 @@ const staticUtilities: Record<string, string[]> = {
   'opacity-60': ['opacity: 0.6;'],
   'opacity-65': ['opacity: 0.65;'],
   'opacity-70': ['opacity: 0.7;'],
-  'opacity-95': ['opacity: 0.95;'],
   'opacity-0': ['opacity: 0;'],
   'opacity-100': ['opacity: 1;'],
   'opacity-50': ['opacity: 0.5;'],
@@ -876,10 +887,6 @@ const staticUtilities: Record<string, string[]> = {
     '--pui-shadow: 0 5px 10px rgb(0 0 0 / 0.2);',
     ...composedShadow(),
   ],
-  'shadow-[0_4px_12px_rgb(0_0_0/10%)]': [
-    '--pui-shadow: 0 4px 12px rgb(0 0 0 / 0.1);',
-    ...composedShadow(),
-  ],
   'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]': [
     '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075);',
     ...composedShadow(),
@@ -951,8 +958,8 @@ const staticUtilities: Record<string, string[]> = {
   isolate: ['isolation: isolate;'],
   'rounded-[inherit]': ['border-radius: inherit;'],
   'min-w-36': ['min-width: 9rem;'],
-  'z-10': ['z-index: 10;'],
   'z-0': ['z-index: 0;'],
+  'z-10': ['z-index: 10;'],
   'z-20': ['z-index: 20;'],
   'z-30': ['z-index: 30;'],
   'z-40': ['z-index: 40;'],
@@ -1289,7 +1296,18 @@ function sortUtilityOverrides(rules: CssRule[]): void {
     if (/^leading-/.test(utility)) return 2;
     return 0;
   };
-  rules.sort((a, b) => overridePriority(a) - overridePriority(b));
+  // Dark context deliberately has zero specificity. Its declarations must
+  // follow unconditioned utilities, before the more specific state recipes.
+  // Keep shorthand/longhand priority and existing ties within each group.
+  const conditionPriority = (rule: CssRule): number => {
+    const variants = splitVariants(rule.token).slice(0, -1);
+    if (variants.length === 0) return 0;
+    return variants.length === 1 && variants[0] === 'dark' ? 1 : 2;
+  };
+  rules.sort(
+    (a, b) =>
+      conditionPriority(a) - conditionPriority(b) || overridePriority(a) - overridePriority(b)
+  );
 }
 
 function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleCssTarget): string {

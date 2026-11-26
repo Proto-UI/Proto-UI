@@ -22,13 +22,11 @@ function wrapBackdrop(family: string, content: DemoNode): DemoNode {
   if (family === 'liquid-glass') {
     return {
       kind: 'box',
-      className:
-        'flex w-full justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+      className: 'flex w-full justify-center',
       children: [
         {
           kind: 'box',
-          className:
-            'grid w-full max-w-md min-w-0 gap-4 rounded-2xl border border-border bg-background/85 p-5',
+          className: 'grid w-full max-w-md min-w-0 gap-4',
           children: [content],
         },
       ],
@@ -417,13 +415,11 @@ export function createLiquidGlassFormMaterialDemo(): DemoSpec {
     type: 'demo',
     root: {
       kind: 'box',
-      className:
-        'grid w-full gap-6 rounded-2xl bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/25 p-6',
+      className: 'grid w-full gap-6',
       children: [
         {
           kind: 'box',
-          className:
-            'grid w-full max-w-md mx-auto min-w-0 gap-5 rounded-2xl border border-border bg-background/85 p-5',
+          className: 'grid w-full max-w-md mx-auto min-w-0 gap-5',
           children: [
             atom(
               'form',

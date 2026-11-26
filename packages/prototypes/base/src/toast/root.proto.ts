@@ -7,7 +7,7 @@ import {
   type RunHandle,
   type DelayTask,
 } from '@proto.ui/core';
-import { asAccessible } from '@proto.ui/hooks';
+import { asAccessible, asAxisInput } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import {
   TOAST_CONTEXT,
@@ -21,6 +21,7 @@ import {
 import type {
   ToastPosition,
   ToastStackTier,
+  ToastSwipeDirection,
   ToastType,
   ToastRootProps,
   ToastRootExposes,
@@ -88,6 +89,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     }),
     expanded = def.state.bool('expanded', false),
     stackTier = def.state.enum('stackTier', 'front', { options: TOAST_STACK_TIERS }),
+    stackIndex = def.state.numberDiscrete('stackIndex', 0),
+    limited = def.state.bool('limited', false),
     role = def.state.string('role', 'status'),
     live = def.state.string('live', 'polite'),
     atomic = def.state.bool('atomic', true);
@@ -96,6 +99,10 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   a11y.role(role);
   a11y.state('live', live);
   a11y.state('atomic', atomic);
+  a11y.tree({ hidden: limited });
+
+  const swipeInput = asAxisInput<ToastRootProps>();
+  swipeInput.configure({ anatomy: TOAST_FAMILY, inputRole: 'root', geometryRole: 'root' });
 
   const id = createToastId();
   def.context.provide(TOAST_CONTEXT, { id, open: true, type: 'default', dismissible: true });
@@ -113,6 +120,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   def.expose.state('position', position);
   def.expose.state('expanded', expanded);
   def.expose.state('stackTier', stackTier);
+  def.expose.state('stackIndex', stackIndex);
+  def.expose.state('limited', limited);
   def.expose.event('openChange', { payload: 'json' });
 
   let currentRun: RunHandle<ToastRootProps> | null = null,
@@ -121,9 +130,11 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     remaining = 5000,
     mounted = false,
     hovered = false,
+    swiping = false,
     manualPause = false,
     viewportPaused = false,
     viewportDuration: number | null = null,
+    swipeDirection: ToastSwipeDirection = 'right',
     seenDismissEpoch = 0,
     expired = false;
   let epoch = 0;
@@ -189,11 +200,11 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     const vp = run.context.tryRead(TOAST_VIEWPORT_CONTEXT);
     if (!vp) return;
     if (isOpen) {
-      if (vp.openIds[0] === id) return;
+      // Membership synchronization is not a new opening. In particular,
+      // controlled prop updates must preserve the existing notification order.
+      if (vp.openIds.includes(id)) return;
       run.context.tryUpdate(TOAST_VIEWPORT_CONTEXT, (prev) =>
-        prev.openIds[0] === id
-          ? prev
-          : { ...prev, openIds: [id, ...prev.openIds.filter((item) => item !== id)] }
+        prev.openIds.includes(id) ? prev : { ...prev, openIds: [id, ...prev.openIds] }
       );
       return;
     }
@@ -230,17 +241,34 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     } else {
       cancel();
       hovered = false;
+      swiping = false;
       focusedItems.clear();
       syncPaused();
       if (currentRun !== run || viewEpoch !== view) return;
       transition.controls.leave();
     }
+    syncSwipeInput();
+  };
+
+  const syncSwipeInput = () => {
+    const enabled = mounted && open.get() && dismissible.get() && swipeDirection !== 'none';
+    const horizontal = swipeDirection === 'left' || swipeDirection === 'right';
+    swipeInput.sync({
+      // A tap belongs to nested Action/Close controls until a directional drag wins.
+      activation: 'directional',
+      axis: horizontal ? 'horizontal' : 'vertical',
+      direction: 'ltr',
+      disabled: !enabled,
+      readOnly: false,
+      reverse: swipeDirection === 'left' || swipeDirection === 'up',
+    });
   };
 
   const syncPaused = () => {
     const next =
       manualPause ||
       hovered ||
+      swiping ||
       viewportPaused ||
       focusedItems.size > 0 ||
       !!currentRun?.props.get().paused;
@@ -265,6 +293,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     expanded.set(!!vp?.expanded, 'reason: toast viewport expanded');
     const idx = vp ? vp.openIds.indexOf(id) : 0;
     const limit = vp?.visibleToasts ?? 3;
+    stackIndex.set(idx, 'reason: toast opening chronology');
+    limited.set(idx >= limit, 'reason: toast visible window');
     const nextTier: ToastStackTier =
       idx <= 0
         ? 'front'
@@ -274,7 +304,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
             ? 'second'
             : idx === 2
               ? 'third'
-              : 'overflow';
+              : 'back';
     stackTier.set(nextTier, 'reason: toast stack tier');
     viewportPaused = !!vp?.paused;
     viewportDuration = vp?.duration ?? null;
@@ -285,6 +315,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       remaining = nextDuration;
       expired = false;
     }
+    swipeDirection = vp?.swipeDirection ?? 'right';
+    syncSwipeInput();
     syncPaused();
     if (currentRun !== run || viewEpoch !== view) return;
     if (durationChanged && !task) schedule();
@@ -352,8 +384,10 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     viewEpoch++;
     mounted = false;
     hovered = false;
+    swiping = false;
     viewportPaused = false;
     focusedItems.clear();
+    syncSwipeInput();
     cancel();
   });
 
@@ -384,6 +418,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
         schedule();
       }
       syncPoliteness(run);
+      syncSwipeInput();
       syncPaused();
     }
   );
@@ -393,6 +428,34 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     if (focused) focusedItems.add(itemId);
     else focusedItems.delete(itemId);
     syncPaused();
+  });
+
+  swipeInput.on((run, sample) => {
+    currentRun = run;
+    if (!mounted || !open.get()) return;
+    if (sample.phase === 'start') {
+      swiping = true;
+      syncPaused();
+      return;
+    }
+    if (sample.phase === 'cancel') {
+      swiping = false;
+      syncPaused();
+      return;
+    }
+    if (sample.phase === 'end') {
+      const active = swiping;
+      swiping = false;
+      syncPaused();
+      if (
+        active &&
+        currentRun === run &&
+        Number.isFinite(sample.totalDelta) &&
+        sample.totalDelta >= 0.3
+      ) {
+        request(false, 'swipe');
+      }
+    }
   });
 
   def.event.on('pointer.enter', () => {
@@ -414,7 +477,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     }
   });
   def.rule({
-    when: (w) => w.state(transition.isPresent).eq(false),
+    when: (w) => w.any(w.state(transition.isPresent).eq(false), w.state(limited).eq(true)),
     intent: (i) => i.feedback.style.use(tw('hidden')),
   });
 }

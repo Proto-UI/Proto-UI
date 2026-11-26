@@ -11,6 +11,18 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-SHADCN-TOAST-STACK-ORDER
+    text:
+      zh-CN: 折叠与展开均使用 Base 的完整 opening 索引决定布局及绘制顺序。bottom placement 的最新消息最靠下，top placement 最靠上；最新消息的绘制层级最高。层级和 flex order 立即更新，不参与尺寸、偏移和透明度的过渡。已关闭但由 Presence 保留的卡片在离场期间退出 normal/flex 布局流和命中范围，保留展示表面直至离场结束，不得占据新 Toast 的定位锚点。
+      en: Collapsed and expanded layouts use the same complete Base opening index for geometry and paint order. The newest message is closest to the bottom edge for bottom placements and the top edge for top placements, and has the highest paint layer. Layers and flex order update immediately, independently of size, offset and opacity transitions. Closed cards retained by Presence leave normal and flex flow and hit testing while keeping their presentation surface until leave completion; they must not reserve a new Toast's anchor.
+  - id: P-SHADCN-TOAST-VIEWPORT
+    text:
+      zh-CN: 默认 placement 为 bottom-right，固定于页面视口而非 RuntimeBox 的文档流；六种现有位置均使用同一个页面级 portal。作者容器的 transform、overflow 或页面滚动不得把 Toast 限制回该容器。主题由预览的 portal owner 投射并随 owner 销毁而释放。
+      en: The default bottom-right placement is fixed to the page viewport, outside RuntimeBox document flow. All six existing placements share the page-level portal. An authored container's transform, overflow or page scroll must not confine Toasts to that container. Preview portal ownership projects the theme and releases it on owner disposal.
+  - id: P-SHADCN-TOAST-HOVER-STABILITY
+    text:
+      zh-CN: 折叠态下 Viewport 保持 `pointer-events-none`，仅已打开卡片响应指针命中；当存在打开消息且处于展开态时，Viewport 切换为 `pointer-events-auto`，使整个展开后的堆叠矩形（含卡片之间的 `gap-3.5` 间距）构成连续命中区域。指针停留在折叠边缘、间距坐标或卡片缝隙时不得触发 `pointer.leave`/`pointer.enter` 反复震荡；消息全部关闭后 Viewport 立即恢复 `pointer-events-none`。
+      en: While collapsed, the Viewport stays `pointer-events-none` so only open Toast cards capture pointer events. While expanded with open messages, the Viewport switches to `pointer-events-auto` so the full expanded stack rectangle—including inter-card `gap-3.5` spacing—forms a continuous hit region. Holding the pointer over collapsed peeking edges or inter-card gap coordinates must not trigger `pointer.leave`/`pointer.enter` oscillation; once all messages close, the Viewport immediately returns to `pointer-events-none`.
   - id: P-SHADCN-TOAST-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -25,8 +37,13 @@ inherits:
 verifies:
   tests:
     - T-SHADCN-OVERLAY-PROFILES-0001
+    - { id: T-TOAST-STACK-0001, since: 0.3.0 }
 sources:
   - path: packages/prototypes/shadcn/src/toast/
+  - path: https://ui.shadcn.com/docs/components/base/toast
+    label: Official Toast composition and manager reference inspected 2026-11-25; semantic guidance, not a wholesale replacement of existing Proto UI visual profiles.
+  - path: https://base-ui.com/react/components/toast
+    label: Official Portal, limit and stacking reference inspected 2026-11-25. Proto UI retains its existing dimensions and hides limited cards from layout instead of copying upstream animation internals.
 openQuestions:
   - id: P-SHADCN-TOAST-Q-ADMISSION
     question:
@@ -35,6 +52,12 @@ openQuestions:
     blocks:
       - activation:P-SHADCN-TOAST
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Require a continuous `pointer-events-auto` Viewport hit region while expanded with open messages (and `pointer-events-none` when collapsed or empty) to eliminate hover expand/collapse oscillation over inter-card gaps.
+  - version: 0.3.0
+    change: refined
+    summary: Bind geometry and paint to complete opening order, exclude layers from animation, keep retained closing cards outside layout and hit testing, and require a fixed page-level viewport outside preview containers.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the shadcn toast family as draft.

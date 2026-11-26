@@ -20,7 +20,7 @@ function wrapStage(family: string, node: DemoNode, maxWidthClass = 'max-w-lg'): 
   if (family !== 'liquid-glass') return node;
   return {
     kind: 'box',
-    className: `w-full ${maxWidthClass} rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6`,
+    className: `w-full ${maxWidthClass}`,
     children: [node],
   };
 }

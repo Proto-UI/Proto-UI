@@ -67,7 +67,7 @@ export default {
                 children: [
                   {
                     kind: 'box',
-                    className: 'flex items-center',
+                    className: 'flex flex-wrap items-center gap-x-2 gap-y-1',
                     children: [
                       {
                         kind: 'proto',

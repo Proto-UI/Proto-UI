@@ -359,7 +359,13 @@ function sourceFiles(root: string): string[] {
     for (const entry of readdirSync(dir)) {
       // `dist` is a build of `src`; `test` compares on unrelated `key`
       // properties of its own fixtures, not on keyboard input.
-      if (entry === 'node_modules' || entry === 'dist' || entry === 'test' || entry === 'tests') {
+      if (
+        entry === 'node_modules' ||
+        entry === 'dist' ||
+        entry.startsWith('dist.') ||
+        entry === 'test' ||
+        entry === 'tests'
+      ) {
         continue;
       }
       const full = path.join(dir, entry);

@@ -1,7 +1,0 @@
-
-> proto-ui@ check:types:workspace /var/tmp/proto-ui-cli-fix-456f
-> tsc -p tsconfig.workspace.json --noEmit
-
-scripts/analysis/fixtures/shadow-s3/admission.ts(5,42): error TS2307: Cannot find module '../../../../apps/www/src/styles/proto-ui-shadow-style.generated.js' or its corresponding type declarations.
-scripts/analysis/fixtures/shadow-s4/dialog.ts(14,42): error TS2307: Cannot find module '../../../../apps/www/src/styles/proto-ui-shadow-style.generated.js' or its corresponding type declarations.
- ELIFECYCLE  Command failed with exit code 2.

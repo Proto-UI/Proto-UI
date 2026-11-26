@@ -9,9 +9,9 @@ import {
 } from './shared';
 
 const TRACK_PROMINENCE: Record<LiquidGlassProgressProminence, StyleHandle> = {
-  regular: tw('h-2 bg-foreground/10 ring-foreground/10'),
-  prominent: tw('h-2.5 bg-primary/15 ring-primary/25'),
-  destructive: tw('h-2 bg-destructive/15 ring-destructive/25'),
+  regular: tw('h-2 bg-muted text-foreground ring-foreground/10'),
+  prominent: tw('h-2.5 bg-muted text-foreground ring-primary/25'),
+  destructive: tw('h-2 bg-muted text-foreground ring-destructive/25'),
 };
 
 export default definePrototype<LiquidGlassProgressPartProps, ProgressPartExposes>({
@@ -25,8 +25,9 @@ export default definePrototype<LiquidGlassProgressPartProps, ProgressPartExposes
         options: [...LIQUID_GLASS_PROGRESS_PROMINENCES, 'inherit'],
         empty: 'fallback',
       },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ prominence: 'inherit' });
+    def.props.setDefaults({ prominence: 'inherit', material: 'auto' });
     const prominence = def.state.enum('liquidGlassProgressProminence', 'regular', {
       options: LIQUID_GLASS_PROGRESS_PROMINENCES,
     });
@@ -44,8 +45,6 @@ export default definePrototype<LiquidGlassProgressPartProps, ProgressPartExposes
     def.lifecycle.onCreated(syncProminence);
     def.lifecycle.onMounted(syncProminence);
     def.lifecycle.onUpdated(syncProminence);
-    // Content-layer translucent capsule track with specular inset rim; keeps
-    // material neutral so Progress never stacks glass-on-glass over content.
     def.feedback.style.use(
       tw(
         'relative flex w-full items-center overflow-hidden rounded-full ring-1 ring-inset shadow-inner'
@@ -57,6 +56,16 @@ export default definePrototype<LiquidGlassProgressPartProps, ProgressPartExposes
         intent: (i) => i.feedback.style.use(TRACK_PROMINENCE[level]),
       });
     }
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    def.rule({
+      when: (w) => w.prop('material').eq('auto'),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
+    });
     return inherited.render;
   },
 });

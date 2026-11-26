@@ -25,7 +25,7 @@ Neither diagnostic changes the P2 product bytes. The generated SSR reconnect wor
 
 ## Proof and bounded verification
 
-Canonical proof binds the final source commit and root tree. Its 4,206 source bindings are byte-identical to the frozen P2 proof. The [supplemental 14-path manifest](./evidence/2026-10-10-finf-p2-diagnostics-source-manifest.json) contains 23 self-verifying tree objects and exact blob/SHA256 identities; it closes the additional diagnostic paths offline without expanding the canonical inventory or making an acceptance claim.
+Canonical proof binds the final source commit and root tree. Its 4,206 source bindings are byte-identical to the frozen P2 proof. The [supplemental 14-path manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-10-finf-p2-diagnostics-source-manifest.json) contains 23 self-verifying tree objects and exact blob/SHA256 identities; it closes the additional diagnostic paths offline without expanding the canonical inventory or making an acceptance claim.
 
 All other canonical fields stay unchanged: 258 draft catalog identities; 55 core plus 13 prior-work items, 68 total, checkedCoreTodos zero; four public SSR completion flags false; Liquid Card private and default-off; all 280 GPUI rows required-unassessed.
 

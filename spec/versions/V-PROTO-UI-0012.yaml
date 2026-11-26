@@ -30,6 +30,14 @@ criteria:
     text:
       en: The stable release may publish only after the reviewed 0.3 scope closure is merged, the full release rehearsal passes from the reviewed preparation diff, and no unresolved release blocker is admitted into the train. The 0.3 published prototype surface is limited to the Base, Shadcn, Brutalist and Lucide families plus the website and CLI surfaces; the remaining UI library families stay deferred to the 0.4 line.
       zh-CN: 仅当已评审的 0.3 范围闭环已合入、完整 release rehearsal 在已评审准备差异上通过，且不存在被纳入 release train 的未解决发版 blocker 时，才可发布稳定版。0.3 发布的原型表面限定为 Base、Shadcn、Brutalist 与 Lucide 家族以及网站与 CLI 表面；其余 UI library 家族顺延至 0.4 线。
+  - id: V-PROTO-UI-0012-BUNDLE-READINESS
+    text:
+      en: The reviewed candidate must pass the existing strict whole-entry package budgets with the pinned toolchain and unchanged bundling, compression and external dependency boundary. Optimization evidence must compare actual retained artifacts from the baseline and candidate; moving code between bundled workspace packages or refreshing a baseline is not evidence of byte reduction.
+      zh-CN: 已评审候选必须在固定工具链及不变的打包、压缩和外部依赖边界下通过既有 strict whole-entry package budgets。优化证据必须比较基线与候选实际保留的产物；在参与打包的 workspace package 之间搬移代码或刷新基线，不构成体积减少的证据。
+  - id: V-PROTO-UI-0012-GENERATED-CONSISTENCY
+    text:
+      en: Generated inputs selected by the effective release checks must be regenerated through their owning scripts and pass freshness checks. Website source bindings may change only after the bound source changes are reviewed; synchronization preserves failed, blocked and unexecuted acceptance states and never substitutes for current-source browser or consumer evidence. Apply the effective 0.3 scope before classifying a deferred target as a release blocker.
+      zh-CN: 有效发行检查选用的生成输入必须通过其所属脚本重新生成并通过 freshness 检查。网站源码绑定仅可在审读对应源码变化后更新；同步必须保留失败、blocked 与未执行的验收状态，不能替代当前源码的 browser 或 consumer 证据。将延期 target 分类为发版 blocker 前，必须先应用有效 0.3 范围。
   - id: V-PROTO-UI-0012-REGISTRY-READINESS
     text:
       en: Publication requires every public package identity to pass the existing registry-readiness policy. Four identities introduced by the 0.3 line still have no registry bootstrap, so preparing this version neither creates package identities nor changes registry tags.
@@ -43,7 +51,13 @@ sources:
   - path: internal/releases/0.3.0/release-notes.md
   - path: internal/releases/0.3.0/release-notes.zh-CN.md
   - path: internal/records/2026-11-24-0.3.0-release-prep.zh-CN.md
+  - path: internal/governance/release-0.3-plan.md
+  - path: scripts/analysis/package-budgets.mjs
+  - path: scripts/release/rehearse.mjs
 openQuestions: []
 revisions:
   - version: 0.3.0
     change: introduced
+  - version: 0.3.0
+    change: clarified
+    summary: Made strict retained-bundle evidence and reviewed generated/source consistency explicit preparation criteria, preserving effective release scope, draft lifecycle and separate publication authority.

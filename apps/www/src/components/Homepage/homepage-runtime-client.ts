@@ -141,7 +141,8 @@ export function createHomepageContent(
   if (group.locale) return createHomepageLocaleSelect(group.locale, family, runtime, isActive).demo;
   const children: DemoNode[] = group.links.map((link, index) => {
     const announcement =
-      siteLinkAppearance(link) === 'text' && !!link.closest('.homepage-hero__eyebrow');
+      (siteLinkAppearance(link) === 'pill' || siteLinkAppearance(link) === 'text') &&
+      !!link.closest('.homepage-hero__eyebrow');
     const attrs: Record<string, string> = {};
     for (const name of ANCHOR_ATTRIBUTES) {
       const value = link.getAttribute(name);
@@ -518,7 +519,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       options: [
         { value: 'shadcn', label: 'Shadcn' },
         { value: 'brutalist', label: 'Brutalist' },
-        { value: 'bootstrap-2-3-2', label: 'Bootstrap 2.3.2 · WIP' },
+        { value: 'bootstrap-2-3-2', label: 'Bootstrap 2.3.2' },
       ],
       onValueChange: requestFamily,
     },

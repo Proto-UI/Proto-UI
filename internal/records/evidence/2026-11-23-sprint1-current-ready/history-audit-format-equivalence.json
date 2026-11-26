@@ -1,6 +1,0 @@
-{
-  "parser": "typescript 5.9.3",
-  "before": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
-  "after": "a8a117d6b3b38890748b5b44b837830a43953d6211eae084b072f0862661cc03",
-  "astEqual": true
-}

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as adapterBase from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { afterTwoHostFrames } from '../../test-utils/host-rendering';
+import { installModalPresentationHost } from './modal-presentation-host';
 import {
   dialogClose,
   dialogCloseIcon,
@@ -17,6 +18,8 @@ import {
 import { hoverCardContent, hoverCardRoot, hoverCardTrigger } from '../src/hover-card';
 import { tooltipContent, tooltipGroup, tooltipRoot, tooltipTrigger } from '../src/tooltip';
 import { drawerContent, drawerFooter, drawerHeader, drawerRoot, drawerTitle } from '../src/drawer';
+
+const useModalPresentationHost = installModalPresentationHost();
 
 type Host = HTMLElement & { getExposes(): Record<string, unknown> };
 
@@ -150,7 +153,10 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
     expect(stateValue<boolean>(root, 'open')).toBe(false);
   });
 
-  it('inherits open/close ownership, presence, and title/description relations', async () => {
+  it('inherits open/close ownership, presence, and title/description relations', async ({
+    onTestFinished,
+  }) => {
+    onTestFinished(useModalPresentationHost());
     const pendingPresentation = new Map<HTMLElement, () => void>();
     const createPresenceSink = adapterBase.createWebPresencePresentationSink;
     vi.spyOn(adapterBase, 'createWebPresencePresentationSink').mockImplementation(
@@ -203,7 +209,9 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
     expect(content.getAttribute('aria-labelledby')).toBe(title.id);
     expect(content.getAttribute('aria-describedby')).toBe(description.id);
 
-    expect(pendingPresentation.has(content)).toBe(true);
+    // The installed finite CSS produces a real host receipt asynchronously.
+    await vi.waitFor(() => expect(pendingPresentation.has(content)).toBe(true));
+    expect(transitionState(content)).toBe('entering');
     releasePresentation();
     await completeTransitions(mask, content);
     expect(transitionState(content)).toBe('entered');
@@ -222,7 +230,9 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
 
     expect(stateValue<boolean>(root, 'open')).toBe(false);
     expect(transitionState(content)).toBe('leaving');
-    expect(pendingPresentation.has(content)).toBe(true);
+    // The installed finite CSS produces a real host receipt asynchronously.
+    await vi.waitFor(() => expect(pendingPresentation.has(content)).toBe(true));
+    expect(transitionState(content)).toBe('leaving');
     releasePresentation();
     await completeTransitions(mask, content);
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
@@ -411,6 +421,10 @@ describe('prototypes/bootstrap-2-3-2: hover-card projection', () => {
 
     trigger.dispatchEvent(new Event('pointerenter'));
     await advance(699);
+    const ink = (trigger.getAttribute('data-pui-style') ?? '').split(/\s+/);
+    expect(ink).toContain('text-foreground');
+    expect(ink).toContain('underline');
+    expect(ink).not.toContain('text-[#005580]');
     expect(stateValue<boolean>(root, 'open')).toBe(false);
     await advance(1);
     expect(stateValue<boolean>(root, 'open')).toBe(true);

@@ -131,16 +131,14 @@ describe('Accordion demo narrow-width ownership', () => {
         )
           expect(node.className?.split(' ')).toContain('wrap-anywhere');
       }
-      const long = nodes.find(
+      const longContent = nodes.find(
         (node) =>
-          typeof node !== 'string' &&
-          node.kind === 'box' &&
-          node.children?.some(
-            (child) =>
-              typeof child === 'string' &&
-              child.startsWith('Reach us anytime via support@example.com')
-          )
+          typeof node !== 'string' && node.kind === 'proto' && node.ref === 'single-long-content'
       );
+      const long =
+        longContent && typeof longContent !== 'string' && longContent.kind === 'proto'
+          ? longContent.children?.[0]
+          : undefined;
       expect(
         long && typeof long !== 'string' && long.kind === 'box' && long.className?.split(' ')
       ).toContain('wrap-anywhere');
@@ -227,21 +225,16 @@ describe('Liquid Accordion bounded source ownership', () => {
     ).toEqual(['controlled', 'requestStatus', 'accept']);
   });
 
-  it('keeps other families in unsegmented example order through their layout wrappers', () => {
+  it('keeps other families in their original unsegmented example order', () => {
     for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2']) {
       const root = createAccordionDemo(family).root;
       expect(planMaterialStages(root)).toEqual([]);
       if (root.kind !== 'box') throw new Error('Expected recipe layout box');
       expect(
-        nodes(root).flatMap((node) =>
-          node.kind !== 'text' &&
-          ['single', 'multiple', 'rtl', 'controlled', 'requestStatus', 'accept'].includes(
-            node.ref ?? ''
-          )
-            ? [node.ref]
-            : []
+        root.children?.map((node) =>
+          typeof node === 'string' || node.kind === 'text' ? null : (node.ref ?? null)
         )
-      ).toEqual(['single', 'multiple', 'rtl', 'controlled', 'requestStatus', 'accept']);
+      ).toEqual(['single', null, 'multiple', null, null, null, 'controlled', null]);
     }
   });
 });

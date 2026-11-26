@@ -4,21 +4,19 @@ import { describe, expect, it } from 'vitest';
 import { loadDemo } from './demo-modules';
 import { loadPrototype } from './prototype-modules';
 import { getPrototype } from './registry';
-import { assertDemoSpec, type DemoChild } from './demo-types';
-
-function prototypes(node: DemoChild): string[] {
-  if (typeof node === 'string' || node.kind === 'text') return [];
-  return [
-    ...(node.kind === 'proto' ? [node.prototypeId] : []),
-    ...(node.children ?? []).flatMap(prototypes),
-  ];
-}
+import {
+  assertDemoSpec,
+  collectPrototypeIds,
+  type DemoChild,
+  type DemoNode,
+  type DemoSpec,
+} from './demo-types';
 
 // Toast is published for base, shadcn, brutalist, bootstrap-2-3-2, and
 // liquid-glass. Every family declares initialRuntime="wc" and a four-runtime
 // selector (including vue2). None of the families has a projection manifest
-// entry, so each demo's authored atom set is asserted exactly. Independently
-// load every published role, including optional parts absent from that demo.
+// entry, so each demo's atom id set is asserted exactly against the published
+// roles instead of being bound to a manifest.
 const TOAST_FAMILIES = [
   {
     family: 'base',
@@ -57,21 +55,46 @@ const TOAST_ROLES = [
   'toast-viewport',
 ] as const;
 
+const TOAST_DEMOS = import.meta.glob<{ default: DemoSpec }>([
+  '../../content/docs/demo-*-toast.demo.ts',
+  '../../content/docs/demo_components/toast/*.demo.ts',
+]);
+
+function toastViewports(root: DemoChild) {
+  const viewports: Extract<DemoNode, { kind: 'proto' }>[] = [];
+  const visit = (node: DemoChild) => {
+    if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.kind === 'proto' && node.prototypeId.endsWith('-toast-viewport')) viewports.push(node);
+    node.children?.forEach(visit);
+  };
+  visit(root);
+  return viewports;
+}
+
 describe('Toast actual DemoSpec registration', () => {
+  for (const [path, load] of Object.entries(TOAST_DEMOS)) {
+    it(`${path} carries the preview theme on its actual portal viewport`, async () => {
+      const { default: demo } = await load();
+      expect(() => assertDemoSpec(demo)).not.toThrow();
+      const viewports = toastViewports(demo.root);
+      expect(viewports).toHaveLength(1);
+      expect(viewports[0]?.previewTheme).toBe('portal');
+      expect(viewports[0]?.ref).toBeTruthy();
+    });
+  }
+
   for (const { family, mdxPath, slug } of TOAST_FAMILIES) {
     it(`${family} loads only real family toast atoms`, async () => {
       const recipeId = `demo-${family}-toast`;
       const demo = await loadDemo(recipeId);
       expect(() => assertDemoSpec(demo)).not.toThrow();
-      const ids = [...new Set(prototypes(demo.root))].sort();
-      const published = TOAST_ROLES.map((role) => `${family}-${role}`);
-      // The Shadcn stack demo dismisses through Action and its timer. Close is
-      // optional anatomy (min: 0) and remains a published part used by the
-      // persistent example; its loader is still checked below.
-      const expected = published.filter((id) => id !== 'shadcn-toast-close');
+      const declaredIds = new Set<string>();
+      collectPrototypeIds(demo.root, declaredIds);
+      const ids = [...declaredIds].sort();
+      const expected = TOAST_ROLES.map((role) => `${family}-${role}`);
       if (family === 'shadcn') expected.push('shadcn-style-scope');
       expect(ids).toEqual(expected.sort());
-      for (const id of new Set([...ids, ...published])) {
+      for (const id of ids) {
         await loadPrototype(id);
         expect(getPrototype(id)?.name).toBe(id);
       }

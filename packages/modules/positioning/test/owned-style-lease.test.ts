@@ -170,4 +170,30 @@ describe('owned style measurement transactions', () => {
     expect(writes).not.toHaveBeenCalled();
     lease.restore();
   });
+
+  it('discards a baseline read when a new field joins the same lease', () => {
+    const element = document.createElement('div');
+    element.style.setProperty('--height', '77px', 'important');
+    const lease = ownStyles(element);
+    lease.write('--height', '234px');
+    const completion = { changed: false, restored: false };
+
+    expect(
+      lease.withBaseline(
+        () => {
+          expect(element.style.getPropertyValue('--height')).toBe('77px');
+          expect(lease.write('--width', '123px')).toBe(true);
+          return 1000;
+        },
+        () => true,
+        completion
+      )
+    ).toBeUndefined();
+    expect(completion).toEqual({ changed: true, restored: false });
+    expect(element.style.getPropertyValue('--width')).toBe('123px');
+    lease.restore();
+    expect(element.style.getPropertyValue('--width')).toBe('');
+    expect(element.style.getPropertyValue('--height')).toBe('77px');
+    expect(element.style.getPropertyPriority('--height')).toBe('important');
+  });
 });

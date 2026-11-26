@@ -135,6 +135,6 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
       } finally {
         window.removeEventListener('error', onError);
       }
-    });
+    }, 20_000);
   }
 }

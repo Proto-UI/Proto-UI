@@ -12,12 +12,18 @@ export default definePrototype<ToastActionProps, ToastActionExposes>({
   modules: asToastAction.modules,
   setup(def) {
     const behavior = asToastAction();
+    const pressed = def.state.fromInteraction('pressed');
     def.feedback.style.use(
       tw(
         'rounded-base border-2 border-black bg-main text-main-foreground shadow-[4px_4px_0_0_#000] font-sans font-bold text-xs leading-4 inline-flex min-w-0 shrink-0 items-center justify-center h-8 px-3 whitespace-nowrap select-none cursor-pointer outline-none'
       )
     );
     setupToastCommandPress(def, behavior.getState!('disabled')!);
+    def.rule({
+      when: (w) =>
+        w.all(w.state(pressed).eq(true), w.state(behavior.getState!('disabled')!).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
+    });
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
       intent: (i) =>

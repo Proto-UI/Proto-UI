@@ -57,10 +57,24 @@ const pressToken = {
 };
 // Registered feedback vocabularies differ per family and consumer: web-exposed
 // states project as data-[state] variants, while profile-gated paint is dynamic.
-const disabledTokens = (family: string, component: string): string[] => {
-  if (family === 'liquid-glass' && (component === 'carousel' || component === 'data-table'))
-    // Material owners emit the resolved complete frame, including disabled paint.
-    return ['cursor-default', 'shadow-none', 'pointer-events-none'];
+// Declaring material keeps all feedback Rules live for these nested controls.
+const hasDynamicLiquidFeedback = (family: string, component: string, part: string) =>
+  family === 'liquid-glass' &&
+  (component === 'carousel' ||
+    component === 'data-table' ||
+    component === 'message-scroller' ||
+    (component === 'date-picker' && part === 'trigger'));
+const disabledTokens = (family: string, component: string, part: string): string[] => {
+  if (hasDynamicLiquidFeedback(family, component, part))
+    return component === 'carousel' || component === 'date-picker'
+      ? [
+          'pointer-events-none',
+          'cursor-default',
+          'shadow-none',
+          'bg-muted',
+          'text-muted-foreground',
+        ]
+      : ['pointer-events-none', 'cursor-default', 'shadow-none'];
   if (family === 'liquid-glass')
     // Liquid disabled commands withdraw optional material without whole-control
     // opacity (README: no opacity suppression for disabled commands).
@@ -73,34 +87,39 @@ const disabledTokens = (family: string, component: string): string[] => {
   return ['data-[disabled]:opacity-50'];
 };
 const focusVisibleToken = (family: string, component: string, part: string): string | null => {
-  if (family === 'liquid-glass' && (component === 'carousel' || component === 'data-table'))
-    return null;
+  if (hasDynamicLiquidFeedback(family, component, part)) return null;
   if (family !== 'shadcn') return 'data-[focus-visible]:ring-2';
-  if (part === 'day') return null;
-  if (component === 'carousel' || component === 'message-scroller')
+  if (component === 'carousel' || component === 'message-scroller' || part === 'day')
     // Profile-gated ring paints dynamically; asserted in the focused phase.
     return null;
   return 'data-[focus-visible]:forced-colors-focus-outline';
 };
-const pressedToken = (family: string, component: string, part: string): string | null => {
+const pressedTokens = (family: string, component: string, part: string): string[] => {
+  if (hasDynamicLiquidFeedback(family, component, part)) return [];
+  if (family === 'liquid-glass' && (component === 'tree' || part === 'day')) {
+    const selector =
+      part === 'day'
+        ? 'data-[pressed]:not-[data-disabled]:not-[data-selected]:'
+        : 'data-[pressed]:not-[data-disabled]:';
+    return [`${selector}bg-muted`, `${selector}shadow-none`];
+  }
   if (family === 'shadcn')
     // Multi-profile press paint is dynamic; asserted in the pressed phase.
-    return null;
-  if (family === 'brutalist' && part === 'day') return null;
-  if (family === 'liquid-glass') {
-    if (component === 'carousel' || component === 'data-table') return null;
-    if (component === 'tree') return 'data-[pressed]:not-[data-disabled]:shadow-none';
-    if (part === 'day') return 'data-[pressed]:not-[data-disabled]:not-[data-selected]:shadow-none';
-  }
+    return [];
+  if (family === 'brutalist' && part === 'day')
+    // Flat grid day cell aligned with brutalist-calendar-day; no raised press translation.
+    return [];
   const token = `data-[pressed]:not-[data-disabled]:${pressToken[family as keyof typeof pressToken]}`;
   if (family === 'bootstrap-2-3-2') {
     if (component === 'message-scroller')
       // Jump consumes the shared Button recipe whose press paint is unguarded.
-      return `data-[pressed]:${pressToken['bootstrap-2-3-2']}`;
+      return [`data-[pressed]:${pressToken['bootstrap-2-3-2']}`];
     if (part === 'day')
-      return `data-[pressed]:not-[data-disabled]:not-[data-selected]:${pressToken['bootstrap-2-3-2']}`;
+      return [
+        `data-[pressed]:not-[data-disabled]:not-[data-selected]:${pressToken['bootstrap-2-3-2']}`,
+      ];
   }
-  return token;
+  return [token];
 };
 // Profiles without a static press variant keep pressed feedback dynamic; the
 // New York profile and popup triggers intentionally register none.
@@ -115,6 +134,14 @@ const dynamicPressed: Record<string, Record<string, string[]>> = {
   },
 };
 const shadcnDayPressed = ['translate-y-px'];
+const liquidFocusTokens = [
+  'outline-none',
+  'forced-colors-focus-outline',
+  'ring-2',
+  'ring-ring',
+  'ring-offset-2',
+  'ring-offset-background',
+];
 for (const [family, modules] of Object.entries(families)) {
   for (const module of modules)
     for (const proto of new Set(Object.values(module)))
@@ -148,23 +175,54 @@ for (const [family, modules] of Object.entries(families)) {
       expect(exposed.disabled.get()).toBe(true);
       expect(control.getAttribute('aria-disabled')).toBe('true');
       const tokens = () => (control.getAttribute('data-pui-style') ?? '').split(/\s+/);
-      for (const token of disabledTokens(family, component)) expect(tokens()).toContain(token);
+      const dynamicLiquid = hasDynamicLiquidFeedback(family, component, part);
+      const expectLiquidDisabled = () => {
+        for (const token of disabledTokens(family, component, part))
+          expect(tokens()).toContain(token);
+        // Carousel keeps its authored base cursor token; cursor utilities
+        // occupy independent semantic groups. Pagination registers it only enabled.
+        if (component === 'data-table') expect(tokens()).not.toContain('cursor-pointer');
+        expect(tokens()).not.toContain('shadow-xs');
+        expect(tokens()).not.toContain('opacity-50');
+      };
+      const expectLiquidRest = () => {
+        expect(tokens()).toContain('cursor-pointer');
+        expect(tokens()).toContain('shadow-sm');
+        for (const token of ['pointer-events-none', 'cursor-default', 'shadow-none', 'shadow-xs'])
+          expect(tokens()).not.toContain(token);
+        if (component === 'carousel' || component === 'date-picker') {
+          expect(tokens()).not.toContain('bg-muted');
+          expect(tokens()).not.toContain('text-muted-foreground');
+        }
+      };
+      if (dynamicLiquid) {
+        expectLiquidDisabled();
+        expect(exposed.pressed.get()).toBe(false);
+        expect(exposed.focusVisible.get()).toBe(false);
+        expect(control.hasAttribute('data-pressed')).toBe(false);
+        expect(control.hasAttribute('data-focus-visible')).toBe(false);
+        for (const token of liquidFocusTokens) expect(tokens()).not.toContain(token);
+      }
+      for (const token of disabledTokens(family, component, part))
+        expect(tokens()).toContain(token);
       if (family === 'liquid-glass') expect(tokens()).not.toContain('data-[disabled]:opacity-50');
       const staticFocus = focusVisibleToken(family, component, part);
       if (staticFocus) expect(tokens()).toContain(staticFocus);
-      const staticPressed = pressedToken(family, component, part);
-      if (staticPressed) expect(tokens()).toContain(staticPressed);
+      for (const token of pressedTokens(family, component, part)) expect(tokens()).toContain(token);
       control.dispatchEvent(new Event('pointerdown'));
       await flush();
       expect(exposed.pressed.get()).toBe(false);
+      if (dynamicLiquid) expectLiquidDisabled();
       setElementProps(control, { ...ownProps, disabled: false });
       if (component === 'carousel') setElementProps(root, { disabled: false });
       await flush();
       expect(exposed.disabled.get()).toBe(false);
+      if (dynamicLiquid) expectLiquidRest();
       exposed.focusSelf({ reason: 'keyboard' });
       await flush();
       expect(exposed.focusVisible.get()).toBe(true);
       expect(control.hasAttribute('data-focus-visible')).toBe(true);
+      if (dynamicLiquid) for (const token of liquidFocusTokens) expect(tokens()).toContain(token);
       if (family === 'shadcn') {
         // Profile-driven focus paint applies dynamically while focusVisible.
         expect(tokens()).toContain('ring-3');
@@ -189,17 +247,59 @@ for (const [family, modules] of Object.entries(families)) {
         // Flat calendar cells retain pressed semantics without raised-button translation.
         expect(tokens().some((token: string) => token.includes('translate-'))).toBe(false);
       }
+      if (dynamicLiquid) {
+        expect(exposed.disabled.get()).toBe(false);
+        expect(tokens()).toContain('shadow-xs');
+        for (const token of ['pointer-events-none', 'cursor-default', 'shadow-none'])
+          expect(tokens()).not.toContain(token);
+      }
       control.dispatchEvent(new Event('pointercancel'));
       await flush();
       expect(exposed.pressed.get()).toBe(false);
       expect(control.hasAttribute('data-pressed')).toBe(false);
+      if (dynamicLiquid) expectLiquidRest();
       control.dispatchEvent(new Event('pointerdown'));
       await flush();
+      if (dynamicLiquid) {
+        expect(exposed.pressed.get()).toBe(true);
+        expect(control.hasAttribute('data-pressed')).toBe(true);
+        expect(tokens()).toContain('shadow-xs');
+      }
       setElementProps(control, { ...ownProps, disabled: true });
       await flush();
       expect(exposed.disabled.get()).toBe(true);
       expect(exposed.pressed.get()).toBe(false);
       expect(control.tabIndex).toBe(-1);
+      if (dynamicLiquid) {
+        expect(control.hasAttribute('data-pressed')).toBe(false);
+        expectLiquidDisabled();
+        setElementProps(control, { ...ownProps, disabled: false });
+        await flush();
+        expect(control.getExposes().disabled).toBe(exposed.disabled);
+        expect(control.getExposes().pressed).toBe(exposed.pressed);
+        expect(control.getExposes().focusVisible).toBe(exposed.focusVisible);
+        expect(exposed.disabled.get()).toBe(false);
+        expect(exposed.pressed.get()).toBe(false);
+        expect(control.getAttribute('aria-disabled')).not.toBe('true');
+        expectLiquidRest();
+        exposed.focusSelf({ reason: 'keyboard' });
+        await flush();
+        expect(exposed.focusVisible.get()).toBe(true);
+        expect(control.hasAttribute('data-focus-visible')).toBe(true);
+        for (const token of liquidFocusTokens) expect(tokens()).toContain(token);
+        control.dispatchEvent(new Event('pointerdown'));
+        await flush();
+        expect(exposed.disabled.get()).toBe(false);
+        expect(exposed.pressed.get()).toBe(true);
+        expect(control.hasAttribute('data-pressed')).toBe(true);
+        expect(tokens()).toContain('shadow-xs');
+        expect(tokens()).not.toContain('shadow-none');
+        control.dispatchEvent(new Event('pointercancel'));
+        await flush();
+        expect(exposed.pressed.get()).toBe(false);
+        expect(control.hasAttribute('data-pressed')).toBe(false);
+        expectLiquidRest();
+      }
       if (component === 'date-picker' && part === 'day') {
         setElementProps(control, { ...ownProps, disabled: false });
         await flush();

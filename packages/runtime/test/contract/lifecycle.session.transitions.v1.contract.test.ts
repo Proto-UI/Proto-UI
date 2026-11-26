@@ -357,4 +357,90 @@ describe('runtime contract: lifecycle transition matrix (v1)', () => {
     ]);
     await expect(session.dispose()).resolves.toBeUndefined();
   });
+
+  it('reuses the active mount promise when mounting observer reenters mount()', async () => {
+    const callbacks: string[] = [];
+    const { host, signals, scheduled, events } = createControlledHost();
+    let session!: ReturnType<typeof createRuntimeSession>;
+    let reentrant: Promise<void> | undefined;
+    const baseObserver = host.onLifecycleEvent!;
+    host.onLifecycleEvent = (event) => {
+      baseObserver(event);
+      if (event.type === 'mount.phase' && event.phase === 'mounting' && !reentrant) {
+        reentrant = session.mount();
+      }
+    };
+
+    session = createRuntimeSession(simpleProto(callbacks), host);
+    const outer = session.mount();
+    expect(reentrant).toBe(outer);
+    expect(signals).toHaveLength(1);
+    expect(events.filter((e) => e.type === 'mount.phase' && e.phase === 'mounting')).toEqual([
+      { type: 'mount.phase', phase: 'mounting', epoch: 1 },
+    ]);
+
+    signals.shift()!.done();
+    scheduled.shift()!();
+    await outer;
+    await reentrant;
+    expect(callbacks).toEqual(['mounted']);
+    expect(session.mountPhase).toBe('mounted');
+  });
+
+  for (const action of ['unmount', 'dispose'] as const)
+    it(`cancels commit when mounting observer reenters ${action}()`, async () => {
+      const callbacks: string[] = [];
+      const { host, signals, scheduled } = createControlledHost();
+      let session!: ReturnType<typeof createRuntimeSession>;
+      let nested: Promise<void> | undefined;
+      const baseObserver = host.onLifecycleEvent!;
+      host.onLifecycleEvent = (event) => {
+        baseObserver(event);
+        if (event.type === 'mount.phase' && event.phase === 'mounting' && !nested) {
+          nested = action === 'unmount' ? session.unmount() : session.dispose();
+        }
+      };
+
+      session = createRuntimeSession(simpleProto(callbacks), host);
+      await session.mount();
+      await nested;
+
+      expect(signals).toHaveLength(0);
+      expect(scheduled).toHaveLength(0);
+      expect(session.mountPhase).toBe('detached');
+      if (action === 'dispose') {
+        expect(session.instancePhase).toBe('disposed');
+        expect(callbacks).toEqual(['unmounted', 'disposed']);
+      } else {
+        expect(session.instancePhase).toBe('alive');
+        expect(callbacks).toEqual(['unmounted']);
+      }
+    });
+
+  it('rolls back mountPhase to detached when mounting observer throws', async () => {
+    const { host, signals, scheduled } = createControlledHost();
+    const boom = new Error('mounting observer failed');
+    let failNext = true;
+    const baseObserver = host.onLifecycleEvent!;
+    host.onLifecycleEvent = (event) => {
+      baseObserver(event);
+      if (event.type === 'mount.phase' && event.phase === 'mounting' && failNext) {
+        failNext = false;
+        throw boom;
+      }
+    };
+
+    const session = createRuntimeSession(simpleProto(), host);
+    expect(() => session.mount()).toThrow(boom);
+    expect(signals).toHaveLength(0);
+    expect(session.mountPhase).toBe('detached');
+
+    // A subsequent mount succeeds cleanly once the observer recovers.
+    const retry = session.mount();
+    expect(signals).toHaveLength(1);
+    signals.shift()!.done();
+    scheduled.shift()!();
+    await retry;
+    expect(session.mountPhase).toBe('mounted');
+  });
 });
