@@ -103,6 +103,16 @@ fn state(item: &Entity<KeyedTaskItem>, cx: &TestAppContext, initial: &str, answe
     });
 }
 
+fn mount_owner(scope: &ContextScope, cx: &mut TestAppContext) -> Entity<KeyedTaskOwner> {
+    let owner = cx.update(|app| KeyedTaskOwner::mount(KeyedTaskOwnerProps::default(), scope, app)).unwrap();
+    owner.update(cx, |owner, cx| owner.set_appearance(|_, style| {
+        style.display = Some(Display::Flex);
+        style.flex_direction = Some(FlexDirection::Column);
+        style.size.width = Some(px(920.).into());
+    }, cx));
+    owner
+}
+
 #[test]
 fn reorder_removal_and_physical_move_preserve_the_correct_owned_task() {
     let text = Arc::new(ObservedText::default());
@@ -113,12 +123,7 @@ fn reorder_removal_and_physical_move_preserve_the_correct_owned_task() {
     let left = cx.new(|_| ITEM_ZONE.provider("left".into()));
     let right = cx.new(|_| ITEM_ZONE.provider("right".into()));
     let scope = ContextScope::new(theme).with(ITEM_ZONE, left.clone());
-    let owner = cx.update(|app| KeyedTaskOwner::mount(KeyedTaskOwnerProps::default(), &scope, app)).unwrap();
-    owner.update(&mut cx, |owner, cx| owner.set_appearance(|_, style| {
-        style.display = Some(Display::Flex);
-        style.flex_direction = Some(FlexDirection::Column);
-        style.size.width = Some(px(920.).into());
-    }, cx));
+    let owner = mount_owner(&scope, &mut cx);
     let first = cx.add_window(|_, _| Surface(Some(owner.clone().into())));
     let second = cx.add_window(|_, _| Surface(None));
     let [a, b]: [_; 2] = paint.frame(first, &mut cx, &["A:left/left/pending", "B:left/left/pending"]).try_into().unwrap();
@@ -202,5 +207,97 @@ fn reorder_removal_and_physical_move_preserve_the_correct_owned_task() {
     assert_eq!(paint.births.borrow().len(), 4);
     assert_eq!(files.len(), 4);
     paint.frame(first, &mut cx, &[]);
+    cx.quit();
+}
+
+#[test]
+fn releasing_the_parent_ends_retained_keyed_tasks_before_their_files_can_publish() {
+    let text = Arc::new(ObservedText::default());
+    let mut cx = TestAppContext::build_with_text_system(TestDispatcher::new(0), None, text.clone());
+    let (paint, _births) = Recorder::attach(text, &cx);
+    let files = KeyedFiles::default();
+    cx.set_global(files.clone());
+    let latest_request = |key: &str| files.requests_for(key).pop().unwrap_or_else(|| panic!("missing {key} request"));
+    let left = cx.new(|_| ITEM_ZONE.provider("left".into()));
+    let owner = mount_owner(&ContextScope::new(theme).with(ITEM_ZONE, left), &mut cx);
+    let owner_id = owner.entity_id();
+    let weak_owner = owner.downgrade();
+    let window = cx.add_window(|_, _| Surface(Some(owner.clone().into())));
+    let [a, b]: [_; 2] = paint.frame(window, &mut cx, &["A:left/left/pending", "B:left/left/pending"]).try_into().unwrap();
+    assert_ne!(a, b);
+    assert_eq!(files.len(), 2);
+    let (a_file, b_file) = (latest_request("A"), latest_request("B"));
+    let (a_task, b_task) = (load(&a, &cx), load(&b, &cx));
+    let _old_answers = [&a, &b].map(|entity| cx.update(|app| app.observe(entity, |item, app| {
+        assert_eq!(item.read(app).projection().answer(), "pending", "an original child published a file result");
+    })));
+
+    present(window, &mut cx, None);
+    paint.frame(window, &mut cx, &[]);
+    assert!(weak_owner.upgrade().is_some());
+    assert_eq!(a_task.outcome(), None);
+    assert_eq!(b_task.outcome(), None);
+    assert_eq!(a_file.returned(), None);
+    assert_eq!(b_file.returned(), None);
+
+    // Advance one runnable at a time and stop as soon as the native file records its return.
+    a_file.deliver("old");
+    while a_file.returned().is_none() {
+        assert!(cx.dispatcher.tick(false), "the released A file had no runnable producer");
+    }
+    assert_eq!(a_file.returned().as_deref(), Some("Obsolete amber record"));
+    assert_eq!(a_task.outcome(), None, "A's generated receipt was already terminal when the file returned");
+    state(&a, &cx, "left", "pending");
+    assert_eq!(b_file.returned(), None);
+    assert_eq!(b_task.outcome(), None);
+    state(&b, &cx, "left", "pending");
+
+    drop(owner);
+    cx.update(|_| {});
+    assert!(weak_owner.upgrade().is_none(), "the SDK did not release the original parent");
+    assert_eq!(a_task.outcome(), Some(&TaskOutcome::OwnerEnded));
+    assert_eq!(b_task.outcome(), Some(&TaskOutcome::OwnerEnded));
+    assert_eq!(b_file.returned(), None);
+
+    let right = cx.new(|_| ITEM_ZONE.provider("right".into()));
+    let replacement = mount_owner(&ContextScope::new(theme).with(ITEM_ZONE, right), &mut cx);
+    assert_ne!(replacement.entity_id(), owner_id);
+    present(window, &mut cx, Some(replacement.into()));
+    let [fresh_a, fresh_b]: [_; 2] = paint.frame(window, &mut cx, &["A:right/right/pending", "B:right/right/pending"]).try_into().unwrap();
+    assert_ne!(fresh_a, fresh_b);
+    for child in [&fresh_a, &fresh_b] { assert!(child != &a && child != &b); }
+    assert_eq!(files.len(), 4);
+    let (new_a_file, new_b_file) = (latest_request("A"), latest_request("B"));
+    assert!(!new_a_file.same_request(&a_file) && !new_b_file.same_request(&b_file));
+    let (new_a_task, new_b_task) = (load(&fresh_a, &cx), load(&fresh_b, &cx));
+    assert_eq!(new_a_task.outcome(), None);
+    assert_eq!(new_b_task.outcome(), None);
+    state(&a, &cx, "left", "pending");
+
+    let a_ready = "A:right/right/Apricot replacement@right>right";
+    new_a_file.deliver("new");
+    assert_eq!(paint.frame(window, &mut cx, &[a_ready, "B:right/right/pending"]), [fresh_a.clone(), fresh_b.clone()]);
+    assert_eq!(new_a_file.returned().as_deref(), Some("Apricot replacement"));
+    assert_eq!(new_a_task.outcome(), Some(&TaskOutcome::Completed(())));
+    state(&fresh_a, &cx, "right", "Apricot replacement@right>right");
+
+    b_file.deliver("original");
+    assert_eq!(paint.frame(window, &mut cx, &[a_ready, "B:right/right/pending"]), [fresh_a.clone(), fresh_b.clone()]);
+    assert_eq!(b_file.returned().as_deref(), Some("Blue retained file"));
+    assert_eq!(new_b_file.returned(), None);
+    assert_eq!(new_b_task.outcome(), None);
+    state(&b, &cx, "left", "pending");
+    state(&fresh_b, &cx, "right", "pending");
+
+    new_b_file.deliver("original");
+    assert_eq!(paint.frame(window, &mut cx, &[a_ready, "B:right/right/Blue retained file@right>right"]), [fresh_a, fresh_b.clone()]);
+    assert_eq!(new_b_file.returned().as_deref(), Some("Blue retained file"));
+    assert_eq!(new_b_task.outcome(), Some(&TaskOutcome::Completed(())));
+    state(&fresh_b, &cx, "right", "Blue retained file@right>right");
+    state(&a, &cx, "left", "pending");
+    state(&b, &cx, "left", "pending");
+    assert_eq!(a_task.outcome(), Some(&TaskOutcome::OwnerEnded));
+    assert_eq!(b_task.outcome(), Some(&TaskOutcome::OwnerEnded));
+    assert_eq!(files.len(), 4);
     cx.quit();
 }
