@@ -1,0 +1,2483 @@
+{
+  "kind": "bounded-package-budget-numeric-transaction",
+  "createdAt": "2026-11-26T13:08:53.148224+00:00",
+  "acceptedDevelopmentCapability": "Combined retained 1914 pending-width/palette owner lifetime, retained-child/Teleport, and native focus/owner preservation; no new semantic capability or lifecycle promotion.",
+  "transactionBase": "7eaf8a354e1d3b67649d10c39e1fcfcaf040815d",
+  "canonicalBefore": {
+    "head": "6aff106b356efa16fab432ed1c0b3219130a4900",
+    "tree": "e4d20c0f4948276cb002393c4e41899aa9cd7306",
+    "runId": 45790581682,
+    "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45790581682",
+    "jobId": 139808282272,
+    "artifactId": 15103115360,
+    "report": {
+      "sha256": "84cc42894f4c52078688af297ef5b3d02831443504312b6c420d6f9e572af553",
+      "bytes": 1567587,
+      "archivedEvidenceFile": "report.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "originalZip": {
+      "sha256": "0d26059585381f0e0687b8c7053e4b5d0305d8f351295a8220b7d1d8e3284bf5",
+      "bytes": 306339,
+      "archivedEvidenceFile": "original-report.zip",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "nativeRun": {
+      "sha256": "f450a3f2e76e60f9adb98cc8cc4d2c6c4db05f3f50d7f7ecb58cbbf03e42f09f",
+      "bytes": 14752,
+      "archivedEvidenceFile": "run.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "nativeJobs": {
+      "sha256": "53d2d0933d475a4a7f50b0de43fcda68d7b62d3f134d9921b46a4f8b8cb1602c",
+      "bytes": 4942,
+      "archivedEvidenceFile": "jobs.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "nativeArtifacts": {
+      "sha256": "fc7e7104a6756bb3ca1127ac42088308eace41f16a8c91726371c7bf686748fd",
+      "bytes": 1919,
+      "archivedEvidenceFile": "artifacts.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "status": "9/9 strict pass",
+    "source": {
+      "head": "6aff106b356efa16fab432ed1c0b3219130a4900",
+      "tree": "e4d20c0f4948276cb002393c4e41899aa9cd7306",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8056,
+      "fingerprintSha256": "3bc85c97705de6e5f970d4337f6f5023a0385064463803b19e69650a7a88b127",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "6aff106b356efa16fab432ed1c0b3219130a4900"
+    }
+  },
+  "canonicalCombinedProductCandidate": {
+    "head": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+    "tree": "d91ebc33af588ed936818bf20f69a9f380e96690",
+    "runId": 45817508536,
+    "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45817508536",
+    "jobId": 139900947095,
+    "artifactId": 15115948366,
+    "report": {
+      "sha256": "e814c3c1c4827d90c8d16634c705d55665f29603920f2c78186831c6f5fa6b26",
+      "bytes": 1568413,
+      "archivedEvidenceFile": "report.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "originalZip": {
+      "sha256": "d4ad97b74129682afae5c5c89e60f37bf7b7de9d306146c279aa8ca2b200ab80",
+      "bytes": 306540,
+      "archivedEvidenceFile": "original-report.zip",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "nativeRun": {
+      "sha256": "46a94e9ab79c5b76d379529c45ff7b415375e7b7084a0053a3a19f781c77d642",
+      "bytes": 14724,
+      "archivedEvidenceFile": "run.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "nativeJobs": {
+      "sha256": "149d1bda953f4fd9e98541a8fa472a6be78e2bc9feece84b45b2de229a276954",
+      "bytes": 4940,
+      "archivedEvidenceFile": "jobs.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "nativeArtifacts": {
+      "sha256": "e7106a4941a591aeee609c0233558acad5d628893af93c2a10bcf1669c2b92e4",
+      "bytes": 1915,
+      "archivedEvidenceFile": "artifacts.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "status": "6/9 pass; React/Vue/WC strict fail",
+    "source": {
+      "head": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+      "tree": "d91ebc33af588ed936818bf20f69a9f380e96690",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8106,
+      "fingerprintSha256": "72ae05c2f35b0da4aeafa4b63e5905c19e2a159397f05a79003e3aaf48189681",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "40ea25c26686afb96a465f9005f03be93af6ecd1"
+    }
+  },
+  "canonicalArtifactUrls": [
+    "https://github.com/Proto-UI/Proto-UI/actions/runs/45790581682/artifacts/15103115360",
+    "https://github.com/Proto-UI/Proto-UI/actions/runs/45817508536/artifacts/15115948366"
+  ],
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "policy": {
+    "mode": "strict",
+    "scope": "whole-entry package budgets"
+  },
+  "entries": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "oldCeiling": 3000,
+      "baseline": {
+        "minifiedBytes": 4765,
+        "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+        "gzipBytes": 1796,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 4765,
+        "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+        "gzipBytes": 1796,
+        "pass": true
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "overOriginalCeiling": 0,
+      "newCeiling": 3000,
+      "ceilingIncrease": 0,
+      "headroomAtCanonicalProductCandidate": 1204
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "oldCeiling": 700000,
+      "baseline": {
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846,
+        "pass": true
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "overOriginalCeiling": 0,
+      "newCeiling": 700000,
+      "ceilingIncrease": 0,
+      "headroomAtCanonicalProductCandidate": 64154
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "oldCeiling": 13100,
+      "baseline": {
+        "minifiedBytes": 41284,
+        "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+        "gzipBytes": 13012,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 41284,
+        "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+        "gzipBytes": 13012,
+        "pass": true
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "overOriginalCeiling": 0,
+      "newCeiling": 13100,
+      "ceilingIncrease": 0,
+      "headroomAtCanonicalProductCandidate": 88
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "oldCeiling": 107400,
+      "baseline": {
+        "minifiedBytes": 408629,
+        "minifiedSha256": "f96a5240051f00ea278a7e8cc1755ddffeb9147ac18830371ba50dd7ff6c8652",
+        "gzipBytes": 107129,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 408629,
+        "minifiedSha256": "f96a5240051f00ea278a7e8cc1755ddffeb9147ac18830371ba50dd7ff6c8652",
+        "gzipBytes": 107129,
+        "pass": true
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "overOriginalCeiling": 0,
+      "newCeiling": 107400,
+      "ceilingIncrease": 0,
+      "headroomAtCanonicalProductCandidate": 271
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 181800,
+      "baseline": {
+        "minifiedBytes": 628318,
+        "minifiedSha256": "a0a24353ba58c8ff49ee131d211fc5eaf10638924ced68eb24bbd9fe4a4df690",
+        "gzipBytes": 181690,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 629938,
+        "minifiedSha256": "786b63a141962e30a60b6e1d26b4d70e52b6b8f270f96de17c6f090028324896",
+        "gzipBytes": 182353,
+        "pass": false
+      },
+      "gzipGrowth": 663,
+      "minifiedGrowth": 1620,
+      "overOriginalCeiling": 553,
+      "newCeiling": 182400,
+      "ceilingIncrease": 600,
+      "headroomAtCanonicalProductCandidate": 47
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 180600,
+      "baseline": {
+        "minifiedBytes": 623724,
+        "minifiedSha256": "d72faba1fe0496d873f8aee58a86f3dcd44002af603ba56301f998db332a06ee",
+        "gzipBytes": 180535,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 625389,
+        "minifiedSha256": "299f984d9c9ea9cc830db038df33ba113e58edff6bb0fb3fdbf67c2f6264728b",
+        "gzipBytes": 181238,
+        "pass": false
+      },
+      "gzipGrowth": 703,
+      "minifiedGrowth": 1665,
+      "overOriginalCeiling": 638,
+      "newCeiling": 181300,
+      "ceilingIncrease": 700,
+      "headroomAtCanonicalProductCandidate": 62
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 218100,
+      "baseline": {
+        "minifiedBytes": 735081,
+        "minifiedSha256": "fa3ec487fedb4a356c745866b62d2c98adfe61acc200f285ef2aa6d1b864ff79",
+        "gzipBytes": 218065,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 737518,
+        "minifiedSha256": "7f1e5dbfa64573e31b11851dc9d61d4da47c689df8a63626edb3d60cb240df7f",
+        "gzipBytes": 218961,
+        "pass": false
+      },
+      "gzipGrowth": 896,
+      "minifiedGrowth": 2437,
+      "overOriginalCeiling": 861,
+      "newCeiling": 219000,
+      "ceilingIncrease": 900,
+      "headroomAtCanonicalProductCandidate": 39
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "oldCeiling": 6000,
+      "baseline": {
+        "minifiedBytes": 14562,
+        "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+        "gzipBytes": 4311,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 14562,
+        "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+        "gzipBytes": 4311,
+        "pass": true
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "overOriginalCeiling": 0,
+      "newCeiling": 6000,
+      "ceilingIncrease": 0,
+      "headroomAtCanonicalProductCandidate": 1689
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "oldCeiling": 7900,
+      "baseline": {
+        "minifiedBytes": 33993,
+        "minifiedSha256": "d813f75fec2e81368c6f63a6f1ea719ef31fbe12b5fc67df7d2b204adc576607",
+        "gzipBytes": 7156,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 34003,
+        "minifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+        "gzipBytes": 7158,
+        "pass": true
+      },
+      "gzipGrowth": 2,
+      "minifiedGrowth": 10,
+      "overOriginalCeiling": 0,
+      "newCeiling": 7900,
+      "ceilingIncrease": 0,
+      "headroomAtCanonicalProductCandidate": 742
+    }
+  ],
+  "closureAttribution": {
+    "kind": "independent-canonical-whole-entry-cost-comparison",
+    "createdAt": "2026-11-26T13:04:41.027401+00:00",
+    "baseline": {
+      "sha256": "84cc42894f4c52078688af297ef5b3d02831443504312b6c420d6f9e572af553",
+      "bytes": 1567587,
+      "archivedEvidenceFile": "report.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "candidate": {
+      "sha256": "e814c3c1c4827d90c8d16634c705d55665f29603920f2c78186831c6f5fa6b26",
+      "bytes": 1568413,
+      "archivedEvidenceFile": "report.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "baselineHead": "6aff106b356efa16fab432ed1c0b3219130a4900",
+    "candidateHead": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+    "environmentIdentical": true,
+    "measurementIdentical": true,
+    "policyIdentical": true,
+    "entries": [
+      {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "oldCeiling": 3000,
+        "baseline": {
+          "minifiedBytes": 4765,
+          "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+          "gzipBytes": 1796,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 4765,
+          "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+          "gzipBytes": 1796,
+          "pass": true
+        },
+        "gzipGrowth": 0,
+        "minifiedGrowth": 0,
+        "overOriginalCeiling": 0
+      },
+      {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "oldCeiling": 700000,
+        "baseline": {
+          "minifiedBytes": 4083517,
+          "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+          "gzipBytes": 635846,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 4083517,
+          "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+          "gzipBytes": 635846,
+          "pass": true
+        },
+        "gzipGrowth": 0,
+        "minifiedGrowth": 0,
+        "overOriginalCeiling": 0
+      },
+      {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "oldCeiling": 13100,
+        "baseline": {
+          "minifiedBytes": 41284,
+          "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+          "gzipBytes": 13012,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 41284,
+          "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+          "gzipBytes": 13012,
+          "pass": true
+        },
+        "gzipGrowth": 0,
+        "minifiedGrowth": 0,
+        "overOriginalCeiling": 0
+      },
+      {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "oldCeiling": 107400,
+        "baseline": {
+          "minifiedBytes": 408629,
+          "minifiedSha256": "f96a5240051f00ea278a7e8cc1755ddffeb9147ac18830371ba50dd7ff6c8652",
+          "gzipBytes": 107129,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 408629,
+          "minifiedSha256": "f96a5240051f00ea278a7e8cc1755ddffeb9147ac18830371ba50dd7ff6c8652",
+          "gzipBytes": 107129,
+          "pass": true
+        },
+        "gzipGrowth": 0,
+        "minifiedGrowth": 0,
+        "overOriginalCeiling": 0
+      },
+      {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "oldCeiling": 181800,
+        "baseline": {
+          "minifiedBytes": 628318,
+          "minifiedSha256": "a0a24353ba58c8ff49ee131d211fc5eaf10638924ced68eb24bbd9fe4a4df690",
+          "gzipBytes": 181690,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 629938,
+          "minifiedSha256": "786b63a141962e30a60b6e1d26b4d70e52b6b8f270f96de17c6f090028324896",
+          "gzipBytes": 182353,
+          "pass": false
+        },
+        "gzipGrowth": 663,
+        "minifiedGrowth": 1620,
+        "overOriginalCeiling": 553
+      },
+      {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "oldCeiling": 180600,
+        "baseline": {
+          "minifiedBytes": 623724,
+          "minifiedSha256": "d72faba1fe0496d873f8aee58a86f3dcd44002af603ba56301f998db332a06ee",
+          "gzipBytes": 180535,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 625389,
+          "minifiedSha256": "299f984d9c9ea9cc830db038df33ba113e58edff6bb0fb3fdbf67c2f6264728b",
+          "gzipBytes": 181238,
+          "pass": false
+        },
+        "gzipGrowth": 703,
+        "minifiedGrowth": 1665,
+        "overOriginalCeiling": 638
+      },
+      {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "oldCeiling": 218100,
+        "baseline": {
+          "minifiedBytes": 735081,
+          "minifiedSha256": "fa3ec487fedb4a356c745866b62d2c98adfe61acc200f285ef2aa6d1b864ff79",
+          "gzipBytes": 218065,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 737518,
+          "minifiedSha256": "7f1e5dbfa64573e31b11851dc9d61d4da47c689df8a63626edb3d60cb240df7f",
+          "gzipBytes": 218961,
+          "pass": false
+        },
+        "gzipGrowth": 896,
+        "minifiedGrowth": 2437,
+        "overOriginalCeiling": 861
+      },
+      {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "oldCeiling": 6000,
+        "baseline": {
+          "minifiedBytes": 14562,
+          "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+          "gzipBytes": 4311,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 14562,
+          "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+          "gzipBytes": 4311,
+          "pass": true
+        },
+        "gzipGrowth": 0,
+        "minifiedGrowth": 0,
+        "overOriginalCeiling": 0
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "oldCeiling": 7900,
+        "baseline": {
+          "minifiedBytes": 33993,
+          "minifiedSha256": "d813f75fec2e81368c6f63a6f1ea719ef31fbe12b5fc67df7d2b204adc576607",
+          "gzipBytes": 7156,
+          "pass": true
+        },
+        "candidate": {
+          "minifiedBytes": 34003,
+          "minifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+          "gzipBytes": 7158,
+          "pass": true
+        },
+        "gzipGrowth": 2,
+        "minifiedGrowth": 10,
+        "overOriginalCeiling": 0
+      }
+    ],
+    "closure": [
+      {
+        "name": "lucide/icons/x",
+        "inputCountBefore": 53,
+        "inputCountAfter": 53,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 0,
+        "sourceChanges": [],
+        "unchangedSourceRetentionChanges": [],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "lucide root",
+        "inputCountBefore": 3453,
+        "inputCountAfter": 3453,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 0,
+        "sourceChanges": [],
+        "unchangedSourceRetentionChanges": [],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "core root",
+        "inputCountBefore": 49,
+        "inputCountAfter": 49,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 0,
+        "sourceChanges": [],
+        "unchangedSourceRetentionChanges": [],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "runtime root",
+        "inputCountBefore": 298,
+        "inputCountAfter": 298,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 29,
+        "sourceChanges": [
+          {
+            "path": "packages/modules/feedback/src/motion/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 11165,
+              "sourceSha256": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+              "retainedBytes": 0
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 13118,
+              "sourceSha256": "7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d",
+              "retainedBytes": 0
+            },
+            "retainedMinifiedDelta": 0
+          }
+        ],
+        "unchangedSourceRetentionChanges": [],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "adapter-react root",
+        "inputCountBefore": 352,
+        "inputCountAfter": 352,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 29,
+        "sourceChanges": [
+          {
+            "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+            "before": {
+              "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+              "sourceBytes": 15224,
+              "sourceSha256": "022e92094ddee8e77a72ff8dce6b94bb4cd6fd0ac2a91f6a6fdd7cadc6f200d0",
+              "retainedBytes": 5385
+            },
+            "after": {
+              "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+              "sourceBytes": 21310,
+              "sourceSha256": "76daf7370b458d1bd60722cc85a0541dde633261f2b08b86fc2e4b1945c0be20",
+              "retainedBytes": 6481
+            },
+            "retainedMinifiedDelta": 1096
+          },
+          {
+            "path": "packages/modules/feedback/src/motion/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 11165,
+              "sourceSha256": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+              "retainedBytes": 3202
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 13118,
+              "sourceSha256": "7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d",
+              "retainedBytes": 3603
+            },
+            "retainedMinifiedDelta": 401
+          }
+        ],
+        "unchangedSourceRetentionChanges": [
+          {
+            "path": "packages/adapters/base/src/events/web-event-router.ts",
+            "before": {
+              "path": "packages/adapters/base/src/events/web-event-router.ts",
+              "sourceBytes": 37791,
+              "sourceSha256": "9bc02f4a2defa31e5817b0c8704b71d18453eeabb4308a322cbf919932c9e6f9",
+              "retainedBytes": 12213
+            },
+            "after": {
+              "path": "packages/adapters/base/src/events/web-event-router.ts",
+              "sourceBytes": 37791,
+              "sourceSha256": "9bc02f4a2defa31e5817b0c8704b71d18453eeabb4308a322cbf919932c9e6f9",
+              "retainedBytes": 12195
+            },
+            "retainedMinifiedDelta": -18
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+              "sourceBytes": 17802,
+              "sourceSha256": "3a1f068b896b3343e3ca064430f94123d8e8b16a977b030d383d96432d7e7201",
+              "retainedBytes": 6598
+            },
+            "after": {
+              "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+              "sourceBytes": 17802,
+              "sourceSha256": "3a1f068b896b3343e3ca064430f94123d8e8b16a977b030d383d96432d7e7201",
+              "retainedBytes": 6602
+            },
+            "retainedMinifiedDelta": 4
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+              "sourceBytes": 15558,
+              "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+              "retainedBytes": 5663
+            },
+            "after": {
+              "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+              "sourceBytes": 15558,
+              "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+              "retainedBytes": 5666
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+              "sourceBytes": 21848,
+              "sourceSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+              "retainedBytes": 9512
+            },
+            "after": {
+              "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+              "sourceBytes": 21848,
+              "sourceSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+              "retainedBytes": 9518
+            },
+            "retainedMinifiedDelta": 6
+          },
+          {
+            "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+            "before": {
+              "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+              "sourceBytes": 6455,
+              "sourceSha256": "c40af0f69e9c2880b747a465146dcd11b8d8702652a8862c717c79c9298559c0",
+              "retainedBytes": 1739
+            },
+            "after": {
+              "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+              "sourceBytes": 6455,
+              "sourceSha256": "c40af0f69e9c2880b747a465146dcd11b8d8702652a8862c717c79c9298559c0",
+              "retainedBytes": 1742
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+            "before": {
+              "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+              "sourceBytes": 17492,
+              "sourceSha256": "f4c228935b36d8e026991dda8e8f31e632eeed48716e09a62e5f5eb336096bff",
+              "retainedBytes": 6264
+            },
+            "after": {
+              "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+              "sourceBytes": 17492,
+              "sourceSha256": "f4c228935b36d8e026991dda8e8f31e632eeed48716e09a62e5f5eb336096bff",
+              "retainedBytes": 6279
+            },
+            "retainedMinifiedDelta": 15
+          },
+          {
+            "path": "packages/adapters/react/src/adapt.ts",
+            "before": {
+              "path": "packages/adapters/react/src/adapt.ts",
+              "sourceBytes": 57426,
+              "sourceSha256": "19059122572fc60b056e4f500186198d09adac50ea1c85b5855c7b70501971ae",
+              "retainedBytes": 15502
+            },
+            "after": {
+              "path": "packages/adapters/react/src/adapt.ts",
+              "sourceBytes": 57426,
+              "sourceSha256": "19059122572fc60b056e4f500186198d09adac50ea1c85b5855c7b70501971ae",
+              "retainedBytes": 15492
+            },
+            "retainedMinifiedDelta": -10
+          },
+          {
+            "path": "packages/adapters/react/src/runtime/modules.ts",
+            "before": {
+              "path": "packages/adapters/react/src/runtime/modules.ts",
+              "sourceBytes": 27778,
+              "sourceSha256": "770ae3463ab2af4f2dc096cefe2e5dd23a4d597d2983800d0f6d70723a98b7fe",
+              "retainedBytes": 6235
+            },
+            "after": {
+              "path": "packages/adapters/react/src/runtime/modules.ts",
+              "sourceBytes": 27778,
+              "sourceSha256": "770ae3463ab2af4f2dc096cefe2e5dd23a4d597d2983800d0f6d70723a98b7fe",
+              "retainedBytes": 6250
+            },
+            "retainedMinifiedDelta": 15
+          },
+          {
+            "path": "packages/modules/a11y/src/web.ts",
+            "before": {
+              "path": "packages/modules/a11y/src/web.ts",
+              "sourceBytes": 53259,
+              "sourceSha256": "856c0810dc923f440aa59cf01d19c94d7e39451d5e2dc7ccff7269739dfd596b",
+              "retainedBytes": 17675
+            },
+            "after": {
+              "path": "packages/modules/a11y/src/web.ts",
+              "sourceBytes": 53259,
+              "sourceSha256": "856c0810dc923f440aa59cf01d19c94d7e39451d5e2dc7ccff7269739dfd596b",
+              "retainedBytes": 17673
+            },
+            "retainedMinifiedDelta": -2
+          },
+          {
+            "path": "packages/modules/control-label/src/web.ts",
+            "before": {
+              "path": "packages/modules/control-label/src/web.ts",
+              "sourceBytes": 16713,
+              "sourceSha256": "d203f9590e12cc99e2531d5c0623f9cebca1a33a9541bc25fc3e1b70e8f52021",
+              "retainedBytes": 5129
+            },
+            "after": {
+              "path": "packages/modules/control-label/src/web.ts",
+              "sourceBytes": 16713,
+              "sourceSha256": "d203f9590e12cc99e2531d5c0623f9cebca1a33a9541bc25fc3e1b70e8f52021",
+              "retainedBytes": 5117
+            },
+            "retainedMinifiedDelta": -12
+          },
+          {
+            "path": "packages/modules/feedback/src/presence/controller.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/presence/controller.ts",
+              "sourceBytes": 12707,
+              "sourceSha256": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+              "retainedBytes": 4645
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/presence/controller.ts",
+              "sourceBytes": 12707,
+              "sourceSha256": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+              "retainedBytes": 4649
+            },
+            "retainedMinifiedDelta": 4
+          },
+          {
+            "path": "packages/modules/feedback/src/presence/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/presence/projector.ts",
+              "sourceBytes": 25818,
+              "sourceSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+              "retainedBytes": 7527
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/presence/projector.ts",
+              "sourceBytes": 25818,
+              "sourceSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+              "retainedBytes": 7523
+            },
+            "retainedMinifiedDelta": -4
+          },
+          {
+            "path": "packages/modules/hit-participation/src/web/static-hit-inset.ts",
+            "before": {
+              "path": "packages/modules/hit-participation/src/web/static-hit-inset.ts",
+              "sourceBytes": 6037,
+              "sourceSha256": "f7a83c4e320d63c831c2fa3809236809c7816248b59e9c02c5d2e6828834e333",
+              "retainedBytes": 3011
+            },
+            "after": {
+              "path": "packages/modules/hit-participation/src/web/static-hit-inset.ts",
+              "sourceBytes": 6037,
+              "sourceSha256": "f7a83c4e320d63c831c2fa3809236809c7816248b59e9c02c5d2e6828834e333",
+              "retainedBytes": 3014
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/modules/positioning/src/web/available-layout-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/available-layout-host.ts",
+              "sourceBytes": 6804,
+              "sourceSha256": "ab8b0f296ddad5bfb9df97beb13b686ee40f63968abfab636d8e042de83a7b19",
+              "retainedBytes": 2974
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/available-layout-host.ts",
+              "sourceBytes": 6804,
+              "sourceSha256": "ab8b0f296ddad5bfb9df97beb13b686ee40f63968abfab636d8e042de83a7b19",
+              "retainedBytes": 2969
+            },
+            "retainedMinifiedDelta": -5
+          },
+          {
+            "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+              "sourceBytes": 11199,
+              "sourceSha256": "99df53009b8372bf1f9ef04875b935b9265ded54a70841464638172f077258ad",
+              "retainedBytes": 3560
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+              "sourceBytes": 11199,
+              "sourceSha256": "99df53009b8372bf1f9ef04875b935b9265ded54a70841464638172f077258ad",
+              "retainedBytes": 3599
+            },
+            "retainedMinifiedDelta": 39
+          },
+          {
+            "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+              "sourceBytes": 30343,
+              "sourceSha256": "ef7d2968ec2a4611e516f0f1cbd14589d38c2e7fc02b3085b76844f5e1f31770",
+              "retainedBytes": 9844
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+              "sourceBytes": 30343,
+              "sourceSha256": "ef7d2968ec2a4611e516f0f1cbd14589d38c2e7fc02b3085b76844f5e1f31770",
+              "retainedBytes": 9840
+            },
+            "retainedMinifiedDelta": -4
+          },
+          {
+            "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+              "sourceBytes": 21498,
+              "sourceSha256": "648126ed8c4a22a7b1bc13bdee33c2043cf79b38335202c2c0ac756e4cc3047a",
+              "retainedBytes": 8371
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+              "sourceBytes": 21498,
+              "sourceSha256": "648126ed8c4a22a7b1bc13bdee33c2043cf79b38335202c2c0ac756e4cc3047a",
+              "retainedBytes": 8366
+            },
+            "retainedMinifiedDelta": -5
+          },
+          {
+            "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+            "before": {
+              "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+              "sourceBytes": 58242,
+              "sourceSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+              "retainedBytes": 17459
+            },
+            "after": {
+              "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+              "sourceBytes": 58242,
+              "sourceSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+              "retainedBytes": 17571
+            },
+            "retainedMinifiedDelta": 112
+          },
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "before": {
+              "path": "packages/runtime/src/instance/session.ts",
+              "sourceBytes": 23948,
+              "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+              "retainedBytes": 6964
+            },
+            "after": {
+              "path": "packages/runtime/src/instance/session.ts",
+              "sourceBytes": 23948,
+              "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+              "retainedBytes": 6959
+            },
+            "retainedMinifiedDelta": -5
+          },
+          {
+            "path": "packages/runtime/src/kernel/as-hook.ts",
+            "before": {
+              "path": "packages/runtime/src/kernel/as-hook.ts",
+              "sourceBytes": 16082,
+              "sourceSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+              "retainedBytes": 5476
+            },
+            "after": {
+              "path": "packages/runtime/src/kernel/as-hook.ts",
+              "sourceBytes": 16082,
+              "sourceSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+              "retainedBytes": 5469
+            },
+            "retainedMinifiedDelta": -7
+          },
+          {
+            "path": "packages/runtime/src/kernel/kernel.ts",
+            "before": {
+              "path": "packages/runtime/src/kernel/kernel.ts",
+              "sourceBytes": 10574,
+              "sourceSha256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+              "retainedBytes": 3392
+            },
+            "after": {
+              "path": "packages/runtime/src/kernel/kernel.ts",
+              "sourceBytes": 10574,
+              "sourceSha256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+              "retainedBytes": 3383
+            },
+            "retainedMinifiedDelta": -9
+          }
+        ],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "adapter-vue root",
+        "inputCountBefore": 351,
+        "inputCountAfter": 351,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 29,
+        "sourceChanges": [
+          {
+            "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+            "before": {
+              "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+              "sourceBytes": 15224,
+              "sourceSha256": "022e92094ddee8e77a72ff8dce6b94bb4cd6fd0ac2a91f6a6fdd7cadc6f200d0",
+              "retainedBytes": 5385
+            },
+            "after": {
+              "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+              "sourceBytes": 21310,
+              "sourceSha256": "76daf7370b458d1bd60722cc85a0541dde633261f2b08b86fc2e4b1945c0be20",
+              "retainedBytes": 6477
+            },
+            "retainedMinifiedDelta": 1092
+          },
+          {
+            "path": "packages/adapters/vue/src/adapt.ts",
+            "before": {
+              "path": "packages/adapters/vue/src/adapt.ts",
+              "sourceBytes": 48590,
+              "sourceSha256": "4e7fb08404fd6041dbb583688185f5a7d10425160d44a0ced4c20c80e14ddb99",
+              "retainedBytes": 13018
+            },
+            "after": {
+              "path": "packages/adapters/vue/src/adapt.ts",
+              "sourceBytes": 49385,
+              "sourceSha256": "d1426dd1de8e3db60310c3df4b3f1bf6edd0c843f36d0869793871434b1d62c4",
+              "retainedBytes": 13048
+            },
+            "retainedMinifiedDelta": 30
+          },
+          {
+            "path": "packages/modules/feedback/src/motion/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 11165,
+              "sourceSha256": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+              "retainedBytes": 3202
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 13118,
+              "sourceSha256": "7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d",
+              "retainedBytes": 3608
+            },
+            "retainedMinifiedDelta": 406
+          }
+        ],
+        "unchangedSourceRetentionChanges": [
+          {
+            "path": "packages/adapters/base/src/events/web-event-router.ts",
+            "before": {
+              "path": "packages/adapters/base/src/events/web-event-router.ts",
+              "sourceBytes": 37791,
+              "sourceSha256": "9bc02f4a2defa31e5817b0c8704b71d18453eeabb4308a322cbf919932c9e6f9",
+              "retainedBytes": 12213
+            },
+            "after": {
+              "path": "packages/adapters/base/src/events/web-event-router.ts",
+              "sourceBytes": 37791,
+              "sourceSha256": "9bc02f4a2defa31e5817b0c8704b71d18453eeabb4308a322cbf919932c9e6f9",
+              "retainedBytes": 12188
+            },
+            "retainedMinifiedDelta": -25
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+              "sourceBytes": 17802,
+              "sourceSha256": "3a1f068b896b3343e3ca064430f94123d8e8b16a977b030d383d96432d7e7201",
+              "retainedBytes": 6598
+            },
+            "after": {
+              "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+              "sourceBytes": 17802,
+              "sourceSha256": "3a1f068b896b3343e3ca064430f94123d8e8b16a977b030d383d96432d7e7201",
+              "retainedBytes": 6601
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+              "sourceBytes": 15558,
+              "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+              "retainedBytes": 5663
+            },
+            "after": {
+              "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+              "sourceBytes": 15558,
+              "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+              "retainedBytes": 5668
+            },
+            "retainedMinifiedDelta": 5
+          },
+          {
+            "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+              "sourceBytes": 21848,
+              "sourceSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+              "retainedBytes": 9512
+            },
+            "after": {
+              "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+              "sourceBytes": 21848,
+              "sourceSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+              "retainedBytes": 9516
+            },
+            "retainedMinifiedDelta": 4
+          },
+          {
+            "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+            "before": {
+              "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+              "sourceBytes": 6455,
+              "sourceSha256": "c40af0f69e9c2880b747a465146dcd11b8d8702652a8862c717c79c9298559c0",
+              "retainedBytes": 1739
+            },
+            "after": {
+              "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+              "sourceBytes": 6455,
+              "sourceSha256": "c40af0f69e9c2880b747a465146dcd11b8d8702652a8862c717c79c9298559c0",
+              "retainedBytes": 1751
+            },
+            "retainedMinifiedDelta": 12
+          },
+          {
+            "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+            "before": {
+              "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+              "sourceBytes": 17492,
+              "sourceSha256": "f4c228935b36d8e026991dda8e8f31e632eeed48716e09a62e5f5eb336096bff",
+              "retainedBytes": 6264
+            },
+            "after": {
+              "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+              "sourceBytes": 17492,
+              "sourceSha256": "f4c228935b36d8e026991dda8e8f31e632eeed48716e09a62e5f5eb336096bff",
+              "retainedBytes": 6283
+            },
+            "retainedMinifiedDelta": 19
+          },
+          {
+            "path": "packages/adapters/base/src/platform/instance-tree.ts",
+            "before": {
+              "path": "packages/adapters/base/src/platform/instance-tree.ts",
+              "sourceBytes": 27343,
+              "sourceSha256": "e5a69b7eada9dd689cc69640539cb73db0c5825ed3fd79033c2015f882f67d75",
+              "retainedBytes": 7446
+            },
+            "after": {
+              "path": "packages/adapters/base/src/platform/instance-tree.ts",
+              "sourceBytes": 27343,
+              "sourceSha256": "e5a69b7eada9dd689cc69640539cb73db0c5825ed3fd79033c2015f882f67d75",
+              "retainedBytes": 7447
+            },
+            "retainedMinifiedDelta": 1
+          },
+          {
+            "path": "packages/modules/a11y/src/web.ts",
+            "before": {
+              "path": "packages/modules/a11y/src/web.ts",
+              "sourceBytes": 53259,
+              "sourceSha256": "856c0810dc923f440aa59cf01d19c94d7e39451d5e2dc7ccff7269739dfd596b",
+              "retainedBytes": 17675
+            },
+            "after": {
+              "path": "packages/modules/a11y/src/web.ts",
+              "sourceBytes": 53259,
+              "sourceSha256": "856c0810dc923f440aa59cf01d19c94d7e39451d5e2dc7ccff7269739dfd596b",
+              "retainedBytes": 17670
+            },
+            "retainedMinifiedDelta": -5
+          },
+          {
+            "path": "packages/modules/control-label/src/web.ts",
+            "before": {
+              "path": "packages/modules/control-label/src/web.ts",
+              "sourceBytes": 16713,
+              "sourceSha256": "d203f9590e12cc99e2531d5c0623f9cebca1a33a9541bc25fc3e1b70e8f52021",
+              "retainedBytes": 5129
+            },
+            "after": {
+              "path": "packages/modules/control-label/src/web.ts",
+              "sourceBytes": 16713,
+              "sourceSha256": "d203f9590e12cc99e2531d5c0623f9cebca1a33a9541bc25fc3e1b70e8f52021",
+              "retainedBytes": 5113
+            },
+            "retainedMinifiedDelta": -16
+          },
+          {
+            "path": "packages/modules/feedback/src/presence/controller.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/presence/controller.ts",
+              "sourceBytes": 12707,
+              "sourceSha256": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+              "retainedBytes": 4645
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/presence/controller.ts",
+              "sourceBytes": 12707,
+              "sourceSha256": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+              "retainedBytes": 4648
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/modules/feedback/src/presence/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/presence/projector.ts",
+              "sourceBytes": 25818,
+              "sourceSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+              "retainedBytes": 7527
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/presence/projector.ts",
+              "sourceBytes": 25818,
+              "sourceSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+              "retainedBytes": 7528
+            },
+            "retainedMinifiedDelta": 1
+          },
+          {
+            "path": "packages/modules/hit-participation/src/web/static-hit-inset.ts",
+            "before": {
+              "path": "packages/modules/hit-participation/src/web/static-hit-inset.ts",
+              "sourceBytes": 6037,
+              "sourceSha256": "f7a83c4e320d63c831c2fa3809236809c7816248b59e9c02c5d2e6828834e333",
+              "retainedBytes": 3011
+            },
+            "after": {
+              "path": "packages/modules/hit-participation/src/web/static-hit-inset.ts",
+              "sourceBytes": 6037,
+              "sourceSha256": "f7a83c4e320d63c831c2fa3809236809c7816248b59e9c02c5d2e6828834e333",
+              "retainedBytes": 3013
+            },
+            "retainedMinifiedDelta": 2
+          },
+          {
+            "path": "packages/modules/positioning/src/web/border-box-size-lease.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/border-box-size-lease.ts",
+              "sourceBytes": 12450,
+              "sourceSha256": "046be0c030a65305e19f6264932bde53effc5460b2bc8c4e1a1a5f7384b6885f",
+              "retainedBytes": 3798
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/border-box-size-lease.ts",
+              "sourceBytes": 12450,
+              "sourceSha256": "046be0c030a65305e19f6264932bde53effc5460b2bc8c4e1a1a5f7384b6885f",
+              "retainedBytes": 3801
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+              "sourceBytes": 11199,
+              "sourceSha256": "99df53009b8372bf1f9ef04875b935b9265ded54a70841464638172f077258ad",
+              "retainedBytes": 3560
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+              "sourceBytes": 11199,
+              "sourceSha256": "99df53009b8372bf1f9ef04875b935b9265ded54a70841464638172f077258ad",
+              "retainedBytes": 3599
+            },
+            "retainedMinifiedDelta": 39
+          },
+          {
+            "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+              "sourceBytes": 21498,
+              "sourceSha256": "648126ed8c4a22a7b1bc13bdee33c2043cf79b38335202c2c0ac756e4cc3047a",
+              "retainedBytes": 8371
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+              "sourceBytes": 21498,
+              "sourceSha256": "648126ed8c4a22a7b1bc13bdee33c2043cf79b38335202c2c0ac756e4cc3047a",
+              "retainedBytes": 8362
+            },
+            "retainedMinifiedDelta": -9
+          },
+          {
+            "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+            "before": {
+              "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+              "sourceBytes": 58242,
+              "sourceSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+              "retainedBytes": 17459
+            },
+            "after": {
+              "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+              "sourceBytes": 58242,
+              "sourceSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+              "retainedBytes": 17571
+            },
+            "retainedMinifiedDelta": 112
+          },
+          {
+            "path": "packages/modules/scroll/src/web/target-reveal.ts",
+            "before": {
+              "path": "packages/modules/scroll/src/web/target-reveal.ts",
+              "sourceBytes": 5527,
+              "sourceSha256": "20024a50985ab85f364bcf1bab78ffafa89f443a8453d538ca47289b35d5c92c",
+              "retainedBytes": 2006
+            },
+            "after": {
+              "path": "packages/modules/scroll/src/web/target-reveal.ts",
+              "sourceBytes": 5527,
+              "sourceSha256": "20024a50985ab85f364bcf1bab78ffafa89f443a8453d538ca47289b35d5c92c",
+              "retainedBytes": 2009
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "before": {
+              "path": "packages/runtime/src/instance/session.ts",
+              "sourceBytes": 23948,
+              "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+              "retainedBytes": 6964
+            },
+            "after": {
+              "path": "packages/runtime/src/instance/session.ts",
+              "sourceBytes": 23948,
+              "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+              "retainedBytes": 6963
+            },
+            "retainedMinifiedDelta": -1
+          },
+          {
+            "path": "packages/runtime/src/kernel/as-hook.ts",
+            "before": {
+              "path": "packages/runtime/src/kernel/as-hook.ts",
+              "sourceBytes": 16082,
+              "sourceSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+              "retainedBytes": 5476
+            },
+            "after": {
+              "path": "packages/runtime/src/kernel/as-hook.ts",
+              "sourceBytes": 16082,
+              "sourceSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+              "retainedBytes": 5469
+            },
+            "retainedMinifiedDelta": -7
+          },
+          {
+            "path": "packages/runtime/src/kernel/kernel.ts",
+            "before": {
+              "path": "packages/runtime/src/kernel/kernel.ts",
+              "sourceBytes": 10574,
+              "sourceSha256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+              "retainedBytes": 3392
+            },
+            "after": {
+              "path": "packages/runtime/src/kernel/kernel.ts",
+              "sourceBytes": 10574,
+              "sourceSha256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+              "retainedBytes": 3385
+            },
+            "retainedMinifiedDelta": -7
+          }
+        ],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "adapter-web-component root",
+        "inputCountBefore": 380,
+        "inputCountAfter": 381,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": ["packages/adapters/web-component/src/native-focus-candidate.ts"],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 29,
+        "sourceChanges": [
+          {
+            "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+            "before": {
+              "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+              "sourceBytes": 15224,
+              "sourceSha256": "022e92094ddee8e77a72ff8dce6b94bb4cd6fd0ac2a91f6a6fdd7cadc6f200d0",
+              "retainedBytes": 5380
+            },
+            "after": {
+              "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+              "sourceBytes": 21310,
+              "sourceSha256": "76daf7370b458d1bd60722cc85a0541dde633261f2b08b86fc2e4b1945c0be20",
+              "retainedBytes": 6472
+            },
+            "retainedMinifiedDelta": 1092
+          },
+          {
+            "path": "packages/adapters/web-component/src/adapt.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/adapt.ts",
+              "sourceBytes": 68090,
+              "sourceSha256": "0f50397f1ae5a6d83067a9b1a85c9fb1e8bd16788f92d698069b68cf1f1b9e0e",
+              "retainedBytes": 21634
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/adapt.ts",
+              "sourceBytes": 68200,
+              "sourceSha256": "8e2c2ee977a66c86078ee906ccd44fed99355e78f3664e1a7046deb8d8339686",
+              "retainedBytes": 21637
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/adapters/web-component/src/feedback-style.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/feedback-style.ts",
+              "sourceBytes": 4755,
+              "sourceSha256": "a1fa6600cfdda774af1aa0c4f8b3042d28a75c6b14ea65f6609a56becf9412e6",
+              "retainedBytes": 1129
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/feedback-style.ts",
+              "sourceBytes": 4996,
+              "sourceSha256": "356a4e16071a045f721811dcdc0a1d4450bd9539cbaf36ceb6ebb661a831b5d8",
+              "retainedBytes": 1177
+            },
+            "retainedMinifiedDelta": 48
+          },
+          {
+            "path": "packages/adapters/web-component/src/focus-scope-targets.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/focus-scope-targets.ts",
+              "sourceBytes": 20843,
+              "sourceSha256": "f3387264327678e03f7526d5ac759e39bc243ba4da9135421b5b7ee926888854",
+              "retainedBytes": 6567
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/focus-scope-targets.ts",
+              "sourceBytes": 23515,
+              "sourceSha256": "ed7f7c53a0c0ad0915798fc7cf2c4c68c4bd98628a62e2a6718c0e493ae4e037",
+              "retainedBytes": 7209
+            },
+            "retainedMinifiedDelta": 642
+          },
+          {
+            "path": "packages/adapters/web-component/src/host-display.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/host-display.ts",
+              "sourceBytes": 3404,
+              "sourceSha256": "d323b31efbc7bfd426b04fd5879bf083421ef0f150e12fdc9f2c05b03a1d93c8",
+              "retainedBytes": 1339
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/host-display.ts",
+              "sourceBytes": 3546,
+              "sourceSha256": "f6c7ddc115f1a3395104e4fea9642a80a8abd94c8d273a86f49958145d092c92",
+              "retainedBytes": 1417
+            },
+            "retainedMinifiedDelta": 78
+          },
+          {
+            "path": "packages/adapters/web-component/src/native-focus-candidate.ts",
+            "before": null,
+            "after": {
+              "path": "packages/adapters/web-component/src/native-focus-candidate.ts",
+              "sourceBytes": 1349,
+              "sourceSha256": "627fa832ce0bd42f6d04034878657d717d07f41a6afa0ac6c7d9e208fa970270",
+              "retainedBytes": 706
+            },
+            "retainedMinifiedDelta": 706
+          },
+          {
+            "path": "packages/adapters/web-component/src/runtime/modules.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/runtime/modules.ts",
+              "sourceBytes": 116119,
+              "sourceSha256": "7f3c8ac2998cbac01bdd75c6dddbcd3e54a989ff3682e06b4b1f6ea4db3f92a4",
+              "retainedBytes": 29373
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/runtime/modules.ts",
+              "sourceBytes": 116623,
+              "sourceSha256": "1df8757a625b253956cc24f1920f177575ae301072b17576ebacec135f616bd0",
+              "retainedBytes": 28808
+            },
+            "retainedMinifiedDelta": -565
+          },
+          {
+            "path": "packages/adapters/web-component/src/runtime/session.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/runtime/session.ts",
+              "sourceBytes": 35445,
+              "sourceSha256": "e3c5c6f446fb80fed6ff3bc44c289ea0e7d87ee7daefb9cd276ee56a0c15b29f",
+              "retainedBytes": 12679
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/runtime/session.ts",
+              "sourceBytes": 35491,
+              "sourceSha256": "6d9de6a6f3d4b65786df2343780ed076a46f9b18778d4b8b867a1498bc6af6e0",
+              "retainedBytes": 12637
+            },
+            "retainedMinifiedDelta": -42
+          },
+          {
+            "path": "packages/modules/feedback/src/motion/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 11165,
+              "sourceSha256": "2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359",
+              "retainedBytes": 3199
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/motion/projector.ts",
+              "sourceBytes": 13118,
+              "sourceSha256": "7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d",
+              "retainedBytes": 3595
+            },
+            "retainedMinifiedDelta": 396
+          }
+        ],
+        "unchangedSourceRetentionChanges": [
+          {
+            "path": "packages/adapters/base/src/events/web-event-router.ts",
+            "before": {
+              "path": "packages/adapters/base/src/events/web-event-router.ts",
+              "sourceBytes": 37791,
+              "sourceSha256": "9bc02f4a2defa31e5817b0c8704b71d18453eeabb4308a322cbf919932c9e6f9",
+              "retainedBytes": 12210
+            },
+            "after": {
+              "path": "packages/adapters/base/src/events/web-event-router.ts",
+              "sourceBytes": 37791,
+              "sourceSha256": "9bc02f4a2defa31e5817b0c8704b71d18453eeabb4308a322cbf919932c9e6f9",
+              "retainedBytes": 12185
+            },
+            "retainedMinifiedDelta": -25
+          },
+          {
+            "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+            "before": {
+              "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+              "sourceBytes": 21848,
+              "sourceSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+              "retainedBytes": 9512
+            },
+            "after": {
+              "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+              "sourceBytes": 21848,
+              "sourceSha256": "df6a869ee639e5aa94899c83c00ed8854d1ed0f5a7629a7b21db312868ba6496",
+              "retainedBytes": 9515
+            },
+            "retainedMinifiedDelta": 3
+          },
+          {
+            "path": "packages/adapters/base/src/platform/instance-tree.ts",
+            "before": {
+              "path": "packages/adapters/base/src/platform/instance-tree.ts",
+              "sourceBytes": 27343,
+              "sourceSha256": "e5a69b7eada9dd689cc69640539cb73db0c5825ed3fd79033c2015f882f67d75",
+              "retainedBytes": 7543
+            },
+            "after": {
+              "path": "packages/adapters/base/src/platform/instance-tree.ts",
+              "sourceBytes": 27343,
+              "sourceSha256": "e5a69b7eada9dd689cc69640539cb73db0c5825ed3fd79033c2015f882f67d75",
+              "retainedBytes": 7542
+            },
+            "retainedMinifiedDelta": -1
+          },
+          {
+            "path": "packages/adapters/web-component/src/material/owned-texture-sink.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/material/owned-texture-sink.ts",
+              "sourceBytes": 28646,
+              "sourceSha256": "dd96fa72626b0d1a2008d9fc4cf2c3d81cf70564ec353fc295c2295b19688bbb",
+              "retainedBytes": 12688
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/material/owned-texture-sink.ts",
+              "sourceBytes": 28646,
+              "sourceSha256": "dd96fa72626b0d1a2008d9fc4cf2c3d81cf70564ec353fc295c2295b19688bbb",
+              "retainedBytes": 12678
+            },
+            "retainedMinifiedDelta": -10
+          },
+          {
+            "path": "packages/adapters/web-component/src/portal-mount.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/portal-mount.ts",
+              "sourceBytes": 21104,
+              "sourceSha256": "40cf50d461c4192e28536b0088510b76747da71a975bf790cb9bcb611b544715",
+              "retainedBytes": 5037
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/portal-mount.ts",
+              "sourceBytes": 21104,
+              "sourceSha256": "40cf50d461c4192e28536b0088510b76747da71a975bf790cb9bcb611b544715",
+              "retainedBytes": 5039
+            },
+            "retainedMinifiedDelta": 2
+          },
+          {
+            "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+            "before": {
+              "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+              "sourceBytes": 35535,
+              "sourceSha256": "e0951390a98321e33672a38cc0f832501409a6e610bb6e58f493f0176d676da9",
+              "retainedBytes": 13776
+            },
+            "after": {
+              "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+              "sourceBytes": 35535,
+              "sourceSha256": "e0951390a98321e33672a38cc0f832501409a6e610bb6e58f493f0176d676da9",
+              "retainedBytes": 13761
+            },
+            "retainedMinifiedDelta": -15
+          },
+          {
+            "path": "packages/modules/a11y/src/web.ts",
+            "before": {
+              "path": "packages/modules/a11y/src/web.ts",
+              "sourceBytes": 53259,
+              "sourceSha256": "856c0810dc923f440aa59cf01d19c94d7e39451d5e2dc7ccff7269739dfd596b",
+              "retainedBytes": 17687
+            },
+            "after": {
+              "path": "packages/modules/a11y/src/web.ts",
+              "sourceBytes": 53259,
+              "sourceSha256": "856c0810dc923f440aa59cf01d19c94d7e39451d5e2dc7ccff7269739dfd596b",
+              "retainedBytes": 17685
+            },
+            "retainedMinifiedDelta": -2
+          },
+          {
+            "path": "packages/modules/control-label/src/web.ts",
+            "before": {
+              "path": "packages/modules/control-label/src/web.ts",
+              "sourceBytes": 16713,
+              "sourceSha256": "d203f9590e12cc99e2531d5c0623f9cebca1a33a9541bc25fc3e1b70e8f52021",
+              "retainedBytes": 5119
+            },
+            "after": {
+              "path": "packages/modules/control-label/src/web.ts",
+              "sourceBytes": 16713,
+              "sourceSha256": "d203f9590e12cc99e2531d5c0623f9cebca1a33a9541bc25fc3e1b70e8f52021",
+              "retainedBytes": 5145
+            },
+            "retainedMinifiedDelta": 26
+          },
+          {
+            "path": "packages/modules/feedback/src/presence/projector.ts",
+            "before": {
+              "path": "packages/modules/feedback/src/presence/projector.ts",
+              "sourceBytes": 25818,
+              "sourceSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+              "retainedBytes": 7522
+            },
+            "after": {
+              "path": "packages/modules/feedback/src/presence/projector.ts",
+              "sourceBytes": 25818,
+              "sourceSha256": "d9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4",
+              "retainedBytes": 7529
+            },
+            "retainedMinifiedDelta": 7
+          },
+          {
+            "path": "packages/modules/positioning/src/web/available-layout-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/available-layout-host.ts",
+              "sourceBytes": 6804,
+              "sourceSha256": "ab8b0f296ddad5bfb9df97beb13b686ee40f63968abfab636d8e042de83a7b19",
+              "retainedBytes": 2972
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/available-layout-host.ts",
+              "sourceBytes": 6804,
+              "sourceSha256": "ab8b0f296ddad5bfb9df97beb13b686ee40f63968abfab636d8e042de83a7b19",
+              "retainedBytes": 2966
+            },
+            "retainedMinifiedDelta": -6
+          },
+          {
+            "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+              "sourceBytes": 11199,
+              "sourceSha256": "99df53009b8372bf1f9ef04875b935b9265ded54a70841464638172f077258ad",
+              "retainedBytes": 3549
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/context-menu-input-host.ts",
+              "sourceBytes": 11199,
+              "sourceSha256": "99df53009b8372bf1f9ef04875b935b9265ded54a70841464638172f077258ad",
+              "retainedBytes": 3553
+            },
+            "retainedMinifiedDelta": 4
+          },
+          {
+            "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+              "sourceBytes": 30343,
+              "sourceSha256": "ef7d2968ec2a4611e516f0f1cbd14589d38c2e7fc02b3085b76844f5e1f31770",
+              "retainedBytes": 9840
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+              "sourceBytes": 30343,
+              "sourceSha256": "ef7d2968ec2a4611e516f0f1cbd14589d38c2e7fc02b3085b76844f5e1f31770",
+              "retainedBytes": 9839
+            },
+            "retainedMinifiedDelta": -1
+          },
+          {
+            "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+            "before": {
+              "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+              "sourceBytes": 21498,
+              "sourceSha256": "648126ed8c4a22a7b1bc13bdee33c2043cf79b38335202c2c0ac756e4cc3047a",
+              "retainedBytes": 8372
+            },
+            "after": {
+              "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+              "sourceBytes": 21498,
+              "sourceSha256": "648126ed8c4a22a7b1bc13bdee33c2043cf79b38335202c2c0ac756e4cc3047a",
+              "retainedBytes": 8371
+            },
+            "retainedMinifiedDelta": -1
+          },
+          {
+            "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+            "before": {
+              "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+              "sourceBytes": 58242,
+              "sourceSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+              "retainedBytes": 17456
+            },
+            "after": {
+              "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+              "sourceBytes": 58242,
+              "sourceSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+              "retainedBytes": 17570
+            },
+            "retainedMinifiedDelta": 114
+          },
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "before": {
+              "path": "packages/runtime/src/instance/session.ts",
+              "sourceBytes": 23948,
+              "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+              "retainedBytes": 6961
+            },
+            "after": {
+              "path": "packages/runtime/src/instance/session.ts",
+              "sourceBytes": 23948,
+              "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+              "retainedBytes": 6956
+            },
+            "retainedMinifiedDelta": -5
+          },
+          {
+            "path": "packages/runtime/src/kernel/as-hook.ts",
+            "before": {
+              "path": "packages/runtime/src/kernel/as-hook.ts",
+              "sourceBytes": 16082,
+              "sourceSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+              "retainedBytes": 5473
+            },
+            "after": {
+              "path": "packages/runtime/src/kernel/as-hook.ts",
+              "sourceBytes": 16082,
+              "sourceSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+              "retainedBytes": 5466
+            },
+            "retainedMinifiedDelta": -7
+          },
+          {
+            "path": "packages/runtime/src/kernel/kernel.ts",
+            "before": {
+              "path": "packages/runtime/src/kernel/kernel.ts",
+              "sourceBytes": 10574,
+              "sourceSha256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+              "retainedBytes": 3388
+            },
+            "after": {
+              "path": "packages/runtime/src/kernel/kernel.ts",
+              "sourceBytes": 10574,
+              "sourceSha256": "4d1953ef05d507714b1d25a6a4d167d8e00e96d5816f8bc83ec79fc7757b4a39",
+              "retainedBytes": 3384
+            },
+            "retainedMinifiedDelta": -4
+          }
+        ],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "prototypes-base/button",
+        "inputCountBefore": 75,
+        "inputCountAfter": 75,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 0,
+        "sourceChanges": [],
+        "unchangedSourceRetentionChanges": [],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "inputCountBefore": 85,
+        "inputCountAfter": 85,
+        "uniqueInputPathsBoth": true,
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeInputPathsUnchanged": true,
+        "runtimeInputSourcesUnchanged": true,
+        "runtimeInputCount": 0,
+        "sourceChanges": [
+          {
+            "path": "packages/prototypes/shadcn/src/style-scope/context.ts",
+            "before": {
+              "path": "packages/prototypes/shadcn/src/style-scope/context.ts",
+              "sourceBytes": 924,
+              "sourceSha256": "3afc726b895d2e76da9bcd1bbaa1e7ee2ac7e841f5220e29fdd968a23f95a0c9",
+              "retainedBytes": 214
+            },
+            "after": {
+              "path": "packages/prototypes/shadcn/src/style-scope/context.ts",
+              "sourceBytes": 1097,
+              "sourceSha256": "7f385a301bfaf8f02fc73c25e4a7e788ffdc97a0149200dedae2a247c6da6d34",
+              "retainedBytes": 219
+            },
+            "retainedMinifiedDelta": 5
+          },
+          {
+            "path": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+            "before": {
+              "path": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+              "sourceBytes": 3153,
+              "sourceSha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+              "retainedBytes": 669
+            },
+            "after": {
+              "path": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+              "sourceBytes": 3229,
+              "sourceSha256": "466e710afadff62027a7fcf7ca54b583dd7069ea7a360b72329b68ed9bd5b724",
+              "retainedBytes": 674
+            },
+            "retainedMinifiedDelta": 5
+          }
+        ],
+        "unchangedSourceRetentionChanges": [],
+        "qualification": "Retained input sizes are minified attribution before gzip. Unchanged-source allocation/retention shifts are not new source code; gzip contributions are not additive."
+      }
+    ],
+    "conclusion": "Shared motion source accounts for the dominant Web Adapter growth. No extra Runtime input paths or copies were introduced in the measured dependency graph. The only new WC input is the adapter-owned native predicate extracted from the old modules.ts implementation. Other WC changes remain in the joint source delta and are not falsely attributed entirely to this extracted helper."
+  },
+  "attributionDiagnostics": {
+    "createdAt": "2026-11-26T13:04:41.027401+00:00",
+    "receipt": {
+      "sha256": "dabcf6f809058b119289f37828ab355b6a5407e6d6cc206871675734b86074f2",
+      "bytes": 11614,
+      "archivedEvidenceFile": "feature-cost-diagnostics.json",
+      "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+    },
+    "variants": [
+      {
+        "label": "DIAGNOSTIC-old-sink",
+        "removedRequiredCapabilities": true,
+        "notAMergeCandidate": true,
+        "source": {
+          "head": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+          "tree": "d91ebc33af588ed936818bf20f69a9f380e96690",
+          "workingTreeClean": false,
+          "measuredSourceMatchesHead": false,
+          "scope": [
+            "packages",
+            "scripts/analysis",
+            "package.json",
+            "pnpm-lock.yaml",
+            "pnpm-workspace.yaml",
+            "tsconfig.json",
+            "internal/coverage-matrices/prototype-coverage-matrix.json"
+          ],
+          "fileCount": 8106,
+          "fingerprintSha256": "f894c89db4f700f3ff32d9fa286eda8b21e1a331e673719328a508e0217baaac",
+          "statusSha256": "9e5a69a6cc96f736ed6e9b4c7c2a52607033e2c7292c0ed07c765cf53531fa54",
+          "stableDuringMeasurement": true,
+          "requireClean": false,
+          "expectedSha": null
+        },
+        "report": {
+          "sha256": "cab9c23664abbdae2b77457ecb99c21561c1956abe6d56e49839c7380f068dcf",
+          "bytes": 1568377,
+          "archivedEvidenceFile": "DIAGNOSTIC-old-sink.report.json",
+          "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+        },
+        "rows": [
+          {
+            "name": "lucide/icons/x",
+            "gzipBytes": 1796,
+            "budget": 3000,
+            "pass": true
+          },
+          {
+            "name": "lucide root",
+            "gzipBytes": 635846,
+            "budget": 700000,
+            "pass": true
+          },
+          {
+            "name": "core root",
+            "gzipBytes": 13012,
+            "budget": 13100,
+            "pass": true
+          },
+          {
+            "name": "runtime root",
+            "gzipBytes": 107129,
+            "budget": 107400,
+            "pass": true
+          },
+          {
+            "name": "adapter-react root",
+            "gzipBytes": 181836,
+            "budget": 181800,
+            "pass": false
+          },
+          {
+            "name": "adapter-vue root",
+            "gzipBytes": 180702,
+            "budget": 180600,
+            "pass": false
+          },
+          {
+            "name": "adapter-web-component root",
+            "gzipBytes": 218457,
+            "budget": 218100,
+            "pass": false
+          },
+          {
+            "name": "prototypes-base/button",
+            "gzipBytes": 4311,
+            "budget": 6000,
+            "pass": true
+          },
+          {
+            "name": "prototypes-shadcn/button",
+            "gzipBytes": 7158,
+            "budget": 7900,
+            "pass": true
+          }
+        ]
+      },
+      {
+        "label": "DIAGNOSTIC-old-projector",
+        "removedRequiredCapabilities": true,
+        "notAMergeCandidate": true,
+        "source": {
+          "head": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+          "tree": "d91ebc33af588ed936818bf20f69a9f380e96690",
+          "workingTreeClean": false,
+          "measuredSourceMatchesHead": false,
+          "scope": [
+            "packages",
+            "scripts/analysis",
+            "package.json",
+            "pnpm-lock.yaml",
+            "pnpm-workspace.yaml",
+            "tsconfig.json",
+            "internal/coverage-matrices/prototype-coverage-matrix.json"
+          ],
+          "fileCount": 8106,
+          "fingerprintSha256": "ab2f524be0f0e0ee4d3544c15b652121a70018814abc8f68379088da550bea53",
+          "statusSha256": "64e6edccb218854aab0be370e23cb584e3a68ba55e6de6d9994d5057481448b3",
+          "stableDuringMeasurement": true,
+          "requireClean": false,
+          "expectedSha": null
+        },
+        "report": {
+          "sha256": "6aa5ec38f548740a8b75ac9e203f7fa8c88d2011a02d53782cc9ea5aa0dcfb43",
+          "bytes": 1568378,
+          "archivedEvidenceFile": "DIAGNOSTIC-old-projector.report.json",
+          "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+        },
+        "rows": [
+          {
+            "name": "lucide/icons/x",
+            "gzipBytes": 1796,
+            "budget": 3000,
+            "pass": true
+          },
+          {
+            "name": "lucide root",
+            "gzipBytes": 635846,
+            "budget": 700000,
+            "pass": true
+          },
+          {
+            "name": "core root",
+            "gzipBytes": 13012,
+            "budget": 13100,
+            "pass": true
+          },
+          {
+            "name": "runtime root",
+            "gzipBytes": 107129,
+            "budget": 107400,
+            "pass": true
+          },
+          {
+            "name": "adapter-react root",
+            "gzipBytes": 182207,
+            "budget": 181800,
+            "pass": false
+          },
+          {
+            "name": "adapter-vue root",
+            "gzipBytes": 181096,
+            "budget": 180600,
+            "pass": false
+          },
+          {
+            "name": "adapter-web-component root",
+            "gzipBytes": 218808,
+            "budget": 218100,
+            "pass": false
+          },
+          {
+            "name": "prototypes-base/button",
+            "gzipBytes": 4311,
+            "budget": 6000,
+            "pass": true
+          },
+          {
+            "name": "prototypes-shadcn/button",
+            "gzipBytes": 7158,
+            "budget": 7900,
+            "pass": true
+          }
+        ]
+      },
+      {
+        "label": "DIAGNOSTIC-old-both",
+        "removedRequiredCapabilities": true,
+        "notAMergeCandidate": true,
+        "source": {
+          "head": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+          "tree": "d91ebc33af588ed936818bf20f69a9f380e96690",
+          "workingTreeClean": false,
+          "measuredSourceMatchesHead": false,
+          "scope": [
+            "packages",
+            "scripts/analysis",
+            "package.json",
+            "pnpm-lock.yaml",
+            "pnpm-workspace.yaml",
+            "tsconfig.json",
+            "internal/coverage-matrices/prototype-coverage-matrix.json"
+          ],
+          "fileCount": 8106,
+          "fingerprintSha256": "328b0978e43e9f644bb55af523ab8233577f0e5be1e83cd3ab04a2db80f2e510",
+          "statusSha256": "0aee13b6f13436b1b4f7884a8d9a5c1cef2ec0c7f771315e50988c3f2e9b7145",
+          "stableDuringMeasurement": true,
+          "requireClean": false,
+          "expectedSha": null
+        },
+        "report": {
+          "sha256": "dd17a65044627622daae6c9af3e72c2b381b103c7bf47996181242ea8057f5ad",
+          "bytes": 1568374,
+          "archivedEvidenceFile": "DIAGNOSTIC-old-both.report.json",
+          "availability": "Original evidence retained with the task; native run/artifact references below are canonical."
+        },
+        "rows": [
+          {
+            "name": "lucide/icons/x",
+            "gzipBytes": 1796,
+            "budget": 3000,
+            "pass": true
+          },
+          {
+            "name": "lucide root",
+            "gzipBytes": 635846,
+            "budget": 700000,
+            "pass": true
+          },
+          {
+            "name": "core root",
+            "gzipBytes": 13012,
+            "budget": 13100,
+            "pass": true
+          },
+          {
+            "name": "runtime root",
+            "gzipBytes": 107129,
+            "budget": 107400,
+            "pass": true
+          },
+          {
+            "name": "adapter-react root",
+            "gzipBytes": 181690,
+            "budget": 181800,
+            "pass": true
+          },
+          {
+            "name": "adapter-vue root",
+            "gzipBytes": 180545,
+            "budget": 180600,
+            "pass": true
+          },
+          {
+            "name": "adapter-web-component root",
+            "gzipBytes": 218294,
+            "budget": 218100,
+            "pass": false
+          },
+          {
+            "name": "prototypes-base/button",
+            "gzipBytes": 4311,
+            "budget": 6000,
+            "pass": true
+          },
+          {
+            "name": "prototypes-shadcn/button",
+            "gzipBytes": 7158,
+            "budget": 7900,
+            "pass": true
+          }
+        ]
+      }
+    ],
+    "interpretation": "Every variant uses the complete original nine-entry measurement. Temporarily restoring the 6aff sink or projector removes required behavior solely for causal attribution; neither variant is eligible for integration. Each working source was restored before the next stage. The saved b7e sink was the pre-format optional optimization; the final formatted optional patch is89e and remains isolated/archived.",
+    "jointMotionCostVersus40ea": {
+      "adapter-react root": 663,
+      "adapter-vue root": 693,
+      "adapter-web-component root": 667
+    },
+    "remainingJointCandidateGrowthOver6affAfterRemovingBoth": {
+      "adapter-react root": 0,
+      "adapter-vue root": 10,
+      "adapter-web-component root": 229
+    },
+    "warning": "Do not add isolated gzip savings or claim that the remaining WC229 belongs exclusively to the new predicate. The canonical combined source and all reviewed WC/Vue fixes determine the final bytes."
+  },
+  "authority": {
+    "policySources": [
+      {
+        "path": "AGENTS.md",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "1503df22eb41cbd6265cf250d5ba60d1d8c499e996d12291d0d326a4f287d8cd",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/AGENTS.md"
+      },
+      {
+        "path": ".agents/skills/pui-dev/SKILL.md",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "e3c2294093aac66722417dcbf03ffba2648e7baaaf4f97c84cb35a87dd129b41",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/.agents/skills/pui-dev/SKILL.md"
+      },
+      {
+        "path": ".agents/skills/pui-package-budget/SKILL.md",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "61dd888c4d9c13bd54ed1c06f8e4f918906b053f8bd5354876e3439cb8354cea",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/.agents/skills/pui-package-budget/SKILL.md"
+      },
+      {
+        "path": "internal/governance/finf-package-budgets.md",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "0833c407d3cc775fd9340939d28e2c9369b064cdc11d22728669c1c3df3361e9",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/internal/governance/finf-package-budgets.md"
+      }
+    ],
+    "maintainerDecision": "https://github.com/Proto-UI/Proto-UI/issues/654#issuecomment-5677625733",
+    "capabilities": [
+      {
+        "id": "retained-web-motion-demand-and-owner-lifetime",
+        "scope": "Preserve the existing finite typed width and palette capability while acquiring a missing containing-block basis through a finite composed ancestor observer set; demand palette only for declared color, with per-view subscription identity and synchronous reentry-safe cleanup.",
+        "sourceCommits": ["3f9cdc4b3e51c40f39520430b2fe9a67b3b59294"],
+        "paths": [
+          {
+            "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+            "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+            "sha256": "76daf7370b458d1bd60722cc85a0541dde633261f2b08b86fc2e4b1945c0be20",
+            "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/packages/adapters/base/src/motion/web-resident-motion.ts"
+          },
+          {
+            "path": "packages/modules/feedback/src/motion/projector.ts",
+            "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+            "sha256": "7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d",
+            "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/packages/modules/feedback/src/motion/projector.ts"
+          }
+        ],
+        "criteria": [
+          "C-FEEDBACK-RESIDENT-MOTION-0001-PALETTE-LIFETIME",
+          "C-FEEDBACK-RESIDENT-MOTION-0001-WIDTH",
+          "C-FEEDBACK-RESIDENT-MOTION-0001-WIDTH-LEASE",
+          "HC-FEEDBACK-RESIDENT-MOTION-0001-OWNER",
+          "HC-FEEDBACK-RESIDENT-MOTION-0001-ENVIRONMENT",
+          "HC-FEEDBACK-RESIDENT-MOTION-0001-EPOCH"
+        ],
+        "nonExpansion": "No new semantic target syntax, property channel, native/Compiler support, or Bootstrap repeating stripe choreography is approved by this cost record."
+      },
+      {
+        "id": "retained-wc-native-focus-demand-boundary",
+        "scope": "Use the exact adapter-owned native candidate predicate to prove a decorative-only region has no descendant stop before sampling style, while preserving all custom-callback, composed/slot/portal, external-input, image-map, radio and late-upgrade paths.",
+        "sourceCommits": [
+          "c07b708bf1e7169f02569efc6a587ceed4bd9fcf",
+          "a47c4b30a7c3e7d0ee7d694b521f4797ecdcbc1f"
+        ],
+        "paths": [
+          {
+            "path": "packages/adapters/web-component/src/native-focus-candidate.ts",
+            "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+            "sha256": "627fa832ce0bd42f6d04034878657d717d07f41a6afa0ac6c7d9e208fa970270",
+            "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/packages/adapters/web-component/src/native-focus-candidate.ts"
+          },
+          {
+            "path": "packages/adapters/web-component/src/focus-scope-targets.ts",
+            "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+            "sha256": "ed7f7c53a0c0ad0915798fc7cf2c4c68c4bd98628a62e2a6718c0e493ae4e037",
+            "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/packages/adapters/web-component/src/focus-scope-targets.ts"
+          },
+          {
+            "path": "packages/adapters/web-component/src/runtime/modules.ts",
+            "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+            "sha256": "1df8757a625b253956cc24f1920f177575ae301072b17576ebacec135f616bd0",
+            "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/packages/adapters/web-component/src/runtime/modules.ts"
+          }
+        ],
+        "criteria": [
+          "C-FOCUS-0001-G",
+          "C-AS-FOCUS-SCOPE-0001-D",
+          "HC-FOCUS-ENTRY-0001-A",
+          "HC-FOCUS-ENTRY-0001-B",
+          "D-FOCUS-ENTRY-DELEGATION-0001-C"
+        ],
+        "nonExpansion": "This does not create focusability, skip supplied predicates, change target identity, or certify the still-failing Matrix latency requirement."
+      }
+    ],
+    "specSources": [
+      {
+        "path": "spec/contracts/C-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "53b1af059948d39fb672a66343ef987a26b44b86c051827f04965bc33dc6f427",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/contracts/C-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      },
+      {
+        "path": "spec/host-caps/HC-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "f569da699e53ca87cfcb3af7848d7f33c9397ddfd8edbac70d6a1a256f843c1e",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/host-caps/HC-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      },
+      {
+        "path": "spec/tests/T-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "8351e60dd0e7a5011030af8cb1d5467147c9299bea3bfef0dc3e29d6db74df31",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/tests/T-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      },
+      {
+        "path": "spec/contracts/C-FOCUS-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "926f0cf78d4b8e1575cd6e7fc5927b1b3ba5ce5a54e7eac12db097a077584cfc",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/contracts/C-FOCUS-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      },
+      {
+        "path": "spec/contracts/C-AS-FOCUS-SCOPE-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "06e5e2b585fd2b7ae2e6c818f2ac5b4cd010831744e363304f183fdb5aaf45a5",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/contracts/C-AS-FOCUS-SCOPE-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      },
+      {
+        "path": "spec/host-caps/HC-FOCUS-ENTRY-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "46022b6c454fbef54828e36b08a98a70ccd59af5e97f7d0a424400ce2e722c61",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/host-caps/HC-FOCUS-ENTRY-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      },
+      {
+        "path": "spec/decisions/D-FOCUS-ENTRY-DELEGATION-0001.yaml",
+        "revision": "40ea25c26686afb96a465f9005f03be93af6ecd1",
+        "sha256": "8b84203903005ae1fa6544419cb367013ddde71f1eaf7dd28d7564f27b2b1585",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/40ea25c26686afb96a465f9005f03be93af6ecd1/spec/decisions/D-FOCUS-ENTRY-DELEGATION-0001.yaml",
+        "lifecycle": "draft",
+        "sameBytesAt6aff": true
+      }
+    ],
+    "draftBoundary": "All listed C/HC/T/D entities remain draft. This record traces already authorized retained development behavior and does not activate any entity, claim full physical animation acceptance, or accept new product direction. Root must preserve this distinction in its current authority map.",
+    "priorConstraints": "Original #1908 rejected #1884 ceiling increases; #1913 explicitly retained all original ceilings for its repair and further Matrix work. Those conclusions are unchanged. Any new decision must be a separately reviewable transaction for the joint #1914 source cost, not a rewriting of #1908/#1913 acceptance or a resurrection of #1884.",
+    "implementationAuthorization": "Current user requested completion and ordered integration of the listed original PRs using our own subagent review. AGENTS.md and pui-dev delegate this separate bounded numeric transaction for accepted capability cost."
+  },
+  "decision": "Select the smallest 100-byte boundary above each canonical combined adapter cost: React182400, Vue181300 and WC219000. This leaves47/62/39 bytes only. Six other ceilings, all entry points, dependency externals, build/compression parameters, diagnostic profiles and strict failure behavior remain unchanged.",
+  "alternatives": [
+    "No accidental extra Runtime copy or widened React/Vue input membership was found. The only added WC input is the existing native candidate predicate extracted from modules.ts; the same reviewed implementation is preserved.",
+    "Private helper changes, pure annotations and safe shared Motion/projector micro-optimizations were measured. They did not close the required gap. None is included in this transaction or its product candidate.",
+    "Ablations temporarily remove required owner behavior solely to attribute cost; they are not acceptable product candidates and their gzip deltas are not additive.",
+    "The rejected1884 proposal and the unchanged-ceiling1908/1913 repair records remain historical facts. This transaction records the later combined1914 source cost and does not relabel those repairs."
+  ],
+  "fixtureOnlyEquivalence": {
+    "at": "2026-11-26T12:57:43.469609+00:00",
+    "finishedAt": "2026-11-26T12:57:47.312130+00:00",
+    "head": "7eaf8a354e1d3b67649d10c39e1fcfcaf040815d",
+    "exitCode": 1,
+    "source": {
+      "head": "7eaf8a354e1d3b67649d10c39e1fcfcaf040815d",
+      "tree": "8fb8e0965266ab5f6030c3ec069fb8580d6999d1",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8106,
+      "fingerprintSha256": "72ae05c2f35b0da4aeafa4b63e5905c19e2a159397f05a79003e3aaf48189681",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "7eaf8a354e1d3b67649d10c39e1fcfcaf040815d"
+    },
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/analysis/package-budgets.mjs",
+      "--json",
+      "--require-clean",
+      "--expected-sha",
+      "7eaf8a354e1d3b67649d10c39e1fcfcaf040815d"
+    ],
+    "localReportSha256": "9f87aa44ed06e9aa12c1516e65d62111da8287e7b508387fd8b5bb20e702bcd9",
+    "canonicalReportSha256": "e814c3c1c4827d90c8d16634c705d55665f29603920f2c78186831c6f5fa6b26",
+    "equalEnvironmentAndMeasurement": true,
+    "entries": [
+      {
+        "name": "lucide/icons/x",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "lucide root",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "core root",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "runtime root",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "adapter-react root",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "adapter-vue root",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "adapter-web-component root",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "prototypes-base/button",
+        "sameMeasuredArtifact": true
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "sameMeasuredArtifact": true
+      }
+    ],
+    "claim": "Clean local fixture-only candidate: actual old-ceiling failure retained; all nine minified hashes/sizes/gzip equal native40ea. Does not invent a new canonical run."
+  },
+  "ownerBehaviorCheck": {
+    "at": "2026-11-26T12:58:01.532855+00:00",
+    "finishedAt": "2026-11-26T12:58:13.504013+00:00",
+    "head": "7eaf8a354e1d3b67649d10c39e1fcfcaf040815d",
+    "exitCode": 0,
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "packages/adapters/base/test/web-resident-width.test.ts",
+      "packages/adapters/base/test/web-resident-pending-width-basis.test.ts",
+      "packages/adapters/base/test/resident-motion-palette-lifecycle.test.ts",
+      "packages/adapters/base/test/resident-motion-trace.test.ts",
+      "packages/adapters/base/test/web-resident-width-adoption.test.ts",
+      "packages/adapters/base/test/web-resident-motion.test.ts",
+      "packages/adapters/base/test/resident-motion-runtime.test.ts",
+      "packages/adapters/base/test/resident-motion-ownership.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--no-file-parallelism",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/630588abef90/pr-merge-20261126/retained-final-budget/accepted-owner-tests.report.json"
+    ],
+    "cleanBeforeAndAfter": true,
+    "passed": 118,
+    "failed": 0,
+    "pending": 0,
+    "files": 8,
+    "sourceScope": "Original unmodified40ea runtime/module/adapter source on fixture-only7eaf. No micro-optimization patch applied.",
+    "reportSha256": "8e891bab143e8b716f7ab1778a64e6f926809a3d469cc5e88d1423a30f75a7aa"
+  },
+  "candidateChecksAtCreation": {
+    "canonical6affOriginalNineCeilings": "passed9/9",
+    "canonical40eaOriginalNineCeilings": "failed3/9; original failed run and original values retained",
+    "fixtureOnly7eafOriginalNineCeilings": "failed3/9; all9 artifacts and environment exactly equal canonical40ea",
+    "fixtureOnly7eafOriginalOwnerFiles": "passed118/118 across8 whole files,0skip",
+    "numericCandidateCanonicalStrictCheck": "not-run; required after this separately reviewable candidate is committed and published",
+    "numericCandidateIndependentReview": "pending",
+    "wholeTypesAfterFixtureRepair": "not-run",
+    "wholeRepositoryAndRelease": "not accepted; actual Matrix, ordinary CLI, Liquid and full-cycle failures retain their recorded scopes"
+  },
+  "rollback": "Revert only this dedicated numeric commit and its new record to restore181800/180600/218100. Do not remove reviewed capability semantics or rewrite original histories. A later lower ceiling requires actual comparable evidence.",
+  "recordBoundary": "This is the pre-canonical-validation transaction record. Subsequent native results and actual independent review bind their real final head separately; this immutable record does not claim those future results."
+}

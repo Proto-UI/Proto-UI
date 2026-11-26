@@ -19,14 +19,16 @@ import {
   stopSearchRuntimeTrace,
 } from './site-search-evidence';
 
-const source = [
+const browserSources = [
   'site-search-browser.ts',
   'site-search-activation.browser.test.ts',
   'site-search-layout.browser.test.ts',
   'site-search-menu.browser.test.ts',
-]
-  .map((name) => readFileSync(`apps/www/src/content/docs/zh-cn/${name}`, 'utf8'))
-  .join('\n');
+].map((name) => ({
+  name,
+  source: readFileSync(`apps/www/src/content/docs/zh-cn/${name}`, 'utf8'),
+}));
+const source = browserSources.map((module) => module.source).join('\n');
 
 describe('independent Pagefind browser callback transport', () => {
   it('runs the actual Vitest-transformed callback without SSR import globals', async () => {
@@ -822,7 +824,16 @@ it('bounds observations and ignores queued observer/definition callbacks after s
 });
 
 it('parses the actual browser suite without starting its browser or server hooks', () => {
-  expect(() => transformSync(source, { loader: 'ts', target: 'es2022' })).not.toThrow();
+  for (const module of browserSources)
+    expect(
+      () =>
+        transformSync(module.source, {
+          loader: 'ts',
+          target: 'es2022',
+          sourcefile: module.name,
+        }),
+      module.name
+    ).not.toThrow();
 });
 
 it('uses one browser-local observation without a nested locator timeout', () => {

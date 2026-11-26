@@ -100,8 +100,7 @@ async function observe({
 
 describe.sequential('finite primitive template keys retain exact production tokens', () => {
   for (const [name, fixture] of [
-    ['shared literal suffix', {}],
-    ['private literal suffix', { privateOwner: true }],
+    ['literal suffix', {}],
     [
       'constant primitive interpolation',
       { beforeLoop: "const suffix = '-surface';", argument: 'TOKENS[`${profile}${suffix}`]' },
@@ -116,30 +115,57 @@ describe.sequential('finite primitive template keys retain exact production toke
       { extras: 'function unrelated(profile){ return profile; }' },
     ],
   ] satisfies readonly (readonly [string, Fixture])[]) {
-    it('resolves ' + name, async () => {
-      const result = await observe(fixture);
-      expect(result.privateProof).toBe('privateOwner' in fixture && fixture.privateOwner === true);
+    it('resolves a private owner with ' + name, async () => {
+      const result = await observe({ ...fixture, privateOwner: true });
+      expect(result.privateProof).toBe(true);
       expect(result.sharedProof).toBe(true);
       expect(result.scan.unresolved).toEqual([]);
       expect(result.scan.usages).toHaveLength(2);
       expect(result.tokens).toEqual(expected);
     });
-  }
-  it('resolves every combination of two independent finite loop keys', async () => {
-    const result = await observe({
-      table:
-        "const TOKENS={'nova-surface':'bg-primary p-2','mira-surface':'bg-muted p-3','nova-border':'border-primary','mira-border':'border-muted'};",
-      beforeLoop: "for(const part of ['surface','border'] as const){",
-      afterLoop: '}',
-      argument: 'TOKENS[`${profile}-${part}`]',
+    it('withholds an exported mutable owner with ' + name, async () => {
+      const result = await observe(fixture);
+      expect(result.privateProof).toBe(false);
+      expect(result.sharedProof).toBe(false);
+      expect(result.scan.unresolved.map((miss) => miss.reason)).toEqual(['intent', 'intent']);
+      expect(result.scan.usages).toEqual([]);
+      // Source token inventory does not prove that an exported object is
+      // immutable when a different runtime consumer can retain and write it.
+      expect(result.tokens).toEqual(expected);
     });
-    expect(result.privateProof).toBe(false);
+  }
+  const combinations: Fixture = {
+    table:
+      "const TOKENS={'nova-surface':'bg-primary p-2','mira-surface':'bg-muted p-3','nova-border':'border-primary','mira-border':'border-muted'};",
+    beforeLoop: "for(const part of ['surface','border'] as const){",
+    afterLoop: '}',
+    argument: 'TOKENS[`${profile}-${part}`]',
+  };
+  const combinedTokens = [
+    ...expected,
+    'data-[profile=mira]:border-muted',
+    'data-[profile=nova]:border-primary',
+  ].sort();
+  it('resolves every combination of two independent finite loop keys', async () => {
+    const result = await observe({ ...combinations, privateOwner: true });
+    expect(result.privateProof).toBe(true);
     expect(result.sharedProof).toBe(true);
     expect(result.scan.unresolved).toEqual([]);
     expect(result.scan.usages).toHaveLength(4);
-    expect(result.tokens).toEqual(
-      [...expected, 'data-[profile=mira]:border-muted', 'data-[profile=nova]:border-primary'].sort()
-    );
+    expect(result.tokens).toEqual(combinedTokens);
+  });
+  it('withholds an exported mutable owner with two independent finite loop keys', async () => {
+    const result = await observe(combinations);
+    expect(result.privateProof).toBe(false);
+    expect(result.sharedProof).toBe(false);
+    expect(result.scan.unresolved.map((miss) => miss.reason)).toEqual([
+      'intent',
+      'intent',
+      'intent',
+      'intent',
+    ]);
+    expect(result.scan.usages).toEqual([]);
+    expect(result.tokens).toEqual(combinedTokens);
   });
   for (const [name, fixture] of [
     [
@@ -168,7 +194,7 @@ describe.sequential('finite primitive template keys retain exact production toke
     ['an escaping whole map', { afterLoop: 'mutate(TOKENS);' }],
   ] satisfies readonly (readonly [string, Fixture])[]) {
     it('withholds proof for ' + name, async () => {
-      const result = await observe(fixture);
+      const result = await observe({ ...fixture, privateOwner: true });
       expect(result.privateProof).toBe(false);
       expect(result.sharedProof).toBe(false);
       expect(result.scan.unresolved.length).toBeGreaterThan(0);
@@ -183,6 +209,7 @@ it('withholds a 17 by 17 primitive-key cross product above the 256-key bound', a
     profiles.flatMap((profile) => parts.map((part) => [`${profile}-${part}`, 'p-2']))
   );
   const result = await observe({
+    privateOwner: true,
     profiles,
     table: `const TOKENS=${JSON.stringify(table)};`,
     beforeLoop: `for(const part of ${JSON.stringify(parts)} as const){`,
