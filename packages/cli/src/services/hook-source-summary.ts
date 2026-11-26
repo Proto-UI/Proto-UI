@@ -1982,6 +1982,38 @@ function createHookSourceSummaryContextInternal(
       const owner = ts.findAncestor(declaration, isFunctionLike);
       if (!owner?.body || !synchronousBody(owner) || opaqueFunctionSyntax(owner)) return false;
       const next = new Set(active).add(declaration);
+      const nativeCallbackRelay = (
+        reference: ts.Identifier,
+        callback: ts.FunctionLikeDeclaration
+      ): boolean => {
+        const value = outerValue(reference);
+        const relay = value.parent;
+        const wrapper = ts.findAncestor(reference, isFunctionLike);
+        if (
+          !ts.isCallExpression(relay) ||
+          relay.expression !== value ||
+          relay.questionDotToken ||
+          relay.arguments.length !== callback.parameters.length ||
+          !ts.isExpressionStatement(outerValue(relay).parent) ||
+          !wrapper ||
+          wrapper === callback ||
+          ts.findAncestor(wrapper.parent, isFunctionLike) !== owner ||
+          !relay.arguments.every((argument, index) => {
+            const supplied = unwrap(argument);
+            return (
+              ts.isIdentifier(supplied) &&
+              bindingDeclaration(supplied, module) === wrapper.parameters[index] &&
+              !hasBindingWrite(supplied, module)
+            );
+          })
+        )
+          return false;
+        // Admit one private, discarded call that forwards the wrapper's own
+        // native callback parameters. Both functions still need complete use
+        // proofs; this wrapper cannot itself rely on another relay. This closes
+        // State identity, not callback timing, purity or a current State value.
+        return registeredCallback(wrapper, owner, module, definitions, true);
+      };
       let closed = true;
       let read = false;
       const visit = (node: ts.Node): void => {
@@ -2022,7 +2054,7 @@ function createHookSourceSummaryContextInternal(
             callback &&
             callback !== owner &&
             ts.findAncestor(callback.parent, isFunctionLike) === owner &&
-            registeredCallback(callback, owner, module, definitions, true)
+            registeredCallback(callback, owner, module, definitions, true, nativeCallbackRelay)
           ) {
             // The complete private handle use set stays inside this owner and
             // exact native registrations. This proves identity only, not the
