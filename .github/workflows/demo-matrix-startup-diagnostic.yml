@@ -82,10 +82,15 @@ jobs:
     # Neither the original 180s case nor its 60s initialization oracle changes.
     timeout-minutes: 25
     env:
-      COMPARISON_DIR: ${{ runner.temp }}/matrix-docs-selector-comparison
       PROTO_UI_MATRIX_STARTUP_PROFILE: '1'
       PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1'
     steps:
+      - name: Prepare the runner-owned comparison directory
+        run: |
+          set -euo pipefail
+          COMPARISON_DIR="$RUNNER_TEMP/matrix-docs-selector-comparison"
+          mkdir -p "$COMPARISON_DIR"
+          echo "COMPARISON_DIR=$COMPARISON_DIR" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.CANDIDATE_SHA }}
@@ -156,6 +161,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: matrix-docs-selector-comparison-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.COMPARISON_DIR }}
+          path: ${{ runner.temp }}/matrix-docs-selector-comparison
           if-no-files-found: error
           retention-days: 14
