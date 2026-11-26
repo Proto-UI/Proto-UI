@@ -5,9 +5,8 @@ import {
   type HoverCardTriggerExposes,
 } from '@proto.ui/prototypes-base/hover-card';
 
-// HoverCard is a Proto link-preview extension. Its passive link paint follows
-// Bootstrap 2.3.2 @linkColor (#08c) and @linkColorHover (#005580) in light mode,
-// adapting hover/focus ink to text-foreground in dark mode so contrast stays readable.
+// HoverCard is a Proto link-preview extension. Resting ink follows Bootstrap 2.3.2 @linkColor (#08c). Hover and focus
+// use the theme foreground with an underline in both color schemes.
 // Base Trigger authors no activation; the app anchor keeps navigation ownership.
 // https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/scaffolding.less
 // https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/variables.less
@@ -18,21 +17,20 @@ export default definePrototype<HoverCardTriggerProps, HoverCardTriggerExposes>({
     const state = behavior.getState!;
     def.feedback.style.use(
       tw(
-        'inline-flex items-center rounded-sm text-sm leading-5 text-[#08c] no-underline cursor-pointer outline-none'
+        'inline-flex items-center rounded-sm text-sm leading-5 cursor-pointer outline-none'
       )
     );
     def.rule({
-      when: (w) => w.all(w.state(state('hovered')!).eq(true), w.state(state('disabled')!).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state('focused')!).eq(true), w.state(state('disabled')!).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
+      when: (w) =>
+        w.any(
+          w.state(state('disabled')!).eq(true),
+          w.all(w.state(state('hovered')!).eq(false), w.state(state('focused')!).eq(false))
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-[#08c] no-underline')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.meta('colorScheme').eq('dark'),
           w.state(state('disabled')!).eq(false),
           w.any(w.state(state('hovered')!).eq(true), w.state(state('focused')!).eq(true))
         ),
