@@ -15,7 +15,7 @@ describe('Popover bounded surface recipes', () => {
     ],
     [
       'brutalist',
-      ['w-72', 'rounded-base', 'gap-4', 'border-2'],
+      ['w-72', 'rounded-base', 'gap-4', 'border-2', 'shadow-[3px_3px_0_0_var(--pui-foreground)]'],
       ['w-80', 'rounded-none', 'shadow-[4px_4px_0_0_var(--pui-foreground)]'],
     ],
   ] as const) {
@@ -29,8 +29,6 @@ describe('Popover bounded surface recipes', () => {
       );
       for (const token of required) expect(tokens).toContain(token);
       for (const token of forbidden) expect(tokens).not.toContain(token);
-      if (family === 'brutalist')
-        expect(tokens.some((token) => String(token).startsWith('shadow-'))).toBe(false);
       expect(tokens).toEqual(
         expect.arrayContaining([
           'max-w-[var(--proto-ui-available-width)]',
