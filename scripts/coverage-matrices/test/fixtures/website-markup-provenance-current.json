@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "3355fb3a99f5d9db03c71d6818ec39f24a4d7109",
-  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1922 integration source commit 3355fb3a99f5d9db03c71d6818ec39f24a4d7109. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-9d5c3f6.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "d7f4182182968f9990367edd632e7bde536b5121",
+  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1925 integration source commit d7f4182182968f9990367edd632e7bde536b5121. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-3355fb3.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -91,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6"
+      "sha256": "212e98529f0e2e76831ae8fee37b281f069e61bb737f8462f7b5cfbcc14ce53a"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
