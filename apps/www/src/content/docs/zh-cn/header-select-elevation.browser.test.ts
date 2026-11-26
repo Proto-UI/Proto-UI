@@ -697,7 +697,7 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 await capture(`${width}-${control}-popup`);
                 if (appearance === 'family' && control === 'family') {
                   expect(popupText.length).toBeGreaterThan(0);
-                  expect(popupText.map((option) => option.text)).toContain('Bootstrap 2.3.2 · WIP');
+                  expect(popupText.map((option) => option.text)).toContain('Bootstrap 2.3.2');
                   for (const option of popupText)
                     expect(
                       headerOptionTextClipping(option),
