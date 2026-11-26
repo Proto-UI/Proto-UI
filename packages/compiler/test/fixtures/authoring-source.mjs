@@ -37,6 +37,10 @@ export function authoredKeyedTaskSource() {
   return compileSource(new URL('./authoring-keyed-tasks/owner.proto.ts.txt', import.meta.url), 'KeyedTaskOwner', 'default');
 }
 
+export function authoredTaskPolicySource() {
+  return compileSource(new URL('./authoring-task-policies/owner.proto.ts.txt', import.meta.url), 'PolicyReader', 'default');
+}
+
 export function authoredSyncRetirementSource() {
   return compileSource(new URL('./authoring-sync-retirement/owner.proto.ts.txt', import.meta.url), 'SyncTree', 'default');
 }

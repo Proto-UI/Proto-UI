@@ -82,8 +82,8 @@ fn literal(v: &Value) -> Expression {
 
 pub fn schema_default(v: &Value) -> TokenStream { literal(v).owned() }
 
-// A move is valid when this entire instruction is the last, single use. Multiple
-// operands of one call may hold a borrow until the last argument has evaluated.
+// Operands in one emitted Rust statement can borrow the same value until the
+// statement ends. An owned value can move on its last use in a later statement.
 fn count_uses<'a>(block: &'a Block) -> HashMap<&'a str, usize> {
     let mut counts = HashMap::new();
     let mut values = Vec::new();
@@ -124,6 +124,12 @@ struct Lower<'c, 'a> {
 }
 
 impl<'c, 'a> Lower<'c, 'a> {
+    fn finish_statement(&mut self) {
+        for id in self.consumed.drain(..) {
+            if let Some(remaining) = self.uses.get_mut(id) { *remaining -= 1; }
+        }
+    }
+
     fn read(&self, p: Place) -> TokenStream {
         if let Place::Field(i) = p {
             if self.checked.bodies[self.f].facts.writes.contains(&i) {
@@ -372,6 +378,7 @@ impl<'c, 'a> Lower<'c, 'a> {
             let name = format_ident!("host_arg_{i}");
             let value = self.value(arg).owned();
             snapshots.push(quote!(let #name = #value;)); call.push(name);
+            self.finish_statement();
         }
         let retained: Vec<_> = self.layout[b].iter().copied().map(names::argument).collect();
         let mut edge = Vec::new();
@@ -379,6 +386,7 @@ impl<'c, 'a> Lower<'c, 'a> {
             let name = format_ident!("across_await_{i}");
             let value = self.value(arg).owned();
             snapshots.push(quote!(let #name = #value;)); edge.push(name);
+            self.finish_statement();
         }
         quote!({
             #(#snapshots)*
@@ -464,9 +472,7 @@ pub fn methods(checked: &Checked<'_>, names: &Names) -> Vec<TokenStream> {
             let mut steps = Vec::new();
             for (index, instruction) in block.instructions.iter().enumerate() {
                 steps.push(lower.instruction(index, instruction));
-                for id in lower.consumed.drain(..) {
-                    if let Some(remaining) = lower.uses.get_mut(id) { *remaining -= 1; }
-                }
+                lower.finish_statement();
             }
             let end = lower.end(&block.end);
             let ty = names.ty(behavior.binding.ty);

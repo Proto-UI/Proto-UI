@@ -9,13 +9,13 @@ import { build } from 'esbuild';
 import { chromium } from 'playwright-core';
 import ts from 'typescript';
 import { emitReact } from '@proto.ui/compiler/targets/react';
-import { authoredKeyedTaskSource } from './fixtures/authoring-source.mjs';
+import { authoredKeyedTaskSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
 import { openTabsServer } from './consumers/react/tabs-server.mjs';
 
 const require = createRequire(import.meta.url);
 const compiler = fileURLToPath(new URL('../', import.meta.url));
 
-async function bundleConsumer(t) {
+async function openConsumer(t, produce, client, record) {
   const retained = process.env.PROTO_UI_REACT_CONSUMER_DIR;
   if (retained) await mkdir(retained, { recursive: true });
   const directory = await mkdtemp(path.join(retained || tmpdir(), 'proto-keyed-task-react-'));
@@ -27,16 +27,15 @@ async function bundleConsumer(t) {
   for (const name of ['react', 'react-dom', '@types/react', '@types/react-dom']) {
     await symlink(path.dirname(require.resolve(`${name}/package.json`)), path.join(modules, name), 'dir');
   }
-  const source = authoredKeyedTaskSource();
+  const source = produce();
   assert.equal(source.status, 'produced', JSON.stringify(source.diagnostics));
-  assert.equal(source.component.name, 'KeyedTaskOwner');
-  if (retained) await writeFile(path.join(directory, 'keyed-task-owner-source.json'), JSON.stringify(source));
+  if (retained) await writeFile(path.join(directory, record), JSON.stringify(source));
   const bindings = { 'fixture.load-keyed-item': { module: './keyed-loader', export: 'loadKeyedItem' } };
-  await writeFile(path.join(directory, 'KeyedTaskOwner.ts'), emitReact(source.component, { bindings }));
-  for (const name of ['keyed-loader.ts', 'keyed-task-client.tsx']) {
+  await writeFile(path.join(directory, `${source.component.name}.ts`), emitReact(source.component, { bindings }));
+  for (const name of ['keyed-loader.ts', client]) {
     await copyFile(new URL(`./consumers/react/${name}.in`, import.meta.url), path.join(directory, name));
   }
-  const app = path.join(directory, 'keyed-task-client.tsx');
+  const app = path.join(directory, client);
   const options = {
     target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
     jsx: ts.JsxEmit.ReactJSX, types: [], allowImportingTsExtensions: true, strict: true, noEmit: true,
@@ -48,8 +47,17 @@ async function bundleConsumer(t) {
   const bundle = await build({
     entryPoints: [app], bundle: true, write: false, jsx: 'automatic', define: { 'process.env.NODE_ENV': '"development"' },
   });
-  if (retained) t.diagnostic(`Generated keyed React consumer: ${directory}`);
-  return { script: bundle.outputFiles[0].text, evidence: retained ? directory : null };
+  if (retained) t.diagnostic(`Generated ${source.component.name} React consumer: ${directory}`);
+  const server = await openTabsServer(t);
+  const browser = await chromium.launch({ executablePath: process.env.PUI_CHROMIUM_EXECUTABLE });
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(15_000);
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(server.origin);
+  await page.addScriptTag({ content: bundle.outputFiles[0].text });
+  return { server, page, errors, evidence: retained ? directory : null };
 }
 
 async function enqueue(page, key, resource, cancellable = true) {
@@ -96,16 +104,7 @@ function expectPending(byPath, resource) {
 }
 
 test('authored keyed children retain tasks through reorder and host moves and reject a retired incarnation’s response', async t => {
-  const { script, evidence } = await bundleConsumer(t);
-  const server = await openTabsServer(t);
-  const browser = await chromium.launch({ executablePath: process.env.PUI_CHROMIUM_EXECUTABLE });
-  t.after(() => browser.close());
-  const page = await browser.newPage();
-  page.setDefaultTimeout(15_000);
-  const errors = [];
-  page.on('pageerror', error => errors.push(error.message));
-  await page.goto(server.origin);
-  await page.addScriptTag({ content: script });
+  const { server, page, errors, evidence } = await openConsumer(t, authoredKeyedTaskSource, 'keyed-task-client.tsx', 'keyed-task-owner-source.json');
 
   const oldA = server.resource('A', 'obsolete A');
   const b = server.resource('B', 'B file');
@@ -220,4 +219,104 @@ test('authored keyed children retain tasks through reorder and host moves and re
   }
   assert.deepEqual(errors, []);
   if (evidence) await writeFile(path.join(evidence, 'keyed-react-native.json'), JSON.stringify({ views, requests: [...network.values()], errors }));
+});
+
+async function expectPolicyView(page, ordered, parallel) {
+  const label = `${ordered} | ${parallel}`.trim();
+  const result = await page.waitForFunction(expected => {
+    const view = window.policyTrace.snapshot();
+    return view.visible && view.ordered === expected.ordered && view.parallel === expected.parallel && view.label === expected.label && view;
+  }, { ordered, parallel, label });
+  try { return await result.jsonValue(); } finally { await result.dispose(); }
+}
+
+test('authored serial and parallel tasks read Context on entry and resumption and retire with their keyed owner', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, authoredTaskPolicySource, 'task-policies-client.tsx', 'task-policy-source.json');
+  const orderedA = server.resource('A', 'Obsolete amber record');
+  const orderedB = server.resource('B', 'Blue retained file');
+  const parallelC = server.resource('C', 'Temporary chart');
+  const parallelA = server.resource('A', 'Apricot replacement');
+  const initial = await page.evaluate(paths => {
+    const host = window.policyTrace;
+    host.mount();
+    for (const [id, path] of paths) host.enqueue(id, path, false);
+    return [host.queue('A'), host.queue('B'), host.submit('C'), host.submit('A')];
+  }, [['A', orderedA.path], ['B', orderedB.path], ['C', parallelC.path], ['A', parallelA.path]]);
+  assert.deepEqual(initial, Array(4).fill('committed'));
+  assert.deepEqual(await Promise.all([orderedA.requested(), parallelC.requested(), parallelA.requested()]), ['A', 'C', 'A']);
+  const issued = await page.evaluate(() => window.policyTrace.history());
+  assert.deepEqual(issued.requests.map(r => r.path).sort(), [orderedA.path, parallelC.path, parallelA.path].sort());
+  assert.equal(orderedB.requests, 0);
+  const views = [await expectPolicyView(page, '', '')];
+
+  await page.evaluate(() => window.policyTrace.publish('right'));
+  parallelA.release();
+  const p1 = 'A@left>right=Apricot replacement;';
+  views.push(await expectPolicyView(page, '', p1));
+  assert.equal(orderedB.requests, 0);
+  orderedA.release();
+  assert.equal(await orderedB.requested(), 'B');
+  const s1 = 'A@left>right=Obsolete amber record;';
+  views.push(await expectPolicyView(page, s1, p1));
+  await page.evaluate(() => window.policyTrace.publish('last'));
+  parallelC.release();
+  const p2 = p1 + 'C@left>last=Temporary chart;';
+  views.push(await expectPolicyView(page, s1, p2));
+  orderedB.release();
+  const s2 = s1 + 'B@right>last=Blue retained file;';
+  const completed = await expectPolicyView(page, s2, p2);
+  views.push(completed);
+
+  const ending = server.resource('D', 'old serial');
+  const queued = server.resource('E', 'old queued');
+  const late = server.resource('F', 'old parallel');
+  assert.deepEqual(await page.evaluate(([ending, queued, late]) => {
+    const host = window.policyTrace;
+    host.replaceOnReturn('D', ending, 'replacement');
+    host.enqueue('E', queued, false);
+    host.enqueue('F', late, false);
+    return [host.queue('D'), host.queue('E'), host.submit('F')];
+  }, [ending.path, queued.path, late.path]), Array(3).fill('committed'));
+  assert.deepEqual(await Promise.all([ending.requested(), late.requested()]), ['D', 'F']);
+  ending.release();
+  await page.waitForFunction(() => window.policyTrace.retirement() !== null);
+  const retired = await page.evaluate(() => window.policyTrace.retirement());
+  assert.equal(retired.value, 'old serial');
+  assert.deepEqual(retired.before, completed);
+  assert.equal(retired.originalConnected, false);
+  assert.equal(retired.oldAction, 'disposed');
+  assert.deepEqual(retired.after, await expectPolicyView(page, '', ''));
+  for (const [resource, state, value] of [[ending, 'returned', 'old serial'], [late, 'pending', null]]) {
+    const request = retired.requests.requests.find(row => row.path === resource.path);
+    assert.ok(request);
+    assert.deepEqual([request.state, request.value, request.aborted, request.reason], [state, value, true, { status: 'owner-ended' }]);
+  }
+
+  const freshD = server.resource('D', 'new serial');
+  const freshF = server.resource('F', 'new parallel');
+  assert.deepEqual(await page.evaluate(([d, f]) => {
+    const host = window.policyTrace;
+    host.enqueue('D', d, false);
+    host.enqueue('F', f, false);
+    return [host.queue('D'), host.submit('F')];
+  }, [freshD.path, freshF.path]), ['committed', 'committed']);
+  assert.deepEqual(await Promise.all([freshD.requested(), freshF.requested()]), ['D', 'F']);
+  freshD.release();
+  const freshOrdered = 'D@replacement>replacement=new serial;';
+  views.push(await expectPolicyView(page, freshOrdered, ''));
+  late.release();
+  await page.waitForFunction(path => window.policyTrace.history().requests.some(r => r.path === path && r.state === 'returned'), late.path);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+  views.push(await expectPolicyView(page, freshOrdered, ''));
+  freshF.release();
+  views.push(await expectPolicyView(page, freshOrdered, 'F@replacement>replacement=new parallel;'));
+
+  const network = await page.evaluate(() => window.policyTrace.history());
+  const started = [orderedA, orderedB, parallelC, parallelA, ending, late, freshD, freshF];
+  assert.deepEqual(network.requests.map(r => r.path).sort(), started.map(r => r.path).sort());
+  assert.ok(started.every(r => r.requests === 1));
+  assert.equal(queued.requests, 0);
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'task-policies-react-native.json'), JSON.stringify({ views, issued, retired, network, errors }));
 });

@@ -8,6 +8,7 @@ mod keyed_task_source;
 mod support;
 mod sync_retirement;
 mod tabs_source;
+mod task_policy_source;
 
 use generated_gpui_consumer::{
     delivery_badge::{DeliveryBadge, DeliveryBadgeProps},

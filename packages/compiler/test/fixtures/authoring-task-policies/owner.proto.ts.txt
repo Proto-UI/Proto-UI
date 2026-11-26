@@ -1,0 +1,42 @@
+import { createContextKey, declareExtern, definePrototype } from '@proto.ui/core/authoring';
+
+export const POLICY_ZONE = createContextKey<string>('policy-zone');
+
+const loadItem = declareExtern<[id: string], string>({
+  name: 'fixture.load-keyed-item',
+  effect: 'after-state-commit',
+  lifetime: 'task',
+  async: true,
+  targets: ['react', 'gpui'],
+});
+
+function append(log: string, id: string, start: string, end: string, text: string): string {
+  return log + id + '@' + start + '>' + end + '=' + text + ';';
+}
+
+export default definePrototype({
+  name: 'policy-reader',
+  setup(def) {
+    const zone = def.context.consume(POLICY_ZONE);
+    const orderedLog = def.state.define<string>('orderedLog', { initialize: () => '' });
+    const parallelLog = def.state.define<string>('parallelLog', { initialize: () => '' });
+    const ordered = def.task<[id: string], void>('ordered', { policy: 'serial' }, async (task, id) => {
+      const start = task.get(zone);
+      const text = await task.await(loadItem, id);
+      task.set(orderedLog, append(task.get(orderedLog), id, start, task.get(zone), text));
+    });
+    const concurrent = def.task<[id: string], void>('concurrent', { policy: 'parallel' }, async (task, id) => {
+      const start = task.get(zone);
+      const text = await task.await(loadItem, id);
+      task.set(parallelLog, append(task.get(parallelLog), id, start, task.get(zone), text));
+    });
+    const queue = def.action<[id: string], void>('queue', (run, id) => { run.start(ordered, id); });
+    const submit = def.action<[id: string], void>('submit', (run, id) => { run.start(concurrent, id); });
+    def.expose.action('queue', queue);
+    def.expose.action('submit', submit);
+    def.expose.state('orderedLog', orderedLog);
+    def.expose.state('parallelLog', parallelLog);
+    const label = def.derive('label', read => read.get(orderedLog) + ' | ' + read.get(parallelLog));
+    return view => view.el('span', {}, [view.get(label)]);
+  },
+});

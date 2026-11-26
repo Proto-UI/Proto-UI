@@ -5,6 +5,7 @@ pub mod controlled_toggle;
 pub mod delivery_badge;
 pub mod keyed_loader;
 pub mod keyed_task_owner;
+pub mod policy_reader;
 pub mod selection_control;
 pub mod sync_tree;
 pub mod tabs_loader;
