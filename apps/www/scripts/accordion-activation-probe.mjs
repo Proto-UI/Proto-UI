@@ -36,24 +36,24 @@ const routerSplices = [
   },
   {
     name: 'global-keydown-event',
-    before: `    listen(globalEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;`,
-    after: `    listen(globalEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled(e, 'global.keydown')) return;`,
+    before: `      listen(globalEl, 'keydown', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;`,
+    after: `      listen(globalEl, 'keydown', (e: KeyboardEvent) => {
+        if (!isEnabled(e, 'global.keydown')) return;`,
   },
   {
     name: 'root-keydown-event',
-    before: `    listen(rootEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;`,
-    after: `    listen(rootEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled(e, 'root.keydown')) return;`,
+    before: `      listen(rootEl, 'keydown', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;`,
+    after: `      listen(rootEl, 'keydown', (e: KeyboardEvent) => {
+        if (!isEnabled(e, 'root.keydown')) return;`,
   },
   {
     name: 'global-keyup-event',
-    before: `    listen(globalEl, 'keyup', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;`,
-    after: `    listen(globalEl, 'keyup', (e: KeyboardEvent) => {
-      if (!isEnabled(e, 'global.keyup')) return;`,
+    before: `      listen(globalEl, 'keyup', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;`,
+    after: `      listen(globalEl, 'keyup', (e: KeyboardEvent) => {
+        if (!isEnabled(e, 'global.keyup')) return;`,
   },
 ];
 

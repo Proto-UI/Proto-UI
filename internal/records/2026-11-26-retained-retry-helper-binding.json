@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "reviewed-build-helper-fingerprint-reconciliation",
+  "carrierPr": 1908,
+  "mergedSourcePr": 1928,
+  "mergedMain": "ea3bc53b7fdb8a13668ae24f602fda818700c0e6",
+  "helper": "apps/www/scripts/accordion-activation-probe.mjs",
+  "previousSha256": "9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b",
+  "currentSha256": "1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642",
+  "sourceDelta": "Three existing global/root keyboard splice before/after strings change indentation from four to six spaces to match current web-event-router. No emitted operation, module identity, owner, URL or event argument changes.",
+  "bindingDelta": "Replace the one exact helper fingerprint in WEBSITE_RETRY_VIRTUAL_HELPERS. Four permitted virtual import owners and exact config/plugin/resolver/helper checks remain unchanged. Historical general-promotion profiles remain separate.",
+  "observedFailure": {
+    "head": "b2ce454705bd0a663c16da0f492c5e08f434b64a",
+    "issues": 4,
+    "message": "The four existing runtime-retry-urls consumers were rejected because the reviewed1928 helper bytes no longer matched the old fingerprint.",
+    "logSha256": "c1a60e27faaa11821cac638fb658e3f91d0a7e8011f7ea70a43e808a59af9d8d"
+  },
+  "validationStatus": "The original complete four-issue failure is retained. Updated exact binding passes57 existing retry boundary/profile controls and7 original activation-probe controls. A final complete checker run remains separately reported.",
+  "agentAssistance": "ChatGPT source integration under explicit current-user direction. No new owner/import promotion or native acceptance is claimed.",
+  "focusedValidation": {
+    "retryBoundaryAndHistoricalProfilePassed": 57,
+    "activationProbePassed": 7,
+    "retryLogSha256": "1145cf9d6af39ba1e1f19ff509f690185e6ef173dacd1e90f3272452dc2562f9",
+    "probeLogSha256": "1de2fbe12f09122b6b888c1795ca9a3e7b5d4d9c90ec1a0096139fc524500ad6",
+    "secondView": "Website subagent reviewed exact source/helper byte delta and existing rejection boundary; source PASS, no hosted or browser pass claim."
+  }
+}
