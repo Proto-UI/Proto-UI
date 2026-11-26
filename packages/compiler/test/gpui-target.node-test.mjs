@@ -211,6 +211,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test keyed_task_source::reorder_removal_and_physical_move_preserve_the_correct_owned_task \.\.\. ok\r?$/m,
     /^test keyed_task_source::releasing_the_parent_ends_retained_keyed_tasks_before_their_files_can_publish \.\.\. ok\r?$/m,
     /^test direct_pair::original_parameter_is_first_read_after_two_awaits_and_a_jump \.\.\. ok\r?$/m,
+    /^test direct_pair::superseded_second_read_cannot_publish_its_prefix_on_the_same_reader \.\.\. ok\r?$/m,
     /^test pair_source::two_file_awaits_publish_each_stage_and_read_current_context \.\.\. ok\r?$/m,
     /^test pair_source::ending_the_owner_during_the_second_await_isolates_its_replacement \.\.\. ok\r?$/m,
     /^test resumed_failure::failed_action_discards_task_cancellation_and_both_serial_reads_complete \.\.\. ok\r?$/m,

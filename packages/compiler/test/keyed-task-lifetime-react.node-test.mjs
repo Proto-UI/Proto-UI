@@ -635,6 +635,72 @@ test('direct IR preserves an original parameter first read after two awaits and 
   if (evidence) await writeFile(path.join(evidence, 'direct-pair-react-native.json'), JSON.stringify({ trials, network, errors }));
 });
 
+test('a superseded direct pair cannot publish its late second response while its replacement waits', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, directPair, 'pair-client.tsx', 'pair-direct-ir.json');
+  const amber = 'Obsolete amber record';
+  const blue = 'Blue retained file';
+  await page.evaluate(() => window.pairTrace.mount());
+  const initial = await expectPairStage(page, 'idle');
+  const observed = await page.locator('#app span').evaluateHandle(label => {
+    const labels = [label.innerText];
+    const observer = new MutationObserver(() => {
+      if (labels.at(-1) !== label.innerText) labels.push(label.innerText);
+    });
+    observer.observe(label, { characterData: true, childList: true, subtree: true });
+    return { label, labels, observer };
+  });
+
+  const old = await beginPair(page, server, amber, blue, 'caller supplied: ');
+  old.first.release();
+  assert.equal(await old.second.requested(), 'B');
+  const oldRequest = () => page.evaluate(path => window.pairTrace.history().requests.find(r => r.path === path), old.second.path);
+  const oldWaiting = await oldRequest();
+  assert.deepEqual(oldWaiting, { key: 'B', path: old.second.path, state: 'pending', value: null, aborted: false, reason: null });
+
+  const fresh = await beginPair(page, server, amber, blue, 'alternate caller: ');
+  const withdrawn = await oldRequest();
+  assert.deepEqual(withdrawn, { ...oldWaiting, aborted: true, reason: { status: 'superseded' } });
+  old.second.release();
+  const closed = await old.second.closed();
+  assert.deepEqual(closed, { finished: true });
+  await page.waitForFunction(path => window.pairTrace.history().requests.some(r => r.path === path && r.state === 'returned'), old.second.path);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+  const afterLate = await expectPairStage(page, 'idle');
+  const pending = await page.evaluate(() => window.pairTrace.history());
+  assert.deepEqual(pending.unexpected, []);
+  assert.deepEqual(pending.requests.map(r => r.path), [old.first.path, old.second.path, fresh.first.path]);
+  const byPath = new Map(pending.requests.map(r => [r.path, r]));
+  assert.deepEqual(byPath.get(old.second.path), { ...withdrawn, state: 'returned', value: blue });
+  expectPending(byPath, fresh.first);
+  assert.equal(fresh.second.requests, 0);
+
+  fresh.first.release();
+  assert.equal(await fresh.second.requested(), 'B');
+  const waitingB = await expectPairStage(page, 'idle');
+  fresh.second.release();
+  const completed = await expectPairStage(page, 'alternate caller: ' + blue);
+  const visible = await observed.evaluate(({ label, labels, observer }) => {
+    observer.disconnect();
+    return { labels, sameNode: label === document.querySelector('#app span') };
+  });
+  await observed.dispose();
+  assert.deepEqual(visible, { labels: ['idle', completed.text], sameNode: true });
+  const network = await page.evaluate(() => window.pairTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(r => [r.key, r.path, r.state, r.value]), [
+    ['A', old.first.path, 'returned', amber], ['B', old.second.path, 'returned', blue],
+    ['A', fresh.first.path, 'returned', amber], ['B', fresh.second.path, 'returned', blue],
+  ]);
+  assert.deepEqual(network.requests[1], byPath.get(old.second.path));
+  assert.deepEqual(network.requests.slice(2).map(r => [r.aborted, r.reason]), [[false, null], [false, null]]);
+  const requestCounts = [old.first, old.second, fresh.first, fresh.second].map(r => r.requests);
+  assert.deepEqual(requestCounts, [1, 1, 1, 1]);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'direct-pair-latest-react-native.json'), JSON.stringify({
+    initial, oldWaiting, withdrawn, closed, afterLate, pending, waitingB, completed, visible, network, requestCounts, errors,
+  }));
+});
+
 const failureSource = { file: 'packages/compiler/test/fixtures/backend-programs.ts', start: 0, end: 0 };
 
 async function expectFailureView(page, stage, accepted, expected) {
