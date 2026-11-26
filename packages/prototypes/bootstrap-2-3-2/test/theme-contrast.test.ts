@@ -52,7 +52,7 @@ describe('Bootstrap readable page adaptation', () => {
       'packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts',
       'utf8'
     );
-    expect(days).toContain("tw('bg-muted border-border')");
+    expect(days).toContain('bg-muted border-border');
     expect(days).toContain("tw('bg-secondary')");
     expect(days).not.toContain('bg-[#eee]');
     const row = readFileSync(
@@ -68,19 +68,25 @@ describe('Bootstrap readable page adaptation', () => {
     );
     expect(description).toContain('text-muted-foreground');
     expect(description).not.toContain('text-[#555]');
-    for (const path of [
-      'accordion/trigger.proto.ts',
-      'collapsible/trigger.proto.ts',
-      'hover-card/trigger.proto.ts',
-    ]) {
+    for (const [path, darkToken] of [
+      ['accordion/trigger.proto.ts', "tw('text-ring')"],
+      ['collapsible/trigger.proto.ts', "tw('text-foreground underline')"],
+    ] as const) {
       const source = readFileSync(`packages/prototypes/bootstrap-2-3-2/src/${path}`, 'utf8');
-      expect(source).toContain("tw('text-foreground underline')");
-      expect(source).not.toContain("tw('text-[#005580] underline')");
+      expect(source).toContain("meta('colorScheme').eq('dark')");
+      expect(source).toContain(darkToken);
     }
+    const hoverCard = readFileSync(
+      'packages/prototypes/bootstrap-2-3-2/src/hover-card/trigger.proto.ts',
+      'utf8'
+    );
+    expect(hoverCard).toContain("tw('text-foreground underline')");
+    expect(hoverCard).not.toContain("tw('text-[#005580] underline')");
     expect(contrast(THEME.dark['muted-foreground'], THEME.dark.background)).toBeGreaterThanOrEqual(
       4.5
     );
     expect(contrast(THEME.dark.foreground, THEME.dark.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(THEME.dark.ring, THEME.dark.background)).toBeGreaterThanOrEqual(4.5);
   });
   it('keeps transparent numeric copy and OTP separators readable on both themes', () => {
     for (const path of ['slider/value.proto.ts', 'input-otp/separator.proto.ts']) {

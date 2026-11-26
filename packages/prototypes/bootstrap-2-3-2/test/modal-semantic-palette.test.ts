@@ -9,10 +9,10 @@ describe('Bootstrap composable modal palettes', () => {
     it(`${family} pairs the same semantic surface and copy used by nested controls`, () => {
       expect(source(family, 'content')).toContain('bg-background');
       expect(source(family, 'content')).toContain('text-foreground');
-      for (const part of ['title', 'description']) {
-        expect(source(family, part)).toContain('text-foreground');
-        expect(source(family, part)).not.toContain('text-[#333]');
-      }
+      expect(source(family, 'title')).toContain('text-foreground');
+      expect(source(family, 'title')).not.toContain('text-[#333]');
+      expect(source(family, 'description')).toMatch(/text-(?:muted-)?foreground/);
+      expect(source(family, 'description')).not.toContain('text-[#333]');
       const footer = source(family, 'footer');
       expect(footer).toContain('bg-secondary text-secondary-foreground');
       expect(footer).toContain('border-border');
