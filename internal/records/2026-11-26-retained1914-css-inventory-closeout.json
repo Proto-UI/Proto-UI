@@ -1,0 +1,325 @@
+{
+  "date": "2026-11-26",
+  "purpose": "Regenerate retained 0.3 family CSS vocabularies after bounded inventory repairs without changing ordinary Rule readiness proofs.",
+  "sourceRevision": "2801e20f0eab2a4df0b0eeeb87fe8749dbabe4d0",
+  "sourceTree": "068b450abe491ecea6e3bb64c3cc0c20c4cba9cd",
+  "originalSourceRevision": "b2e448d484b685500021cc92f0cdfee8f3727803",
+  "collectorSha256": "597b5bb15f95f91137bee00e29693a8ce1b4bd5ccaed053a2623e6329e2652bf",
+  "generatedFiles": [
+    {
+      "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "beforeSha256": "622b3135166c05e3af455761e2cf0d8968af9ebfc9ae433e766241c778dd719a",
+      "afterSha256": "ee6e60bd949ed571906a7d506b2f3d13d6f6af30fea2fffd46273e97168206a6"
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "beforeSha256": "d7296cc55b73820a6a21fc2ab15e5c1cc9184d11e9a13db39802da541a47ccdd",
+      "afterSha256": "e93b6823bf0d4b253ebc16d0f156e343e63abc76ff10b96dd029e9f53e490d55"
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "beforeSha256": "44fd70bd7da51598da993b97733d4cc5fdf8d03adf7d5b31a4ec0b95cf90d22a",
+      "afterSha256": "31fc0a8d0d5af7e5eeecf12454b5ed9e77198d0cdbcb32d6c1289f9f274604ec"
+    }
+  ],
+  "families": [
+    {
+      "family": "shadcn",
+      "before": 1117,
+      "after": 1036,
+      "added": [],
+      "removed": [
+        "dark:bg-destructive/20",
+        "dark:bg-destructive/30",
+        "dark:bg-destructive/60",
+        "dark:bg-destructive/90",
+        "dark:data-[focus-visible]:ring-destructive/40",
+        "dark:data-[hovered]:bg-accent/50",
+        "dark:data-[hovered]:bg-input/30",
+        "dark:data-[hovered]:not-[data-disabled]:bg-accent/50",
+        "dark:data-[hovered]:not-[data-disabled]:bg-input/30",
+        "dark:data-[hovered]:not-[data-disabled]:bg-input/50",
+        "dark:data-[hovered]:not-[data-disabled]:bg-muted/50",
+        "dark:data-[selected]:bg-input/30",
+        "dark:data-[selected]:border-transparent",
+        "dark:data-[selected]:text-foreground",
+        "dark:text-muted-foreground",
+        "data-[active]:not-[data-disabled]:bg-accent",
+        "data-[active]:not-[data-disabled]:bg-input/50",
+        "data-[active]:not-[data-disabled]:border-input",
+        "data-[active]:not-[data-disabled]:text-accent-foreground",
+        "data-[active]:not-[data-disabled]:text-foreground",
+        "data-[alignment-full]:max-h-[var(--proto-ui-available-height)]",
+        "data-[expanded]:not-[data-pressed]:bg-muted",
+        "data-[expanded]:not-[data-pressed]:bg-muted/50",
+        "data-[expanded]:not-[data-pressed]:text-foreground",
+        "data-[focus-visible]:border-destructive",
+        "data-[focus-visible]:border-destructive/40",
+        "data-[focus-visible]:not-[data-invalid]:border-b-ring",
+        "data-[focus-visible]:not-[data-invalid]:border-ring",
+        "data-[focus-visible]:not-[data-invalid]:ring-1",
+        "data-[focus-visible]:not-[data-invalid]:ring-2",
+        "data-[focus-visible]:not-[data-invalid]:ring-3",
+        "data-[focus-visible]:not-[data-invalid]:ring-ring/30",
+        "data-[focus-visible]:not-[data-invalid]:ring-ring/50",
+        "data-[focus-visible]:outline-2",
+        "data-[focus-visible]:outline-offset-2",
+        "data-[focus-visible]:ring-destructive/20",
+        "data-[focus-visible]:ring-destructive/30",
+        "data-[hovered]:bg-destructive/90",
+        "data-[hovered]:bg-input/50",
+        "data-[hovered]:bg-primary/90",
+        "data-[hovered]:bg-secondary/80",
+        "data-[hovered]:not-[data-active]:bg-accent",
+        "data-[hovered]:not-[data-active]:bg-muted",
+        "data-[hovered]:not-[data-active]:text-accent-foreground",
+        "data-[hovered]:not-[data-active]:text-muted-foreground",
+        "data-[hovered]:not-[data-disabled]:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]",
+        "data-[hovered]:not-[data-disabled]:bg-destructive/20",
+        "data-[hovered]:not-[data-disabled]:bg-destructive/90",
+        "data-[hovered]:not-[data-disabled]:bg-input/50",
+        "data-[hovered]:not-[data-disabled]:bg-primary/80",
+        "data-[hovered]:not-[data-disabled]:bg-primary/90",
+        "data-[hovered]:not-[data-disabled]:bg-secondary/80",
+        "data-[hovered]:underline",
+        "data-[open]:animate-none",
+        "data-[open]:not-[data-alignment-full]:slide-in-from-bottom-2",
+        "data-[open]:not-[data-alignment-full]:slide-in-from-left-2",
+        "data-[open]:not-[data-alignment-full]:slide-in-from-right-2",
+        "data-[open]:not-[data-alignment-full]:slide-in-from-top-2",
+        "data-[open]:slide-in-from-bottom-2",
+        "data-[open]:slide-in-from-left-2",
+        "data-[open]:slide-in-from-right-2",
+        "data-[open]:slide-in-from-top-2",
+        "data-[pressed]:bg-accent/80",
+        "data-[selected]:bg-background",
+        "data-[selected]:border-foreground",
+        "data-[selected]:shadow-none",
+        "data-[selected]:shadow-sm",
+        "data-[selected]:text-foreground",
+        "data-[type=error]:bg-destructive",
+        "data-[type=error]:border-destructive",
+        "data-[type=error]:border-destructive/50",
+        "data-[type=error]:text-destructive-foreground",
+        "data-[type=info]:bg-accent",
+        "data-[type=info]:border-border",
+        "data-[type=info]:text-accent-foreground",
+        "data-[type=success]:bg-secondary",
+        "data-[type=success]:border-primary/40",
+        "data-[type=success]:text-secondary-foreground",
+        "data-[type=warning]:bg-muted",
+        "data-[type=warning]:border-ring/50",
+        "data-[type=warning]:text-foreground"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "before": 758,
+      "after": 745,
+      "added": [],
+      "removed": [
+        "data-[hovered]:not-[data-disabled]:not-[data-selected]:bg-secondary-background",
+        "data-[hovered]:not-[data-disabled]:not-[data-selected]:text-foreground",
+        "data-[hovered]:not-[data-disabled]:text-foreground",
+        "data-[hovered]:not-[data-pressed]:not-[data-selected]:bg-secondary-background",
+        "data-[hovered]:not-[data-pressed]:not-[data-selected]:border-black",
+        "data-[open]:slide-in-from-bottom-2",
+        "data-[open]:slide-in-from-left-2",
+        "data-[open]:slide-in-from-right-2",
+        "data-[open]:slide-in-from-top-2",
+        "data-[selected]:border-foreground",
+        "data-[selected]:cursor-default",
+        "data-[selected]:not-[data-pressed]:border-black",
+        "data-[selected]:text-foreground"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "before": 826,
+      "after": 778,
+      "added": [],
+      "removed": [
+        "dark:bg-background",
+        "dark:border-b-transparent",
+        "dark:border-ring",
+        "dark:cursor-default",
+        "dark:data-[disabled]:cursor-default",
+        "dark:data-[disabled]:text-muted-foreground",
+        "dark:data-[selected]:bg-background",
+        "dark:data-[selected]:border-b-transparent",
+        "dark:data-[selected]:border-border",
+        "dark:data-[selected]:border-ring",
+        "dark:data-[selected]:cursor-default",
+        "dark:data-[selected]:text-foreground",
+        "dark:text-foreground",
+        "dark:text-muted-foreground",
+        "data-[disabled]:bg-[#04c_none_0_0_repeat-x]",
+        "data-[disabled]:bg-[#222_none_0_0_repeat-x]",
+        "data-[disabled]:bg-[#2f96b4_none_0_0_repeat-x]",
+        "data-[disabled]:bg-[#51a351_none_0_0_repeat-x]",
+        "data-[disabled]:bg-[#bd362f_none_0_0_repeat-x]",
+        "data-[disabled]:bg-[#f89406_none_0_0_repeat-x]",
+        "data-[disabled]:data-[field-read-only]:bg-[#eee]",
+        "data-[disabled]:data-[field-read-only]:cursor-not-allowed",
+        "data-[disabled]:data-[read-only]:bg-[#eee]",
+        "data-[disabled]:data-[read-only]:cursor-not-allowed",
+        "data-[focus-visible]:ring-offset-0",
+        "data-[focus-visible]:ring-white",
+        "data-[focused]:not-[data-disabled]:bg-[#da4f49_linear-gradient(#ee5f5b,#bd362f)_0_0_repeat-x]",
+        "data-[focused]:not-[data-disabled]:bg-[linear-gradient(#08c,#0077b3)]",
+        "data-[focused]:not-[data-disabled]:text-primary-foreground",
+        "data-[hovered]:bg-[#e6e6e6_none_0_-15px_repeat-x]",
+        "data-[hovered]:data-[pressed]:bg-[#e6e6e6_none_0_-15px_repeat-x]",
+        "data-[hovered]:not-[data-disabled]:text-foreground",
+        "data-[pressed]:not-[data-disabled]:bg-[#04c_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-[#222_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-[#2f96b4_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-[#51a351_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-[#bd362f_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-[#e6e6e6_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-[#f89406_none_0_0_repeat-x]",
+        "data-[pressed]:not-[data-disabled]:bg-black/20",
+        "data-[selected]:bg-white",
+        "data-[selected]:border-[#ddd]",
+        "data-[selected]:border-[#eee_#fff_#eee_#eee]",
+        "data-[selected]:border-b-transparent",
+        "data-[selected]:border-primary",
+        "data-[selected]:cursor-default",
+        "data-[selected]:text-[#555]",
+        "data-[selected]:text-foreground"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "before": 719,
+      "after": 702,
+      "added": [],
+      "removed": [
+        "data-[expanded]:not-[data-focus-visible]:ring-1",
+        "data-[expanded]:not-[data-focus-visible]:ring-border",
+        "data-[expanded]:not-[data-focus-visible]:ring-inset",
+        "data-[focused]:not-[data-disabled]:bg-destructive",
+        "data-[focused]:not-[data-disabled]:bg-primary",
+        "data-[focused]:not-[data-disabled]:text-destructive-foreground",
+        "data-[focused]:not-[data-disabled]:text-primary-foreground",
+        "data-[hovered]:not-[data-disabled]:not-[data-pressed]:not-[data-selected]:bg-foreground/5",
+        "data-[hovered]:not-[data-disabled]:text-foreground",
+        "data-[selected]:bg-background",
+        "data-[selected]:border-border/60",
+        "data-[selected]:border-primary",
+        "data-[selected]:cursor-default",
+        "data-[selected]:ring-1",
+        "data-[selected]:ring-foreground/10",
+        "data-[selected]:ring-inset",
+        "data-[selected]:shadow-sm"
+      ]
+    }
+  ],
+  "originalGeneratedDifference": {
+    "removedPerFamily": 222,
+    "heldFromPublication": true,
+    "actualRuntimeRequirementsRestored": 63,
+    "reviewedRemainingRemovals": 159,
+    "newTokensComparedWithOriginalManifest": 0
+  },
+  "generation": [
+    {
+      "script": "scripts/styles/generate-shadcn-style-tokens.ts",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--import",
+        "tsx",
+        "scripts/styles/generate-shadcn-style-tokens.ts"
+      ],
+      "startedAt": "2026-11-26T11:37:21.783933+00:00",
+      "exitCode": 0,
+      "completedAt": "2026-11-26T11:37:50.971948+00:00"
+    },
+    {
+      "script": "scripts/styles/generate-brutalist-style-tokens.ts",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--import",
+        "tsx",
+        "scripts/styles/generate-brutalist-style-tokens.ts"
+      ],
+      "startedAt": "2026-11-26T11:37:50.972949+00:00",
+      "exitCode": 0,
+      "completedAt": "2026-11-26T11:38:10.961267+00:00"
+    },
+    {
+      "script": "scripts/styles/generate-draft-family-style-tokens.ts",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--import",
+        "tsx",
+        "scripts/styles/generate-draft-family-style-tokens.ts"
+      ],
+      "startedAt": "2026-11-26T11:38:10.971725+00:00",
+      "exitCode": 0,
+      "completedAt": "2026-11-26T11:38:44.779730+00:00"
+    },
+    {
+      "script": "scripts/styles/generate-shadcn-motion-palette.ts",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--import",
+        "tsx",
+        "scripts/styles/generate-shadcn-motion-palette.ts"
+      ],
+      "startedAt": "2026-11-26T11:38:44.781502+00:00",
+      "exitCode": 0,
+      "completedAt": "2026-11-26T11:38:46.257276+00:00"
+    },
+    {
+      "script": "scripts/gpui/generate-style-fixture.mts",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--import",
+        "tsx",
+        "scripts/gpui/generate-style-fixture.mts"
+      ],
+      "startedAt": "2026-11-26T11:38:46.258004+00:00",
+      "exitCode": 0,
+      "completedAt": "2026-11-26T11:38:46.638142+00:00"
+    }
+  ],
+  "validation": {
+    "compoundInventory": {
+      "baselinePassed": 9,
+      "baselineFailed": 2,
+      "repairedFiles": 4,
+      "repairedPassed": 101,
+      "repairedFailed": 0
+    },
+    "conditionalInventory": {
+      "baselinePassed": 7,
+      "baselineFailed": 7,
+      "repairedFiles": 6,
+      "repairedPassed": 243,
+      "repairedFailed": 0,
+      "rejectedIntermediate": {
+        "passed": 78,
+        "failed": 2,
+        "findings": [
+          "Unexposed Shadcn style selection guard was omitted from a partial selector.",
+          "Unsupported meta leaf was omitted from a partial selector."
+        ]
+      }
+    },
+    "runtimeTokenReview": "Independent actual Web Component token observations for four Toast families, Brutalist OTP/Field Textarea, Shadcn Field Control and four-family Tabs all occur in the corrected generated vocabularies. These observations do not claim browser paint or performance.",
+    "overlappingTestScopesAreNotSummed": true
+  },
+  "reviewBindings": {
+    "compoundPatchSha256": "2a93aa74814614091cae1e58ddfd24333f547a627a8d8cb8992a5e516bf9e25a",
+    "conditionalPatchSha256": "067e175cc766da869a57d362c84ed2c61fd6ee8fe5b02569c8fa32b7ec894b82",
+    "generatedPatchSha256": "aa1b44db5fa01bb8bff6f18810f1f02dfee688d24e5279330dfe1f1fd6030b6a",
+    "finalGeneratedReviewSha256": "6e92f6a645124475c0026c2f95bfcd169bbbb6f536ad0512dae3dcd43ebaea93"
+  },
+  "limits": [
+    "CSS inventory preserves known possible resources and does not promote an unknown mutable row to a singleton or complete lowering proof.",
+    "Ordinary whole-library lowering coverage remains a separately documented failing baseline; it is not made green by these inventory changes.",
+    "The retained historical coverage denominators and acceptance status are not advanced."
+  ],
+  "authorship": "Agent-assisted integration under current-user direction; original source authors and merge history retained."
+}
