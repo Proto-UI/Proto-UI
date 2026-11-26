@@ -7,6 +7,7 @@ import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
+  type RuntimeId,
   applyColorScheme,
   launchBrowser,
   selectRuntime,
@@ -15,13 +16,14 @@ import {
 } from './browser-harness';
 
 const ROUTE = '/zh-cn/ui-libraries/shadcn/radio-group/';
+const FORM_ROUTE = '/zh-cn/ui-libraries/shadcn/form/';
 let browser: Browser;
 let baseUrl = '';
 let evidenceDir = '';
 
 beforeAll(async () => {
   evidenceDir = await mkdtemp(path.join(tmpdir(), 'proto-shadcn-radio-group-'));
-  baseUrl = await startServer(ROUTE);
+  baseUrl = await startServer([ROUTE, FORM_ROUTE]);
   browser = await launchBrowser();
   console.log(`Shadcn Radio Group browser evidence: ${evidenceDir}`);
 }, 180_000);
@@ -83,7 +85,7 @@ async function clickCenter(page: Page, target: Locator) {
 }
 
 async function waitForValueProjection(page: Page) {
-  // The demo observes checked attributes and publishes its value label on rAF.
+  // Allow pending projections to settle before checking a rejected input.
   await page.evaluate(
     () =>
       new Promise<void>((resolve) =>
@@ -92,7 +94,75 @@ async function waitForValueProjection(page: Page) {
   );
 }
 
+function radioCheckedStates(group: Locator) {
+  return group
+    .getByRole('radio')
+    .evaluateAll((items) => items.map((item) => item.getAttribute('aria-checked')));
+}
+
+async function observeLabelSignals(scope: Locator, runtime: RuntimeId) {
+  if (runtime === 'wc') {
+    await scope.evaluate((element) => {
+      for (const [event, attribute] of [
+        ['valueChange', 'data-label-change-count'],
+        ['select', 'data-label-select-count'],
+      ] as const) {
+        element.setAttribute(attribute, '0');
+        element.addEventListener(event, () => {
+          element.setAttribute(attribute, String(Number(element.getAttribute(attribute)) + 1));
+        });
+      }
+    });
+  }
+  return async (count: number) => {
+    if (runtime !== 'wc') return;
+    expect(await scope.getAttribute('data-label-change-count')).toBe(String(count));
+    expect(await scope.getAttribute('data-label-select-count')).toBe(String(count));
+  };
+}
+
 describe.sequential('Shadcn Radio Group public browser acceptance', () => {
+  it.each(RUNTIMES)(
+    '%s enters the empty Plan group with Tab and selects with Space',
+    async (runtime) => {
+      const page = await browser.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.goto(`${baseUrl}${FORM_ROUTE}`, { waitUntil: 'domcontentloaded' });
+        const preview = page.locator('[data-demo-id="demo-shadcn-field-choices"]');
+        await selectRuntime(page, preview, runtime, '[role="radiogroup"]', 1);
+        const plan = preview.getByRole('radiogroup');
+        const basic = plan.getByRole('radio', { name: 'Basic · 基础', exact: true });
+        const status = preview.locator('[data-demo-ref="choiceStatus"]');
+        await expect.poll(() => status.textContent()).toContain('proposals=0 owner=accept');
+        expect(await radioCheckedStates(plan)).toEqual(['false', 'false', 'false']);
+        expect(await plan.locator('[role="radio"][tabindex="0"]').count()).toBe(1);
+        expect(await basic.getAttribute('tabindex')).toBe('0');
+
+        // Agreement precedes Plan in the form. No radio receives input before Tab.
+        const agreement = preview.getByRole('checkbox');
+        await agreement.focus();
+        expect(await agreement.evaluate((item) => item === document.activeElement)).toBe(true);
+        await page.keyboard.press('Tab');
+        await expect.poll(() => basic.evaluate((item) => item === document.activeElement)).toBe(true);
+        expect(await radioCheckedStates(plan)).toEqual(['false', 'false', 'false']);
+        await page.keyboard.press('Enter');
+        await waitForValueProjection(page);
+        expect(await radioCheckedStates(plan)).toEqual(['false', 'false', 'false']);
+        expect(await status.textContent()).toContain('proposals=0 owner=accept');
+        await page.keyboard.press('Space');
+        await expect.poll(() => radioCheckedStates(plan)).toEqual(['true', 'false', 'false']);
+        expect(await status.textContent()).toContain('proposals=1 owner=accept');
+        expect(await basic.evaluate((item) => item === document.activeElement)).toBe(true);
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    },
+    120_000
+  );
+
   it.each(
     RUNTIMES.flatMap((runtime) =>
       ['initial-entry', 'interaction', 'labels'].map((scenario) => ({ runtime, scenario }))
@@ -129,10 +199,7 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         const first = density.getByRole('radio', { name: 'Default', exact: true });
         const selected = density.getByRole('radio', { name: 'Comfortable', exact: true });
         const compact = density.getByRole('radio', { name: 'Compact', exact: true });
-        const checkedStates = () =>
-          density
-            .getByRole('radio')
-            .evaluateAll((items) => items.map((item) => item.getAttribute('aria-checked')));
+        const checkedStates = () => radioCheckedStates(density);
         observations.entry = {
           checked: await checkedStates(),
           items: await Promise.all([first, selected, compact].map(itemState)),
@@ -181,29 +248,7 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           expect(await first.locator('.sr-only').count()).toBe(0);
           expect(await firstLabel.getAttribute('tabindex')).toBeNull();
           expect(await firstLabel.getAttribute('role')).toBeNull();
-          if (runtime === 'wc') {
-            await density.evaluate((element) => {
-              element.setAttribute('data-label-change-count', '0');
-              element.setAttribute('data-label-select-count', '0');
-              element.addEventListener('valueChange', () => {
-                element.setAttribute(
-                  'data-label-change-count',
-                  String(Number(element.getAttribute('data-label-change-count')) + 1)
-                );
-              });
-              element.addEventListener('select', () => {
-                element.setAttribute(
-                  'data-label-select-count',
-                  String(Number(element.getAttribute('data-label-select-count')) + 1)
-                );
-              });
-            });
-          }
-          const expectSignalCounts = async (count: number) => {
-            if (runtime !== 'wc') return;
-            expect(await density.getAttribute('data-label-change-count')).toBe(String(count));
-            expect(await density.getAttribute('data-label-select-count')).toBe(String(count));
-          };
+          const expectSignalCounts = await observeLabelSignals(density, runtime);
           await firstLabel.click();
           await expect.poll(checkedStates).toEqual(['true', 'false', 'false']);
           await expect.poll(async () => (await itemState(first)).focused).toBe(true);
@@ -331,11 +376,11 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         const disabledPreview = page.locator('[data-demo-id="demo-shadcn-radio-group-disabled"]');
         await disabledPreview.scrollIntoViewIfNeeded();
         await selectRuntime(page, disabledPreview, runtime, '[role="radiogroup"]', 2);
-        const disabledItem = disabledPreview
-          .getByRole('radiogroup', { name: 'Single disabled option' })
-          .getByRole('radio', { name: 'Disabled', exact: true });
+        const single = disabledPreview.getByRole('radiogroup', { name: 'Single disabled option' });
+        const disabledItem = single.getByRole('radio', { name: 'Disabled', exact: true });
         expect(await itemState(disabledItem)).toMatchObject({
           disabled: 'true',
+          tabIndex: -1,
           opacity: '0.5',
           cursor: 'not-allowed',
         });
@@ -345,16 +390,34 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         expect(await disabledGroup.locator('[role="radio"][aria-disabled="true"]').count()).toBe(3);
         expect(await disabledGroup.locator('[role="radio"][tabindex="0"]').count()).toBe(0);
         expect(await disabledGroup.locator('[role="radio"][aria-checked="true"]').count()).toBe(1);
-        await clickCenter(
-          page,
-          disabledGroup.getByRole('radio', { name: 'Option 1', exact: true })
-        );
-        await waitForValueProjection(page);
-        expect(
-          await disabledGroup
-            .getByRole('radio', { name: 'Option 2', exact: true })
-            .getAttribute('aria-checked')
-        ).toBe('true');
+        const expectDisabledDemoSignals = await observeLabelSignals(disabledPreview, runtime);
+        await single.locator('[data-demo-ref="single-option3-label"]').click();
+        await expect.poll(() => radioCheckedStates(single)).toEqual(['false', 'false', 'true']);
+        await expectDisabledDemoSignals(1);
+        await page.keyboard.press('ArrowRight');
+        const option2 = single.getByRole('radio', { name: 'Option 2', exact: true });
+        await expect.poll(async () => (await itemState(option2)).focused).toBe(true);
+        await expect.poll(() => radioCheckedStates(single)).toEqual(['false', 'true', 'false']);
+        await expectDisabledDemoSignals(2);
+
+        const groupItem = disabledGroup.getByRole('radio', { name: 'Option 1', exact: true });
+        for (const [item, label] of [
+          [disabledItem, single.locator('[data-demo-ref="single-option1-label"]')],
+          [groupItem, disabledGroup.locator('[data-demo-ref="all-option1-label"]')],
+        ] as const) {
+          const labelId = await label.getAttribute('id');
+          expect(labelId).toBeTruthy();
+          expect(await item.getAttribute('aria-labelledby')).toBe(labelId);
+          for (const target of [label, item]) {
+            // Deliver a pointer click even when Playwright considers the target disabled.
+            await target.click({ force: true });
+            await waitForValueProjection(page);
+            expect(await radioCheckedStates(single)).toEqual(['false', 'true', 'false']);
+            expect(await radioCheckedStates(disabledGroup)).toEqual(['false', 'true', 'false']);
+            await expectDisabledDemoSignals(2);
+            if (target === label) expect((await itemState(item)).focused).toBe(false);
+          }
+        }
 
         await preview.scrollIntoViewIfNeeded();
         await applyColorScheme(page, 'dark');
