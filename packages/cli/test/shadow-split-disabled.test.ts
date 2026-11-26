@@ -13,7 +13,10 @@ import {
   renderProtoShadowSplitStyleArtifact,
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
-import { toggle as bootstrapToggle } from '../../prototypes/bootstrap-2-3-2/src/toggle';
+import {
+  drawerRoot as bootstrapDrawerRoot,
+  drawerTrigger as bootstrapDrawerTrigger,
+} from '../../prototypes/bootstrap-2-3-2/src/drawer';
 
 let serial = 0;
 const name = () => `cli-disabled-${++serial}`;
@@ -129,19 +132,21 @@ describe('public split disabled token boundary', () => {
 });
 
 describe('helper-carried Rule stylesheet equivalence', () => {
-  it('provides distinct active background and shadow rules for the actual Toggle lowering', async () => {
+  it('provides distinct pressed background and shadow rules for helper-carried button lowering', async () => {
     const tokens = (await collectProtoStyleTokens(
-      'packages/prototypes/bootstrap-2-3-2/src/toggle'
+      'packages/prototypes/bootstrap-2-3-2/src/drawer'
     )) as string[];
-    const C = AdaptToWebComponent(bootstrapToggle, { registerAs: name() });
-    const host = new C();
-    setElementProps(host, { active: false });
-    document.body.append(host);
+    const Root = AdaptToWebComponent(bootstrapDrawerRoot, { registerAs: name() });
+    const Trigger = AdaptToWebComponent(bootstrapDrawerTrigger, { registerAs: name() });
+    const root = new Root();
+    const host = new Trigger();
+    root.append(host);
+    document.body.append(root);
     await flush();
 
     const runtimeTokens = host.getAttribute('data-pui-style')!.split(' ');
-    const shadowToken = runtimeTokens.find((token) => token.startsWith('data-[active]:shadow-'));
-    const backgroundToken = runtimeTokens.find((token) => token.startsWith('data-[active]:bg-'));
+    const shadowToken = runtimeTokens.find((token) => token.startsWith('data-[pressed]:shadow-'));
+    const backgroundToken = runtimeTokens.find((token) => token.startsWith('data-[pressed]:bg-'));
     const restShadowToken = runtimeTokens.find((token) => token.startsWith('shadow-'));
     expect(shadowToken).toBeDefined();
     expect(backgroundToken).toBeDefined();
@@ -179,7 +184,10 @@ describe('helper-carried Rule stylesheet equivalence', () => {
           .map((child) => css.slice(parser.locStart(child), parser.locEnd(child)))
           .join(';');
         rules.push({ selector: node.selector!, style });
-      } else if (node.type === 'css-root' || (node.type === 'css-atrule' && node.name === 'layer')) {
+      } else if (
+        node.type === 'css-root' ||
+        (node.type === 'css-atrule' && node.name === 'layer')
+      ) {
         for (const child of node.nodes ?? []) visit(child);
       }
     };
@@ -201,8 +209,7 @@ describe('helper-carried Rule stylesheet equivalence', () => {
         case 'selector-pseudo':
           if (selector.value === ':where' || selector.value === ':is')
             return children.some((child) => matches(child, element));
-          if (selector.value === ':not')
-            return !children.some((child) => matches(child, element));
+          if (selector.value === ':not') return !children.some((child) => matches(child, element));
           break;
         case 'selector-attribute': {
           if (!selector.attribute || selector.namespace || selector.insensitive)
@@ -224,13 +231,13 @@ describe('helper-carried Rule stylesheet equivalence', () => {
         selector.raws?.unquoted === token) ||
       (selector.nodes ?? []).some((child) => containsToken(child, token));
 
-    const forToken = (token: string, property: string, active: boolean) => {
+    const forToken = (token: string, property: string, pressed: boolean) => {
       const probe = document.createElement('div');
       const empty = document.createElement('div');
       probe.setAttribute('data-pui-style', token);
       empty.setAttribute('data-pui-style', '');
-      probe.toggleAttribute('data-active', active);
-      empty.toggleAttribute('data-active', active);
+      probe.toggleAttribute('data-pressed', pressed);
+      empty.toggleAttribute('data-pressed', pressed);
       const matching = rules.filter(
         (rule) =>
           containsToken(rule.selector, token) &&
@@ -238,7 +245,10 @@ describe('helper-carried Rule stylesheet equivalence', () => {
           matches(rule.selector, probe) &&
           !matches(rule.selector, empty)
       );
-      expect(matching.length, `${token} must select its own ${property} declaration`).toBeGreaterThan(0);
+      expect(
+        matching.length,
+        `${token} must select its own ${property} declaration`
+      ).toBeGreaterThan(0);
       return matching.at(-1)!;
     };
     const shadow = forToken(shadowToken!, '--pui-shadow', true);
@@ -248,14 +258,21 @@ describe('helper-carried Rule stylesheet equivalence', () => {
       resting.style.getPropertyValue('--pui-shadow')
     );
     // The actual host must match both independent declarations only while
-    // active. Native cascade and paint remain the eight Bootstrap journeys.
-    for (const active of [false, true, false]) {
-      setElementProps(host, { active });
-      host.update();
-      await flush();
-      expect(host.hasAttribute('data-active')).toBe(active);
-      expect(matches(shadow.selector, host)).toBe(active);
-      expect(matches(background.selector, host)).toBe(active);
-    }
+    // pressed. Native cascade and paint remain the eight Bootstrap journeys.
+    expect(host.hasAttribute('data-pressed')).toBe(false);
+    expect(matches(shadow.selector, host)).toBe(false);
+    expect(matches(background.selector, host)).toBe(false);
+
+    host.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    await flush();
+    expect(host.hasAttribute('data-pressed')).toBe(true);
+    expect(matches(shadow.selector, host)).toBe(true);
+    expect(matches(background.selector, host)).toBe(true);
+
+    host.dispatchEvent(new Event('pointerup', { bubbles: true }));
+    await flush();
+    expect(host.hasAttribute('data-pressed')).toBe(false);
+    expect(matches(shadow.selector, host)).toBe(false);
+    expect(matches(background.selector, host)).toBe(false);
   });
 });
