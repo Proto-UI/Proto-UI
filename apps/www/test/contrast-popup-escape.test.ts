@@ -293,7 +293,7 @@ for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
         else expect(document.activeElement).toBe(mounted.trigger);
         if (family === 'select') {
           expect(result.after.selectionUnchanged).toBe(true);
-          expect(result.after.triggerText).toBe('Paper');
+          expect(result.after.triggerText).toBe('Select a fruit');
           expect(result.after.retiredOptions).toBe(runtime === 'react' || runtime === 'vue');
           expect(mounted.baseline.options.every(({ element }: any) => !element.isConnected)).toBe(
             runtime === 'react' || runtime === 'vue'
@@ -531,13 +531,17 @@ for (const mutation of [
           else if (mutation === 'generation')
             option.setAttribute('data-projection-generation', 'stale');
           else if (mutation === 'partial-retirement') option.remove();
-          else option.setAttribute('aria-selected', 'false');
+          else
+            option.setAttribute(
+              'aria-selected',
+              option.getAttribute('aria-selected') === 'true' ? 'false' : 'true'
+            );
         })
       ).rejects.toThrow('focus/selection baseline');
       expect(mounted.record.after.sameOwnedPopup).toBe(true);
       expect(mounted.record.after.closed).toBe(true);
       expect(mounted.record.after.triggerFocused).toBe(true);
-      expect(mounted.record.after.triggerText).toBe('Paper');
+      expect(mounted.record.after.triggerText).toBe('Select a fruit');
       expect(mounted.record.after.selectionUnchanged).toBe(false);
       expect(mounted.record.achieved).toBe(false);
     } finally {
@@ -579,7 +583,7 @@ it('select/vue2: public Root preserves selection when the whole closed option vi
     expect(after.retainedOptions).toBe(false);
     expect(after.optionViewWithdrawn).toBe(true);
     expect(after.rootSelectionUnchanged).toBe(true);
-    expect(after.rootSelection).toEqual({ value: 'paper', textValue: 'Paper', open: false });
+    expect(after.rootSelection).toEqual({ value: '', textValue: '', open: false });
     expect(after.selectionUnchanged).toBe(true);
     expect(mounted.record.achieved).toBe(true);
   } finally {
@@ -630,11 +634,11 @@ for (const mutation of [
             );
             expect(toolbarRoot.contains(mounted.trigger)).toBe(false);
             // Matching labels/lease cannot authorize a different physical Root.
-            toolbarRoot.setAttribute('data-value', 'paper');
-            toolbarRoot.setAttribute('data-text-value', 'Paper');
+            toolbarRoot.setAttribute('data-value', '');
+            toolbarRoot.setAttribute('data-text-value', '');
             toolbarRoot.removeAttribute('data-open');
-            expect(toolbarRoot.getAttribute('data-value')).toBe('paper');
-            expect(toolbarRoot.getAttribute('data-text-value')).toBe('Paper');
+            expect(toolbarRoot.getAttribute('data-value')).toBe('');
+            expect(toolbarRoot.getAttribute('data-text-value')).toBe('');
             expect(toolbarRoot.hasAttribute('data-open')).toBe(false);
             mounted.baseline.selectRoot = toolbarRoot;
           } else if (mutation === 'missing-value') root.removeAttribute('data-value');
