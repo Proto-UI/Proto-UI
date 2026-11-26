@@ -24,6 +24,9 @@ export function initPreviewerBootstrap(
   const view = document.defaultView;
   if (!view) return () => {};
   const pending = new Map<PreviewerRoot, PendingPreview>();
+  // Only roots observed leaving the light DOM need this fallback. A later
+  // host removal cannot expose a closed shadow subtree to a document walker.
+  const nonDocumentRoots = new Set<PreviewerRoot>();
   let disposed = false;
   let matrix: Matrix | null = null;
   let intersection: IntersectionObserver | undefined;
@@ -63,6 +66,7 @@ export function initPreviewerBootstrap(
     entry.observedAt = undefined;
   };
   const release = (root: PreviewerRoot) => {
+    nonDocumentRoots.delete(root);
     const entry = pending.get(root);
     if (!entry) return;
     entry.owner.abort();
@@ -163,12 +167,21 @@ export function initPreviewerBootstrap(
       if (nextMatrix) {
         // The Matrix asks the existing Previewer client to deliver its modules
         // before initialization is measured.
-        nextMatrix.warmDemoModules = async () => {
-          if (matrix !== nextMatrix || !nextMatrix.isConnected) return null;
+        const deliver: NonNullable<Matrix['warmDemoModules']> = async () => {
+          const ownsDelivery = () =>
+            matrix === nextMatrix &&
+            nextMatrix.warmDemoModules === deliver &&
+            nextMatrix.isConnected;
+          if (!ownsDelivery()) return null;
           const { demoModuleCount, warmDemoModules } = await import('./previewer-client');
-          if (matrix !== nextMatrix || !nextMatrix.isConnected) return null;
-          return { delivered: await warmDemoModules(), registered: demoModuleCount() };
+          if (!ownsDelivery()) return null;
+          const delivered = await warmDemoModules();
+          // A swap can rearm this same element while module delivery is pending.
+          // Only the callback installed by the current scan may publish counts.
+          if (!ownsDelivery()) return null;
+          return { delivered, registered: demoModuleCount() };
         };
+        nextMatrix.warmDemoModules = deliver;
       }
     }
     for (const panel of document.querySelectorAll('[data-adapter-panel]')) {
@@ -209,7 +222,13 @@ export function initPreviewerBootstrap(
     for (const root of pending.keys()) release(root);
   };
   const removal = new view.MutationObserver((records) => {
-    if (!records.some((record) => record.removedNodes.length > 0)) return;
+    if (!records.some((record) => record.removedNodes.length > 0)) {
+      // A move back from a shadow root appears here only as an addition.
+      // Stop tracking that exception before the next unrelated removal.
+      for (const root of nonDocumentRoots)
+        if (root.getRootNode() === document) nonDocumentRoots.delete(root);
+      return;
+    }
     // Runtime child/status removal must not rescan every Matrix previewer.
     // Use tracked identity rather than attributes, which may change after scan.
     const removedRoots = new Set<PreviewerRoot>();
@@ -227,7 +246,12 @@ export function initPreviewerBootstrap(
     }
     // Collect before destroy mutates detached subtrees. Reinserted/moved roots
     // retain their owners, including moves recorded earlier in this delivery.
-    for (const root of removedRoots) if (!root.isConnected) release(root);
+    for (const root of nonDocumentRoots) removedRoots.add(root);
+    for (const root of removedRoots) {
+      if (!root.isConnected) release(root);
+      else if (root.getRootNode() !== document) nonDocumentRoots.add(root);
+      else nonDocumentRoots.delete(root);
+    }
   });
   removal.observe(document.documentElement, { childList: true, subtree: true });
   const dispose = () => {

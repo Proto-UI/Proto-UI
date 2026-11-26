@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "two-source-website-candidate-binding-review",
+  "date": "2026-11-25",
+  "sourceContext": {
+    "head": "56221ad7221ae454ddda36cb9724001dcbf5525e",
+    "reviewedRemoteHead": "ba79177be149aa17de7d4c152120eac25327a851",
+    "previousBoundSourceHead": "c738a4076e3bb1f8de0267130991416c69c9d10d",
+    "matrixPreimageSha256": "75c07b285e051d77c9a26de5fb17d6face8b7fb47ea242907a8610b380ee879b",
+    "binding": "The two files at the candidate HEAD are byte-identical to the previously reviewed ba79177 sources. This record admits only these exact source bytes; it does not rename a browser run, claim a later merged HEAD was tested, or replace the separate consumer refresh workflow."
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts",
+      "previousSha256": "2576709ceb69f3f98dcbd4bd8d7a140cb009dd98bd89bd48b47b753135ff1048",
+      "sha256": "27d71426fc8a7707d446efd9724cacd713d4de36b77b8331404fc7c7642f411c",
+      "gitBlob": "86ab3471c808c426737c991963ab07a55e503017",
+      "owners": ["www.demo.authored-controllers"],
+      "review": "The sole source change from the bound c738 bytes adds root ref 'toast-demo'. The existing independent dynamic notification creation, numeric stack, selected position and portal behavior are retained. This identifies the demo owner without moving its controller into the website shell or admitting a new raw import.",
+      "dependencies": "Import list is unchanged. The existing withShadcnRheaDemo definition and family Toast/Select/Button definitions remain the same. The website portal safe-area rule consumes the already opted-in runtime-owned surface.",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/56221ad7221ae454ddda36cb9724001dcbf5525e/apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts",
+      "previousSourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/c738a4076e3bb1f8de0267130991416c69c9d10d/apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts"
+    },
+    {
+      "path": "apps/www/src/components/site-header-disclosure.ts",
+      "previousSha256": "0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904",
+      "sha256": "d784ea0ba41797e8540f4f582b85e1c04bac1a9995f9b4b01a6807a029f361dd",
+      "gitBlob": "78a5e6ae9e99bf2d48a7c6bae6767e081d58373c",
+      "owners": ["www.shell.mobile-menu-panel", "www.shell.mobile-menu-toggle"],
+      "review": "Publishes the existing positive layout-pixel Header measurement to --docs-preview-header-height for document-body preview portals. Per-Document/per-root ownership chooses an active root, restores the previous live owner on disposal, and restores the original value and priority only while the property is still owned. External value or priority changes are not overwritten by teardown. Existing disclosure, nested overlay, Escape, focus-return and navigation behavior is retained.",
+      "dependencies": "Import list is unchanged. TwoColumnContent.astro consumes this variable only on opted-in .pui-runtime-preview-owned-surface regions carrying data-position, including an empty dynamic Toast list. No prototype authority or runtime facade boundary changes.",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/56221ad7221ae454ddda36cb9724001dcbf5525e/apps/www/src/components/site-header-disclosure.ts",
+      "previousSourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/c738a4076e3bb1f8de0267130991416c69c9d10d/apps/www/src/components/site-header-disclosure.ts"
+    }
+  ],
+  "matrixChange": {
+    "sourceHashRows": 2,
+    "ownersChanged": false,
+    "dispositionsChanged": false,
+    "criteriaChanged": false,
+    "checkboxesChanged": false,
+    "consumerSnapshotFieldsChanged": false,
+    "pinnedMainDefinitionChanged": false,
+    "genericGateOrRawImportAllowanceChanged": false,
+    "historicalFixturesChanged": false
+  },
+  "reviewScope": {
+    "method": "Read the complete prior and candidate source files and their diffs, check the adjacent portal consumer, and independently verify each exact candidate Git blob and SHA-256. The candidate matrix changes only the two known source fingerprint cells.",
+    "relatedConsumer": {
+      "path": "apps/www/src/components/override/TwoColumnContent.astro",
+      "reviewedGitBlob": "51cdf162df6fc8d0b83a26d8630d36760f97064a",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/ba79177be149aa17de7d4c152120eac25327a851/apps/www/src/components/override/TwoColumnContent.astro",
+      "review": "The Docs rule is scoped to opted-in portaled runtime-owned regions, derives the top safe area from the measured Header variable, and no longer depends on a present Toast descendant inside the reading pane."
+    }
+  },
+  "acceptanceBoundary": [
+    "Source fingerprint maintenance is not a feature acceptance, browser acceptance, lifecycle promotion or full governance-suite pass.",
+    "The mobile-menu composition rows retain their blocked disposition and all existing focus, Escape, outside-click, geometry and remount evidence requirements.",
+    "All #83x historical provenance fixtures and previous records remain unchanged.",
+    "A subsequent merge must recheck the two exact source hashes before applying this patch. Consumer HEAD/ancestor refresh is performed separately using the original workflow."
+  ]
+}

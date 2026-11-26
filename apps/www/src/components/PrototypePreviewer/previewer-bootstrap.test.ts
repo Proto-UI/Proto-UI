@@ -1,12 +1,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initPreviewerBootstrap } from './previewer-bootstrap';
 
+const matrixClient = vi.hoisted(() => ({
+  warmDemoModules: vi.fn<() => Promise<number>>(),
+  demoModuleCount: vi.fn<() => number>(),
+  initPreviewer: vi.fn(),
+}));
+// Hold only module delivery at an asynchronous boundary. The actual bootstrap,
+// Astro retirement and existing lazy-root lifecycle cases remain in charge.
+vi.mock('./previewer-client', () => matrixClient);
+
 let dispose: (() => void) | undefined;
 type Intersection = Pick<IntersectionObserverEntry, 'isIntersecting' | 'target' | 'time'>;
 let callbacks: Array<(entries: Intersection[]) => void>;
 let disconnects: Array<ReturnType<typeof vi.fn>>;
 let unobserves: Array<ReturnType<typeof vi.fn>>;
 beforeEach(() => {
+  matrixClient.warmDemoModules.mockReset().mockResolvedValue(7);
+  matrixClient.demoModuleCount.mockReset().mockReturnValue(11);
+  matrixClient.initPreviewer.mockReset();
   document.body.replaceChildren();
   localStorage.clear();
   callbacks = [];
@@ -47,6 +59,87 @@ const deliver = (target: Element, isIntersecting: boolean, observer = 0) => {
 const flush = async () => {
   for (let i = 0; i < 15; i++) await Promise.resolve();
 };
+
+describe('Matrix delivery owner after asynchronous module warmup', () => {
+  type Matrix = HTMLElement & {
+    warmDemoModules?: () => Promise<{ delivered: number; registered: number } | null>;
+  };
+  function matrixRoot() {
+    const matrix = document.createElement('section') as Matrix;
+    matrix.dataset.demoMatrix = '';
+    document.body.append(matrix);
+    return matrix;
+  }
+
+  for (const retirement of [
+    'page swap',
+    'disconnection',
+    'replacement',
+    'bootstrap disposal',
+    'same-element rearm',
+  ] as const) {
+    it(`returns no delivery receipt after ${retirement} while warmup is pending`, async () => {
+      const matrix = matrixRoot();
+      let release!: (delivered: number) => void;
+      matrixClient.warmDemoModules.mockReturnValueOnce(
+        new Promise<number>((resolve) => {
+          release = resolve;
+        })
+      );
+      dispose = initPreviewerBootstrap(document);
+      document.dispatchEvent(new Event('astro:page-load'));
+      const deliver = matrix.warmDemoModules!;
+      const pending = deliver();
+      await vi.waitFor(() => expect(matrixClient.warmDemoModules).toHaveBeenCalledOnce());
+      expect(matrixClient.demoModuleCount).not.toHaveBeenCalled();
+
+      if (retirement === 'disconnection') matrix.remove();
+      else if (retirement === 'replacement') {
+        delete matrix.dataset.demoMatrix;
+        const replacement = matrixRoot();
+        document.dispatchEvent(new Event('astro:page-load'));
+        expect(replacement.warmDemoModules).toBeTypeOf('function');
+        expect(matrix.isConnected).toBe(true);
+      } else if (retirement === 'bootstrap disposal') {
+        dispose();
+        dispose = undefined;
+      } else {
+        document.dispatchEvent(new Event('astro:before-swap'));
+        if (retirement === 'same-element rearm') {
+          document.dispatchEvent(new Event('astro:page-load'));
+          expect(matrix.warmDemoModules).not.toBe(deliver);
+          expect(matrix.isConnected).toBe(true);
+        }
+      }
+
+      release(7);
+      await expect(pending).resolves.toBeNull();
+      expect(matrixClient.demoModuleCount).not.toHaveBeenCalled();
+      if (retirement === 'same-element rearm') {
+        await expect(matrix.warmDemoModules!()).resolves.toEqual({ delivered: 7, registered: 11 });
+        expect(matrixClient.demoModuleCount).toHaveBeenCalledOnce();
+      }
+    });
+  }
+
+  it('publishes the delivered and registered counts only for the current owner', async () => {
+    const matrix = matrixRoot();
+    let release!: (delivered: number) => void;
+    matrixClient.warmDemoModules.mockReturnValueOnce(
+      new Promise<number>((resolve) => {
+        release = resolve;
+      })
+    );
+    dispose = initPreviewerBootstrap(document);
+    document.dispatchEvent(new Event('astro:page-load'));
+    const pending = matrix.warmDemoModules!();
+    await vi.waitFor(() => expect(matrixClient.warmDemoModules).toHaveBeenCalledOnce());
+    expect(matrixClient.demoModuleCount).not.toHaveBeenCalled();
+    release(7);
+    await expect(pending).resolves.toEqual({ delivered: 7, registered: 11 });
+    expect(matrixClient.demoModuleCount).toHaveBeenCalledOnce();
+  });
+});
 
 describe('RuntimeBox lazy bootstrap lifetime', () => {
   it('revokes the Matrix delivery callback when Astro swaps the page', async () => {
@@ -340,5 +433,149 @@ describe('adapter panel first activation', () => {
     dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
     document.dispatchEvent(new Event('astro:page-load'));
     await vi.waitFor(() => expect(initPreviewer).toHaveBeenCalledTimes(1));
+  });
+});
+
+async function deliverDocumentMutation(action: () => void) {
+  let observer: MutationObserver | undefined;
+  try {
+    await new Promise<void>((resolve) => {
+      observer = new MutationObserver(() => resolve());
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      action();
+    });
+    await flush();
+  } finally {
+    observer?.disconnect();
+  }
+}
+
+async function mountedTrackedRoot() {
+  const element = root();
+  const destroy = vi.fn();
+  const initPreviewer = vi.fn(({ root: mounted }: { root: HTMLElement }) => {
+    mounted.dataset.inited = '1';
+    (mounted as HTMLElement & { __previewer__: unknown }).__previewer__ = { destroy };
+  });
+  dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
+  document.dispatchEvent(new Event('astro:page-load'));
+  deliver(element, true);
+  await flush();
+  expect(initPreviewer).toHaveBeenCalledOnce();
+  return { element, destroy };
+}
+
+function countConnectionReads(element: HTMLElement) {
+  const connected = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected')!.get!;
+  let reads = 0;
+  Object.defineProperty(element, 'isConnected', {
+    configurable: true,
+    get() {
+      reads++;
+      return connected.call(this);
+    },
+  });
+  return {
+    reads: () => reads,
+    restore: () => Reflect.deleteProperty(element, 'isConnected'),
+  };
+}
+
+describe('tracked previewer moves outside the observed document root', () => {
+  it.each(['open', 'closed'] as const)(
+    'retains an owner moved into a connected %s ShadowRoot and releases it on a later host removal',
+    async (mode) => {
+      const { element, destroy } = await mountedTrackedRoot();
+      const host = document.createElement('div');
+      document.body.append(host);
+      const shadow = host.attachShadow({ mode });
+      await deliverDocumentMutation(() => shadow.append(element));
+      expect(element.isConnected).toBe(true);
+      expect(destroy).not.toHaveBeenCalled();
+      if (mode === 'closed') expect(host.shadowRoot).toBeNull();
+      // The original scan owns identity, including after authored markers change.
+      element.removeAttribute('class');
+      element.removeAttribute('data-previewer-id');
+      await deliverDocumentMutation(() => host.remove());
+      expect(element.isConnected).toBe(false);
+      expect(destroy).toHaveBeenCalledOnce();
+      const connection = countConnectionReads(element);
+      await deliverDocumentMutation(() => {
+        const unrelated = document.createElement('div');
+        document.body.append(unrelated);
+        unrelated.remove();
+      });
+      expect(connection.reads()).toBe(0);
+      expect(destroy).toHaveBeenCalledOnce();
+      connection.restore();
+    }
+  );
+
+  it('forgets the exception after an addition moves the same owner back to the document', async () => {
+    const { element, destroy } = await mountedTrackedRoot();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const shadow = host.attachShadow({ mode: 'closed' });
+    await deliverDocumentMutation(() => shadow.append(element));
+    await deliverDocumentMutation(() => document.body.append(element));
+    expect(element.getRootNode()).toBe(document);
+    const connection = countConnectionReads(element);
+    await deliverDocumentMutation(() => host.remove());
+    expect(connection.reads()).toBe(0);
+    expect(destroy).not.toHaveBeenCalled();
+    connection.restore();
+    await deliverDocumentMutation(() => element.remove());
+    expect(destroy).toHaveBeenCalledOnce();
+  });
+
+  it('preserves a move into and out of a closed root in one mutation delivery', async () => {
+    const { element, destroy } = await mountedTrackedRoot();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const shadow = host.attachShadow({ mode: 'closed' });
+    await deliverDocumentMutation(() => {
+      shadow.append(element);
+      document.body.append(element);
+    });
+    expect(destroy).not.toHaveBeenCalled();
+    const connection = countConnectionReads(element);
+    await deliverDocumentMutation(() => host.remove());
+    expect(connection.reads()).toBe(0);
+    expect(destroy).not.toHaveBeenCalled();
+    connection.restore();
+  });
+
+  it('does not scan 10000 ordinary registered light-DOM roots for an unrelated removal', async () => {
+    const fragment = document.createDocumentFragment();
+    const elements: HTMLElement[] = [];
+    for (let index = 0; index < 10000; index++) {
+      const element = document.createElement('section');
+      element.className = 'proto-previewer';
+      element.dataset.previewerId = `unrelated-${index}`;
+      element.dataset.lazy = 'true';
+      fragment.append(element);
+      elements.push(element);
+    }
+    document.body.append(fragment);
+    const initPreviewer = vi.fn();
+    dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
+    document.dispatchEvent(new Event('astro:page-load'));
+    const connected = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected')!.get!;
+    let reads = 0;
+    for (const element of elements)
+      Object.defineProperty(element, 'isConnected', {
+        configurable: true,
+        get() {
+          reads++;
+          return connected.call(this);
+        },
+      });
+    await deliverDocumentMutation(() => {
+      const unrelated = document.createElement('span');
+      document.body.append(unrelated);
+      unrelated.remove();
+    });
+    expect(reads).toBe(0);
+    expect(initPreviewer).not.toHaveBeenCalled();
   });
 });

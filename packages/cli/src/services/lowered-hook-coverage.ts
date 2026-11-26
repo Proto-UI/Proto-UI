@@ -3573,20 +3573,24 @@ function scanRuleStateSource(
     return null;
   };
 
-  type LiteralTokenData = string | Map<string, LiteralTokenData>;
+  const nonTokenStateLeaf = Symbol('non-token State leaf');
+  type LiteralTokenData = string | Map<string, LiteralTokenData> | typeof nonTokenStateLeaf;
 
   /** Plain own data only: getters, spreads and prototype setters are not values. */
-  const literalTokenData = (expression: ts.Expression): LiteralTokenData | null => {
+  const literalTokenData = (expression: ts.Expression, scope: Scope): LiteralTokenData | null => {
     const value = unwrapWritten(expression);
     if (ts.isStringLiteralLike(value) || ts.isNoSubstitutionTemplateLiteral(value))
       return value.text;
+    // A sibling State can feed the condition without being token data. Its
+    // marker never certifies a token read: the selected leaf must be a string.
+    if (readState(value, scope) !== null) return nonTokenStateLeaf;
     if (!ts.isObjectLiteralExpression(value)) return null;
     const members = new Map<string, LiteralTokenData>();
     for (const property of value.properties) {
       if (!ts.isPropertyAssignment(property)) return null;
       const key = propertyName(property.name);
       if (key === null || key === '__proto__') return null;
-      const member = literalTokenData(property.initializer);
+      const member = literalTokenData(property.initializer, scope);
       if (member === null) return null;
       members.set(key, member);
     }
@@ -3594,8 +3598,9 @@ function scanRuleStateSource(
   };
 
   /**
-   * A private map read hands only a proven string to its consumer. Bare
-   * references, exports, aliases, writes and unknown paths withhold this proof.
+   * A private map read hands only a proven string or a separate State leaf to
+   * its consumer. Bare references, exports, aliases, writes and unknown paths
+   * withhold this proof. A nested container still cannot escape through a read.
    * The entire source is checked, including deferred writes and later escapes.
    */
   const literalTokenMapIsReadOnly = (
@@ -3666,7 +3671,7 @@ function scanRuleStateSource(
           data = data.get(key)!;
           current = next;
         }
-        if (typeof data !== 'string') {
+        if (typeof data !== 'string' && data !== nonTokenStateLeaf) {
           safe = false;
           return;
         }
@@ -3714,7 +3719,7 @@ function scanRuleStateSource(
             : null;
         return owner instanceof Map && key !== null ? (owner.get(key) ?? null) : null;
       }
-      if (!ts.isIdentifier(value)) return literalTokenData(value as ts.Expression);
+      if (!ts.isIdentifier(value)) return literalTokenData(value as ts.Expression, scope);
       const binding = lookup(scope, value.text);
       // Imported const objects remain mutable through other modules. This
       // proof admits only a private owner whose complete source is visible.
@@ -3742,7 +3747,7 @@ function scanRuleStateSource(
         statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
       )
         return null;
-      const data = literalTokenData(declaration.initializer);
+      const data = literalTokenData(declaration.initializer, scope);
       if (!(data instanceof Map)) return null;
       if (!literalTokenMapIsReadOnly(declaration.getSourceFile(), declaration.name, data))
         return null;

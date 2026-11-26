@@ -17,7 +17,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-function entryFixture() {
+function entryFixture(styleText = '.entry-refresh-button { visibility: visible; }') {
   const nativeObserver = window.MutationObserver;
   const observers: DeliveryObserver[] = [];
   const observations: Array<{ node: Node; options?: MutationObserverInit }> = [];
@@ -44,7 +44,7 @@ function entryFixture() {
   const target = document.createElement('div');
   const ancestor = document.createElement('div');
   const style = document.createElement('style');
-  style.textContent = '.entry-refresh-button { visibility: visible; }';
+  style.textContent = styleText;
   ancestor.append(target);
   document.body.append(style, ancestor);
   const modules = createWebComponentModules({
@@ -108,7 +108,25 @@ describe('WC entry dependency refresh coalescing', () => {
       button.className = 'entry-refresh-button';
       target.append(button);
       ancestor.className = 'unrelated-while-inert';
-      style.textContent = '.entry-refresh-button { display: none; }';
+      const rule = style.sheet!.cssRules[0] as CSSStyleRule;
+      // Happy DOM's computed style reads the parsed rule text rather than
+      // later CSSStyleRule.style mutations. Supply that native CSSOM input at
+      // the platform boundary; the Adapter still owns every refresh and write.
+      const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+        const computed = nativeGetComputedStyle(element, pseudoElement);
+        if (element !== button) return computed;
+        return new Proxy(computed, {
+          get(target, property) {
+            if (property === 'display')
+              return (
+                rule.style.getPropertyValue('display') || Reflect.get(target, property, target)
+              );
+            return Reflect.get(target, property, target);
+          },
+        });
+      });
+      rule.style.setProperty('display', 'none');
       await settle();
       expect(fixture.rebuilds()).toBe(0);
       expect(target.tabIndex).toBe(0);
@@ -118,7 +136,7 @@ describe('WC entry dependency refresh coalescing', () => {
       expect(fixture.rebuilds()).toBe(1);
       expect(target.tabIndex).toBe(0);
 
-      style.textContent = '.entry-refresh-button { display: inline-block; }';
+      rule.style.removeProperty('display');
       await settle();
       expect(target.hasAttribute('tabindex')).toBe(false);
 
@@ -145,9 +163,7 @@ describe('WC entry dependency refresh coalescing', () => {
       document.body.append(target);
       fixture.deliver();
       expect(
-        fixture.delivered.some((record) =>
-          Array.from(record.removedNodes).includes(target)
-        )
+        fixture.delivered.some((record) => Array.from(record.removedNodes).includes(target))
       ).toBe(true);
       await settle();
       expect(fixture.rebuilds()).toBe(1);
@@ -430,6 +446,119 @@ describe('WC entry dependency refresh coalescing', () => {
       expect(replacement.hasAttribute('tabindex')).toBe(false);
     } finally {
       fixture.setEntry(replacement, false);
+      fixture.dispose();
+    }
+  });
+});
+
+describe('WC external entry invalidation preserves native attribute changes', () => {
+  const relationalStyle =
+    'body:has(> [data-entry-external="hidden"]) .entry-refresh-button { visibility: hidden; }';
+
+  function externalFixture() {
+    const fixture = entryFixture(relationalStyle);
+    const button = document.createElement('button');
+    button.className = 'entry-refresh-button';
+    fixture.target.append(button);
+    const external = document.createElement('aside');
+    external.className = 'entry-external-marker';
+    external.setAttribute('style', 'color: red;');
+    external.setAttribute('data-entry-external', 'visible');
+    document.body.append(external);
+    return { fixture, button, external };
+  }
+
+  it.each(['class', 'style', 'data-entry-external'])(
+    'does not resample an unchanged external %s attribute',
+    async (attribute) => {
+      const { fixture, external } = externalFixture();
+      try {
+        await settle();
+        const projected = fixture.target.getAttribute('tabindex');
+        const computed = vi.spyOn(window, 'getComputedStyle');
+        external.setAttribute(attribute, external.getAttribute(attribute)!);
+        fixture.deliver();
+        expect(
+          fixture.delivered.some(
+            (record) => record.target === external && record.attributeName === attribute
+          )
+        ).toBe(true);
+        await settle();
+        expect(computed).not.toHaveBeenCalled();
+        expect(fixture.target.getAttribute('tabindex')).toBe(projected);
+      } finally {
+        fixture.dispose();
+      }
+    }
+  );
+
+  it('still resamples an external A to B to A attribute batch', async () => {
+    const { fixture, external } = externalFixture();
+    try {
+      await settle();
+      const computed = vi.spyOn(window, 'getComputedStyle');
+      external.setAttribute('data-entry-external', 'hidden');
+      external.setAttribute('data-entry-external', 'visible');
+      fixture.deliver();
+      expect(
+        fixture.delivered.some(
+          (record) => record.target === external && record.oldValue === 'hidden'
+        )
+      ).toBe(true);
+      await settle();
+      expect(computed).toHaveBeenCalled();
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  it('retains an external change raised by an author during an unchanged write', async () => {
+    const { fixture, button, external } = externalFixture();
+    try {
+      const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+        const computed = nativeGetComputedStyle(element, pseudoElement);
+        if (element !== button) return computed;
+        // Happy DOM does not reevaluate this native relational selector. Supply
+        // only the platform style result, as in the original observer controls.
+        return new Proxy(computed, {
+          get(target, property) {
+            if (property === 'visibility')
+              return external.getAttribute('data-entry-external') === 'hidden'
+                ? 'hidden'
+                : 'visible';
+            return Reflect.get(target, property, target);
+          },
+        });
+      });
+      await settle();
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+      const name = `entry-external-author-${++authorSerial}`;
+      customElements.define(
+        name,
+        class extends HTMLElement {
+          static observedAttributes = ['data-input'];
+          attributeChangedCallback() {
+            external.setAttribute('data-entry-external', 'hidden');
+          }
+        }
+      );
+      const author = document.createElement(name);
+      author.setAttribute('data-input', 'same');
+      document.body.append(author);
+      external.setAttribute('data-entry-external', 'visible');
+      await settle();
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+
+      author.setAttribute('data-input', 'same');
+      fixture.deliver();
+      await settle();
+      expect(fixture.target.tabIndex).toBe(0);
+
+      external.setAttribute('data-entry-external', 'visible');
+      await settle();
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    } finally {
       fixture.dispose();
     }
   });
