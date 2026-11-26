@@ -62,7 +62,8 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan, taskBloc
   const { fn } = plan;
   const scope = program.names.scope();
   const argumentsById = new Map<string, LocalBinding>();
-  const parameters = fn.params.map((binding) => {
+  const blockPlan = taskBlock && plan.taskBlocks!.get(taskBlock.id);
+  const parameters = (blockPlan?.originalParams ?? fn.params).map((binding) => {
     const name = scope.take(binding.name);
     argumentsById.set(binding.id, { binding, name });
     return param(name, program.data.type(binding.type));
@@ -194,7 +195,8 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan, taskBloc
       const values = edge.args.map(value);
       if (payload) values.unshift(payload);
       if (taskBlock) {
-        return [f.createReturnStatement(continueTask(edge, id('$view'), id('$task'), values))];
+        const next = plan.taskBlocks!.get(edge.block)!;
+        return [f.createReturnStatement(call(id(next.name), id('$view'), id('$task'), ...originalArgs(next.originalParams), ...values))];
       }
       const params = blockParameters.get(edge.block)!;
       const moves: ts.Statement[] = values.map((arg, i) => f.createExpressionStatement(f.createAssignment(id(params[i].name), arg)));
@@ -208,9 +210,8 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan, taskBloc
       }
       return moves;
     }
-    const originalArgs = () => fn.params.map(binding => id(argumentsById.get(binding.id)!.name));
-    function continueTask(edge: Edge, view: ts.Expression, task: ts.Expression, args: ts.Expression[], original = originalArgs()): ts.Expression {
-      return call(id(plan.taskBlocks!.get(edge.block)!), view, task, ...original, ...args);
+    function originalArgs(params: readonly Binding[]) {
+      return params.map(binding => id(argumentsById.get(binding.id)!.name));
     }
     for (const op of current.instructions) {
       let out: ts.Statement;
@@ -316,22 +317,24 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan, taskBloc
       }
       case 'await': {
         const { extern, name, localResult } = program.unit.externs.get(end.extern)!;
-        const next = plan.blocks.find(b => b.id === end.resume.block)!;
+        const next = plan.taskBlocks!.get(end.resume.block)!;
         const bind = (binding: Binding) => param(scope.take(binding.name), program.data.type(binding.type));
         const commandParams = extern.params.map(bind);
-        const capturedParams = [...fn.params, ...next.params.slice(1)].map(bind);
+        const originalParams = next.originalParams.map(bind);
+        const edgeParams = next.block.params.slice(1).map(bind);
         const paramNames = (params: ts.ParameterDeclaration[]) => params.map(p => p.name as ts.Identifier);
         const commandArgs = [...paramNames(commandParams), id('$signal')];
-        const captured = paramNames(capturedParams);
         const commandResult = typeRef(localResult);
         const origin = str(`${end.source.file}:${end.source.start}-${end.source.end} (${extern.name})`);
         const validate = arrow([param('$outcome')], program.data.read(extern.binding.type, id('$outcome'), origin));
         const read = f.createCallExpression(program.use('checkTaskResult'), [commandResult], [call(id(name), ...commandArgs), validate]);
         const command = arrow([param('$signal')], read);
-        const resume = arrow([param('$view'), param('$task'), param('$outcome')], continueTask(end.resume, id('$view'), id('$task'), [id('$outcome'), ...captured.slice(fn.params.length)], captured.slice(0, fn.params.length)));
+        const resume = arrow([param('$view'), param('$task'), param('$outcome')], call(
+          id(next.name), id('$view'), id('$task'), ...paramNames(originalParams), id('$outcome'), ...paramNames(edgeParams)
+        ));
         const wait = f.createCallExpression(member(id('$task'), 'await'), [commandResult], [command, resume]);
-        const suspend = arrow([param('$task', program.useType('TaskControl', ...taskTypes!)), ...commandParams, ...capturedParams], wait);
-        const start = call(f.createParenthesizedExpression(suspend), id('$task'), ...end.args.map(value), ...originalArgs(), ...end.resume.args.map(value));
+        const suspend = arrow([param('$task', program.useType('TaskControl', ...taskTypes!)), ...commandParams, ...originalParams, ...edgeParams], wait);
+        const start = call(f.createParenthesizedExpression(suspend), id('$task'), ...end.args.map(value), ...originalArgs(next.originalParams), ...end.resume.args.map(value));
         statements.push(atSource(f.createReturnStatement(start), end.source));
         break;
       }
@@ -350,6 +353,6 @@ export function emitBehavior(program: ReactProgram, plan: FunctionPlan, taskBloc
   }
   const statements = regions.flatMap((region) => region.statements);
   if (declarations.length) statements.unshift(f.createVariableStatement(undefined, f.createVariableDeclarationList(declarations, ts.NodeFlags.Let)));
-  const name = taskBlock ? plan.taskBlocks!.get(taskBlock.id)! : plan.name;
+  const name = blockPlan?.name ?? plan.name;
   return atSource(declaration(name, parameters, taskTypes ? program.useType('TaskExit', ...taskTypes) : result, statements), taskBlock?.end.source ?? fn.binding.source);
 }

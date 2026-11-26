@@ -37,6 +37,8 @@ The source producer also links nominal Context keys, pure provider values, requi
 
 The [keyed task owner](test/fixtures/authoring-keyed-tasks/owner.proto.ts.txt) declares two siblings whose text keys come from the parent's `first` and `second` props. Each child records its initial Context and starts one load for its own ID. Its rendered result includes the Context captured before suspension and the current Context read after the load completes. These values distinguish a retained child from a new child created with a previously used key.
 
+`PairReader` issues two loads in one task. Its public `stage` records the Context at entry, after the first response and after the second response. React task continuations keep original function parameters that a reachable block reads, including parameters first used beyond another suspension. [Author source](test/fixtures/authoring-pair/owner.proto.ts.txt)
+
 The versioned Tabs owner and `AsyncTabPanel` both reach the declared extern `authoring.load-tab`. Pass `--bindings host-bindings.json` to `compile` when emitting either export. The path is relative to the working directory. In this example the React entry names an ESM export and the GPUI entry names a Rust function in the consuming crate.
 
 ```json

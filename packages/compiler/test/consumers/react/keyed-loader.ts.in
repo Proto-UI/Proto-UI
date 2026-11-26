@@ -1,6 +1,7 @@
 interface Resource {
   readonly path: string;
   readonly cancellable: boolean;
+  readonly onStart?: () => void;
   readonly onReturn?: (value: string) => void;
 }
 interface Request {
@@ -16,9 +17,9 @@ const resources = new Map<string, Resource[]>();
 const requests: Request[] = [];
 const unexpected: string[] = [];
 
-export function enqueue(key: string, path: string, cancellable: boolean, onReturn?: (value: string) => void): void {
+export function enqueue(key: string, path: string, cancellable: boolean, hooks: Pick<Resource, 'onStart' | 'onReturn'> = {}): void {
   const queue = resources.get(key) ?? [];
-  queue.push({ path, cancellable, onReturn });
+  queue.push({ path, cancellable, ...hooks });
   resources.set(key, queue);
 }
 
@@ -30,6 +31,7 @@ export function loadKeyedItem(key: string, signal: AbortSignal): Promise<string>
   }
   const request: Request = { key, path: resource.path, signal, state: 'pending', value: null };
   requests.push(request);
+  resource.onStart?.();
   const result = readResponse(request, resource.cancellable);
   // Register the host's reaction before handing this same promise to the generated task.
   if (resource.onReturn) void result.then(resource.onReturn, () => {});

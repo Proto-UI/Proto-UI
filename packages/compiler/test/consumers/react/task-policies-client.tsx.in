@@ -31,15 +31,17 @@ function replace(zone: string) {
 }
 
 function replaceOnReturn(id: string, path: string, zone: string) {
-  enqueue(id, path, false, value => {
-    const previous = reader.current!;
-    const element = surface.querySelector('span')!;
-    const before = snapshot();
-    replace(zone);
-    retirement = {
-      value, before, after: snapshot(), requests: loadHistory(),
-      originalConnected: element.isConnected, oldAction: previous.queue('retired').status,
-    };
+  enqueue(id, path, false, {
+    onReturn(value) {
+      const previous = reader.current!;
+      const element = surface.querySelector('span')!;
+      const before = snapshot();
+      replace(zone);
+      retirement = {
+        value, before, after: snapshot(), requests: loadHistory(),
+        originalConnected: element.isConnected, oldAction: previous.queue('retired').status,
+      };
+    },
   });
 }
 

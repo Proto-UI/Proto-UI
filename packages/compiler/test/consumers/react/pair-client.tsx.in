@@ -1,0 +1,43 @@
+import { createRef, StrictMode } from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { PAIR_ZONE, PairReader, type PairReaderHandle } from './PairReader';
+import { enqueue, loadHistory } from './keyed-loader';
+
+const surface = document.getElementById('app')!;
+const root = createRoot(surface);
+const reader = createRef<PairReaderHandle>();
+let provider = PAIR_ZONE.createProvider('left');
+let key = 0;
+const starts: { key: string; path: string; stage: string }[] = [];
+
+function render() {
+  flushSync(() => root.render(
+    <StrictMode><PAIR_ZONE.Provider value={provider}>
+      <PairReader key={key} ref={reader} />
+    </PAIR_ZONE.Provider></StrictMode>
+  ));
+}
+
+const trace = {
+  mount: render,
+  schedule(id: string, path: string) {
+    enqueue(id, path, false, { onStart: () => starts.push({ key: id, path, stage: reader.current!.stage }) });
+  },
+  begin(first: string, second: string) { return reader.current!.begin(first, second).status; },
+  publish(zone: string) { provider.publish(zone); },
+  replace(zone: string) {
+    const previous = reader.current!;
+    const span = surface.querySelector('span')!;
+    key++;
+    provider = PAIR_ZONE.createProvider(zone);
+    render();
+    return { oldConnected: span.isConnected, oldAction: previous.begin('retired', 'retired').status };
+  },
+  stage() { return reader.current!.stage; },
+  starts: () => starts,
+  history: loadHistory,
+};
+
+declare global { interface Window { pairTrace: typeof trace } }
+window.pairTrace = trace;

@@ -9,7 +9,7 @@ import { build } from 'esbuild';
 import { chromium } from 'playwright-core';
 import ts from 'typescript';
 import { emitReact } from '@proto.ui/compiler/targets/react';
-import { authoredKeyedTaskSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
+import { authoredKeyedTaskSource, authoredPairSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
 import { openTabsServer } from './consumers/react/tabs-server.mjs';
 
 const require = createRequire(import.meta.url);
@@ -394,4 +394,117 @@ test('replacing the whole keyed parent retires a returned response and a pending
   assert.ok([oldA, oldB, freshA, freshB].every(resource => resource.requests === 1));
   assert.deepEqual(errors, []);
   if (evidence) await writeFile(path.join(evidence, 'keyed-parent-react-native.json'), JSON.stringify({ initial, detached, replacement, afterLateB, completed, retained, requests: [...network.values()], errors }));
+});
+
+async function expectPairStage(page, expected) {
+  const view = page.locator('#app span');
+  await page.waitForFunction(expected => window.pairTrace.stage() === expected &&
+    document.querySelector('#app span')?.innerText === expected, expected);
+  await view.waitFor({ state: 'visible' });
+  return { stage: await page.evaluate(() => window.pairTrace.stage()), text: await view.innerText() };
+}
+
+async function beginPair(page, server, firstText, secondText, secondArg = 'B') {
+  const first = server.resource('A', firstText);
+  const second = server.resource('B', secondText);
+  const status = await page.evaluate(([first, second, secondArg]) => {
+    const host = window.pairTrace;
+    host.schedule('A', first);
+    host.schedule('B', second);
+    return host.begin('A', secondArg);
+  }, [first.path, second.path, secondArg]);
+  assert.equal(status, 'committed');
+  assert.equal(await first.requested(), 'A');
+  assert.equal(second.requests, 0);
+  return { first, second };
+}
+
+test('each authored await commits before its HTTP call and only the live reader can finish the pair', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, authoredPairSource, 'pair-client.tsx', 'pair-source.json');
+  await page.evaluate(() => window.pairTrace.mount());
+  const views = [await expectPairStage(page, 'idle')];
+  const old = await beginPair(page, server, 'old first', 'old second');
+  views.push(await expectPairStage(page, 'first@left'));
+  await page.evaluate(() => window.pairTrace.publish('middle'));
+  old.first.release();
+  assert.equal(await old.second.requested(), 'B');
+  views.push(await expectPairStage(page, 'second@left>middle=old first'));
+
+  const replacement = await page.evaluate(() => window.pairTrace.replace('new-start'));
+  assert.deepEqual(replacement, { oldConnected: false, oldAction: 'disposed' });
+  const oldSecond = await page.evaluate(path => window.pairTrace.history().requests.find(r => r.path === path), old.second.path);
+  assert.deepEqual([oldSecond.state, oldSecond.reason], ['pending', { status: 'owner-ended' }]);
+  views.push(await expectPairStage(page, 'idle'));
+  const fresh = await beginPair(page, server, 'fresh first', 'fresh second');
+  views.push(await expectPairStage(page, 'first@new-start'));
+  await page.evaluate(() => window.pairTrace.publish('new-middle'));
+  fresh.first.release();
+  assert.equal(await fresh.second.requested(), 'B');
+  const waiting = 'second@new-start>new-middle=fresh first';
+  views.push(await expectPairStage(page, waiting));
+  await page.evaluate(() => window.pairTrace.publish('new-last'));
+
+  old.second.release();
+  await page.waitForFunction(path => window.pairTrace.history().requests.find(r => r.path === path)?.state === 'returned', old.second.path);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+  views.push(await expectPairStage(page, waiting));
+  const pending = await page.evaluate(() => window.pairTrace.history());
+  const byPath = new Map(pending.requests.map(r => [r.path, r]));
+  assert.equal(byPath.get(old.second.path).value, 'old second');
+  expectPending(byPath, fresh.second);
+  fresh.second.release();
+  views.push(await expectPairStage(page, 'new-start>new-middle>new-last=fresh first/fresh second'));
+
+  const starts = await page.evaluate(() => window.pairTrace.starts());
+  assert.deepEqual(starts, [
+    { key: 'A', path: old.first.path, stage: 'first@left' },
+    { key: 'B', path: old.second.path, stage: 'second@left>middle=old first' },
+    { key: 'A', path: fresh.first.path, stage: 'first@new-start' },
+    { key: 'B', path: fresh.second.path, stage: waiting },
+  ]);
+  const network = await page.evaluate(() => window.pairTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(request => request.value), ['old first', 'old second', 'fresh first', 'fresh second']);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'pair-react-native.json'), JSON.stringify({ views, starts, replacement, oldSecond, pending, network, errors }));
+});
+
+// The author producer normally threads a later reference through explicit block
+// arguments. Direct IR may read an original function parameter in any block.
+function directPair() {
+  const source = { file: 'packages/compiler/test/keyed-task-lifetime-react.node-test.mjs', start: 0, end: 0 };
+  const authored = authoredPairSource();
+  assert.equal(authored.status, 'produced', JSON.stringify(authored.diagnostics));
+  const component = authored.component;
+  const task = component.behaviors.find(fn => fn.binding.id === component.tasks[0].fn);
+  const [firstId, label] = task.params;
+  const local = id => ({ kind: 'local', id });
+  const text = value => ({ kind: 'text', value });
+  const binding = id => ({ id, name: id, type: 'text', source });
+  const wait = (arg, next) => ({ kind: 'await', extern: component.externs[0].binding.id, args: [arg], resume: { block: next, args: [] }, source });
+  task.entry = 'first';
+  task.blocks = [
+    { id: 'first', params: [], instructions: [], end: wait(local(firstId.id), 'second') },
+    { id: 'second', params: [binding('firstResult')], instructions: [], end: wait(text('B'), 'resumed') },
+    { id: 'resumed', params: [binding('secondResult')], instructions: [], end: {
+      kind: 'jump', to: { block: 'publish', args: [local('secondResult')] }, source,
+    } },
+    { id: 'publish', params: [binding('result')], instructions: [{
+      kind: 'write', target: component.fields[0].binding.id, source,
+      value: { kind: 'binary', op: 'concat', left: local(label.id), right: local('result') },
+    }], end: { kind: 'return', source } },
+  ];
+  return { status: 'produced', inputKind: 'direct-ir', component };
+}
+
+test('direct IR preserves an original parameter first read after two awaits and a synchronous jump', async t => {
+  const { server, page, errors } = await openConsumer(t, directPair, 'pair-client.tsx', 'pair-direct-ir.json');
+  await page.evaluate(() => window.pairTrace.mount());
+  const { first, second } = await beginPair(page, server, 'first document', 'second document', 'caller supplied: ');
+  first.release();
+  assert.equal(await second.requested(), 'B');
+  await expectPairStage(page, 'idle');
+  second.release();
+  await expectPairStage(page, 'caller supplied: second document');
+  assert.deepEqual(errors, []);
 });

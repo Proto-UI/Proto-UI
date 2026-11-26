@@ -77,12 +77,14 @@ const trace = {
   history: loadHistory,
   mount: render,
   replaceParentAfterReturn(id: string, path: string) {
-    enqueue(id, path, false, value => {
-      const before = sample();
-      ownerKey++;
-      active = 'replacement';
-      render();
-      replacement = { value, before, after: sample() };
+    enqueue(id, path, false, {
+      onReturn(value) {
+        const before = sample();
+        ownerKey++;
+        active = 'replacement';
+        render();
+        replacement = { value, before, after: sample() };
+      },
     });
   },
   replacement: () => replacement,

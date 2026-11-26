@@ -65,7 +65,7 @@ export interface FunctionPlan {
   writes: boolean;
   emits: boolean;
   tasks: boolean;
-  taskBlocks?: ReadonlyMap<string, string>;
+  taskBlocks?: ReadonlyMap<string, { block: Block; name: string; originalParams: readonly Binding[] }>;
   taskView?: string;
 }
 
@@ -162,9 +162,21 @@ export class ReactProgram {
       };
       if (fn.phase === 'task') {
         plan.taskView = this.names.take(`${plan.name}View`);
-        plan.taskBlocks = new Map(plan.blocks.map((b, i) => [b.id, i ? this.names.take(`${plan.name}Block`) : plan.name]));
+        plan.taskBlocks = new Map(plan.blocks.map((b, i) => [b.id, {
+          block: b,
+          name: i ? this.names.take(`${plan.name}Block`) : plan.name,
+          originalParams: fn.params,
+        }]));
       }
+      const originals = plan.taskBlocks && fn.params.length > 0 && plan.blocks.length > 1
+        ? new Map(fn.params.map(binding => [binding.id, binding])) : undefined;
+      const readsByBlock = originals && new Map<string, Set<Binding>>();
+      let originalReads: Set<Binding> | undefined;
       const inspect = (value: Value) => {
+        if (value.kind === 'local' && originalReads) {
+          const parameter = originals!.get(value.id);
+          if (parameter) originalReads.add(parameter);
+        }
         if (value.kind === 'call') plan.calls.add(value.fn);
         if (value.kind === 'number' || value.kind === 'tokens') unit.reserveLiteral(value);
         if (value.kind === 'prop' || value.kind === 'context' || value.kind === 'state' || value.kind === 'capture') {
@@ -174,6 +186,10 @@ export class ReactProgram {
         }
       };
       for (const b of plan.blocks) {
+        if (readsByBlock && b.id !== fn.entry) {
+          originalReads = new Set();
+          readsByBlock.set(b.id, originalReads);
+        }
         for (const op of b.instructions) {
           if (op.kind === 'invoke') {
             plan.calls.add(op.fn);
@@ -202,6 +218,18 @@ export class ReactProgram {
         if (b.end.kind === 'await') for (const arg of b.end.args) visitValue(arg, inspect);
         if (b.end.kind === 'return' && b.end.value) visitValue(b.end.value, inspect);
         for (const edge of successors(b)) for (const arg of edge.args) visitValue(arg, inspect);
+      }
+      // The entry keeps the task's declared call signature. Each later block
+      // needs only originals read there or forwarded to a reachable successor.
+      if (readsByBlock && plan.taskBlocks) {
+        for (let i = plan.blocks.length - 1; i > 0; i--) {
+          const b = plan.blocks[i]!;
+          const used = readsByBlock.get(b.id)!;
+          for (const edge of successors(b)) {
+            for (const parameter of plan.taskBlocks.get(edge.block)!.originalParams) used.add(parameter);
+          }
+          plan.taskBlocks.get(b.id)!.originalParams = fn.params.filter(parameter => used.has(parameter));
+        }
       }
       this.functions.set(fnId, plan);
       for (const callee of plan.calls) reached.add(callee);

@@ -41,6 +41,10 @@ export function authoredTaskPolicySource() {
   return compileSource(new URL('./authoring-task-policies/owner.proto.ts.txt', import.meta.url), 'PolicyReader', 'default');
 }
 
+export function authoredPairSource() {
+  return compileSource(new URL('./authoring-pair/owner.proto.ts.txt', import.meta.url), 'PairReader', 'default');
+}
+
 export function authoredSyncRetirementSource() {
   return compileSource(new URL('./authoring-sync-retirement/owner.proto.ts.txt', import.meta.url), 'SyncTree', 'default');
 }
