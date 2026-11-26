@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "kind": "historical-record-archive",
+  "archivedAt": "2026-11-26T18:15:38.789920+00:00",
+  "displayDate": "2026-11-27",
+  "displayTimeZone": "Asia/Shanghai",
+  "sourceRevision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+  "purpose": "Immutable original records whose historical archive URLs exceeded the current file-size policy; the two landing pages retain navigation and make no current-source acceptance claim.",
+  "originalBytesPreservedInPublishedGit": true,
+  "recordCount": 2,
+  "records": [
+    {
+      "path": "internal/records/2026-11-24-sprint7-knowledge-comparison.md",
+      "title": "# Sprint 7 · #734 三路径 Tabs 知识比较实际结果",
+      "sourceRevision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+      "blob": "ca4df2e4f280ff9b2cb2fc130fb77bad1c23d954",
+      "bytes": 12870,
+      "sha256": "193abe605c9013ac103fceaac78fad1f479c2e8fe2651c7e849ae8d34fe47a7d",
+      "originalUrl": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/internal/records/2026-11-24-sprint7-knowledge-comparison.md"
+    },
+    {
+      "path": "internal/records/archive/2026-11/2026-11-16-compiler-native-acceptance.zh-CN.md",
+      "title": "# Compiler 原生浏览器续验与源码解析修复",
+      "sourceRevision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+      "blob": "67fdcaea7b4e478d401dafbbd82391f3d1e2b8ad",
+      "bytes": 12344,
+      "sha256": "5f12b3aaf321ed1297f21e5ed1077a02a9b859f05d31ddf65a27470894175b49",
+      "originalUrl": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/internal/records/archive/2026-11/2026-11-16-compiler-native-acceptance.zh-CN.md"
+    }
+  ]
+}
