@@ -15,7 +15,7 @@ const def = {
 };
 const walkFiles = (directory) =>
   readdirSync(directory, { withFileTypes: true }).flatMap((e) =>
-    ['node_modules', 'dist', 'test', 'test-utils'].includes(e.name)
+    ['node_modules', 'dist', 'test', 'test-utils'].includes(e.name) || e.name.startsWith('dist.')
       ? []
       : e.isDirectory()
         ? walkFiles(resolve(directory, e.name))
