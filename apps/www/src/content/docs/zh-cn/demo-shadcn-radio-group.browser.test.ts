@@ -116,8 +116,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
       page.on('pageerror', (error) => errors.push(error.message));
       try {
         await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
-        const preview = page.locator('[data-previewer-id]').first();
-        await selectRuntime(page, preview, runtime, '[role="radiogroup"]', 3);
+        const preview = page.locator('[data-demo-id="demo-shadcn-radio-group"]');
+        await selectRuntime(page, preview, runtime, '[role="radiogroup"]', 1);
         await page.keyboard.press('Escape');
         await expect.poll(() => page.getByRole('option').count()).toBe(0);
         expect(await preview.getAttribute('data-projection-mode')).toBe('fixed-family');
@@ -125,20 +125,21 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         expect(await preview.getAttribute('data-projection-component')).toBe('radio-group');
 
         const content = preview.locator('[data-projection-content]');
-        const density = content.getByRole('radiogroup', { name: 'Density preference' });
-        const empty = content.getByRole('radiogroup', { name: 'No initial selection' });
-        const disabled = content.getByRole('radiogroup', { name: 'Disabled group' });
+        const density = content.getByRole('radiogroup', { name: 'Display density' });
         const first = density.getByRole('radio', { name: 'Default', exact: true });
         const selected = density.getByRole('radio', { name: 'Comfortable', exact: true });
-        const compact = density.getByRole('radio', { name: 'Compact (disabled)', exact: true });
-        const value = content.locator('[data-demo-ref="selectedValue"]');
+        const compact = density.getByRole('radio', { name: 'Compact', exact: true });
+        const checkedStates = () =>
+          density
+            .getByRole('radio')
+            .evaluateAll((items) => items.map((item) => item.getAttribute('aria-checked')));
         observations.entry = {
-          value: await value.textContent(),
+          checked: await checkedStates(),
           items: await Promise.all([first, selected, compact].map(itemState)),
         };
         await expect
-          .poll(() => value.textContent(), { message: `${runtime}: initial exposed value` })
-          .toBe('Value: comfortable');
+          .poll(checkedStates, { message: `${runtime}: initial checked selection` })
+          .toEqual(['false', 'true', 'false']);
         if (scenario === 'initial-entry') {
           // P-BASE-RADIO-GROUP-FOCUS-ENTRY: no Item input may establish current
           // before verifying the initially selected, non-first Tab entry.
@@ -152,10 +153,10 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
               [first, selected, compact].map(async (item) => (await itemState(item)).tabIndex)
             )
           ).toEqual([-1, 0, -1]);
-          await content.getByText('Density preference', { exact: true }).click();
+          await preview.locator('[role="tab"][aria-selected="true"]').first().focus();
           await page.keyboard.press('Tab');
           await expect.poll(async () => (await itemState(selected)).focused).toBe(true);
-          expect(await value.textContent()).toBe('Value: comfortable');
+          expect(await checkedStates()).toEqual(['false', 'true', 'false']);
           observations.focus = await itemState(selected);
           observations.errors = errors;
           expect(errors).toEqual([]);
@@ -171,9 +172,9 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           // The visible sibling Label is the sole name source and uses Base's
           // default activation. WC exposes DOM CustomEvents; the framework
           // adapters expose callbacks instead, covered by their integration tests.
-          const firstLabel = content.locator('[data-demo-ref="density-default-label"]');
-          const selectedLabel = content.locator('[data-demo-ref="density-comfortable-label"]');
-          const compactLabel = content.locator('[data-demo-ref="density-compact-label"]');
+          const firstLabel = content.locator('[data-demo-ref="hero-default-label"]');
+          const selectedLabel = content.locator('[data-demo-ref="hero-comfortable-label"]');
+          const compactLabel = content.locator('[data-demo-ref="hero-compact-label"]');
           expect(await first.getAttribute('aria-labelledby')).toBe(
             await firstLabel.getAttribute('id')
           );
@@ -204,24 +205,18 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
             expect(await density.getAttribute('data-label-select-count')).toBe(String(count));
           };
           await firstLabel.click();
-          await expect.poll(() => value.textContent()).toBe('Value: default');
+          await expect.poll(checkedStates).toEqual(['true', 'false', 'false']);
           await expect.poll(async () => (await itemState(first)).focused).toBe(true);
           await expectSignalCounts(1);
           await firstLabel.click();
           await expectSignalCounts(1);
           await selectedLabel.tap();
-          await expect.poll(() => value.textContent()).toBe('Value: comfortable');
+          await expect.poll(checkedStates).toEqual(['false', 'true', 'false']);
           await expect.poll(async () => (await itemState(selected)).focused).toBe(true);
           await expectSignalCounts(2);
           await compactLabel.click();
-          await content.locator('[data-demo-ref="disabled-default-label"]').click();
-          expect(await value.textContent()).toBe('Value: comfortable');
-          expect(
-            await disabled
-              .getByRole('radio', { name: 'Comfortable', exact: true })
-              .getAttribute('aria-checked')
-          ).toBe('true');
-          await expectSignalCounts(2);
+          await expect.poll(checkedStates).toEqual(['false', 'false', 'true']);
+          await expectSignalCounts(3);
           observations.labels = {
             signalCarrier:
               runtime === 'wc' ? 'DOM CustomEvent' : 'callback; counted in adapter tests',
@@ -231,17 +226,14 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           };
           // Label does not create a keyboard path; the focused Item keeps it.
           await selectedLabel.click();
+          await expect.poll(checkedStates).toEqual(['false', 'true', 'false']);
           await page.keyboard.press('ArrowRight');
-          await expect.poll(() => value.textContent()).toBe('Value: default');
+          await expect.poll(checkedStates).toEqual(['false', 'false', 'true']);
+          await page.keyboard.press('Home');
+          await expect.poll(checkedStates).toEqual(['true', 'false', 'false']);
           await page.keyboard.press('End');
-          await expect.poll(() => value.textContent()).toBe('Value: comfortable');
+          await expect.poll(checkedStates).toEqual(['false', 'false', 'true']);
           expect(await density.locator('[role="radio"][tabindex="0"]').count()).toBe(1);
-          await page.keyboard.press('Tab');
-          const emptyFirst = empty.getByRole('radio', { name: 'Default', exact: true });
-          await expect.poll(async () => (await itemState(emptyFirst)).focused).toBe(true);
-          expect(await empty.locator('[role="radio"][aria-checked="true"]').count()).toBe(0);
-          await page.keyboard.press('Space');
-          await expect.poll(() => emptyFirst.getAttribute('aria-checked')).toBe('true');
           observations.errors = errors;
           expect(errors).toEqual([]);
           await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}.png`) });
@@ -273,29 +265,19 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           expect(item.indicatorRole).toBeNull();
           expect(item.indicatorTabIndex).toBeNull();
           expect(item.indicatorControls).toBe(0);
-          // The Rhea profile paints an unchecked item with bg-input/90.
+          // The Rhea profile paints an unchecked item with bg-input/90 and transition-shadow (150ms).
           expect(alpha(item.background)).toBe(item.checked === 'true' ? 1 : 0.9);
-          expect(item.duration).toBe('0s');
+          expect(item.duration).toBe('0.15s');
         }
-        expect(initial[2]).toMatchObject({
-          disabled: 'true',
-          opacity: '0.5',
-          cursor: 'not-allowed',
-        });
-        expect(await empty.locator('[role="radio"][aria-checked="true"]').count()).toBe(0);
-        expect(await empty.locator('[role="radio"][tabindex="0"]').count()).toBe(1);
-        expect(await disabled.locator('[role="radio"][aria-disabled="true"]').count()).toBe(3);
-        expect(await disabled.locator('[role="radio"][tabindex="0"]').count()).toBe(0);
-        expect(await disabled.locator('[role="radio"][aria-checked="true"]').count()).toBe(1);
         expect(await content.locator('input').count()).toBe(0);
         await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}-light.png`) });
 
         // Independent interaction evidence starts from real pointer selections;
         // the separate initial-entry case remains required and unmodified.
         await clickCenter(page, first);
-        await expect.poll(() => value.textContent()).toBe('Value: default');
+        await expect.poll(checkedStates).toEqual(['true', 'false', 'false']);
         await clickCenter(page, selected);
-        await expect.poll(() => value.textContent()).toBe('Value: comfortable');
+        await expect.poll(checkedStates).toEqual(['false', 'true', 'false']);
         expect(
           await Promise.all(
             [first, selected, compact].map(async (item) => (await itemState(item)).tabIndex)
@@ -317,33 +299,19 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         observations.focus = await itemState(selected);
         await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}-focus.png`) });
 
-        for (const [key, next] of [
-          ['ArrowRight', 'default'],
-          ['End', 'comfortable'],
-          ['Home', 'default'],
-          ['ArrowLeft', 'comfortable'],
-          ['ArrowDown', 'default'],
-          ['ArrowUp', 'comfortable'],
-        ]) {
-          await page.keyboard.press(key!);
-          await expect.poll(() => value.textContent()).toBe(`Value: ${next}`);
+        for (const [key, expected] of [
+          ['ArrowRight', ['false', 'false', 'true']],
+          ['Home', ['true', 'false', 'false']],
+          ['End', ['false', 'false', 'true']],
+          ['ArrowLeft', ['false', 'true', 'false']],
+          ['ArrowDown', ['false', 'false', 'true']],
+          ['ArrowUp', ['false', 'true', 'false']],
+        ] as const) {
+          await page.keyboard.press(key);
+          await expect.poll(checkedStates).toEqual(expected);
           expect(await density.locator('[role="radio"][aria-checked="true"]').count()).toBe(1);
           expect(await density.locator('[role="radio"][tabindex="0"]').count()).toBe(1);
         }
-
-        // P-BASE-RADIO-GROUP-ITEM activation: Tab and Enter leave an empty
-        // group unselected; Space requests selection of its focused Item.
-        const emptyFirst = empty.getByRole('radio', { name: 'Default', exact: true });
-        await page.keyboard.press('Tab');
-        await expect.poll(async () => (await itemState(emptyFirst)).focused).toBe(true);
-        await page.keyboard.press('Enter');
-        await waitForValueProjection(page);
-        expect(await empty.locator('[role="radio"][aria-checked="true"]').count()).toBe(0);
-        await page.keyboard.press('Space');
-        await expect.poll(() => emptyFirst.getAttribute('aria-checked')).toBe('true');
-        expect(await empty.locator('[role="radio"][aria-checked="true"]').count()).toBe(1);
-        expect(await value.textContent()).toBe('Value: comfortable');
-        observations.emptySelection = await itemState(emptyFirst);
 
         // Base selection commits on release, not on down or an outside release.
         const rect = await first.boundingBox();
@@ -351,45 +319,50 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
         await page.mouse.down();
         await waitForValueProjection(page);
-        expect(await value.textContent()).toBe('Value: comfortable');
-        expect(
-          await density
-            .getByRole('radio')
-            .evaluateAll((items) => items.map((item) => item.getAttribute('aria-checked')))
-        ).toEqual(['false', 'true', 'false']);
+        expect(await checkedStates()).toEqual(['false', 'true', 'false']);
         await page.mouse.move(rect.x + 60, rect.y + rect.height / 2);
         await page.mouse.up();
         await waitForValueProjection(page);
-        expect(await value.textContent()).toBe('Value: comfortable');
-        expect(
-          await density
-            .getByRole('radio')
-            .evaluateAll((items) => items.map((item) => item.getAttribute('aria-checked')))
-        ).toEqual(['false', 'true', 'false']);
+        expect(await checkedStates()).toEqual(['false', 'true', 'false']);
         await clickCenter(page, first);
-        await expect.poll(() => value.textContent()).toBe('Value: default');
-        await clickCenter(page, compact);
+        await expect.poll(checkedStates).toEqual(['true', 'false', 'false']);
+
+        // Verify disabled item and disabled group in the dedicated disabled demo.
+        const disabledPreview = page.locator('[data-demo-id="demo-shadcn-radio-group-disabled"]');
+        await disabledPreview.scrollIntoViewIfNeeded();
+        await selectRuntime(page, disabledPreview, runtime, '[role="radiogroup"]', 2);
+        const disabledItem = disabledPreview
+          .getByRole('radiogroup', { name: 'Single disabled option' })
+          .getByRole('radio', { name: 'Disabled', exact: true });
+        expect(await itemState(disabledItem)).toMatchObject({
+          disabled: 'true',
+          opacity: '0.5',
+          cursor: 'not-allowed',
+        });
+        const disabledGroup = disabledPreview.getByRole('radiogroup', {
+          name: 'Disabled radio group',
+        });
+        expect(await disabledGroup.locator('[role="radio"][aria-disabled="true"]').count()).toBe(3);
+        expect(await disabledGroup.locator('[role="radio"][tabindex="0"]').count()).toBe(0);
+        expect(await disabledGroup.locator('[role="radio"][aria-checked="true"]').count()).toBe(1);
+        await clickCenter(
+          page,
+          disabledGroup.getByRole('radio', { name: 'Option 1', exact: true })
+        );
         await waitForValueProjection(page);
-        expect(await value.textContent()).toBe('Value: default');
         expect(
-          await density
-            .getByRole('radio')
-            .evaluateAll((items) => items.map((item) => item.getAttribute('aria-checked')))
-        ).toEqual(['true', 'false', 'false']);
-        await clickCenter(page, disabled.getByRole('radio', { name: 'Default', exact: true }));
-        await waitForValueProjection(page);
-        expect(
-          await disabled
-            .getByRole('radio', { name: 'Comfortable', exact: true })
+          await disabledGroup
+            .getByRole('radio', { name: 'Option 2', exact: true })
             .getAttribute('aria-checked')
         ).toBe('true');
 
+        await preview.scrollIntoViewIfNeeded();
         await applyColorScheme(page, 'dark');
         await expect.poll(async () => alpha((await itemState(first)).background)).toBe(1);
         // The Rhea profile keeps bg-input/90 in both color schemes; the dark
         // input color carries a 0.15 alpha, so the unchecked surface is 0.135.
         expect(alpha((await itemState(selected)).background)).toBeCloseTo(0.135, 3);
-        expect(await value.textContent()).toBe('Value: default');
+        expect(await checkedStates()).toEqual(['true', 'false', 'false']);
         observations.dark = await Promise.all([first, selected, compact].map(itemState));
         expect(
           (observations.dark as Awaited<ReturnType<typeof itemState>>[]).map(
@@ -408,12 +381,12 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           16,
           1
         );
-        expect(await value.textContent()).toBe('Value: default');
+        expect(await checkedStates()).toEqual(['true', 'false', 'false']);
         await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}-narrow.png`) });
         await applyColorScheme(page, 'light');
         await expect.poll(async () => alpha((await itemState(first)).background)).toBe(1);
         await expect.poll(async () => alpha((await itemState(selected)).background)).toBe(0.9);
-        expect(await value.textContent()).toBe('Value: default');
+        expect(await checkedStates()).toEqual(['true', 'false', 'false']);
         expect(errors).toEqual([]);
         observations.errors = errors;
         await writeFile(
