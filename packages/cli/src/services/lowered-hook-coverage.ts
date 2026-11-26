@@ -34,6 +34,7 @@ import {
   createFiniteTokenMapPathProof,
 } from './finite-token-map-proof.js';
 import { createFiniteRowLifetimeProof } from './finite-row-lifetime.js';
+import { createPrivateStyleHandleMapProof } from './private-style-handle-map-proof.js';
 
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
@@ -3931,6 +3932,11 @@ function scanRuleStateSource(
     finiteTokenMapRows,
     closure?.entrySource ?? source
   );
+  const privateStyleHandleMapMember = createPrivateStyleHandleMapProof(
+    finiteTokenMapRows,
+    closure?.entrySource ?? source,
+    sourceSummary
+  );
   const finiteTokenMapMember = (expression: ts.Expression): boolean =>
     privateTokenMapMember(expression) ||
     sharedTokenMapMember(expression) ||
@@ -4086,7 +4092,10 @@ function scanRuleStateSource(
       // The style collector resolves a finite pre-bound tw handle through its
       // lexical binding; require that same token proof here instead of
       // rejecting every non-inline handle.
-      return resolvableTokenArgument(call as ts.Expression, scope);
+      return (
+        resolvableTokenArgument(call as ts.Expression, scope) ||
+        privateStyleHandleMapMember(call as ts.Expression)
+      );
     });
   };
 

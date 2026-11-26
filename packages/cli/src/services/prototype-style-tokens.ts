@@ -1613,20 +1613,28 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     }
   }
 
-  if (rootInventory && ts.isCallExpression(node) && isFeedbackStyleUseCall(node)) {
-    const sourceFile = node.getSourceFile();
-    const position = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-    const context = isInsideRuleCall(node) ? 'rule' : 'setup';
-    for (const token of collectTwTokens(node, scope, exposures)) {
-      rootInventory.occurrences.push(
-        Object.freeze({
-          token,
-          path: rootInventory.sourcePath,
-          line: position.line + 1,
-          column: position.character + 1,
-          context,
-        })
-      );
+  if (ts.isCallExpression(node) && isFeedbackStyleUseCall(node)) {
+    const usedTokens = collectTwTokens(node, scope, exposures);
+    // A pre-bound handle has no inline tw() node in the consuming helper.
+    // Runtime-only Rules still apply these raw tokens, even when their private
+    // State deliberately has no Web selector prefix. Collect the actual use,
+    // including handles reached from imported module constants.
+    for (const token of usedTokens) tokens.add(token);
+    if (rootInventory) {
+      const sourceFile = node.getSourceFile();
+      const position = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+      const context = isInsideRuleCall(node) ? 'rule' : 'setup';
+      for (const token of usedTokens) {
+        rootInventory.occurrences.push(
+          Object.freeze({
+            token,
+            path: rootInventory.sourcePath,
+            line: position.line + 1,
+            column: position.character + 1,
+            context,
+          })
+        );
+      }
     }
   }
 
