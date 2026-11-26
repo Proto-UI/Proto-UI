@@ -119,16 +119,11 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
       expect(phases).toContainEqual({ phase: 'mounting', epoch: 2 });
       expect(mounted).toBe(0);
       if (replacementGate === 'presence') {
-        expect(scheduled).toHaveLength(1);
-        scheduled.shift()!(); // Invalidated epoch 1; epoch 2 is still awaiting Presence.
+        expect(scheduled).toHaveLength(0);
         presence!.setIntent('enter');
         await new Promise<void>((resolve) => queueMicrotask(resolve));
         expect(scheduled).toHaveLength(1);
       } else {
-        expect(scheduled).toHaveLength(2);
-        // The configured host owns task order. Epoch 2 was queued recursively
-        // before epoch 1 returned to schedule; execute the stale task first.
-        scheduled.pop()!();
         expect(scheduled).toHaveLength(1);
       }
       expect(actualMountedEpochs).toEqual([]);
