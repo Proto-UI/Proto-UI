@@ -1146,7 +1146,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const [expectedPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
-        expectHardFrame(panelSurface, 'none', 'rgb(0, 0, 0)', `${runtime}/hover-panel`);
+        expectHardFrame(panelSurface, '3px', expectedPanelForeground, `${runtime}/hover-panel`);
         expect(panelSurface.backgroundColor, `${runtime}/hover-panel/background`).toBe(
           expectedPanelBackground
         );
@@ -1255,17 +1255,22 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkPanelSurface.animationDuration,
           `${runtime}/dark/hover-panel/animation-duration`
         ).toBe('0.2s');
-        expectHardFrame(darkPanelSurface, 'none', 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
-        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
-        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
-          'rgba(0, 0, 0, 0)'
-        );
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-background',
         ]);
         const [darkPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
+        expectHardFrame(
+          darkPanelSurface,
+          '3px',
+          darkPanelForeground,
+          `${runtime}/dark/hover-panel`
+        );
+        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
+        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
+          'rgba(0, 0, 0, 0)'
+        );
         expect(darkPanelSurface.backgroundColor, `${runtime}/dark/hover-panel/background`).toBe(
           darkPanelBackground
         );

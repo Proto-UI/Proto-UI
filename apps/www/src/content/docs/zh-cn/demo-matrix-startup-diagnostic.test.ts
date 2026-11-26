@@ -593,3 +593,52 @@ it.each([
     ]);
   }
 );
+
+it('rejects incomplete demo module delivery and records route-open failure without a passed phase', async () => {
+  const source = ts.createSourceFile(
+    'matrix.ts',
+    readFileSync(new URL('./demo-matrix.browser.test.ts', import.meta.url), 'utf8'),
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const open = source.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'openMatrixRoute'
+  )!;
+  const { page } = fixture();
+  page.evaluate.mockResolvedValue({ delivered: 1, registered: 2 });
+  const waitFor = vi.fn(async () => {});
+  Object.assign(page, { locator: () => ({ first: () => ({ waitFor }) }) });
+  const context = { newPage: async () => page, close: vi.fn(async () => {}) };
+  const browser = { newContext: async () => context };
+  const start = vi.fn(async () => ({ finish: async () => {} }));
+  const readDiagnostic = vi.fn(async () => {});
+  const run = vm.runInNewContext(
+    transformSync(`${open.getText(source)}\nopenMatrixRoute;`, { loader: 'ts', target: 'es2022' })
+      .code,
+    {
+      browser,
+      expect: Object.assign((value: unknown) => expect(value), {
+        getState: () => ({
+          currentTestName:
+            'Website Demo Matrix browser smoke > mounts every demo in every official Web adapter',
+        }),
+      }),
+      matrixDiagnostics: new WeakMap(),
+      diagnosticSourceSha: options().sourceSha,
+      console,
+      Date,
+      URL,
+      process: { env: {} },
+      baseUrl: 'http://127.0.0.1:4321',
+      MATRIX_ROUTE: '/zh-cn/internal/demo-matrix/',
+      startMatrixStartupDiagnostic: start,
+      persistReadinessDiagnostic: readDiagnostic,
+    }
+  );
+  await expect(run({ width: 1440, height: 900 })).rejects.toThrow();
+  expect(context.close).toHaveBeenCalledTimes(1);
+  expect(readDiagnostic.mock.calls.map((call) => (call as unknown[]).slice(1, 3))).toEqual([
+    ['route-open', 'started'],
+    ['route-open', 'failed'],
+  ]);
+});
