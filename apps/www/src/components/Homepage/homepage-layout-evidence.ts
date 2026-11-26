@@ -1,22 +1,12 @@
 /** Passive geometry evidence only. Never writes to the rendered page. */
-export const HOMEPAGE_GALLERY_IDS = [
-  'controls',
-  'shortcuts',
-  'editor',
-  'milestones',
-  'workspace-analytics',
-  'workspace-command',
-  'spark',
-  'ecosystem',
-  'preferences',
-  'workspace-help',
-  'overlays',
-  'protocol',
-  'workspace-progress',
-  'hover',
-  'choices',
-  'throughput',
+const WIDE_GALLERY_COLUMNS = [
+  ['controls', 'shortcuts', 'milestones'],
+  ['workspace-analytics', 'workspace-command', 'ecosystem'],
+  ['preferences', 'workspace-progress', 'protocol'],
+  ['hover', 'editor', 'workspace-help', 'highlights'],
+  ['overlays', 'spark', 'choices', 'throughput'],
 ] as const;
+export const HOMEPAGE_GALLERY_IDS = WIDE_GALLERY_COLUMNS.flat();
 
 export type GalleryRect = {
   left: number;
@@ -132,6 +122,19 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
       )
         issues.push(`${a.id}/${b.id}: gallery cards overlap`);
     }
+  const paintedColumns = columns.map((column) => ({
+    left: column.left,
+    right: column.right,
+    ids: column.cards.map((card) => card.id),
+    bottom: Math.max(...column.cards.map((card) => card.rect.bottom)),
+    adjacentGaps: column.adjacentGaps,
+  }));
+  if (
+    facts.viewportWidth >= 96 * facts.rootFontSize &&
+    JSON.stringify(paintedColumns.map((column) => column.ids)) !==
+      JSON.stringify(WIDE_GALLERY_COLUMNS)
+  )
+    issues.push('painted wide gallery columns differ from authored card groups');
   if (facts.container) {
     const expectedColumns =
       facts.viewportWidth <= 639
@@ -155,12 +158,11 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
   return {
     issues: [...new Set(issues)],
     expectedGap,
-    columns: columns.map((column) => ({
-      left: column.left,
-      right: column.right,
-      ids: column.cards.map((card) => card.id),
-      adjacentGaps: column.adjacentGaps,
-    })),
+    columns: paintedColumns,
+    bottomSpread: paintedColumns.length
+      ? Math.max(...paintedColumns.map((column) => column.bottom)) -
+        Math.min(...paintedColumns.map((column) => column.bottom))
+      : null,
   };
 }
 

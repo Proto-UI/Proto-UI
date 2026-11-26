@@ -32,9 +32,9 @@ const CARD_TEXT_OWNERS: Record<string, Record<string, number>> = {
   },
   milestones: {
     '.home-gallery__title': 1,
-    '.home-gallery__caption': 3,
-    '.home-gallery__eyebrow': 4,
-    '.home-gallery__submetric': 2,
+    '.home-gallery__caption': 4,
+    '.home-gallery__eyebrow': 6,
+    '.home-gallery__submetric': 3,
   },
   spark: {
     '.home-gallery__title': 1,
@@ -65,6 +65,11 @@ const CARD_TEXT_OWNERS: Record<string, Record<string, number>> = {
     '[data-demo-ref="gallery-protocol-status"][role="status"]': 1,
   },
   hover: { '.home-gallery__title': 2, '.home-gallery__caption': 1, '.home-gallery__copy': 1 },
+  highlights: {
+    '.home-gallery__title': 1,
+    '.home-gallery__caption': 3,
+    '.home-gallery__stat-value': 2,
+  },
   choices: {
     '.home-gallery__title': 1,
     '.home-gallery__caption': 1,
@@ -73,7 +78,7 @@ const CARD_TEXT_OWNERS: Record<string, Record<string, number>> = {
   },
   throughput: {
     '.home-gallery__title': 1,
-    '.home-gallery__caption': 1,
+    '.home-gallery__caption': 2,
     '.home-gallery__chart-label': 8,
     '.home-gallery__eyebrow': 2,
     '.home-gallery__stat-value': 2,
@@ -148,8 +153,11 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     const assertTextOwners = () => {
       // Direct WC rendering retains authored boxes inside detached content hosts.
       const owners = [...host.querySelectorAll('[data-home-text]')];
+      const cardId = (owner: Element) =>
+        owner.closest('[data-gallery-demo]')?.getAttribute('data-gallery-demo');
+      const ownersOf = (id: string) => owners.filter((owner) => cardId(owner) === id);
       for (const [id, roles] of Object.entries(CARD_TEXT_OWNERS)) {
-        const cardOwners = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
+        const cardOwners = ownersOf(id);
         for (const [selector, count] of Object.entries(roles)) {
           const matches = cardOwners.filter((owner) => owner.matches(selector));
           expect(matches, `${id} ${selector}`).toHaveLength(count);
@@ -160,9 +168,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         milestones: 'Release milestones',
         ecosystem: 'Adapter parity',
         protocol: 'Quick setup',
+        highlights: 'Architecture notes',
         throughput: 'Component matrix',
       })) {
-        const cardOwners = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
+        const cardOwners = ownersOf(id);
         const heading = cardOwners.find((owner) => owner.matches('[role="heading"]'));
         expect(heading?.textContent?.trim(), id).toBe(title);
       }
@@ -205,8 +214,13 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
           'This is an interactive example on the current page. Nothing is uploaded, published or saved to an account. Reloading restores the defaults.',
         ],
       };
+      const expectedCards = [...Object.keys(CARD_TEXT_OWNERS), ...Object.keys(scenes)].sort();
+      expect([...host.querySelectorAll('[data-gallery-demo]')].map(cardId).sort()).toEqual(
+        expectedCards
+      );
+      expect([...new Set(owners.map(cardId))].sort()).toEqual(expectedCards);
       for (const [id, texts] of Object.entries(scenes)) {
-        const actual = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
+        const actual = ownersOf(id);
         expect(
           actual.map((owner) => owner.textContent?.trim()),
           id

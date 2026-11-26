@@ -895,7 +895,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
   'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
-    sourceSha256: '8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940',
+    sourceSha256: '29b2d2041176aaa91fd68934b9869835482a16e7beafb99937c448f6ccd66fff',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-lucide/icons/activity',
       '@proto.ui/prototypes-lucide/icons/arrow-right',
@@ -9990,7 +9990,7 @@ const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   ],
   [
     'apps/www/scripts/accordion-activation-probe.mjs',
-    '9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b',
+    '1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642',
   ],
 ];
 export function promotionBarePackageTargets(root, specifier, metadata) {

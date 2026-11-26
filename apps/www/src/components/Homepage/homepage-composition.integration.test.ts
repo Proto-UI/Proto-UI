@@ -144,25 +144,26 @@ it.each([
 
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
-    it('mounts sixteen real cards, decorative icons, a labelled sample chart and attribution', async () => {
+    it('mounts the gallery cards, decorative icons, a labelled sample chart and attribution', async () => {
       const view = await mount(family);
       await settle();
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
       expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
         'controls',
         'shortcuts',
-        'editor',
         'milestones',
         'workspace-analytics',
         'workspace-command',
-        'spark',
         'ecosystem',
         'preferences',
-        'workspace-help',
-        'overlays',
-        'protocol',
         'workspace-progress',
+        'protocol',
         'hover',
+        'editor',
+        'workspace-help',
+        'highlights',
+        'overlays',
+        'spark',
         'choices',
         'throughput',
       ]);
@@ -179,11 +180,30 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       await expect
         .poll(() => [...bars].map((bar) => bar.getAttribute('height')).join(','))
         .not.toBe(initialHeights.join(','));
-      const icons = view.host.querySelectorAll('[data-gallery-icon] svg');
-      expect(icons).toHaveLength(18);
-      for (const icon of icons) {
-        expect(icon.getAttribute('aria-hidden')).toBe('true');
-        expect(icon.closest('[data-gallery-icon]')?.getAttribute('aria-hidden')).toBe('true');
+      const glyphsIn = (id: string) =>
+        [...view.host.querySelectorAll(`[data-gallery-demo="${id}"] [data-gallery-icon]`)].map(
+          (slot) => slot.getAttribute('data-gallery-icon')
+        );
+      expect(glyphsIn('controls')).toEqual(['arrow-right']);
+      expect(glyphsIn('overlays')).toEqual(['release-plus']);
+      expect(glyphsIn('highlights')).toEqual(['controls', 'preferences']);
+      const highlights = cards.find((card) => card.dataset.galleryDemo === 'highlights')!;
+      const rows = highlights.querySelectorAll('.home-gallery__highlight-row');
+      expect(
+        [...rows].map((row) => [
+          row.querySelector('[data-gallery-icon]')?.getAttribute('data-gallery-icon'),
+          row.querySelector('.home-gallery__stat-value')?.textContent?.trim(),
+          row.querySelector('.home-gallery__caption')?.textContent?.trim(),
+        ])
+      ).toEqual([
+        ['controls', 'Portable protocols', 'One state and a11y model across every host.'],
+        ['preferences', 'Swappable projections', 'Swap design systems without rewriting logic.'],
+      ]);
+      for (const slot of view.host.querySelectorAll('[data-gallery-icon]')) {
+        expect(slot.getAttribute('aria-hidden')).toBe('true');
+        const icons = slot.querySelectorAll('svg');
+        expect(icons, slot.getAttribute('data-gallery-icon') ?? '').toHaveLength(1);
+        expect(icons[0]!.getAttribute('aria-hidden')).toBe('true');
       }
       expect(view.host.querySelector('[data-gallery-fade]')).toBeNull();
       expect(view.ref('gallery-rhythm-value').textContent).toBe('90%');

@@ -564,7 +564,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
-      PREVIEW_BASELINE_SHA: 5f0844907895a4ae0db506fe6a5d0bf162318329
+      PREVIEW_BASELINE_SHA: 2f2398fcbf65be5099901caa5649e39103b3a163
       # Dispatch binds github.sha; a reusable PR caller must use the real head.
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       ASTRO_TELEMETRY_DISABLED: '1'
@@ -629,7 +629,15 @@ jobs:
               )
             done
           } | tee "$PREVIEW_FIT_EVIDENCE_DIR/environment.txt"
-      - name: Run the four selected source suites sequentially
+      - name: Check the gallery capture contract
+        if: ${{ !cancelled() && steps.ready.outcome == 'success' }}
+        working-directory: candidate
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          node --import tsx --test apps/www/scripts/homepage-evidence-contract.test.ts \
+            2>&1 | tee "$PREVIEW_FIT_EVIDENCE_DIR/gallery-contract.log"
+      - name: Exercise gallery composition, typography, icons, layout and runtime ownership
         if: ${{ !cancelled() && steps.ready.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 5
@@ -638,6 +646,11 @@ jobs:
           set +e
           corepack pnpm@10.32.1 exec vitest run --no-file-parallelism --maxWorkers=1 --minWorkers=1 \
             apps/www/src/components/Homepage/homepage-showcase.test.ts \
+            apps/www/src/components/Homepage/homepage-composition.integration.test.ts \
+            apps/www/src/components/Homepage/homepage-gallery-props.test.ts \
+            apps/www/src/components/Homepage/homepage-gallery-icons.test.ts \
+            apps/www/src/components/Homepage/homepage-layout-evidence.test.ts \
+            apps/www/src/components/Homepage/homepage-typography-state.test.ts \
             apps/www/src/components/Homepage/homepage-runtime-client.test.ts \
             apps/www/src/components/Homepage/homepage-focus-lifecycle.integration.test.ts \
             apps/www/src/components/PrototypePreviewer/homepage-presentation.test.ts \
@@ -647,7 +660,7 @@ jobs:
           printf '%s\n' "${fit_status[0]}" > "$PREVIEW_FIT_EVIDENCE_DIR/units-exit.txt"
           if [ "${fit_status[0]}" -ne 0 ]; then exit "${fit_status[0]}"; fi
           exit "${fit_status[1]}"
-      - name: Capture all eight exact current-main before views with the same probe
+      - name: Capture mobile, desktop and wide before views at the pinned main revision
         if: ${{ !cancelled() && steps.ready.outcome == 'success' }}
         working-directory: baseline
         timeout-minutes: 10
@@ -658,7 +671,7 @@ jobs:
             --revision-kind baseline --expected-revision "$PREVIEW_BASELINE_SHA" \
             --expected-probe-revision "$CANDIDATE_SHA" --out "$PREVIEW_FIT_EVIDENCE_DIR/baseline" \
             2>&1 | tee "$PREVIEW_FIT_EVIDENCE_DIR/baseline.log"
-      - name: Capture and verify all eight exact candidate after views
+      - name: Capture and verify the matching candidate views
         if: ${{ !cancelled() && steps.ready.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 10
@@ -669,7 +682,7 @@ jobs:
             --revision-kind candidate --expected-revision "$CANDIDATE_SHA" \
             --expected-probe-revision "$CANDIDATE_SHA" --out "$PREVIEW_FIT_EVIDENCE_DIR/candidate" \
             2>&1 | tee "$PREVIEW_FIT_EVIDENCE_DIR/candidate.log"
-      - name: Run only the three mobile journeys and original responsive gallery journey
+      - name: Exercise the mobile journeys, responsive gallery, shortcuts and compact editor tabs
         if: ${{ !cancelled() && steps.ready.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 10
@@ -680,7 +693,7 @@ jobs:
           set +e
           corepack pnpm@10.32.1 exec vitest run --no-file-parallelism --maxWorkers=1 --minWorkers=1 \
             apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts \
-            --testNamePattern='^Homepage Runtime demobox browser smoke (fills the mobile preview with live components and enters the same gallery through the Hero Demo link|keeps the compact preview full width through viewport, root-font, theme and Runtime changes|honors direct and repeated Hero hash entry with native Back and Forward|uses unframed responsive task layout, real control feedback and four executable runtimes)$' \
+            --testNamePattern='^Homepage Runtime demobox browser smoke (fills the mobile preview with live components and enters the same gallery through the Hero Demo link|keeps the compact preview full width through viewport, root-font, theme and Runtime changes|honors direct and repeated Hero hash entry with native Back and Forward|uses unframed responsive task layout, real control feedback and four executable runtimes|operates the four homepage shortcut groups and compact Brutalist editor tabs with native input)$' \
             --reporter=default --reporter=json --outputFile="$PREVIEW_FIT_EVIDENCE_DIR/runtime.json" \
             2>&1 | tee "$PREVIEW_FIT_EVIDENCE_DIR/runtime.log"
           fit_status=("${PIPESTATUS[@]}")
@@ -705,7 +718,7 @@ jobs:
           printf '%s\n' "${fit_status[0]}" > "$PREVIEW_FIT_EVIDENCE_DIR/composition-exit.txt"
           if [ "${fit_status[0]}" -ne 0 ]; then exit "${fit_status[0]}"; fi
           exit "${fit_status[1]}"
-      - name: Reconcile exact source, all sixteen capture cases and the actual selected test inventory
+      - name: Reconcile exact source, all capture cases and the selected test inventory
         if: always()
         working-directory: candidate
         run: |
@@ -719,7 +732,7 @@ jobs:
           const failures = [], captures = {}, suites = [];
           const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
           const read = name => JSON.parse(fs.readFileSync(path.join(root, name), 'utf8'));
-          const expectedIds = ['zh-cn', 'en'].flatMap(locale => [390, 1440].flatMap(width =>
+          const expectedIds = ['zh-cn', 'en'].flatMap(locale => [390, 1440, 1920].flatMap(width =>
             ['light', 'dark'].map(theme => `${locale}-${width}-${theme}`)));
           for (const [kind, revision] of [['baseline', process.env.PREVIEW_BASELINE_SHA], ['candidate', process.env.CANDIDATE_SHA]]) {
             try {
@@ -737,7 +750,7 @@ jobs:
               assert.equal(data.generatedFiles.length, 5);
               assert.ok(data.generatedFiles.every(item => item.bytes > 0 && /^[a-f0-9]{64}$/.test(item.sha256)));
               assert.ok(data.browser.length > 0 && data.chromiumSandbox === true);
-              assert.equal(data.cases.length, 8);
+              assert.equal(data.cases.length, expectedIds.length);
               assert.deepEqual(data.cases.map(item => item.id).sort(), [...expectedIds].sort());
               assert.deepEqual(data.failures, []);
               for (const entry of data.cases) {
@@ -772,6 +785,11 @@ jobs:
           } catch (error) { failures.push(`Shared probe binding: ${error.message}`); }
           const unitFiles = [
             'apps/www/src/components/Homepage/homepage-showcase.test.ts',
+            'apps/www/src/components/Homepage/homepage-composition.integration.test.ts',
+            'apps/www/src/components/Homepage/homepage-gallery-props.test.ts',
+            'apps/www/src/components/Homepage/homepage-gallery-icons.test.ts',
+            'apps/www/src/components/Homepage/homepage-layout-evidence.test.ts',
+            'apps/www/src/components/Homepage/homepage-typography-state.test.ts',
             'apps/www/src/components/Homepage/homepage-runtime-client.test.ts',
             'apps/www/src/components/Homepage/homepage-focus-lifecycle.integration.test.ts',
             'apps/www/src/components/PrototypePreviewer/homepage-presentation.test.ts',
@@ -783,6 +801,7 @@ jobs:
               'keeps the compact preview full width through viewport, root-font, theme and Runtime changes',
               'honors direct and repeated Hero hash entry with native Back and Forward',
               'uses unframed responsive task layout, real control feedback and four executable runtimes',
+              'operates the four homepage shortcut groups and compact Brutalist editor tabs with native input',
             ] },
             { id: 'composition', files: ['apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts'],
               titles: ['wc/shadcn connects the example tasks and keeps their content readable'] },
@@ -817,7 +836,7 @@ jobs:
           const receipt = { schemaVersion: 1, candidate: process.env.CANDIDATE_SHA,
             baseline: process.env.PREVIEW_BASELINE_SHA, runId: process.env.GITHUB_RUN_ID,
             runAttempt: process.env.GITHUB_RUN_ATTEMPT, observedAt: new Date().toISOString(),
-            scope: '8 initial views per source; four source files; 4 Runtime and 1 WC/Shadcn composition native cases',
+            scope: '12 initial views per source; 9 source suites; 5 Runtime and 1 WC/Shadcn composition native cases',
             captures: Object.fromEntries(Object.entries(captures).map(([kind, { file, sha256 }]) => [kind, { file, sha256 }])),
             comparison, suites, failures, captureIntegrity: failures.length ? 'failed' : 'passed',
             acceptance: 'pending-independent-visual-review-and-project-gates',

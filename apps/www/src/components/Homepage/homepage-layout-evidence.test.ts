@@ -18,15 +18,19 @@ const rect = (left: number, top: number, width: number, height = 100): GalleryRe
 function fixture(
   width: number,
   viewportWidth: number,
-  columnCount: number,
+  tracks: number | number[],
   gap = 20
 ): GalleryFlowFacts {
   const count = HOMEPAGE_GALLERY_IDS.length;
-  const distribution = Array.from(
-    { length: columnCount },
-    (_, index) =>
-      Math.floor(((index + 1) * count) / columnCount) - Math.floor((index * count) / columnCount)
-  );
+  const columnCount = typeof tracks === 'number' ? tracks : tracks.length;
+  const distribution = Array.isArray(tracks)
+    ? tracks
+    : Array.from(
+        { length: columnCount },
+        (_, index) =>
+          Math.floor(((index + 1) * count) / columnCount) -
+          Math.floor((index * count) / columnCount)
+      );
   const track = (width - gap * (columnCount - 1)) / columnCount;
   let index = 0;
   return {
@@ -52,15 +56,20 @@ function fixture(
 describe('homepage evidence observers', () => {
   it('accepts five real columns at 2K+, four desktop columns and one mobile column', () => {
     for (const scene of [
-      fixture(1856, 2048, 5),
-      fixture(1856, 2560, 5),
+      fixture(1856, 2048, [3, 3, 3, 4, 4]),
+      fixture(1856, 2560, [3, 3, 3, 4, 4]),
       fixture(1320, 1440, 4),
       fixture(288, 320, 1, 16),
     ])
       expect(galleryFlowEvidence(scene).issues).toEqual([]);
   });
   it('rejects wrong order, split cards, overlapping cards and absent columns', () => {
-    const scene = fixture(1856, 2048, 5);
+    const scene = fixture(1856, 2048, [3, 3, 3, 4, 4]);
+    expect(galleryFlowEvidence(scene).bottomSpread).toBe(120);
+    // Shift a column break while keeping the full inventory and flattened order intact.
+    expect(galleryFlowEvidence(fixture(1856, 2048, [3, 3, 4, 3, 4])).issues).toEqual([
+      'painted wide gallery columns differ from authored card groups',
+    ]);
     const order = structuredClone(scene);
     order.cards.reverse();
     expect(galleryFlowEvidence(order).issues).toContain(
@@ -120,7 +129,7 @@ describe('homepage evidence observers', () => {
       card.fragments = [{ ...card.rect }];
     }
     expect(galleryFlowEvidence(scene).issues).not.toEqual([]);
-    const columns = fixture(1856, 2048, 5);
+    const columns = fixture(1856, 2048, [3, 3, 3, 4, 4]);
     columns.columnGap = 48;
     expect(galleryFlowEvidence(columns).issues).not.toEqual([]);
   });

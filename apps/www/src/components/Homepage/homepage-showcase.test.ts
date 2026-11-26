@@ -204,21 +204,23 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     const root = content.demo.root;
     if (root.kind !== 'box') throw new Error('gallery root must be a box');
     const cards: Array<{ id: string; density: string; emphasis: string; body?: string }> = [];
-    const icons: string[] = [];
+    const icons: Record<string, string[]> = {};
     let charts = 0;
     let fades = 0;
     const links: Array<{ href?: string; text?: string }> = [];
-    const visit = (node: DemoChild) => {
+    const visit = (node: DemoChild, cardId = 'outside gallery cards') => {
       if (typeof node === 'string' || node.kind === 'text') return;
-      if (node.kind === 'box' && node.attrs?.['data-gallery-demo'])
+      if (node.kind === 'box' && node.attrs?.['data-gallery-demo']) {
+        cardId = node.attrs['data-gallery-demo'];
         cards.push({
-          id: node.attrs['data-gallery-demo'],
+          id: cardId,
           density: node.attrs['data-gallery-density']!,
           emphasis: node.attrs['data-gallery-emphasis']!,
           ...(node.attrs['data-gallery-body'] ? { body: node.attrs['data-gallery-body'] } : {}),
         });
+      }
       if (node.kind === 'box' && node.attrs?.['data-gallery-icon'])
-        icons.push(node.attrs['data-gallery-icon']);
+        (icons[cardId] ??= []).push(node.attrs['data-gallery-icon']);
       if (node.kind === 'box' && node.ref === 'gallery-rhythm-bars') charts++;
       if (node.kind === 'box' && node.attrs?.['data-gallery-fade'] !== undefined) {
         fades++;
@@ -226,24 +228,25 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       }
       if (node.kind === 'box' && node.tag === 'a')
         links.push({ href: node.attrs?.href, text: node.children?.[0] as string });
-      for (const child of node.children ?? []) visit(child);
+      for (const child of node.children ?? []) visit(child, cardId);
     };
     visit(root);
     expect(cards.map((card) => card.id)).toEqual([
       'controls',
       'shortcuts',
-      'editor',
       'milestones',
       'workspace-analytics',
       'workspace-command',
-      'spark',
       'ecosystem',
       'preferences',
-      'workspace-help',
-      'overlays',
-      'protocol',
       'workspace-progress',
+      'protocol',
       'hover',
+      'editor',
+      'workspace-help',
+      'highlights',
+      'overlays',
+      'spark',
       'choices',
       'throughput',
     ]);
@@ -255,8 +258,29 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       'workspace-analytics',
       'spark',
     ]);
-    expect(icons).toHaveLength(18);
-    expect(new Set(icons).size).toBe(18);
+    expect(icons).toEqual({
+      controls: ['arrow-right'],
+      shortcuts: [
+        'nav-blocks',
+        'nav-layers',
+        'nav-grid',
+        'nav-box',
+        'nav-workflow',
+        'nav-compass',
+        'nav-shield',
+        'nav-activity',
+        'nav-globe',
+        'nav-code',
+        'nav-cpu',
+        'nav-terminal',
+        'nav-palette',
+        'nav-sparkles',
+        'nav-wrench',
+        'nav-book',
+      ],
+      highlights: ['controls', 'preferences'],
+      overlays: ['release-plus'],
+    });
     expect(charts).toBe(1);
     expect(fades).toBe(0);
     expect(links).toEqual([

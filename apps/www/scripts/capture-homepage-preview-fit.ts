@@ -55,23 +55,29 @@ const generatedNames = [
 // Reading order of the workflow's immutable before image.
 const baselineGalleryIds = [
   'controls',
-  'workspace-command',
+  'shortcuts',
   'workspace-analytics',
-  'workspace-progress',
+  'workspace-command',
   'preferences',
-  'workspace-help',
-  'editor',
+  'workspace-progress',
   'hover',
+  'editor',
+  'workspace-help',
   'overlays',
+  'spark',
   'choices',
 ];
 const plan = ['zh-cn', 'en'].flatMap((locale) =>
-  [390, 1440].flatMap((width) =>
+  [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+    { width: 1920, height: 1080 },
+  ].flatMap((viewport) =>
     (['light', 'dark'] as const).map((theme) => ({
-      id: `${locale}-${width}-${theme}`,
+      id: `${locale}-${viewport.width}-${theme}`,
       locale,
       theme,
-      viewport: { width, height: width === 390 ? 844 : 1000 },
+      viewport,
     }))
   )
 );

@@ -892,6 +892,14 @@ export function createHomepageGalleryParts(
         'Shadcn · Brutalist',
         zh ? '设计体系投影就绪度示例' : 'Design projection readiness example'
       ),
+      milestoneTile(
+        zh ? '语义规范目录' : 'SPEC CATALOG',
+        zh ? '50+ 原型' : '50+ specs',
+        92,
+        zh ? '92% 已编目' : '92% cataloged',
+        '0.3 RC',
+        zh ? '语义规范编目覆盖率示例' : 'Spec catalog coverage example'
+      ),
     ],
     'milestones',
     { density: 'compact', emphasis: 'quiet' }
@@ -1026,8 +1034,61 @@ export function createHomepageGalleryParts(
           box('home-gallery__stat-value', ['4']),
         ]),
       ]),
+      box('home-gallery__caption', [
+        zh
+          ? '跨设计体系共用同一套 Base 交互契约。'
+          : 'Shared Base interaction contracts across families.',
+      ]),
     ],
     'throughput',
+    { density: 'compact', emphasis: 'quiet' }
+  );
+
+  // Column 4 Bottom: Architecture highlights (balances Col 4 into the shared bottom fade horizon)
+  const highlightRows: ReadonlyArray<{
+    glyph: HomepageGalleryIcon;
+    title: string;
+    desc: string;
+  }> = [
+    {
+      glyph: 'controls',
+      title: zh ? '无框架交互协议' : 'Portable protocols',
+      desc: zh
+        ? '一套状态机与无障碍语义跨宿主运行。'
+        : 'One state and a11y model across every host.',
+    },
+    {
+      glyph: 'preferences',
+      title: zh ? '可替换设计投影' : 'Swappable projections',
+      desc: zh
+        ? '外观与交互解耦，按需切换设计体系。'
+        : 'Swap design systems without rewriting logic.',
+    },
+  ];
+  const highlights = card(
+    zh ? '架构要点' : 'Architecture notes',
+    zh
+      ? '一次定义，投影到不同框架与设计语言。'
+      : 'Defined once, projected across frameworks and styles.',
+    highlightRows.map((row) =>
+      p(
+        PREVIEW_SURFACE_ID,
+        [
+          box('home-gallery__highlight-row', [
+            icon(row.glyph, 16),
+            box('home-gallery__parity-copy', [
+              box('home-gallery__stat-value', [row.title]),
+              box('home-gallery__caption', [row.desc]),
+            ]),
+          ]),
+        ],
+        { variant: 'muted', radius: 'lg', border: 'none', elevation: 'none' },
+        undefined,
+        undefined,
+        { display: 'block', padding: '0.625rem 0.75rem', width: '100%' }
+      )
+    ),
+    'highlights',
     { density: 'compact', emphasis: 'quiet' }
   );
 
@@ -1045,11 +1106,11 @@ export function createHomepageGalleryParts(
     analytics: composition.analytics,
     columns(form: DemoNode, analyticsCard: DemoNode = composition.analytics): DemoNode[] {
       return [
-        box('home-gallery__column', [controls, shortcuts, editor]),
-        box('home-gallery__column', [milestones, analyticsCard, composition.command]),
-        box('home-gallery__column', [spark, ecosystem, form]),
-        box('home-gallery__column', [composition.help, overlays, protocol]),
-        box('home-gallery__column', [composition.progress, hover, choices, throughput]),
+        box('home-gallery__column', [controls, shortcuts, milestones]),
+        box('home-gallery__column', [analyticsCard, composition.command, ecosystem]),
+        box('home-gallery__column', [form, composition.progress, protocol]),
+        box('home-gallery__column', [hover, editor, composition.help, highlights]),
+        box('home-gallery__column', [overlays, spark, choices, throughput]),
       ];
     },
     setup(context: DemoSetupContext) {

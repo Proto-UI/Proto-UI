@@ -323,17 +323,17 @@ const ACTIVITY_BAR_OPACITIES = [0.46, 0.64, 0.74, 0.56, 0.82, 0.72, 0.78, 0.74] 
 /** Eight-bar rounded monochrome histogram for the bottom-right matrix card. */
 export function appendHomepageGalleryActivityBars(slot: HTMLElement): void {
   const svg = slot.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 320 132');
+  svg.setAttribute('viewBox', '0 0 320 164');
   svg.setAttribute('width', '100%');
-  svg.setAttribute('height', '132');
+  svg.setAttribute('height', '164');
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   for (let index = 0; index < ACTIVITY_BAR_FACTORS.length; index++) {
     const bar = slot.ownerDocument.createElementNS(svg.namespaceURI, 'rect');
-    const h = Math.max(24, Math.round(ACTIVITY_BAR_FACTORS[index]! * 120));
+    const h = Math.max(28, Math.round(ACTIVITY_BAR_FACTORS[index]! * 150));
     bar.setAttribute('x', String(index * 39 + 6));
-    bar.setAttribute('y', String(128 - h));
+    bar.setAttribute('y', String(160 - h));
     bar.setAttribute('width', '30');
     bar.setAttribute('height', String(h));
     bar.setAttribute('rx', '6');

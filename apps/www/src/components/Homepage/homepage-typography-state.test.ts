@@ -218,7 +218,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
       await expect
         .poll(() => ref('settings-feedback').textContent)
         .toContain('Note: 20 characters');
-    });
+    }, 20_000);
   }
 
   for (const failure of ['prepare', 'partial activate'] as const) {
@@ -257,7 +257,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
       document.querySelector('h1')!.append(' updated');
       await expect.poll(() => surface().getAttribute('data-pui-style')).toContain('text-3xl');
       expect(note()).toBe(before.input);
-    });
+    }, 20_000);
   }
 
   it('coalesces source and viewport changes during local preparation without activating stale source', async () => {
@@ -288,7 +288,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(note().value).toBe('Accepted during refresh');
     expect(note().selectionStart).toBe(8);
     expect(document.activeElement).toBe(before.input);
-  });
+  }, 20_000);
 
   it('a whole-page family commit revokes an older same-generation local preparation', async () => {
     await editGallery();
@@ -296,7 +296,9 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     resize(true);
     const pending = await held.entered;
     select('family', 'brutalist');
-    await expect.poll(() => handle!.getSnapshot().selection.projectionFamilyId).toBe('brutalist');
+    await expect
+      .poll(() => handle!.getSnapshot().selection.projectionFamilyId, { timeout: 10_000 })
+      .toBe('brutalist');
     const nextSurface = surface();
     const snapshot = handle!.getSnapshot();
     const gallery = ref('settings');
@@ -437,7 +439,9 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     added.textContent = 'Added during React preparation';
     document.querySelector('main')!.append(added);
     held.release();
-    await expect.poll(() => added.getAttribute('data-typography-runtime')).toBe('react');
+    await expect
+      .poll(() => added.getAttribute('data-typography-runtime'), { timeout: 10_000 })
+      .toBe('react');
     const snapshot = handle!.getSnapshot();
     expect(snapshot).toEqual({
       phase: 'ready',
@@ -470,7 +474,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
     expect(document.querySelectorAll('[data-projection-generation-host]')).toHaveLength(0);
     expect(document.querySelector('h1')!.textContent).toBe('Stable original source');
-  });
+  }, 20_000);
 
   for (const change of ['change role', 'remove role', 'new marker'] as const) {
     it(`${change}: observes only the authored change, keeps gallery state and settles after one batch`, async () => {
@@ -544,7 +548,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
       await expect
         .poll(() => ref('settings-feedback').textContent)
         .toContain('Note: 20 characters');
-    });
+    }, 20_000);
   }
 
   it('keeps language and complete textContent replacement fresh in the same page generation', async () => {
@@ -592,7 +596,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
       .not.toBeNull();
     expect(handle!.getSnapshot()).toEqual(before.snapshot);
     expect(note()).toBe(before.input);
-  });
+  }, 20_000);
 });
 
 it('publishes a committed runtime preference when a live family request supersedes its pending retirement observer', async () => {

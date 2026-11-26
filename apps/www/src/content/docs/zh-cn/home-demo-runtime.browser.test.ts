@@ -238,7 +238,7 @@ async function createHomeGalleryObservation(
     revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim() !== '',
   };
-  const capture = async (name: string) => {
+  const captureObservation = async <T>(name: string, observe: () => Promise<T>) => {
     // Native layout and ResizeObserver delivery settle across real frames;
     // neither this observer nor the capture changes component state.
     await page.evaluate(
@@ -247,7 +247,7 @@ async function createHomeGalleryObservation(
           requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
         )
     );
-    const facts = await sample();
+    const facts = await observe();
     const id = `${evidenceLabel}-${name}`;
     await writeFile(
       path.join(evidenceDirectory, `${id}.json`),
@@ -260,6 +260,7 @@ async function createHomeGalleryObservation(
     await page.screenshot({ path: path.join(evidenceDirectory, `${id}.png`), fullPage: true });
     return facts;
   };
+  const capture = (name: string) => captureObservation(name, sample);
   const expectCompactPreview = (facts: Awaited<ReturnType<typeof sample>>) => {
     expect(facts).toMatchObject({
       inert: true,
@@ -286,7 +287,7 @@ async function createHomeGalleryObservation(
     expect(facts.bodyBackgroundRgba?.[3]).toBe(255);
     expect(facts.fadeFirstStopRgba).toEqual(facts.bodyBackgroundRgba);
   };
-  return { home, stage, errors, sample, capture, expectCompactPreview };
+  return { home, stage, errors, sample, capture, captureObservation, expectCompactPreview };
 }
 
 let browser: Browser;
@@ -303,6 +304,205 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Homepage Runtime demobox browser smoke', () => {
+  it('operates the four homepage shortcut groups and compact Brutalist editor tabs with native input', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      colorScheme: 'light',
+    });
+    const page = await context.newPage();
+    try {
+      const { home, stage, errors, captureObservation } = await createHomeGalleryObservation(
+        page,
+        'shortcuts-native',
+        'light'
+      );
+      await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+      await waitForHomeRuntime(page, 'wc');
+      const shortcuts = stage.locator('[data-gallery-demo="shortcuts"]');
+      const groups = [
+        [
+          'prototypes',
+          '核心原型',
+          [
+            ['buttons', '按钮与开关'],
+            ['cards', '卡片容器'],
+            ['tabs', '标签与折叠'],
+            ['dialogs', '弹层对话'],
+          ],
+        ],
+        [
+          'modules',
+          '语义模块',
+          [
+            ['focus', '焦点管理'],
+            ['overlay', '浮层定位'],
+            ['a11y', '无障碍语义'],
+            ['state', '状态协议'],
+          ],
+        ],
+        [
+          'adapters',
+          '多端适配',
+          [
+            ['wc', 'Web'],
+            ['react', 'React'],
+            ['vue', 'Vue 3'],
+            ['vue2', 'Vue 2'],
+          ],
+        ],
+        [
+          'styles',
+          '设计投影',
+          [
+            ['shadcn', 'Shadcn'],
+            ['brutalist', 'Brutalist'],
+            ['bootstrap-2-3-2', 'Bootstrap'],
+            ['liquid-glass', 'Glass'],
+          ],
+        ],
+      ] as const;
+      const prototypes = shortcuts.getByRole('group', { name: '核心原型', exact: true });
+      const cards = prototypes.getByRole('button', { name: '卡片容器', exact: true });
+      const tabs = prototypes.getByRole('button', { name: '标签与折叠', exact: true });
+      const dialogs = prototypes.getByRole('button', { name: '弹层对话', exact: true });
+      const pressed = (owner: Locator) =>
+        owner
+          .getByRole('button', { pressed: true })
+          .evaluateAll((items) => items.map((item) => item.getAttribute('data-demo-ref')));
+      const focused = (row: Locator) => row.evaluate((el) => el === document.activeElement);
+      const paint = (row: Locator) => row.screenshot({ animations: 'disabled' });
+      const expectSelection = (key: string) =>
+        expect.poll(() => pressed(prototypes)).toEqual([`shortcut-prototypes-${key}`]);
+
+      await expect.poll(() => shortcuts.getByRole('group').count()).toBe(4);
+      await expectSelection('buttons');
+      const otherGroups = shortcuts.getByRole('group').filter({
+        hasNot: page.getByRole('button', { name: '卡片容器', exact: true }),
+      });
+      expect(await otherGroups.count()).toBe(3);
+      const otherSelections = await pressed(otherGroups);
+      await cards.scrollIntoViewIfNeeded();
+      await page.mouse.move(0, 0);
+      const idle = await paint(cards);
+      await cards.hover();
+      await expect.poll(async () => (await paint(cards)).equals(idle)).toBe(false);
+      await expectSelection('buttons');
+      await captureObservation('hover', () => pressed(shortcuts));
+      await cards.click();
+      await expectSelection('cards');
+      expect(await pressed(otherGroups)).toEqual(otherSelections);
+      await page.keyboard.press('Shift+Tab');
+      expect(await prototypes.locator(':focus').count()).toBe(0);
+      await page.keyboard.press('Tab');
+      await expect.poll(() => focused(cards)).toBe(true);
+      await page.mouse.move(0, 0);
+      for (const [row, key, previous, stroke] of [
+        [tabs, 'tabs', 'cards', 'Space'],
+        [dialogs, 'dialogs', 'tabs', 'Enter'],
+      ] as const) {
+        await page.keyboard.press('ArrowDown');
+        await expect.poll(() => focused(row)).toBe(true);
+        await expectSelection(previous);
+        const unpressed = await paint(row);
+        await page.keyboard.press(stroke);
+        await expectSelection(key);
+        await expect.poll(() => focused(row)).toBe(true);
+        await expect.poll(async () => (await paint(row)).equals(unpressed)).toBe(false);
+      }
+      await page.keyboard.press('Tab');
+      await expect
+        .poll(() => focused(shortcuts.getByRole('button', { name: '焦点管理', exact: true })))
+        .toBe(true);
+      await page.keyboard.press('Shift+Tab');
+      await expect.poll(() => focused(dialogs)).toBe(true);
+      await expectSelection('dialogs');
+      expect(await pressed(otherGroups)).toEqual(otherSelections);
+      await captureObservation('keyboard', () => pressed(shortcuts));
+
+      for (const [group, name, items] of groups) {
+        const owner = shortcuts.getByRole('group', { name, exact: true });
+        expect(await owner.getAttribute('data-demo-ref')).toBe(`shortcut-group-${group}`);
+        expect(await owner.getByRole('button').count()).toBe(4);
+        for (const [key, label] of items) {
+          const row = owner.getByRole('button', { name: label, exact: true });
+          expect(await row.getAttribute('data-demo-ref')).toBe(`shortcut-${group}-${key}`);
+          await row.scrollIntoViewIfNeeded();
+          const glyph = await row.locator('svg').boundingBox();
+          const text = await row.locator('.home-gallery__shortcut-text').boundingBox();
+          if (!glyph?.width || !glyph.height || !text?.height || text.width <= 2) {
+            throw new Error(`Missing visible glyph or text for ${group}/${key}`);
+          }
+          await page.mouse.move(glyph.x + glyph.width / 2, glyph.y + glyph.height / 2);
+          await page.mouse.down();
+          try {
+            await page.mouse.move(text.x + text.width - 2, text.y + text.height / 2, { steps: 14 });
+          } finally {
+            await page.mouse.up();
+          }
+          expect(
+            await page.evaluate(() => getSelection()?.toString()),
+            `${group}/${key} drag`
+          ).toBe('');
+        }
+      }
+
+      await chooseProjectionControl(page, home, 'family', 'brutalist');
+      const editor = stage.locator('[data-gallery-demo="editor"]');
+      await expect
+        .poll(
+          () =>
+            stage.evaluate((el) =>
+              el.closest('[data-projection-scope]')?.getAttribute('data-projection-family')
+            ),
+          { timeout: 30_000 }
+        )
+        .toBe('brutalist');
+      await waitForHomeRuntime(page, 'wc');
+      const list = editor.getByRole('tablist');
+      const edit = list.getByRole('tab', { name: '编辑', exact: true });
+      const preview = list.getByRole('tab', { name: '预览', exact: true });
+      expect(await list.getByRole('tab').count()).toBe(2);
+      await list.scrollIntoViewIfNeeded();
+      const bounds = await list.boundingBox();
+      const root = await editor.locator('[data-demo-ref="editor-tabs"]').boundingBox();
+      if (!bounds || !root) throw new Error('Missing Brutalist editor tab geometry');
+      expect(bounds.width).toBeLessThan(root.width);
+      for (const tab of [edit, preview]) {
+        const box = await tab.boundingBox();
+        if (!box) throw new Error('Missing Brutalist editor tab');
+        expect(box.width).toBeGreaterThan(0);
+        expect(box.x).toBeGreaterThanOrEqual(bounds.x - 1);
+        expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1);
+      }
+      await edit.click();
+      const panel = editor.getByRole('tabpanel');
+      for (const [key, tab, content] of [
+        ['ArrowRight', preview, panel.locator('[data-demo-ref="editor-preview"]')],
+        ['ArrowLeft', edit, panel.getByRole('textbox', { name: '编辑示例文本', exact: true })],
+      ] as const) {
+        await page.keyboard.press(key);
+        await expect.poll(() => focused(tab)).toBe(true);
+        if ((await tab.getAttribute('aria-selected')) !== 'true')
+          await page.keyboard.press('Enter');
+        await expect.poll(() => tab.getAttribute('aria-selected')).toBe('true');
+        expect(await list.getByRole('tab', { selected: true }).count()).toBe(1);
+        await panel.waitFor({ state: 'visible' });
+        const id = await panel.getAttribute('id');
+        expect(id).toBeTruthy();
+        expect(id).toBe(await tab.getAttribute('aria-controls'));
+        await content.waitFor({ state: 'visible' });
+        await captureObservation(`brutalist-${key}`, async () => ({
+          list: bounds,
+          root,
+          panel: id,
+        }));
+      }
+      expect(errors).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
   it('keeps the compact Bootstrap homepage checkbox operable through its visible label', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const page = await context.newPage();

@@ -431,6 +431,15 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.75rem;
     min-width: 0;
   }
+  .home-demo-previewer :global(.home-gallery__highlight-row) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__highlight-row .home-gallery__icon) {
+    margin-block-start: 0.125rem;
+  }
   .home-demo-previewer :global(.home-gallery__parity-copy) {
     display: grid;
     gap: 0.125rem;
