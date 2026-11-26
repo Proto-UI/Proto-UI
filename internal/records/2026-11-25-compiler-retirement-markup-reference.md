@@ -1,98 +1,49 @@
 # Compiler retirement: website markup reference repair
 
-## Observed failure and preserved input
+## Observed failure and preserved-input receipts
 
-[CI run 45670038286, browser job 139402949669](https://github.com/Proto-UI/Proto-UI/actions/runs/45670038286/job/139402949669)
-ran source `862870f53b96ba7012c8bcd16832d05554a23171`. The unchanged
-`website-markup-provenance.browser.test.ts` failed in its source-binding
-preflight when it tried to read the removed `browser-compiler-panel.ts`.
-The 17 markup-study cases did not execute. The same shard also recorded a
-separate Search 200% text page-overflow failure; this repair does not resolve or
-relabel that result.
+[CI run 45670038286, browser job 139402949669](https://github.com/Proto-UI/Proto-UI/actions/runs/45670038286/job/139402949669) ran source `862870f53b96ba7012c8bcd16832d05554a23171`. The unchanged `website-markup-provenance.browser.test.ts` failed in its source-binding preflight when it tried to read the removed `browser-compiler-panel.ts`. The 17 markup-study cases did not execute. The same shard also recorded a separate Search 200% text page-overflow failure; this repair does not resolve or relabel that result.
 
-The complete previous 33-source reference, whose recorded revision is
-`0b436b388882d73b916ede97c73a1bf304dcf6f6`, is copied byte-for-byte to
-[website-markup-provenance-0b436b3.json](../../scripts/coverage-matrices/test/fixtures/website-markup-provenance-0b436b3.json).
-Its SHA-256 is
-`df7f7f9957cd8e6adcc61375c3ef8cde4fe79d287347940f4842f6543c3af0e0`.
-Neither that reference nor any historical execution receives a new result.
+The complete previous 33-source reference, whose recorded revision is `0b436b388882d73b916ede97c73a1bf304dcf6f6`, is copied byte-for-byte to [website-markup-provenance-0b436b3.json](../../scripts/coverage-matrices/test/fixtures/website-markup-provenance-0b436b3.json). Its SHA-256 is `df7f7f9957cd8e6adcc61375c3ef8cde4fe79d287347940f4842f6543c3af0e0`. Neither that reference nor any historical execution receives a new result.
 
-The current user authorized this bounded source-reference repair. The accepted
-compiler retirement is recorded in
-[D-COMPILER-FOUNDATION-0001](../../spec/decisions/D-COMPILER-FOUNDATION-0001.yaml).
-[PR #1915](https://github.com/Proto-UI/Proto-UI/pull/1915) is still an unmerged
-candidate at this source; this record does not claim that retirement has landed
-on main.
+The current user authorized this bounded source-reference repair. The accepted compiler retirement is recorded in [D-COMPILER-FOUNDATION-0001](../../spec/decisions/D-COMPILER-FOUNDATION-0001.yaml).
 
 ## Reviewed source changes
 
-The [current reference](../../scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json)
-binds the exact product bytes at `862870f53b96ba7012c8bcd16832d05554a23171`, the
-source before this metadata repair. Its 31 retained owners all match both the
-Git blobs at that commit and the reviewed worktree files. Twenty-six existing
-hashes remain unchanged; five are renewed after the comparison below.
+The [current reference](../../scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json) binds the exact product bytes at `862870f53b96ba7012c8bcd16832d05554a23171`, the source before this metadata repair. Its 31 retained owners all match both the Git blobs at that commit and the reviewed worktree files. Twenty-six existing hashes remain unchanged; five are renewed after the comparison below.
 
-| Direct owner | Review and boundary |
-| --- | --- |
-| `PrototypePreviewer.astro` | Removes the optional compiler-panel import, its `compiledPrototypeId`/`compiledItems` inputs and conditional panel markup. The sampled Transition, Dialog and Button pages do not activate those inputs. Ordinary runtime tabs, preview hosts and the CodePanel remain. |
-| `previewer-client.ts` | Removes only the retired `pui-browser-compiler` selector exclusion and its comment. Native selects inside the live `.host` remain excluded from the previewer's legacy selector fallback. |
-| `astro.config.mjs` | Removes the compiler Worker ESM-format setting and the three QuickJS dependency-optimization exclusions. The existing website resolver, ordinary package exclusions and public WC material-provider chunk assignments are retained. |
-| `pnpm-lock.yaml` | Empties the retired compiler importer and removes its now-unreferenced QuickJS and hash packages. No retained framework or TypeScript version is changed by the reviewed retirement diff. This reference repair does not edit the lockfile. |
-| `zh-cn/ui-libraries/shadcn/dialog.mdx` | Carries an earlier documentation expansion already present at the PR base `67fd94f58372cf35fa929f24ef731416b5817e31`; it is not a change made by the compiler foundation. The exact prior source and the bounded sampling implications are described below. |
-| `BrowserCompilerPanel.astro` and `browser-compiler-panel.ts` | Removed from the current inventory because both optional panel owners are deleted by the authorized retirement. Their complete previous identities remain in the preserved reference. No remaining direct owner is removed. |
+| Direct owner | Review and boundary | Details and limits |
+| --- | --- | --- |
+| `PrototypePreviewer.astro` | Removes the optional compiler-panel import, its `compiledPrototypeId`/`compiledItems` inputs and conditional panel markup. | The sampled Transition, Dialog and Button pages do not activate those inputs. Ordinary runtime tabs, preview hosts and the CodePanel remain. |
+| `previewer-client.ts` | Removes only the retired `pui-browser-compiler` selector exclusion and its comment. | Native selects inside the live `.host` remain excluded from the previewer's legacy selector fallback. |
+| `astro.config.mjs` | Removes the compiler Worker ESM-format setting and the three QuickJS dependency-optimization exclusions. | The existing website resolver, ordinary package exclusions and public WC material-provider chunk assignments are retained. |
+| `pnpm-lock.yaml` | Empties the retired compiler importer and removes its now-unreferenced QuickJS and hash packages. | No retained framework or TypeScript version is changed by the reviewed retirement diff. This reference repair does not edit the lockfile. |
+| `zh-cn/ui-libraries/shadcn/dialog.mdx` | Carries an earlier documentation expansion already present at the PR base `67fd94f58372cf35fa929f24ef731416b5817e31`; it is not a change made by the compiler foundation. | The exact prior source and the bounded sampling implications are described below. |
+| `BrowserCompilerPanel.astro` and `browser-compiler-panel.ts` | Removed from the current inventory because both optional panel owners are deleted by the authorized retirement. | Their complete previous identities remain in the preserved reference. No remaining direct owner is removed. |
 
-The old and renewed hashes are explicit in the two references. They are fixed
-reviewed values, not dynamically accepted digests generated by the browser test.
-This change does not alter `sourceBindingIssues`, the browser study, its
-timeouts, selected routes, or its source/HTML/runtime/Copy/teardown assertions.
+## Separate pre-existing Dialog binding receipts
 
-### Separate pre-existing Dialog binding drift
+The Dialog file was retrieved from the reference's actual [0b436b388 source](https://github.com/Proto-UI/Proto-UI/blob/0b436b388882d73b916ede97c73a1bf304dcf6f6/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx). Its Git blob is `248c6d9d5a6cb15e878a6e4af1b7d7321ef7df0e`; its SHA-256 is `7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e`, exactly the hash in the preserved reference. The current SHA-256 is `202a03164a8a4599d686b502c87f474b381bf453f0ee7ef47b9807da7c81bc0a`. The current file is byte-identical at the PR base and the reviewed candidate.
 
-The Dialog file was retrieved from the reference's actual
-[0b436b388 source](https://github.com/Proto-UI/Proto-UI/blob/0b436b388882d73b916ede97c73a1bf304dcf6f6/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx).
-Its Git blob is `248c6d9d5a6cb15e878a6e4af1b7d7321ef7df0e`; its SHA-256 is
-`7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e`, exactly
-the hash in the preserved reference. The current SHA-256 is
-`202a03164a8a4599d686b502c87f474b381bf453f0ee7ef47b9807da7c81bc0a`.
-The current file is byte-identical at the PR base and the reviewed candidate.
+This is a substantive documentation difference, not formatting-only drift. It adds a usage example, five later Dialog previews, composition and API sections; it removes the old early-draft/acceptance paragraph and changes the workspace version wording from `0.3.0-alpha.2` to `0.3.0`. Those lifecycle and release claims are not accepted by renewing a source hash and remain subject to their own catalog and release-documentation checks.
 
-This is a substantive documentation difference, not formatting-only drift. It
-adds a usage example, five later Dialog previews, composition and API sections;
-it removes the old early-draft/acceptance paragraph and changes the workspace
-version wording from `0.3.0-alpha.2` to `0.3.0`. Those lifecycle and release
-claims are not accepted by renewing a source hash and remain subject to their
-own catalog and release-documentation checks.
+The first sampled `demo-shadcn-dialog` preview retains its identity, four runtime choices, initial WC runtime and code surface. The study selects the first original code panel and compares it with the unchanged `shadcnDialogCode.ts` producer, then exercises its native runtime switching, Copy and remount.
 
-The first sampled `demo-shadcn-dialog` preview retains its identity, four
-runtime choices, initial WC runtime and code surface. The study selects the
-first original code panel and compares it with the unchanged
-`shadcnDialogCode.ts` producer, then exercises its native runtime switching,
-Copy and remount. The five added previews follow that first panel. Static
-inspection therefore keeps the original sampled owner and all 17 scenarios;
-it does not establish execution of the additional examples or a complete
-served/transitive dependency closure. The separate Button installation route
-and its pinned command are unchanged.
+The five added previews follow that first panel. Static inspection therefore keeps the original sampled owner and all 17 scenarios; it does not establish execution of the additional examples or a complete served/transitive dependency closure. The separate Button installation route and its pinned command are unchanged.
 
-## Validation and remaining evidence
+## Scope & Limits
 
-The exact source preflight passes. The complete existing
-`node --test scripts/coverage-matrices/test/website-markup-provenance.test.mjs`
-suite passes **67/67**, with no failures, skips or todos. The original
-17-case browser study is not rerun by this source-reference repair.
-`corepack pnpm@10.32.1 check:public-docs` also passes: 332 bilingual primary
-routes, four library inventories and 437 maintained repository documents.
+[PR #1915](https://github.com/Proto-UI/Proto-UI/pull/1915) is still an unmerged candidate at this source; this record does not claim that retirement has landed on main.
+
+The old and renewed hashes are explicit in the two references. They are fixed reviewed values, not dynamically accepted digests generated by the browser test. This change does not alter `sourceBindingIssues`, the browser study, its timeouts, selected routes, or its source/HTML/runtime/Copy/teardown assertions.
+
+### Validation and remaining evidence
+
+The exact source preflight passes. The complete existing `node --test scripts/coverage-matrices/test/website-markup-provenance.test.mjs` suite passes **67/67**, with no failures, skips or todos. The original 17-case browser study is not rerun by this source-reference repair. `corepack pnpm@10.32.1 check:public-docs` also passes: 332 bilingual primary routes, four library inventories and 437 maintained repository documents.
 
 - The preserved reference is byte-identical to the pre-repair current file.
-- All 31 retained paths exist and their hashes match the bound Git source;
-  exactly the two retired panel paths are removed.
-- `sourceBindingIssues` returns no issues for the 31 exact source bindings;
-  the existing Node discriminator controls retain changed, missing, duplicate,
-  opaque and unrecognized-source rejection.
-- The passing repository/public documentation check validates the record and
-  maintained links; it does not establish browser, visual, lifecycle or release
-  acceptance.
+- All 31 retained paths exist and their hashes match the bound Git source; exactly the two retired panel paths are removed.
+- `sourceBindingIssues` returns no issues for the 31 exact source bindings; the existing Node discriminator controls retain changed, missing, duplicate, opaque and unrecognized-source rejection.
+- The passing repository/public documentation check validates the record and maintained links; it does not establish browser, visual, lifecycle or release acceptance.
 
-`sourceAdmission` remains `unverified`. The original ENOENT and all earlier
-failures remain source-bound history. A later actual browser run must report
-its own candidate and outcomes; this reference update supplies no new browser
-pass, served-source proof, transitive closure or completion of #834.
+`sourceAdmission` remains `unverified`. The original ENOENT and all earlier failures remain source-bound history. A later actual browser run must report its own candidate and outcomes; this reference update supplies no new browser pass, served-source proof, transitive closure or completion of #834.

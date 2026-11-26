@@ -4,7 +4,11 @@ The source commit is `4583e080e9cc3d46cf023da8a208f9ce01c7bace`. The private com
 
 ## Reviewed source delta
 
-All 32 direct owners from the [preceding integration](2026-11-25-compiler-retirement-markup-integration.md) remain registered. The other 31 source hashes match exactly. The reviewed `pnpm-lock.yaml` identity changes from `50cb2a3862c7875afd270b10567e9202baa2223e00016a13242041381eb8e56b` to `833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6`.
+All 32 direct owners from the [preceding integration](2026-11-25-compiler-retirement-markup-integration.md) remain registered. The other 31 source hashes match exactly.
+
+## Source receipts
+
+The reviewed `pnpm-lock.yaml` identity changes from `50cb2a3862c7875afd270b10567e9202baa2223e00016a13242041381eb8e56b` to `833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6`.
 
 The previous reference is preserved byte-for-byte in [website-markup-provenance-8635852.json](../../scripts/coverage-matrices/test/fixtures/website-markup-provenance-8635852.json), with SHA-256 `25a94091426c8241753748ce49684a44ee499e45edcb9af3f68e8e600715be8a`. The [current reference](../../scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json) binds the source commit above, before this reference-only commit.
 

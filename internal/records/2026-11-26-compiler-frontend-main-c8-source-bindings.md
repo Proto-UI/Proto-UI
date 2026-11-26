@@ -1,5 +1,7 @@
 # Shared compiler frontend: source identity after current main integration
 
+## Source identity receipts
+
 The frontend source merge is `3ed63ef546891e518e3ba237c5e9f53acc63b77b`, tree `d700659807eed4f83a145597c4e1451d5cb92fc1`, with parents `8e16d709e350f826e2d5ac5dba916844ed959479` and foundation `06dc33e1069a46406f22b5200a9bb41a5758e72e`. It preserves the shared analysis implementation and all main `c8e700ff06ef7a96e7ec8b406859268918d158c6` RC repairs. The five legacy compiler paths resolved as retired in the foundation remain absent.
 
 ## Source reference
