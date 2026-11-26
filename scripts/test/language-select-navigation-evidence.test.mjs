@@ -118,7 +118,7 @@ function assertNativeSource(source) {
   const ast = ts.createSourceFile(suitePath, source, ts.ScriptTarget.Latest, true);
   for (const [name, expected] of [
     ['FAMILIES', ['shadcn', 'brutalist']],
-    ['CONTROLS', ['header', 'sidebar']],
+    ['CONTROLS', ['desktop-settings', 'mobile-settings']],
   ]) {
     const declaration = ast.statements
       .filter(ts.isVariableStatement)
@@ -146,8 +146,8 @@ function assertNativeSource(source) {
     "base.hostname !== '127.0.0.1' || base.protocol !== 'http:'",
     "if (process.env.PROTO_UI_EXPECTED_HEAD !== revision) throw new Error('Exact source revision mismatch')",
     "if (dirty) throw new Error('Dirty source tree is not exact-head evidence')",
-    "await page.locator('[data-language-select-root]').count()).toBe(2)",
-    'page.locator(\'[data-language-select-root][data-language-select-initialized="true"]\').count()).toBe(2)',
+    "await page.locator('[data-language-select-root]').count()).toBe(1)",
+    'page.locator(\'[data-language-select-root][data-language-select-initialized="true"]\').count()).toBe(1)',
     "[['zh-cn', 'pointer'], ['en', 'keyboard']]",
     "writes.filter(row => row.kind === 'storage').map(row => row.value)).toEqual([locale])",
     "writes.filter(row => row.kind === 'cookie')).toHaveLength(1)",
@@ -157,7 +157,7 @@ function assertNativeSource(source) {
     'expect(cookie[0].value).toBe(locale)',
     "expect(cookie[0].path).toBe('/')",
     "expect(cookie[0].sameSite).toBe('Lax')",
-    '.toEqual([locale, locale])',
+    '.toEqual([locale])',
     'const before = await readWrites(page)',
     'const writes = (await readWrites(page)).slice(before.length)',
     'const expectedPath = `/${locale}/ui-libraries/${suffix}`',
@@ -208,7 +208,8 @@ function assertNativeSource(source) {
 
   const choose = functionSource(source, 'chooseLocale');
   for (const required of [
-    "control === 'header' ? 'header' : '.sidebar-pane'",
+    "page.locator('[data-docs-site-header] [data-language-select-root]')",
+    "expect(page.viewportSize()?.width).toBe(control === 'desktop-settings' ? 1440 : 390)",
     'await trigger.click()',
     'await option.click()',
     "await page.keyboard.press('ArrowDown')",
@@ -327,7 +328,7 @@ function collectSuite(source) {
   assert.equal(cases.length, 4);
   assert.equal(new Set(cases.map(({ name }) => name)).size, 4);
   for (const family of ['shadcn', 'brutalist'])
-    for (const control of ['header', 'sidebar'])
+    for (const control of ['desktop-settings', 'mobile-settings'])
       assert.equal(cases.filter(({ name }) => name.startsWith(`${family} ${control}:`)).length, 1);
   assert.ok(
     cases.every(({ action, timeout }) => typeof action === 'function' && timeout === 90_000)
@@ -419,6 +420,16 @@ function assertWorkflow(candidate) {
 }
 
 describe('production language navigation evidence contract', () => {
+  it('retains both viewport journeys through the authored single Header language owner', () => {
+    const header = readFileSync('apps/www/src/components/override/Header.astro', 'utf8');
+    const sidebar = readFileSync('apps/www/src/components/override/Sidebar.astro', 'utf8');
+    assert.equal((header.match(/<LanguageSelect\s*\/>/g) ?? []).length, 1);
+    assert.doesNotMatch(sidebar, /<LanguageSelect(?:\s|\/|>)/);
+    includes(
+      suite,
+      "viewport: { width: control === 'desktop-settings' ? 1440 : 390, height: 1000 }"
+    );
+  });
   it('ignores optional array trailing commas but retains separators and holes', () => {
     const texts = (source) => sourceTokens(source).map((token) => token.text);
     assert.deepEqual(
@@ -512,9 +523,9 @@ for (const [name, before, after] of [
   ['cookie write not forwarded', 'descriptor.set!.call(document, value)', 'void value'],
   ['repeated lifecycle removed', 'await repeatPageLoad(page)', 'void page'],
   [
-    'second root no longer required',
-    "await page.locator('[data-language-select-root]').count()).toBe(2)",
+    'single authored root no longer required',
     "await page.locator('[data-language-select-root]').count()).toBe(1)",
+    "await page.locator('[data-language-select-root]').count()).toBe(0)",
   ],
   ['target visibility bypassed', 'await languageTrigger.isVisible()', 'true'],
   ['menu opening removed', 'await menu.click()', 'void menu'],
@@ -601,7 +612,7 @@ for (const [name, mutate] of [
 
 it('rejects unbounded or incomplete case registration without opening a browser', () => {
   for (const [before, after] of [
-    ["['header', 'sidebar']", "['header']"],
+    ["['desktop-settings', 'mobile-settings']", "['desktop-settings']"],
     ['}, 90_000)', '}, 120_000)'],
     ['}, 150_000)', '}, 180_000)'],
   ]) {

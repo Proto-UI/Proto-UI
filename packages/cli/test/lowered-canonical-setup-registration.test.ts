@@ -1,8 +1,11 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import ts from 'typescript';
+
+import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
 
 import {
   scanRuleStateReadInventory,
@@ -182,12 +185,92 @@ describe('canonical setup references in the source Rule inventory', () => {
     expect(inventory.evaluated.flatMap((row) => row.unresolved)).toEqual([]);
   });
 
-  it('does not close the actual Base Dialog setup that also has an ordinary invocation', () => {
+  it('retains every actual Base Dialog Rule through its configured and first native calls', async () => {
     const file = path.join(REPO_ROOT, 'packages/prototypes/base/src/dialog/content.proto.ts');
+    const source = await readFile(file, 'utf8');
+    const sites = scanRuleStateReadsWithSites(source, file);
     const inventory = scanRuleStateReadInventory([file]);
-    expect(inventory.evaluated.flatMap((row) => row.unresolved)).toContainEqual({
-      expression: 'unverified helper value: setupDialogContent',
-      reason: 'subject',
-    });
+    expect(sites.sites.length).toBeGreaterThan(0);
+    expect(new Set(inventory.evaluated.map((row) => row.rule.start))).toEqual(
+      new Set(sites.sites.map((site) => site.call.getStart()))
+    );
+    expect(inventory.evaluated.flatMap((row) => row.unresolved)).toEqual([]);
+    // The shipped presence rule compares only against false. Both lowering
+    // paths leave an all-negative condition on the runtime plan, so its site
+    // must remain inventoried without claiming a lowered hook usage.
+    expect(inventory.evaluated.flatMap((row) => row.usages)).toEqual([]);
+  });
+
+  it('withholds positive lowering capability after closing only setup references', async () => {
+    const file = path.join(REPO_ROOT, 'packages/prototypes/base/src/dialog/content.proto.ts');
+    const source = await readFile(file, 'utf8');
+    const sites = scanRuleStateReadsWithSites(source, file);
+
+    // Closing a configured reference does not grant a new capture/projection
+    // capability. The same member with a positive comparison needs a lowering
+    // proof that this source scan does not have, so keep that gap visible.
+    const negative = 'w.state(transition.isPresent).eq(false)';
+    expect(source.split(negative)).toHaveLength(2);
+    const positive = scanRuleStateReadsWithSites(
+      source.replace(negative, 'w.state(transition.isPresent).eq(true)'),
+      file
+    );
+    expect(positive.sites.map((site) => site.call.getStart())).toEqual(
+      sites.sites.map((site) => site.call.getStart())
+    );
+    expect(positive.scan.unresolved).toEqual([
+      { expression: 'transition.isPresent', reason: 'subject' },
+    ]);
+    expect(positive.scan.usages).toEqual([]);
+    expect(positive.scan.exposedLocals).toEqual([]);
+  });
+
+  it('keeps the real Dialog presence receiver bound to the authored Transition producer', async () => {
+    const file = path.join(REPO_ROOT, 'packages/prototypes/base/src/dialog/content.proto.ts');
+    const source = await readFile(file, 'utf8');
+    const sites = scanRuleStateReadsWithSites(source, file);
+
+    // Producer identity is a separate positive fact: follow the real Rule's
+    // receiver to its stable initializer and the actual exported Transition
+    // declaration. A same-spelled foreign producer cannot satisfy this check.
+    const summary = createHookSourceSummaryContext();
+    summary.registerSource(sites.source);
+    const reads: ts.PropertyAccessExpression[] = [];
+    const collectPresenceRead = (node: ts.Node): void => {
+      if (
+        ts.isPropertyAccessExpression(node) &&
+        node.name.text === 'isPresent' &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === 'transition'
+      )
+        reads.push(node);
+      ts.forEachChild(node, collectPresenceRead);
+    };
+    for (const site of sites.sites) collectPresenceRead(site.call);
+    expect(reads).toHaveLength(1);
+    const receiver = reads[0]?.expression;
+    if (!receiver || !ts.isIdentifier(receiver))
+      throw new Error('The actual Dialog presence receiver must be an Identifier.');
+    const declaration = summary.resolveStableSourceBinding(receiver);
+    if (!declaration?.initializer || !ts.isCallExpression(declaration.initializer))
+      throw new Error('The actual Dialog presence receiver must have a stable producer call.');
+    const call = declaration.initializer;
+    expect(summary.isAuthoredProducerCall(call, sites.source)).toBe(true);
+    const transitionFile = path.join(
+      REPO_ROOT,
+      'packages/prototypes/base/src/transition/as-transition.proto.ts'
+    );
+    const transitionSource = ts.createSourceFile(
+      transitionFile,
+      await readFile(transitionFile, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    const producer = transitionSource.statements
+      .filter(ts.isVariableStatement)
+      .flatMap((statement) => [...statement.declarationList.declarations])
+      .find((entry) => ts.isIdentifier(entry.name) && entry.name.text === 'asTransition');
+    if (!producer) throw new Error('The real Transition producer declaration must remain present.');
+    expect(summary.isSameSourceBinding(call, sites.source, producer)).toBe(true);
   });
 });

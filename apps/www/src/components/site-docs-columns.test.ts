@@ -3,11 +3,18 @@ import { describe, expect, it } from 'vitest';
 const frame = readFileSync('apps/www/src/components/override/PageFrame.astro', 'utf8');
 const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
 
+function rightRailStyles(source: string) {
+  return [...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].filter((style) =>
+    /\.right-sidebar(?:-container)?\b/.test(style[1]!.replace(/\/\*[\s\S]*?\*\//g, ''))
+  );
+}
+
 function expectRightRailOrHidden(source: string) {
-  // One emitted style block prevents Astro5 reversing equal-specificity rules.
+  // One emitted rail style block prevents Astro5 reversing equal-specificity
+  // rules. Independent portal styles do not contribute to rail visibility.
   // This source guard preserves structure; native geometry is the acceptance
   // oracle for the estimated canvas budget, not a duplicated numeric constant.
-  const styles = [...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)];
+  const styles = rightRailStyles(source);
   expect(styles).toHaveLength(1);
   const css = styles[0]![1]!.replace(/\/\*[\s\S]*?\*\//g, '');
   const wideMedia = [...css.matchAll(/@media\s*\(min-width:\s*80rem\)/g)];
@@ -32,7 +39,7 @@ function expectRightRailOrHidden(source: string) {
 }
 
 function reverseWideMediaBlocks(source: string) {
-  const style = /<style\b[^>]*>([\s\S]*?)<\/style>/.exec(source)!;
+  const style = rightRailStyles(source)[0]!;
   const css = style[1]!;
   const media = [...css.matchAll(/@media\s*\(min-width:\s*80rem\)/g)];
   const first = media[0]!.index!;
@@ -45,11 +52,28 @@ describe('documentation shell composition contract', () => {
     expectRightRailOrHidden(columns);
   });
 
+  it.each(['before', 'after'] as const)(
+    'allows an independent portal style %s the rail cascade',
+    (position) => {
+      const portal = '<style is:global>.pui-runtime-preview-owned-surface { z-index: 31; }</style>';
+      expectRightRailOrHidden(position === 'before' ? portal + columns : columns + portal);
+    }
+  );
+
   it.each([
     [
       'separate style tags',
       (source: string) =>
         source.replace(/(?=@media\s*\(min-width:\s*80rem\)\s*\{\s*@container)/, '</style><style>'),
+    ],
+    [
+      'rail override in an additional global style',
+      (source: string) =>
+        source + '<style is:global>.right-sidebar-container { display: flex; }</style>',
+    ],
+    [
+      'inner rail override in an additional global style',
+      (source: string) => source + '<style is:global>.right-sidebar { position: fixed; }</style>',
     ],
     ['reversed media blocks', reverseWideMediaBlocks],
     [
@@ -80,10 +104,9 @@ describe('documentation shell composition contract', () => {
     // These are current-candidate mutation checks, not independent baseline
     // conformance evidence. A baseline that fails the positive precondition
     // never executes its mutation; keep that failure distinct in reports.
-    const singleStyleFixture = columns.replace(/<\/style>\s*<style>/g, '\n');
-    expectRightRailOrHidden(singleStyleFixture);
-    const broken = mutate(singleStyleFixture);
-    expect(broken).not.toBe(singleStyleFixture);
+    expectRightRailOrHidden(columns);
+    const broken = mutate(columns);
+    expect(broken).not.toBe(columns);
     expect(() => expectRightRailOrHidden(broken)).toThrow();
   });
 

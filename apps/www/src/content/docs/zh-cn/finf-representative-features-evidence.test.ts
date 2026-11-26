@@ -11,6 +11,7 @@ import { Window, type HTMLDivElement } from 'happy-dom';
 import ts from 'typescript';
 import { parse } from 'yaml';
 import { describe, expect, it, vi } from 'vitest';
+import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
 import type {
   PopoverCaptureObservation,
   PopoverFrame,
@@ -792,6 +793,9 @@ function popoverMotionFixture(
   const trigger = document.querySelector('button')!;
   // This fixture declares #panel as an HTML div; Happy DOM's id query returns Element.
   const panel = document.getElementById('panel') as HTMLDivElement;
+  panel.style.color = 'rgb(0, 0, 0)';
+  if (expectedEntryAnimation === null)
+    panel.style.boxShadow = 'rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(0, 0, 0) 3px 3px 0px 0px';
   let animations: Array<{
     animationName?: string;
     playState: string;
@@ -820,13 +824,13 @@ function popoverMotionFixture(
       return {
         x: 100,
         y: 100,
-        width: Number.parseFloat(panel.style.width || '18rem') * 16 * scale,
+        width: Number.parseFloat(panel.style.width || '20rem') * 16 * scale,
         height: 100 * scale,
       };
     },
   });
   Object.defineProperty(panel, 'clientWidth', {
-    get: () => Number.parseFloat(panel.style.width || '18rem') * 16,
+    get: () => Number.parseFloat(panel.style.width || '20rem') * 16,
   });
   let clock = 0;
   let nextRaf = 0;
@@ -870,9 +874,9 @@ function popoverMotionFixture(
   // These are the three known in-process helpers extracted from this exact source.
   const helpers = execute(
     `${statements(['waitForSettledPopover', 'captureSettledPopover', 'installPopoverNegativeControl'])}; ({waitForSettledPopover, captureSettledPopover, installPopoverNegativeControl});`,
-    { expect }
+    { expect, hasNoVisibleBoxShadow }
   ) as {
-    waitForSettledPopover: (probe: typeof handle) => Promise<void>;
+    waitForSettledPopover: (probe: typeof handle) => Promise<PopoverFrame>;
     installPopoverNegativeControl: (panel: typeof locator, control: string) => Promise<void>;
     captureSettledPopover: (
       probe: typeof handle,
@@ -1004,6 +1008,27 @@ function popoverCaptureCase(
   };
 }
 
+describe('bottom Drawer entered translation preserves its independent layout contribution', () => {
+  it.each([
+    ['0px -100%', true],
+    ['0px 0px', false],
+    ['0px -99%', false],
+    ['1px -100%', false],
+    ['none', false],
+  ])('observes %s as entered=%s', (translate, entered) => {
+    const observe = execute(
+      `${statements(['isBottomDrawerAtEnteredTranslation'])}; isBottomDrawerAtEnteredTranslation;`,
+      { getComputedStyle: () => ({ translate }) }
+    ) as (element: unknown) => boolean;
+    const window = new Window();
+    try {
+      expect(observe(window.document.createElement('div'))).toBe(entered);
+    } finally {
+      window.happyDOM.abort();
+    }
+  });
+});
+
 describe('Popover same-phase capture and controls, no native browser', () => {
   it('observes an already finished current entry and still requires consecutive frames before capture', async () => {
     const fixture = popoverMotionFixture();
@@ -1022,14 +1047,14 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       const binding = fixture.shots[0].captureBinding;
       expect(binding.animations).toBe('allow');
       expect(binding.before.signature).toBe(binding.after?.signature);
-      expect(binding.before.rect?.width).toBe(288);
+      expect(binding.before.rect?.width).toBe(320);
     } finally {
       fixture.close();
     }
   });
 
   it.each([false, true])(
-    'waits through the empty pre-animation gap and genuine entry endpoint, reducedMotion=%s',
+    'observes the reduced-motion policy and rejects active entry motion, reducedMotion=%s',
     async (reducedMotion) => {
       const fixture = popoverMotionFixture('pui-enter', reducedMotion);
       try {
@@ -1039,7 +1064,13 @@ describe('Popover same-phase capture and controls, no native browser', () => {
         fixture.frame();
         expect(fixture.probe.read().animations).toEqual([]);
         expect(fixture.probe.read().reducedMotion).toBe(reducedMotion);
-        expect(fixture.probe.settled).toBe(false);
+        expect(fixture.probe.settled).toBe(reducedMotion);
+        if (reducedMotion) {
+          await fixture.capture();
+          const binding = fixture.shots.at(-1)!.captureBinding;
+          expect(binding.before.animations).toEqual([]);
+          expect(binding.before.signature).toBe(binding.after?.signature);
+        }
         fixture.enter();
         fixture.frame();
         fixture.frame();
@@ -1049,7 +1080,7 @@ describe('Popover same-phase capture and controls, no native browser', () => {
         expect(fixture.probe.settled).toBe(false);
         fixture.frame();
         await fixture.capture();
-        const binding = fixture.shots[0].captureBinding;
+        const binding = fixture.shots.at(-1)!.captureBinding;
         expect(binding.before.animations[0]).toMatchObject({
           name: 'pui-enter',
           currentOpen: true,
@@ -1061,6 +1092,27 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       }
     }
   );
+
+  it('waits for the current positioning read instead of admitting a stale settled frame', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      fixture.frame();
+      fixture.frame();
+      expect(fixture.probe.settled).toBe(true);
+      fixture.panel.style.width = '20.01rem';
+      const capture = fixture.capture();
+      await Promise.resolve();
+      expect(fixture.shots).toEqual([]);
+      fixture.frame();
+      fixture.frame();
+      await capture;
+      const binding = fixture.shots[0].captureBinding;
+      expect(binding.before.rect!.width).toBeCloseTo(320.16, 6);
+      expect(binding.before.signature).toBe(binding.after?.signature);
+    } finally {
+      fixture.close();
+    }
+  });
 
   it.each(['reopen', 'replace'] as const)(
     'rejects an earlier finished animation after panel %s, even with the same content ID',
@@ -1132,6 +1184,25 @@ describe('Popover same-phase capture and controls, no native browser', () => {
     }
   });
 
+  it.each([
+    'none',
+    'rgb(0, 0, 0) 4px 4px 0px 0px',
+    'rgba(0, 0, 0, 0) 3px 3px 0px 0px',
+    'rgb(255, 0, 0) 3px 3px 0px 0px',
+  ])('rejects a settled Brutalist panel without its 3px foreground shadow: %s', async (shadow) => {
+    const fixture = popoverMotionFixture(null);
+    try {
+      fixture.panel.style.boxShadow = shadow;
+      fixture.frame();
+      fixture.frame();
+      expect(fixture.probe.settled).toBe(true);
+      await expect(fixture.capture()).rejects.toThrow();
+      expect(fixture.shots[0].captureBinding.before.shadow).toBe(shadow);
+    } finally {
+      fixture.close();
+    }
+  });
+
   it('rejects genuinely wrong settled width with the unchanged 1px oracle and retains its capture', async () => {
     const fixture = popoverMotionFixture();
     try {
@@ -1141,8 +1212,8 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       fixture.frame();
       expect(fixture.probe.settled).toBe(true);
       await expect(fixture.capture()).rejects.toThrow(/less than or equal/);
-      expect(fixture.shots[0].captureBinding.before.rect?.width).toBe(320);
-      expect(fixture.shots[0].captureBinding.after?.rect?.width).toBe(320);
+      expect(fixture.shots[0].captureBinding.before.rect?.width).toBe(288);
+      expect(fixture.shots[0].captureBinding.after?.rect?.width).toBe(288);
       expect(fixture.shots[0].captureBinding.before.signature).toBe(
         fixture.shots[0].captureBinding.after?.signature
       );
@@ -1162,7 +1233,7 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       fixture.frame();
       fixture.frame();
       const frame = fixture.probe.read();
-      expect(frame.rect?.width).toBe(288);
+      expect(frame.rect?.width).toBe(320);
       expect(frame.animations[0]).toMatchObject({
         name: 'pui-enter',
         currentOpen: true,
@@ -1187,11 +1258,11 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       await expect(
         fixture.capture(async (_state, observation) => {
           fixture.shots.push(observation);
-          fixture.panel.style.width = '18.01rem';
+          fixture.panel.style.width = '20.01rem';
         })
       ).rejects.toThrow();
       const binding = fixture.shots[0].captureBinding;
-      expect(Math.abs((binding.after?.rect?.width ?? NaN) - 288)).toBeLessThanOrEqual(1);
+      expect(Math.abs((binding.after?.rect?.width ?? NaN) - 320)).toBeLessThanOrEqual(1);
       expect(binding.before.signature).not.toBe(binding.after?.signature);
     } finally {
       fixture.close();
@@ -1213,7 +1284,7 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       expect(captured.paint.signature).toBe(observation.captureBinding.before.signature);
       expect(captured.paint.signature).toBe(observation.captureBinding.after?.signature);
       expect(opened.sha256).toBe(createHash('sha256').update(captured.bytes).digest('hex'));
-      expect(captured.paint.rect?.width).toBe(288);
+      expect(captured.paint.rect?.width).toBe(320);
     } finally {
       fixture.close();
     }
@@ -1232,10 +1303,10 @@ describe('Popover same-phase capture and controls, no native browser', () => {
         if (!opened) throw new Error('Phase control failed before actual capture');
         const binding = fixture.observations[0].captureBinding;
         const captured = fixture.image(opened.file);
-        expect(binding.before.rect?.width).toBe(288);
+        expect(binding.before.rect?.width).toBe(320);
         expect(captured.paint.signature).toBe(binding.after?.signature);
         expect(captured.paint.signature).not.toBe(binding.before.signature);
-        expect(captured.paint.rect?.width).toBe(forceFinal ? 288 : 288 * 0.95);
+        expect(captured.paint.rect?.width).toBe(forceFinal ? 320 : 320 * 0.95);
         expect(captured.paint.animations[0]?.playState).toBe(forceFinal ? 'finished' : 'running');
         expect(opened.sha256).toBe(createHash('sha256').update(captured.bytes).digest('hex'));
       } finally {
@@ -1255,7 +1326,7 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       expect(receipt.screenshots.map((shot) => shot.state)).toEqual(['failed', 'failed-previewer']);
       for (const shot of receipt.screenshots) {
         const captured = fixture.image(shot.file);
-        expect(captured.paint.rect?.width).toBe(288 * 0.95);
+        expect(captured.paint.rect?.width).toBe(320 * 0.95);
         expect(captured.paint.opacity).toBe('0');
         expect(captured.paint.animations[0]?.playState).toBe('running');
         expect(captured.paint.signature).toBe(fixture.motion.probe.read().signature);

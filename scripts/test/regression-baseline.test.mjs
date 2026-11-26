@@ -22,6 +22,9 @@ import {
   browserShardCosts,
   BROWSER_SUITES,
   BROWSER_SHARD_COUNT,
+  BROWSER_EXECUTION_BUDGET_SECONDS,
+  BROWSER_SETUP_RESERVE_SECONDS,
+  SEARCH_BROWSER_SUITES,
   validateBrowserCostEvidence,
 } from './runtime-test-plan.mjs';
 
@@ -32,6 +35,38 @@ const snapshot = {
   dirty: false,
   worktreeSha256: 'c'.repeat(64),
 };
+
+test('Search splitting preserves the complete retained inventory and fixed worker budgets', () => {
+  assert.deepEqual(SEARCH_BROWSER_SUITES, [
+    'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
+  ]);
+  assert.equal(BROWSER_SHARD_COUNT, 18);
+  assert.equal(BROWSER_EXECUTION_BUDGET_SECONDS, 900);
+  assert.equal(BROWSER_SETUP_RESERVE_SECONDS, 180);
+  const shards = browserShards();
+  assert.equal(shards.length, 18);
+  assert.deepEqual([...shards.flat()].sort(), [...BROWSER_SUITES].sort());
+  assert.equal(new Set(shards.flat()).size, BROWSER_SUITES.length);
+  assert.ok(
+    shards.every(
+      (shard) => shard.length > 0 && shard.length <= Math.ceil(BROWSER_SUITES.length / 18)
+    )
+  );
+  assert.deepEqual(browserShards([...BROWSER_SUITES].reverse()), shards);
+  for (const suite of SEARCH_BROWSER_SUITES)
+    assert.equal(shards.flat().filter((selected) => selected === suite).length, 1);
+  assert.ok(
+    !BROWSER_SUITES.includes('apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts')
+  );
+});
+
+test('suite exchanges cannot make an impossible complete workload pass capacity admission', () => {
+  const impossible = browserShards(BROWSER_SUITES, 1);
+  assert.deepEqual([...impossible.flat()].sort(), [...BROWSER_SUITES].sort());
+  assert.throws(() => assertBrowserShardCapacity(impossible), /beyond 900s/);
+});
 
 test('the general receipt inventory retains the explicitly included JavaScript source suite', () => {
   const suite = 'apps/www/test/proto-ui-source.test.mjs';

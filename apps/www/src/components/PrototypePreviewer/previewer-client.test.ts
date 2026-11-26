@@ -1,5 +1,14 @@
 import { observePreviewerRemoval } from './previewer-removal';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
+
+// Keep the pinned host's internal forwarding callbacks alive; actual records,
+// filters, batching and delivery still come from Happy DOM's observer.
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 
 const runtimeSpies = vi.hoisted(() => ({
   mount: vi.fn(),
@@ -315,7 +324,7 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     const watch = vi
       .spyOn(projectionTheme, 'watchProjectionThemeSurfaceStyle')
       .mockImplementation((_family, scope, callback) => {
-        const index = roots.indexOf(scope as HTMLElement);
+        const index = roots.findIndex((root) => root === scope);
         order.push(`read ${index}`);
         callback({ '--pui-background': (scope as HTMLElement).dataset.themeSample! });
         const stop = vi.fn();

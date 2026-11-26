@@ -65,6 +65,9 @@ function transition(target: Element, trusted = true) {
 describe('WC entry native transition origin', () => {
   it('does not resample an ordinary entry for an unrelated transition', async () => {
     const fixture = entry();
+    const button = document.createElement('button');
+    button.style.visibility = 'hidden';
+    fixture.target.append(button);
     const outside = document.createElement('div');
     document.body.append(outside);
     await settle();
@@ -73,6 +76,7 @@ describe('WC entry native transition origin', () => {
     transition(outside);
 
     expect(reads.mock.calls.filter(([node]) => node === fixture.target)).toHaveLength(0);
+    expect(fixture.target.tabIndex).toBe(0);
   });
 
   it('keeps a descendant transition and its current eligibility', async () => {
@@ -116,13 +120,22 @@ describe('WC entry native transition origin', () => {
     // Happy DOM does not project assignedSlot; supply only that host fact.
     Object.defineProperty(fixture.target, 'assignedSlot', { configurable: true, value: slot });
     document.body.append(carrier);
+    const button = document.createElement('button');
+    button.style.visibility = 'hidden';
+    fixture.target.append(button);
     fixture.configure(true);
     await settle();
+    expect(fixture.target.tabIndex).toBe(0);
     const reads = vi.spyOn(window, 'getComputedStyle');
 
+    button.style.visibility = 'visible';
     transition(wrapper);
 
     expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    button.style.visibility = 'hidden';
+    transition(wrapper);
+    expect(fixture.target.tabIndex).toBe(0);
   });
 
   it('keeps a newly projected logical Portal before observation refresh', () => {

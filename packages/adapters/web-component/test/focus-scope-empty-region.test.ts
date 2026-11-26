@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { hasWebComponentScopeDescendant } from '../src/focus-scope-targets';
 import { createWebComponentPortalMount } from '../src/portal-mount';
+import { isWebComponentNativeFocusCandidate as nativeFocusable } from '../src/native-focus-candidate';
 
-const nativeFocusable = (target: HTMLElement) => target.localName === 'button';
+// Exercise the actual Adapter-owned entry predicate. Supplied wrappers keep the
+// complete sampler and have separate effect/order controls in focus-descendant-potential.
 const hasDescendant = (container: HTMLElement) =>
   hasWebComponentScopeDescendant(container, nativeFocusable);
 const button = () => {

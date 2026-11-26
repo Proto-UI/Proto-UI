@@ -966,14 +966,12 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       f.setProbe(true);
       const release = f.holdProbe();
       click(f.retry!);
-      await settle();
-      expect(f.retry!.getAttribute('aria-disabled')).toBe('true');
+      await vi.waitFor(() => expect(f.retry?.getAttribute('aria-disabled')).toBe('true'));
       await f.runtime('vue');
       // The parent generation has committed; its real dynamic action subtree
       // has a separate asynchronous children commit. Await that public ref,
       // then keep the original disabled/paint and late-recovery assertions.
-      await vi.waitFor(() => expect(f.retry).toBeDefined());
-      expect(f.retry!.getAttribute('aria-disabled')).toBe('true');
+      await vi.waitFor(() => expect(f.retry?.getAttribute('aria-disabled')).toBe('true'));
       expect(f.retry!.getAttribute('data-pui-style')).toContain(variant);
       click(f.close);
       await settle();

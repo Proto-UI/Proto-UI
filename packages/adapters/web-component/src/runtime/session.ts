@@ -1,5 +1,8 @@
 import type { RuntimeHost } from '@proto.ui/runtime';
-import { withWebComponentCallerDomMove, withWebComponentOwnedRelocation } from '../owned-relocation';
+import {
+  withWebComponentCallerDomMove,
+  withWebComponentOwnedRelocation,
+} from '../owned-relocation';
 import {
   createWebOwnedDecorationPortalGate,
   hasOwnedWebPresenceZeroOpacity,
@@ -36,7 +39,13 @@ type DecorationTreeRecord = {
   };
 };
 
-const SPLIT_SURFACE_ATTRIBUTES = ['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'];
+const SPLIT_SURFACE_ATTRIBUTES = [
+  'part',
+  'data-pui-split-surface',
+  'aria-hidden',
+  'inert',
+  'hidden',
+];
 
 function captureSplitSurfaceIdentity(surface: HTMLElement) {
   return SPLIT_SURFACE_ATTRIBUTES.map((name) => surface.getAttribute(name));
@@ -639,7 +648,9 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         } catch (rollbackError) {
           throw new AggregateError(
             [error, rollbackError],
-            error instanceof Error ? error.message : '[WC Adapter] decoration caller projection changed'
+            error instanceof Error
+              ? error.message
+              : '[WC Adapter] decoration caller projection changed'
           );
         }
       }

@@ -57,6 +57,7 @@ test('authored Toast styles are declarations rather than selector-only markers',
     'opacity-95',
     'pointer-events-auto',
     'shadow-[0_4px_12px_rgb(0_0_0/10%)]',
+    'order-[var(--pui-stack-index)]',
     'z-0',
     'pointer-events-none',
     'order-[var(--pui-stack-index)]',
@@ -70,6 +71,14 @@ test('authored Toast styles are declarations rather than selector-only markers',
     assert.ok(fixture.order.includes(token), `${token} must retain cascade order`);
     assert.ok(!fixture.noDeclarations.includes(token), `${token} is not a selector marker`);
   }
+  // Live Toasts use the full opening index for both flex and paint order.
+  // Preserve the variable expressions; fixed layers no longer cover authored stacking.
+  assert.deepEqual(fixture.tokens['order-[var(--pui-stack-index)]'], {
+    order: 'var(--pui-stack-index)',
+  });
+  assert.deepEqual(fixture.tokens['z-[calc(1000_-_var(--pui-stack-index))]'], {
+    'z-index': 'calc(1000 - var(--pui-stack-index))',
+  });
   // The native vocabulary treats every noDeclarations entry as intentionally
   // ignorable. A fresh snapshot must not conceal an unimplemented utility.
   assert.deepEqual(

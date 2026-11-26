@@ -37,9 +37,7 @@ export function initDocumentationTypography(doc: Document = document) {
   let alive = true;
   const family = () => {
     const committed = root.dataset.siteLibraryFamily;
-    return committed === 'shadcn' ||
-      committed === 'brutalist' ||
-      committed === 'bootstrap-2-3-2'
+    return committed === 'shadcn' || committed === 'brutalist' || committed === 'bootstrap-2-3-2'
       ? committed
       : resolveSiteLibraryFamily(view.location.pathname);
   };

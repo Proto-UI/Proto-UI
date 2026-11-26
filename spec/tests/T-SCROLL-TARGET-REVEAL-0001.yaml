@@ -98,7 +98,7 @@ implementations:
   - id: search-target-reveal-native-consumer
     kind: runtime-test
     status: failing
-    path: apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts
+    path: apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts
     required: true
     consumesCases: [T-SCROLL-TARGET-REVEAL-0001-CASE-CONSUMER]
     notes:

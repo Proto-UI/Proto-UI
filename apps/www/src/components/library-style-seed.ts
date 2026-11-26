@@ -1,5 +1,8 @@
 import type { Prototype } from '@proto.ui/core';
-import type { WebComponentAdapterConstructor } from '@proto.ui/adapter-web-component';
+import type {
+  ProtoWebComponentProps,
+  WebComponentAdapterConstructor,
+} from '@proto.ui/adapter-web-component';
 
 const marker = 'data-library-style-seed';
 const style = 'data-pui-style';
@@ -21,7 +24,12 @@ export function withLibraryStyleSeed<T extends Prototype<any, any>>(
   const connect: unknown = Reflect.get(Adapter.prototype, 'connectedCallback');
   if (typeof connect !== 'function') throw new Error('Library Adapter has no connection hook');
   const acquired = new WeakSet<HTMLElement>();
-  return class extends Adapter {
+  return class LibraryStyleSeed<
+    Props extends ProtoWebComponentProps<T> = ProtoWebComponentProps<T>,
+  > extends Adapter {
+    // Keep the constructor's prototype bound to its exact props; no field is emitted.
+    declare readonly __protoUiProps?: Props;
+
     connectedCallback() {
       if (acquired.has(this)) {
         Reflect.apply(connect, this, []);

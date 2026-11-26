@@ -79,7 +79,6 @@ describe('actual omitted immutable helper parameters', () => {
 
   it.each([
     ['supplied unknown identifier', { caller: 'paint(def, state, unknownFlag);' }],
-    ['supplied false literal', { caller: 'paint(def, state, false);' }],
     ['supplied undefined spelling', { caller: 'paint(def, state, undefined);' }],
     ['supplied getter', { caller: 'paint(def, state, external.flag);' }],
     ['supplied effect', { caller: 'paint(def, state, unknownEffect());' }],
@@ -107,6 +106,15 @@ describe('actual omitted immutable helper parameters', () => {
     expect(
       inventory.evaluated.flatMap((row) => row.unresolved.map((miss) => miss.reason))
     ).toContain('condition');
+  });
+
+  it('selects the false branch for an actual captured false primitive without treating it as omitted', async () => {
+    const { inventory, tokens } = await fixture({ caller: 'paint(def, state, false);' });
+    expect(inventory.evaluated).toHaveLength(1);
+    expect(inventory.evaluated[0].unresolved).toEqual([]);
+    expect(inventory.evaluated[0].usages.map((usage) => usage.state)).toEqual(['checked']);
+    expect(tokens).toContain('data-[checked]:bg-lime-500');
+    expect(tokens.some((token) => token.includes('pressed'))).toBe(false);
   });
 
   it('keeps each actual caller separate when only one omits the argument', async () => {

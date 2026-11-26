@@ -1,6 +1,10 @@
 // @vitest-environment node
 import { expect, it } from 'vitest';
-import type { DemoNode, DemoSpec } from '../../components/PrototypePreviewer/demo-types';
+import {
+  assertDemoSpec,
+  type DemoNode,
+  type DemoSpec,
+} from '../../components/PrototypePreviewer/demo-types';
 import { drawerExtentModel } from '../../../../../packages/prototypes/base/src/drawer/extent-model';
 const files = import.meta.glob<DemoSpec>('./demo-*-drawer*.demo.ts', {
   eager: true,
@@ -93,5 +97,28 @@ it.each(Object.entries(files).filter(([path]) => path.includes('shadcn')))(
     }
     expect(header!.className ?? '').not.toMatch(/(?:^|\s)p[xytrblse]?-\S+/);
     expect(footer!.className ?? '').not.toMatch(/(?:^|\s)p[xytrblse]?-\S+/);
+  }
+);
+
+// These examples share the public Drawer route, so an invalid portal blocks
+// unrelated native fixtures on that page before their own geometry is sampled.
+const portalExamples = import.meta.glob<DemoSpec>(
+  './demo_components/drawer/demo-brutalist-drawer-*.demo.ts',
+  { eager: true, import: 'default' }
+);
+it.each(Object.entries(portalExamples))(
+  'keeps every public Brutalist Drawer portal mountable in %s',
+  (_path, demo) => {
+    expect(() => assertDemoSpec(demo)).not.toThrow();
+    const content = panels(demo.root);
+    expect(content.length).toBeGreaterThan(0);
+    for (const panel of content) expect(panel.previewTheme).toBe('portal');
+    expect(new Set(content.map((panel) => panel.ref)).size).toBe(content.length);
+
+    const missingRef = structuredClone(demo);
+    delete panels(missingRef.root)[0].ref;
+    expect(() => assertDemoSpec(missingRef)).toThrow(
+      'previewTheme requires portal and a nonempty ref'
+    );
   }
 );

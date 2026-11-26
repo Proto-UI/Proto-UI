@@ -17,7 +17,23 @@ import {
 
 const families = ['base', 'shadcn', 'brutalist'] as const;
 const appleEditingKeys = process.platform === 'darwin';
-const subjects = [
+// Base and styled public overviews intentionally use different authored copy.
+// Keep exact accessible-name expectations independent of the rendered labels.
+const overviewCopy = {
+  base: {
+    disabled: 'Disabled choice',
+    controlled: 'Controlled choice (owner keeps it off)',
+    passive: 'Naming only: this text can be copied',
+    textarea: 'Useful content stays selectable',
+  },
+  styled: {
+    disabled: 'Disabled option',
+    controlled: 'Controlled preference',
+    passive: 'Naming-only label (selectable text)',
+    textarea: 'Share a brief summary of your project.',
+  },
+} as const;
+const subjectDefinitions = [
   { ref: 'checkbox', role: 'checkbox', name: 'Community updates' },
   { ref: 'switch', role: 'switch', name: 'Enable notifications' },
   { ref: 'radio-email', role: 'radio', name: 'Email delivery' },
@@ -26,9 +42,9 @@ const subjects = [
   { ref: 'textarea', role: 'textbox', name: 'Project notes' },
   { ref: 'readonly-input', role: 'textbox', name: 'Read-only project name' },
   { ref: 'readonly-textarea', role: 'textbox', name: 'Read-only project notes' },
-  { ref: 'disabled', role: 'checkbox', name: 'Disabled choice' },
-  { ref: 'controlled', role: 'checkbox', name: 'Controlled choice (owner keeps it off)' },
-  { ref: 'passive', role: 'checkbox', name: 'Naming only: this text can be copied' },
+  { ref: 'disabled', role: 'checkbox' },
+  { ref: 'controlled', role: 'checkbox' },
+  { ref: 'passive', role: 'checkbox' },
 ] as const;
 const routes = {
   base: '/en/ui-libraries/base/label/',
@@ -50,6 +66,8 @@ beforeAll(async () => {
     'apps/www/src/content/docs/zh-cn/label-selection-observer.ts',
     'apps/www/src/content/docs/zh-cn/browser-harness.ts',
     'apps/www/src/components/PrototypePreviewer/control-label-demo.ts',
+    'apps/www/src/content/docs/demo_components/label/label-examples.shared.ts',
+    'apps/www/src/content/docs/shadcn-demo-style.ts',
     'apps/www/src/components/PrototypePreviewer/projection-families.ts',
     'packages/prototypes/base/src/label/root.proto.ts',
     ...families.map((family) => `apps/www/src/content/docs/zh-cn/demo-${family}-label.demo.ts`),
@@ -83,6 +101,11 @@ describe.sequential('Independent Label public consumer journeys', () => {
   it.each(families.flatMap((family) => RUNTIMES.map((runtime) => ({ family, runtime }))))(
     '$family $runtime names five real target types and preserves their operation owners',
     async ({ family, runtime }) => {
+      const copy = overviewCopy[family === 'base' ? 'base' : 'styled'];
+      const subjects = subjectDefinitions.map((subject) => ({
+        ...subject,
+        name: 'name' in subject ? subject.name : copy[subject.ref],
+      }));
       const context = await browser.newContext({
         viewport: { width: 1280, height: 1000 },
         colorScheme: 'light',
@@ -114,7 +137,7 @@ describe.sequential('Independent Label public consumer journeys', () => {
       const content = preview.locator('.host');
       const label = (id: string) => content.locator(`[data-demo-ref="label-${id}"]`);
       const controlled = content.getByRole('checkbox', {
-        name: 'Controlled choice (owner keeps it off)',
+        name: copy.controlled,
         exact: true,
       });
       const requests = content.locator('[data-demo-ref="controlled-requests"]');
@@ -128,7 +151,7 @@ describe.sequential('Independent Label public consumer journeys', () => {
       const input = content.getByRole('textbox', { name: 'Project name', exact: true });
       const textarea = content.getByRole('textbox', { name: 'Project notes', exact: true });
       const passive = content.getByRole('checkbox', {
-        name: 'Naming only: this text can be copied',
+        name: copy.passive,
         exact: true,
       });
       const capture = async (stage: string) => {
@@ -283,7 +306,7 @@ describe.sequential('Independent Label public consumer journeys', () => {
         }
         await capture('readonly-editors');
 
-        const disabled = content.getByRole('checkbox', { name: 'Disabled choice', exact: true });
+        const disabled = content.getByRole('checkbox', { name: copy.disabled, exact: true });
         await label('disabled').click();
         await label('disabled').tap();
         expect(await disabled.getAttribute('aria-checked')).toBe('false');
@@ -352,7 +375,7 @@ describe.sequential('Independent Label public consumer journeys', () => {
         await expect.poll(() => requests.textContent()).toBe('Requests: 0');
         await expect.poll(() => checkbox.getAttribute('aria-checked')).toBe('false');
         expect(await input.inputValue()).toBe('Proto UI');
-        expect(await textarea.inputValue()).toBe('Useful content stays selectable');
+        expect(await textarea.inputValue()).toBe(copy.textarea);
         await label('checkbox').click();
         await expect.poll(() => checkbox.getAttribute('aria-checked')).toBe('true');
         await label('controlled').click();

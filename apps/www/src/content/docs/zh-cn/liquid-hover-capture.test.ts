@@ -432,7 +432,12 @@ describe('idle observation across awaited material readiness (offline IO)', () =
       const current = test.current();
       const restored = { ...current.material };
       current.states.disabled = false;
-      current.material = { ...restored, quality: 'opaque-fallback', contact: 'held', carrier: null };
+      current.material = {
+        ...restored,
+        quality: 'opaque-fallback',
+        contact: 'held',
+        carrier: null,
+      };
       let clock = 0;
       const budgets: number[] = [];
       const io = {

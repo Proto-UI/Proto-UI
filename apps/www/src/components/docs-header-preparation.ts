@@ -1,4 +1,7 @@
-const pendingPreparations = new WeakMap<Document, { waiters: Set<() => void>; leases: Set<symbol> }>();
+const pendingPreparations = new WeakMap<
+  Document,
+  { waiters: Set<() => void>; leases: Set<symbol> }
+>();
 
 export function hasPendingDocsHeaderPreparation(document: Document): boolean {
   return pendingPreparations.has(document);

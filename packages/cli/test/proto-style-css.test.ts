@@ -32,6 +32,50 @@ const STYLE_CSS_LANES: ReadonlyArray<{
   },
 ];
 
+describe('zero-specificity theme cascade', () => {
+  for (const { target, render } of STYLE_CSS_LANES) {
+    it(`${target} places dark-only paint after defaults and before state recipes`, () => {
+      const tokens = [
+        'shadow-[4px_4px_0_0_#000]',
+        'dark:shadow-[4px_4px_0_0_var(--pui-foreground)]',
+        'data-[open]:shadow-none',
+        'dark:data-[open]:shadow-md',
+      ];
+      for (const ordered of [tokens, [...tokens].reverse(), [...tokens].sort()]) {
+        const css = render(ordered);
+        const plain = css.indexOf('--pui-shadow: 4px 4px 0 0 #000;');
+        const dark = css.indexOf('--pui-shadow: 4px 4px 0 0 var(--pui-foreground);');
+        const state = css.indexOf('--pui-shadow: 0 0 #0000;');
+        const combined = css.indexOf('--pui-shadow: 0 4px 6px -1px');
+        expect(plain).toBeGreaterThanOrEqual(0);
+        expect(dark).toBeGreaterThan(plain);
+        expect(state).toBeGreaterThan(dark);
+        expect(combined).toBeGreaterThan(dark);
+        // The state recipes retain their existing relative ordering; dark
+        // does not gain selector specificity or a new priority over State.
+        expect(state < combined).toBe(
+          ordered.indexOf('data-[open]:shadow-none') < ordered.indexOf('dark:data-[open]:shadow-md')
+        );
+      }
+    });
+
+    it(`${target} keeps explicit longhands within their own theme condition`, () => {
+      const tokens = ['dark:leading-[2.5rem]', 'leading-6', 'dark:text-sm', 'text-xs'];
+      for (const ordered of [tokens, [...tokens].reverse()]) {
+        const css = render(ordered);
+        const baseFont = css.indexOf('font-size: 0.75rem;');
+        const baseLeading = css.indexOf('line-height: 1.5rem;');
+        const darkFont = css.indexOf('font-size: 0.875rem;');
+        const darkLeading = css.indexOf('line-height: 2.5rem;');
+        expect(baseFont).toBeGreaterThanOrEqual(0);
+        expect(baseLeading).toBeGreaterThan(baseFont);
+        expect(darkFont).toBeGreaterThan(baseLeading);
+        expect(darkLeading).toBeGreaterThan(darkFont);
+      }
+    });
+  }
+});
+
 it('ships every Toast viewport anchor in each family preset', () => {
   const placements = [
     ['top-left', 'top-6', 'left-6'],
