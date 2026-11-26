@@ -41,7 +41,7 @@ it('preserves typed props and exposes without emitting a physical props carrier'
     }
     connectedCallback() {}
   }
-  const Enhanced = withLibraryStyleSeed<SeedPrototype>(Adapter);
+  const Enhanced = withLibraryStyleSeed<WebComponentAdapterConstructor<SeedPrototype>>(Adapter);
   expectTypeOf(Enhanced).toEqualTypeOf<WebComponentAdapterConstructor<SeedPrototype>>();
   expectTypeOf(Enhanced.prototype.__protoUiProps).toEqualTypeOf<
     ProtoWebComponentProps<SeedPrototype> | undefined

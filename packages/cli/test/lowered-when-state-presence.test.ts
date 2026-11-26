@@ -240,7 +240,11 @@ describe('captured native State existence agrees with production Rule collection
     expect(rows).toHaveLength(1);
     expect(rows[0].unresolved.some((miss) => miss.reason === 'condition')).toBe(true);
     expect(tokens).toContain('bg-primary');
-    expect(tokens).not.toContain(selected);
+    // The bag alternative prevents ordinary proof, but does not erase the
+    // complete selector vocabulary of the possible native-State alternative.
+    expect(tokens).toContain(selected);
+    expect(tokens).toContain(fallback);
+    expect(tokens).not.toContain('not-[data-ready]:bg-primary');
   });
 
   const scalarPaint = `
@@ -277,8 +281,10 @@ describe('captured native State existence agrees with production Rule collection
     expect(rows).toHaveLength(1);
     expect(rows[0].declarationOnly).toBe(false);
     expect(rows[0].unresolved.some((miss) => miss.reason === 'condition')).toBe(true);
-    expect(tokens).toContain('bg-primary');
-    expect(tokens).not.toContain('data-[ready]:bg-primary');
+    // This inventory is a vocabulary, not a claim that the erased optional
+    // handle survives or that Runtime chooses the first branch. Both branch
+    // subjects were captured separately before erase(state).
+    expect(tokens).toEqual(['bg-primary', 'data-[focused]:bg-primary', 'data-[ready]:bg-primary']);
   });
 
   it.each([

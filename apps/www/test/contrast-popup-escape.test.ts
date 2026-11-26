@@ -313,10 +313,13 @@ for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
         if (family === 'select') {
           expect(result.after.selectionUnchanged).toBe(true);
           expect(result.after.triggerText).toBe('Apple');
-          expect(result.after.retiredOptions).toBe(runtime === 'react' || runtime === 'vue');
+          // Vue preserves the same Teleport and Item owners across closure;
+          // its connected options must fully withdraw their closed view facts.
+          expect(result.after.retiredOptions).toBe(runtime === 'react');
           expect(mounted.baseline.options.every(({ element }: any) => !element.isConnected)).toBe(
-            runtime === 'react' || runtime === 'vue'
+            runtime === 'react'
           );
+          if (runtime === 'vue') expect(result.after.optionViewWithdrawn).toBe(true);
           if (result.after.retainedOptions)
             expect(result.after.selection).toEqual(result.before.selection);
         }
