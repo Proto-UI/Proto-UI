@@ -637,13 +637,10 @@ describe('all sibling sizes, not only the alignment row', () => {
 function publicFixture(runtime = 'wc', transport: 'attribute' | 'class' = 'attribute') {
   const f = fixture('selected', 5);
   f.trigger.__puiSizingMotion!.stop();
-  const previewer = document.createElement('div') as HTMLElement & {
-    __previewer__: { getCurrentRuntime: () => string };
-  };
-  previewer.dataset.demoId = 'public-select';
   let committedRuntime = runtime;
   const controller = { getCurrentRuntime: () => committedRuntime };
-  previewer.__previewer__ = controller;
+  const previewer = Object.assign(document.createElement('div'), { __previewer__: controller });
+  previewer.dataset.demoId = 'public-select';
   const root = document.createElement('div');
   root.dataset.collectionCount = '5';
   root.append(f.trigger);

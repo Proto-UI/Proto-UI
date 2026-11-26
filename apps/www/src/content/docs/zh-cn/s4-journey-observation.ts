@@ -34,8 +34,13 @@ export function observeS4Journey(page: Page, publish: (row: Observation) => void
   const wrap = <T extends object>(target: T, label: string): T => {
     const proxy = new Proxy(target, {
       get(owner, key) {
-        const value = Reflect.get(owner, key, owner);
-        if (key === 'keyboard' || key === 'mouse') return wrap(value, `${label}.${String(key)}`);
+        const value: unknown = Reflect.get(owner, key, owner);
+        if (
+          (key === 'keyboard' || key === 'mouse') &&
+          value !== null &&
+          (typeof value === 'object' || typeof value === 'function')
+        )
+          return wrap(value, `${label}.${String(key)}`);
         if (typeof value !== 'function') return value;
         return (...args: unknown[]) => {
           const operation = `${label}.${String(key)}`;
