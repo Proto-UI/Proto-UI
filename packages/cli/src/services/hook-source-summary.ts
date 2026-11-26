@@ -1499,9 +1499,126 @@ function createHookSourceSummaryContextInternal(
     call.arguments.length === 2 &&
     !call.arguments.some(ts.isSpreadElement) &&
     isStringValue(unwrap(call.arguments[0]!));
+
+  // Only literal data can enter the Core family constructor in this slice.
+  // Getters, spreads, computed keys and borrowed objects could execute authored
+  // code while the constructor copies the declaration, so remain opaque.
+  const nativeObservationLiteral = (node: ts.Node, depth = 0): boolean => {
+    if (depth >= 16) return false;
+    const value = unwrap(node);
+    if (
+      isStringValue(value) ||
+      ts.isNumericLiteral(value) ||
+      value.kind === ts.SyntaxKind.TrueKeyword ||
+      value.kind === ts.SyntaxKind.FalseKeyword ||
+      value.kind === ts.SyntaxKind.NullKeyword
+    )
+      return true;
+    if (ts.isPrefixUnaryExpression(value))
+      return (
+        (value.operator === ts.SyntaxKind.PlusToken ||
+          value.operator === ts.SyntaxKind.MinusToken) &&
+        ts.isNumericLiteral(value.operand)
+      );
+    if (ts.isArrayLiteralExpression(value))
+      return value.elements.every((element) => nativeObservationLiteral(element, depth + 1));
+    if (!ts.isObjectLiteralExpression(value)) return false;
+    const names = new Set<string>();
+    return value.properties.every((property) => {
+      if (!ts.isPropertyAssignment(property) || ts.isComputedPropertyName(property.name))
+        return false;
+      const name = propertyName(property.name);
+      if (name === null || name === '__proto__' || names.has(name)) return false;
+      names.add(name);
+      return nativeObservationLiteral(property.initializer, depth + 1);
+    });
+  };
+  const nativeObservationIdentity = (
+    node: ts.Node,
+    factoryName: 'createContextKey' | 'createAnatomyFamily',
+    module: Module
+  ): boolean => {
+    const value = unwrap(node);
+    if (!ts.isIdentifier(value)) return false;
+    const binding = moduleContext.resolveReference(value, module);
+    const declaration = binding?.declaration;
+    if (
+      !binding ||
+      !declaration ||
+      !ts.isVariableDeclaration(declaration) ||
+      !ts.isIdentifier(declaration.name) ||
+      !stableVariable(declaration, binding.module) ||
+      !declaration.initializer
+    )
+      return false;
+    const initializer = unwrap(declaration.initializer);
+    if (
+      !ts.isCallExpression(initializer) ||
+      initializer.questionDotToken ||
+      initializer.arguments.some(ts.isSpreadElement) ||
+      initializer.arguments.length !== (factoryName === 'createContextKey' ? 1 : 2) ||
+      !isStringValue(unwrap(initializer.arguments[0]!))
+    )
+      return false;
+    const factory = unwrap(initializer.expression);
+    if (!ts.isIdentifier(factory) || hasBindingWrite(factory, binding.module)) return false;
+    const imported = moduleContext.resolveReference(factory, binding.module)?.declaration;
+    if (!imported || !ts.isImportSpecifier(imported) || imported.isTypeOnly) return false;
+    const clause = imported.parent.parent;
+    const statement = clause.parent;
+    if (
+      !ts.isImportClause(clause) ||
+      clause.isTypeOnly ||
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== '@proto.ui/core' ||
+      (imported.propertyName ?? imported.name).text !== factoryName
+    )
+      return false;
+    // These actual Core constructors freeze the identity they return. A const
+    // alias, object member, foreign factory or unknown metadata proves none of
+    // this; module resolution must reach the original lexical declaration.
+    return (
+      factoryName === 'createContextKey' ||
+      (ts.isObjectLiteralExpression(unwrap(initializer.arguments[1]!)) &&
+        nativeObservationLiteral(initializer.arguments[1]!))
+    );
+  };
+  const nativeObservationRegistration = (
+    call: ts.CallExpression,
+    path: readonly string[],
+    module: Module
+  ): { callbackIndex: number; maxParameters: number } | null => {
+    if (path.length !== 2 || call.questionDotToken || call.arguments.some(ts.isSpreadElement))
+      return null;
+    if (path[0] === 'props' && path[1] === 'watch' && call.arguments.length === 2) {
+      const keys = unwrap(call.arguments[0]!);
+      return ts.isArrayLiteralExpression(keys) &&
+        keys.elements.every((key) => isStringValue(unwrap(key)))
+        ? { callbackIndex: 1, maxParameters: 4 }
+        : null;
+    }
+    if (
+      path[0] === 'context' &&
+      path[1] === 'subscribe' &&
+      call.arguments.length === 2 &&
+      nativeObservationIdentity(call.arguments[0]!, 'createContextKey', module)
+    )
+      return { callbackIndex: 1, maxParameters: 3 };
+    if (
+      path[0] === 'anatomy' &&
+      path[1] === 'subscribeParts' &&
+      call.arguments.length === 3 &&
+      nativeObservationIdentity(call.arguments[0]!, 'createAnatomyFamily', module) &&
+      isStringValue(unwrap(call.arguments[1]!))
+    )
+      return { callbackIndex: 2, maxParameters: 2 };
+    return null;
+  };
   const knownReturnedStateDefinitionCall = (
     path: readonly string[],
-    call: ts.CallExpression
+    call: ts.CallExpression,
+    module: Module
   ): boolean => {
     const operation = path.join('.');
     // This bounded slice knows these native operations. An unfamiliar facade
@@ -1513,6 +1630,7 @@ function createHookSourceSummaryContextInternal(
       // The native Def wrapper stores argument 1 for later Event dispatch.
       // This slice admits no dynamic event name or third options argument.
       nativeEventRegistration(call, path) ||
+      nativeObservationRegistration(call, path, module) !== null ||
       operation === 'context.provide' ||
       operation === 'context.trySubscribe' ||
       operation === 'context.trySubscribeAncestor' ||
@@ -1568,7 +1686,8 @@ function createHookSourceSummaryContextInternal(
         // provenance. Bare members, writes, method aliases and unfamiliar
         // operations remain opaque; only the State constructors are read below.
         const operation = staticMemberCall(node);
-        if (operation && knownReturnedStateDefinitionCall(operation.path, operation.call)) return;
+        if (operation && knownReturnedStateDefinitionCall(operation.path, operation.call, module))
+          return;
         if (
           ts.isCallExpression(parent) &&
           !parent.questionDotToken &&
@@ -1860,6 +1979,27 @@ function createHookSourceSummaryContextInternal(
             read = true;
             return;
           }
+          const operation = staticMemberCall(node);
+          const callback = ts.findAncestor(node, isFunctionLike);
+          if (
+            operation &&
+            operation.path.length === 1 &&
+            ((operation.path[0] === 'get' && operation.call.arguments.length === 0) ||
+              (operation.path[0] === 'set' &&
+                operation.call.arguments.length >= 1 &&
+                operation.call.arguments.length <= 2) ||
+              (operation.path[0] === 'setDefault' && operation.call.arguments.length === 1)) &&
+            callback &&
+            callback !== owner &&
+            ts.findAncestor(callback.parent, isFunctionLike) === owner &&
+            registeredCallback(callback, owner, module, definitions, true)
+          ) {
+            // The complete private handle use set stays inside this owner and
+            // exact native registrations. This proves identity only, not the
+            // current State value, callback phase validity or selector names.
+            read = true;
+            return;
+          }
           // In particular, a helper may expose the handle without a lexical
           // expose call here. No argument, return, container or callback escape
           // can certify this result as an internal State.
@@ -1876,7 +2016,8 @@ function createHookSourceSummaryContextInternal(
       fn: ts.FunctionLikeDeclaration,
       owner: ts.FunctionLikeDeclaration,
       module: Module,
-      definitions: ReadonlySet<ts.Node>
+      definitions: ReadonlySet<ts.Node>,
+      requireExactSlot = false
     ): boolean => {
       if (!synchronousBody(fn) || opaqueFunctionSyntax(fn)) return false;
       // A named function expression has a second, private self binding. The
@@ -1915,25 +2056,62 @@ function createHookSourceSummaryContextInternal(
           path.unshift(name);
           receiver = unwrap(receiver.expression);
         }
+        let registration = nativeEventRegistration(call, path)
+          ? { callbackIndex: 1, maxParameters: 2 }
+          : nativeObservationRegistration(call, path, module);
+        // The new caller-use proof also needs exact slots for already supported
+        // registrations. Preserve the older helper proof's admitted surface.
+        if (!registration && requireExactSlot) {
+          if (
+            path.length === 2 &&
+            path[0] === 'context' &&
+            ['trySubscribe', 'trySubscribeAncestor'].includes(path[1]!) &&
+            call.arguments.length === 2 &&
+            nativeObservationIdentity(call.arguments[0]!, 'createContextKey', module)
+          )
+            registration = { callbackIndex: 1, maxParameters: 3 };
+          if (path.join('.') === 'props.watchRaw' && call.arguments.length === 2) {
+            const keys = unwrap(call.arguments[0]!);
+            if (
+              ts.isArrayLiteralExpression(keys) &&
+              keys.elements.every((key) => isStringValue(unwrap(key)))
+            )
+              registration = { callbackIndex: 1, maxParameters: 4 };
+          }
+          if (
+            path.length === 2 &&
+            path[0] === 'lifecycle' &&
+            ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onBeforeDispose'].includes(
+              path[1]!
+            ) &&
+            call.arguments.length === 1
+          )
+            registration = { callbackIndex: 0, maxParameters: 1 };
+        }
         return (
           nativeReference(receiver, module, definitions) &&
-          ((nativeEventRegistration(call, path) &&
-            call.arguments[1] === value &&
-            fn.parameters.length <= 2 &&
+          ((registration &&
+            call.arguments[registration.callbackIndex] === value &&
+            fn.parameters.length <= registration.maxParameters &&
             fn.parameters.every(
               (parameter) =>
                 ts.isIdentifier(parameter.name) &&
                 !parameter.initializer &&
                 !parameter.dotDotDotToken
             )) ||
-            path.join('.') === 'context.trySubscribe' ||
-            path.join('.') === 'context.trySubscribeAncestor' ||
-            path.join('.') === 'props.watchRaw' ||
-            (path.length === 2 &&
-              path[0] === 'lifecycle' &&
-              ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onBeforeDispose'].includes(
-                path[1]!
-              )))
+            (!requireExactSlot &&
+              (path.join('.') === 'context.trySubscribe' ||
+                path.join('.') === 'context.trySubscribeAncestor' ||
+                path.join('.') === 'props.watchRaw' ||
+                (path.length === 2 &&
+                  path[0] === 'lifecycle' &&
+                  [
+                    'onCreated',
+                    'onMounted',
+                    'onUpdated',
+                    'onUnmounted',
+                    'onBeforeDispose',
+                  ].includes(path[1]!)))))
         );
       };
       const value = outerValue(fn);
@@ -2090,7 +2268,8 @@ function createHookSourceSummaryContextInternal(
     // The production collector does not yet recover a helper-created State's
     // declared attribute name. Admit only an unexposed const whose complete
     // use set is closed: native WhenBuilder reads, Core's directly returned
-    // renderer's value get(), or the exact replay's discarded helper result.
+    // renderer's value get(), exact native registration callbacks, or the exact
+    // replay's discarded helper result.
     // Exposed/escaped returns stay pending instead of certifying the
     // collector's fallback expose-key CSS.
     if (
