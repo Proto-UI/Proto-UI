@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
@@ -470,4 +471,72 @@ test('the real Shenko intake keeps reported counts, observed declarations and se
     )
   );
   assert.equal(manifest.provenance.separateMainObservation.selectedForThisIntake, false);
+});
+
+test('Unicode key insertion order preserves configuration identity without merging distinct keys', (t) => {
+  const f = fixture(t);
+  const settings = { bindings: { '\u00e9': 1, 'e\u0301': 2 } };
+  const configuration = { ...f.configuration, settings };
+  const manifest = createSourceManifest(
+    { ...f.request, configuration },
+    { snapshots: [f.snapshot] }
+  );
+  const previous = f.verify({ configuration }, manifest);
+  assert.equal(previous.status, 'matched');
+  const reordered = { ...configuration, settings: { bindings: { 'e\u0301': 2, '\u00e9': 1 } } };
+  const current = f.verify({ configuration: reordered, previousEvidence: previous }, manifest);
+  assert.equal(current.status, 'matched');
+  assert.equal(current.configurationDigest, previous.configurationDigest);
+  assert.equal(current.previousInputEvidenceMatches, true);
+  assert.equal(current.priorInputEvidenceReusable, true);
+  assert.equal(
+    sourceManifestDigest(
+      createSourceManifest({ ...f.request, configuration: reordered }, { snapshots: [f.snapshot] })
+    ),
+    sourceManifestDigest(manifest)
+  );
+  const changed = { ...configuration, settings: { bindings: { 'e\u0301': 1, '\u00e9': 2 } } };
+  const mismatch = f.verify({ configuration: changed, previousEvidence: previous }, manifest);
+  assert.ok(mismatch.issues.some((item) => item.code === 'CONFIGURATION_CHANGED'));
+  assert.notEqual(mismatch.configurationDigest, previous.configurationDigest);
+});
+
+test('frontend closure and manifest identities stay equal across default locales', (t) => {
+  const f = fixture(t, {
+    'entry.proto.ts':
+      'import { a } from "./ä.proto.ts"; import { z } from "./z.proto.ts"; export const component = a + z;',
+    'ä.proto.ts': 'export const a = 1;',
+    'z.proto.ts': 'export const z = 2;',
+  });
+  const programUrl = new URL('../src/frontend/program.ts', import.meta.url).href;
+  const manifestUrl = new URL('../src/source-manifest.ts', import.meta.url).href;
+  const script = `
+    import { createProtoProgram, getProtoSourceClosure, canonicalJson } from ${JSON.stringify(programUrl)};
+    import { createSourceManifest, directorySourceSnapshot, sourceManifestDigest } from ${JSON.stringify(manifestUrl)};
+    const directory = ${JSON.stringify(f.directory)};
+    const closure = getProtoSourceClosure(createProtoProgram({ rootNames: ['entry.proto.ts'], currentDirectory: directory }));
+    const snapshot = directorySourceSnapshot({ repositoryId: 'consumer', revision: ${JSON.stringify(REVISION)}, directory });
+    const request = ${JSON.stringify(f.request)};
+    request.configuration.settings = { bindings: { 'ä': 1, z: 2 } };
+    request.files.push(...['ä.proto.ts', 'z.proto.ts'].map(path => ({ repositoryId: 'consumer', path, role: 'dependency' })));
+    request.entrypoints.push(...['ä', 'z'].map(id => ({ id, repositoryId: 'consumer', path: 'entry.proto.ts', exportName: id })));
+    const manifest = createSourceManifest(request, { snapshots: [snapshot] });
+    console.log(JSON.stringify({ locale: Intl.Collator().resolvedOptions().locale, canonical: canonicalJson(request.configuration.settings), configuration: closure.configurationHash, closure: closure.digest, manifest: sourceManifestDigest(manifest) }));
+  `;
+  const run = (locale) => {
+    const result = spawnSync(process.execPath, ['--input-type=module', '--eval', script], {
+      encoding: 'utf8',
+      timeout: 30000,
+      env: { ...process.env, LANG: locale, LC_ALL: locale },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout);
+  };
+  const english = run('en_US.UTF-8');
+  const swedish = run('sv_SE.UTF-8');
+  assert.equal(english.locale, 'en-US');
+  assert.equal(swedish.locale, 'sv-SE');
+  const { locale: _en, ...enIdentity } = english;
+  const { locale: _sv, ...svIdentity } = swedish;
+  assert.deepEqual(enIdentity, svIdentity);
 });
