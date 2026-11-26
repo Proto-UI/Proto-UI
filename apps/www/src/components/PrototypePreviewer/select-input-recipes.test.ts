@@ -6,11 +6,11 @@ import * as shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import * as brutalistButton from '@proto.ui/prototypes-brutalist/button';
 import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
 import type { Prototype } from '@proto.ui/core';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, expect, it, vi } from 'vitest';
 import baseDemo from '../../content/docs/demo-base-select-input.demo';
 import shadcnDemo from '../../content/docs/demo-shadcn-select-input.demo';
 import brutalistDemo from '../../content/docs/demo-brutalist-select-input.demo';
-import { renderDemo } from './demo-renderer';
+import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { registerPrototype } from './registry';
 import type { DemoRuntimeApi } from './demo-types';
 // Only substitute CDN acquisition. These are the public recipe and real
@@ -57,6 +57,9 @@ for (const library of [
       registerPrototype(prototype.name, prototype);
     }
 const cleanups: Array<() => void | Promise<void>> = [];
+// Each case exercises a mounted selection owner. Load its actual framework before mounting.
+for (const runtime of ['react', 'vue', 'vue2'] as const)
+  beforeAll(() => prepareDemoRuntime(runtime));
 afterEach(async () => {
   for (const cleanup of cleanups.splice(0).reverse()) await cleanup();
   document.body.replaceChildren();
@@ -141,18 +144,50 @@ for (const [family, demo] of Object.entries({
         await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('system'));
         expect(x('controlledSelect').getCollectionCount()).toBe(4);
         expect(refs.selectedTheme.textContent).toContain('Selected: System');
-        expect(
-          api.call('controlledSelect', 'requestValue', {
-            value: 'dark',
-            textValue: 'Dark',
-            reason: 'programmatic',
-          })
-        ).toBe(true);
-        await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('dark'));
-        expect(refs.selectedTheme.textContent).toContain('Selected: Dark');
-        refs.resetTheme.click();
-        await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('system'));
+        const trigger = host.querySelector<HTMLElement>('[role="combobox"]')!;
+        await vi.waitFor(() => expect(trigger.textContent?.trim()).toBe('System'));
+        trigger.click();
+        const option = (label: string) => {
+          const listbox = document.getElementById(trigger.getAttribute('aria-controls')!);
+          return Array.from(listbox?.querySelectorAll<HTMLElement>('[role="option"]') ?? []).find(
+            (item) => item.textContent?.trim() === label
+          );
+        };
+        const disabled = await vi.waitFor(() => {
+          const item = option('High Contrast (Coming soon)');
+          expect(item?.getAttribute('aria-disabled')).toBe('true');
+          return item!;
+        });
+        disabled.click();
+        await flush();
+        expect(x('controlledSelect').value.get()).toBe('system');
         expect(refs.selectedTheme.textContent).toContain('Selected: System');
+        expect(trigger.textContent?.trim()).toBe('System');
+        expect(trigger.getAttribute('aria-expanded')).toBe('true');
+        for (const activateDark of [
+          () => option('Dark')!.click(),
+          () =>
+            expect(
+              api.call('controlledSelect', 'requestValue', {
+                value: 'dark',
+                textValue: 'Dark',
+                reason: 'programmatic',
+              })
+            ).toBe(true),
+        ]) {
+          activateDark();
+          await vi.waitFor(() => {
+            expect(x('controlledSelect').value.get()).toBe('dark');
+            expect(trigger.textContent?.trim()).toBe('Dark');
+            expect(refs.selectedTheme.textContent).toContain('Selected: Dark');
+          });
+          refs.resetTheme.click();
+          await vi.waitFor(() => {
+            expect(x('controlledSelect').value.get()).toBe('system');
+            expect(trigger.textContent?.trim()).toBe('System');
+            expect(refs.selectedTheme.textContent).toContain('Selected: System');
+          });
+        }
         await view.destroy();
         cleaned = true;
         await flush();
