@@ -2,7 +2,9 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import ts from 'typescript';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { tabsRoot, tabsList, tabsTrigger } from '@proto.ui/prototypes-shadcn/tabs';
 
 import {
   createHookSourceSummaryContext,
@@ -318,10 +320,80 @@ describe('native Props initialization before authored hook capture', () => {
     const tokens = await collectProtoStyleTokensFromFiles([
       path.resolve(process.cwd(), 'packages/prototypes/shadcn/src/tabs/trigger.proto.ts'),
     ]);
-    expect(tokens).toContain('data-[selected]:bg-background');
-    expect(tokens).toContain('data-[selected]:shadow-sm');
-    expect(tokens).toContain('data-[focus-visible]:ring-3');
-    expect(tokens).toContain('data-[focus-visible]:outline-1');
+    // Appearance is mutable Props input, so these actual Rules remain in
+    // Runtime evaluation. Their resources are raw paint, not the former
+    // pure-State selector projection.
+    const paint = [
+      ['selected', 'bg-background'],
+      ['selected', 'shadow-sm'],
+      ['focus-visible', 'ring-3'],
+      ['focus-visible', 'outline-1'],
+    ] as const;
+    for (const [state, token] of paint) {
+      expect(tokens).toContain(token);
+      expect(tokens).not.toContain(`data-[${state}]:${token}`);
+    }
+
+    const Root = AdaptToWebComponent(tabsRoot, { register: false });
+    const List = AdaptToWebComponent(tabsList, { register: false });
+    const Trigger = AdaptToWebComponent(tabsTrigger, { register: false });
+    const tag = path.basename(directory).toLowerCase();
+    customElements.define(`${tag}-root`, Root);
+    customElements.define(`${tag}-list`, List);
+    customElements.define(`${tag}-trigger`, Trigger);
+    const root = new Root();
+    const list = new List();
+    const trigger = new Trigger();
+    setElementProps(root, { value: 'a', activationMode: 'manual' });
+    setElementProps(trigger, { value: 'a' });
+    trigger.textContent = 'Alpha';
+    list.append(trigger);
+    root.append(list);
+    const flush = async () => {
+      for (let index = 0; index < 6; index++) await Promise.resolve();
+    };
+    const currentTokens = () =>
+      (trigger.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean).sort();
+    let restoreMatches: (() => void) | undefined;
+    try {
+      document.body.append(root);
+      await vi.waitFor(() => expect(trigger.getExposes().selected.get()).toBe(true));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      const matches = vi.spyOn(trigger, 'matches').mockReturnValue(true);
+      restoreMatches = () => matches.mockRestore();
+      trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+      await flush();
+      const state = trigger.getExposes();
+      expect(state.selected.get()).toBe(true);
+      expect(state.focusVisible.get()).toBe(true);
+      const before = currentTokens();
+      for (const [, token] of paint) expect(before).toContain(token);
+      for (const token of before) expect(tokens).toContain(token);
+
+      setElementProps(trigger, { value: 'a', appearance: 'underline' });
+      await flush();
+      expect(trigger.getExposes().selected).toBe(state.selected);
+      expect(trigger.getExposes().focusVisible).toBe(state.focusVisible);
+      expect(state.selected.get()).toBe(true);
+      expect(state.focusVisible.get()).toBe(true);
+      const underline = currentTokens();
+      for (const [, token] of paint) expect(underline).not.toContain(token);
+      expect(underline).toContain('bg-transparent');
+      expect(underline).toContain('outline-2');
+      for (const token of underline) expect(tokens).toContain(token);
+
+      setElementProps(trigger, { value: 'a', appearance: 'default' });
+      await flush();
+      expect(trigger.getExposes().selected).toBe(state.selected);
+      expect(trigger.getExposes().focusVisible).toBe(state.focusVisible);
+      expect(state.selected.get()).toBe(true);
+      expect(state.focusVisible.get()).toBe(true);
+      expect(currentTokens()).toEqual(before);
+    } finally {
+      restoreMatches?.();
+      root.remove();
+      await flush();
+    }
   });
 
   it('retains the actual Brutalist Toggle active paint and pressed inset rules', async () => {
