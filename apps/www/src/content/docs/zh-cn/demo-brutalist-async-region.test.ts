@@ -31,7 +31,7 @@ if (typeof globalThis.MutationObserver === 'undefined') {
 }
 
 describe('Brutalist Async Region demo contract', () => {
-  it('binds one real family region with authored payload and two button controls', () => {
+  it('binds one real family region with authored payload and button controls', () => {
     // T-BRUTALIST-ASYNC-REGION-0001-CASE-5
     const nodes = collectNodes(asyncRegionDemo.root);
     const regions = nodes.filter(
@@ -41,7 +41,7 @@ describe('Brutalist Async Region demo contract', () => {
       (node) => node.kind === 'proto' && node.prototypeId === 'brutalist-button'
     );
     expect(regions).toHaveLength(1);
-    expect(buttons).toHaveLength(2);
+    expect(buttons).toHaveLength(3);
 
     const region = regions[0];
     if (region.kind !== 'proto') throw new Error('Expected Async Region Root');
@@ -49,9 +49,8 @@ describe('Brutalist Async Region demo contract', () => {
     // The demo starts not-busy and keeps an authored payload child; nothing
     // simulates a loading widget, timer, or second state machine.
     expect(region.props?.busy).toBe(false);
-    const payloads = (region.children ?? []).filter(
-      (child): child is DemoRefNode =>
-        typeof child !== 'string' && child.kind !== 'text' && child.ref === 'payload'
+    const payloads = collectNodes(region).filter(
+      (child): child is DemoRefNode => child.kind !== 'text' && child.ref === 'payload'
     );
     expect(payloads).toHaveLength(1);
 
@@ -59,16 +58,17 @@ describe('Brutalist Async Region demo contract', () => {
       .map((node) => (node.kind === 'proto' ? node.ref : undefined))
       .filter((ref): ref is string => typeof ref === 'string')
       .sort();
-    expect(buttonRefs).toEqual(['markBusy', 'markReady']);
+    expect(buttonRefs).toEqual(['finishRefresh', 'inspectBtn', 'startRefresh']);
   });
 
   it('drives busy only through the real region prop', () => {
-    // T-BRUTALIST-ASYNC-REGION-0001-CASE-5: setup wires markBusy/markReady
+    // T-BRUTALIST-ASYNC-REGION-0001-CASE-5: setup wires startRefresh/finishRefresh
     // clicks to api.setProps('region', {busy}) and reads exposes.busy; it never
     // touches region attributes or injects loading chrome.
     expect(asyncRegionDemo.setup).toBeTypeOf('function');
     const payload = document.createElement('div');
-    const busyState = document.createElement('div');
+    const statusBadge = document.createElement('div');
+    const metaNote = document.createElement('div');
     const host = document.createElement('div');
     const propWrites: Array<{ ref: string; next: Record<string, unknown> }> = [];
     const exposes: Record<string, Record<string, unknown> | undefined> = {
@@ -83,26 +83,31 @@ describe('Brutalist Async Region demo contract', () => {
     };
     asyncRegionDemo.setup?.({
       host,
-      refs: { payload, busyState },
+      refs: { payload, statusBadge, metaNote },
       api,
     });
 
     const regionWrites = () => propWrites.filter((write) => write.ref === 'region');
     const controlWrites = propWrites.filter((write) => write.ref !== 'region');
     expect(regionWrites()).toHaveLength(0);
-    expect(controlWrites.map((write) => write.ref).sort()).toEqual(['markBusy', 'markReady']);
+    expect(controlWrites.map((write) => write.ref).sort()).toEqual([
+      'finishRefresh',
+      'inspectBtn',
+      'startRefresh',
+    ]);
 
     // Clicking the real controls issues only a busy prop transition.
     for (const write of controlWrites) {
       expect(typeof write.next.onClick).toBe('function');
     }
-    (controlWrites.find((write) => write.ref === 'markBusy')!.next.onClick as () => void)();
+    (controlWrites.find((write) => write.ref === 'startRefresh')!.next.onClick as () => void)();
     expect(regionWrites()).toEqual([{ ref: 'region', next: { busy: true } }]);
-    (controlWrites.find((write) => write.ref === 'markReady')!.next.onClick as () => void)();
+    (controlWrites.find((write) => write.ref === 'finishRefresh')!.next.onClick as () => void)();
     expect(regionWrites()).toEqual([
       { ref: 'region', next: { busy: true } },
       { ref: 'region', next: { busy: false } },
     ]);
-    expect(busyState.textContent).toBe('true');
+    expect(statusBadge.textContent).toBe('Syncing…');
+    expect(metaNote.textContent).toContain('aria-busy="true"');
   });
 });
