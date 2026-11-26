@@ -1,13 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Dialog'
-description: '保留 Bootstrap 2.3.2 经典 .modal 下滑过渡、6px 圆角与底部内高光的模态对话框组件。'
+description: 'Bootstrap 2.3.2 模态对话框，采用经典下滑过渡、6px 圆角与适配主题的页脚。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Dialog 基于 [Base Dialog](../../base/dialog/) 构建，保留经典 `.modal` 的 560px 面板宽度、6px 圆角、300 ms 顶部滑入（`-25% → 10%`）过渡、80% 黑色遮罩与 `.modal-footer` 顶部 `1px` 白色内高光。
+Bootstrap 2.3.2 Dialog 基于 [Base Dialog](../../base/dialog/) 构建，保留 560px 面板宽度、6px 圆角、300 ms 顶部滑入（`-25% → 10%`）过渡与 80% 黑色遮罩。页脚采用主题的次级背景色与配套前景色。
 
 ## 预览
 
@@ -85,7 +85,7 @@ BootstrapDialogRoot
 ### 视觉与交互特性
 
 - **经典入场动效**：`Content` 沿用 Bootstrap 2.3.2 `.modal.fade` 的 300 ms 透明度与顶部 `-25% → 10%` 平滑下滑，`Mask` 使用 150 ms 淡入至 80% 不透明度。
-- **层级与结构**：`Mask` 与 `Content` 分别声明 `z-40` 与 `z-50`；`Header` 提供 `9px 15px` 内边距与底部分割线，`Footer` 保留浅灰背景与 `inset 0 1px 0 #fff` 顶部高光。
+- `Mask` 与 `Content` 分别使用 `z-40` 与 `z-50`。`Header` 提供 `9px 15px` 内边距与底部分割线，`Footer` 通过主题色上边框分隔正文与操作区。
 - **焦点与无障碍**：自动管理模态焦点陷阱、焦点归还、`Escape` / 点击外部关闭，以及 `aria-labelledby` / `aria-describedby` 关联。
 
 ## 示例

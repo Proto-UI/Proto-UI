@@ -4,6 +4,7 @@ import {
   type HookSourceModule as Module,
   type HookSourceSymbol as SymbolRef,
 } from './hook-source-module.js';
+import { createHookSourceMetadataCreationGuard } from './hook-source-metadata-creation.js';
 
 /** The source identity of an authored declaration. */
 export type HookSourceRef = { file: string; start: number };
@@ -749,10 +750,14 @@ function createHookSourceSummaryContextInternal(
   rootStyleSource?: ts.SourceFile
 ): HookSourceSummaryContext | null {
   let rootStyleSetup: ts.FunctionLikeDeclaration | null = null;
+  let rootStyleProofRevision = -1;
+  let rootStyleProofQuery: object | undefined;
   const moduleContext = createHookSourceModuleContext();
   const registeredSources = new Map<string, ts.SourceFile>();
   const authoredSourcePaths = new Set<string>();
   const producerCache = new Map<string, Producer | null>();
+  let producerCacheQuery: object | undefined;
+  let producerCacheRevision = -1;
   const summaryCache = new Map<string, HookSourceValue>();
   const summaryStack = new Set<string>();
   let returnedStateDefinitionFacts = new WeakMap<ts.Node, boolean>();
@@ -774,10 +779,12 @@ function createHookSourceSummaryContextInternal(
   const dynamicImports = new WeakMap<ts.SourceFile, string[]>();
   const exportedFunctionKeys = new Map<string, Set<string>>();
   const moduleForSource = (source: ts.SourceFile): Module => {
+    const revision = moduleContext.sourceRevision();
     const module = moduleContext.moduleForSource(source);
     const previous = registeredSources.get(module.file);
-    if (previous !== source) returnedStateDefinitionFacts = new WeakMap();
-    if (previous && previous !== source) {
+    if (moduleContext.sourceRevision() !== revision || previous !== source)
+      returnedStateDefinitionFacts = new WeakMap();
+    if (moduleContext.sourceRevision() !== revision || (previous && previous !== source)) {
       producerCache.clear();
       summaryCache.clear();
       summaryStack.clear();
@@ -954,6 +961,15 @@ function createHookSourceSummaryContextInternal(
     moduleContext.isDefineAsHookReference(unwrap(call.expression), module);
 
   const producerForSymbol = (symbol: SymbolRef, stack = new Set<string>()): Producer | null => {
+    const query = moduleContext.synchronousQueryIdentity();
+    const revision = moduleContext.sourceRevision();
+    if (!query || producerCacheQuery !== query || producerCacheRevision !== revision) {
+      // A local alias may resolve to a producer in a newly targeted physical
+      // dependency without changing the alias declaration's own source AST.
+      producerCache.clear();
+      producerCacheQuery = query;
+      producerCacheRevision = revision;
+    }
     const key = `${symbol.module.file}:${symbol.declaration.getStart(symbol.module.source)}`;
     const cached = producerCache.get(key);
     if (cached !== undefined) return cached;
@@ -3299,6 +3315,23 @@ function createHookSourceSummaryContextInternal(
     owner: ts.FunctionLikeDeclaration,
     module: Module
   ): boolean => {
+    const query = moduleContext.synchronousQueryIdentity();
+    if (
+      rootStyleSource === module.source &&
+      (!query ||
+        rootStyleProofQuery !== query ||
+        rootStyleProofRevision !== moduleContext.sourceRevision())
+    ) {
+      // A new query may resolve an unchanged import to a different physical
+      // module, and a caller may replace an AST inside the current query.
+      // Re-prove the complete creation graph and empty modules before using
+      // the fresh Runtime Props scenario under either changed observation.
+      const revision = moduleContext.sourceRevision();
+      rootStyleSetup = selectStandardRuntimeRootSetup(rootStyleSource);
+      rootStyleProofRevision = moduleContext.sourceRevision();
+      rootStyleProofQuery = query;
+      if (rootStyleProofRevision !== revision) rootStyleSetup = null;
+    }
     const parameter = owner.parameters[0];
     if (
       !rootStyleSource ||
@@ -7476,6 +7509,80 @@ function createHookSourceSummaryContextInternal(
     return canonical;
   }
 
+  const metadataCreationClosed = createHookSourceMetadataCreationGuard(moduleContext, {
+    resolveFunction: functionFor,
+    isStaticModules: (node, module) => {
+      const value = unwrap(node);
+      if (
+        !ts.isPropertyAccessExpression(value) ||
+        value.questionDotToken ||
+        value.name.text !== 'modules'
+      )
+        return false;
+      const symbol = moduleContext.resolveReference(value.expression, module);
+      const producer = symbol ? producerForSymbol(symbol) : null;
+      return !!producer && !producer.call.questionDotToken && producer.call.arguments.length === 1;
+    },
+  });
+
+  function hasEmptyStaticModules(
+    expression: ts.Node,
+    module: Module,
+    seen = new Set<ts.Node>()
+  ): boolean {
+    const value = unwrap(expression);
+    if (ts.isArrayLiteralExpression(value)) return value.elements.length === 0;
+    if (
+      !ts.isPropertyAccessExpression(value) ||
+      value.questionDotToken ||
+      value.name.text !== 'modules'
+    )
+      return false;
+    const symbol = moduleContext.resolveReference(value.expression, module);
+    const producer = symbol ? producerForSymbol(symbol) : null;
+    if (
+      !producer ||
+      producer.call.questionDotToken ||
+      producer.call.arguments.length !== 1 ||
+      seen.has(producer.declaration)
+    )
+      return false;
+    const nextSeen = new Set(seen).add(producer.declaration);
+    // Core snapshots AsHook modules into an own, frozen, non-configurable
+    // property at creation. Prove that snapshot empty; an arbitrary .modules
+    // read, getter, spread or custom module must not establish fresh Props.
+    const keys = new Set<string>();
+    let modules: ts.Expression | undefined;
+    for (const property of producer.config.properties) {
+      if (ts.isSpreadAssignment(property) || ts.isComputedPropertyName(property.name)) return false;
+      const key = propertyName(property.name);
+      if (!key || keys.has(key) || !['name', 'setup', 'projectHandle', 'modules'].includes(key))
+        return false;
+      keys.add(key);
+      if (key === 'name') {
+        if (
+          !ts.isPropertyAssignment(property) ||
+          typeof registrationLiteral(property.initializer) !== 'string'
+        )
+          return false;
+      } else if (key === 'modules') {
+        if (!ts.isPropertyAssignment(property)) return false;
+        modules = property.initializer;
+      } else if (
+        (!ts.isMethodDeclaration(property) &&
+          !ts.isPropertyAssignment(property) &&
+          !ts.isShorthandPropertyAssignment(property)) ||
+        !functionFor(propertyExpression(property), producer.module)
+      )
+        return false;
+    }
+    return (
+      keys.has('name') &&
+      keys.has('setup') &&
+      (!modules || hasEmptyStaticModules(modules, producer.module, nextSeen))
+    );
+  }
+
   /** Select a concrete default entry for the explicit standard-instance scenario.
    * An export edge is not itself a freshness proof: freshness belongs only to
    * the separate Runtime construction scenario and never to ordinary resolve.
@@ -7513,12 +7620,17 @@ function createHookSourceSummaryContextInternal(
     for (const property of config.properties) {
       if (ts.isSpreadAssignment(property) || ts.isComputedPropertyName(property.name)) return null;
       const key = propertyName(property.name);
-      if (!key || keys.has(key) || (key !== 'name' && key !== 'setup')) return null;
+      if (!key || keys.has(key) || !['name', 'setup', 'modules'].includes(key)) return null;
       keys.add(key);
       if (
         key === 'name' &&
         (!ts.isPropertyAssignment(property) ||
           typeof registrationLiteral(property.initializer) !== 'string')
+      )
+        return null;
+      if (
+        key === 'modules' &&
+        (!ts.isPropertyAssignment(property) || !hasEmptyStaticModules(property.initializer, module))
       )
         return null;
     }
@@ -7527,6 +7639,7 @@ function createHookSourceSummaryContextInternal(
     if (
       !keys.has('name') ||
       !setup ||
+      !metadataCreationClosed(source) ||
       setup.module.source !== source ||
       !isAuthoredSetup(setup.fn, source) ||
       !hasOnlyAuthoredSetupReferences(setup.fn, source)
@@ -7567,6 +7680,8 @@ function createHookSourceSummaryContextInternal(
   if (rootStyleSource) {
     registerSource(rootStyleSource);
     rootStyleSetup = selectStandardRuntimeRootSetup(rootStyleSource);
+    rootStyleProofRevision = moduleContext.sourceRevision();
+    rootStyleProofQuery = moduleContext.synchronousQueryIdentity();
     const owner = rootStyleSetup;
     if (!owner?.body || !ts.isBlock(owner.body)) return null;
     const first = owner.body.statements[0];

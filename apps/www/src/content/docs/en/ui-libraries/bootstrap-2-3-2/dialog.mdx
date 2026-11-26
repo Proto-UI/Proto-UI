@@ -1,13 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Dialog'
-description: 'A Bootstrap 2.3.2 modal dialog preserving the classic .modal slide-in transition, 6px border radius, and footer inset highlight.'
+description: 'A Bootstrap 2.3.2 modal dialog with a slide-in transition, 6px rounded corners and a theme-aware footer.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Dialog builds on [Base Dialog](../../base/dialog/) while preserving the authentic `.modal` 560px frame, 6px border radius, 300 ms top `-25% -> 10%` slide transition, 80% black backdrop, and `.modal-footer` `1px` white inset top highlight.
+Bootstrap 2.3.2 Dialog builds on [Base Dialog](../../base/dialog/) and preserves the 560px panel, 6px corners, 300 ms top `-25% -> 10%` slide transition and 80% black backdrop. The footer uses the theme’s secondary surface and foreground colors.
 
 ## Preview
 
@@ -85,7 +85,7 @@ BootstrapDialogRoot
 ### Visual and behavioral details
 
 - **Classic motion**: `Content` runs Bootstrap 2.3.2's 300 ms opacity and `-25% -> 10%` top slide presence transition, paired with a 150 ms backdrop fade to 80% black opacity.
-- **Layering & chrome**: `Mask` (`z-40`) and `Content` (`z-50`) maintain predictable stacking; `Header` applies `9px 15px` padding and a hairline divider, while `Footer` restores the classic `inset 0 1px 0 #fff` top highlight.
+- `Mask` (`z-40`) and `Content` (`z-50`) own the backdrop and panel stacking. `Header` applies `9px 15px` padding and a hairline divider. `Footer` separates its actions from the body with a theme-colored top border.
 - **Accessibility**: Full focus trapping, trigger focus restoration, `Escape` and outside-press dismissal, and live `aria-labelledby` / `aria-describedby` links.
 
 ## Examples
