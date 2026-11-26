@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { createHookSourceModuleContext, type HookSourceModule } from './hook-source-module.js';
 import {
   sourceMembersProven,
   type HookSourceSummaryContext,
@@ -84,6 +85,155 @@ export type ClosedRuleScalar = Readonly<{
   value: string | number | boolean | null | undefined;
 }>;
 
+/** An iteration value is a separate capability from a stable source binding.
+ * Only this const binding's actual inline primitive row may supply it. Nothing
+ * here certifies a shared array, a compound row, a State or an escaped callback.
+ * Each caller owns these facts for its immutable source instances. */
+export function createClosedRuleIterationScalarProof(): (
+  reference: ts.Identifier,
+  declaration: ts.Node | undefined,
+  row: ts.Expression | undefined,
+  origin: ts.Node
+) => ClosedRuleScalar | null {
+  const modules = createHookSourceModuleContext();
+  const sources = new WeakMap<ts.SourceFile, HookSourceModule>();
+  const loops = new WeakMap<ts.ForOfStatement, boolean>();
+  const passiveRow = (expression: ts.Node): boolean => {
+    const value = unwrap(expression);
+    return (
+      ts.isStringLiteralLike(value) ||
+      ts.isNumericLiteral(value) ||
+      value.kind === ts.SyntaxKind.TrueKeyword ||
+      value.kind === ts.SyntaxKind.FalseKeyword ||
+      value.kind === ts.SyntaxKind.NullKeyword ||
+      (ts.isPrefixUnaryExpression(value) &&
+        (value.operator === ts.SyntaxKind.PlusToken ||
+          value.operator === ts.SyntaxKind.MinusToken) &&
+        ts.isNumericLiteral(unwrap(value.operand)))
+    );
+  };
+  const directRead = (origin: ts.Node, loop: ts.ForOfStatement): boolean => {
+    let callbacks = 0;
+    for (let node: ts.Node | undefined = origin; node && node !== loop; node = node.parent) {
+      if (node === loop.statement) return true;
+      if (!ts.isFunctionLike(node)) continue;
+      // The ordinary closed-When proof checks this callback's builder and
+      // returned expression separately. No arbitrary deferred function may
+      // borrow its enclosing loop's activation (including through an alias).
+      const property: ts.Node = node.parent;
+      if (
+        ++callbacks > 1 ||
+        !ts.isArrowFunction(node) ||
+        node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+        !ts.isPropertyAssignment(property) ||
+        property.initializer !== node ||
+        !ts.isIdentifier(property.name) ||
+        property.name.text !== 'when'
+      )
+        return false;
+    }
+    return false;
+  };
+  return (reference, declaration, row, origin) => {
+    if (
+      !declaration ||
+      !ts.isVariableDeclaration(declaration) ||
+      !ts.isIdentifier(declaration.name) ||
+      declaration.initializer ||
+      !row ||
+      !passiveRow(row)
+    )
+      return null;
+    const list = declaration.parent;
+    if (
+      !ts.isVariableDeclarationList(list) ||
+      (list.flags & ts.NodeFlags.Const) === 0 ||
+      list.declarations.length !== 1 ||
+      !ts.isForOfStatement(list.parent) ||
+      list.parent.initializer !== list ||
+      list.parent.awaitModifier
+    )
+      return null;
+    const loop = list.parent;
+    const iterable = unwrap(loop.expression);
+    if (
+      !ts.isArrayLiteralExpression(iterable) ||
+      !iterable.elements.includes(row) ||
+      !iterable.elements.every(passiveRow) ||
+      !directRead(origin, loop)
+    )
+      return null;
+    const source = declaration.getSourceFile();
+    if (reference.getSourceFile() !== source || origin.getSourceFile() !== source) return null;
+    let module = sources.get(source);
+    if (!module) {
+      modules.registerSource(source);
+      module = modules.moduleForSource(source);
+      sources.set(source, module);
+    }
+    if (modules.resolveReference(reference, module)?.declaration !== declaration) return null;
+    let closed = loops.get(loop);
+    if (closed === undefined) {
+      closed = true;
+      const owner = ts.findAncestor(loop, ts.isFunctionLike);
+      if (
+        owner &&
+        ((ts.canHaveModifiers(owner) &&
+          ts
+            .getModifiers(owner)
+            ?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword)) ||
+          ('asteriskToken' in owner && owner.asteriskToken))
+      )
+        closed = false;
+      const writes = (target: ts.Node): boolean => {
+        const value = unwrap(target);
+        if (ts.isIdentifier(value))
+          return modules.resolveReference(value, module!)?.declaration === declaration;
+        if (ts.isArrayLiteralExpression(value)) return value.elements.some(writes);
+        if (ts.isObjectLiteralExpression(value))
+          return value.properties.some((property) =>
+            ts.isShorthandPropertyAssignment(property)
+              ? writes(property.name)
+              : ts.isPropertyAssignment(property)
+                ? writes(property.initializer)
+                : ts.isSpreadAssignment(property) && writes(property.expression)
+          );
+        if (ts.isSpreadElement(value)) return writes(value.expression);
+        if (ts.isBinaryExpression(value) && value.operatorToken.kind === ts.SyntaxKind.EqualsToken)
+          return writes(value.left);
+        return false;
+      };
+      const visit = (node: ts.Node): void => {
+        if (!closed || ts.isTypeNode(node)) return;
+        if (
+          ts.isWithStatement(node) ||
+          (ts.isCallExpression(node) &&
+            ts.isIdentifier(unwrap(node.expression)) &&
+            (unwrap(node.expression) as ts.Identifier).text === 'eval') ||
+          (ts.isBinaryExpression(node) &&
+            node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+            node.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
+            writes(node.left)) ||
+          ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+            (node.operator === ts.SyntaxKind.PlusPlusToken ||
+              node.operator === ts.SyntaxKind.MinusMinusToken) &&
+            writes(node.operand)) ||
+          ((ts.isForOfStatement(node) || ts.isForInStatement(node)) &&
+            !ts.isVariableDeclarationList(node.initializer) &&
+            writes(node.initializer))
+        ) {
+          closed = false;
+          return;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(source);
+      loops.set(loop, closed);
+    }
+    return closed ? closedRuleScalarValue(row, null, () => null) : null;
+  };
+}
+
 /** Resolve only passive scalar expressions with an immutable lexical binding.
  * A captured parameter belongs to this exact invocation and lexical binding;
  * a type annotation or a same-spelled outer name cannot supply that value.
@@ -91,7 +241,8 @@ export type ClosedRuleScalar = Readonly<{
 export function closedRuleScalarValue(
   node: ts.Node,
   summary: HookSourceSummaryContext | null | undefined,
-  captured: (declaration: ts.ParameterDeclaration) => ClosedRuleScalar | null
+  captured: (declaration: ts.ParameterDeclaration) => ClosedRuleScalar | null,
+  iteration?: (reference: ts.Identifier) => ClosedRuleScalar | null
 ): ClosedRuleScalar | null {
   const read = (expression: ts.Node, active: ReadonlySet<ts.Node>): ClosedRuleScalar | null => {
     if (active.size >= 32) return null;
@@ -105,6 +256,8 @@ export function closedRuleScalarValue(
       return Number.isFinite(number) ? { value: number } : null;
     }
     if (ts.isIdentifier(value)) {
+      const perIteration = iteration?.(value);
+      if (perIteration) return perIteration;
       if (!summary) return null;
       const declaration = summary.resolveStableSourceBinding(value);
       if (!declaration || !ts.isIdentifier(declaration.name) || active.has(declaration))

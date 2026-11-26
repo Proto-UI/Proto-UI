@@ -184,10 +184,15 @@ describe('closed scalar Rule conditions agree with the production collector', ()
     expect(rows).toHaveLength(2);
     expect(rows.every((row) => !row.declarationOnly)).toBe(true);
     expect(new Set(rows.map((row) => row.rule.start)).size).toBe(1);
-    expect(
-      rows.flatMap((row) => row.unresolved).filter((miss) => miss.reason === 'condition')
-    ).toHaveLength(2);
-    expect(tokens).toContain('bg-primary');
+    // The ordinary stable-binding proof still rejects a for-of initialization.
+    // The separate per-iteration scalar capability selects these exact rows.
+    expect(rows.map((row) => row.unresolved)).toEqual([[], []]);
+    expect(rows.map((row) => row.exposedLocals.length)).toEqual([2, 1]);
+    expect(tokens.filter((token) => token.endsWith('bg-primary'))).toEqual([
+      'bg-primary',
+      'data-[primary-flag]:bg-primary',
+      'data-[primary-flag]:data-[secondary-flag]:bg-primary',
+    ]);
   });
 
   it('retains finite profile rows when the induction-binding proof remains unavailable', async () => {
@@ -209,10 +214,13 @@ describe('closed scalar Rule conditions agree with the production collector', ()
     expect(rows).toHaveLength(2);
     expect(rows.every((row) => !row.declarationOnly)).toBe(true);
     expect(new Set(rows.map((row) => row.rule.start)).size).toBe(1);
-    expect(
-      rows.flatMap((row) => row.unresolved).filter((miss) => miss.reason === 'condition')
-    ).toHaveLength(2);
-    expect(tokens).toContain('bg-primary');
+    expect(rows.map((row) => row.unresolved)).toEqual([[], []]);
+    expect(rows.map((row) => row.exposedLocals.length)).toEqual([1, 2]);
+    expect(tokens.filter((token) => token.endsWith('bg-primary'))).toEqual([
+      'bg-primary',
+      'data-[mode=classic]:bg-primary',
+      'data-[mode=modern]:data-[primary-flag]:bg-primary',
+    ]);
   });
 
   it.each([

@@ -13,6 +13,7 @@ import { createFiniteRowLifetimeProof } from './finite-row-lifetime.js';
 import { constantModuleHasUnmodeledEffects } from './constant-module-effects.js';
 import {
   canKeepOmittedParameter,
+  createClosedRuleIterationScalarProof,
   closedRuleScalarValue,
   omittedParameterConditionOutcome,
 } from './closed-rule-helpers.js';
@@ -373,6 +374,7 @@ function createScope(parent = null, node = null, sourceSummary = parent?.sourceS
     bindings: new Map(),
     node,
     sourceSummary,
+    iterationScalar: parent?.iterationScalar ?? createClosedRuleIterationScalarProof(),
     finiteRowsStayClosed: parent?.finiteRowsStayClosed,
     tokenRowArgumentOrigins: parent?.tokenRowArgumentOrigins ?? new Map(),
     decorationSourceFiles: parent?.decorationSourceFiles,
@@ -1156,16 +1158,29 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       // A bound/imported finite array is a token inventory, not an evaluated
       // program. Unknown rows remain unknown while known rows still contribute.
       const graph = evaluateTokenGraph(node.expression, scope);
-      if (
+      const closedRows =
+        graph?.kind === 'array' && graph.complete && scope.finiteRowsStayClosed?.(node.expression);
+      // A compound row has a second mutable alias layer. Its known strings
+      // are still CSS requirements, but no leaf is a finite semantic value.
+      const compoundInventory =
         graph?.kind === 'array' &&
-        graph.complete &&
-        scope.finiteRowsStayClosed?.(node.expression)
-      ) {
-        for (const item of graph.members.values()) {
+        graph.members.size > 0 &&
+        [...graph.members.values()].every((row) => row.kind === 'array' || row.kind === 'object');
+      if (closedRows || compoundInventory) {
+        // Snapshot the inventory extent: an unproved compound loop can delete
+        // and reinsert members while its body is inspected. A live Map iterator
+        // would revisit those keys forever instead of keeping a bounded walk.
+        for (const item of [...graph.members.values()]) {
           const rowScope = createScope(nextScope, node);
           for (const decl of loopInitializerDeclarations(node)) {
             shadowBindingPattern(rowScope, decl.name);
-            bindTokenLoopPattern(decl.name, item, rowScope);
+            bindTokenLoopPattern(
+              decl.name,
+              closedRows ? item : tokenUnion([item, { kind: 'unknown' }]),
+              rowScope,
+              closedRows ? null : node.expression,
+              !closedRows
+            );
           }
           walk(node.statement, rowScope, tokens, exposures, rootInventory);
         }
@@ -2831,7 +2846,12 @@ function registerLoopDeclaration(decl, scope, exposures, elements, lookupScope =
   const assign = (name, expressions) => {
     if (!ts.isIdentifier(name)) return;
     const binding = joinLoopBindings(expressions, lookupScope);
-    const local = { ...binding, importedBinding: false, bindingNode: decl };
+    const local = {
+      ...binding,
+      importedBinding: false,
+      bindingNode: decl,
+      iterationRow: elements.length === 1 ? elements[0] : undefined,
+    };
     scope.bindings.set(name.text, applyExposure(name.text, local, scope, exposures));
   };
   if (ts.isIdentifier(decl.name)) {
@@ -3691,13 +3711,23 @@ function capturedOmissionOutcome(node, scope) {
 }
 
 function capturedRuleScalar(node, scope) {
-  return closedRuleScalarValue(node, scope.sourceSummary, (declaration) => {
-    if (!ts.isIdentifier(declaration.name)) return null;
-    const held = lookup(declaration.name.text, scope);
-    if (held.bindingNode !== declaration || held.unknownAlternative) return null;
-    if (held.kind === 'absent') return { value: undefined };
-    return held.closedRuleScalar ?? null;
-  });
+  return closedRuleScalarValue(
+    node,
+    scope.sourceSummary,
+    (declaration) => {
+      if (!ts.isIdentifier(declaration.name)) return null;
+      const held = lookup(declaration.name.text, scope);
+      if (held.bindingNode !== declaration || held.unknownAlternative) return null;
+      if (held.kind === 'absent') return { value: undefined };
+      return held.closedRuleScalar ?? null;
+    },
+    (reference) => {
+      const held = lookup(reference.text, scope);
+      return held.unknownAlternative
+        ? null
+        : scope.iterationScalar(reference, held.bindingNode, held.iterationRow, node);
+    }
+  );
 }
 
 function captureStatePresenceSources(argument, scope) {
@@ -6400,9 +6430,15 @@ function applyTokenCallMutation(
   }
 }
 
-function bindTokenLoopPattern(name, graph, scope, readExpression = null) {
+function bindTokenLoopPattern(name, graph, scope, readExpression = null, inventoryOnly = false) {
   if (ts.isIdentifier(name)) {
-    scope.bindings.set(name.text, withTokenGraph(emptyValue(), graph ?? { kind: 'unknown' }));
+    scope.bindings.set(
+      name.text,
+      withTokenGraph(
+        { ...emptyValue(), ...(inventoryOnly ? { unknownAlternative: true } : {}) },
+        graph ?? { kind: 'unknown' }
+      )
+    );
     return;
   }
   const consumed = new Set();
@@ -6436,6 +6472,6 @@ function bindTokenLoopPattern(name, graph, scope, readExpression = null) {
     if (element.initializer)
       selected = tokenUnion([selected, evaluateTokenGraph(element.initializer, scope)]);
     for (const key of keys ?? []) consumed.add(key);
-    bindTokenLoopPattern(element.name, selected, scope, readExpression);
+    bindTokenLoopPattern(element.name, selected, scope, readExpression, inventoryOnly);
   });
 }

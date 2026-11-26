@@ -24,6 +24,7 @@ import {
 } from './closed-when-state-presence.js';
 import {
   canKeepOmittedParameter,
+  createClosedRuleIterationScalarProof,
   closedLocalRuleHelpers,
   closedRuleScalarValue,
   helperArgumentBeforeVisit,
@@ -436,6 +437,8 @@ type Binding = (
   | {
       kind: 'token';
       initializer: ts.Expression;
+      /** The exact literal row for this one const iteration, not an alias proof. */
+      iterationRow?: ts.Expression;
       /** Members written after the declaration, latest candidates first. */
       members?: Map<string, ts.Expression[]>;
       /** Containers the name may still hold because a write may be skipped. */
@@ -3268,6 +3271,7 @@ function scanRuleStateSource(
    * Anything else keeps the existing unresolved path.
    */
   const finiteRowsStayClosed = createFiniteRowLifetimeProof(closure?.entrySource ?? source);
+  const iterationScalar = createClosedRuleIterationScalarProof();
   const provenLoopRows = (expression: ts.Expression, scope: Scope): ts.Expression[] | null => {
     const names = new Set<string>();
     const rows = localValueRows(expression, scope, new Set(), names);
@@ -3285,24 +3289,29 @@ function scanRuleStateSource(
     const initializer = node.initializer;
     if (!ts.isVariableDeclarationList(initializer)) return;
     const elements = [row];
-    const assign = (name: ts.BindingName, expressions: ts.Expression[]): void => {
+    const assign = (
+      name: ts.BindingName,
+      expressions: ts.Expression[],
+      declaration: ts.VariableDeclaration
+    ): void => {
       if (!ts.isIdentifier(name) || expressions.length === 0) return;
       declare(scope, name.text, {
         kind: 'token',
         initializer: expressions[0],
         ...(expressions.length > 1 ? { alternates: expressions.slice(1) } : {}),
-        bindingNode: initializer,
+        bindingNode: declaration,
+        iterationRow: row,
       });
     };
     const members = (key: string): ts.Expression[] =>
       elements.flatMap((element) => containerMembers(element, key, scope));
     for (const declaration of initializer.declarations) {
       if (ts.isIdentifier(declaration.name)) {
-        assign(declaration.name, elements);
+        assign(declaration.name, elements, declaration);
       } else if (ts.isArrayBindingPattern(declaration.name)) {
         declaration.name.elements.forEach((element, index) => {
           if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
-          assign(element.name, members(String(index)));
+          assign(element.name, members(String(index)), declaration);
         });
       } else if (ts.isObjectBindingPattern(declaration.name)) {
         for (const element of declaration.name.elements) {
@@ -3310,7 +3319,7 @@ function scanRuleStateSource(
           const property = element.propertyName ?? element.name;
           const key =
             ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
-          if (key !== null) assign(element.name, members(key));
+          if (key !== null) assign(element.name, members(key), declaration);
         }
       }
     }
@@ -3439,25 +3448,35 @@ function scanRuleStateSource(
     });
 
   const capturedScalarOutcome = (node: ts.Node, scope: Scope): boolean | null => {
-    const result = closedRuleScalarValue(node, sourceSummary, (declaration) => {
-      if (!ts.isIdentifier(declaration.name)) return null;
-      const held = lookup(scope, declaration.name.text);
-      if (!held || !('bindingNode' in held)) return null;
-      if (held.bindingNode !== declaration) return null;
-      if (held.kind === 'absent') return { value: undefined };
-      if (held.kind !== 'token' || held.opaque || held.members?.size || held.alternates?.length)
-        return null;
-      const literal = unwrapWritten(held.initializer);
-      if (
-        !ts.isStringLiteralLike(literal) &&
-        !ts.isNumericLiteral(literal) &&
-        literal.kind !== ts.SyntaxKind.TrueKeyword &&
-        literal.kind !== ts.SyntaxKind.FalseKeyword &&
-        literal.kind !== ts.SyntaxKind.NullKeyword
-      )
-        return null;
-      return closedRuleScalarValue(literal, sourceSummary, () => null);
-    });
+    const result = closedRuleScalarValue(
+      node,
+      sourceSummary,
+      (declaration) => {
+        if (!ts.isIdentifier(declaration.name)) return null;
+        const held = lookup(scope, declaration.name.text);
+        if (!held || !('bindingNode' in held)) return null;
+        if (held.bindingNode !== declaration) return null;
+        if (held.kind === 'absent') return { value: undefined };
+        if (held.kind !== 'token' || held.opaque || held.members?.size || held.alternates?.length)
+          return null;
+        const literal = unwrapWritten(held.initializer);
+        if (
+          !ts.isStringLiteralLike(literal) &&
+          !ts.isNumericLiteral(literal) &&
+          literal.kind !== ts.SyntaxKind.TrueKeyword &&
+          literal.kind !== ts.SyntaxKind.FalseKeyword &&
+          literal.kind !== ts.SyntaxKind.NullKeyword
+        )
+          return null;
+        return closedRuleScalarValue(literal, sourceSummary, () => null);
+      },
+      (reference) => {
+        const held = lookup(scope, reference.text);
+        return held?.kind === 'token' && !held.opaque && !held.alternates?.length
+          ? iterationScalar(reference, held.bindingNode, held.iterationRow, node)
+          : null;
+      }
+    );
     return result ? Boolean(result.value) : null;
   };
 
