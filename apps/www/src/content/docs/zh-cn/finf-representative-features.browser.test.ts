@@ -578,7 +578,10 @@ function createPopoverMotionProbe(
         // actual native endpoint, not the vacuous every([]) before it starts.
         // fill:both keeps a finished entry observable even to a late probe;
         // an animation retained from an older panel/open is not a new entry.
-        (expectedEntryAnimation === null ||
+        // The actual reduced-motion policy removes entry animation entirely;
+        // it still requires visible paint, no active timelines and stable frames.
+        (frame.reducedMotion ||
+          expectedEntryAnimation === null ||
           frame.animations.some(
             (animation) =>
               animation.currentOpen &&
@@ -622,12 +625,29 @@ function createPopoverMotionProbe(
   };
 }
 
-async function waitForSettledPopover(probe: PopoverProbe) {
-  // Retain the existing expect.poll default bound explicitly, not a sleep or an
-  // animation.finish()/cancel() that changes the state being measured.
+async function waitForSettledPopover(probe: PopoverProbe): Promise<PopoverFrame> {
+  // Admit the current read and the consecutive-frame observation atomically.
+  // Positioning can publish again between a successful poll and a second read.
+  // Keep the same 1s bound and the screenshot's independent before/after check.
+  let before: PopoverFrame | null = null;
   await expect
-    .poll(() => probe.evaluate((current) => current.settled), { timeout: 1_000 })
+    .poll(
+      async () => {
+        const observation = await probe.evaluate((current) => {
+          const frame = current.read();
+          return {
+            frame,
+            settled: current.settled && frame.signature === current.frames.at(-1)?.signature,
+          };
+        });
+        before = observation.settled ? observation.frame : null;
+        return observation.settled;
+      },
+      { timeout: 1_000 }
+    )
     .toBe(true);
+  if (!before) throw new Error('The Popover did not yield a settled capture observation.');
+  return before;
 }
 
 async function captureSettledPopover(
@@ -637,15 +657,7 @@ async function captureSettledPopover(
   capture: Journey['capture'],
   state: string
 ) {
-  await waitForSettledPopover(probe);
-  const { before, settled } = await probe.evaluate((current) => {
-    const before = current.read();
-    return {
-      before,
-      settled: current.settled && before.signature === current.frames.at(-1)?.signature,
-    };
-  });
-  expect(settled).toBe(true);
+  const before = await waitForSettledPopover(probe);
   expect(await panel.getAttribute('id')).toBe(before.contentId);
   const binding: PopoverCaptureObservation['captureBinding'] = {
     before,
@@ -1431,6 +1443,13 @@ async function calendarCaptionJourney(journey: Journey, runtime: RuntimeId) {
   await caption('caption-november-2025-date-selected');
 }
 
+function isBottomDrawerAtEnteredTranslation(element: HTMLElement): boolean {
+  // Available layout anchors the bottom edge with -100% of the panel height.
+  // Entered presentation contributes zero; the composed translation stays -100%.
+  const axes = getComputedStyle(element).translate.trim().split(/\s+/);
+  return axes.length === 2 && /^0(?:px|%)?$/.test(axes[0]) && axes[1] === '-100%';
+}
+
 async function drawerJourney({ page, previewer, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="root"]', 1);
   const trigger = previewer.getByRole('button', { name: 'Open Snap Drawer', exact: true });
@@ -1447,20 +1466,10 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       )
     )
     .toBe('50');
-  // Snap state publishes before the authored 500ms physical entry reaches zero translation.
-  // Observe that endpoint within the existing default poll bound, without finishing motion.
+  // Snap state publishes before the authored 500ms physical entry settles.
+  // Observe zero presentation added to the bottom layout's -100% translation.
   await expect
-    .poll(
-      () =>
-        panel.evaluate((element) => {
-          const translate = getComputedStyle(element).translate;
-          return (
-            translate === 'none' ||
-            translate.split(/\s+/).every((axis) => /^0(?:px|%)?$/.test(axis))
-          );
-        }),
-      { timeout: 1_000 }
-    )
+    .poll(() => panel.evaluate(isBottomDrawerAtEnteredTranslation), { timeout: 1_000 })
     .toBe(true);
   const geometry = await panel.evaluate((element) => {
     const rect = element.getBoundingClientRect(),

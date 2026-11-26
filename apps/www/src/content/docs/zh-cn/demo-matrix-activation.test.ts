@@ -1,10 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Page } from 'playwright-core';
 import { activateMatrixPreviews, waitForMatrixInitialization } from './demo-matrix-activation';
 import { matrixPreviewersInitialized } from './demo-matrix-observation';
 import { initPreviewerBootstrap } from '../../../components/PrototypePreviewer/previewer-bootstrap';
 import { initPreviewer } from '../../../components/PrototypePreviewer/previewer-client';
 import { WEBSITE_SHADCN_THEME_TOKENS } from '../../../components/PrototypePreviewer/projection-theme';
+import * as renderer from '../../../components/PrototypePreviewer/demo-renderer';
+import { loadDemo } from '../../../components/PrototypePreviewer/demo-modules';
+import { collectPrototypeIds } from '../../../components/PrototypePreviewer/demo-types';
+import { loadPrototypes } from '../../../components/PrototypePreviewer/prototype-modules';
 
 // Happy DOM has no layout/intersection engine. Emulate only that UA boundary
 // below; the real bootstrap, initPreviewer and renderers own every inited write.
@@ -30,6 +34,20 @@ vi.mock('../../../components/PrototypePreviewer/runtimes/vue2-runtime', async (o
   const { createRequire } = await import('node:module');
   const require = createRequire(process.cwd() + '/packages/adapters/vue2/package.json');
   return { ...current, loadVue2: async () => require('vue') };
+});
+
+beforeAll(async () => {
+  // This fixture injects an already-delivered Previewer client and measures
+  // native viewport admission, not Vite's cold framework module transforms.
+  // Prepare the exact real fixture dependencies before either measured budget;
+  // all eight owners still initialize and render through the real bootstrap.
+  const demo = await loadDemo('demo-base-text');
+  const prototypeIds = new Set<string>();
+  collectPrototypeIds(demo.root, prototypeIds);
+  await Promise.all([
+    loadPrototypes([...prototypeIds]),
+    ...(['wc', 'react', 'vue', 'vue2'] as const).map(renderer.prepareDemoRuntime),
+  ]);
 });
 
 type Root = HTMLElement & {
@@ -212,6 +230,22 @@ function pageFixture() {
   };
 }
 
+const waitForMountedRuntimes = () =>
+  vi.waitFor(
+    () =>
+      expect(roots.map((root) => root.__previewer__?.getCurrentRuntime())).toEqual([
+        'wc',
+        'react',
+        'vue',
+        'vue2',
+        'wc',
+        'react',
+        'vue',
+        'vue2',
+      ]),
+    { timeout: 1000 } // Pin the pre-existing vi.waitFor default; never renew it.
+  );
+
 describe('complete Matrix activation keeps the original inited deadline', () => {
   it('the unchanged no-scroll predicate stays at zero for the whole 60s negative control', async () => {
     const { load } = fixture();
@@ -256,24 +290,50 @@ describe('complete Matrix activation keeps the original inited deadline', () => 
       expect(receipt.restoredScroll).toEqual({ x: 0, y: 0 });
       expect(waitForFunction.mock.calls[0]![2].timeout).toBeLessThan(60_000);
       const owners = roots.map((root) => root.__previewer__);
-      await vi.waitFor(() =>
-        expect(roots.map((root) => root.__previewer__?.getCurrentRuntime())).toEqual([
-          'wc',
-          'react',
-          'vue',
-          'vue2',
-          'wc',
-          'react',
-          'vue',
-          'vue2',
-        ])
-      );
+      await waitForMountedRuntimes();
       await waitForMatrixInitialization(page, 4);
       roots.forEach((root, index) => expect(root.__previewer__).toBe(owners[index]));
       expect(load).toHaveBeenCalledTimes(8);
       expect((window as any).__puiMatrixActivation.scrolls).toBe(0);
     });
   }
+
+  it('retains the original 1s mounted-owner deadline when an actual renderer cannot publish', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let enter!: () => void;
+    const entered = new Promise<void>((resolve) => {
+      enter = resolve;
+    });
+    const render = renderer.renderDemo;
+    vi.spyOn(renderer, 'renderDemo').mockImplementation(async (options) => {
+      const result = await render(options);
+      if (options.runtime === 'wc') {
+        enter();
+        await gate;
+      }
+      return result;
+    });
+    try {
+      fixture();
+      const { page } = pageFixture();
+      await waitForMatrixInitialization(page, 4);
+      await entered;
+      expect(matrixPreviewersInitialized(4)).toBe(true);
+      // This is the same real 1000ms waiter used by both positive cases. The
+      // real rendered result stays held until after its rejection is observed.
+      await expect(waitForMountedRuntimes()).rejects.toThrow();
+      expect(
+        roots
+          .filter((root) => root.dataset.initialRuntime === 'wc')
+          .map((root) => root.__previewer__?.getCurrentRuntime())
+      ).toEqual([null, null]);
+    } finally {
+      release();
+    }
+  });
 
   it('does not count a viewport visit as initialization when no intersection is delivered', async () => {
     const { load } = fixture(true);

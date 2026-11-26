@@ -53,18 +53,141 @@ export interface SizingMotionHandle {
   done: Promise<SizingMotionResult>;
   stop(): void;
 }
-export type SizingMotionTrigger = HTMLElement & { __puiSizingMotion?: SizingMotionHandle };
+export interface SizingPublicOwnerBinding {
+  readonly owner: string;
+  readonly runtime: string;
+  readonly itemCount: number;
+  isCurrent(): boolean;
+  owns(node: HTMLElement): boolean;
+  read(): {
+    content: HTMLElement;
+    surface: HTMLElement;
+    viewport: HTMLElement;
+    items: HTMLElement[];
+  };
+}
+export type SizingMotionTrigger = HTMLElement & {
+  __puiSizingMotion?: SizingMotionHandle;
+  __puiSizingOwner?: SizingPublicOwnerBinding;
+};
+
+/** Bind the ordinary public DemoRenderer through its actual owner transport and
+ * committed controller. This journal observes DOM identity; it writes no app state. */
+export function installSizingPublicOwner(
+  trigger: SizingMotionTrigger,
+  input: { demoId: string; itemCount: number }
+): { owner: string; runtime: string; itemCount: number } {
+  // Keep every runtime dependency inside this function for page serialization.
+  type Previewer = HTMLElement & {
+    __previewer__?: { getCurrentRuntime?: () => string | null };
+  };
+  const { demoId, itemCount } = input;
+  const doc = trigger.ownerDocument;
+  const controls = trigger.getAttribute('aria-controls');
+  const previewer = trigger.closest<Previewer>('[data-demo-id]');
+  const controller = previewer?.__previewer__;
+  const runtime = controller?.getCurrentRuntime?.();
+  const root = trigger.parentElement;
+  const ownerOf = (node: HTMLElement): string | null => {
+    const owners = new Set<string>();
+    const attribute = node.getAttribute('data-demo-owner');
+    if (attribute) owners.add(attribute);
+    for (const token of node.classList)
+      if (token.startsWith('pui-owner-')) owners.add(token.slice('pui-owner-'.length));
+    return owners.size === 1 ? [...owners][0] || null : null;
+  };
+  const owner = ownerOf(trigger);
+  if (
+    !previewer ||
+    previewer.dataset.demoId !== demoId ||
+    !controller ||
+    !runtime ||
+    !owner ||
+    !root ||
+    !controls ||
+    !Number.isSafeInteger(itemCount) ||
+    itemCount < 1
+  )
+    throw new Error('Expected an owned public Select and its committed preview controller');
+  const owns = (node: HTMLElement) =>
+    node.isConnected && node.ownerDocument === doc && ownerOf(node) === owner;
+  const binding: SizingPublicOwnerBinding = Object.freeze({
+    owner,
+    runtime,
+    itemCount: itemCount,
+    owns,
+    isCurrent: () =>
+      trigger.__puiSizingOwner === binding &&
+      previewer.isConnected &&
+      previewer.dataset.demoId === demoId &&
+      previewer.__previewer__ === controller &&
+      controller.getCurrentRuntime?.() === runtime &&
+      previewer.contains(trigger) &&
+      trigger.getAttribute('aria-controls') === controls &&
+      trigger.parentElement === root &&
+      root.hasAttribute('data-pui-root') &&
+      root.getAttribute('data-collection-count') === String(itemCount) &&
+      trigger.getAttribute('role') === 'combobox' &&
+      owns(trigger) &&
+      owns(root),
+    read: () => {
+      if (!binding.isCurrent()) throw new Error('Public Select owner or committed runtime changed');
+      const id = controls;
+      const content = id ? doc.getElementById(id) : null;
+      if (
+        !id ||
+        !content ||
+        doc.querySelectorAll(`#${doc.defaultView!.CSS.escape(id)}`).length !== 1 ||
+        !content.hasAttribute('data-pui-root') ||
+        content.getAttribute('role') !== 'listbox' ||
+        !owns(content)
+      )
+        throw new Error('Expected the unique same-owner controlled listbox');
+      const childRoot = (parent: HTMLElement, part: string): HTMLElement => {
+        const children = [...parent.children].filter((node) => node.hasAttribute('data-pui-root'));
+        if (children.length !== 1 || !owns(children[0] as HTMLElement))
+          throw new Error(`Expected one same-owner public Select ${part}`);
+        return children[0] as HTMLElement;
+      };
+      // The authored public recipe is Content > Surface > Viewport. Decorative
+      // spans are not prototype roots and cannot stand in for either measured box.
+      const surface = childRoot(content, 'Surface');
+      const viewport = childRoot(surface, 'Viewport');
+      const group = childRoot(viewport, 'Group');
+      if (group.getAttribute('role') !== 'group')
+        throw new Error('Expected the authored public Select Group inside Viewport');
+      const items = [...content.querySelectorAll<HTMLElement>('[role="option"]')];
+      if (
+        items.length !== itemCount ||
+        items.some(
+          (item, index) =>
+            !owns(item) ||
+            !group.contains(item) ||
+            item.getAttribute('data-collection-index') !== String(index)
+        )
+      )
+        throw new Error('Expected every current same-owner registered option inside Viewport');
+      return { content, surface, viewport, items };
+    },
+  });
+  trigger.__puiSizingOwner = binding;
+  if (!binding.isCurrent()) throw new Error('Public Select registration is not current');
+  return { owner, runtime, itemCount: itemCount };
+}
 
 // All runtime dependencies are inside this function: Playwright serializes it into the page.
 export function installSizingMotionTrace(
   trigger: SizingMotionTrigger,
-  selection: SizingMotionSelection
+  input: SizingMotionSelection | { selection: SizingMotionSelection; itemCount: number }
 ): SizingMotionHandle {
   trigger.__puiSizingMotion?.stop();
+  const selection = typeof input === 'string' ? input : input.selection;
+  const itemCount = typeof input === 'string' ? 4 : input.itemCount;
   const doc = trigger.ownerDocument;
   const win = doc.defaultView!;
-  const owner = trigger.dataset.projectionOwner;
-  const runtime = trigger.dataset.projectionRuntime;
+  const publicOwner = trigger.__puiSizingOwner;
+  const owner = publicOwner?.owner ?? trigger.dataset.projectionOwner;
+  const runtime = publicOwner?.runtime ?? trigger.dataset.projectionRuntime;
   const startedAt = win.performance.now();
   const samples: SizingMotionSample[] = [];
   let frame: number | null = null;
@@ -158,8 +281,10 @@ export function installSizingMotionTrace(
         !trigger.isConnected ||
         !owner ||
         !runtime ||
-        trigger.dataset.projectionOwner !== owner ||
-        trigger.dataset.projectionRuntime !== runtime
+        (publicOwner
+          ? !publicOwner.isCurrent() || publicOwner.itemCount !== itemCount
+          : trigger.dataset.projectionOwner !== owner ||
+            trigger.dataset.projectionRuntime !== runtime)
       )
         return stop('invalid-owner');
       if (trigger.getAttribute('aria-expanded') !== 'true') {
@@ -180,13 +305,29 @@ export function installSizingMotionTrace(
         if (nodes.length !== 1) throw new Error(`Expected one ${name}`);
         return nodes[0];
       };
-      const surface = one('shadcn-select-surface');
-      const viewport = one('shadcn-select-viewport');
-      const items = [...content.querySelectorAll<HTMLElement>('[role="option"]')];
+      let publicNodes: ReturnType<SizingPublicOwnerBinding['read']> | null = null;
+      if (publicOwner) {
+        try {
+          publicNodes = publicOwner.read();
+        } catch (error) {
+          return stop('invalid-owner', String(error));
+        }
+      }
+      if (publicNodes && publicNodes.content !== content)
+        return stop('invalid-owner', 'Controlled Content changed during sampling');
+      const surface = publicNodes?.surface ?? one('shadcn-select-surface');
+      const viewport = publicNodes?.viewport ?? one('shadcn-select-viewport');
+      const items = publicNodes?.items ?? [
+        ...content.querySelectorAll<HTMLElement>('[role="option"]'),
+      ];
       const nodes = [content, surface, viewport, ...items];
       if (
-        items.length !== 4 ||
-        nodes.some((node) => !node.isConnected || node.dataset.projectionOwner !== owner) ||
+        items.length !== itemCount ||
+        nodes.some(
+          (node) =>
+            !node.isConnected ||
+            (publicOwner ? !publicOwner.owns(node) : node.dataset.projectionOwner !== owner)
+        ) ||
         items.some((node) => !viewport.contains(node)) ||
         (bound && nodes.some((node, index) => node !== bound![index]))
       )
@@ -211,7 +352,11 @@ export function installSizingMotionTrace(
       // objects after they disappear from getAnimations(), including cancellation.
       let missingAnimation: string | null = null;
       for (const [index, element] of [trigger, ...nodes].entries()) {
-        const target = element.dataset.projectionPrototype ?? `node:${index}`;
+        const target =
+          element.dataset.projectionPrototype ??
+          (publicOwner
+            ? (['Trigger', 'Content', 'Surface', 'Viewport'][index] ?? `Item:${index - 4}`)
+            : `node:${index}`);
         const observed = animationsByNode.get(element) ?? new Set<Animation>();
         animationsByNode.set(element, observed);
         for (const animation of element.getAnimations()) {
@@ -318,7 +463,11 @@ export function sizingItemSizeIssues(
 }
 
 /** Independent checks on the retained whole trajectory, not a selected successful frame. */
-export function sizingMotionIssues(result: SizingMotionResult, runtime: string): string[] {
+export function sizingMotionIssues(
+  result: SizingMotionResult,
+  runtime: string,
+  itemCount = 4
+): string[] {
   const issues: string[] = [];
   if (result.status !== 'settled') issues.push(`trace ${result.status}: ${result.error ?? ''}`);
   if (!result.cleanup.frame || !result.cleanup.timer) issues.push('trace cleanup incomplete');
@@ -335,7 +484,7 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       !sample.owner ||
       sample.owner !== result.samples[0].owner ||
       sample.runtime !== runtime ||
-      sample.items.length !== 4
+      sample.items.length !== itemCount
     )
       issues.push('sample identity/time');
     previous = sample.at;

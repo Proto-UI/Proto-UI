@@ -16,7 +16,7 @@ cases:
       - P-BRUTALIST-IMAGE-VISUAL-GRAMMAR
       - P-BASE-IMAGE-ALT-TEXT
       - P-BASE-IMAGE-FIT
-    expectation: 'Across WC, React, Vue and Vue 2 in light/dark, the three decoded fit examples keep their authored 112px boxes, equal positive widths, fixed 2px black frame, 5px radius and 4px hard shadow. Real hover adds no interaction displacement. The informative browser names survive the negative broken-resource case; the decoded decorative image has empty alt and is absent from the browser role query. Dynamic source generations and portable loadingStatus callbacks are not covered by this fixed recipe.'
+    expectation: 'Across WC, React, Vue and Vue 2 in light/dark, the public Fit Modes recipe keeps three decoded images in their authored 120px boxes, equal positive widths, fixed 2px black frame, 5px radius and 4px hard shadow. Real hover adds no interaction displacement. The Framed Card recipe retains its informative caption photo and decoded decorative thumbnail with empty alt, absent from the browser role query. The Loading recipe reaches a decoded loaded resource, then the real Broken URL Button reaches its error state while preserving the informative browser name and frame. This bounded loaded-to-error journey does not establish complete source-generation or portable callback parity.'
   - id: T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-SEPARATOR
     title: Consumer-owned horizontal and vertical extent survives root-font pressure and orientation reversal
     covers:
@@ -28,13 +28,13 @@ cases:
       - P-BASE-SEPARATOR-NO-INTERACTION
     expectation: 'At desktop, compact and compact 200-percent root-font profiles, the contentless decorative rules have 2 CSS-pixel thickness and actual parent-owned length. The injected orientation update reaches horizontal then returns vertical while keeping adjacent consumer text and two rule instances. Neither decorative rule acquires a separator role, aria-orientation or a tab stop. Semantic decorative=false coverage remains separate.'
   - id: T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-SURFACE
-    title: Four existing public Surface states remain passive under real pointer and selection input
+    title: Public variant and geometry Surface states remain passive under real pointer and selection input
     covers:
       - P-BRUTALIST-SURFACE-PASSIVE
       - P-BRUTALIST-SURFACE-PROJECTION
       - P-BRUTALIST-SURFACE-RAISED-MOTION
       - P-BASE-SURFACE-PASSIVE
-    expectation: 'The existing outline, borderless muted, supplied-focus solid and supplied-press raised shells remain roleless with no tab stop or aria-pressed semantics. Real hovering does not invent observed props; native double-click still selects the authored label word. Raised timing follows live no-preference to reduce to no-preference, preserves its supplied endpoint and does not claim an animated path. Other variants, withdrawal/fade timing and native link/button actions remain outside this public recipe.'
+    expectation: 'The public Variants recipe supplies the outline shell; the Geometry recipe supplies borderless muted, supplied-focus secondary and supplied-press raised shells. These four subjects remain roleless with no tab stop or aria-pressed semantics. Real hovering does not invent observed props; native double-click still selects the authored outline label word. Raised timing follows live no-preference to reduce to no-preference, preserves its supplied endpoint and does not claim an animated path. Other variants, withdrawal/fade timing and native link/button actions remain outside this bounded observation.'
 implementations:
   - id: www-brutalist-passive-public-browser
     kind: adapter-test
@@ -56,6 +56,7 @@ implementations:
       - 'Authored only; expected Vitest scope is 12 tests, each with both color schemes and three viewport/root-font profiles. No browser, types, collection or formatting command was run by this owner.'
       - 'Main must register the new path in the canonical BROWSER_SUITES inventory before hosted test-plan acceptance; the worker does not edit central runtime routing.'
       - 'Optional source-bound observations and PNGs are written beneath PROTO_UI_RUNTIME_EVIDENCE_DIR/brutalist-passive-consumers. Selected input hashes identify current bytes and do not constitute a complete source freeze or historical calibration.'
+      - 'Current public recipe alignment uses named Image Fit/Card/Loading and Surface Variants/Geometry previewers with exact subject counts. All 12 tests retain both color schemes, the three viewport/root-font profiles, native input boundaries and their original time budgets; no candidate or historical acceptance is inferred from this mapping.'
 verifies:
   prototypes:
     - P-BRUTALIST-IMAGE

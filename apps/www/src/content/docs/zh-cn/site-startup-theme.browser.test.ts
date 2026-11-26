@@ -564,11 +564,28 @@ for (const width of [2048, 390, 430]) {
         release();
         await page.waitForLoadState('load');
         await page.waitForSelector('[data-site-menu-ready]', { timeout: 45_000 });
-        if (route.includes('/card/'))
-          await page
-            .locator('.proto-previewer .pui-runtime-preview-surface')
-            .first()
-            .waitFor({ timeout: 45_000 });
+        if (route.includes('/card/')) {
+          if (baseline) {
+            await page
+              .locator('.proto-previewer .pui-runtime-preview-surface')
+              .first()
+              .waitFor({ timeout: 45_000 });
+          } else {
+            const previewer = page.locator('.proto-previewer').first();
+            // A connected staging surface is intentionally laid out before
+            // publish. The public ready marker owns skeleton retirement.
+            await expect
+              .poll(() => previewer.getAttribute('data-projection-state'), {
+                timeout: 45_000,
+              })
+              .toBe('ready');
+            const surface = previewer.locator(
+              '[data-projection-generation-state="active"] .pui-runtime-preview-surface'
+            );
+            expect(await surface.count()).toBe(1);
+            expect(await surface.isVisible()).toBe(true);
+          }
+        }
         const loaded = await firstScreen(page);
         await capture(page, `loaded-${route.includes('card') ? 'card' : 'home'}-${width}`, {
           scriptsReleased: true,
@@ -662,8 +679,13 @@ for (const width of [2048, 390]) {
             );
           }
           if (route === '/zh-cn/' && width === 390 && !baseline) {
-            const entry = page.locator('a[href="#home-demo-previewer"]').first();
+            const entry = page.locator(
+              '[data-homepage-mount] [data-projection-generation-state="active"] ' +
+                'a[href="#home-demo-previewer"]'
+            );
+            expect(await entry.count()).toBe(1);
             await entry.focus();
+            expect(await entry.evaluate((node) => node === document.activeElement)).toBe(true);
             await page.keyboard.press('Enter');
             await expect.poll(() => new URL(page.url()).hash).toBe('#home-demo-previewer');
             await expect
@@ -682,6 +704,7 @@ for (const width of [2048, 390]) {
           await trigger.waitFor();
           const contentId = await trigger.getAttribute('aria-controls');
           if (!contentId) throw new Error('The actual Dialog Trigger has no Content identity');
+          const originalTrigger = await trigger.elementHandle();
           const content = page.locator(`[role="dialog"][id=${JSON.stringify(contentId)}]`);
           await trigger.click();
           if (runtime === 'react') {
@@ -714,7 +737,54 @@ for (const width of [2048, 390]) {
             .toBe('entered');
           expect(await content.count()).toBe(1);
           expect(await content.getAttribute('aria-modal')).toBe('true');
-          expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+          const expanded = await trigger.getAttribute('aria-expanded');
+          if (expanded !== 'true') {
+            await capture(
+              page,
+              `dialog-${route === '/zh-cn/' ? 'home' : 'docs'}-${width}-${runtime}-expanded-failure`,
+              await page.evaluate(
+                ({ originalTrigger, contentId }) => {
+                  const read = (element: Element | null) =>
+                    element
+                      ? {
+                          tag: element.localName,
+                          connected: element.isConnected,
+                          id: element.id,
+                          controls: element.getAttribute('aria-controls'),
+                          expanded: element.getAttribute('aria-expanded'),
+                          transition: element.getAttribute('data-transition-state'),
+                          generationState:
+                            element
+                              .closest('[data-projection-generation-state]')
+                              ?.getAttribute('data-projection-generation-state') ?? null,
+                          previewerState:
+                            element
+                              .closest('[data-previewer-id]')
+                              ?.getAttribute('data-projection-state') ?? null,
+                          coordinates: Object.fromEntries(
+                            ['owner', 'family', 'runtime', 'generation'].map((key) => [
+                              key,
+                              element.getAttribute(`data-projection-${key}`),
+                            ])
+                          ),
+                          bounds: element.getBoundingClientRect().toJSON(),
+                          inertAncestor: !!element.closest('[inert]'),
+                          hiddenAncestor: !!element.closest('[hidden], [aria-hidden="true"]'),
+                        }
+                      : null;
+                  return {
+                    expectedContentId: contentId,
+                    originalTrigger: read(originalTrigger),
+                    triggers: [...document.querySelectorAll('[aria-haspopup="dialog"]')].map(read),
+                    content: [...document.querySelectorAll('[role="dialog"]')].map(read),
+                    focused: read(document.activeElement),
+                  };
+                },
+                { originalTrigger, contentId }
+              )
+            );
+          }
+          expect(expanded).toBe('true');
           const contentHandle = await content.elementHandle();
           if (!contentHandle) throw new Error('The opened Dialog Content handle is missing');
           const coordinates = await content.evaluate((element) =>

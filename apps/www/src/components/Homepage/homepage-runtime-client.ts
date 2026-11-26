@@ -141,7 +141,7 @@ export function createHomepageContent(
   if (group.locale) return createHomepageLocaleSelect(group.locale, family, runtime, isActive).demo;
   const children: DemoNode[] = group.links.map((link, index) => {
     const announcement =
-      siteLinkAppearance(link) === 'text' && !!link.closest('.homepage-hero__eyebrow');
+      siteLinkAppearance(link) === 'pill' && !!link.closest('.homepage-hero__eyebrow');
     const attrs: Record<string, string> = {};
     for (const name of ANCHOR_ATTRIBUTES) {
       const value = link.getAttribute(name);
@@ -174,7 +174,7 @@ export function createHomepageContent(
               navbarLinkContext(link)
             ),
             // The native announcement already owns its pill padding and minimum
-            // height. An inner text-link target must not add a second line box.
+            // height. Its passive inner Surface must not add a second line box.
             ...(announcement ? { minHeight: '0', marginBottom: '0' } : {}),
           },
           props: {

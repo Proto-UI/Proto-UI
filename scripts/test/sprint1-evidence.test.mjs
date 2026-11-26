@@ -219,7 +219,9 @@ test('the fixed serial selection preserves the full original criteria and bounde
   const search = steps.find((step) => step.id === 'search-native');
   assert.equal(search.timeoutMs, 1_200_000);
   assert.deepEqual(search.suites, [
-    'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
   ]);
   assert.ok(
     search.args.every(

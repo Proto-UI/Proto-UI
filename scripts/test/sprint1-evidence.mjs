@@ -10,6 +10,7 @@ import { executeGeneralChecks } from './general-ci.mjs';
 import { assertRuntimeSource, assertVitestReport, writeJson } from './runtime-ci.mjs';
 import { readOptionalJson, runtimeSourceSnapshot } from './runtime-observation.mjs';
 import { liveOwned, observeChildren } from './linux-process-ownership.mjs';
+import { SEARCH_BROWSER_SUITES } from './runtime-test-plan.mjs';
 
 export const SPRINT1_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
@@ -190,12 +191,12 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
     matrix,
     vitest(
       'search-native',
-      ['apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts'],
+      SEARCH_BROWSER_SUITES,
       // The complete serial Search producer exhausted its previous 900s window
       // before writing terminal Vitest JSON. Preserve that failed attempt and
-      // allow the unchanged 84-case suite enough acquisition/reporting time;
+      // allow the same 84 cases across three files their acquisition/reporting time;
       // every case, assertion and original 1000ms readiness limit remains owned
-      // by that suite. This outer resource allowance proves no product speedup.
+      // by their original callbacks. This allowance proves no product speedup.
       1200
     ),
     vitest('ownership-native', SPRINT1_BROWSER_SUITES.slice(2, 3), 180),

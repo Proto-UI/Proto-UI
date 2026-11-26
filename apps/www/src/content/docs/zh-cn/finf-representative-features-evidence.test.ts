@@ -876,7 +876,7 @@ function popoverMotionFixture(
     `${statements(['waitForSettledPopover', 'captureSettledPopover', 'installPopoverNegativeControl'])}; ({waitForSettledPopover, captureSettledPopover, installPopoverNegativeControl});`,
     { expect, hasNoVisibleBoxShadow }
   ) as {
-    waitForSettledPopover: (probe: typeof handle) => Promise<void>;
+    waitForSettledPopover: (probe: typeof handle) => Promise<PopoverFrame>;
     installPopoverNegativeControl: (panel: typeof locator, control: string) => Promise<void>;
     captureSettledPopover: (
       probe: typeof handle,
@@ -1008,6 +1008,27 @@ function popoverCaptureCase(
   };
 }
 
+describe('bottom Drawer entered translation preserves its independent layout contribution', () => {
+  it.each([
+    ['0px -100%', true],
+    ['0px 0px', false],
+    ['0px -99%', false],
+    ['1px -100%', false],
+    ['none', false],
+  ])('observes %s as entered=%s', (translate, entered) => {
+    const observe = execute(
+      `${statements(['isBottomDrawerAtEnteredTranslation'])}; isBottomDrawerAtEnteredTranslation;`,
+      { getComputedStyle: () => ({ translate }) }
+    ) as (element: unknown) => boolean;
+    const window = new Window();
+    try {
+      expect(observe(window.document.createElement('div'))).toBe(entered);
+    } finally {
+      window.happyDOM.abort();
+    }
+  });
+});
+
 describe('Popover same-phase capture and controls, no native browser', () => {
   it('observes an already finished current entry and still requires consecutive frames before capture', async () => {
     const fixture = popoverMotionFixture();
@@ -1033,7 +1054,7 @@ describe('Popover same-phase capture and controls, no native browser', () => {
   });
 
   it.each([false, true])(
-    'waits through the empty pre-animation gap and genuine entry endpoint, reducedMotion=%s',
+    'observes the reduced-motion policy and rejects active entry motion, reducedMotion=%s',
     async (reducedMotion) => {
       const fixture = popoverMotionFixture('pui-enter', reducedMotion);
       try {
@@ -1043,7 +1064,13 @@ describe('Popover same-phase capture and controls, no native browser', () => {
         fixture.frame();
         expect(fixture.probe.read().animations).toEqual([]);
         expect(fixture.probe.read().reducedMotion).toBe(reducedMotion);
-        expect(fixture.probe.settled).toBe(false);
+        expect(fixture.probe.settled).toBe(reducedMotion);
+        if (reducedMotion) {
+          await fixture.capture();
+          const binding = fixture.shots.at(-1)!.captureBinding;
+          expect(binding.before.animations).toEqual([]);
+          expect(binding.before.signature).toBe(binding.after?.signature);
+        }
         fixture.enter();
         fixture.frame();
         fixture.frame();
@@ -1053,7 +1080,7 @@ describe('Popover same-phase capture and controls, no native browser', () => {
         expect(fixture.probe.settled).toBe(false);
         fixture.frame();
         await fixture.capture();
-        const binding = fixture.shots[0].captureBinding;
+        const binding = fixture.shots.at(-1)!.captureBinding;
         expect(binding.before.animations[0]).toMatchObject({
           name: 'pui-enter',
           currentOpen: true,
@@ -1065,6 +1092,27 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       }
     }
   );
+
+  it('waits for the current positioning read instead of admitting a stale settled frame', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      fixture.frame();
+      fixture.frame();
+      expect(fixture.probe.settled).toBe(true);
+      fixture.panel.style.width = '20.01rem';
+      const capture = fixture.capture();
+      await Promise.resolve();
+      expect(fixture.shots).toEqual([]);
+      fixture.frame();
+      fixture.frame();
+      await capture;
+      const binding = fixture.shots[0].captureBinding;
+      expect(binding.before.rect!.width).toBeCloseTo(320.16, 6);
+      expect(binding.before.signature).toBe(binding.after?.signature);
+    } finally {
+      fixture.close();
+    }
+  });
 
   it.each(['reopen', 'replace'] as const)(
     'rejects an earlier finished animation after panel %s, even with the same content ID',

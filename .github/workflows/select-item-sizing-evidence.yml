@@ -36,7 +36,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
           git rev-parse HEAD > "$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE/source-sha.txt"
           git rev-parse HEAD^{tree} > "$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE/source-tree.txt"
-          sha256sum apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts scripts/test/runtime-test-plan.mjs > "$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE/input-sha256.txt"
+          sha256sum apps/www/src/content/docs/demo_components/select/demo-shadcn-select-disabled.demo.ts apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts scripts/test/runtime-test-plan.mjs > "$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE/input-sha256.txt"
           corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile.json="$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE/vitest.json" 2>&1 | tee "$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE/native.log"
           python3 - <<'PYCOUNT'
           import json, os
@@ -53,12 +53,12 @@ jobs:
               {'id': 'reduced-motion', 'direction': 'ltr', 'reducedMotion': 'reduce'},
           ]
           phases = [
-              'first-entry', 'selected-reopen', 'narrow-reopen',
+              'first-entry', 'selected-reopen', 'narrow-reopen', 'narrow-bottom-collision',
               'disabled-keyboard-skip', 'disabled-pointer-move',
               'disabled-pointer-click', 'enabled-pointer-move', 'pointer-selected-reopen',
           ]
           motion_phases = [
-              'first-entry', 'selected-reopen', 'narrow-reopen',
+              'first-entry', 'selected-reopen', 'narrow-reopen', 'narrow-bottom-collision',
               'disabled-probe-entry', 'pointer-selected-reopen',
           ]
           pointer_phases = [
@@ -86,7 +86,15 @@ jobs:
                       assert all(m['value']['status'] == 'settled' and m['value']['error'] is None for m in case['motion'])
                       assert all(m['value']['cleanup'] == {'frame': True, 'timer': True} for m in case['motion'])
                       assert [p['phase'] for p in case['pointerInputs']] == pointer_phases
-                      for capture in ['first', 'narrow', 'disabled', 'pointer-reopen']:
+                      assert [i['phase'] for i in case['geometryInputs']] == [
+                          'narrow-reopen', 'narrow-bottom-collision', 'disabled-probe-entry',
+                      ]
+                      assert [i['value']['placement'] for i in case['geometryInputs']] == [
+                          'center', 'bottom-collision', 'center',
+                      ]
+                      assert all(i['value']['method'] == 'native document scrolling' for i in case['geometryInputs'])
+                      assert all(i['value']['browser'] == {'width': 390, 'height': 900} for i in case['geometryInputs'])
+                      for capture in ['first', 'narrow', 'bottom-collision', 'disabled', 'pointer-reopen']:
                           assert (root / f'{name}-{capture}.png').is_file()
           PYCOUNT
       - name: Retain source-bound results, four-box facts and screenshots

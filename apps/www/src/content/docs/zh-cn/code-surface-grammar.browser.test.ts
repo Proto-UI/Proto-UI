@@ -362,10 +362,14 @@ describe.sequential('website passive code-surface grammar (#785)', () => {
           }
           // The selected host queues its real Tree separately from passive surface paint.
           // Use the same bounded admission check as the host-coverage journey below.
-          await example.locator('[data-code-example-tree][role="tree"]').waitFor({
-            state: 'visible',
-            timeout: 1_000,
-          });
+          await example
+            .locator(
+              '[data-code-host="react"][data-code-host-panel] [data-code-example-tree][role="tree"]'
+            )
+            .waitFor({
+              state: 'visible',
+              timeout: 1_000,
+            });
           let previousBackground = '';
           for (const theme of ['light', 'dark']) {
             pagePhase(page, 'frame-theme', 'start', { runtime, family, theme });

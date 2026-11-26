@@ -840,9 +840,9 @@ it('keeps public Dropdown readiness on the actual committed preview shell', () =
   }
   expect(source).not.toContain('data-adapter-panel');
   expect(source).toContain(
-    `await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 2)`
+    `await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 1)`
   );
-  expect(source).toContain(`preview.getByRole('button', { name: 'Open menu', exact: true })`);
+  expect(source).toContain(`preview.getByRole('button', { name: 'Open', exact: true })`);
   expect(source).toContain(
     `await choosePreviewRuntime(page, page.locator('.site-header-runtime').first(), runtime)`
   );

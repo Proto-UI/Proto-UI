@@ -265,14 +265,17 @@ export async function captureDocumentationEvidence({
               after: await toggle.getAttribute('aria-pressed'),
             };
           } else if (variant.family === 'shadcn') {
-            const radio = preview.locator('[data-demo-ref="density-default"]');
+            // The pinned baseline used the Density demo; the current public
+            // Hero retains the same Comfortable -> Default selection journey.
+            const radioRef = revisionKind === 'baseline' ? 'density-default' : 'hero-default';
+            const radio = preview.locator(`[data-demo-ref="${radioRef}"]`);
             const before = await radio.getAttribute('aria-checked');
             await radio.click();
             await page.waitForFunction(
-              () =>
-                document
-                  .querySelector('[data-demo-ref="density-default"]')
-                  ?.getAttribute('aria-checked') === 'true'
+              (ref) =>
+                document.querySelector(`[data-demo-ref="${ref}"]`)?.getAttribute('aria-checked') ===
+                'true',
+              radioRef
             );
             evidence.interaction = {
               action: 'Pointer click density Default',
@@ -280,9 +283,13 @@ export async function captureDocumentationEvidence({
               after: await radio.getAttribute('aria-checked'),
             };
           } else {
-            const trigger = preview.getByText('Hover or focus for details', { exact: true });
+            const triggerLabel =
+              revisionKind === 'baseline' ? 'Hover or focus for details' : 'Account';
+            const tooltipText =
+              revisionKind === 'baseline' ? 'Portable Base behavior' : 'View account settings';
+            const trigger = preview.getByText(triggerLabel, { exact: true });
             await trigger.hover();
-            const tooltip = page.getByRole('tooltip').filter({ hasText: 'Portable Base behavior' });
+            const tooltip = page.getByRole('tooltip').filter({ hasText: tooltipText });
             await tooltip.waitFor({ state: 'visible' });
             evidence.interaction = {
               action: 'Pointer hover first trigger',

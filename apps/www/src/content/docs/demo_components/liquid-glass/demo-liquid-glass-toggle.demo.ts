@@ -4,8 +4,6 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
     children: [
       {
         kind: 'box',
@@ -33,8 +31,22 @@ export default {
             props: { defaultActive: true, disabled: true },
             children: ['Disabled'],
           },
+          {
+            kind: 'box',
+            ref: 'count',
+            attrs: { role: 'status', 'aria-live': 'polite' },
+            children: ['0 activeChange requests'],
+          },
         ],
       },
     ],
+  },
+  setup({ refs, api }) {
+    let requests = 0;
+    api.setProps('bold', {
+      onActiveChange: () => {
+        refs.count.textContent = `${++requests} activeChange requests`;
+      },
+    });
   },
 } satisfies DemoSpec;

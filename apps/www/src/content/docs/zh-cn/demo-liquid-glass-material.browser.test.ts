@@ -14,6 +14,7 @@ import {
   RUNTIMES,
   choosePreviewRuntime,
   selectRuntime as selectPublicRuntime,
+  waitForPreviewRuntime,
 } from './browser-harness';
 const ROUTE = '/en/test/liquid-glass-material/';
 const evidence = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
@@ -3013,12 +3014,10 @@ if (includeLiquidWip)
         const headerRuntime = page.locator('.site-header-runtime').first();
         for (const runtime of RUNTIMES) {
           await choosePreviewRuntime(page, headerRuntime, runtime);
-          const panel = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
-            has: page.locator(
-              '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="true"]'
-            ),
-          });
-          await panel.waitFor({ state: 'visible' });
+          const panel = page.locator(
+            '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-mode="fixed-family"][data-projection-toolbar="true"]'
+          );
+          await waitForPreviewRuntime(page, runtime, '[role="button"]', 3);
           const button = panel.getByRole('button', { name: 'Back', exact: true });
           await expect
             .poll(() => button.getAttribute('data-material-quality'), { timeout: 30000 })

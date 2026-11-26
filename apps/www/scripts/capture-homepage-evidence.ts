@@ -1042,6 +1042,16 @@ try {
           await screenshot('initial-full', true);
           if (revisionKind === 'candidate') {
             await revealHeaderPreferences(page);
+            // Runtime/family preferences are docked outside the desktop popup;
+            // locale remains in Settings and needs the same real menu action.
+            const settings = page.locator('[data-homepage-runtime] [data-site-header-settings]');
+            if (!(await settings.isVisible())) {
+              const menu = page.locator(
+                '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+              );
+              if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
+              await settings.waitFor({ state: 'visible' });
+            }
             // Initial captures intentionally show the collapsed compact Header.
             // Inspect settings fonts only after the user's real disclosure path.
             evidence.settings = await measure(page);

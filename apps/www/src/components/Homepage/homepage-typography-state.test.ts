@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { initHomepageRuntime } from './homepage-runtime-client';
+import { createHomepageShowcase } from './homepage-showcase';
+import { prepareDemoRuntime } from '../PrototypePreviewer/demo-renderer';
+import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
+import { resolveProjectionSelectParts } from '../PrototypePreviewer/projection-families';
 import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 import * as siteFamily from '../site-library-family';
 import * as materialization from '../PrototypePreviewer/projection-materializer';
@@ -16,9 +20,27 @@ import type { MaterializedProjectionCandidate } from '../PrototypePreviewer/proj
 // Keep the pinned host's internal WeakRef forwarding closure alive, exactly as
 // the other real typography suites do. Browser behavior and deadlines stay real.
 let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
-beforeAll(() => {
+beforeAll(async () => {
   installGeneratedProtoUiStylesheet();
   observerKeeper = retainHappyDomMutationCallbacks(window);
+  // These host controls observe retained owners and publication, after the
+  // fixture's real dependencies arrive. Prepare the same public recipes before
+  // the original 5s cases and 1s observations; native startup owns cold loading.
+  const prototypeIds = new Set<string>();
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    prototypeIds.add(`${family}-text-root`);
+    prototypeIds.add(`${family}-surface-root`);
+    for (const id of Object.values(resolveProjectionSelectParts(family))) prototypeIds.add(id);
+    for (const runtime of ['wc', 'react'] as const) {
+      const { recipe } = createHomepageShowcase(family, runtime, 'en', () => true);
+      for (const id of recipe.prototypeIds) prototypeIds.add(id);
+    }
+  }
+  await Promise.all([
+    loadPrototypes([...prototypeIds]),
+    prepareDemoRuntime('wc'),
+    prepareDemoRuntime('react'),
+  ]);
 });
 afterAll(() => observerKeeper.restore());
 
@@ -71,6 +93,7 @@ vi.mock('../PrototypePreviewer/projection-theme', async (original) => {
 let handle: NonNullable<ReturnType<typeof initHomepageRuntime>> | undefined;
 let homepageController: projectionScope.ProjectionScopeController | undefined;
 let media: MediaQueryList;
+const preparationReleases = new Set<() => void>();
 beforeEach(() => {
   localStorage.clear();
   homepageController = undefined;
@@ -112,6 +135,9 @@ beforeEach(() => {
     </section></main>`;
 });
 afterEach(async () => {
+  // Assertion failures must not leave fixture gates blocking the real destroy.
+  // Each test still controls release during its own original deadline.
+  for (const release of preparationReleases) release();
   await handle?.destroy();
   handle = undefined;
   document.body.replaceChildren();
@@ -140,6 +166,11 @@ function deferred<T>() {
 function holdNext() {
   const entered = deferred<TypographyCandidate>();
   const gate = deferred<void>();
+  const release = () => {
+    gate.resolve();
+    preparationReleases.delete(release);
+  };
+  preparationReleases.add(release);
   preparation.next = async (candidate) => {
     const wrapped = {
       ...candidate,
@@ -150,7 +181,7 @@ function holdNext() {
     await gate.promise;
     return wrapped;
   };
-  return { entered: entered.promise, release: () => gate.resolve() };
+  return { entered: entered.promise, release };
 }
 
 async function waitForHomepageStartup() {
