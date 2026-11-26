@@ -27,7 +27,7 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate commit 9e2d126d9c72e31a0cc5f129ff4c9dcc5ccaf1de; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit ce0a8b5c796b42053917b560028a9f245c302724; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Historical main families / identities | Candidate families / identities | Release scope |
 | --- | --- | --- | --- |
