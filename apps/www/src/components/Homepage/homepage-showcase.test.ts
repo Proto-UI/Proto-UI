@@ -198,7 +198,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     );
     expect(JSON.stringify(composition.demo.root)).not.toContain('"data-projection-id":"button"');
   });
-  it(`${family} composes twelve task cards without a veil over live controls and with real source attribution`, () => {
+  it(`${family} composes the gallery task cards without a veil over live controls and with real source attribution`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
     const root = content.demo.root;
@@ -232,16 +232,20 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     expect(cards.map((card) => card.id)).toEqual([
       'controls',
       'shortcuts',
+      'editor',
+      'milestones',
       'workspace-analytics',
       'workspace-command',
+      'spark',
+      'ecosystem',
       'preferences',
-      'workspace-progress',
-      'hover',
-      'editor',
       'workspace-help',
       'overlays',
-      'spark',
+      'protocol',
+      'workspace-progress',
+      'hover',
       'choices',
+      'throughput',
     ]);
     expect(new Set(cards.map((card) => card.density))).toEqual(new Set(['regular', 'compact']));
     expect(new Set(cards.map((card) => card.emphasis))).toEqual(

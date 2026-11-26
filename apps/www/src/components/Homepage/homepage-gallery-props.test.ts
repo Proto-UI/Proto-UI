@@ -87,11 +87,16 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     verify();
     const assertTextOwners = (owners: Element[]) => {
       // Direct WC rendering retains authored boxes inside detached content hosts.
-      expect(owners).toHaveLength(76);
-      expect(new Set(owners).size).toBe(76);
-      expect(
-        owners.filter((owner) => !owner.closest('[data-gallery-demo^="workspace-"]'))
-      ).toHaveLength(47);
+      expect(new Set(owners).size).toBe(owners.length);
+      for (const [id, title] of Object.entries({
+        milestones: 'Release milestones',
+        ecosystem: 'Adapter parity',
+        protocol: 'Quick setup',
+        throughput: 'Component matrix',
+      })) {
+        const cardOwners = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
+        expect(cardOwners.map((owner) => owner.textContent?.trim())).toContain(title);
+      }
       const scenes = {
         'workspace-command': [
           'What comes next?',
@@ -136,9 +141,30 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         expect(actual.map((owner) => owner.textContent?.trim())).toEqual(texts);
       }
     };
+    const shortcutTile = host.querySelector('[data-gallery-demo="shortcuts"]')!;
+    const groups = shortcutTile.querySelectorAll('[role="group"]');
+    expect(groups).toHaveLength(4);
+    for (const group of groups) {
+      const items = group.querySelectorAll('[role="button"][aria-pressed]');
+      expect(items).toHaveLength(4);
+      for (const item of items) {
+        expect(item.querySelector('svg')).not.toBeNull();
+        expect(
+          item.querySelector('.home-gallery__shortcut-text')?.textContent?.trim()
+        ).toBeTruthy();
+      }
+    }
+    const cardsShortcut = ref('shortcut-prototypes-cards');
+    cardsShortcut.click();
+    await settle();
+    expect(cardsShortcut.getAttribute('aria-pressed')).toBe('true');
+    expect(ref('shortcut-prototypes-buttons').getAttribute('aria-pressed')).toBe('false');
     const textOwners = Array.from(host.querySelectorAll('[data-home-text]'));
     assertTextOwners(textOwners);
-    expect(() => assertTextOwners(textOwners.slice(1))).toThrow();
+    const withoutMilestoneTitle = textOwners.filter(
+      (owner) => owner.textContent?.trim() !== 'Release milestones'
+    );
+    expect(() => assertTextOwners(withoutMilestoneTitle)).toThrow();
     expect(() => assertTextOwners([...textOwners, textOwners[0]!])).toThrow();
     expect(() => assertTextOwners([textOwners[0]!, ...textOwners.slice(0, -1)])).toThrow();
     for (const owner of host.querySelectorAll('[data-home-text]')) {

@@ -1,6 +1,8 @@
 import { shadcnCheckboxDemoChildren } from '../PrototypePreviewer/shadcn-checkbox-composition';
 import {
+  appendHomepageGalleryActivityBars,
   appendHomepageGalleryGlyph,
+  appendHomepageGalleryMiniBars,
   appendHomepageGalleryQrMatrix,
   appendHomepageGallerySampleBars,
   homepageBarHeight,
@@ -414,48 +416,76 @@ export function createHomepageGalleryParts(
     { emphasis: 'accent', headless: true }
   );
 
-  // Column 1 Bottom: 2x2 nested mini-cards architecture index
+  // Column 1 Middle: 2x2 interactive ToggleGroup mini-cards (unselectable + real hover & click)
   const shortcutGroups: ReadonlyArray<{
+    id: string;
     title: string;
-    items: ReadonlyArray<{ label: string; glyph: HomepageGalleryIcon; active?: boolean }>;
+    defaultValue: readonly string[];
+    items: ReadonlyArray<{ value: string; label: string; glyph: HomepageGalleryIcon }>;
   }> = [
     {
+      id: 'prototypes',
       title: zh ? '核心原型' : 'Prototypes',
+      defaultValue: ['buttons'],
       items: [
-        { label: zh ? '按钮与开关' : 'Buttons', glyph: 'nav-blocks' },
-        { label: zh ? '卡片容器' : 'Cards', glyph: 'nav-layers' },
-        { label: zh ? '标签与折叠' : 'Tabs', glyph: 'nav-grid' },
-        { label: zh ? '弹层对话' : 'Dialogs', glyph: 'nav-box' },
+        { value: 'buttons', label: zh ? '按钮与开关' : 'Buttons', glyph: 'nav-blocks' },
+        { value: 'cards', label: zh ? '卡片容器' : 'Cards', glyph: 'nav-layers' },
+        { value: 'tabs', label: zh ? '标签与折叠' : 'Tabs', glyph: 'nav-grid' },
+        { value: 'dialogs', label: zh ? '弹层对话' : 'Dialogs', glyph: 'nav-box' },
       ],
     },
     {
+      id: 'modules',
       title: zh ? '语义模块' : 'Modules',
+      defaultValue: [],
       items: [
-        { label: zh ? '焦点管理' : 'Focus', glyph: 'nav-workflow' },
-        { label: zh ? '浮层定位' : 'Overlay', glyph: 'nav-compass' },
-        { label: zh ? '无障碍语义' : 'A11y', glyph: 'nav-shield' },
-        { label: zh ? '状态协议' : 'State', glyph: 'nav-activity' },
+        { value: 'focus', label: zh ? '焦点管理' : 'Focus', glyph: 'nav-workflow' },
+        { value: 'overlay', label: zh ? '浮层定位' : 'Overlay', glyph: 'nav-compass' },
+        { value: 'a11y', label: zh ? '无障碍语义' : 'A11y', glyph: 'nav-shield' },
+        { value: 'state', label: zh ? '状态协议' : 'State', glyph: 'nav-activity' },
       ],
     },
     {
+      id: 'adapters',
       title: zh ? '多端适配' : 'Adapters',
+      defaultValue: [runtime],
       items: [
-        { label: 'Web', glyph: 'nav-globe', active: runtime === 'wc' },
-        { label: 'React', glyph: 'nav-code', active: runtime === 'react' },
-        { label: 'Vue 3', glyph: 'nav-cpu', active: runtime === 'vue' },
-        { label: 'Vue 2', glyph: 'nav-terminal', active: runtime === 'vue2' },
+        { value: 'wc', label: 'Web', glyph: 'nav-globe' },
+        { value: 'react', label: 'React', glyph: 'nav-code' },
+        { value: 'vue', label: 'Vue 3', glyph: 'nav-cpu' },
+        { value: 'vue2', label: 'Vue 2', glyph: 'nav-terminal' },
       ],
     },
     {
+      id: 'styles',
       title: zh ? '设计投影' : 'Styles',
+      defaultValue: [family],
       items: [
-        { label: 'Shadcn', glyph: 'nav-palette', active: family === 'shadcn' },
-        { label: 'Brutalist', glyph: 'nav-sparkles', active: family === 'brutalist' },
-        { label: 'Bootstrap', glyph: 'nav-wrench', active: family === 'bootstrap-2-3-2' },
-        { label: 'Glass', glyph: 'nav-book', active: false },
+        { value: 'shadcn', label: 'Shadcn', glyph: 'nav-palette' },
+        { value: 'brutalist', label: 'Brutalist', glyph: 'nav-sparkles' },
+        { value: 'bootstrap-2-3-2', label: 'Bootstrap', glyph: 'nav-wrench' },
+        { value: 'liquid-glass', label: 'Glass', glyph: 'nav-book' },
       ],
     },
   ];
+  const toggleGroupProps = (
+    title: string,
+    defaultValue: readonly string[]
+  ): Record<string, unknown> => {
+    const base = {
+      orientation: 'vertical',
+      multiple: false,
+      defaultValue,
+      a11yLabel: title,
+    };
+    if (family === 'shadcn') {
+      return { ...base, variant: 'default', size: 'sm', spacing: 1 };
+    }
+    if (family === 'brutalist') {
+      return { ...base, variant: 'default', size: 'sm', spacing: 0 };
+    }
+    return { ...base, variant: 'default', size: 'small' };
+  };
   const shortcuts = box(
     'home-gallery__item home-gallery__item--regular home-gallery__item--standard',
     [
@@ -466,24 +496,35 @@ export function createHomepageGalleryParts(
             null,
             [
               box('home-gallery__shortcut-title', [group.title]),
-              box(
-                'home-gallery__shortcut-list',
-                group.items.map((entry) => {
-                  const rowContent = box('home-gallery__shortcut-row', [
-                    icon(entry.glyph, 14),
-                    box('home-gallery__shortcut-label', [entry.label]),
-                  ]);
-                  return entry.active
-                    ? p(
-                        PREVIEW_SURFACE_ID,
-                        [rowContent],
-                        { variant: 'muted', radius: 'md', border: 'none', elevation: 'none' },
-                        undefined,
-                        undefined,
-                        { display: 'block', width: '100%', padding: '0.25rem 0.5rem' }
-                      )
-                    : box('home-gallery__shortcut-item', [rowContent]);
-                })
+              p(
+                `${family}-toggle-group-root`,
+                group.items.map((entry) =>
+                  p(
+                    `${family}-toggle-group-item`,
+                    [
+                      icon(entry.glyph, 14),
+                      {
+                        kind: 'box',
+                        tag: 'span',
+                        className: 'home-gallery__shortcut-text',
+                        children: [entry.label],
+                      },
+                    ],
+                    { value: entry.value },
+                    `shortcut-${group.id}-${entry.value}`,
+                    undefined,
+                    {
+                      width: '100%',
+                      justifyContent: 'flex-start',
+                      gap: '0.45rem',
+                      paddingInline: '0.5rem',
+                    }
+                  )
+                ),
+                toggleGroupProps(group.title, group.defaultValue),
+                `shortcut-group-${group.id}`,
+                undefined,
+                { width: '100%' }
               ),
             ],
             { size: 'sm' }
@@ -558,10 +599,17 @@ export function createHomepageGalleryParts(
       p(
         part('tabs'),
         [
-          p(part('tabs', 'list'), [
-            p(part('tabs', 'trigger'), [zh ? '编辑' : 'Edit'], { value: 'edit' }),
-            p(part('tabs', 'trigger'), [zh ? '预览' : 'Preview'], { value: 'preview' }),
-          ]),
+          p(
+            part('tabs', 'list'),
+            [
+              p(part('tabs', 'trigger'), [zh ? '编辑' : 'Edit'], { value: 'edit' }),
+              p(part('tabs', 'trigger'), [zh ? '预览' : 'Preview'], { value: 'preview' }),
+            ],
+            {},
+            undefined,
+            undefined,
+            { width: 'fit-content', maxWidth: '100%', alignSelf: 'flex-start' }
+          ),
           p(
             part('tabs', 'content'),
             [
@@ -795,6 +843,195 @@ export function createHomepageGalleryParts(
     { emphasis: 'quiet' }
   );
 
+  // Column 1 Bottom: Release milestones with real Progress bars (balanced bottom horizon)
+  const milestoneTile = (
+    eyebrow: string,
+    figure: string,
+    value: number,
+    leftCaption: string,
+    rightCaption: string,
+    ariaLabel: string
+  ): DemoNode =>
+    p(
+      PREVIEW_SURFACE_ID,
+      [
+        box('home-gallery__eyebrow', [eyebrow]),
+        box('home-gallery__submetric', [figure]),
+        p(
+          `${family}-progress-root`,
+          [p(`${family}-progress-track`, [p(`${family}-progress-indicator`)])],
+          { value, min: 0, max: 100, ariaLabel }
+        ),
+        box('home-gallery__meta-row', [
+          box('home-gallery__caption', [leftCaption]),
+          box('home-gallery__eyebrow', [rightCaption]),
+        ]),
+      ],
+      { variant: 'muted', radius: 'lg', border: 'none', elevation: 'none' },
+      undefined,
+      undefined,
+      { display: 'grid', gap: '0.5rem', padding: '0.875rem', width: '100%' }
+    );
+  const milestones = card(
+    zh ? '演进里程碑' : 'Release milestones',
+    zh ? '追踪 0.3 原型与适配层进度。' : 'Track 0.3 prototype and adapter milestones.',
+    [
+      milestoneTile(
+        zh ? '运行时适配' : 'RUNTIME ADAPTERS',
+        zh ? '4 / 4 端' : '4 / 4 targets',
+        84,
+        zh ? '84% 已覆盖' : '84% covered',
+        'WC · React · Vue',
+        zh ? '运行时适配覆盖率' : 'Runtime adapter coverage'
+      ),
+      milestoneTile(
+        zh ? '设计体系投影' : 'DESIGN PROJECTIONS',
+        zh ? '4 套风格' : '4 families',
+        68,
+        zh ? '68% 已就绪' : '68% ready',
+        'Shadcn · Brutalist',
+        zh ? '设计体系投影就绪度' : 'Design projection readiness'
+      ),
+    ],
+    'milestones',
+    { density: 'compact', emphasis: 'quiet' }
+  );
+
+  // Column 2 Bottom: Adapter parity rows with compact 4-bar indicators
+  const parityRows: ReadonlyArray<{ title: string; detail: string; ref: string }> = [
+    {
+      title: 'Web Components',
+      detail: 'Custom Elements',
+      ref: 'gallery-parity-bars-0',
+    },
+    {
+      title: 'React 19',
+      detail: 'Hooks & Props',
+      ref: 'gallery-parity-bars-1',
+    },
+    {
+      title: 'Vue 3',
+      detail: 'Composition API',
+      ref: 'gallery-parity-bars-2',
+    },
+    {
+      title: 'Vue 2',
+      detail: 'Legacy Bridge',
+      ref: 'gallery-parity-bars-3',
+    },
+  ];
+  const ecosystem = card(
+    zh ? '适配层分布' : 'Adapter parity',
+    zh ? '同一份语义原型在各宿主运行时的落地状态。' : 'Shared semantic prototypes across runtimes.',
+    parityRows.map((row) =>
+      p(
+        PREVIEW_SURFACE_ID,
+        [
+          box('home-gallery__parity-row', [
+            box('home-gallery__parity-copy', [
+              box('home-gallery__stat-value', [row.title]),
+              box('home-gallery__caption', [row.detail]),
+            ]),
+            box('home-gallery__mini-bars', [], row.ref, { 'aria-hidden': 'true' }),
+          ]),
+        ],
+        { variant: 'muted', radius: 'lg', border: 'none', elevation: 'none' },
+        undefined,
+        undefined,
+        { display: 'block', padding: '0.625rem 0.75rem', width: '100%' }
+      )
+    ),
+    'ecosystem',
+    { density: 'compact', emphasis: 'quiet' }
+  );
+
+  // Column 3 Bottom: Quick setup form snippet (balanced bottom horizon)
+  const protocol = card(
+    zh ? '快速接入' : 'Quick setup',
+    zh ? '通过 CLI 在任意前端项目中初始化原型。' : 'Initialize prototypes in any frontend project.',
+    [
+      box('home-settings__field', [
+        box('home-settings__label', [zh ? '目标框架' : 'Target runtime']),
+        p(
+          `${family}-input-root`,
+          [],
+          {
+            defaultValue: 'react / vue / web-components',
+            ariaLabel: zh ? '目标框架示例' : 'Target runtime example',
+          },
+          'gallery-protocol-target',
+          undefined,
+          { width: '100%', minWidth: '0' }
+        ),
+      ]),
+      box('home-settings__field', [
+        box('home-settings__label', [zh ? '初始化命令' : 'CLI command']),
+        p(
+          `${family}-input-root`,
+          [],
+          {
+            defaultValue: 'npx @proto.ui/cli@latest init',
+            ariaLabel: zh ? '初始化命令示例' : 'CLI command example',
+          },
+          'gallery-protocol-cmd',
+          undefined,
+          { width: '100%', minWidth: '0' }
+        ),
+      ]),
+      button(zh ? '预览生成清单' : 'Preview setup', 'gallery-protocol-preview', 'primary', false, {
+        fullWidth: true,
+      }),
+      status(
+        zh ? '零额外运行时框架依赖' : 'Zero secondary framework runtime',
+        'gallery-protocol-status'
+      ),
+    ],
+    'protocol',
+    { density: 'compact', emphasis: 'quiet' }
+  );
+
+  // Column 5 Bottom: Component matrix histogram (balanced bottom horizon)
+  const throughput = card(
+    zh ? '原型矩阵' : 'Component matrix',
+    zh ? '跨设计语言与交互协议的覆盖密度。' : 'Coverage across design languages and protocols.',
+    [
+      box(
+        'home-gallery__activity-chart',
+        [
+          box('home-gallery__activity-bars', [], 'gallery-activity-bars', {
+            'aria-hidden': 'true',
+          }),
+        ],
+        undefined,
+        {
+          role: 'img',
+          'aria-label': zh
+            ? '八组示例柱形，展示不同组件类别的原型分布。'
+            : 'Eight sample bars showing prototype distribution across categories.',
+        }
+      ),
+      box(
+        'home-gallery__chart-labels',
+        ['WC', 'R19', 'V3', 'V2', 'SH', 'BR', 'BS', 'LG'].map((label) =>
+          box('home-gallery__chart-label', [label])
+        )
+      ),
+      p(part('separator')),
+      box('home-gallery__stats', [
+        box('home-gallery__stat', [
+          box('home-gallery__eyebrow', [zh ? '交互原型' : 'Prototypes']),
+          box('home-gallery__stat-value', ['50+']),
+        ]),
+        box('home-gallery__stat', [
+          box('home-gallery__eyebrow', [zh ? '设计体系' : 'Families']),
+          box('home-gallery__stat-value', ['4']),
+        ]),
+      ]),
+    ],
+    'throughput',
+    { density: 'compact', emphasis: 'quiet' }
+  );
+
   const composition = createHomepageCompositionParts(family, locale, {
     p,
     box,
@@ -809,11 +1046,11 @@ export function createHomepageGalleryParts(
     analytics: composition.analytics,
     columns(form: DemoNode, analyticsCard: DemoNode = composition.analytics): DemoNode[] {
       return [
-        box('home-gallery__column', [controls, shortcuts]),
-        box('home-gallery__column', [analyticsCard, composition.command]),
-        box('home-gallery__column', [form, composition.progress]),
-        box('home-gallery__column', [hover, editor, composition.help]),
-        box('home-gallery__column', [overlays, spark, choices]),
+        box('home-gallery__column', [controls, shortcuts, editor]),
+        box('home-gallery__column', [milestones, analyticsCard, composition.command]),
+        box('home-gallery__column', [spark, ecosystem, form]),
+        box('home-gallery__column', [composition.help, overlays, protocol]),
+        box('home-gallery__column', [composition.progress, hover, choices, throughput]),
       ];
     },
     setup(context: DemoSetupContext) {
@@ -926,6 +1163,12 @@ export function createHomepageGalleryParts(
       if (qrSlot) appendHomepageGalleryQrMatrix(qrSlot);
       const sparkSlot = context.refs['gallery-spark-chart'];
       if (sparkSlot) renderHomepageGalleryAreaChart(sparkSlot, sparkIndex);
+      for (let index = 0; index < parityRows.length; index++) {
+        const slot = context.refs[parityRows[index]!.ref];
+        if (slot) appendHomepageGalleryMiniBars(slot, index);
+      }
+      const activitySlot = context.refs['gallery-activity-bars'];
+      if (activitySlot) appendHomepageGalleryActivityBars(activitySlot);
       composition.setup({ bind, write, feedback });
       // The chart observes the same public Progress value that Command, Slider
       // and Reset already share. No duplicated plan map or second write channel.
@@ -1028,6 +1271,12 @@ export function createHomepageGalleryParts(
         feedback(
           'choice-feedback',
           zh ? `已应用 ${selected.size} 项选择` : `Applied ${selected.size} selections`
+        )
+      );
+      bind('gallery-protocol-preview', 'click', () =>
+        feedback(
+          'gallery-protocol-status',
+          zh ? '已就绪：1 个原型配置 + 样式投影' : 'Ready: 1 prototype config + style projection'
         )
       );
       return () => {

@@ -110,16 +110,20 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
         'controls',
         'shortcuts',
+        'editor',
+        'milestones',
         'workspace-analytics',
         'workspace-command',
+        'spark',
+        'ecosystem',
         'preferences',
-        'workspace-progress',
-        'hover',
-        'editor',
         'workspace-help',
         'overlays',
-        'spark',
+        'protocol',
+        'workspace-progress',
+        'hover',
         'choices',
+        'throughput',
       ]);
       const analytics = cards.find((card) => card.dataset.galleryDemo === 'workspace-analytics')!;
       expect(analytics.dataset.galleryBody).toBe('edge-media');

@@ -522,6 +522,13 @@ export function createHomepageShowcase(
           },
           {
             kind: 'box',
+            tag: 'span',
+            className: 'home-gallery__attribution-sep',
+            attrs: { 'aria-hidden': 'true' },
+            children: ['·'],
+          },
+          {
+            kind: 'box',
             tag: 'a',
             className: 'home-gallery__attribution-link',
             attrs: { href: attribution.href },
