@@ -1,0 +1,881 @@
+{
+  "kind": "bounded-package-budget-numeric-transaction",
+  "createdAt": "2026-11-26T21:58:38.976660+00:00",
+  "transactionBase": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+  "sourceTree": "ed94eeed46f7ce63a8e5d2bac206bb8e256b847f",
+  "acceptedDevelopmentCapability": "Integrated per-ticket mount handoff/error ownership plus ordinary cursor semantic merge on ec2.",
+  "status": "Independently source/cost-reviewed numeric candidate; final canonical acceptance pending.",
+  "baseline": {
+    "head": "d5b9e64a14132e9c9e1cc327ac35341f9942b26f",
+    "kind": "actual local strict original command",
+    "report": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/retained/recovery-retained-20261126T1620Z/native-final-0089/final-81e2-2bec/validation/strict-nine.report.json",
+      "sha256": "0cdbc64617cd22c9e3996ab7ef876c29c4268add97a9d1d6af363109e852ba47"
+    },
+    "result": "9/9 passed",
+    "source": {
+      "head": "d5b9e64a14132e9c9e1cc327ac35341f9942b26f",
+      "tree": "7deb00e4a3e9b0ff98f78b028b907f8f4d51593a",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8109,
+      "fingerprintSha256": "7338a5dfc56ef7526262edcf21e4b9524b25b0044059020b90e73f6efdaf7d78",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "d5b9e64a14132e9c9e1cc327ac35341f9942b26f"
+    }
+  },
+  "acceptedSourceMeasurement": {
+    "head": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+    "kind": "actual local strict original command",
+    "report": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/retained/recovery-retained-20261126T1620Z/native-final-0089/final-ec2/validation/strict-nine.report.json",
+      "sha256": "6517c1c79d8da49e4841c559fdeac00891748b62d339162f610b7f258b4de5b7"
+    },
+    "execution": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/retained/recovery-retained-20261126T1620Z/native-final-0089/final-ec2/validation/strict-nine.execution.json",
+      "sha256": "6ee3164124a31259da220361d3e6a9c19d973e6940dab7d94a7fcb4474dbdbfb"
+    },
+    "result": "6/9 passed;3actual failures preserved",
+    "source": {
+      "head": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+      "tree": "ed94eeed46f7ce63a8e5d2bac206bb8e256b847f",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8111,
+      "fingerprintSha256": "21f592e6fddf6ef622b5a8dbad66803a375fe9798e01a81bd174ea6feaffa978",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c"
+    }
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "policy": {
+    "mode": "strict",
+    "scope": "whole-entry package budgets"
+  },
+  "entries": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "oldCeiling": 3000,
+      "proposedCeiling": 3000,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 4765,
+        "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+        "gzipBytes": 1796,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 4765,
+        "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+        "gzipBytes": 1796,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "measuredGzipGrowth": 0,
+      "oldBaselineHeadroom": 1204,
+      "headroomAtCurrentMeasuredBytes": 1204
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "oldCeiling": 700000,
+      "proposedCeiling": 700000,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "measuredGzipGrowth": 0,
+      "oldBaselineHeadroom": 64154,
+      "headroomAtCurrentMeasuredBytes": 64154
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "oldCeiling": 13100,
+      "proposedCeiling": 13100,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 41284,
+        "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+        "gzipBytes": 13012,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 41294,
+        "minifiedSha256": "3c97f38ecf111dcee2f806474009b92f4f5209845e9e92028b1c949ccf9a40cf",
+        "gzipBytes": 13012,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "measuredGzipGrowth": 0,
+      "oldBaselineHeadroom": 88,
+      "headroomAtCurrentMeasuredBytes": 88
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "oldCeiling": 107400,
+      "proposedCeiling": 107400,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 408672,
+        "minifiedSha256": "7aed51a922867191b17c54022e3b94e75761e17aedfe997dcb4b7850d715d573",
+        "gzipBytes": 107150,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 409010,
+        "minifiedSha256": "dd077b773a8131e014e8ad748e9ced3cfb09d481bab3d008be9c6ccbd466e1aa",
+        "gzipBytes": 107259,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "measuredGzipGrowth": 109,
+      "oldBaselineHeadroom": 250,
+      "headroomAtCurrentMeasuredBytes": 141
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 182450,
+      "proposedCeiling": 182550,
+      "increase": 100,
+      "baseline": {
+        "minifiedBytes": 630031,
+        "minifiedSha256": "5cca13588df8527fb6345b3e0bc28ac425f7b560af54b8477448381834b9379f",
+        "gzipBytes": 182413,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 630373,
+        "minifiedSha256": "81abb86b6fc9b930fa901f44cfd0bb1fd7cb6c7da6afaa169c06d74b8f8e9124",
+        "gzipBytes": 182500,
+        "pass": false,
+        "overBudgetBytes": 50
+      },
+      "measuredGzipGrowth": 87,
+      "oldBaselineHeadroom": 37,
+      "headroomAtCurrentMeasuredBytes": 50
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 181300,
+      "proposedCeiling": 181400,
+      "increase": 100,
+      "baseline": {
+        "minifiedBytes": 625482,
+        "minifiedSha256": "399acdaf1c83b2c8a6ed849277bb1e132399ffe08da313b7ec861e3ff160b5ad",
+        "gzipBytes": 181282,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 625824,
+        "minifiedSha256": "1d622d74b5544e05ec86a5f0cd9fdeec568415cfe5e8cdfa6634e90204296a89",
+        "gzipBytes": 181377,
+        "pass": false,
+        "overBudgetBytes": 77
+      },
+      "measuredGzipGrowth": 95,
+      "oldBaselineHeadroom": 18,
+      "headroomAtCurrentMeasuredBytes": 23
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 219100,
+      "proposedCeiling": 219200,
+      "increase": 100,
+      "baseline": {
+        "minifiedBytes": 737747,
+        "minifiedSha256": "39938d85c18d3a3031facf5c49bc6dcc00c4f2a861d5a8491b324191aa784c8c",
+        "gzipBytes": 219062,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 738086,
+        "minifiedSha256": "5ddb6b0e49c9d1cda5385693e2258f083bb41583080ba4bc9ff70c4e734b9ddf",
+        "gzipBytes": 219179,
+        "pass": false,
+        "overBudgetBytes": 79
+      },
+      "measuredGzipGrowth": 117,
+      "oldBaselineHeadroom": 38,
+      "headroomAtCurrentMeasuredBytes": 21
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "oldCeiling": 6000,
+      "proposedCeiling": 6000,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 14562,
+        "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+        "gzipBytes": 4311,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 14562,
+        "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+        "gzipBytes": 4311,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "measuredGzipGrowth": 0,
+      "oldBaselineHeadroom": 1689,
+      "headroomAtCurrentMeasuredBytes": 1689
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "oldCeiling": 7900,
+      "proposedCeiling": 7900,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 34003,
+        "minifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+        "gzipBytes": 7158,
+        "pass": true
+      },
+      "acceptedSource": {
+        "minifiedBytes": 34003,
+        "minifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+        "gzipBytes": 7158,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "measuredGzipGrowth": 0,
+      "oldBaselineHeadroom": 742,
+      "headroomAtCurrentMeasuredBytes": 742
+    }
+  ],
+  "sourceChanges": [
+    {
+      "path": "packages/runtime/src/instance/session.ts",
+      "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+      "sha256": "2e48346b0535156baecc1d14a6266d76f8583bd9b2b17deab018ea6fc86706f8",
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/packages/runtime/src/instance/session.ts"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+      "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+      "sha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/packages/core/src/spec/feedback/semantic-merge.ts"
+    }
+  ],
+  "closureAttribution": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "beforeGzip": 1796,
+      "afterGzip": 1796,
+      "gzipDelta": 0,
+      "budget": 3000,
+      "overBudgetBytes": 0,
+      "beforeMinifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+      "afterMinifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+      "minifiedDelta": 0,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 0
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 0
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 53,
+      "afterInputCount": 53
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "beforeGzip": 635846,
+      "afterGzip": 635846,
+      "gzipDelta": 0,
+      "budget": 700000,
+      "overBudgetBytes": 0,
+      "beforeMinifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+      "afterMinifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+      "minifiedDelta": 0,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 34
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 34
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 3453,
+      "afterInputCount": 3453
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "beforeGzip": 13012,
+      "afterGzip": 13012,
+      "gzipDelta": 0,
+      "budget": 13100,
+      "overBudgetBytes": 0,
+      "beforeMinifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+      "afterMinifiedSha256": "3c97f38ecf111dcee2f806474009b92f4f5209845e9e92028b1c949ccf9a40cf",
+      "minifiedDelta": 10,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 2899
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 2909
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 49,
+      "afterInputCount": 49
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "beforeGzip": 107150,
+      "afterGzip": 107259,
+      "gzipDelta": 109,
+      "budget": 107400,
+      "overBudgetBytes": 0,
+      "beforeMinifiedSha256": "7aed51a922867191b17c54022e3b94e75761e17aedfe997dcb4b7850d715d573",
+      "afterMinifiedSha256": "dd077b773a8131e014e8ad748e9ced3cfb09d481bab3d008be9c6ccbd466e1aa",
+      "minifiedDelta": 338,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 2904
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 2914
+          }
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 6999
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 25646,
+            "sourceSha256": "2e48346b0535156baecc1d14a6266d76f8583bd9b2b17deab018ea6fc86706f8",
+            "retainedBytes": 7327
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 298,
+      "afterInputCount": 298
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "beforeGzip": 182413,
+      "afterGzip": 182500,
+      "gzipDelta": 87,
+      "budget": 182450,
+      "overBudgetBytes": 50,
+      "beforeMinifiedSha256": "5cca13588df8527fb6345b3e0bc28ac425f7b560af54b8477448381834b9379f",
+      "afterMinifiedSha256": "81abb86b6fc9b930fa901f44cfd0bb1fd7cb6c7da6afaa169c06d74b8f8e9124",
+      "minifiedDelta": 342,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 2904
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 2914
+          }
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 7000
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 25646,
+            "sourceSha256": "2e48346b0535156baecc1d14a6266d76f8583bd9b2b17deab018ea6fc86706f8",
+            "retainedBytes": 7332
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 352,
+      "afterInputCount": 352
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "beforeGzip": 181282,
+      "afterGzip": 181377,
+      "gzipDelta": 95,
+      "budget": 181300,
+      "overBudgetBytes": 77,
+      "beforeMinifiedSha256": "399acdaf1c83b2c8a6ed849277bb1e132399ffe08da313b7ec861e3ff160b5ad",
+      "afterMinifiedSha256": "1d622d74b5544e05ec86a5f0cd9fdeec568415cfe5e8cdfa6634e90204296a89",
+      "minifiedDelta": 342,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 2904
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 2914
+          }
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 7004
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 25646,
+            "sourceSha256": "2e48346b0535156baecc1d14a6266d76f8583bd9b2b17deab018ea6fc86706f8",
+            "retainedBytes": 7336
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 351,
+      "afterInputCount": 351
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "beforeGzip": 219062,
+      "afterGzip": 219179,
+      "gzipDelta": 117,
+      "budget": 219100,
+      "overBudgetBytes": 79,
+      "beforeMinifiedSha256": "39938d85c18d3a3031facf5c49bc6dcc00c4f2a861d5a8491b324191aa784c8c",
+      "afterMinifiedSha256": "5ddb6b0e49c9d1cda5385693e2258f083bb41583080ba4bc9ff70c4e734b9ddf",
+      "minifiedDelta": 339,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 2904
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 2914
+          }
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 7003
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 25646,
+            "sourceSha256": "2e48346b0535156baecc1d14a6266d76f8583bd9b2b17deab018ea6fc86706f8",
+            "retainedBytes": 7332
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 381,
+      "afterInputCount": 381
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "beforeGzip": 4311,
+      "afterGzip": 4311,
+      "gzipDelta": 0,
+      "budget": 6000,
+      "overBudgetBytes": 0,
+      "beforeMinifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+      "afterMinifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+      "minifiedDelta": 0,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 0
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 0
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 75,
+      "afterInputCount": 75
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "beforeGzip": 7158,
+      "afterGzip": 7158,
+      "gzipDelta": 0,
+      "budget": 7900,
+      "overBudgetBytes": 0,
+      "beforeMinifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+      "afterMinifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+      "minifiedDelta": 0,
+      "sourceChangedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "before": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5658,
+            "sourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "retainedBytes": 0
+          },
+          "after": {
+            "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+            "sourceBytes": 5671,
+            "sourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+            "retainedBytes": 0
+          }
+        }
+      ],
+      "addedInputs": [],
+      "removedInputs": [],
+      "beforeInputCount": 85,
+      "afterInputCount": 85
+    }
+  ],
+  "sourceInvestigation": {
+    "allNineInputSetsIdentical": true,
+    "addedInputs": 0,
+    "removedInputs": 0,
+    "changedInputSources": [
+      "packages/runtime/src/instance/session.ts",
+      "packages/core/src/spec/feedback/semantic-merge.ts"
+    ],
+    "runtimeMultiplicity": "Each original input path appears once in each captured closure; no new Runtime copy or imported package.",
+    "minifiedNotGzip": "Per-input retained-byte changes are minified output attribution only, never summed to derive gzip growth. Actual integrated whole-entry gzip deltas are87/95/117 for React/Vue/WC and109 for Runtime.",
+    "avoidableWork": "The reviewed source retains ticket-specific error/identity/depth checks. No new dependency, eager import, dead feature or plainly removable duplicate owner was found in this exact delta; no source rewrite is proposed to save these small byte costs.",
+    "review": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/recovery-compiler-1620/main-ec2-owned-source-review/source-review.json",
+      "sha256": "8de3f168c32df6ed0fa00c999824a8a38c2d08a29dab291e2f441864e182de95"
+    },
+    "sourceCostReview": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/recovery-compiler-1620/per-ticket-budget-5a18-second-review/review.json",
+      "sha256": "8457589fb1b070f0c5b88e57ae820813c7ae2dd2325c55d1b13949ba37586297"
+    }
+  },
+  "authority": {
+    "policy": [
+      {
+        "path": "AGENTS.md",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "a419a31a815b06a293308d75042019b0d155c6c4980d4940486ecab9e7aadf6e",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/AGENTS.md"
+      },
+      {
+        "path": ".agents/skills/pui-dev/SKILL.md",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "e3c2294093aac66722417dcbf03ffba2648e7baaaf4f97c84cb35a87dd129b41",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/.agents/skills/pui-dev/SKILL.md"
+      },
+      {
+        "path": ".agents/skills/pui-package-budget/SKILL.md",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "61dd888c4d9c13bd54ed1c06f8e4f918906b053f8bd5354876e3439cb8354cea",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/.agents/skills/pui-package-budget/SKILL.md"
+      },
+      {
+        "path": "internal/governance/finf-package-budgets.md",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "0833c407d3cc775fd9340939d28e2c9369b064cdc11d22728669c1c3df3361e9",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/internal/governance/finf-package-budgets.md"
+      }
+    ],
+    "specSources": [
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/spec/contracts/C-LIFECYCLE-0002.yaml",
+        "id": "C-LIFECYCLE-0002",
+        "status": "draft"
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0006.yaml",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "0f0c58122e5477a8c75d05454ccb7907796deceff9e9b882906c6e05e2ce19b2",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/spec/contracts/C-LIFECYCLE-0006.yaml",
+        "id": "C-LIFECYCLE-0006",
+        "status": "draft"
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0007.yaml",
+        "revision": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+        "sha256": "f8246d015822eafdaa1bd318a9b0a8e2852477e5e66096ec69c2a17207ced733",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/5a18f1a11c05121f08d948ca8c59b8c9bf01667c/spec/contracts/C-LIFECYCLE-0007.yaml",
+        "id": "C-LIFECYCLE-0007",
+        "status": "draft"
+      }
+    ],
+    "rootDirection": "Prepare three+100 literals only; independent review and fresh strict required.",
+    "previousConstraints": "No change to original1908/1913 ceiling-repair conclusions or rejected1884 proposal. Historical global mountHandoff cost record remains historical.",
+    "lifecycle": "All traced contracts stay draft."
+  },
+  "decision": {
+    "changes": {
+      "adapter-react root": {
+        "old": 182450,
+        "proposed": 182550,
+        "measured": 182500,
+        "measuredGrowth": 87,
+        "newHeadroom": 50,
+        "oldBaselineHeadroom": 37
+      },
+      "adapter-vue root": {
+        "old": 181300,
+        "proposed": 181400,
+        "measured": 181377,
+        "measuredGrowth": 95,
+        "newHeadroom": 23,
+        "oldBaselineHeadroom": 18
+      },
+      "adapter-web-component root": {
+        "old": 219100,
+        "proposed": 219200,
+        "measured": 219179,
+        "measuredGrowth": 117,
+        "newHeadroom": 21,
+        "oldBaselineHeadroom": 38
+      }
+    },
+    "rationale": "One100-byte step per affected adapter keeps the existing very small absolute headroom: React50 versus prior37,Vue23 versus prior18,WC21 versus prior38. Runtime/Core and the other four entries stay within their existing limits and are unchanged. This proposal covers measured accepted integrated cost, not hypothetical growth or permission to waive strict checks."
+  },
+  "unchanged": [
+    "All9entry paths",
+    "Six unrelated ceiling literals",
+    "Strict pass/fail and errors",
+    "ESM browser es2020,minification/tree shaking",
+    "Level9gzip/external boundary",
+    "All implementation and tests",
+    "All prior red and historical records"
+  ],
+  "validationAtCreation": {
+    "publicBuild": "47/47 pass on5a actuallocal",
+    "publicManifests": "47pass",
+    "budgetControls": "29/29pass",
+    "wholeTypes": "pass on5a actual complete command",
+    "newNumericCandidateStrict": "not-run",
+    "canonicalHostedFinalStrict": "pending",
+    "focusedCombinedOriginal": "825/36retained; isolated original64/64+25/25PASSED with independently reviewed runner isolation cause, no product repair.",
+    "nativeMerge": "not-ready",
+    "canonicalAcceptedSourceBeforeNumericMutation": "Official5arun45900249584:47/47+47manifests+29controlsPASS; strict3overages real.",
+    "browser295": "Actual5a4wholefiles295/295PASS; source remains5a.",
+    "formalOwnership": "Exactnative5a8obligations49predicates+114contracts+28relocationPASS; source remains5a.",
+    "fieldBrowser32": "OriginalbeforeAll120s timeout/32skipretained; quiet originalretry pending.",
+    "sourceBinding": "Only1existing Core importer hashpending exact fix and originalwholechecker; no product change."
+  },
+  "canonicalRequirement": "The official6e baseline and5a before run establish integrated growth. Current-candidate canonical blocking strict must still pass after these literal changes; neither old red nor partialField becomes accepted by this transaction.",
+  "rollback": "Revert only the dedicated numeric commit to restore182450/181300/219100, retaining all product semantics and original source/cost evidence.",
+  "recordBoundary": "Concrete proposed numeric transaction with actual cost facts; not a published approval, completed release or merge permission.",
+  "canonicalBaseline": {
+    "head": "6e56453a8e840cbc785c0f770634b9d2bbb7de0d",
+    "tree": "70018bf5a09359c4e1d147eedac846a5da6da00f",
+    "runId": 45878062751,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45878062751",
+    "strictExitCode": 0,
+    "results": "9/9pass",
+    "report": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/native-budget-historical-6e564/15146811227/report.json",
+      "sha256": "bea1f315dd645f0b53b05cca2ca6c15cd6ee9accfd359658aefe48b371866054"
+    },
+    "officialDownloads": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/native-budget-historical-6e564/downloads.json",
+      "sha256": "7576448a834e6e30cc6d8dc9e0ddc81ee3823b61bab819a7a9fe953b76668115"
+    },
+    "completeNineEntryEquivalenceToLocalD5b": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/retained/recovery-retained-20261126T1620Z/native-final-0089/final-ec2/per-ticket-budget-transaction/canonical-6e-to-d5b-comparison.json",
+      "sha256": "9272cda7bda6f7eb1076359b1ed25b09526627010f8e3f279eae4652b1f2238f"
+    },
+    "sourceIdentityBoundary": "Historical6e remains its actual evidenceHead. Its nine complete captured input closures and all minified/gzip artifacts equal local d5b; this is not a claim of a d5b hosted execution."
+  },
+  "canonicalAcceptedSourceBeforeNumericMutation": {
+    "head": "5a18f1a11c05121f08d948ca8c59b8c9bf01667c",
+    "tree": "ed94eeed46f7ce63a8e5d2bac206bb8e256b847f",
+    "runId": 45900249584,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45900249584",
+    "nativeConclusion": "failure",
+    "strictExitCode": 1,
+    "results": "6pass/3overruns50,77,79",
+    "report": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/native-budget-before-5a18/15155616357/report.json",
+      "sha256": "6517c1c79d8da49e4841c559fdeac00891748b62d339162f610b7f258b4de5b7"
+    },
+    "verifiedNativeReceipt": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/native-budget-before-5a18/verified-canonical-before.json",
+      "sha256": "fc86f4f9ec6caa171d53cc8dd2ba4f8529aa5734b21196bc2280c68ce56ec0ef"
+    },
+    "officialDownloads": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/native-budget-before-5a18/downloads.json",
+      "sha256": "976eedc9b06648c4d949d47fe2ca778ff971819b83d72f31ec9622f667063da4"
+    },
+    "nativeApi": {
+      "path": "/tank/shared/projects/proto-ui-pr-merge-20261126-630588abef90/root/native-budget-before-5a18/native-api.json",
+      "sha256": "ba80ce0eb2c8a6215dea20c889cc8b7b4550513f0bb5e82aa99f8675c88ad0a6"
+    },
+    "sameBytesAsActualLocalReport": true,
+    "publicBuild": {
+      "passed": 47,
+      "manifests": 47
+    },
+    "budgetControls": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0
+    }
+  }
+}

@@ -60,6 +60,8 @@ const environment = {
 // internal/records/2026-11-24-main-sprint6-package-budget.json
 // Native1949 mounted-handoff ownership repair; bounded React/WC cost only.
 // internal/records/2026-11-27-mount-handoff-package-budget.json
+// Integrated per-ticket mount ownership and ordinary cursor merge cost.
+// internal/records/2026-11-27-integrated-per-ticket-package-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -129,8 +131,8 @@ const cases = [
   // internal/records/2026-11-26-retained-owner-package-budget.json
   // The separately measured main-only mount-ticket and cursor delta remains in:
   // internal/records/2026-11-27-mount-ticket-package-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 182_450],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 181_300],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 182_550],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 181_400],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -138,7 +140,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 219_100],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 219_200],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];
