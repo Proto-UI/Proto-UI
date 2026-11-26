@@ -157,7 +157,9 @@ describe('closed primitive defaults preserve captured Rule State identity', () =
     const { rows, tokens } = await observe(entry(), helper);
     expect(rows).toHaveLength(1);
     expect(rows[0].unresolved.some((miss) => miss.reason === 'condition')).toBe(true);
-    expect(tokens).toEqual(['bg-primary']);
+    // Ordinary proof still rejects this frame. The separate CSS vocabulary
+    // retains both complete native-State alternatives without selecting one.
+    expect(tokens).toEqual(['bg-primary', fallback, selected]);
   });
 
   it('keeps a later unknown caller separate from the closed frame', async () => {
