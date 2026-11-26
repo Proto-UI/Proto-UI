@@ -103,6 +103,7 @@ export function createFiniteRowLifetimeProof(
   const moduleEffects = new WeakMap<ts.SourceFile, boolean>();
   const parameterOwners = new WeakMap<ts.Node, boolean>();
   const includesIntrinsics = new WeakMap<ts.SourceFile, boolean>();
+  const opaqueSources = new WeakMap<ts.SourceFile, boolean>();
 
   const closedParameterOwner = (parameter: ts.ParameterDeclaration): boolean => {
     const owner = parameter.parent;
@@ -128,6 +129,31 @@ export function createFiniteRowLifetimeProof(
     visit(owner);
     parameterOwners.set(owner, safe);
     return safe;
+  };
+
+  // Only immutable syntax is shared between graphs. A fresh parse at the
+  // same path must be inspected again; import resolution stays in graph().
+  const hasOpaqueSyntax = (source: ts.SourceFile): boolean => {
+    const cached = opaqueSources.get(source);
+    if (cached !== undefined) return cached;
+    let opaque = false;
+    const visit = (node: ts.Node): void => {
+      if (opaque || ts.isTypeNode(node)) return;
+      if (
+        ts.isWithStatement(node) ||
+        (ts.isCallExpression(node) &&
+          (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+            (ts.isIdentifier(unwrap(node.expression)) &&
+              ['eval', 'require'].includes((unwrap(node.expression) as ts.Identifier).text))))
+      ) {
+        opaque = true;
+        return;
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    opaqueSources.set(source, opaque);
+    return opaque;
   };
 
   const graph = (current: ts.SourceFile): readonly HookSourceModule[] | null => {
@@ -178,25 +204,42 @@ export function createFiniteRowLifetimeProof(
           closed = false;
         }
       }
-      const opaque = (node: ts.Node): void => {
-        if (!closed || ts.isTypeNode(node)) return;
-        if (
-          ts.isWithStatement(node) ||
-          (ts.isCallExpression(node) &&
-            (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
-              (ts.isIdentifier(unwrap(node.expression)) &&
-                ['eval', 'require'].includes((unwrap(node.expression) as ts.Identifier).text))))
-        ) {
-          closed = false;
-          return;
-        }
-        ts.forEachChild(node, opaque);
-      };
-      opaque(module.source);
+      if (closed && hasOpaqueSyntax(module.source)) closed = false;
     }
     const result = closed ? [...reached.values()] : null;
     graphs.set(current, result);
     return result;
+  };
+
+  // A cached graph can outlive one filesystem-identity observation. Verify
+  // its runtime edges in this query before using them to exclude references;
+  // changed paths or parses retain the original complete source scan.
+  const recordedEdgesAreCurrent = (
+    current: ts.SourceFile,
+    sources: readonly HookSourceModule[]
+  ): boolean => {
+    const edges = dependencies.get(current);
+    if (!edges) return false;
+    const recorded = new Map(sources.map((module) => [module.file, module.source]));
+    for (const module of sources) {
+      const imports = edges.get(module.file);
+      if (!imports) return false;
+      for (const statement of module.source.statements) {
+        const specifier =
+          ts.isImportDeclaration(statement) && !statement.importClause?.isTypeOnly
+            ? statement.moduleSpecifier
+            : ts.isExportDeclaration(statement) && !statement.isTypeOnly
+              ? statement.moduleSpecifier
+              : undefined;
+        if (!specifier) continue;
+        if (!ts.isStringLiteralLike(specifier)) return false;
+        if (specifier.text === '@proto.ui/core') continue;
+        const target = modules.resolveModule(module.file, specifier.text);
+        if (!target || !imports.has(target.file) || recorded.get(target.file) !== target.source)
+          return false;
+      }
+    }
+    return true;
   };
 
   // Receiver references alone cannot justify a native method after authored
@@ -536,6 +579,7 @@ export function createFiniteRowLifetimeProof(
       }
       return !effects;
     }
+    const graphWasCached = graphs.has(current);
     const sources = graph(current);
     if (!sources) return false;
     const key = [...declarations]
@@ -552,12 +596,42 @@ export function createFiniteRowLifetimeProof(
     const arrays = new Set<ts.Node>(declarations);
     const binding = (node: ts.Node, module: HookSourceModule): ts.Node | null =>
       rowDeclaration(modules.resolveReference(unwrap(node), module)?.declaration);
+    // A lexical reference or alias can reach these declarations only through
+    // its own module or an actual import/re-export path. Keep the full graph
+    // admission and intrinsic inspection, but avoid resolving unrelated ASTs
+    // in the two row-reference passes below.
+    const owners = [...declarations].map((node) => modules.moduleForSource(node.getSourceFile()));
+    const possibleReaders = new Set(owners.map((module) => module.file));
+    const hasExternalOwner = owners.some(
+      (owner) =>
+        !sources.some((module) => module.file === owner.file && module.source === owner.source)
+    );
+    let readerAdded = true;
+    while (readerAdded) {
+      readerAdded = false;
+      for (const [file, imports] of dependencies.get(current) ?? []) {
+        if (
+          !possibleReaders.has(file) &&
+          [...imports].some((target) => possibleReaders.has(target))
+        ) {
+          possibleReaders.add(file);
+          readerAdded = true;
+        }
+      }
+    }
+    // Core's trusted ABI edge is intentionally absent from graph(). A prior
+    // query may also have observed different import edges before a symlink
+    // changed. Only revalidated edges can exclude a reading source.
+    const readingSources =
+      hasExternalOwner || (graphWasCached && !recordedEdgesAreCurrent(current, sources))
+        ? sources
+        : sources.filter((module) => possibleReaders.has(module.file));
     // A const alias shares the array; copied spreads do not. Mutable aliases
     // and container construction are refused by the reference check below.
     let added = true;
     while (added) {
       added = false;
-      for (const module of sources) {
+      for (const module of readingSources) {
         const visit = (node: ts.Node): void => {
           if (ts.isTypeNode(node)) return;
           if (
@@ -634,7 +708,7 @@ export function createFiniteRowLifetimeProof(
       return !!target && reachesRows.has(target.file);
     };
     let safe = true;
-    for (const module of sources) {
+    for (const module of readingSources) {
       const visit = (node: ts.Node): void => {
         if (
           !safe ||
@@ -734,7 +808,11 @@ export function createFiniteRowLifetimeProof(
     return safe;
   };
 
-  return (expression, parameterSources, partialInventory = false) => {
+  const prove: ReturnType<typeof createFiniteRowLifetimeProof> = (
+    expression,
+    parameterSources,
+    partialInventory = false
+  ) => {
     const current = expression.getSourceFile();
     modules.registerSource(current);
     const declarations = new Set<ts.VariableDeclaration | ts.ParameterDeclaration>();
@@ -805,4 +883,8 @@ export function createFiniteRowLifetimeProof(
     };
     return rows(expression) && preserves(declarations, current);
   };
+  return (expression, parameterSources, partialInventory = false) =>
+    modules.withSynchronousIdentityQuery(() =>
+      prove(expression, parameterSources, partialInventory)
+    );
 }

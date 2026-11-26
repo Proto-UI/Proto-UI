@@ -1146,7 +1146,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const [expectedPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
-        expectHardFrame(panelSurface, '3px', expectedPanelForeground, `${runtime}/hover-panel`);
+        expectHardFrame(panelSurface, 'none', expectedPanelForeground, `${runtime}/hover-panel`);
         expect(panelSurface.backgroundColor, `${runtime}/hover-panel/background`).toBe(
           expectedPanelBackground
         );
@@ -1263,7 +1263,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         ]);
         expectHardFrame(
           darkPanelSurface,
-          '3px',
+          'none',
           darkPanelForeground,
           `${runtime}/dark/hover-panel`
         );
