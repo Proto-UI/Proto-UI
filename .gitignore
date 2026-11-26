@@ -93,6 +93,8 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+dist.staging-*
+dist.previous-*
 
 # Gatsby files
 .cache/

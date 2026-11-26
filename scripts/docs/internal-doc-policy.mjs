@@ -16,6 +16,7 @@ export const ALLOWED_RECORD_KINDS = Object.freeze([
   'investigation',
   'audit',
   'ops',
+  'sprint-note',
   'deep-audit',
   'blueprint',
 ]);

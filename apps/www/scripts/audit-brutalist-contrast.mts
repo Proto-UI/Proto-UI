@@ -717,18 +717,18 @@ async function capture(
   }
 }
 function primary(previewer: Locator, family: string): Locator | null {
-  if (family === 'tabs') return previewer.getByRole('tab', { name: 'Details', exact: true });
+  if (family === 'tabs') return previewer.getByRole('tab', { name: 'Password', exact: true });
   if (family === 'input') {
     const control = '[data-pui-root][data-projection-prototype="brutalist-input-root"]';
-    // The authored editable Name example is distinct from Disabled/Read-only.
+    // The authored editable Email example is distinct from Disabled/Read-only.
     // Bind its actual editor in every host, preserving uniqueness and ownership.
     return previewer.locator(
-      `[data-projection-content] input${control}[aria-label="Name"], [data-projection-content] ${control} > input[part="control"][aria-label="Name"]:not([data-pui-root])`
+      `[data-projection-content] input${control}[aria-label="Email"], [data-projection-content] ${control} > input[part="control"][aria-label="Email"]:not([data-pui-root])`
     );
   }
   if (family === 'field') {
     const control =
-      '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="requiredControl"]';
+      '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="usernameControl"]';
     // WC exposes a direct owned native part; React/Vue roots are the input.
     // No first(): missing or duplicate physical editors remain an audit error.
     return previewer.locator(
@@ -743,12 +743,12 @@ function primary(previewer: Locator, family: string): Locator | null {
         '[data-pui-root][data-projection-prototype="brutalist-collapsible-root"][data-demo-ref="uncontrolled"] [data-pui-root][data-projection-prototype="brutalist-collapsible-trigger"]',
       accordion:
         '[data-pui-root][data-projection-prototype="brutalist-accordion-trigger"][data-demo-ref="single-lifetime-trigger"]',
-      // The authored Density preference group starts at Comfortable. It is the
+      // The authored Display density group starts at Comfortable. It is the
       // selected roving Tab entry for this family's rest/hover/keyboard-focus
-      // journey; Default, the disabled Compact and the unselected second group
-      // cannot substitute. Keep strict uniqueness and the shared lease checks.
+      // journey; Default and Compact cannot substitute. Keep strict uniqueness
+      // and the shared lease checks.
       'radio-group':
-        '[data-pui-root][data-projection-prototype="brutalist-radio-group-root"][data-demo-ref="Density preference"] [data-pui-root][data-projection-prototype="brutalist-radio-group-item"][data-demo-ref="density-comfortable"][role="radio"][aria-checked="true"][tabindex="0"]',
+        '[data-pui-root][data-projection-prototype="brutalist-radio-group-root"][data-demo-ref="brutalistHeroGroup"] [data-pui-root][data-projection-prototype="brutalist-radio-group-item"][data-demo-ref="hero-comfortable"][role="radio"][aria-checked="true"][tabindex="0"]',
       // The authored Enter button is the first public phase-machine control.
       // These rest/hover/keyboard-focus frames observe that exact control's
       // visual states, not the passive presence region or transition motion.
@@ -758,9 +758,9 @@ function primary(previewer: Locator, family: string): Locator | null {
       // visual states belong to the controls, not to the semantic-only regions;
       // this adds no focus behavior to those passive parts.
       'live-region':
-        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="announcePolite"][role="button"]',
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="checkInbox"][role="button"]',
       'async-region':
-        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="markBusy"][role="button"]',
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="startRefresh"][role="button"]',
     } as Record<string, string>
   )[family];
   if (named) return previewer.locator(`[data-projection-content] ${named}`);
@@ -816,14 +816,13 @@ function imagePassiveApplicability(demo: DemoSpec) {
   }
   visit(demo.root);
   const expected = [
+    ['hero-frame', 'cover', 'informative'],
     ['fit-contain', 'contain', 'informative'],
     ['fit-cover', 'cover', 'informative'],
     ['fit-fill', 'fill', 'informative'],
-    ['decorative', 'contain', 'decorative'],
-    ['error', 'contain', 'informative'],
   ];
   if (instances.length !== expected.length)
-    fail('Image static plan requires all five presentations.');
+    fail('Image static plan requires all four presentations.');
   for (const [ref, fit, a11yMode] of expected) {
     const matches = instances.filter((instance) => instance.ref === ref);
     const props = matches[0]?.props;
@@ -841,7 +840,7 @@ function imagePassiveApplicability(demo: DemoSpec) {
     applicable: failures.length === 0,
     criteria: ['P-BRUTALIST-IMAGE-VISUAL-GRAMMAR', 'P-BASE-IMAGE'],
     scope:
-      'Only the current five static authored Image presentations; no interaction variant exemption.',
+      'Only the current four static authored Image presentations; no interaction variant exemption.',
     instances,
     failures,
   };
@@ -1691,7 +1690,7 @@ async function pointerJourney(
     if (family === 'tabs') {
       await target.locator('xpath=self::*[@aria-selected="true"]').waitFor();
       await capture(page, item, `${prefix}activation-result`, () =>
-        tabsObservation(previewer, 'Details')
+        tabsObservation(previewer, 'Password')
       );
       return;
     }
@@ -2411,33 +2410,33 @@ async function hoverCardObservation(
 }
 async function tabsObservation(
   previewer: Locator,
-  selected: 'Details' | 'Overview'
+  selected: 'Password' | 'Account'
 ): Promise<Observation> {
-  const overview = previewer.getByRole('tab', { name: 'Overview', exact: true });
-  const details = previewer.getByRole('tab', { name: 'Details', exact: true });
+  const account = previewer.getByRole('tab', { name: 'Account', exact: true });
+  const password = previewer.getByRole('tab', { name: 'Password', exact: true });
   // The previewer itself has a tabpanel wrapper; only the materialized product
   // part proves that selection changed the current Tabs content.
   const panel = previewer.locator(
     '[data-projection-content] [data-pui-root][data-projection-prototype="brutalist-tabs-content"][role="tabpanel"]:visible'
   );
   const expectedText =
-    selected === 'Details'
-      ? 'Dark mode keeps black shadows on warm paper.'
-      : 'Hard borders, loud yellow, no radius.';
-  const overviewTarget = await targetObservation(overview);
-  const detailsTarget = await targetObservation(details);
+    selected === 'Password'
+      ? "Change your password here. After saving, you'll be logged out."
+      : 'Make changes to your account profile and username here.';
+  const accountTarget = await targetObservation(account);
+  const passwordTarget = await targetObservation(password);
   const panelTarget = (await panel.count()) === 1 ? await targetObservation(panel) : null;
   return {
     achieved:
-      overviewTarget.achieved &&
-      detailsTarget.achieved &&
+      accountTarget.achieved &&
+      passwordTarget.achieved &&
       panelTarget?.achieved === true &&
-      (await overview.getAttribute('aria-selected')) === String(selected === 'Overview') &&
-      (await details.getAttribute('aria-selected')) === String(selected === 'Details') &&
+      (await account.getAttribute('aria-selected')) === String(selected === 'Account') &&
+      (await password.getAttribute('aria-selected')) === String(selected === 'Password') &&
       (await panel.count()) === 1 &&
-      (await panel.innerText()).trim() === expectedText,
-    overview: overviewTarget,
-    details: detailsTarget,
+      (await panel.innerText()).includes(expectedText),
+    overview: accountTarget,
+    details: passwordTarget,
     panelTarget,
     panel: await panel.allTextContents(),
   };
@@ -2994,12 +2993,12 @@ try {
         }
       }
       if (family === 'tabs') {
-        const overview = previewer.getByRole('tab', { name: 'Overview', exact: true });
+        const overview = previewer.getByRole('tab', { name: 'Account', exact: true });
         await target.press('ArrowLeft');
         await overview.press('Space');
         await overview.locator('xpath=self::*[@aria-selected="true"]').waitFor();
         await capture(page, item, 'keyboard-selection-overview', () =>
-          tabsObservation(previewer, 'Overview')
+          tabsObservation(previewer, 'Account')
         );
         // Selection has already committed through native keyboard activation.
         // This is not the initially unselected Details pointerdown journey.

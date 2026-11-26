@@ -35,6 +35,7 @@ const PREFIXES_V0 = [
   'content-',
 
   // Effects
+  'cursor-',
   'opacity-',
   'shadow-',
   'tracking-',

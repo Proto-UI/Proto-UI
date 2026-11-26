@@ -1,0 +1,195 @@
+{
+  "acceptedCapability": "Runtime mount-ticket error settlement (62cb57cf1), cursor-* token last-wins merge (03e5861fc), and integrated 2026-11-26 runtime/WC reentry & teardown fixes on main (874dfbc06, 294d85ea7, 2bed881ac, d4e12f594)",
+  "baseline": {
+    "head": "a9f41293d0703c720576666d2a6faf5d735a1f5e",
+    "run": 45777607200,
+    "job": 139765127313,
+    "artifact": 15097011612,
+    "reportSha256": "e7a02ac40f257a5dc9ae158b3e1c4cf04a96c9dce8371ef9d186022fd03f30c2",
+    "environment": {
+      "node": "v24.22.3",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    }
+  },
+  "intermediateMain": {
+    "head": "df54e9b7bb8f5cd8a110dfff1ab42980242dea5d",
+    "includedCommits": [
+      "874dfbc068db5370c2f4cc0f91e268b7584abc1e",
+      "294d85ea79d3bc57786b53807b5037eacd440333",
+      "2bed881acdfd445c7a0fc82bfced49b732aa4b46",
+      "d4e12f5943748e647ef990c361758adff2637f52"
+    ],
+    "measuredGzipBytes": {
+      "adapter-react root": 181731,
+      "adapter-vue root": 180558,
+      "adapter-web-component root": 218159
+    },
+    "note": "origin/main (df54e9b7b) was already +59 gzip bytes over the 218,100 adapter-web-component root ceiling before this branch."
+  },
+  "candidate": {
+    "head": "74fb4917b7a12ec61d5cbf80db9742111dad4bcf",
+    "tree": "fd441f2abee6f60a0ca313e9a008887bda5c7ca6",
+    "sourceFingerprintSha256": "60ef09d312efa2c49ad30ba026c42575893f632ecd3b60b0120dbaf6f1b67e81",
+    "reportSha256": "f681938e93544f222d07b80dc0ad097baf988be760bf5e88d976591e25c550fc",
+    "measurementScope": "local-clean-linux-x64",
+    "canonicalCiStatus": "pending-post-push-scheduled-ci",
+    "environment": {
+      "node": "v24.22.1",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "environmentEquivalence": {
+      "identicalUnchangedEntries": [
+        "lucide/icons/x",
+        "lucide root",
+        "prototypes-base/button",
+        "prototypes-shadcn/button"
+      ],
+      "verified": "All four unchanged whole-entry outputs match baseline CI run 45777607200 bit-for-bit in both minifiedSha256 and gzipBytes under identical zlib (1.3.2.1-motley-285e94b), esbuild (0.25.12), linux/x64, and externalSha256."
+    }
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": [
+      "es2020"
+    ],
+    "gzipLevel": 9,
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "transactionBase": "74fb4917b7a12ec61d5cbf80db9742111dad4bcf",
+  "bundleInputDeltaSinceCandidate": [],
+  "entries": [
+    {
+      "entry": "adapter-react root",
+      "oldCeiling": 181800,
+      "before": {
+        "minifiedBytes": 628318,
+        "minifiedSha256": "a0a24353ba58c8ff49ee131d211fc5eaf10638924ced68eb24bbd9fe4a4df690",
+        "gzipBytes": 181690,
+        "pass": true
+      },
+      "after": {
+        "minifiedBytes": 628600,
+        "minifiedSha256": "3299479a89ecda0c6fadb2630ea0356edcd9cc5814bd25f47aa71308d4b08f7c",
+        "gzipBytes": 181823,
+        "pass": false
+      },
+      "gzipDelta": 133,
+      "newCeiling": 181900,
+      "headroom": 77,
+      "changedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "oldSourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+          "newSourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+          "oldRetainedBytes": 2904,
+          "newRetainedBytes": 2914
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+          "newSourceSha256": "199b0eb9c7b333aeced967fc94902db301c237caca35096e7f6ff7f0e7d185e8",
+          "oldRetainedBytes": 6964,
+          "newRetainedBytes": 7232
+        }
+      ],
+      "beforeClosure": "e09755df23d6f088620a4a0e9e78f2b6ef27440e0e83c42335eb15409cfdf630",
+      "afterClosure": "163c83354ad99be0840c73f4dc5acfd2ab658bff4241992883fc04ca5f265e34",
+      "addedOrRemovedInputs": []
+    },
+    {
+      "entry": "adapter-vue root",
+      "oldCeiling": 180600,
+      "before": {
+        "minifiedBytes": 623724,
+        "minifiedSha256": "d72faba1fe0496d873f8aee58a86f3dcd44002af603ba56301f998db332a06ee",
+        "gzipBytes": 180535,
+        "pass": true
+      },
+      "after": {
+        "minifiedBytes": 623997,
+        "minifiedSha256": "5124e89183d9457371d6a3ed131a4ef71b497b37b731ceba1635d23deaa2f178",
+        "gzipBytes": 180654,
+        "pass": false
+      },
+      "gzipDelta": 119,
+      "newCeiling": 180700,
+      "headroom": 46,
+      "changedInputs": [
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "oldSourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+          "newSourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+          "oldRetainedBytes": 2904,
+          "newRetainedBytes": 2914
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+          "newSourceSha256": "199b0eb9c7b333aeced967fc94902db301c237caca35096e7f6ff7f0e7d185e8",
+          "oldRetainedBytes": 6964,
+          "newRetainedBytes": 7232
+        }
+      ],
+      "beforeClosure": "fae5bbb277ae022e375002cf290bfd96025fe36d289801563e4d455d37ab57f6",
+      "afterClosure": "e66be79307a197abeb2cc1635ca24491c068df654cea7a4a6eb851dffb4c77ec",
+      "addedOrRemovedInputs": []
+    },
+    {
+      "entry": "adapter-web-component root",
+      "oldCeiling": 218100,
+      "before": {
+        "minifiedBytes": 735306,
+        "minifiedSha256": "ce465e344167b9d0b1a4f15550157611db489e9067c5a4c08e46b96173aaa7a0",
+        "gzipBytes": 218048,
+        "pass": true
+      },
+      "after": {
+        "minifiedBytes": 735695,
+        "minifiedSha256": "bfaaf4ce7dc79f5f7a49455cb3a1d3c484b3540d7a46f51521a01f94931f0677",
+        "gzipBytes": 218219,
+        "pass": false
+      },
+      "gzipDelta": 171,
+      "newCeiling": 218300,
+      "headroom": 81,
+      "changedInputs": [
+        {
+          "path": "packages/adapters/web-component/src/adapt.ts",
+          "oldSourceSha256": "56007c4a020fb54daf1ee24be9bd803e1281b04cf88dad805a8b0b6285f320c6",
+          "newSourceSha256": "fdf5b76d75632ddc3a13360b28f5ae1a9538e055eb357902ada914bd0beedd5a",
+          "oldRetainedBytes": 21761,
+          "newRetainedBytes": 21896
+        },
+        {
+          "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+          "oldSourceSha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+          "newSourceSha256": "591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d",
+          "oldRetainedBytes": 2904,
+          "newRetainedBytes": 2914
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+          "newSourceSha256": "199b0eb9c7b333aeced967fc94902db301c237caca35096e7f6ff7f0e7d185e8",
+          "oldRetainedBytes": 6949,
+          "newRetainedBytes": 7226
+        }
+      ],
+      "beforeClosure": "34bcd794e17961a04c61da983f6105e94410471623d044ad9d3295fd9a9e2771",
+      "afterClosure": "97d0c8270145a4c563bf14e7e6e5896850bfbb3555e481a0be5d36f458c5cf69",
+      "addedOrRemovedInputs": []
+    }
+  ],
+  "rationale": "Input membership is identical across all three Web adapter roots (zero added or removed modules, zero duplicate runtime copies). Changed retained bytes come exclusively from runtime session mount-ticket error settlement and scheduler error propagation (session.ts), cursor-* last-wins style token merging (semantic-merge.ts, +10 minified bytes), and the 2026-11-26 Web Component portal/focus teardown fixes already merged on main (adapt.ts). The prior 2026-11-25 ceilings left only 6/54/90 bytes of headroom; each new ceiling rounds the integrated measured gzip cost up to the next 100-byte boundary (46-81 bytes headroom, <0.05%). All six other whole-entry limits remain unchanged and passing.",
+  "rollback": "Restore the prior three ceilings (181,800 / 180,600 / 218,100) if reverting the runtime mount-ticket and 2026-11-26 Web Component fixes or after canonical measurements support lower limits."
+}

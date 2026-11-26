@@ -131,3 +131,28 @@ test('unbound dependencies, escaped sources, missing metadata and invalid attrib
     /retained dependency/
   );
 });
+
+test('git-ignored dist.staging-* and dist.previous-* directories do not invalidate budget source stability', (t) => {
+  const { root, git } = fixture(t);
+  writeFileSync(join(root, '.gitignore'), 'dist\ndist.staging-*\ndist.previous-*\n');
+  git(['add', '.gitignore']);
+  git(['commit', '-m', 'ignore build staging directories']);
+  const before = captureBudgetSource(root);
+  assert.equal(before.receipt.workingTreeClean, true);
+
+  mkdirSync(join(root, 'packages/runtime/dist.staging-12345-abcd1234'), { recursive: true });
+  writeFileSync(
+    join(root, 'packages/runtime/dist.staging-12345-abcd1234/index.js'),
+    'export const value = 1;\n'
+  );
+  mkdirSync(join(root, 'packages/runtime/dist.previous-12345-efgh5678'), { recursive: true });
+  writeFileSync(
+    join(root, 'packages/runtime/dist.previous-12345-efgh5678/index.js'),
+    'export const value = 0;\n'
+  );
+
+  const during = captureBudgetSource(root);
+  assert.equal(during.receipt.workingTreeClean, true);
+  assert.equal(during.receipt.measuredSourceMatchesHead, true);
+  assertStableBudgetSource(before, during);
+});
