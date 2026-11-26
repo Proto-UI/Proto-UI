@@ -1974,7 +1974,8 @@ function createHookSourceSummaryContextInternal(
           }
           if (
             nativeRendererStateRead(node, owner, module, definitions) ||
-            discardedOwnerStateReturn(node, owner, module)
+            discardedOwnerStateReturn(node, owner, module) ||
+            capturedOwnerStateReturn(node, owner, module)
           ) {
             read = true;
             return;
@@ -2010,6 +2011,45 @@ function createHookSourceSummaryContextInternal(
       };
       visit(owner.body);
       return closed && read;
+    };
+
+    const capturedOwnerStateReturn = (
+      reference: ts.Node,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module
+    ): boolean => {
+      if (
+        !ownerInvocation ||
+        ownerInvocation.questionDotToken ||
+        ownerInvocation.arguments.some(ts.isSpreadElement) ||
+        !ts.isIdentifier(unwrap(ownerInvocation.expression)) ||
+        !owner.body ||
+        !ts.isBlock(owner.body)
+      )
+        return false;
+      const result = outerValue(ownerInvocation);
+      const capture = result.parent;
+      if (!ts.isVariableDeclaration(capture) || capture.initializer !== result) return false;
+      const caller = ts.findAncestor(capture, isFunctionLike);
+      const native = caller?.parameters[0];
+      if (!caller || !native || !isNativeSetupDefinition(native)) return false;
+      const callerModule = moduleForSource(ownerInvocation.getSourceFile());
+      if (functionFor(ownerInvocation.expression, callerModule)?.fn !== owner) return false;
+      const returned = directReturnExpression(owner, module);
+      const last = owner.body.statements.at(-1);
+      const value = outerValue(reference);
+      // This exact replay may return its private handle to one canonical
+      // setup's stable const. Close every use of that captured identity there;
+      // another caller, a forwarded result or an exposure supplies no proof.
+      return (
+        !!returned &&
+        returned.expression === unwrap(value) &&
+        !!last &&
+        ts.isReturnStatement(last) &&
+        last.expression === value &&
+        ts.findAncestor(value, isFunctionLike) === owner &&
+        closedCallerState(capture, callerModule, new Set([native]))
+      );
     };
 
     const registeredCallback = (
@@ -2199,6 +2239,7 @@ function createHookSourceSummaryContextInternal(
           if (isValueIdentifier(node) && bindingDeclaration(node, helper.module) === declaration) {
             const value = outerValue(node);
             if (unwrap(value) === returned.expression) return;
+            if (nativeWhenStateRead(node, helper.module, localDefinitions)) return;
             if (
               ts.isVariableDeclaration(value.parent) &&
               value.parent.initializer === value &&
