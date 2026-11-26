@@ -290,6 +290,8 @@ describe('ordinary helper returns preserve invocation-owned local State', () => 
     [
       'caller return escape',
       {
+        // This invocation escapes only when an actual consumer receives its result.
+        'entry.proto.ts': entry('opaque(paint(def));'),
         'visual.ts': visual.replace(
           "intent: i => i.feedback.style.use(tw('bg-primary')) });",
           "intent: i => i.feedback.style.use(tw('bg-primary')) }); return selected;"

@@ -79,6 +79,91 @@ export function omittedParameterConditionOutcome(
   return null;
 }
 
+/** A primitive captured by value, never a State, object or function capability. */
+export type ClosedRuleScalar = Readonly<{
+  value: string | number | boolean | null | undefined;
+}>;
+
+/** Resolve only passive scalar expressions with an immutable lexical binding.
+ * A captured parameter belongs to this exact invocation and lexical binding;
+ * a type annotation or a same-spelled outer name cannot supply that value.
+ * Unknown calls, members, coercive comparisons and writes remain unresolved. */
+export function closedRuleScalarValue(
+  node: ts.Node,
+  summary: HookSourceSummaryContext | null | undefined,
+  captured: (declaration: ts.ParameterDeclaration) => ClosedRuleScalar | null
+): ClosedRuleScalar | null {
+  const read = (expression: ts.Node, active: ReadonlySet<ts.Node>): ClosedRuleScalar | null => {
+    if (active.size >= 32) return null;
+    const value = unwrap(expression);
+    if (value.kind === ts.SyntaxKind.TrueKeyword) return { value: true };
+    if (value.kind === ts.SyntaxKind.FalseKeyword) return { value: false };
+    if (value.kind === ts.SyntaxKind.NullKeyword) return { value: null };
+    if (ts.isStringLiteralLike(value)) return { value: value.text };
+    if (ts.isNumericLiteral(value)) {
+      const number = Number(value.text);
+      return Number.isFinite(number) ? { value: number } : null;
+    }
+    if (ts.isIdentifier(value)) {
+      if (!summary) return null;
+      const declaration = summary.resolveStableSourceBinding(value);
+      if (!declaration || !ts.isIdentifier(declaration.name) || active.has(declaration))
+        return null;
+      if (ts.isParameter(declaration))
+        return canKeepOmittedParameter(declaration, summary) ? captured(declaration) : null;
+      // Imported or not-yet-initialized bindings need an execution-order proof.
+      // This slice only follows earlier const initializers in the same source.
+      if (
+        declaration.getSourceFile() !== value.getSourceFile() ||
+        declaration.end >= value.getStart()
+      )
+        return null;
+      const next = new Set(active).add(declaration);
+      if (declaration.initializer) return read(declaration.initializer, next);
+      // Loop induction bindings need their own identity/write proof. Do not
+      // turn an initializer-free declaration into a stable scalar here.
+      return null;
+    }
+    if (ts.isPrefixUnaryExpression(value)) {
+      const operand = read(value.operand, active);
+      if (!operand) return null;
+      if (value.operator === ts.SyntaxKind.ExclamationToken) return { value: !operand.value };
+      if (typeof operand.value !== 'number') return null;
+      if (value.operator === ts.SyntaxKind.MinusToken) return { value: -operand.value };
+      if (value.operator === ts.SyntaxKind.PlusToken) return operand;
+      return null;
+    }
+    if (ts.isConditionalExpression(value)) {
+      const condition = read(value.condition, active);
+      return condition ? read(condition.value ? value.whenTrue : value.whenFalse, active) : null;
+    }
+    if (!ts.isBinaryExpression(value)) return null;
+    const left = read(value.left, active);
+    if (!left) return null;
+    const operator = value.operatorToken.kind;
+    if (operator === ts.SyntaxKind.AmpersandAmpersandToken)
+      return left.value ? read(value.right, active) : left;
+    if (operator === ts.SyntaxKind.BarBarToken)
+      return left.value ? left : read(value.right, active);
+    if (operator === ts.SyntaxKind.QuestionQuestionToken)
+      return left.value === null || left.value === undefined ? read(value.right, active) : left;
+    if (
+      operator !== ts.SyntaxKind.EqualsEqualsEqualsToken &&
+      operator !== ts.SyntaxKind.ExclamationEqualsEqualsToken
+    )
+      return null;
+    const right = read(value.right, active);
+    if (!right) return null;
+    return {
+      value:
+        operator === ts.SyntaxKind.EqualsEqualsEqualsToken
+          ? left.value === right.value
+          : left.value !== right.value,
+    };
+  };
+  return read(node, new Set());
+}
+
 /**
  * Whether a function registers a rule. Only such a function carries rule
  * conditions, so only such a function is worth reading at its call sites.

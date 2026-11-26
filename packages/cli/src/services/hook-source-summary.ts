@@ -108,11 +108,12 @@ export type HookSourceSummaryContext = {
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
   /** Keep native Def ownership separate from ordinary source values. */
   isNativeSetupDefinition(parameter: ts.ParameterDeclaration): boolean;
-  /** Follow a closed synchronous helper return used only by native WhenBuilder reads. */
+  /** Follow a closed synchronous helper return without granting AsHook provenance. */
   resolveReturnedLocalState(
     node: ts.CallExpression,
     source: ts.SourceFile,
-    nativeDefinitions: ReadonlySet<ts.Node>
+    nativeDefinitions: ReadonlySet<ts.Node>,
+    ownerInvocation?: ts.CallExpression
   ): HookSourceReturnedLocalState | null;
   /** Resolve a stable synchronous authored function without executing it. */
   resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
@@ -1498,7 +1499,9 @@ function createHookSourceSummaryContextInternal(
       operation === 'rule' ||
       operation === 'feedback.style.use' ||
       operation === 'expose.state' ||
+      operation === 'context.provide' ||
       operation === 'context.trySubscribe' ||
+      operation === 'context.trySubscribeAncestor' ||
       (path.length === 2 &&
         ((path[0] === 'state' &&
           ['bool', 'enum', 'string', 'numberRange', 'numberList', 'numberDiscrete'].includes(
@@ -1506,7 +1509,7 @@ function createHookSourceSummaryContextInternal(
           )) ||
           (path[0] === 'props' && ['define', 'setDefaults', 'watchRaw'].includes(path[1]!)) ||
           (path[0] === 'lifecycle' &&
-            ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onDisposed'].includes(
+            ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onBeforeDispose'].includes(
               path[1]!
             ))))
     );
@@ -1599,9 +1602,20 @@ function createHookSourceSummaryContextInternal(
   const resolveReturnedLocalState = (
     call: ts.CallExpression,
     source: ts.SourceFile,
-    nativeDefinitions: ReadonlySet<ts.Node>
+    nativeDefinitions: ReadonlySet<ts.Node>,
+    ownerInvocation?: ts.CallExpression
   ): HookSourceReturnedLocalState | null => {
     if (!nativeDefinitions.size) return null;
+    const module = moduleForSource(source);
+    // invoke rejects these same call shapes before resolving any helper. Keep
+    // source registration, but avoid proving the caller's entire reference set
+    // for a call that cannot reach the returned-State constructor path.
+    if (
+      call.questionDotToken ||
+      call.arguments.some(ts.isSpreadElement) ||
+      !ts.isIdentifier(unwrap(call.expression))
+    )
+      return null;
     const nativeReference = (
       expression: ts.Node,
       module: Module,
@@ -1651,7 +1665,7 @@ function createHookSourceSummaryContextInternal(
             ts.findAncestor(node, isFunctionLike) === fn &&
             !!operation &&
             operation.path.length === 1 &&
-            ['state', 'meta', 'all', 'any', 'not'].includes(operation.path[0]!);
+            ['state', 'prop', 'meta', 'all', 'any', 'not'].includes(operation.path[0]!);
           if (!closed) return;
         }
         ts.forEachChild(node, visit);
@@ -1708,6 +1722,88 @@ function createHookSourceSummaryContextInternal(
       const receiver = memberOwner(rule.expression);
       return !!receiver && nativeReference(receiver, module, definitions);
     };
+    const nativeRendererStateRead = (
+      reference: ts.Node,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>
+    ): boolean => {
+      const operation = staticMemberCall(reference);
+      const renderer = ts.findAncestor(reference, isFunctionLike);
+      if (
+        !operation ||
+        operation.path.length !== 1 ||
+        operation.path[0] !== 'get' ||
+        operation.call.arguments.length !== 0 ||
+        !renderer ||
+        (!ts.isArrowFunction(renderer) && !ts.isFunctionExpression(renderer)) ||
+        (ts.isFunctionExpression(renderer) && !!renderer.name) ||
+        !synchronousBody(renderer) ||
+        opaqueFunctionSyntax(renderer) ||
+        renderer.parameters.length !== 1 ||
+        !ts.isIdentifier(renderer.parameters[0]!.name) ||
+        renderer.parameters[0]!.initializer ||
+        renderer.parameters[0]!.dotDotDotToken ||
+        !owner.body ||
+        !ts.isBlock(owner.body) ||
+        !isAuthoredSetup(owner, owner.getSourceFile()) ||
+        !hasOnlyAuthoredSetupReferences(owner, owner.getSourceFile())
+      )
+        return false;
+      const parameter = owner.parameters[0];
+      const returned = directReturnExpression(owner, module);
+      const last = owner.body.statements.at(-1);
+      // Only Core's directly returned renderer may retain this private handle.
+      // A callback given to an unknown operation still fails the complete use
+      // proof, as do aliases, method writes and all nonzero-argument calls.
+      return (
+        !!parameter &&
+        nativeReference(parameter.name, module, definitions) &&
+        !!returned &&
+        returned.expression === renderer &&
+        !!last &&
+        ts.isReturnStatement(last) &&
+        !!last.expression &&
+        unwrap(last.expression) === renderer
+      );
+    };
+    const discardedOwnerStateReturn = (
+      reference: ts.Node,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module
+    ): boolean => {
+      if (
+        !ownerInvocation ||
+        ownerInvocation.questionDotToken ||
+        ownerInvocation.arguments.some(ts.isSpreadElement) ||
+        !ts.isIdentifier(unwrap(ownerInvocation.expression)) ||
+        !owner.body ||
+        !ts.isBlock(owner.body)
+      )
+        return false;
+      const result = outerValue(ownerInvocation);
+      if (!ts.isExpressionStatement(result.parent) || result.parent.expression !== result)
+        return false;
+      const callee = functionFor(
+        ownerInvocation.expression,
+        moduleForSource(ownerInvocation.getSourceFile())
+      );
+      if (callee?.fn !== owner) return false;
+      const returned = directReturnExpression(owner, module);
+      const last = owner.body.statements.at(-1);
+      const value = outerValue(reference);
+      // The evidence is this exact replay call, never another caller of the
+      // same exported helper. Captured, forwarded or chained results stay
+      // unresolved even if another activation discards its own fresh State.
+      return (
+        !!returned &&
+        returned.expression === unwrap(value) &&
+        !!last &&
+        ts.isReturnStatement(last) &&
+        last.expression === value &&
+        ts.findAncestor(value, isFunctionLike) === owner
+      );
+    };
     const closedCallerState = (
       declaration: ts.VariableDeclaration,
       module: Module,
@@ -1740,6 +1836,13 @@ function createHookSourceSummaryContextInternal(
             return;
           }
           if (nativeWhenStateRead(node, module, definitions)) {
+            read = true;
+            return;
+          }
+          if (
+            nativeRendererStateRead(node, owner, module, definitions) ||
+            discardedOwnerStateReturn(node, owner, module)
+          ) {
             read = true;
             return;
           }
@@ -1783,10 +1886,11 @@ function createHookSourceSummaryContextInternal(
         return (
           nativeReference(receiver, module, definitions) &&
           (path.join('.') === 'context.trySubscribe' ||
+            path.join('.') === 'context.trySubscribeAncestor' ||
             path.join('.') === 'props.watchRaw' ||
             (path.length === 2 &&
               path[0] === 'lifecycle' &&
-              ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onDisposed'].includes(
+              ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onBeforeDispose'].includes(
                 path[1]!
               )))
         );
@@ -1941,12 +2045,13 @@ function createHookSourceSummaryContextInternal(
       };
       return valueOf(returned.expression);
     };
-    const module = moduleForSource(source);
     const captured = outerValue(call).parent;
     // The production collector does not yet recover a helper-created State's
     // declared attribute name. Admit only an unexposed const whose complete
-    // use set stays in native WhenBuilder reads; keep exposed/escaped returns
-    // pending instead of certifying the collector's fallback expose-key CSS.
+    // use set is closed: native WhenBuilder reads, Core's directly returned
+    // renderer's value get(), or the exact replay's discarded helper result.
+    // Exposed/escaped returns stay pending instead of certifying the
+    // collector's fallback expose-key CSS.
     if (
       !ts.isVariableDeclaration(captured) ||
       !captured.initializer ||
@@ -7017,10 +7122,16 @@ function createHookSourceSummaryContextInternal(
   return {
     registerSource,
     resolveRegisteredSourceImport,
-    resolve: evaluate,
-    resolveCall,
-    isNativeSetupDefinition,
-    resolveReturnedLocalState,
+    resolve: (node, source, environment) =>
+      moduleContext.withSynchronousIdentityQuery(() => evaluate(node, source, environment)),
+    resolveCall: (node, source) =>
+      moduleContext.withSynchronousIdentityQuery(() => resolveCall(node, source)),
+    isNativeSetupDefinition: (parameter) =>
+      moduleContext.withSynchronousIdentityQuery(() => isNativeSetupDefinition(parameter)),
+    resolveReturnedLocalState: (node, source, nativeDefinitions, ownerInvocation) =>
+      moduleContext.withSynchronousIdentityQuery(() =>
+        resolveReturnedLocalState(node, source, nativeDefinitions, ownerInvocation)
+      ),
     resolveSourceFunction: (node, source) => {
       const resolved = functionFor(node, moduleForSource(source));
       if (

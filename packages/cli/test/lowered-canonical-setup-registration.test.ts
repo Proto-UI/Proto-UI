@@ -249,7 +249,9 @@ describe('canonical setup references in the source Rule inventory', () => {
     for (const site of sites.sites) collectPresenceRead(site.call);
     expect(reads).toHaveLength(1);
     const receiver = reads[0]?.expression;
-    const declaration = receiver && summary.resolveStableSourceBinding(receiver);
+    if (!receiver || !ts.isIdentifier(receiver))
+      throw new Error('The actual Dialog presence receiver must be an Identifier.');
+    const declaration = summary.resolveStableSourceBinding(receiver);
     if (!declaration?.initializer || !ts.isCallExpression(declaration.initializer))
       throw new Error('The actual Dialog presence receiver must have a stable producer call.');
     const call = declaration.initializer;

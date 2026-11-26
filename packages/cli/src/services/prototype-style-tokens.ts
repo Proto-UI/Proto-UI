@@ -5,7 +5,15 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 import {
+  canCaptureWhenStateArgument,
+  canPruneClosedWhenCondition,
+  closedWhenStatePresence,
+} from './closed-when-state-presence.js';
+import { createFiniteRowLifetimeProof } from './finite-row-lifetime.js';
+import { constantModuleHasUnmodeledEffects } from './constant-module-effects.js';
+import {
   canKeepOmittedParameter,
+  closedRuleScalarValue,
   omittedParameterConditionOutcome,
 } from './closed-rule-helpers.js';
 
@@ -305,44 +313,7 @@ async function loadModuleBindings(file, moduleCache, stack, sourceSummary) {
       registerDeclaration(decl, scope, undefined);
     }
   }
-  // This constants loader does not execute module statements. An unmodeled
-  // effect can write an exported alias; preserve its inventory, never certify
-  // a cached pre-effect value as an exact semantic name or finite key list.
-  const initializerHasEffects = (node) => {
-    if (ts.isFunctionLike(node)) return false;
-    if (
-      ts.isCallExpression(node) ||
-      ts.isNewExpression(node) ||
-      ts.isTaggedTemplateExpression(node) ||
-      ts.isDeleteExpression(node) ||
-      ts.isAwaitExpression(node) ||
-      ts.isYieldExpression(node) ||
-      (ts.isBinaryExpression(node) &&
-        node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
-        node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
-      ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
-        (node.operator === ts.SyntaxKind.PlusPlusToken ||
-          node.operator === ts.SyntaxKind.MinusMinusToken))
-    )
-      return true;
-    let effects = false;
-    ts.forEachChild(node, (child) => {
-      effects ||= initializerHasEffects(child);
-    });
-    return effects;
-  };
-  const hasUnmodeledEffects = sourceFile.statements.some((stmt) =>
-    ts.isVariableStatement(stmt)
-      ? stmt.declarationList.declarations.some(
-          (decl) => decl.initializer && initializerHasEffects(decl.initializer)
-        )
-      : !ts.isImportDeclaration(stmt) &&
-        !ts.isExportDeclaration(stmt) &&
-        !ts.isInterfaceDeclaration(stmt) &&
-        !ts.isTypeAliasDeclaration(stmt) &&
-        !ts.isFunctionDeclaration(stmt) &&
-        !ts.isEmptyStatement(stmt)
-  );
+  const hasUnmodeledEffects = constantModuleHasUnmodeledEffects(sourceFile);
   for (const [name, value] of scope.bindings) {
     if (value.sourceFunction && value.bindingNode && !value.importedBinding) {
       const resolved = sourceSummary?.resolveSourceFunction(value.bindingNode.name, sourceFile);
@@ -402,12 +373,15 @@ function createScope(parent = null, node = null, sourceSummary = parent?.sourceS
     bindings: new Map(),
     node,
     sourceSummary,
+    finiteRowsStayClosed: parent?.finiteRowsStayClosed,
+    tokenRowArgumentOrigins: parent?.tokenRowArgumentOrigins ?? new Map(),
     decorationSourceFiles: parent?.decorationSourceFiles,
     decorationHelperUses: parent?.decorationHelperUses,
     functionSummary: parent?.functionSummary ?? sourceSummary,
     activeSourceFunctions: parent?.activeSourceFunctions ?? new Set(),
     sourceExposures: parent?.sourceExposures ?? new WeakMap(),
     tokenGraphClones: parent?.tokenGraphClones ?? new Map(),
+    tokenGraphScopes: parent?.tokenGraphScopes ?? new Map(),
     // The versions of the containers this scope's owner holds. A scope chain
     // shares one tracker, so a helper inside an owner shares its owner's
     // containers, while a separate owner starts with its own.
@@ -956,15 +930,45 @@ function sourceFunctionNeedsReplay(helper, captured, callerScope, callNode) {
   return false;
 }
 
+/** A helper's cached module scope is an immutable template. Its globals must
+ * share this entry's import clones, including across sibling helper calls,
+ * without carrying a previous entry's writes into the next collection. */
+function entryTokenScope(lexical, caller) {
+  if (!lexical?.tokenGraphTemplate) return lexical;
+  const previous = caller.tokenGraphScopes.get(lexical);
+  if (previous) return previous;
+  const next = {
+    ...lexical,
+    parent: entryTokenScope(lexical.parent, caller),
+    bindings: new Map(),
+    tokenGraphTemplate: false,
+    tokenGraphClones: caller.tokenGraphClones,
+    tokenGraphScopes: caller.tokenGraphScopes,
+  };
+  caller.tokenGraphScopes.set(lexical, next);
+  for (const [name, value] of lexical.bindings)
+    next.bindings.set(name, {
+      ...value,
+      tokenGraph: cloneTokenGraph(value.tokenGraph, caller.tokenGraphClones),
+    });
+  return next;
+}
+
 /** Reached helper bodies use their defining scope and this call's arguments.
  * Unresolved calls keep the existing container-withdrawal boundary below. */
 function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory) {
+  if (helper) helper = { ...helper, scope: entryTokenScope(helper.scope, scope) };
   if (!helper || !sourceFunctionNeedsReplay(helper, captured, scope, node)) return;
   const nextScope = createScope(helper.scope, helper.node, scope.sourceSummary);
   nextScope.decorationSourceFiles = scope.decorationSourceFiles;
   nextScope.decorationHelperUses = scope.decorationHelperUses;
   nextScope.versions = scope.versions;
   nextScope.activeSourceFunctions = scope.activeSourceFunctions;
+  // A module template must not replace the caller graph that can mutate its rows.
+  nextScope.finiteRowsStayClosed = scope.finiteRowsStayClosed;
+  nextScope.tokenRowArgumentOrigins = new Map(scope.tokenRowArgumentOrigins);
+  for (const parameter of helper.node.parameters)
+    nextScope.tokenRowArgumentOrigins.delete(parameter);
   if (captured.some((entry) => carriesHelperEffects(entry.binding)))
     nextScope.borrowedSourceFunctionRegion = sourceFunctionRegion(helper.node).node;
   for (const parameter of helper.node.parameters) shadowBindingPattern(nextScope, parameter.name);
@@ -973,6 +977,8 @@ function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootIn
     for (const [index, parameter] of helper.node.parameters.entries()) {
       if (parameter.dotDotDotToken) break;
       const argument = captured[index];
+      if (argument && !node.arguments.some(ts.isSpreadElement))
+        nextScope.tokenRowArgumentOrigins.set(parameter, argument.argument);
       let value = argument?.binding;
       if (!argument && parameter.initializer) {
         value = resolveBinding(parameter.initializer, nextScope);
@@ -987,6 +993,13 @@ function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootIn
       if (value?.kind === 'absent' && !canKeepOmittedParameter(parameter, scope.sourceSummary))
         value = undefined;
       if (!value) continue;
+      // Only the scalar captured before argument evaluation belongs to this
+      // invocation. Never inherit a convenient first branch's scalar metadata.
+      value = {
+        ...value,
+        closedRuleScalar: argument?.scalar ?? undefined,
+        whenStateSources: argument?.whenStateSources,
+      };
       const sources = sourceValueCandidates(value);
       const currentSources = [
         ...new Set(
@@ -1034,6 +1047,8 @@ function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootIn
 }
 
 function walk(node, scope, tokens, exposures, rootInventory = null) {
+  if (ts.isSourceFile(node) && !scope.finiteRowsStayClosed)
+    scope.finiteRowsStayClosed = createFiniteRowLifetimeProof(node);
   if (rootInventory?.styleHandleUsage && ts.isIdentifier(node))
     observeStyleHandleReference(node, scope, tokens, rootInventory);
   if (ts.isDeleteExpression(node)) {
@@ -1078,6 +1093,22 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       if (ts.isArrayLiteralExpression(iterable)) {
         const snapshots = new Map();
         const snapshotScope = { ...nextScope, expressionSnapshots: snapshots };
+        const saveSnapshot = (expression, binding) => {
+          // A literal row can copy a shared array's scalar through an alias,
+          // destructuring, a template or a helper argument. Keep its actual
+          // read origins until this entry's lifetime can certify the snapshot.
+          const closed = tokenRowReadDependencies(binding.tokenGraph, true).every(
+            (read) =>
+              read.getSourceFile?.() &&
+              scope.finiteRowsStayClosed?.(read, scope.tokenRowArgumentOrigins)
+          );
+          snapshots.set(
+            expression,
+            closed
+              ? binding
+              : { ...emptyValue(), unknownAlternative: true, tokenGraph: { kind: 'unknown' } }
+          );
+        };
         const capture = (expression) => {
           const value = unwrapTransparent(expression);
           if (ts.isArrayLiteralExpression(value)) {
@@ -1097,15 +1128,15 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
             value.operatorToken.kind === ts.SyntaxKind.EqualsToken
           ) {
             walk(expression, nextScope, tokens, exposures, rootInventory);
-            snapshots.set(expression, resolveBinding(value.right, snapshotScope));
+            saveSnapshot(expression, resolveBinding(value.right, snapshotScope));
             return;
           } else {
             const binding = resolveBinding(expression, snapshotScope);
             walk(expression, nextScope, tokens, exposures, rootInventory);
-            snapshots.set(expression, binding);
+            saveSnapshot(expression, binding);
             return;
           }
-          snapshots.set(expression, resolveBinding(expression, snapshotScope));
+          saveSnapshot(expression, resolveBinding(expression, snapshotScope));
         };
         const rowScopes = iterable.elements
           .filter((row) => !ts.isOmittedExpression(row))
@@ -1125,7 +1156,11 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       // A bound/imported finite array is a token inventory, not an evaluated
       // program. Unknown rows remain unknown while known rows still contribute.
       const graph = evaluateTokenGraph(node.expression, scope);
-      if (graph?.kind === 'array' && graph.complete) {
+      if (
+        graph?.kind === 'array' &&
+        graph.complete &&
+        scope.finiteRowsStayClosed?.(node.expression)
+      ) {
         for (const item of graph.members.values()) {
           const rowScope = createScope(nextScope, node);
           for (const decl of loopInitializerDeclarations(node)) {
@@ -1623,6 +1658,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     // holds now, so a member a write replaced is not exempt.
     const readsOnly = provenAccessorCallee(node, scope, receiver);
     const tokenJoinReadOnly = provenTokenJoin(node, scope, tokenReceiver);
+    const tokenIncludesReadOnly = provenTokenIncludes(node, scope, tokenReceiver);
     const captured = [];
     for (const argument of node.arguments) {
       const inner = unwrapTransparent(argument);
@@ -1633,13 +1669,44 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           : inner;
       const values = containerArgumentValues(assigned, scope);
       const parameter = helper?.node.parameters[captured.length];
+      let whenStateSources = parameter ? captureStatePresenceSources(argument, scope) : undefined;
+      // Ordinary calls have no parameter environment to populate. Resolving
+      // every argument here would undo containerArgumentValues' fast path
+      // and expand source candidates even when no helper can consume them.
+      let binding =
+        parameter && !parameter.dotDotDotToken ? resolveBinding(assigned, scope) : undefined;
+      if (
+        binding &&
+        !binding.unknownAlternative &&
+        whenStateSources?.length === 0 &&
+        ts.isObjectLiteralExpression(inner)
+      ) {
+        // A fresh, passively read flat State bag has real own data fields even
+        // though the legacy literal binding retained only its semantic map.
+        // Capture one actual source graph for this invocation and share it with
+        // the ordinary binding/mutation tracker. A detached proof-only copy
+        // would miss a later write or escape through the callee's parameter.
+        const source = sourceSummaryValue(inner, scope);
+        const sources = source?.resolvedValues ?? (source ? [source.resolved.value] : []);
+        if (
+          sources.length > 0 &&
+          sources.every(
+            (value) =>
+              value.kind === 'object' &&
+              sourceMembersProven(value) &&
+              [...value.members.values()].every((member) => member.kind === 'state')
+          )
+        ) {
+          binding = { ...binding, sourceValue: sources[0], sourceValues: sources };
+          whenStateSources = sources;
+          values.push(...sources);
+        }
+      }
       captured.push({
         argument,
-        // Ordinary calls have no parameter environment to populate. Resolving
-        // every argument here would undo containerArgumentValues' fast path
-        // and expand source candidates even when no helper can consume them.
-        binding:
-          parameter && !parameter.dotDotDotToken ? resolveBinding(assigned, scope) : undefined,
+        whenStateSources,
+        binding,
+        scalar: parameter && !parameter.dotDotDotToken ? capturedRuleScalar(assigned, scope) : null,
         values,
         tokenGraph: evaluateTokenGraph(assigned, scope),
         source:
@@ -1652,7 +1719,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     // Scalar leaves cannot be changed by either mutation pass. Only a helper
     // or a captured mutable container needs producer admission; ordinary
     // scalar calls must not repeatedly resolve an unused source identity.
-    const tokenReadsOnly = readsOnly || tokenJoinReadOnly;
+    const tokenReadsOnly = readsOnly || tokenJoinReadOnly || tokenIncludesReadOnly;
     let sourceMutation = !readsOnly && hasMutableSourceContainer(receiver);
     let tokenMutation =
       !tokenReadsOnly &&
@@ -2662,7 +2729,7 @@ function registerValueBinding(name, binding, scope, exposures, bindingNode) {
   if (ts.isArrayBindingPattern(name) || ts.isObjectBindingPattern(name)) {
     const graph = destructuredValue.tokenGraph;
     shadowBindingPattern(scope, name);
-    bindTokenLoopPattern(name, graph, scope);
+    bindTokenLoopPattern(name, graph, scope, bindingNode.initializer ?? bindingNode.name);
   }
 
   if (ts.isArrayBindingPattern(name)) {
@@ -3613,6 +3680,84 @@ function capturedOmissionOutcome(node, scope) {
     const held = lookup(name, scope);
     return held?.kind === 'absent' ? held.bindingNode : undefined;
   });
+}
+
+function capturedRuleScalar(node, scope) {
+  return closedRuleScalarValue(node, scope.sourceSummary, (declaration) => {
+    if (!ts.isIdentifier(declaration.name)) return null;
+    const held = lookup(declaration.name.text, scope);
+    if (held.bindingNode !== declaration || held.unknownAlternative) return null;
+    if (held.kind === 'absent') return { value: undefined };
+    return held.closedRuleScalar ?? null;
+  });
+}
+
+function captureStatePresenceSources(argument, scope) {
+  const sourceValues = (node) => {
+    const value = unwrapTransparent(node);
+    if (ts.isIdentifier(value)) {
+      const declaration = scope.sourceSummary.resolveStableSourceBinding(value);
+      if (declaration && ts.isParameter(declaration)) {
+        const held = lookup(value.text, scope);
+        if (held.bindingNode === declaration)
+          return held.whenStateSources?.flatMap((source) => scope.versions.versions(source)) ?? [];
+      }
+      if (
+        declaration &&
+        ts.isVariableDeclaration(declaration) &&
+        declaration.initializer &&
+        ts.isIdentifier(unwrapTransparent(declaration.initializer))
+      )
+        return sourceValues(declaration.initializer);
+    }
+    const binding = resolveBinding(node, scope);
+    return binding.unknownAlternative ? [] : sourceValueCandidates(binding);
+  };
+  const admitted = canCaptureWhenStateArgument(
+    argument,
+    scope.sourceSummary,
+    sourceValues,
+    (parameter) => {
+      if (!ts.isIdentifier(parameter.name)) return false;
+      const held = lookup(parameter.name.text, scope);
+      return held.bindingNode === parameter && (held.whenStateSources?.length ?? 0) > 0;
+    }
+  );
+  return admitted ? sourceValues(argument) : undefined;
+}
+
+function capturedStatePresence(conditional, callback, scope) {
+  return closedWhenStatePresence(
+    conditional,
+    callback,
+    scope.sourceSummary,
+    (parameter) => {
+      if (!ts.isIdentifier(parameter.name)) return null;
+      const held = lookup(parameter.name.text, scope);
+      if (held.bindingNode !== parameter || held.unknownAlternative) return null;
+      return held.whenStateSources ?? null;
+    },
+    (value) => scope.versions.versions(value)
+  );
+}
+
+function capturedWhenConditionOutcome(conditional, callback, scope) {
+  const scalar = capturedRuleScalar(conditional.condition, scope);
+  const outcome =
+    capturedOmissionOutcome(conditional.condition, scope) ??
+    (scalar ? Boolean(scalar.value) : null);
+  if (
+    outcome !== null &&
+    canPruneClosedWhenCondition(
+      conditional,
+      callback,
+      scope.sourceSummary,
+      (node) => (captureStatePresenceSources(node, scope)?.length ?? 0) > 0,
+      true
+    )
+  )
+    return outcome;
+  return capturedStatePresence(conditional, callback, scope);
 }
 
 function sourceConditionOutcome(node, scope) {
@@ -5060,7 +5205,7 @@ function collectRuleVariantTokens(node, scope, tokens, exposures) {
 /** Only prove ineligibility of a direct, actually returned WhenBuilder expression.
  * Unknown aliases/helper returns retain the existing collector boundary; this is
  * not a second evaluator or a claim that all return/control-flow shapes resolve. */
-function hasProvenRuntimeOnlyReturnedCondition(node) {
+function hasProvenRuntimeOnlyReturnedCondition(node, scope) {
   const callback = unwrapTransparent(node);
   if (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) return false;
   const parameter = callback.parameters[0];
@@ -5141,6 +5286,14 @@ function hasProvenRuntimeOnlyReturnedCondition(node) {
   };
   const runtimeOnly = (value) => {
     const expression = unwrapTransparent(value);
+    if (ts.isConditionalExpression(expression)) {
+      const outcome = capturedWhenConditionOutcome(expression, node, scope);
+      return outcome === null
+        ? false
+        : runtimeOnly(outcome ? expression.whenTrue : expression.whenFalse);
+    }
+    if (ts.isSpreadElement(expression)) return runtimeOnly(expression.expression);
+    if (ts.isArrayLiteralExpression(expression)) return expression.elements.some(runtimeOnly);
     const call = callOnBuilder(expression);
     if (call) {
       const method = call.expression.name.text;
@@ -5155,6 +5308,10 @@ function hasProvenRuntimeOnlyReturnedCondition(node) {
       const subject = callOnBuilder(expression.expression.expression);
       const key = subject?.arguments[0];
       const expected = expression.arguments[0];
+      // Prop dependencies keep the complete Rule on the runtime plan. The
+      // State leaves in the same selected branch must not become a partial CSS
+      // selector which drops that prop guard (rule-expose-state-web/create.ts).
+      if (subject?.expression.name.text === 'prop') return true;
       if (
         subject?.expression.name.text === 'meta' &&
         key &&
@@ -5170,10 +5327,15 @@ function hasProvenRuntimeOnlyReturnedCondition(node) {
 }
 
 function analyzeWhenVariants(node, scope) {
-  if (hasProvenRuntimeOnlyReturnedCondition(node)) return [];
+  if (hasProvenRuntimeOnlyReturnedCondition(node, scope)) return [];
   const groups = [];
+  let unresolvedConditional = false;
 
   visit(node);
+  // Only one complete branch is returned at runtime. An unproved choice must
+  // not concatenate both branches' leaves into a selector neither returns.
+  // The ordinary intent-token walk still records its authored base tokens.
+  if (unresolvedConditional) return [];
   let chains = [[]];
   for (const group of groups) {
     chains = chains.flatMap((chain) => group.map((variant) => [...chain, variant]));
@@ -5184,11 +5346,13 @@ function analyzeWhenVariants(node, scope) {
 
   function visit(current) {
     if (ts.isConditionalExpression(current)) {
-      const outcome = capturedOmissionOutcome(current.condition, scope);
+      const outcome = capturedWhenConditionOutcome(current, node, scope);
       if (outcome !== null) {
         visit(outcome ? current.whenTrue : current.whenFalse);
         return;
       }
+      unresolvedConditional = true;
+      return;
     }
     if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
       visit(current.body);
@@ -5565,11 +5729,77 @@ export async function collectSourceFiles(dir) {
   return out;
 }
 
+// A primitive copied out of an array keeps its actual read origin through
+// aliases/import clones/helper arguments. No entry-specific verdict is cached
+// here: the consuming literal-loop snapshot supplies its own runtime graph.
+const tokenRowReads = new WeakMap();
+
+function tokenRowReadDependencies(graph, includeMembers = false, seen = new Set()) {
+  if (!graph || seen.has(graph)) return [];
+  seen.add(graph);
+  return [
+    ...new Set([
+      ...(tokenRowReads.get(graph) ?? []),
+      ...(graph.kind === 'union'
+        ? graph.items.flatMap((item) => tokenRowReadDependencies(item, includeMembers, seen))
+        : includeMembers && (graph.kind === 'array' || graph.kind === 'object')
+          ? [...graph.members.values(), graph.unknownMember].flatMap((item) =>
+              tokenRowReadDependencies(item, true, seen)
+            )
+          : []),
+    ]),
+  ];
+}
+
+function withTokenRowReads(graph, reads = []) {
+  if (!graph) return graph;
+  const previous = tokenRowReads.get(graph);
+  const next = new Set([...(previous ?? []), ...reads]);
+  if (!next.size || (previous && next.size === previous.size)) return graph;
+  // Containers must retain identity for the existing mutation tracker. A
+  // scalar copy must not add a later array dependency to its original value.
+  const result = graph.kind === 'array' || graph.kind === 'object' ? graph : { ...graph };
+  tokenRowReads.set(result, next);
+  return result;
+}
+
+function tokenArrayReadDependencies(expression) {
+  if (!expression) return [];
+  let root = unwrapTransparent(expression);
+  while (ts.isPropertyAccessExpression(root) || ts.isElementAccessExpression(root))
+    root = unwrapTransparent(root.expression);
+  const literal = (input) => {
+    const value = unwrapTransparent(input);
+    if (
+      ts.isStringLiteralLike(value) ||
+      ts.isNumericLiteral(value) ||
+      value.kind === ts.SyntaxKind.TrueKeyword ||
+      value.kind === ts.SyntaxKind.FalseKeyword ||
+      value.kind === ts.SyntaxKind.NullKeyword
+    )
+      return true;
+    if (ts.isArrayLiteralExpression(value)) return value.elements.every(literal);
+    if (ts.isObjectLiteralExpression(value))
+      return value.properties.every(
+        (property) =>
+          ts.isPropertyAssignment(property) &&
+          !ts.isComputedPropertyName(property.name) &&
+          literal(property.initializer)
+      );
+    return false;
+  };
+  // A fresh outer array can still borrow an inner shared array (`[ROWS][0]`).
+  // Only a complete literal-value tree has no shared binding to prove. Keep
+  // ordinary literal tuples; unknown values and parameter patterns fail closed.
+  return ts.isArrayLiteralExpression(root) && literal(root) ? [] : [expression];
+}
+
 // Token inventory is not a hook/state proof. Unknown alternatives keep known
 // CSS requirements, but never certify a singleton semantic name.
 function tokenUnion(values) {
   const items = [];
   const seen = new Set();
+  const rowReads = new Set();
   let stringGraph;
   let stringIndex;
   let stringValues;
@@ -5579,6 +5809,7 @@ function tokenUnion(values) {
   let fragmentPaths;
   let fragmentsChanged = false;
   for (const value of values) {
+    for (const read of tokenRowReadDependencies(value)) rowReads.add(read);
     const alternatives = value?.kind === 'union' ? value.items : null;
     const length = alternatives ? alternatives.length : 1;
     for (let index = 0; index < length; index++) {
@@ -5635,7 +5866,7 @@ function tokenUnion(values) {
   if (stringsChanged) items[stringIndex] = { kind: 'string', values: [...stringValues] };
   if (fragmentsChanged)
     items[fragmentIndex] = { kind: 'fragments', paths: [...fragmentPaths.values()] };
-  return items.length === 1 ? items[0] : { kind: 'union', items };
+  return withTokenRowReads(items.length === 1 ? items[0] : { kind: 'union', items }, rowReads);
 }
 
 function tokenStrings(graph, seen = new Set()) {
@@ -5665,6 +5896,7 @@ function cloneTokenGraph(graph, copies) {
   if (copies.has(graph)) return copies.get(graph);
   const copy = { ...graph };
   copies.set(graph, copy);
+  if (tokenRowReads.has(graph)) tokenRowReads.set(copy, new Set(tokenRowReads.get(graph)));
   if (graph.members)
     copy.members = new Map(
       [...graph.members].map(([key, child]) => [key, cloneTokenGraph(child, copies)])
@@ -5676,19 +5908,26 @@ function cloneTokenGraph(graph, copies) {
   return copy;
 }
 
-function tokenMember(graph, keys) {
+function tokenMember(graph, keys, readExpression = null) {
   if (graph?.kind === 'union')
-    return tokenUnion(graph.items.map((item) => tokenMember(item, keys)));
+    return withTokenRowReads(
+      tokenUnion(graph.items.map((item) => tokenMember(item, keys, readExpression))),
+      tokenRowReadDependencies(graph)
+    );
   if (graph?.kind !== 'object' && graph?.kind !== 'array') return { kind: 'unknown' };
   // Incomplete keys are not a finite proof: retain all known members plus the
   // unknown branch. This cannot become `.single`, even with one known member.
-  if (!keys)
-    return tokenUnion([...graph.members.values(), graph.unknownMember, { kind: 'unknown' }]);
-  return tokenUnion(
-    keys.map(
-      (key) => graph.members.get(key) ?? tokenUnion([graph.unknownMember, { kind: 'unknown' }])
-    )
-  );
+  const selected = !keys
+    ? tokenUnion([...graph.members.values(), graph.unknownMember, { kind: 'unknown' }])
+    : tokenUnion(
+        keys.map(
+          (key) => graph.members.get(key) ?? tokenUnion([graph.unknownMember, { kind: 'unknown' }])
+        )
+      );
+  return withTokenRowReads(selected, [
+    ...tokenRowReadDependencies(graph),
+    ...(graph.kind === 'array' ? tokenArrayReadDependencies(readExpression) : []),
+  ]);
 }
 
 function tokenIndexKeys(expression, scope) {
@@ -5740,7 +5979,10 @@ function composeTokenStrings(parts) {
   const opaque = paths.filter((path) => path.includes(null));
   const result = [{ kind: 'string', values: [...new Set(known)] }];
   if (opaque.length) result.push({ kind: 'fragments', paths: opaque });
-  return tokenUnion(result);
+  return withTokenRowReads(
+    tokenUnion(result),
+    parts.flatMap((part) => tokenRowReadDependencies(part))
+  );
 }
 
 function tokenJoinSeparator(node, scope) {
@@ -5770,6 +6012,27 @@ function provenTokenJoin(node, scope, receiver) {
     tokenJoinArray(receiver) &&
     !!tokenJoinSeparator(node, scope) &&
     [...receiver.members.values()].every((value) => finiteTokenStrings(value) !== null)
+  );
+}
+
+/** A native includes call reads a closed primitive list. The shared lifetime
+ * proof also checks authored intrinsic access across this entry's module graph;
+ * a receiver-only check cannot exclude an Array.prototype override. */
+function provenTokenIncludes(node, scope, receiver) {
+  const callee = unwrapTransparent(node.expression);
+  return (
+    ts.isPropertyAccessExpression(callee) &&
+    callee.name.text === 'includes' &&
+    !callee.questionDotToken &&
+    !node.questionDotToken &&
+    node.arguments.length === 1 &&
+    !node.arguments.some(ts.isSpreadElement) &&
+    receiver?.kind === 'array' &&
+    receiver.complete &&
+    !receiver.unknownMember &&
+    [...receiver.members.keys()].every((key, index) => key === String(index)) &&
+    [...receiver.members.values()].every((value) => finiteTokenStrings(value) !== null) &&
+    scope.finiteRowsStayClosed?.(callee.expression, scope.tokenRowArgumentOrigins) === true
   );
 }
 
@@ -5808,7 +6071,14 @@ function evaluateTokenGraph(expression, scope) {
       if (ts.isSpreadElement(element)) {
         const spread = evaluateTokenGraph(element.expression, scope);
         if (spread?.kind === 'array' && spread.complete) {
-          for (const value of spread.members.values()) members.set(String(index++), value);
+          for (const value of spread.members.values())
+            members.set(
+              String(index++),
+              withTokenRowReads(value, [
+                ...tokenRowReadDependencies(spread),
+                ...tokenArrayReadDependencies(element.expression),
+              ])
+            );
         } else {
           complete = false;
           members.set(String(index++), spread ?? { kind: 'unknown' });
@@ -5829,9 +6099,11 @@ function evaluateTokenGraph(expression, scope) {
   }
   if (ts.isObjectLiteralExpression(node)) {
     const members = new Map();
+    const rowReads = new Set();
     let unknownMember;
     let complete = true;
     const spreadInto = (graph) => {
+      for (const read of tokenRowReadDependencies(graph)) rowReads.add(read);
       if (graph?.kind === 'noop') return;
       if (graph?.kind === 'object') {
         if (!graph.complete) {
@@ -5881,6 +6153,11 @@ function evaluateTokenGraph(expression, scope) {
         spreadInto(evaluateTokenGraph(property.expression, scope));
         continue;
       }
+      if (property.name && ts.isComputedPropertyName(property.name))
+        for (const read of tokenRowReadDependencies(
+          evaluateTokenGraph(property.name.expression, scope)
+        ))
+          rowReads.add(read);
       if (
         ts.isMethodDeclaration(property) ||
         ts.isGetAccessorDeclaration(property) ||
@@ -5910,7 +6187,7 @@ function evaluateTokenGraph(expression, scope) {
         }
       }
     }
-    return { kind: 'object', members, complete, unknownMember };
+    return withTokenRowReads({ kind: 'object', members, complete, unknownMember }, rowReads);
   }
   if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
     const graph = evaluateTokenGraph(node.expression, scope);
@@ -5920,7 +6197,12 @@ function evaluateTokenGraph(expression, scope) {
       : node.argumentExpression
         ? tokenIndexKeys(node.argumentExpression, scope)
         : null;
-    return tokenMember(graph, keys);
+    return withTokenRowReads(
+      tokenMember(graph, keys, node.expression),
+      ts.isElementAccessExpression(node) && node.argumentExpression
+        ? tokenRowReadDependencies(evaluateTokenGraph(node.argumentExpression, scope))
+        : []
+    );
   }
   if (
     ts.isCallExpression(node) &&
@@ -5939,7 +6221,10 @@ function evaluateTokenGraph(expression, scope) {
       if (index++) parts.push(separator);
       parts.push(value);
     }
-    return composeTokenStrings(parts);
+    return withTokenRowReads(composeTokenStrings(parts), [
+      ...tokenRowReadDependencies(array),
+      ...tokenArrayReadDependencies(node.expression.expression),
+    ]);
   }
   if (
     ts.isCallExpression(node) &&
@@ -5979,6 +6264,11 @@ function writeTokenMember(target, right, scope, uncertain, remove = false) {
   const targets = graph?.kind === 'union' ? graph.items : [graph];
   for (const item of targets) {
     if (!item?.members) continue;
+    if (ts.isElementAccessExpression(node) && node.argumentExpression)
+      withTokenRowReads(
+        item,
+        tokenRowReadDependencies(evaluateTokenGraph(node.argumentExpression, scope))
+      );
     if (
       item.kind === 'array' &&
       (remove || !keys || keys.some((key) => !/^(0|[1-9]\d*)$/.test(key) || !item.members.has(key)))
@@ -6061,6 +6351,7 @@ function applyTokenCallMutation(
       );
     for (const index of mutation.sources) {
       const source = arguments_[index];
+      withTokenRowReads(target, tokenRowReadDependencies(source));
       if (source?.kind === 'noop') continue;
       const alternatives = source?.kind === 'union' ? source.items : [source];
       const sources = alternatives.filter((item) => item?.kind === 'object');
@@ -6101,7 +6392,7 @@ function applyTokenCallMutation(
   }
 }
 
-function bindTokenLoopPattern(name, graph, scope) {
+function bindTokenLoopPattern(name, graph, scope, readExpression = null) {
   if (ts.isIdentifier(name)) {
     scope.bindings.set(name.text, withTokenGraph(emptyValue(), graph ?? { kind: 'unknown' }));
     return;
@@ -6127,10 +6418,16 @@ function bindTokenLoopPattern(name, graph, scope) {
           ),
         };
       } else selected = { kind: 'unknown' };
-    } else selected = tokenMember(graph, keys);
+    } else selected = tokenMember(graph, keys, readExpression);
+    selected = withTokenRowReads(selected, [
+      ...tokenRowReadDependencies(graph),
+      ...(element.propertyName && ts.isComputedPropertyName(element.propertyName)
+        ? tokenRowReadDependencies(evaluateTokenGraph(element.propertyName.expression, scope))
+        : []),
+    ]);
     if (element.initializer)
       selected = tokenUnion([selected, evaluateTokenGraph(element.initializer, scope)]);
     for (const key of keys ?? []) consumed.add(key);
-    bindTokenLoopPattern(element.name, selected, scope);
+    bindTokenLoopPattern(element.name, selected, scope, readExpression);
   });
 }

@@ -1296,7 +1296,18 @@ function sortUtilityOverrides(rules: CssRule[]): void {
     if (/^leading-/.test(utility)) return 2;
     return 0;
   };
-  rules.sort((a, b) => overridePriority(a) - overridePriority(b));
+  // Dark context deliberately has zero specificity. Its declarations must
+  // follow unconditioned utilities, before the more specific state recipes.
+  // Keep shorthand/longhand priority and existing ties within each group.
+  const conditionPriority = (rule: CssRule): number => {
+    const variants = splitVariants(rule.token).slice(0, -1);
+    if (variants.length === 0) return 0;
+    return variants.length === 1 && variants[0] === 'dark' ? 1 : 2;
+  };
+  rules.sort(
+    (a, b) =>
+      conditionPriority(a) - conditionPriority(b) || overridePriority(a) - overridePriority(b)
+  );
 }
 
 function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleCssTarget): string {

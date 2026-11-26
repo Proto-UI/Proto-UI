@@ -1,6 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import { constantModuleHasUnmodeledEffects } from './constant-module-effects.js';
 
 import {
   createHookSourceSummaryContext,
@@ -17,11 +18,22 @@ import {
 } from './hook-source-summary.js';
 import { loweredHookStates } from './prototype-style-tokens.js';
 import {
+  canCaptureWhenStateArgument,
+  canPruneClosedWhenCondition,
+  closedWhenStatePresence,
+} from './closed-when-state-presence.js';
+import {
   canKeepOmittedParameter,
   closedLocalRuleHelpers,
+  closedRuleScalarValue,
   helperArgumentBeforeVisit,
   omittedParameterConditionOutcome,
 } from './closed-rule-helpers.js';
+import {
+  createFiniteTokenMapProof,
+  createFiniteTokenMapPathProof,
+} from './finite-token-map-proof.js';
+import { createFiniteRowLifetimeProof } from './finite-row-lifetime.js';
 
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
@@ -200,12 +212,15 @@ export type RuleSourceObservation = RuleStateScan & {
 
 type RuleClosureContext = {
   entryFile: string;
+  /** Preserve the original caller text while replaying a module helper. */
+  entrySource: ts.SourceFile;
   observations: RuleSourceObservation[];
   callPath: HookSourceRef[];
   activeFunctions: Set<string>;
   ruleFunctions: Map<string, boolean>;
   invocation?: {
     start: number;
+    call: ts.CallExpression;
     parameters: Binding[];
     versions: SourceGraphVersionTracker;
     canOmitArguments: boolean;
@@ -228,6 +243,7 @@ export function scanRuleStateReadInventory(
     const file = source.fileName;
     scanRuleStateReads(source.text, file, sourceSummary, {
       entryFile: file,
+      entrySource: source,
       observations,
       callPath: [],
       activeFunctions: new Set(),
@@ -369,7 +385,7 @@ type LocalStateBinding = {
   exposedAs?: string | null;
 };
 
-type Binding =
+type Binding = (
   | { kind: 'nativeDefinition'; bindingNode: ts.Node }
   | {
       kind: 'hookResult';
@@ -452,7 +468,8 @@ type Binding =
   /** A genuinely omitted helper argument without a default. */
   | { kind: 'absent'; bindingNode?: ts.Node }
   /** A parameter: it shadows an outer name and its origin is not recoverable. */
-  | { kind: 'opaque'; sourceAuthority?: boolean; bindingNode?: ts.Node };
+  | { kind: 'opaque'; sourceAuthority?: boolean; bindingNode?: ts.Node }
+) & { whenStateSources?: readonly HookSourceValue[] };
 
 type Scope = {
   parent: Scope | null;
@@ -2554,7 +2571,8 @@ function scanRuleStateSource(
       const returned = lookupScope.sourceSummary.resolveReturnedLocalState(
         value,
         source,
-        nativeDefinitions
+        nativeDefinitions,
+        closure?.invocation?.call ?? invocations.at(-1)?.call
       );
       if (returned && exposureFor(name.text, scope) === undefined) {
         declare(scope, name.text, {
@@ -3021,50 +3039,11 @@ function scanRuleStateSource(
    * module holds. A row this scan certifies has to pass that same admission, or
    * the gate would vouch for a rule the extractor cannot lower.
    */
-  const initializerHasEffects = (node: ts.Node): boolean => {
-    if (ts.isFunctionLike(node)) return false;
-    if (
-      ts.isCallExpression(node) ||
-      ts.isNewExpression(node) ||
-      ts.isTaggedTemplateExpression(node) ||
-      ts.isDeleteExpression(node) ||
-      ts.isAwaitExpression(node) ||
-      ts.isYieldExpression(node) ||
-      (ts.isBinaryExpression(node) &&
-        node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
-        node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
-      ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
-        (node.operator === ts.SyntaxKind.PlusPlusToken ||
-          node.operator === ts.SyntaxKind.MinusMinusToken))
-    )
-      return true;
-    let effects = false;
-    ts.forEachChild(node, (child) => {
-      if (!effects && initializerHasEffects(child)) effects = true;
-    });
-    return effects;
-  };
-
   const constantsModulePurity = new Map<ts.SourceFile, boolean>();
   const constantsModuleIsPure = (module: ts.SourceFile): boolean => {
     const cached = constantsModulePurity.get(module);
     if (cached !== undefined) return cached;
-    const pure = !module.statements.some((statement) =>
-      ts.isVariableStatement(statement)
-        ? statement.declarationList.declarations.some(
-            (declaration) =>
-              declaration.initializer !== undefined &&
-              initializerHasEffects(declaration.initializer)
-          )
-        : !(
-            ts.isImportDeclaration(statement) ||
-            ts.isExportDeclaration(statement) ||
-            ts.isInterfaceDeclaration(statement) ||
-            ts.isTypeAliasDeclaration(statement) ||
-            ts.isFunctionDeclaration(statement) ||
-            ts.isEmptyStatement(statement)
-          )
-    );
+    const pure = !constantModuleHasUnmodeledEffects(module);
     constantsModulePurity.set(module, pure);
     return pure;
   };
@@ -3194,6 +3173,11 @@ function scanRuleStateSource(
     if (!ts.isIdentifier(value)) return null;
     const provider = moduleProvider(module, value.text, seen);
     if (!provider) return null;
+    // The constants loader registers declarations in source order. An alias
+    // cannot borrow a later local initializer's value (including through a
+    // same-module export name); imported providers retain their module order.
+    if (provider.module === module && provider.declaration.getStart() >= value.getStart())
+      return null;
     return foreignDeclarationRows(provider, seen);
   };
 
@@ -3261,7 +3245,18 @@ function scanRuleStateSource(
     const value = unwrapWritten(expression);
     if (ts.isArrayLiteralExpression(value))
       return finiteArrayRows(value, (spread) => localValueRows(spread, scope, seen, names));
-    if (ts.isIdentifier(value)) return localBindingRows(value.text, scope, seen, names);
+    if (ts.isIdentifier(value)) {
+      const binding = lookup(scope, value.text);
+      const declaration = binding?.kind === 'token' ? binding.bindingNode : undefined;
+      if (
+        declaration &&
+        ts.isVariableDeclaration(declaration) &&
+        declaration.getSourceFile() === value.getSourceFile() &&
+        declaration.getStart() >= value.getStart()
+      )
+        return null;
+      return localBindingRows(value.text, scope, seen, names);
+    }
     return null;
   };
 
@@ -3271,10 +3266,11 @@ function scanRuleStateSource(
    * free of writes in this file, and each row has to carry its own value.
    * Anything else keeps the existing unresolved path.
    */
+  const finiteRowsStayClosed = createFiniteRowLifetimeProof(closure?.entrySource ?? source);
   const provenLoopRows = (expression: ts.Expression, scope: Scope): ts.Expression[] | null => {
     const names = new Set<string>();
     const rows = localValueRows(expression, scope, new Set(), names);
-    if (!rows) return null;
+    if (!rows || !finiteRowsStayClosed(expression)) return null;
     const writes = writeNamesOf(source);
     for (const name of names) if (writes.has(name)) return null;
     return rows;
@@ -3440,6 +3436,112 @@ function scanRuleStateSource(
       const held = lookup(scope, name);
       return held?.kind === 'absent' ? held.bindingNode : undefined;
     });
+
+  const capturedScalarOutcome = (node: ts.Node, scope: Scope): boolean | null => {
+    const result = closedRuleScalarValue(node, sourceSummary, (declaration) => {
+      if (!ts.isIdentifier(declaration.name)) return null;
+      const held = lookup(scope, declaration.name.text);
+      if (!held || !('bindingNode' in held)) return null;
+      if (held.bindingNode !== declaration) return null;
+      if (held.kind === 'absent') return { value: undefined };
+      if (held.kind !== 'token' || held.opaque || held.members?.size || held.alternates?.length)
+        return null;
+      const literal = unwrapWritten(held.initializer);
+      if (
+        !ts.isStringLiteralLike(literal) &&
+        !ts.isNumericLiteral(literal) &&
+        literal.kind !== ts.SyntaxKind.TrueKeyword &&
+        literal.kind !== ts.SyntaxKind.FalseKeyword &&
+        literal.kind !== ts.SyntaxKind.NullKeyword
+      )
+        return null;
+      return closedRuleScalarValue(literal, sourceSummary, () => null);
+    });
+    return result ? Boolean(result.value) : null;
+  };
+
+  const captureStatePresenceSources = (
+    argument: ts.Node,
+    scope: Scope
+  ): readonly HookSourceValue[] | undefined => {
+    const sourceValues = (node: ts.Node): readonly HookSourceValue[] => {
+      const value = unwrap(node);
+      if (ts.isIdentifier(value)) {
+        const declaration = sourceSummary.resolveStableSourceBinding(value);
+        if (declaration && ts.isParameter(declaration)) {
+          const held = lookup(scope, value.text);
+          if (held?.bindingNode === declaration)
+            return (
+              held.whenStateSources?.flatMap((source) => scope.versions.versions(source)) ?? []
+            );
+        }
+        // Forwarding a const alias must carry the complete incoming candidate
+        // set, not a legacy handle binding's convenient first State.
+        if (
+          declaration &&
+          ts.isVariableDeclaration(declaration) &&
+          declaration.initializer &&
+          ts.isIdentifier(unwrap(declaration.initializer))
+        )
+          return sourceValues(declaration.initializer);
+      }
+      const candidates = sourceResolveCandidates(node, scope);
+      return candidates.every((candidate) => candidate.matched)
+        ? candidates.map((candidate) => candidate.value)
+        : [];
+    };
+    const admitted = canCaptureWhenStateArgument(
+      argument,
+      sourceSummary,
+      sourceValues,
+      (parameter) => {
+        if (!ts.isIdentifier(parameter.name)) return false;
+        const held = lookup(scope, parameter.name.text);
+        return held?.bindingNode === parameter && (held.whenStateSources?.length ?? 0) > 0;
+      }
+    );
+    return admitted ? sourceValues(argument) : undefined;
+  };
+
+  const capturedStatePresence = (
+    conditional: ts.ConditionalExpression,
+    callback: ts.Node,
+    scope: Scope
+  ): boolean | null =>
+    closedWhenStatePresence(
+      conditional,
+      callback,
+      sourceSummary,
+      (parameter) => {
+        if (!ts.isIdentifier(parameter.name)) return null;
+        const held = lookup(scope, parameter.name.text);
+        if (!held || held.bindingNode !== parameter) return null;
+        return held.whenStateSources ?? null;
+      },
+      (value) => scope.versions.versions(value)
+    );
+
+  const capturedWhenConditionOutcome = (
+    conditional: ts.ConditionalExpression,
+    callback: ts.Node,
+    scope: Scope
+  ): boolean | null => {
+    const scalar =
+      capturedOmissionOutcome(conditional.condition, scope) ??
+      capturedScalarOutcome(conditional.condition, scope);
+    if (
+      scalar !== null &&
+      canPruneClosedWhenCondition(
+        conditional,
+        callback,
+        sourceSummary,
+        (node) => (captureStatePresenceSources(node, scope)?.length ?? 0) > 0,
+        true
+      )
+    )
+      return scalar;
+    return capturedStatePresence(conditional, callback, scope);
+  };
 
   const sourceConditionOutcome = (node: ts.Node, scope: Scope): boolean | null => {
     const omission = capturedOmissionOutcome(node, scope);
@@ -3803,6 +3905,37 @@ function scanRuleStateSource(
    * cannot reach — names a real token set at runtime and yields nothing to the
    * closure, so the rendered variant would have no CSS.
    */
+  const finiteTokenMapRows = (loop: ts.ForOfStatement) => {
+    const module = loop.getSourceFile();
+    const root = moduleRootScope(module);
+    const constants: Scope = { ...root, bindings: new Map(root.bindings) };
+    // The row resolver requires the actual const declaration identity. Keep
+    // this local to the finite-map proof; do not upgrade arbitrary token maps.
+    for (const statement of module.statements) {
+      if (!ts.isVariableStatement(statement)) continue;
+      for (const declaration of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name)) continue;
+        const held = constants.bindings.get(declaration.name.text);
+        if (held?.kind === 'token')
+          constants.bindings.set(declaration.name.text, { ...held, bindingNode: declaration });
+      }
+    }
+    return provenLoopRows(loop.expression, constants);
+  };
+  const privateTokenMapMember = createFiniteTokenMapProof(finiteTokenMapRows);
+  const sharedTokenMapMember = createFiniteTokenMapProof(
+    finiteTokenMapRows,
+    closure?.entrySource ?? source
+  );
+  const nestedTokenMapMember = createFiniteTokenMapPathProof(
+    finiteTokenMapRows,
+    closure?.entrySource ?? source
+  );
+  const finiteTokenMapMember = (expression: ts.Expression): boolean =>
+    privateTokenMapMember(expression) ||
+    sharedTokenMapMember(expression) ||
+    nestedTokenMapMember(expression);
+
   const resolvableTokenArgument = (
     node: ts.Expression,
     scope: Scope,
@@ -3885,11 +4018,12 @@ function scanRuleStateSource(
     if (ts.isElementAccessExpression(inner)) {
       // An extractable owner's inventory does not prove an unknown key reads
       // its own string data. Use the same private-leaf proof as dot access.
-      return literalTokenMember(inner, scope) !== null;
+      return literalTokenMember(inner, scope) !== null || finiteTokenMapMember(inner);
     }
     // evaluateTokenGraph/tokenMember also reads ordinary dot members. Admit a
     // finite own string leaf, not an opaque receiver's partial token inventory.
-    if (ts.isPropertyAccessExpression(inner)) return literalTokenMember(inner, scope) !== null;
+    if (ts.isPropertyAccessExpression(inner))
+      return literalTokenMember(inner, scope) !== null || finiteTokenMapMember(inner);
     return false;
   };
 
@@ -3898,7 +4032,8 @@ function scanRuleStateSource(
     const inner = unwrap(node) as ts.Expression;
     if (ts.isStringLiteralLike(inner) || ts.isNoSubstitutionTemplateLiteral(inner)) return true;
     if (ts.isTemplateExpression(inner)) return true;
-    if (ts.isPropertyAccessExpression(inner)) return literalTokenMember(inner, scope) !== null;
+    if (ts.isPropertyAccessExpression(inner))
+      return literalTokenMember(inner, scope) !== null || finiteTokenMapMember(inner);
     if (ts.isIdentifier(inner)) {
       const binding = lookup(scope, inner.text);
       if (binding?.kind === 'token') return singleValuedTokenArgument(binding.initializer, scope);
@@ -4034,7 +4169,7 @@ function scanRuleStateSource(
 
     const visitCondition = (node: ts.Node): void => {
       if (ts.isConditionalExpression(node)) {
-        const outcome = capturedOmissionOutcome(node.condition, scope);
+        const outcome = capturedWhenConditionOutcome(node, when.initializer, scope);
         if (outcome !== null) {
           visitCondition(outcome ? node.whenTrue : node.whenFalse);
           return;
@@ -4540,6 +4675,16 @@ function scanRuleStateSource(
 
   const captureHelperBinding = (argument: ts.Expression, scope: Scope): Binding => {
     const value = unwrap(argument);
+    // A primitive argument is already its captured value and has no free
+    // names to resolve in the callee's lexical scope.
+    if (
+      ts.isStringLiteralLike(value) ||
+      ts.isNumericLiteral(value) ||
+      value.kind === ts.SyntaxKind.TrueKeyword ||
+      value.kind === ts.SyntaxKind.FalseKeyword ||
+      value.kind === ts.SyntaxKind.NullKeyword
+    )
+      return { kind: 'token', initializer: argument };
     if (ts.isIdentifier(value)) {
       const held = lookup(scope, value.text);
       if (held?.kind === 'token') {
@@ -4624,6 +4769,7 @@ function scanRuleStateSource(
       callPath: [...closure.callPath, ref],
       activeFunctions: new Set(closure.activeFunctions).add(key),
       invocation: {
+        call,
         start: helper.getStart(),
         parameters: current,
         versions: scope.versions,
@@ -5151,7 +5297,29 @@ function scanRuleStateSource(
       const readsOnly = provenAccessorCallee(node, current, receiver);
       const captured: CapturedArgument[] = [];
       for (const argument of node.arguments) {
-        if (inventoryHelper) parameters.push(captureHelperBinding(argument, current));
+        if (inventoryHelper) {
+          const binding = captureHelperBinding(argument, current);
+          // This permission belongs to this argument before it executes. Never
+          // inherit a convenient previous call's proof through a copied binding.
+          let whenStateSources = captureStatePresenceSources(argument, current);
+          if (whenStateSources !== undefined && ts.isObjectLiteralExpression(unwrap(argument))) {
+            // Resolving a fresh literal twice creates two object graphs. The
+            // presence proof must hold the same container as the callee's
+            // parameter, so a member write or escape withdraws both together.
+            const sources = sourceBindingValues(binding);
+            whenStateSources =
+              sources.length > 0 &&
+              sources.every(
+                (value) =>
+                  value.kind === 'object' &&
+                  sourceMembersProven(value) &&
+                  [...value.members.values()].every((member) => member.kind === 'state')
+              )
+                ? sources
+                : undefined;
+          }
+          parameters.push({ ...binding, whenStateSources });
+        }
         if (localHelper && localParameters) {
           const parameter = localHelper.parameters[captured.length];
           const assigned = helperArgumentBeforeVisit(argument, sourceSummary, (part) =>
@@ -5267,7 +5435,9 @@ function scanRuleStateSource(
               (ts.isStringLiteralLike(value) ||
                 ts.isNumericLiteral(value) ||
                 value.kind === ts.SyntaxKind.TrueKeyword ||
-                value.kind === ts.SyntaxKind.FalseKeyword)
+                value.kind === ts.SyntaxKind.FalseKeyword ||
+                (constantsModuleIsPure(source) &&
+                  foreignDeclarationRows({ module: source, declaration }, new Set()) !== null))
             )
               declare(rootScope, declaration.name.text, {
                 kind: 'token',
