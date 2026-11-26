@@ -881,7 +881,13 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     { name: 'homepage-composition', suite: 'homepage-composition' },
     { name: 'copy-commands', suite: 'site-copy-commands' },
     { name: 'runtime-box', suite: 'runtime-preview-surface', contract: 'runtime-preview-evidence' },
-    { name: 'search-commands', suite: 'site-search-commands' },
+    {
+      name: 'search-activation',
+      suite: 'site-search-activation',
+      contract: 'site-search-browser-inventory',
+    },
+    { name: 'search-layout', suite: 'site-search-layout' },
+    { name: 'search-menu', suite: 'site-search-menu' },
   ];
   assert.deepEqual(job.strategy.matrix.include, expectedScopes);
   assert.throws(
