@@ -197,7 +197,7 @@ describe('Docs Contents actual family Button command', () => {
         expect(button.getAttribute('aria-expanded')).toBe('false');
         expect(button.querySelector('button, [role="button"]')).toBeNull();
         const tokens = button.getAttribute('data-pui-style')!;
-        // The opener is keyboard-focused: public Rhea focus paint legitimately
+        // The opener is keyboard-focused: public Luma focus paint legitimately
         // replaces its resting transparent border, without losing secondary fill.
         if (family === 'shadcn') {
           for (const token of [
@@ -206,7 +206,7 @@ describe('Docs Contents actual family Button command', () => {
             'ring-ring/30',
             'bg-secondary',
             'text-secondary-foreground',
-            'rounded-[var(--pui-radius-2xl)]',
+            'rounded-[var(--pui-radius-4xl)]',
           ])
             expect(tokens.split(/\s+/), tokens).toContain(token);
           expect(tokens.split(/\s+/)).not.toContain('bg-transparent');

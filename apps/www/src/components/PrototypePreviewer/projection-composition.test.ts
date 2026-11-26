@@ -68,7 +68,7 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     expect(trigger.props).toMatchObject({ appearance: 'default', accessibleLabel: 'Runtime' });
     expect(trigger.props).not.toHaveProperty('aria-label');
     expect(root.props).toMatchObject({
-      styleProfile: 'rhea',
+      styleProfile: 'luma',
       value: runtimeId,
     });
     expect(root.props).not.toHaveProperty('itemSizing');
