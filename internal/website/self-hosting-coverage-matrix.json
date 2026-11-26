@@ -2063,7 +2063,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "291cdd524d60f57f65fca7ada36d23772a131edcef647adce619e58236b727ec"
+      "sourceSha256": "1c0c2f4bf6b32a49c21f15211bd3b7b69aef4a47fc9f99c90900c5b49de45f25"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
