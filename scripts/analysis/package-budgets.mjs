@@ -122,8 +122,10 @@ const cases = [
   // internal/records/2026-10-06-template-scroll-focus-budget.json
   // The integrated scroll-preserving intrinsic measurement is shared by all three Web adapters.
   // internal/records/2026-11-25-positioning-scroll-package-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 181_800],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 180_600],
+  // Mount-ticket error settlement, cursor-* token merge, and 2026-11-26 main WC reentry/teardown fixes:
+  // internal/records/2026-11-27-mount-ticket-package-budget.json
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 181_900],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 180_700],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -131,7 +133,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 218_100],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 218_300],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];
