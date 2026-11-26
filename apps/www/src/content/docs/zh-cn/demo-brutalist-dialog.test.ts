@@ -64,26 +64,38 @@ describe('Brutalist Dialog consumer composition', () => {
     if (footer.kind !== 'proto') throw new Error('Expected Footer');
     expect(footer.children).toEqual([
       {
-        kind: 'proto',
-        prototypeId: 'brutalist-dialog-close',
+        kind: 'box',
+        className: 'min-w-0 max-w-full',
         children: [
           {
             kind: 'proto',
-            prototypeId: 'brutalist-button',
-            props: { variant: 'surface', wrap: true },
-            children: ['Cancel'],
+            prototypeId: 'brutalist-dialog-close',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-button',
+                props: { variant: 'surface', wrap: true },
+                children: ['Cancel'],
+              },
+            ],
           },
         ],
       },
       {
-        kind: 'proto',
-        prototypeId: 'brutalist-dialog-close',
+        kind: 'box',
+        className: 'min-w-0 max-w-full',
         children: [
           {
             kind: 'proto',
-            prototypeId: 'brutalist-button',
-            props: { wrap: true },
-            children: ['Save changes'],
+            prototypeId: 'brutalist-dialog-close',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-button',
+                props: { wrap: true },
+                children: ['Save changes'],
+              },
+            ],
           },
         ],
       },
