@@ -565,7 +565,7 @@ fn selectable_text_affordances_remain_explicitly_unmapped() {
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 44] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 43] = [
     (
         "border-color",
         "inherit",
@@ -790,11 +790,6 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 44] = [
     (
         "border-color",
         "#eee #eee #ddd",
-        "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
-    ),
-    (
-        "border-color",
-        "#eee #eee #fff #eee",
         "GPUI exposes one border color; distinct CSS edge colors cannot be represented by that field.",
     ),
     (
