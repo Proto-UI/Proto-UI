@@ -1,6 +1,6 @@
 # Proto language compiler foundation
 
-The previous private compiler is retired. The replacement compiler has not been implemented. This package currently exposes availability and an explicit failure boundary; it produces no React, GPUI, Vue 2, Vue 3 or Web Components artifacts.
+The previous private compiler is retired. This package now provides the first shared TypeScript frontend and partial Proto semantic lint, alongside the availability boundary. It produces no React, GPUI, Vue 2, Vue 3 or Web Components artifacts.
 
 | Target         | Replacement implementation |
 | -------------- | -------------------------- |
@@ -14,7 +14,41 @@ The previous private compiler is retired. The replacement compiler has not been 
 
 The replacement is a Proto language based on TypeScript syntax and compiler infrastructure. Its explicit `schema`, `init`, `derive`, `action` and `lifecycle` declarations lower through a typed semantic IR into target ASTs. React and GPUI are the first implementation targets; Vue 2, Vue 3 and Web Components remain required targets. LLVM is outside the initial implementation.
 
-The [compiler design entry](../../internal/compiler/README.md) and [foundation contract](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml) define the replacement. Old compiler APIs, generated snapshots and tests do not define the new language. Source parsing, semantic analysis, target lowering and consumer integration are future implementation work.
+The [compiler design entry](../../internal/compiler/README.md), [foundation contract](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml) and [lint contract](../../spec/contracts/C-COMPILER-LINT-0001.yaml) define the replacement. Old compiler APIs, generated snapshots and tests do not define the new language. Complete phase, effect, capture and ownership analysis, typed IR, target lowering and generated-consumer integration remain implementation work.
+
+## Shared frontend and partial lint
+
+With Node.js 24, analyze one or more entries without executing author modules or writing generated files:
+
+```sh
+node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json
+```
+
+The command resolves actual imports and TypeScript bindings, including aliases, reexports and project `paths`. `--project path/to/tsconfig.json` selects a project explicitly; otherwise it finds the current directory's config. The frontend fixes its own prelude, ambient-type policy and strict checks, so project flags cannot silently substitute JavaScript or host semantics.
+
+Implemented checks cover boolean conditions, proven implicit numeric/text conversions, explicitly undeclared JavaScript code-unit operations and well-formed Unicode literals. Operations requiring unimplemented union correlation, phase/effect or capability analysis remain `compiler-missing`; they do not become new language bans. There is no automatic source rewrite.
+
+The JSON report identifies language, rule-set and compiler versions, resolved source/dependency byte digests, configuration and all five targets. Its three status fields remain distinct:
+
+| Field | Meaning in this increment |
+| --- | --- |
+| `sourceValid` | `false` when a defined violation is established; otherwise `null`, because full analysis is incomplete. |
+| `analysisComplete` | Always `false`; missing analysis obligations are reported explicitly. |
+| `targets[target].compilable` | Always `false`; none of the source backends is implemented. |
+
+Exit status `1` means invalid source, `2` means analysis or the requested target is incomplete, and `64` means an invalid command invocation. Status `0` is reserved for a future complete requested analysis. A missing dependency is recorded in the closure and cannot produce a complete-input claim. An informational missing-capability diagnostic is not a compile success.
+
+### Editor integration
+
+`@proto.ui/compiler/frontend` exports `createProtoProgram`, `analyzeProtoProgram` and `analyzeProtoFiles`. `@proto.ui/compiler/editor` exports `analyzeProtoDocument` for a Node-based editor or language-server host. The editor entry accepts unsaved source/dependency snapshots and uses the exact same Program and analysis as the CLI. It returns source locations in zero-based UTF-16 editor coordinates; those transport coordinates do not change Proto's Unicode-scalar text semantics.
+
+The editor adapter is an API for integration, not an installed VS Code extension or a completed TypeScript language-service plugin. Both analysis entries are private development surfaces. The package's browser export remains the dependency-free availability module and does not import the Node-based analyzer.
+
+### Consumer source inventories
+
+`@proto.ui/compiler/source-manifest` exports `createSourceManifest`, `verifySourceManifest`, `parseSourceManifest` and a read-only directory snapshot reader. An intake fixes repository revisions, explicit exported entrypoints, original file bytes and configuration. Verification reuses the shared frontend's actual dependency closure and invalidates prior input evidence when those inputs change. It performs no checkout, source migration or author-module execution.
+
+File totals, prototype declarations and registered entries remain separate counts. Missing files and unresolved inventory stay visible. Even a `matched` input report leaves `sourceValid: null`, `compilationVerified: false` and `conformanceVerified: false`: matching an input is not execution evidence. The [Shenko intake](../../internal/compiler/consumers/README.md) records a real partial snapshot and the outstanding upstream and Adapter declarations.
 
 ## What was retired
 
@@ -32,12 +66,12 @@ With Node.js 24, inspect the status from the repository root:
 node packages/compiler/src/cli-entry.mjs --status
 ```
 
-Any other invocation exits with status 1 and the explicit unavailable diagnostic. The command does not inspect input files or write outputs. The browser export has no Worker, network or WASM dependency.
+Compilation invocations exit with status 1 and the explicit unavailable diagnostic before inspecting input files or writing outputs. The separate `lint` command reads source for analysis only. The browser export has no Worker, network or WASM dependency.
 
-Run the focused retirement checks:
+Run the frontend, editor, CLI and retirement checks:
 
 ```sh
-node --test packages/compiler/test/retirement.node-test.mjs
+corepack pnpm@10.32.1 --filter @proto.ui/compiler test
 ```
 
-These checks establish the availability boundary and absence of compilation side effects. They are not tests of the replacement language or evidence of target support.
+These checks cover the implemented analysis rules, shared diagnostics, source binding and absence of compilation side effects. They do not establish complete language conformance or any target support.

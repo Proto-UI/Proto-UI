@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
-  "description": "Proto language compiler foundation; the legacy compiler is retired and all replacement targets are not implemented.",
+  "description": "Proto language compiler foundation and partial semantic analysis; all replacement source targets remain unimplemented.",
   "engines": {
     "node": ">=24"
   },
@@ -20,10 +20,26 @@
     "./browser": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./frontend": {
+      "types": "./src/frontend/index.ts",
+      "default": "./src/frontend/index.ts"
+    },
+    "./editor": {
+      "types": "./src/editor.ts",
+      "default": "./src/editor.ts"
+    },
+    "./source-manifest": {
+      "types": "./src/source-manifest.ts",
+      "default": "./src/source-manifest.ts"
     }
   },
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
   "scripts": {
-    "test": "node --test test/retirement.node-test.mjs",
+    "test": "node --test test/*.node-test.mjs",
+    "lint": "node src/cli-entry.mjs lint",
     "status": "node src/cli-entry.mjs --status"
   }
 }

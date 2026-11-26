@@ -4,7 +4,7 @@ desp: 'The 0.4 Proto language compiler foundation and implementation status'
 description: 'The 0.4 Proto language compiler foundation and implementation status'
 ---
 
-The old private compiler has been retired. The replacement belongs to **0.4 scope** and is currently a specification and implementation plan: none of its five source backends is implemented yet. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
+The old private compiler has been retired. The replacement belongs to **0.4 scope** and now includes an initial shared frontend and partial semantic lint; none of its five source backends is implemented yet. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
 
 Existing applications continue to use [Runtime](/en/build/runtime-architecture/) and [Adapters](/en/build/adapter-guide/). Their working examples, component facades and style tooling remain supported within their own release boundaries. The compiler rebuild does not add an acceptance condition to the 0.3 release.
 
@@ -56,13 +56,16 @@ Application-specific externs may declare a limited target set and must fail clea
 
 The repository now records the new contract, independent semantic test scenarios, implementation order and the retirement boundary. The old compiler, generated fixtures, compiler-specific runners and browser compilation panel are removed. Git history retains the old implementation and dated observations; they are not evidence for the replacement.
 
-The private package exposes availability only:
+The private package exposes availability and an initial source-analysis command:
 
 ```sh
 node packages/compiler/src/cli-entry.mjs --status
+node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json
 ```
 
 The temporary CLI rejects compilation requests with `PUI_COMPILER_NOT_IMPLEMENTED`; the `requireCompilerImplementation()` availability guard raises the same code. Imports of removed APIs can instead fail at module loading or a consumer's export check. There is no supported replacement compile command yet. The package remains private; this status boundary is not a promised compiler API.
+
+The new lint command shares its TypeScript Program/checker analysis with an editor integration API. It checks implemented boolean, coercion and text rules without executing author modules. Reports bind source/dependency bytes and configuration, and distinguish invalid source, incomplete analysis and unavailable targets. Full phase, effect, ownership and backend analysis remains missing: `analysisComplete` is currently false, an otherwise undiagnosed source remains `sourceValid: null`, and all targets remain non-compilable. Exit status 1 indicates invalid source; 2 indicates incomplete analysis or an unavailable requested target. The command does not rewrite source or generate components.
 
 Each implementation batch must demonstrate its complete scenario through ordinary target builds and observed behavior. Unsupported language features, missing compiler work, missing backend lowering and unbound externs must remain distinguishable. Performance work starts with reproducible cold, warm, incremental, shared and per-component measurements before adopting hard budgets.
 

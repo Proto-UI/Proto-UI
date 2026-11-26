@@ -4,7 +4,7 @@ desp: '0.4 Proto 语言编译器的基础规范与实现状态'
 description: '0.4 Proto 语言编译器的基础规范与实现状态'
 ---
 
-旧的私有编译器已经退役。新编译器属于 **0.4 scope**，目前交付的是规范与实现计划，五个源码后端均尚未实现。[Compiler 基础文档](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md)是开发入口。
+旧的私有编译器已经退役。新编译器属于 **0.4 scope**，目前已开始交付共享前端与部分语义 lint，五个源码后端均尚未实现。[Compiler 基础文档](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md)是开发入口。
 
 现有应用继续使用 [Runtime](/zh-cn/build/runtime-architecture/) 与 [Adapter](/zh-cn/build/adapter-guide/)。真实运行的示例、组件 facade 与样式工具沿用各自版本边界。新编译器重建不会成为 0.3 发布的新增验收条件。
 
@@ -56,13 +56,16 @@ Proto 使用合法的 TypeScript 语法及其编译器基础设施，独立定�
 
 仓库现已记录新合同、独立的语义测试场景、实现顺序与旧实现退役边界。旧编译器、生成物 fixture、编译器专属 runner 与浏览器编译面板已移除。Git 历史保留旧实现和当时的观察记录，它们不构成新编译器的正确性证据。
 
-私有包目前仅提供可用性查询：
+私有包目前提供可用性查询与初步源码分析命令：
 
 ```sh
 node packages/compiler/src/cli-entry.mjs --status
+node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json
 ```
 
 临时 CLI 对编译请求返回 `PUI_COMPILER_NOT_IMPLEMENTED`，`requireCompilerImplementation()` 可用性检查也抛出同一错误码。导入已移除的 API 则可能在模块加载或消费方的导出检查处失败。目前没有可用的新编译命令；该包仍为私有包，可用性查询也不是已承诺的编译器 API。
+
+新的 lint 命令与编辑器接入 API 共用 TypeScript Program/checker 分析，不执行作者模块，检查已经实现的 boolean 条件、隐式转换和文本规则。报告绑定源码、依赖与配置摘要，分别报告源码错误、分析未完成与目标不可编译。完整的阶段、效果、所有权和后端分析仍待实现：当前 `analysisComplete` 为 false，尚未发现错误的源码仍保持 `sourceValid: null`，五个目标均不可编译。退出码 1 表示源码错误，2 表示分析或请求目标尚未完成；命令不改写源文件、不生成组件。
 
 后续按能力集交付，每批通过普通目标构建与真实行为验证完整场景。语言不合法、编译器尚未实现、后端尚未降低、extern 缺少绑定应能分别诊断。性能工作先固定冷、热、增量、共享成本与单组件成本的测量方法，再制定硬预算。
 

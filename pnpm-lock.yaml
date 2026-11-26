@@ -732,7 +732,11 @@ importers:
         specifier: ^2.4.9
         version: 2.4.9
 
-  packages/compiler: {}
+  packages/compiler:
+    dependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   packages/compositions/chatui:
     dependencies:
