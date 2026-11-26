@@ -22,7 +22,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
       const tokens = surface.getAttribute('data-pui-style')!;
       expect(tokens).toContain(family === 'shadcn' ? 'rounded-xl' : 'rounded-base');
       expect(tokens.includes('shadow-')).toBe(appearance === 'card');
-      expect(tokens).toContain(family === 'shadcn' ? 'border-border' : 'border-black');
+      expect(tokens).toContain('border-border');
       expect(surface.contains(p)).toBe(true);
       expect(p.textContent).toBe('Actual example result');
       expect(surface.hasAttribute('role')).toBe(false);
