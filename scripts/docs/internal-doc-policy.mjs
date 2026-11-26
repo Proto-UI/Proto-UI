@@ -87,6 +87,11 @@ export const EXEMPT_FROM_PROSE_CHECKS = Object.freeze([
   // Upstream reference fixtures & frozen snapshots.
   'internal/fixtures/',
   'internal/coverage-matrices/snapshots/',
+  // Generated Markdown views backed by canonical JSON sources (verified by their generators).
+  'internal/coverage-matrices/prototype-coverage-matrix.md',
+  'internal/coverage-matrices/finf-delivery-checklist.md',
+  'internal/website/self-hosting-coverage-matrix.md',
+  'internal/agent-harness/dogfood-coverage-matrix.md',
   // The debt ratchet ledger itself and style guide containing negative examples.
   'internal/governance/prototype-docs-style-guide.md',
   'internal/governance/engineering-writing-guide.md',
