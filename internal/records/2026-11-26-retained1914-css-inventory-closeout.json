@@ -321,5 +321,12 @@
     "Ordinary whole-library lowering coverage remains a separately documented failing baseline; it is not made green by these inventory changes.",
     "The retained historical coverage denominators and acceptance status are not advanced."
   ],
-  "authorship": "Agent-assisted integration under current-user direction; original source authors and merge history retained."
+  "authorship": "Agent-assisted integration under current-user direction; original source authors and merge history retained.",
+  "generationInvocation": {
+    "baseHead": "07d0c6da8d2d3e667a2125000f2d24c348c49888",
+    "uncommittedSourcePatchSha256": "067e175cc766da869a57d362c84ed2c61fd6ee8fe5b02569c8fa32b7ec894b82",
+    "collectorSha256Before": "597b5bb15f95f91137bee00e29693a8ce1b4bd5ccaed053a2623e6329e2652bf",
+    "collectorSha256After": "597b5bb15f95f91137bee00e29693a8ce1b4bd5ccaed053a2623e6329e2652bf",
+    "sourceRevisionRelation": "The later committed sourceRevision contains identical collector and prototype input bytes. Generation ran before those equivalent input bytes were committed; these fields preserve the actual invocation identity."
+  }
 }
