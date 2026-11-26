@@ -62,6 +62,36 @@ test('Search splitting preserves the complete retained inventory and fixed worke
   );
 });
 
+test('the isolated homepage workflow selects the complete retained Search replacement inventory', () => {
+  const workflow = YAML.parse(
+    readFileSync(
+      new URL('../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+      'utf8'
+    )
+  );
+  const job = workflow.jobs['isolated-controls'];
+  const search = job.strategy.matrix.include.filter((entry) =>
+    entry.suite.startsWith('site-search-')
+  );
+  const files = search.map(
+    (entry) => `apps/www/src/content/docs/zh-cn/${entry.suite}.browser.test.ts`
+  );
+  assert.deepEqual(files, SEARCH_BROWSER_SUITES);
+  for (const file of files)
+    assert.ok(readFileSync(new URL(`../../${file}`, import.meta.url)).length);
+  assert.equal(
+    search.filter((entry) => entry.contract === 'site-search-browser-inventory').length,
+    1
+  );
+  assert.equal(job['timeout-minutes'], 15);
+  const execution = job.steps.find(
+    (step) => step.name === 'Execute the exact isolated browser suite'
+  );
+  assert.equal(execution['timeout-minutes'], 12);
+  assert.match(execution.run, /timeout --signal=TERM --kill-after=10s 600s/);
+  assert.match(execution.run, /test -f "\$FILE"/);
+});
+
 test('suite exchanges cannot make an impossible complete workload pass capacity admission', () => {
   const impossible = browserShards(BROWSER_SUITES, 1);
   assert.deepEqual([...impossible.flat()].sort(), [...BROWSER_SUITES].sort());
