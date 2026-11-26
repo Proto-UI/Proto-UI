@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "historical-record-archive",
-  "archivedAt": "2026-11-26",
+  "archivedAt": "2026-11-26T17:41:52.973766Z",
   "sourceRevision": "1c4a23455175ec65d3b41a630cfa9797d74a721d",
   "reviewedBase": "a1e4344ee0a20da8d6ad20ab5b20529bc822ca52",
   "purpose": "Immutable original records and their evidence directories; the landing pages make no current-source acceptance claim.",
