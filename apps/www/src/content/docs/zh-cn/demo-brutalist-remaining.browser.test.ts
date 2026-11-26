@@ -915,14 +915,6 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           await first.getAttribute('aria-pressed'),
           `${runtime}/first-enabled-after-second-click`
         ).toBe('false');
-        const firstRestingSurface = await facts(first);
-        expect(
-          firstRestingSurface.backgroundColor,
-          `${runtime}/after-second-click/background`
-        ).toBe(expectedRestingBackground);
-        expect(firstRestingSurface.color, `${runtime}/after-second-click/foreground`).toBe(
-          expectedRestingForeground
-        );
         const firstElement = await first.elementHandle();
         if (!firstElement) throw new Error('Toggle was not materialized.');
         await opened.page.mouse.move(1, NARROW_VIEWPORT.height - 1);
@@ -933,6 +925,14 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             getComputedStyle(target).boxShadow === 'none',
           firstElement,
           { timeout: 10_000 }
+        );
+        const firstRestingSurface = await facts(first);
+        expect(
+          firstRestingSurface.backgroundColor,
+          `${runtime}/after-second-click/background`
+        ).toBe(expectedRestingBackground);
+        expect(firstRestingSurface.color, `${runtime}/after-second-click/foreground`).toBe(
+          expectedRestingForeground
         );
         const disabled = toggles.nth(3);
         expect(
@@ -1058,7 +1058,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           { timeout: 10_000 }
         );
         const panelText = opened.page
-          .getByText('A rounded, flat preview panel.', { exact: true })
+          .getByText(
+            'Host-neutral interaction protocols with bold Neo-Brutalist borders and hard shadows.',
+            { exact: true }
+          )
           .last();
         const triggerSurface = await facts(trigger);
         const [expectedTriggerBackground] = await resolvedThemeColors(
@@ -1105,7 +1108,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const [expectedPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
-        expectHardFrame(panelSurface, 'none', 'rgb(0, 0, 0)', `${runtime}/hover-panel`);
+        expectHardFrame(panelSurface, '3px', expectedPanelForeground, `${runtime}/hover-panel`);
         expect(panelSurface.backgroundColor, `${runtime}/hover-panel/background`).toBe(
           expectedPanelBackground
         );
@@ -1174,7 +1177,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           `${runtime}/dark/hover-trigger/rest`
         );
         const darkPanelText = opened.page
-          .getByText('A rounded, flat preview panel.', { exact: true })
+          .getByText(
+            'Host-neutral interaction protocols with bold Neo-Brutalist borders and hard shadows.',
+            { exact: true }
+          )
           .last();
         await darkTrigger.focus();
         await expectVisibility(darkPanelText, true, `${runtime}/dark/hover-focus-open`);
@@ -1213,17 +1219,22 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkPanelSurface.animationDuration,
           `${runtime}/dark/hover-panel/animation-duration`
         ).toBe('0.2s');
-        expectHardFrame(darkPanelSurface, 'none', 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
-        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
-        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
-          'rgba(0, 0, 0, 0)'
-        );
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-background',
         ]);
         const [darkPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
+        expectHardFrame(
+          darkPanelSurface,
+          '3px',
+          darkPanelForeground,
+          `${runtime}/dark/hover-panel`
+        );
+        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
+        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
+          'rgba(0, 0, 0, 0)'
+        );
         expect(darkPanelSurface.backgroundColor, `${runtime}/dark/hover-panel/background`).toBe(
           darkPanelBackground
         );
