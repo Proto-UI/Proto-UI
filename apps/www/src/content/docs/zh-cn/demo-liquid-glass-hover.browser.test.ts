@@ -1150,12 +1150,13 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                     const reduced = await sample('reduced-motion', { quality: 'self-optical' });
                     expect(reduced.facts.motion).toBe('static');
                     if (part === 'submit' || part === 'reset') {
-                      // Reduced-motion Form candidates omit deformation and paint on the host.
+                      // The complete Base-owned candidate retains its neutral carrier;
+                      // the Host suppresses elastic motion while keeping static material.
                       expect(reduced.facts.phase).toBe('rest');
-                      expect(reduced.facts.receipt.contact).toBeNull();
-                      expect(reduced.facts.receipt.contactSession).toBeNull();
-                      expect(reduced.facts.carrier.marker).toBeNull();
-                      opticalPaint(reduced.facts);
+                      expect(reduced.facts.receipt.contact).toBe('rest');
+                      expect(reduced.facts.receipt.contactSession).toMatch(/^\d+$/);
+                      expect(reduced.facts.carrier.marker).toBe('contact-v1');
+                      optical(reduced);
                     } else {
                       expect(reduced.facts.receipt.contact).toBe('rest');
                     }
