@@ -108,12 +108,17 @@ export type HookSourceSummaryContext = {
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
   /** Keep native Def ownership separate from ordinary source values. */
   isNativeSetupDefinition(parameter: ts.ParameterDeclaration): boolean;
-  /** Follow a closed synchronous helper return without granting AsHook provenance. */
+  /**
+   * Follow a closed synchronous helper return without granting AsHook provenance.
+   * The optional argument resolver carries this caller's source State identity
+   * only; it never certifies the borrowed object's methods or State values.
+   */
   resolveReturnedLocalState(
     node: ts.CallExpression,
     source: ts.SourceFile,
     nativeDefinitions: ReadonlySet<ts.Node>,
-    ownerInvocation?: ts.CallExpression
+    ownerInvocation?: ts.CallExpression,
+    resolveStateArgument?: (argument: ts.Expression) => HookSourceState | null
   ): HookSourceReturnedLocalState | null;
   /** Resolve a stable synchronous authored function without executing it. */
   resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
@@ -1746,7 +1751,8 @@ function createHookSourceSummaryContextInternal(
     call: ts.CallExpression,
     source: ts.SourceFile,
     nativeDefinitions: ReadonlySet<ts.Node>,
-    ownerInvocation?: ts.CallExpression
+    ownerInvocation?: ts.CallExpression,
+    resolveStateArgument?: (argument: ts.Expression) => HookSourceState | null
   ): HookSourceReturnedLocalState | null => {
     if (!nativeDefinitions.size) return null;
     const module = moduleForSource(source);
@@ -2062,13 +2068,7 @@ function createHookSourceSummaryContextInternal(
       );
     };
 
-    const registeredCallback = (
-      fn: ts.FunctionLikeDeclaration,
-      owner: ts.FunctionLikeDeclaration,
-      module: Module,
-      definitions: ReadonlySet<ts.Node>,
-      requireExactSlot = false
-    ): boolean => {
+    const closedCallbackSyntax = (fn: ts.FunctionLikeDeclaration, module: Module): boolean => {
       if (!synchronousBody(fn) || opaqueFunctionSyntax(fn)) return false;
       // A named function expression has a second, private self binding. The
       // const/inline reference check below cannot close uses of that binding.
@@ -2088,6 +2088,17 @@ function createHookSourceSummaryContextInternal(
         visit(fn.body!);
         if (used) return false;
       }
+      return true;
+    };
+    const registeredCallback = (
+      fn: ts.FunctionLikeDeclaration,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>,
+      requireExactSlot = false,
+      relayCall?: (reference: ts.Identifier, callback: ts.FunctionLikeDeclaration) => boolean
+    ): boolean => {
+      if (!closedCallbackSyntax(fn, module)) return false;
       const admitted = (reference: ts.Node): boolean => {
         const value = outerValue(reference);
         const call = value.parent;
@@ -2178,8 +2189,9 @@ function createHookSourceSummaryContextInternal(
       const visit = (node: ts.Node): void => {
         if (!closed || ts.isTypeNode(node)) return;
         if (isValueIdentifier(node) && bindingDeclaration(node, module) === declaration) {
-          used = true;
-          closed = ts.findAncestor(node, isFunctionLike) === owner && admitted(node);
+          const registration = ts.findAncestor(node, isFunctionLike) === owner && admitted(node);
+          used ||= registration;
+          closed = registration || !!relayCall?.(node, fn);
         }
         ts.forEachChild(node, visit);
       };
@@ -2234,6 +2246,141 @@ function createHookSourceSummaryContextInternal(
           return null;
       }
       const next = new Set(active).add(helper.fn);
+      const simpleArgument = (node: ts.Node): boolean => {
+        const value = unwrap(node);
+        return (
+          ts.isIdentifier(value) ||
+          isStringValue(value) ||
+          ts.isNumericLiteral(value) ||
+          [
+            ts.SyntaxKind.TrueKeyword,
+            ts.SyntaxKind.FalseKeyword,
+            ts.SyntaxKind.NullKeyword,
+          ].includes(value.kind) ||
+          ((ts.isPropertyAccessExpression(value) || ts.isElementAccessExpression(value)) &&
+            !value.questionDotToken &&
+            memberName(value) !== null &&
+            simpleArgument(value.expression))
+        );
+      };
+      const simpleWatchCallback = (expression: ts.Node): ts.FunctionLikeDeclaration | null => {
+        const fn = unwrap(expression);
+        return (ts.isArrowFunction(fn) || ts.isFunctionExpression(fn)) &&
+          ts.findAncestor(fn.parent, isFunctionLike) === helper.fn &&
+          closedCallbackSyntax(fn, helper.module) &&
+          fn.parameters.length <= 2 &&
+          fn.parameters.every(
+            (parameter) =>
+              ts.isIdentifier(parameter.name) && !parameter.initializer && !parameter.dotDotDotToken
+          )
+          ? fn
+          : null;
+      };
+      const receiverFacts = new Map<ts.ParameterDeclaration, boolean>();
+      const closedBorrowedReceiver = (parameter: ts.ParameterDeclaration): boolean => {
+        const cached = receiverFacts.get(parameter);
+        if (cached !== undefined) return cached;
+        const index = helper.fn.parameters.indexOf(parameter);
+        const argument = invocation.arguments[index];
+        // The caller supplies source identity for this exact replay only. A
+        // State declaration does not prove that its writable watch method is
+        // native, or say anything about callback timing or current values.
+        if (
+          invocation !== call ||
+          !resolveStateArgument ||
+          !argument ||
+          helper.fn.parameters.length !== invocation.arguments.length ||
+          !invocation.arguments.every(simpleArgument) ||
+          !ts.isIdentifier(parameter.name) ||
+          parameter.initializer ||
+          parameter.dotDotDotToken ||
+          hasBindingWrite(parameter.name, helper.module) ||
+          !resolveStateArgument(argument)
+        )
+          return false;
+        let closed = true;
+        const visit = (node: ts.Node): void => {
+          if (!closed || ts.isTypeNode(node)) return;
+          if (isValueIdentifier(node) && bindingDeclaration(node, helper.module) === parameter) {
+            const value = outerValue(node);
+            const parent = value.parent;
+            if (
+              ts.isBinaryExpression(parent) &&
+              ts.findAncestor(parent, isFunctionLike) === helper.fn &&
+              ((parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken &&
+                parent.left === value) ||
+                (parent.operatorToken.kind === ts.SyntaxKind.InKeyword &&
+                  parent.right === value &&
+                  isStringValue(unwrap(parent.left)) &&
+                  (unwrap(parent.left) as ts.StringLiteralLike).text === 'watch'))
+            )
+              return;
+            if (
+              (ts.isPropertyAccessExpression(parent) || ts.isElementAccessExpression(parent)) &&
+              parent.expression === value
+            ) {
+              const operation = outerValue(parent).parent;
+              if (
+                ts.isCallExpression(operation) &&
+                operation.expression === outerValue(parent) &&
+                !operation.questionDotToken
+              ) {
+                if (memberName(parent) === 'get' && operation.arguments.length === 0) return;
+                if (
+                  memberName(parent) === 'watch' &&
+                  !parent.questionDotToken &&
+                  operation.arguments.length === 1 &&
+                  ts.findAncestor(operation, isFunctionLike) === helper.fn &&
+                  simpleWatchCallback(operation.arguments[0]!)
+                )
+                  return;
+              }
+            }
+            closed = false;
+            return;
+          }
+          ts.forEachChild(node, visit);
+        };
+        visit(body);
+        receiverFacts.set(parameter, closed);
+        return closed;
+      };
+      const borrowedWatchRelay = (
+        reference: ts.Identifier,
+        callback: ts.FunctionLikeDeclaration
+      ): boolean => {
+        const value = outerValue(reference);
+        const relay = value.parent;
+        const wrapper = ts.findAncestor(reference, isFunctionLike);
+        if (
+          callback.parameters.length !== 0 ||
+          !ts.isCallExpression(relay) ||
+          relay.expression !== value ||
+          relay.questionDotToken ||
+          relay.arguments.length !== 0 ||
+          !ts.isExpressionStatement(outerValue(relay).parent) ||
+          !wrapper ||
+          simpleWatchCallback(wrapper) !== wrapper
+        )
+          return false;
+        const supplied = outerValue(wrapper);
+        const registration = supplied.parent;
+        if (
+          !ts.isCallExpression(registration) ||
+          registration.questionDotToken ||
+          registration.arguments.length !== 1 ||
+          registration.arguments[0] !== supplied ||
+          memberName(registration.expression) !== 'watch'
+        )
+          return false;
+        const receiver = memberOwner(registration.expression);
+        const parameter = receiver && bindingDeclaration(receiver, helper.module);
+        // Only a direct, discarded zero-argument call crosses this boundary.
+        // The private callback still has a native registration and every one
+        // of its other references is closed. Neither function nor State
+        // identity can be returned, stored, aliased or handed to the receiver.
+        return !!parameter && ts.isParameter(parameter) && closedBorrowedReceiver(parameter);
+      };
       const closedState = (declaration: ts.VariableDeclaration, seen: Set<ts.Node>): boolean => {
         if (
           !ts.isIdentifier(declaration.name) ||
@@ -2264,7 +2411,15 @@ function createHookSourceSummaryContextInternal(
               ['get', 'set', 'setDefault'].includes(member.path[0]!) &&
               (callback === helper.fn ||
                 (callback &&
-                  registeredCallback(callback, helper.fn, helper.module, localDefinitions)))
+                  (registeredCallback(callback, helper.fn, helper.module, localDefinitions) ||
+                    registeredCallback(
+                      callback,
+                      helper.fn,
+                      helper.module,
+                      localDefinitions,
+                      true,
+                      borrowedWatchRelay
+                    ))))
             )
               return;
             closed = false;
@@ -7399,9 +7554,21 @@ function createHookSourceSummaryContextInternal(
       moduleContext.withSynchronousIdentityQuery(() => resolveCall(node, source)),
     isNativeSetupDefinition: (parameter) =>
       moduleContext.withSynchronousIdentityQuery(() => isNativeSetupDefinition(parameter)),
-    resolveReturnedLocalState: (node, source, nativeDefinitions, ownerInvocation) =>
+    resolveReturnedLocalState: (
+      node,
+      source,
+      nativeDefinitions,
+      ownerInvocation,
+      resolveStateArgument
+    ) =>
       moduleContext.withSynchronousIdentityQuery(() =>
-        resolveReturnedLocalState(node, source, nativeDefinitions, ownerInvocation)
+        resolveReturnedLocalState(
+          node,
+          source,
+          nativeDefinitions,
+          ownerInvocation,
+          resolveStateArgument
+        )
       ),
     resolveSourceFunction: (node, source) => {
       const resolved = functionFor(node, moduleForSource(source));

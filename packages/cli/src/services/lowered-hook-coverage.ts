@@ -2583,7 +2583,14 @@ function scanRuleStateSource(
         value,
         source,
         nativeDefinitions,
-        closure?.invocation?.call ?? invocations.at(-1)?.call
+        closure?.invocation?.call ?? invocations.at(-1)?.call,
+        (argument) => {
+          const candidates = sourceResolveCandidates(argument, lookupScope);
+          const resolution = candidates.length === 1 ? candidates[0] : null;
+          return resolution?.matched && resolution.value.kind === 'state'
+            ? resolution.value.state
+            : null;
+        }
       );
       if (returned && exposureFor(name.text, scope) === undefined) {
         declare(scope, name.text, {
