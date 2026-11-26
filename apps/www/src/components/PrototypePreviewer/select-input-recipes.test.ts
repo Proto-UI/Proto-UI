@@ -93,46 +93,94 @@ for (const [family, demo] of Object.entries({
         if (!cleaned) await view.destroy();
       });
       const x = (name: string) => api.getExposes(name) as any;
-      await vi.waitFor(() => expect(x('select').value.get()).toBe('alpha'));
-      expect(x('select').getCollectionCount()).toBe(18);
-      expect(x('item3').disabled.get()).toBe(true);
-      api.call('select', 'openDropdown', 'recipe');
-      await vi.waitFor(() =>
-        expect(refs[family === 'brutalist' ? 'selectContent' : 'selectViewport']).toBeDefined()
-      );
-      const viewport = refs[family === 'brutalist' ? 'selectContent' : 'selectViewport'];
-      expect(viewport.style.maxHeight).toBe('180px');
-      expect(viewport.style.overflowY).toBe('auto');
-      refs.toggleRefusal.click();
+      if (family === 'base') {
+        await vi.waitFor(() => expect(x('select').value.get()).toBe('alpha'));
+        expect(x('select').getCollectionCount()).toBe(18);
+        expect(x('item3').disabled.get()).toBe(true);
+        api.call('select', 'openDropdown', 'recipe');
+        await vi.waitFor(() => expect(refs.selectViewport).toBeDefined());
+        const viewport = refs.selectViewport;
+        expect(viewport.style.maxHeight).toBe('180px');
+        expect(viewport.style.overflowY).toBe('auto');
+        refs.toggleRefusal.click();
+        await flush();
+        expect(refs.selectPolicy.textContent).toContain('controlled-refusal');
+        expect(
+          api.call('select', 'requestValue', {
+            value: 'beta',
+            textValue: 'beta',
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await flush();
+        expect(x('select').value.get()).toBe('alpha');
+        expect(refs.selectRequests.textContent).toContain('requested=beta');
+        refs.toggleRefusal.click();
+        await flush();
+        expect(
+          api.call('select', 'requestValue', {
+            value: 'gamma',
+            textValue: 'gamma',
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await flush();
+        expect(x('select').value.get()).toBe('gamma');
+        expect(x('item2').selected.get()).toBe(true);
+        expect(refs.selectPolicy.textContent).toContain('owner=uncontrolled value=gamma');
+        const content = refs.selectContent;
+        await view.destroy();
+        cleaned = true;
+        await flush();
+        expect(host.childElementCount).toBe(0);
+        expect(content.isConnected).toBe(false);
+        return;
+      }
+
+      if (family === 'shadcn') {
+        await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('system'));
+        expect(x('controlledSelect').getCollectionCount()).toBe(4);
+        expect(refs.selectedTheme.textContent).toContain('Selected: System');
+        expect(
+          api.call('controlledSelect', 'requestValue', {
+            value: 'dark',
+            textValue: 'Dark',
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('dark'));
+        expect(refs.selectedTheme.textContent).toContain('Selected: Dark');
+        refs.resetTheme.click();
+        await vi.waitFor(() => expect(x('controlledSelect').value.get()).toBe('system'));
+        expect(refs.selectedTheme.textContent).toContain('Selected: System');
+        await view.destroy();
+        cleaned = true;
+        await flush();
+        expect(host.childElementCount).toBe(0);
+        return;
+      }
+
+      await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('jst'));
+      expect(x('timezoneSelect').getCollectionCount()).toBe(12);
+      api.call('timezoneSelect', 'openDropdown', 'recipe');
       await flush();
-      expect(refs.selectPolicy.textContent).toContain('controlled-refusal');
+      const content = document.body.querySelector<HTMLElement>('[role="listbox"]');
+      expect(content).not.toBeNull();
+      expect(content!.style.maxHeight).toBe('200px');
+      expect(content!.style.overflowY).toBe('auto');
       expect(
-        api.call('select', 'requestValue', {
-          value: 'beta',
-          textValue: 'beta',
+        api.call('timezoneSelect', 'requestValue', {
+          value: 'est',
+          textValue: 'Eastern Standard Time (EST)',
           reason: 'programmatic',
         })
       ).toBe(true);
-      await flush();
-      expect(x('select').value.get()).toBe('alpha');
-      expect(refs.selectRequests.textContent).toContain('requested=beta');
-      refs.toggleRefusal.click();
-      await flush();
-      expect(
-        api.call('select', 'requestValue', {
-          value: 'gamma',
-          textValue: 'gamma',
-          reason: 'programmatic',
-        })
-      ).toBe(true);
-      await flush();
-      expect(x('select').value.get()).toBe('gamma');
-      expect(x('item2').selected.get()).toBe(true);
-      expect(refs.selectPolicy.textContent).toContain('owner=uncontrolled value=gamma');
-      const content = refs.selectContent;
+      await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('est'));
+      refs.resetTimezone.click();
+      await vi.waitFor(() => expect(x('timezoneSelect').value.get()).toBe('jst'));
       await view.destroy();
       cleaned = true;
       await flush();
       expect(host.childElementCount).toBe(0);
-      expect(content.isConnected).toBe(false);
+      expect(content!.isConnected).toBe(false);
     });
