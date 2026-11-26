@@ -387,7 +387,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `28e2afbcee6a6a538157cc7714e8ffaea08394df89bdae390ea10ab55e209479` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
-| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `291cdd524d60f57f65fca7ada36d23772a131edcef647adce619e58236b727ec` |
+| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `1c0c2f4bf6b32a49c21f15211bd3b7b69aef4a47fc9f99c90900c5b49de45f25` |
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `65369290f4ba40a5f88a9b1bf38005aed3c7a735b471fe91fcba39dd1a9d0889` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel`, `www.docs.code-panel-expand` | `8ee4c63e5b1581afcade0b02ada62710ad3da7538a986471fc176ff0f3582cc7` |

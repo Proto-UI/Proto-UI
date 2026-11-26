@@ -308,7 +308,10 @@ for (const [interruption, expectedCode] of [
 it('never reacquires a vanished group when its numeric PGID is reused', options, async (t) => {
   const temporary = mkdtempSync(path.join(tmpdir(), 'proto-runtime-reused-group-'));
   const table = path.join(temporary, 'table');
-  writeFileSync(path.join(temporary, 'ps'), '#!/bin/sh\n/bin/cat "$PUI_PROCESS_TABLE"\n');
+  writeFileSync(
+    path.join(temporary, 'ps'),
+    '#!/bin/sh\nwhile IFS= read -r line || [ -n "$line" ]; do printf \'%s\\n\' "$line"; done < "$PUI_PROCESS_TABLE"\n'
+  );
   chmodSync(path.join(temporary, 'ps'), 0o755);
   const originalPath = process.env.PATH;
   const originalTable = process.env.PUI_PROCESS_TABLE;

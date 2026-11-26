@@ -5811,7 +5811,13 @@ export async function collectSourceFiles(dir) {
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === 'dist' || entry.name === 'test' || entry.name === 'node_modules') continue;
+      if (
+        entry.name === 'dist' ||
+        entry.name.startsWith('dist.') ||
+        entry.name === 'test' ||
+        entry.name === 'node_modules'
+      )
+        continue;
       out.push(...(await collectSourceFiles(fullPath)));
       continue;
     }

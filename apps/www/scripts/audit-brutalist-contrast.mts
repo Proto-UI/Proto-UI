@@ -213,7 +213,7 @@ function plannedStates(family: string): string[] {
   if (['dropdown-menu', 'select'].includes(family))
     states.push('item-focus-first', 'item-focus-last');
   if (family === 'dropdown-menu')
-    for (const variant of ['default', 'logout'])
+    for (const variant of ['default', 'logout', 'destructive'])
       states.push(`item-${variant}-hover`, `item-${variant}-pointer-held`);
   if (family === 'select')
     for (const selection of ['selected', 'unselected'])
@@ -1901,6 +1901,15 @@ function dropdownPointerRows() {
       pair: 'main',
       selected: null,
     },
+    {
+      name: 'Delete',
+      ref: 'deleteAction',
+      value: 'delete',
+      shortcut: null,
+      identity: 'destructive',
+      pair: 'destructive',
+      selected: null,
+    },
   ];
 }
 async function dropdownPointerTarget(
@@ -2129,7 +2138,9 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
     // observed item in this exact popup before sending End/Home; then require
     // focus on the OTHER authored row, rather than merely hoping the key ran.
     const role = isSelect ? 'option' : 'menuitem';
-    const otherRow = rows.find((candidate) => candidate !== row)!;
+    // Profile moves End to the actual last Delete Item; later rows move Home.
+    // Select retains its explicit Pineapple edge below.
+    const otherRow = row === rows[0] ? rows[rows.length - 1]! : rows[0]!;
     // The current public fruit menu has five options. End reaches Pineapple;
     // Banana is still the unselected pointer target, but is no longer an edge.
     const otherName = isSelect && row === rows[0] ? 'Pineapple' : otherRow.name;

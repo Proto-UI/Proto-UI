@@ -291,16 +291,35 @@ async function expectCopyControls(
     await page.bringToFront();
     await control.waitFor({ state: 'visible' });
     await page.mouse.move(0, 0);
-    await control.evaluate((element: HTMLElement) => element.blur());
+    await control.evaluate(async (element: HTMLElement) => {
+      element.blur();
+      // Let Chromium thaw and commit any background-tab CSS transition before polling.
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+    });
     await expect
-      .poll(() =>
-        control.evaluate((element) =>
-          element
-            .getAnimations()
-            .every((animation) => !animation.pending && animation.playState !== 'running')
-        )
+      .poll(
+        () =>
+          control.evaluate((element) =>
+            element
+              .getAnimations()
+              .filter((animation) => animation.pending || animation.playState === 'running')
+              .map((animation) => ({
+                playState: animation.playState,
+                pending: animation.pending,
+                iterations: animation.effect?.getComputedTiming().iterations ?? null,
+                transitionProperty:
+                  'transitionProperty' in animation
+                    ? (animation as CSSTransition).transitionProperty
+                    : null,
+                animationName:
+                  'animationName' in animation ? (animation as CSSAnimation).animationName : null,
+              }))
+          ),
+        { timeout: 5_000 }
       )
-      .toBe(true);
+      .toEqual([]);
     const facts = await control.evaluate((element) => {
       const style = getComputedStyle(element);
       const icon = element.querySelector('svg')!;
@@ -1059,10 +1078,12 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
       ).toEqual([`${baseUrl}${QUICK_START}`]);
       const expectedInstall = new Map<string, CodeStyleFacts & { radius: string }>();
       for (const theme of ['light', 'dark']) {
-        await page.evaluate((mode) => {
+        await ecPage.bringToFront();
+        await ecPage.evaluate((mode) => {
           document.documentElement.dataset.theme = mode;
         }, theme);
-        await ecPage.evaluate((mode) => {
+        await page.bringToFront();
+        await page.evaluate((mode) => {
           document.documentElement.dataset.theme = mode;
         }, theme);
         const facts = await expectSurfaces(page, ecPage);
