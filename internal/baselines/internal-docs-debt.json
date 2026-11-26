@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "description": "Frozen legacy internal-docs debt baseline. New files must pass with zero errors; existing files may only reduce debt. Refresh via `pnpm check:internal-docs:baseline` after cleaning debt.",
-  "totalFilesWithDebt": 1229,
-  "totalViolations": 8939,
+  "totalFilesWithDebt": 1227,
+  "totalViolations": 8923,
   "files": {
     "internal/agent-operations/autonomous-tasks.md": {
       "prose/max-paragraph-length": 4,
@@ -1600,11 +1600,6 @@
       "internal/no-inline-forensics": 1,
       "internal/no-local-paths": 1,
       "internal/size-budget": 1
-    },
-    "internal/records/2026-11-24-sprint7-knowledge-comparison.md": {
-      "internal/no-inline-forensics": 5,
-      "prose/max-paragraph-length": 2,
-      "prose/structural-rhythm": 1
     },
     "internal/records/2026-11-24-sprint7-zero-marginal-cost-study.md": {
       "internal/no-inline-forensics": 2,
@@ -3986,12 +3981,6 @@
       "internal/size-budget": 1,
       "prose/max-paragraph-length": 3,
       "prose/structural-rhythm": 3
-    },
-    "internal/records/archive/2026-11/2026-11-16-compiler-native-acceptance.zh-CN.md": {
-      "internal/no-inline-forensics": 1,
-      "prose/max-paragraph-length": 4,
-      "prose/no-stacked-negatives": 1,
-      "prose/structural-rhythm": 2
     },
     "internal/records/archive/2026-11/2026-11-16-dart-ordinary-call-recovery.md": {
       "internal/no-inline-forensics": 1,
