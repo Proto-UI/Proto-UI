@@ -118,6 +118,7 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/prototypes/base/test/async-region.browser.test.ts',
   'packages/prototypes/base/test/toast-pointer.browser.test.ts',
   'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
+  'packages/adapters/web-component/test/focus-entry-potential-dependencies.browser.test.ts',
   'packages/adapters/react/test/focus-entry-readiness.browser.test.ts',
   'packages/adapters/vue/test/focus-request-readiness.browser.test.ts',
   'apps/www/test/template-style.browser.test.ts',
@@ -346,7 +347,11 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 // Header suite alone took 641s rather than its 52s fallback. Preserve the 900s
 // deadline and complete inventory; use more bounded, less concurrent workers.
 // These estimates are planning admission, never executed acceptance evidence.
-export const BROWSER_SHARD_COUNT = 18;
+// Adding native focus dependency coverage takes the complete inventory above
+// eighteen workers' capacity, even with a measured local planning estimate.
+// Retain every historical cost and the default reserve for the new suite;
+// add one bounded worker while CI's maximum concurrency remains unchanged.
+export const BROWSER_SHARD_COUNT = 19;
 export const BROWSER_EXECUTION_BUDGET_SECONDS = 900;
 export const BROWSER_SETUP_RESERVE_SECONDS = 180;
 export const BROWSER_MAX_ESTIMATED_SECONDS =
