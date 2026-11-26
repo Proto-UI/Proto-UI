@@ -351,19 +351,17 @@ describe.each(overlays)('Liquid $name functional popup ownership', (parts) => {
         });
         expect(mask.frames).toEqual([]);
       } else if (mask) expectOrdinary(mask);
-      if (parts.name === 'AlertDialog' || parts.name === 'Drawer') {
-        const triggerCandidate = {
-          intent: 'liquid-glass',
-          variant: 'regular',
-          deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
-        };
-        expect(trigger.material()).toEqual({ slot, candidates: [triggerCandidate] });
-        trigger.set({ material: 'opaque' });
-        expect(trigger.material()).toEqual({ slot, candidates: [] });
-        expectOpaqueFallback(trigger);
-        trigger.set({});
-        expect(trigger.material()).toEqual({ slot, candidates: [triggerCandidate] });
-      } else expectOrdinary(trigger);
+      const triggerCandidate = {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      };
+      expect(trigger.material()).toEqual({ slot, candidates: [triggerCandidate] });
+      trigger.set({ material: 'opaque' });
+      expect(trigger.material()).toEqual({ slot, candidates: [] });
+      expectOpaqueFallback(trigger);
+      trigger.set({});
+      expect(trigger.material()).toEqual({ slot, candidates: [triggerCandidate] });
       expect(content.material()).toEqual({ slot, candidates: [] });
       if (parts.name === 'Drawer') {
         await vi.advanceTimersByTimeAsync(0);
@@ -433,8 +431,7 @@ describe.each(overlays)('Liquid $name functional popup ownership', (parts) => {
       expect(trigger.exposes.disabled.get()).toBe(true);
       trigger.input('press.commit');
       expect(root.exposes.open.get()).toBe(false);
-      if (parts.name === 'AlertDialog' || parts.name === 'Drawer')
-        expect(trigger.material().candidates).toEqual([]);
+      expect(trigger.material().candidates).toEqual([]);
       if (parts.name === 'Drawer') {
         await vi.advanceTimersByTimeAsync(0);
         expect(content.exposes.transitionState.get()).toBe('closed');
@@ -536,7 +533,12 @@ describe.each(menuBars)('Liquid $name distinct popup identity', (parts) => {
         panels.push(panel);
         items.push(item);
       }
-      for (const unit of [root, ...triggers, ...items]) expectOrdinary(unit);
+      for (const unit of [...triggers, ...items]) expectOrdinary(unit);
+      expect(root.material()).toEqual({
+        slot,
+        candidates: [{ intent: 'liquid-glass', variant: 'regular' }],
+      });
+      expectOpaqueFallback(root);
       expect(panels.map((panel) => panel.material().candidates)).toEqual([[candidate], []]);
       for (const panel of panels) expectOpaqueFallback(panel);
       triggers[1].input('press.commit');
@@ -841,7 +843,7 @@ describe.each(searchFamilies)('Liquid $name single-editor source consumer', (par
   });
 });
 
-it('inline Command content has no material while retaining its visible listbox', async () => {
+it('inline Command content declares regular glass with opaque opt-out while retaining its visible listbox', async () => {
   const h = runtimeHarness();
   try {
     const root = h.create(command.commandRoot);
@@ -851,15 +853,25 @@ it('inline Command content has no material while retaining its visible listbox',
     const empty = h.create(command.commandEmpty, {}, content.target);
     await empty.session.mount();
     expectOrdinary(root);
-    expectOrdinary(content);
+    expect(content.material()).toEqual({
+      slot,
+      candidates: [{ intent: 'liquid-glass', variant: 'regular' }],
+    });
     expectOrdinary(empty);
     expect(root.exposes.open.get()).toBe(true);
     expect(content.exposes.open.get()).toBe(true);
     expect(empty.exposes.visible.get()).toBe(true);
     expectOpaqueFallback(content);
+    content.set({ material: 'opaque' });
+    expect(content.material()).toEqual({ slot, candidates: [] });
+    content.set({});
+    expect(content.material()).toEqual({
+      slot,
+      candidates: [{ intent: 'liquid-glass', variant: 'regular' }],
+    });
     root.session.invokeInCallbackScope(() => root.exposes.close());
     expect(content.exposes.open.get()).toBe(true);
-    expectOrdinary(content);
+    expect(content.material().candidates).toEqual([{ intent: 'liquid-glass', variant: 'regular' }]);
   } finally {
     await h.dispose();
   }

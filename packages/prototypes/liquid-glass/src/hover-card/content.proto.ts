@@ -65,29 +65,64 @@ export default definePrototype<LiquidGlassHoverCardContentProps, HoverCardConten
       intent: (i) => i.feedback.style.use(tw('shadow-xl')),
     });
 
-    // Fluid enter/leave keyframes; CSS output honors prefers-reduced-motion.
+    // Keep entry/leave keyframes inside Base's finite transition phases so no
+    // forwards-filled transform blocks optical compositing at rest.
     def.rule({
-      when: (w) => w.state(open).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
     });
     def.rule({
-      when: (w) => w.state(open).eq(false),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(false),
+          w.state(behavior.asTransition.transitionState).eq('leaving'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
     });
     def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('bottom')),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference'),
+          w.prop('side').eq('bottom')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-top-2')),
     });
     def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('top')),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference'),
+          w.prop('side').eq('top')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-bottom-2')),
     });
     def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('left')),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference'),
+          w.prop('side').eq('left')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-right-2')),
     });
     def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('right')),
+      when: (w) =>
+        w.all(
+          w.state(open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference'),
+          w.prop('side').eq('right')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-left-2')),
     });
 

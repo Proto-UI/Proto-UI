@@ -506,6 +506,26 @@ describe('progressive native decoration', () => {
     expect(document.querySelectorAll('[data-site-link-content]')).toHaveLength(3);
   });
 
+  it('finishes progressive navigation when only overdue idle callbacks are delivered', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    vi.stubGlobal(
+      'requestIdleCallback',
+      (callback: IdleRequestCallback, options?: IdleRequestOptions) => {
+        if (options?.timeout === undefined) return 0;
+        return window.setTimeout(
+          () => callback({ didTimeout: true, timeRemaining: () => 0 }),
+          options.timeout
+        );
+      }
+    );
+    vi.stubGlobal('cancelIdleCallback', (task: number) => window.clearTimeout(task));
+    releases.push(initSiteNativeControls(document, { progressive: true }));
+
+    expect(document.querySelector('[data-site-link-enhanced]')).toBeNull();
+    await vi.runAllTimersAsync();
+    expect(document.querySelectorAll('[data-site-link-enhanced]')).toHaveLength(3);
+  });
+
   it.each([false, true])(
     'completes or cancels the timer fallback without idle APIs: cancel=%s',
     async (cancel) => {

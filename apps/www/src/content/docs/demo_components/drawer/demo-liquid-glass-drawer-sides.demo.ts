@@ -2,17 +2,31 @@ import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 const SIDES = [
   { side: 'top', label: 'Top', title: 'Top Sheet', description: 'Slides down from the top edge.' },
-  { side: 'right', label: 'Right', title: 'Right Sheet', description: 'Slides in from the right edge.' },
-  { side: 'bottom', label: 'Bottom', title: 'Bottom Sheet', description: 'Slides up from the bottom edge.' },
-  { side: 'left', label: 'Left', title: 'Left Sheet', description: 'Slides in from the left edge.' },
+  {
+    side: 'right',
+    label: 'Right',
+    title: 'Right Sheet',
+    description: 'Slides in from the right edge.',
+  },
+  {
+    side: 'bottom',
+    label: 'Bottom',
+    title: 'Bottom Sheet',
+    description: 'Slides up from the bottom edge.',
+  },
+  {
+    side: 'left',
+    label: 'Left',
+    title: 'Left Sheet',
+    description: 'Slides in from the left edge.',
+  },
 ] as const;
 
 export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex min-w-0 w-full flex-wrap items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex min-w-0 w-full flex-wrap items-center justify-center gap-3',
     children: SIDES.map((item) => ({
       kind: 'proto' as const,
       prototypeId: 'liquid-glass-drawer-root',

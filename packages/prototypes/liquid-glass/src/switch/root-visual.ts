@@ -31,7 +31,7 @@ export function setupLiquidSwitchRootVisual(
   // The Thumb paints the moving circle; this track owns its state colors.
   def.feedback.style.use(
     tw(
-      'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border bg-muted text-foreground px-0.5 outline-none select-none cursor-pointer transition-colors duration-150 ease-in-out'
+      'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border bg-muted text-foreground px-0.5 outline-none select-none cursor-pointer transition-shadow duration-150 ease-in-out'
     )
   );
   def.rule({

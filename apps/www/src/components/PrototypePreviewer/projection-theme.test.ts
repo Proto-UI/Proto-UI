@@ -236,6 +236,49 @@ describe('Website projection theme inputs', () => {
     cleanup();
   });
 
+  it('shares the native color preference listener until the last projection stops watching', async () => {
+    const media = new EventTarget() as EventTarget & { matches: boolean };
+    media.matches = false;
+    const add = vi.spyOn(media, 'addEventListener');
+    const remove = vi.spyOn(media, 'removeEventListener');
+    const matchMedia = vi.spyOn(window, 'matchMedia').mockReturnValue(media as MediaQueryList);
+    const first = document.body.appendChild(document.createElement('div'));
+    const second = document.body.appendChild(document.createElement('div'));
+    const onFirst = vi.fn();
+    const onSecond = vi.fn();
+    const offFirst = watchProjectionThemeSurfaceStyle('brutalist', first, onFirst);
+    const offSecond = watchProjectionThemeSurfaceStyle('brutalist', second, onSecond);
+    try {
+      expect(add).toHaveBeenCalledTimes(1);
+      expect(onFirst).toHaveBeenCalledTimes(1);
+      expect(onSecond).toHaveBeenCalledTimes(1);
+
+      offFirst();
+      expect(remove).not.toHaveBeenCalled();
+      media.matches = true;
+      media.dispatchEvent(new Event('change'));
+      await vi.waitFor(() => {
+        expect(onSecond).toHaveBeenLastCalledWith(
+          expect.objectContaining({ '--pui-background': BRUTALIST_THEME.dark.background })
+        );
+      });
+      expect(onFirst).toHaveBeenCalledTimes(1);
+
+      offSecond();
+      expect(remove).toHaveBeenCalledTimes(1);
+      const offNext = watchProjectionThemeSurfaceStyle('brutalist', second, vi.fn());
+      expect(add).toHaveBeenCalledTimes(2);
+      offNext();
+      expect(remove).toHaveBeenCalledTimes(2);
+    } finally {
+      offFirst();
+      offSecond();
+      first.remove();
+      second.remove();
+      matchMedia.mockRestore();
+    }
+  });
+
   it('uses an explicit light class before a dark system preference', () => {
     const matchMedia = vi.spyOn(window, 'matchMedia').mockReturnValue({
       matches: true,

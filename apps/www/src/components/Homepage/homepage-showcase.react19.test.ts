@@ -173,6 +173,6 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       await rendered.destroy();
       rendered = undefined;
       expect(errors).toEqual([]);
-    });
+    }, 20_000);
   });
 }

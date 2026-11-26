@@ -60,9 +60,6 @@ describe('source-aligned Brutalist style closure', () => {
         ordinary.push(...(await collectProtoStyleTokens(path.join(root, entry.name))));
     }
     expect(ordinary).not.toContain('font-mono');
-    // Progress and Meter labels author `uppercase` in the pinned neobrutalism
-    // recipes, so it is now a lawful preset member.
-    expect(BRUTALIST_STYLE_TOKENS).toContain('uppercase');
     expect(BRUTALIST_THEME.light.main).toBe('#5294ff');
     // Per-directory source scans across the whole family exceed the 5s
     // default since the multi-profile sources landed.

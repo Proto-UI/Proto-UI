@@ -28,6 +28,8 @@ export type * from '@proto.ui/prototypes-base/date-picker';
 
 export interface LiquidGlassDatePickerTriggerProps extends DatePickerTriggerProps {
   variant?: 'regular' | 'prominent';
+  /** Auto enhances only when all live preference/support inputs are affirmative. */
+  material?: 'auto' | 'opaque';
 }
 
 export interface LiquidGlassDatePickerContentProps extends DatePickerContentProps {
@@ -71,16 +73,16 @@ export const datePickerTrigger = definePrototype<
   setup(def) {
     def.props.define({
       variant: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ variant: 'regular' });
+    def.props.setDefaults({ variant: 'regular', material: 'auto' });
     const behavior = asDatePickerTrigger();
     const states = behavior.getAsHookHandle?.('as-popover-trigger')?.stateHandles;
     if (!states)
       throw new Error('[liquid-glass-date-picker] Required inherited state is unavailable.');
-    // Concentric pill trigger; keeps material neutral so open popup stays the sole glass layer.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full inline-flex min-h-9 items-center justify-between gap-2 rounded-full border border-border px-4 py-2 font-sans text-sm font-medium text-start select-none cursor-pointer shadow-sm'
+        'min-w-0 max-w-full inline-flex min-h-9 items-center justify-between gap-2 rounded-full border border-border px-4 py-2 font-sans text-sm font-medium text-start select-none cursor-pointer shadow-sm transition-shadow'
       )
     );
     (Object.keys(TRIGGER_FILLS) as Array<keyof typeof TRIGGER_FILLS>).forEach((variant) => {
@@ -89,6 +91,36 @@ export const datePickerTrigger = definePrototype<
         intent: (i) => i.feedback.style.use(tw(TRIGGER_FILLS[variant])),
       });
     });
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    for (const variant of ['regular', 'prominent'] as const) {
+      for (const phase of [false, true]) {
+        def.rule({
+          when: (w) =>
+            w.all(
+              w.prop('variant').eq(variant),
+              w.prop('material').eq('auto'),
+              w.state(states.disabled).eq(false),
+              w.state(states.pressed).eq(phase)
+            ),
+          intent: (i) =>
+            i.feedback.material.use({
+              intent: 'liquid-glass',
+              variant: 'regular',
+              ...(variant === 'prominent' ? { tint: 'style-fill' as const } : {}),
+              deformation: {
+                kind: 'press',
+                phase: phase ? 'pressed' : 'rest',
+                contact: 'pointer',
+              },
+            }),
+        });
+      }
+    }
     def.rule({
       when: (w) =>
         w.all(
@@ -128,9 +160,11 @@ export const datePickerContent = definePrototype<
     });
     def.props.setDefaults({ material: 'auto' });
     const behavior = asDatePickerContent();
-    const states = behavior.getAsHookHandle?.('as-popover-content')?.stateHandles;
-    if (!states)
+    const popover = behavior.getAsHookHandle?.('as-popover-content');
+    const states = popover?.stateHandles;
+    if (!popover || !states)
       throw new Error('[liquid-glass-date-picker] Required inherited popup state is unavailable.');
+    popover.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
     // Floating regular Liquid Glass layer with concentric rounded-2xl geometry and subtle inset rim.
     def.feedback.style.use(
       tw(
@@ -138,11 +172,21 @@ export const datePickerContent = definePrototype<
       )
     );
     def.rule({
-      when: (w) => w.state(states.open).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(states.open).eq(true),
+          w.state(popover.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95 duration-150')),
     });
     def.rule({
-      when: (w) => w.state(states.open).eq(false),
+      when: (w) =>
+        w.all(
+          w.state(states.open).eq(false),
+          w.state(popover.asTransition.transitionState).eq('leaving'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95 duration-150')),
     });
     def.rule({

@@ -18,10 +18,10 @@ it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
   }
 );
 
-// P-SHADCN-SURFACE-ACTION-APPEARANCE: explicit passive Rhea paint.
+// P-SHADCN-SURFACE-ACTION-APPEARANCE: explicit passive Luma paint.
 // Literal expectations are independent of shadcnActionAppearance's output.
 for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
-  it(`Shadcn community ${emphasis} selects Rhea while retaining the 44px native target`, () => {
+  it(`Shadcn community ${emphasis} selects Luma while retaining the 44px native target`, () => {
     for (const facts of [
       idle,
       { ...idle, hovered: true },
@@ -31,7 +31,7 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
       idle,
     ]) {
       expect(linkSurfaceProps('shadcn', 'icon', emphasis, facts)).toEqual({
-        actionProfile: 'rhea',
+        actionProfile: 'luma',
         variant:
           emphasis === 'primary' ? 'solid' : emphasis === 'secondary' ? 'secondary' : 'transparent',
         radius: 'none',
@@ -43,7 +43,7 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
         current: false,
       });
       expect(linkTextProps('icon', facts, 'shadcn')).toEqual({
-        actionProfile: 'rhea',
+        actionProfile: 'luma',
         size: 'sm',
         tone: 'inherit',
         weight: 'medium',
@@ -68,12 +68,12 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
   });
 }
 
-it('community opt-in leaves existing Rhea nav, luma actions and ordinary Shadcn rows separate', () => {
+it('community opt-in keeps Luma nav/actions separate from ordinary Shadcn rows', () => {
   expect(linkSurfaceProps('shadcn', 'nav', 'minimal')).toMatchObject({
-    actionProfile: 'rhea',
+    actionProfile: 'luma',
     variant: 'transparent',
   });
-  expect(linkTextProps('nav', idle, 'shadcn')).toMatchObject({ actionProfile: 'rhea' });
+  expect(linkTextProps('nav', idle, 'shadcn')).toMatchObject({ actionProfile: 'luma' });
   expect(linkSurfaceProps('shadcn', 'action', 'primary')).toMatchObject({
     actionProfile: 'luma',
     variant: 'solid',
@@ -113,7 +113,7 @@ it('keeps the current navigation projection family-specific and fact-bound', () 
   expect(satisfiesCurrentProjection('shadcn', current)).toBe(true);
   expect(satisfiesCurrentProjection('brutalist', current)).toBe(true);
   expect(linkTextProps('nav', current, 'shadcn')).toMatchObject({
-    actionProfile: 'rhea',
+    actionProfile: 'luma',
     weight: 'semibold',
     decoration: 'none',
   });

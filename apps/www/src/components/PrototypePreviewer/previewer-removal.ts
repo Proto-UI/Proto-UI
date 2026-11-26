@@ -9,7 +9,8 @@ export function observePreviewerRemoval(body: HTMLElement, check: () => void): (
   let state = bodyObservers.get(body);
   if (!state) {
     const registrations = new Set<Registration>();
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((records) => {
+      if (!records.some((record) => record.removedNodes.length > 0)) return;
       for (const registration of [...registrations]) {
         if (!registrations.has(registration)) continue;
         try {

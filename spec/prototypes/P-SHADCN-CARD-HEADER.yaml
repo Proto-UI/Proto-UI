@@ -11,7 +11,7 @@ statement:
 criteria:
   - id: P-SHADCN-CARD-HEADER-VISUAL
     text:
-      en: Header retains roleless grid/auto-rows-min/two automatic rows and start alignment. New York preserves gap-2/px-6. Rhea uses gap-1.5, theme-capped top corners and inherited default20/sm16 horizontal padding. Explicit divider adds border-b with border ink and matching bottom padding; it does not inspect className or children. Action-dependent columns/container queries remain outside this existing four-part subset.
+      en: Header retains roleless grid/auto-rows-min/two automatic rows and start alignment. New York preserves gap-2/px-6. Rhea uses gap-1.5, theme-capped top corners and inherited default20/sm16 horizontal padding. Luma uses gap-1.5, rounded-t-4xl and inherited default24/sm16 horizontal padding. Explicit divider adds border-b with border ink and matching bottom padding; it does not inspect className or children. Action-dependent columns/container queries remain outside this existing four-part subset.
 dependsOn:
   contracts:
     - C-CORE-SYNTAX-0003
@@ -26,6 +26,9 @@ sources:
   - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
   - path: packages/prototypes/shadcn/test/card.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Add bounded Luma style profile (rounded-t-4xl and default24/sm16 horizontal padding) alongside New York and Rhea.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Project existing passive parts through bounded New York/Rhea shared scope and density; preserve native content ownership and explicit unsupported source features.

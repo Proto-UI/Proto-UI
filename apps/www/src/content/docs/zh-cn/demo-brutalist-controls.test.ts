@@ -15,7 +15,7 @@ const tabsDemo = tabsDemoDefinition as DemoSpec;
 const SWITCH_EXAMPLES = [
   {
     switchRef: 'emailAlertsSwitch',
-    label: 'Email alerts',
+    label: 'Airplane Mode',
   },
   {
     switchRef: 'releaseAlertsSwitch',
@@ -42,7 +42,7 @@ function textContent(node: DemoChild): string {
 }
 
 describe('Brutalist documentation demo state contracts', () => {
-  it('keeps each visible Switch label inside its naming content', () => {
+  it('keeps each Switch accessible name and visible sibling label aligned', () => {
     const nodes = collectNodes(switchDemo.root);
 
     for (const example of SWITCH_EXAMPLES) {
@@ -59,18 +59,17 @@ describe('Brutalist documentation demo state contracts', () => {
         throw new Error(`Missing Switch demo node: ${example.switchRef}`);
       }
 
-      expect((switchNode.className ?? '').split(/\s+/)).toContain('relative');
       const thumb = switchNode.children?.find(
         (child) =>
           typeof child !== 'string' &&
           child.kind === 'proto' &&
           child.prototypeId === 'brutalist-switch-thumb'
       );
-      const visibleLabel = switchNode.children?.find(
+      const accessibleLabel = switchNode.children?.find(
         (child) =>
           typeof child !== 'string' &&
           child.kind === 'box' &&
-          (child.className ?? '').split(/\s+/).includes('absolute')
+          (child.className ?? '').split(/\s+/).includes('sr-only')
       );
 
       expect(thumb).toBeDefined();
@@ -79,12 +78,35 @@ describe('Brutalist documentation demo state contracts', () => {
       }
       expect(textContent(thumb)).toBe('');
 
+      expect(accessibleLabel).toBeDefined();
+      if (
+        !accessibleLabel ||
+        typeof accessibleLabel === 'string' ||
+        accessibleLabel.kind !== 'box'
+      ) {
+        throw new Error(`Missing Switch accessible label: ${example.switchRef}`);
+      }
+      expect(textContent(accessibleLabel)).toBe(example.label);
+
+      const wrapper = nodes.find(
+        (node) => node.kind === 'box' && node.children?.includes(switchNode)
+      );
+      expect(wrapper).toBeDefined();
+      if (!wrapper || wrapper.kind !== 'box') {
+        throw new Error(`Missing Switch row wrapper: ${example.switchRef}`);
+      }
+      const visibleLabel = wrapper.children?.find(
+        (child) =>
+          typeof child !== 'string' &&
+          child.kind === 'box' &&
+          child.tag === 'span' &&
+          !(child.className ?? '').split(/\s+/).includes('sr-only')
+      );
       expect(visibleLabel).toBeDefined();
       if (!visibleLabel || typeof visibleLabel === 'string' || visibleLabel.kind !== 'box') {
-        throw new Error(`Missing visible Switch label: ${example.switchRef}`);
+        throw new Error(`Missing visible Switch sibling label: ${example.switchRef}`);
       }
       expect(textContent(visibleLabel)).toBe(example.label);
-      expect(visibleLabel.className).not.toContain('sr-only');
     }
   });
 
@@ -121,8 +143,7 @@ describe('Brutalist documentation demo state contracts', () => {
     if (tabsDemo.root.kind !== 'proto') throw new Error('Expected a Tabs prototype root.');
 
     const tokens = new Set((tabsDemo.root.className ?? '').split(/\s+/).filter(Boolean));
-    expect(tokens.has('w-full')).toBe(true);
-    expect(tokens.has('max-w-sm')).toBe(true);
-    expect([...tokens].some((token) => token.startsWith('w-['))).toBe(false);
+    expect(tokens.has('w-[420px]')).toBe(true);
+    expect(tokens.has('max-w-full')).toBe(true);
   });
 });

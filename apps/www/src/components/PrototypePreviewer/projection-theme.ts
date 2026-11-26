@@ -14,6 +14,9 @@ export { scheduleProjectionThemeRead } from './projection-theme-read';
  */
 export const WEBSITE_SHADCN_THEME_TOKENS = [
   'radius',
+  'radius-2xl',
+  'radius-3xl',
+  'radius-4xl',
   'radius-xl',
   'radius-lg',
   'radius-md',
@@ -70,6 +73,34 @@ const preservedThemeStamps = new WeakMap<
   ProjectionThemeSurface,
   { properties: Map<string, ThemeStamp>; authored: Set<string> }
 >();
+
+const colorPreferenceSources = new WeakMap<
+  Document,
+  { listeners: Set<() => void>; stop: () => void }
+>();
+
+function subscribeColorPreference(doc: Document, schedule: () => void): () => void {
+  let source = colorPreferenceSources.get(doc);
+  if (!source) {
+    const media = doc.defaultView?.matchMedia?.('(prefers-color-scheme: dark)');
+    if (!media?.addEventListener) return () => {};
+    const listeners = new Set<() => void>();
+    const refresh = () => {
+      for (const listener of listeners) listener();
+    };
+    media.addEventListener('change', refresh);
+    source = { listeners, stop: () => media.removeEventListener?.('change', refresh) };
+    colorPreferenceSources.set(doc, source);
+  }
+
+  const { listeners, stop } = source;
+  listeners.add(schedule);
+  return () => {
+    if (!listeners.delete(schedule) || listeners.size > 0) return;
+    colorPreferenceSources.delete(doc);
+    stop();
+  };
+}
 
 function retainsThemeStamp(
   element: ProjectionThemeSurface,
@@ -282,14 +313,14 @@ export function watchProjectionThemeSurfaceStyle(
       attributeFilter: ['class', 'data-theme', 'style'],
     });
   }
-  const colorScheme = view.matchMedia?.('(prefers-color-scheme: dark)');
-  colorScheme?.addEventListener?.('change', schedule);
+  let stopColorPreference = () => {};
   try {
+    stopColorPreference = subscribeColorPreference(doc, schedule);
     emit();
   } catch (error) {
     cleaned = true;
     observer.disconnect();
-    colorScheme?.removeEventListener?.('change', schedule);
+    stopColorPreference();
     throw error;
   }
 
@@ -297,6 +328,6 @@ export function watchProjectionThemeSurfaceStyle(
     if (cleaned) return;
     cleaned = true;
     observer.disconnect();
-    colorScheme?.removeEventListener?.('change', schedule);
+    stopColorPreference();
   };
 }

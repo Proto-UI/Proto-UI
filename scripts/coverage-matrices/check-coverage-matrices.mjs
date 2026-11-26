@@ -178,7 +178,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
-    sourceSha256: '82eb473290d2afa5714d2cb97abfd32efad153bee53359902478740a0a4797ad',
+    sourceSha256: '513109fab6b240f8bd2bb9eddb4e6cab6fac48707226ee2020efd914a7d089e0',
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
   // Import-edge allowances only: an inline entry without a `sourceSha256`
@@ -354,7 +354,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
 
   // Exact public caption binding consumed by the blocked application controller.
   'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts': Object.freeze({
-    sourceSha256: '37c792ceced2ceb4074276b3d35e4f8efedb154406fd1d203d3dc981305b36ff',
+    sourceSha256: 'd49eaa0a85403ab65ec73f7486d3c149afa4a38ff3dba11484dacd7ba304f480',
     specifiers: Object.freeze(['@proto.ui/prototypes-base/calendar']),
   }),
   // Reviewed Field validation request type consumed by the blocked demo controller.
@@ -362,7 +362,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
   'apps/www/src/content/docs/demo_components/field/field-examples.shared.ts': Object.freeze({
-    sourceSha256: '465da4c285c65ef402376cbe8caec3c1be06119839856bf43a3eb48992ae0504',
+    sourceSha256: 'd7075d5c034cb75691d3c30656e1e442de83f3f9c2131133853d487657f915b0',
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
   // Exact public-fact demo compositions under the blocked authored-controller
@@ -408,7 +408,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts': Object.freeze({
-    sourceSha256: '76abaea39fcfef64c32f5697ac9a8d2bb5ad131f9040b52f7b7e91351461c1ed',
+    sourceSha256: 'cdce7524455c85eb22ee42fbb77eea08d04b0aa3d0d1dcae454e2f03ec0e7542',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/virtual-list/web',
       '@proto.ui/prototypes-base/virtual-list',
@@ -464,7 +464,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     }),
   'apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-filter.demo.ts':
     Object.freeze({
-      sourceSha256: 'a0bc39776523939e7cacbfd485667bf9e9a39d9b30d65bcd49f9ab84805e964e',
+      sourceSha256: '1a7b25f872fb5c17d552ecb3b38b5fe8e818c79936f7440ad7e99031d73621f9',
       specifiers: Object.freeze([
         '@proto.ui/prototypes-base/virtual-list/web',
         '@proto.ui/prototypes-base/virtual-list',
@@ -472,7 +472,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     }),
   'apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-jump.demo.ts':
     Object.freeze({
-      sourceSha256: '21c8f40fe9d370505e90deb0d59095b7bde7c3035b046ce409fc7018ffaf9fba',
+      sourceSha256: 'eee0b36aaf8ee9b361187863a716230ba6d3884af721904bd93b0cc10df0d032',
       specifiers: Object.freeze([
         '@proto.ui/prototypes-base/virtual-list/web',
         '@proto.ui/prototypes-base/virtual-list',
@@ -480,7 +480,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     }),
   'apps/www/src/content/docs/demo_components/virtual-list/demo-liquid-glass-virtual-list-window.demo.ts':
     Object.freeze({
-      sourceSha256: '1d921324c455efd7a7510ab3e934edeb2586ee08d66760600e9ca99f7a2723dc',
+      sourceSha256: '6a559b4609c273b2e18f1ad8de1dfd004ed37fb66485af9edae9b4867b045bde',
       specifiers: Object.freeze([
         '@proto.ui/prototypes-base/virtual-list/web',
         '@proto.ui/prototypes-base/virtual-list',
@@ -587,7 +587,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: '34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc',
+    sourceSha256: '16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
@@ -597,7 +597,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-native-controls.ts': Object.freeze({
-    sourceSha256: 'c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9',
+    sourceSha256: 'b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/surface',
@@ -609,7 +609,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: 'faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572',
+    sourceSha256: 'e46446b1bfcfd4b3874017bf0e72ab111901cbc089bf835286265801db745541',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -619,7 +619,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3',
+    sourceSha256: '37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -895,25 +895,42 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
   'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
-    sourceSha256: 'ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7',
+    sourceSha256: '8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940',
     specifiers: Object.freeze([
+      '@proto.ui/prototypes-lucide/icons/activity',
+      '@proto.ui/prototypes-lucide/icons/arrow-right',
       '@proto.ui/prototypes-lucide/icons/bell',
+      '@proto.ui/prototypes-lucide/icons/blocks',
+      '@proto.ui/prototypes-lucide/icons/book-open',
+      '@proto.ui/prototypes-lucide/icons/box',
       '@proto.ui/prototypes-lucide/icons/chart-no-axes-column-increasing',
       '@proto.ui/prototypes-lucide/icons/circle-question-mark',
+      '@proto.ui/prototypes-lucide/icons/code',
+      '@proto.ui/prototypes-lucide/icons/compass',
+      '@proto.ui/prototypes-lucide/icons/cpu',
+      '@proto.ui/prototypes-lucide/icons/globe',
       '@proto.ui/prototypes-lucide/icons/layers',
+      '@proto.ui/prototypes-lucide/icons/layout-grid',
       '@proto.ui/prototypes-lucide/icons/mouse-pointer-click',
+      '@proto.ui/prototypes-lucide/icons/palette',
+      '@proto.ui/prototypes-lucide/icons/plus',
       '@proto.ui/prototypes-lucide/icons/scan-search',
       '@proto.ui/prototypes-lucide/icons/settings-2',
+      '@proto.ui/prototypes-lucide/icons/shield',
       '@proto.ui/prototypes-lucide/icons/sliders-horizontal',
+      '@proto.ui/prototypes-lucide/icons/sparkles',
       '@proto.ui/prototypes-lucide/icons/square-check-big',
+      '@proto.ui/prototypes-lucide/icons/terminal',
       '@proto.ui/prototypes-lucide/icons/text-cursor-input',
+      '@proto.ui/prototypes-lucide/icons/workflow',
+      '@proto.ui/prototypes-lucide/icons/wrench',
     ]),
   }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: '087311d17d74329b1e58345672da46e1767f97de9ed03fb721fe8af0f51596b5',
+    sourceSha256: 'b441db9889421b028ba5cf1422ca78db1f203bdcb5ed1419d1425fcdc38db41f',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -9958,6 +9975,9 @@ const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
   // Adds the Wave 3–5 sidebar links and English UI Library labels only.
   // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
   '36a90352d9b22089abfde1318c29cd9e920dda2e79f088f259eec9c2de10be70',
+  // Removes graduated Early draft / WIP sidebar badges from component entries only.
+  // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
+  'abce1afc9d7e4211b0cb4c6bd3fbfb9ed26b08422f3ca5ceb571d18fb8c9d9b1',
 ]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',

@@ -12,4 +12,6 @@ export type LiquidGlassInputOtpRootProps = InputOtpRootProps & {
 
 export type LiquidGlassInputOtpSlotProps = InputOtpSlotProps & {
   invalid?: boolean;
+  /** Auto enhances OTP cells as static liquid glass; pass opaque to opt out. */
+  material?: 'auto' | 'opaque';
 };

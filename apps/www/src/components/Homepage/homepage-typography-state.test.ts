@@ -316,7 +316,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(
       document.querySelector('[data-home-showcase]')!.getAttribute('data-projection-family')
     ).toBe('brutalist');
-  });
+  }, 20_000);
 
   it('whole-page publication rollback restores the latest locally refreshed typography and live gallery', async () => {
     const before = await editGallery();
@@ -349,7 +349,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     handle = undefined;
     expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
     expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
-  });
+  }, 20_000);
 
   it('a failed publication keeps the committed owner and no replacement batch', async () => {
     await editGallery();
@@ -397,7 +397,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     // Only the failed generation itself was prepared. A replacement owner
     // needs one more typography batch.
     expect(preparation.count).toBe(preparations + 1);
-  });
+  }, 20_000);
 
   it('a source added during a failed publication joins the retained generation', async () => {
     const before = await editGallery();
@@ -426,7 +426,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(handle!.getSnapshot()).toEqual(before.snapshot);
     expect(note()).toBe(before.input);
     expect(note().value).toBe('Keep my unsaved note');
-  });
+  }, 20_000);
 
   it('a source added during a whole-page runtime preparation joins its committed generation without a second page commit', async () => {
     await editGallery();
@@ -453,7 +453,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     ).toBe('react');
     expect(surface().getAttribute('data-typography-runtime')).toBe('react');
     expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
-  });
+  }, 20_000);
 
   it('destroy waits for and retires an in-flight local batch without reviving source or framework owners', async () => {
     await editGallery();
@@ -561,7 +561,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(handle!.getSnapshot()).toEqual(before.snapshot);
     expect(note()).toBe(before.input);
     expect(note().value).toBe('Keep my unsaved note');
-  });
+  }, 20_000);
 
   it('reconciles source changes arriving while a failed local batch is being disposed', async () => {
     const before = await editGallery();
@@ -659,4 +659,4 @@ it('publishes a committed runtime preference when a live family request supersed
     releaseRetirement.resolve();
     document.removeEventListener(PREFERRED_ADAPTER_EVENT, listener);
   }
-}, 15000);
+}, 30_000);

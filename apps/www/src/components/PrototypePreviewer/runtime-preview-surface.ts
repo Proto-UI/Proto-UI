@@ -25,6 +25,8 @@ import {
 import { type ProjectionThemeSurfaceStyle } from './projection-theme';
 import { findPreviewMaterialProvider } from './preview-material-provider';
 
+export { runtimePreviewFamily } from '../site-library-family';
+
 export const RUNTIME_PREVIEW_SURFACE_ID = surfacePrototypeId;
 const SURFACE_REF = '__website_runtime_preview_surface__';
 
@@ -328,7 +330,12 @@ export function createRuntimePreviewSurface(
             scene &&
             scene.querySelector(':scope > canvas[data-material-backdrop]') &&
             findPreviewMaterialProvider(scene);
-          return { ...props, variant: 'transparent', ...(hasCanvas ? { border: 'none' } : {}) };
+          return {
+            ...props,
+            variant: 'transparent',
+            radius: 'none',
+            ...(hasCanvas ? { border: 'none' } : {}),
+          };
         },
         layout: {
           display: 'flex',

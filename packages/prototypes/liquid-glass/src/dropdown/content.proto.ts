@@ -19,7 +19,9 @@ export default definePrototype<DropdownContentProps, DropdownContentExposes>({
     });
     def.props.setDefaults({ material: 'auto' });
     const behavior = asDropdownContent();
-    behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
+    // Keep the existing entry animation within Base's finite perceptual phase.
+    // A forwards-filled identity transform must not survive into optical rest.
+    behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 0 });
     // Concentric radii: rounded-2xl (16px) outer - p-2 (8px) = rounded-lg (8px) items.
     def.feedback.style.use(
       tw(
@@ -38,7 +40,12 @@ export default definePrototype<DropdownContentProps, DropdownContentExposes>({
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
     });
     def.rule({
-      when: (w) => w.state(behavior.stateHandles.open).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(behavior.stateHandles.open).eq(true),
+          w.state(behavior.asTransition.transitionState).eq('entering'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95 duration-150')),
     });
   },

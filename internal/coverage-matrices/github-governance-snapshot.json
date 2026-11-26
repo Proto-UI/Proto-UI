@@ -11,7 +11,7 @@
       "bodySha256": "4b00f5967342cecccd0e3ad2a05e980bb3cd106bd4891f934465e05a0c20b16d",
       "state": "CLOSED",
       "stateReason": "COMPLETED",
-      "updatedAt": "2026-10-27T22:38:13Z",
+      "updatedAt": "2026-11-25T15:12:20Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -31,7 +31,7 @@
       "bodySha256": "abb6ac7ee27f2ed2dacbf22f9bc47b40144c17000d55034d3aceae8b950dddd6",
       "state": "CLOSED",
       "stateReason": "COMPLETED",
-      "updatedAt": "2026-10-27T22:38:18Z",
+      "updatedAt": "2026-11-25T15:12:20Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -51,7 +51,7 @@
       "bodySha256": "e2bbecf873c02bb7b2ebdfe9ebabcc7aa4b5267d155411b8174ebfb4d0fccf92",
       "state": "OPEN",
       "stateReason": "REOPENED",
-      "updatedAt": "2026-11-24T12:59:53Z",
+      "updatedAt": "2026-11-25T15:12:30Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -69,10 +69,10 @@
       "nodeId": "I_kwDOMhQZjc8AAAABOKaOtA",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/523",
       "title": "[proposal][tree] Define a hierarchical Tree family for files, plans, sessions, and subagents",
-      "bodySha256": "aaaa61634977201ffeb1ac372d08806d9f6fc9c154ca6dd4057dba16be70df9f",
+      "bodySha256": "a756c9f4459ef48b0d029892920d662abbf0311e3ec062fee9cb59485fc4d8c2",
       "state": "OPEN",
       "stateReason": "REOPENED",
-      "updatedAt": "2026-11-24T12:59:56Z",
+      "updatedAt": "2026-11-25T15:22:00Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -97,7 +97,7 @@
       "bodySha256": "f45524b03af5c845746189b9e02c1a498f4f0ff324483412e1048b8d6c042388",
       "state": "CLOSED",
       "stateReason": "COMPLETED",
-      "updatedAt": "2026-11-24T16:48:06Z",
+      "updatedAt": "2026-11-25T15:13:59Z",
       "labels": [
         "F5 - Large",
         "advanced contribution",
@@ -117,8 +117,8 @@
       "bodySha256": "5bfc25ff2341ea220bc5ed39978f89cd02bfdb60a08098c40878ca6f1041feaf",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-11-24T23:24:23Z",
-      "labels": [],
+      "updatedAt": "2026-11-25T15:20:05Z",
+      "labels": ["0.4 scope"],
       "assignees": [],
       "milestone": null,
       "owners": [
@@ -223,7 +223,7 @@
       "title": "fix(www): restore documentation content flow rhythm",
       "bodySha256": "10d9fe36f3cd9e67c0a8983a8c7912f1e4bdc30d730e37f0804c8de705183dec",
       "state": "MERGED",
-      "updatedAt": "2026-09-03T08:59:01Z",
+      "updatedAt": "2026-11-25T15:27:26Z",
       "headSha": "2a6d5f3208d91e5c9862a67408a39ff208d43306",
       "mergeCommit": "9841c86a10940267fb30ee25b63c9a5a39f76fe6"
     }

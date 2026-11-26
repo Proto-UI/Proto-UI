@@ -65,7 +65,7 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   triggerAppearance?: 'default' | 'ghost';
   compactTriggerAppearance?: 'default' | 'ghost';
   /** Explicit family projection; never overrides another family's recipe. */
-  shadcnStyleProfile?: 'new-york-v4' | 'rhea';
+  shadcnStyleProfile?: 'new-york-v4' | 'rhea' | 'luma';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
