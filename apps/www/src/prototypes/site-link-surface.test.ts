@@ -84,14 +84,14 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
       await settle();
       const tokens = new Set((surface.getAttribute('data-pui-style') ?? '').split(/\s+/));
       for (const token of [
-        'rounded-[var(--pui-radius-2xl)]',
+        'rounded-[var(--pui-radius-4xl)]',
         'border',
         'bg-clip-padding',
         'transition-all',
       ])
         expect(tokens.has(token)).toBe(true);
       expect(tokens.has('rounded-lg')).toBe(false);
-      expect(tokens.has('rounded-[var(--pui-radius-4xl)]')).toBe(false);
+      expect(tokens.has('rounded-[var(--pui-radius-2xl)]')).toBe(false);
       expect(tokens.has('ring-3')).toBe(facts.focusVisible);
       expect(tokens.has('ring-ring/30')).toBe(facts.focusVisible);
       expect(tokens.has('ring-2')).toBe(false);
