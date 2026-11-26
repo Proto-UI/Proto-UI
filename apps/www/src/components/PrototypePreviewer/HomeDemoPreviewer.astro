@@ -500,17 +500,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.2rem;
     min-width: 0;
   }
-  /* The icon-free Shadcn example keeps the 4px wrapper inset. Its native
-     editor therefore needs 4px more, not the standalone 10px, to align
-     to the 8px option text inset. The shell and option paint stay untouched. */
-  .home-demo-previewer
-    :global(
-      [data-gallery-demo='workspace-command']
-        [data-projection-prototype='shadcn-command-input-wrapper']
-        input
-    ) {
-    padding-inline-start: 0.25rem;
-  }
   .home-demo-previewer :global(.home-gallery__profile),
   .home-demo-previewer :global(.home-gallery__release) {
     display: grid;

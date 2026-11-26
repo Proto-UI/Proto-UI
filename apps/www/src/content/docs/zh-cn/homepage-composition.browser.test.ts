@@ -1005,14 +1005,19 @@ describe.sequential(
                   try {
                     const inner = getComputedStyle(input),
                       outer = getComputedStyle(shell),
+                      wrapperStyle = getComputedStyle(wrapper),
                       item = getComputedStyle(active);
                     return {
                       rootRadius: getComputedStyle(root).borderRadius,
                       shellRadius: outer.borderRadius,
                       shellHeight: shell.getBoundingClientRect().height,
-                      wrapperPadding: getComputedStyle(wrapper).padding,
+                      shellBorderStart: outer.borderInlineStartWidth,
+                      wrapperPadding: wrapperStyle.padding,
+                      wrapperInsetStart: wrapperStyle.paddingInlineStart,
                       innerRadius: inner.borderRadius,
                       innerBorder: inner.borderTopWidth,
+                      editorInsets: [inner.paddingInlineStart, inner.paddingInlineEnd],
+                      optionInsets: [item.paddingInlineStart, item.paddingInlineEnd],
                       innerFont: inner.fontSize,
                       activeRadius: item.borderRadius,
                       activeBackground: item.backgroundColor,
@@ -1054,44 +1059,43 @@ describe.sequential(
                     async () => {
                       paint = await readPaint();
                       samples.push(paint);
-                      return (
-                        paint.shellCount === 1 &&
-                        paint.rootRadius === '22px' &&
-                        paint.shellRadius === '18px' &&
-                        paint.shellHeight === 32 &&
-                        paint.wrapperPadding === '4px 4px 0px' &&
-                        paint.innerRadius === '0px' &&
-                        paint.innerBorder === '0px' &&
-                        paint.innerFont === '14px' &&
-                        paint.activeRadius === '14px' &&
-                        paint.activeText === 'Build a prototype' &&
-                        paint.themeMutedToken.length > 0 &&
-                        !['transparent', 'rgba(0, 0, 0, 0)'].includes(paint.expectedMuted) &&
-                        paint.activeBackground === paint.expectedMuted
-                      );
+                      return {
+                        ...paint,
+                        mutedSelection:
+                          paint.themeMutedToken.length > 0 &&
+                          !['transparent', 'rgba(0, 0, 0, 0)'].includes(paint.expectedMuted) &&
+                          paint.activeBackground === paint.expectedMuted,
+                      };
                     },
                     { timeout: 1500, interval: 25 }
                   )
-                  .toBe(true);
+                  .toMatchObject({
+                    // Luma Command and its grouped InputShell both use 4xl.
+                    // The h-9 shell owns the border, and the option uses 2xl.
+                    rootRadius: '26px',
+                    shellCount: 1,
+                    shellRadius: '26px',
+                    shellHeight: 36,
+                    shellBorderStart: '1px',
+                    wrapperPadding: '4px 4px 0px',
+                    innerRadius: '0px',
+                    innerBorder: '0px',
+                    editorInsets: ['12px', '12px'],
+                    optionInsets: ['12px', '12px'],
+                    innerFont: '14px',
+                    activeRadius: '18px',
+                    activeText: 'Build a prototype',
+                    mutedSelection: true,
+                  });
               } finally {
                 record.commandPaint = paint;
                 await save();
               }
-              expect(paint.themeMutedToken).not.toBe('');
-              expect(paint.expectedMuted).not.toBe('rgba(0, 0, 0, 0)');
-              expect(paint.expectedMuted).not.toBe('transparent');
-              expect(paint.shellCount).toBe(1);
-              expect(paint.rootRadius).toBe('22px');
-              expect(paint.shellRadius).toBe('18px');
-              expect(paint.shellHeight).toBe(32);
-              expect(paint.wrapperPadding).toBe('4px 4px 0px');
-              expect(paint.innerRadius).toBe('0px');
-              expect(paint.innerBorder).toBe('0px');
-              expect(paint.innerFont).toBe('14px');
-              expect(Math.abs(paint.inlineTextOffset)).toBeLessThanOrEqual(1);
-              expect(paint.activeRadius).toBe('14px');
-              expect(paint.activeBackground).toBe(paint.expectedMuted);
-              expect(paint.activeText).toBe('Build a prototype');
+              // P-SHADCN-COMMAND-NO-ADDON-INSET gives the grouped editor its
+              // own inset. Only the editor also sits inside a padded wrapper and bordered shell.
+              const editorNestingInset =
+                parseFloat(paint.wrapperInsetStart) + parseFloat(paint.shellBorderStart);
+              expect(Math.abs(paint.inlineTextOffset - editorNestingInset)).toBeLessThanOrEqual(1);
             }
             await input.press('Enter');
             await plan(page, 60);
