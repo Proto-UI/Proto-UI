@@ -165,6 +165,76 @@ fn declared_serial_and_parallel_tasks_capture_context_at_their_own_start() {
 }
 
 #[test]
+fn cancelling_serial_reads_keeps_parallel_work_live_and_allows_a_fresh_read() {
+    const ORDERED: &str = "B@left>left=Blue retained file;";
+    const PARALLEL: &str = "C@left>left=Temporary chart;";
+
+    with_window(|cx, ui, files| {
+        let zone = cx.new(|_| POLICY_ZONE.provider("left".into()));
+        let reader = mount(cx, ContextScope::default().with(POLICY_ZONE, zone));
+        ui.show(cx, Some(&reader));
+        ui.logs(cx, &reader, "", "");
+        let _observation = cx.update(|app| app.observe(&reader, |entity, app| {
+            let projection = entity.read(app).projection();
+            let logs = (projection.orderedLog(), projection.parallelLog());
+            assert!(matches!(logs, ("", "") | (ORDERED, "") | (ORDERED, PARALLEL)),
+                "unexpected published policy logs {logs:?}");
+        }));
+
+        let active_a = queue(&reader, "A", cx);
+        let queued_b = queue(&reader, "B", cx);
+        let parallel_c = submit(&reader, "C", cx);
+        let [old_a] = requests::<1>(files, "A");
+        let [c_file] = requests::<1>(files, "C");
+        assert!(files.requests_for("B").is_empty());
+        assert_eq!(files.len(), 2);
+        for task in [&active_a, &queued_b, &parallel_c] { assert_eq!(task.outcome(), None); }
+
+        assert_eq!(reader.update(cx, |reader, cx| reader.actions(cx).cancelOrdered()), ActionOutcome::Committed);
+        ui.logs(cx, &reader, "", "");
+        assert_eq!(active_a.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(queued_b.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(parallel_c.outcome(), None);
+        assert_eq!(old_a.returned(), None);
+        assert_eq!(c_file.returned(), None);
+        assert!(files.requests_for("B").is_empty(), "the cancelled queued read reached the host");
+        assert_eq!(files.len(), 2);
+
+        let fresh_b = queue(&reader, "B", cx);
+        let [b_file] = requests::<1>(files, "B");
+        assert!(!b_file.same_request(&old_a));
+        assert_eq!(files.len(), 3);
+        assert_eq!(fresh_b.outcome(), None);
+        assert_eq!(queued_b.outcome(), Some(&TaskOutcome::Cancelled));
+
+        old_a.deliver("old");
+        ui.logs(cx, &reader, "", "");
+        assert_eq!(old_a.returned().as_deref(), Some("Obsolete amber record"));
+        assert_eq!(active_a.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(b_file.returned(), None);
+        assert_eq!(c_file.returned(), None);
+        assert_eq!(fresh_b.outcome(), None);
+        assert_eq!(parallel_c.outcome(), None);
+
+        b_file.deliver("original");
+        ui.logs(cx, &reader, ORDERED, "");
+        assert_eq!(b_file.returned().as_deref(), Some("Blue retained file"));
+        assert_eq!(fresh_b.outcome(), Some(&TaskOutcome::Completed(())));
+        assert_eq!(c_file.returned(), None);
+        assert_eq!(parallel_c.outcome(), None);
+
+        c_file.deliver("temporary");
+        ui.logs(cx, &reader, ORDERED, PARALLEL);
+        assert_eq!(c_file.returned().as_deref(), Some("Temporary chart"));
+        assert_eq!(parallel_c.outcome(), Some(&TaskOutcome::Completed(())));
+        assert_eq!(fresh_b.outcome(), Some(&TaskOutcome::Completed(())));
+        assert_eq!(active_a.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(queued_b.outcome(), Some(&TaskOutcome::Cancelled));
+        assert_eq!(files.len(), 3);
+    });
+}
+
+#[test]
 fn disposing_a_reader_retires_its_active_and_queued_serial_submissions() {
     with_window(|cx, ui, files| {
         let left = cx.new(|_| POLICY_ZONE.provider("left".into()));

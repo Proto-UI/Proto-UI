@@ -31,8 +31,10 @@ export default definePrototype({
       task.set(parallelLog, append(task.get(parallelLog), id, start, task.get(zone), text));
     });
     const queue = def.action<[id: string], void>('queue', (run, id) => { run.start(ordered, id); });
+    const cancelOrdered = def.action<[], void>('cancelOrdered', run => { run.cancel(ordered); });
     const submit = def.action<[id: string], void>('submit', (run, id) => { run.start(concurrent, id); });
     def.expose.action('queue', queue);
+    def.expose.action('cancelOrdered', cancelOrdered);
     def.expose.action('submit', submit);
     def.expose.state('orderedLog', orderedLog);
     def.expose.state('parallelLog', parallelLog);

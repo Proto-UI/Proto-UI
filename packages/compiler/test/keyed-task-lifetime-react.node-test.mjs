@@ -326,6 +326,76 @@ test('authored serial and parallel tasks read Context on entry and resumption an
   if (evidence) await writeFile(path.join(evidence, 'task-policies-react-native.json'), JSON.stringify({ views, issued, retired, network, errors }));
 });
 
+test('authored cancellation withdraws active and queued serial reads while the same reader completes parallel and fresh work', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, authoredTaskPolicySource, 'task-policies-client.tsx', 'task-policy-source.json');
+  const oldA = server.resource('A', 'Obsolete amber record');
+  const parallelC = server.resource('C', 'Temporary chart');
+  const freshB = server.resource('B', 'Blue retained file');
+  const submitted = await page.evaluate(([a, c]) => {
+    const host = window.policyTrace;
+    host.mount();
+    host.enqueue('A', a, false);
+    host.enqueue('C', c, true);
+    return [host.queue('A'), host.queue('B'), host.submit('C')];
+  }, [oldA.path, parallelC.path]);
+  assert.deepEqual(submitted, ['committed', 'committed', 'committed']);
+  assert.deepEqual(await Promise.all([oldA.requested(), parallelC.requested()]), ['A', 'C']);
+  const initial = await expectPolicyView(page, '', '');
+  const span = await page.locator('#app span').elementHandle();
+
+  const cancelled = await page.evaluate(() => {
+    const host = window.policyTrace;
+    return { status: host.cancelOrdered(), network: host.history() };
+  });
+  assert.equal(cancelled.status, 'committed');
+  assert.deepEqual(cancelled.network.unexpected, []);
+  assert.deepEqual(cancelled.network.requests.map(r => [r.key, r.state, r.aborted, r.reason]), [
+    ['A', 'pending', true, { status: 'cancelled' }], ['C', 'pending', false, null],
+  ]);
+  assert.equal(freshB.requests, 0);
+
+  // Only the fresh B gets a host response. Starting the cancelled B would be an unexpected load.
+  assert.equal(await page.evaluate(path => {
+    const host = window.policyTrace;
+    host.publish('right');
+    host.enqueue('B', path, true);
+    return host.queue('B');
+  }, freshB.path), 'committed');
+  assert.equal(await freshB.requested(), 'B');
+  oldA.release();
+  await page.waitForFunction(path => window.policyTrace.history().requests.some(r => r.path === path && r.state === 'returned'), oldA.path);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+  const afterLate = await expectPolicyView(page, '', '');
+  const held = await page.evaluate(() => window.policyTrace.history());
+  const byPath = new Map(held.requests.map(request => [request.path, request]));
+  assert.deepEqual(byPath.get(oldA.path), {
+    key: 'A', path: oldA.path, state: 'returned', value: 'Obsolete amber record', aborted: true, reason: { status: 'cancelled' },
+  });
+  expectPending(byPath, parallelC);
+  expectPending(byPath, freshB);
+
+  await page.evaluate(() => window.policyTrace.publish('last'));
+  parallelC.release();
+  const parallelLog = 'C@left>last=Temporary chart;';
+  const parallelDone = await expectPolicyView(page, '', parallelLog);
+  freshB.release();
+  const completed = await expectPolicyView(page, 'B@right>last=Blue retained file;', parallelLog);
+  const sameSpan = await span.evaluate(node => node.isConnected && node === document.querySelector('#app span'));
+  await span.dispose();
+  assert.equal(sameSpan, true);
+  const network = await page.evaluate(() => window.policyTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(r => [r.path, r.state, r.value, r.reason]), [
+    [oldA.path, 'returned', 'Obsolete amber record', { status: 'cancelled' }],
+    [parallelC.path, 'returned', 'Temporary chart', null], [freshB.path, 'returned', 'Blue retained file', null],
+  ]);
+  assert.deepEqual([oldA.requests, parallelC.requests, freshB.requests], [1, 1, 1]);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'cancel-ordered-react-native.json'), JSON.stringify({
+    submitted, initial, cancelled, afterLate, held, parallelDone, completed, sameSpan, network, errors,
+  }));
+});
+
 test('replacing the whole keyed parent retires a returned response and a pending sibling before either can publish', async t => {
   const { server, page, errors, evidence } = await openConsumer(t, authoredKeyedTaskSource, 'keyed-task-client.tsx', 'keyed-parent-source.json');
   const oldA = server.resource('A', 'Obsolete amber record');
