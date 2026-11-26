@@ -1643,13 +1643,14 @@ describe.sequential('Independent Label public documentation', () => {
             .poll(() => textarea.evaluate((element) => document.activeElement === element))
             .toBe(true);
           await page.keyboard.press('ControlOrMeta+A');
+          const expectedNotesLength = family === 'base' ? 31 : 38;
           expect(
             await textarea.evaluate((element) => ({
               start: (element as HTMLTextAreaElement).selectionStart,
               end: (element as HTMLTextAreaElement).selectionEnd,
               length: (element as HTMLTextAreaElement).value.length,
             }))
-          ).toEqual({ start: 0, end: 31, length: 31 });
+          ).toEqual({ start: 0, end: expectedNotesLength, length: expectedNotesLength });
 
           for (const name of ['disabled', 'controlled']) {
             const control = content.locator(`[data-demo-ref="${name}"]`);
@@ -1664,7 +1665,7 @@ describe.sequential('Independent Label public documentation', () => {
           // creates selection. No page-local CSS or Selection writer is used.
           for (const ref of ['label-passive', 'description']) {
             const description = content.locator(`[data-demo-ref="${ref}"]`);
-            await description.scrollIntoViewIfNeeded();
+            await description.evaluate((element) => element.scrollIntoView({ block: 'center' }));
             const drag = await description.evaluate(measureLabelTextDrag);
             const geometry = { ...drag.bounds, start: drag.start, end: drag.end };
             const recorder = await description.evaluateHandle(recordLabelPointerTrace);
