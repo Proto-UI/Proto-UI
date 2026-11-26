@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "description": "Frozen legacy internal-docs debt baseline. New files must pass with zero errors; existing files may only reduce debt. Refresh via `pnpm check:internal-docs:baseline` after cleaning debt.",
-  "totalFilesWithDebt": 1218,
-  "totalViolations": 8826,
+  "totalFilesWithDebt": 1216,
+  "totalViolations": 8810,
   "files": {
     "internal/agent-operations/autonomous-tasks.md": {
       "prose/max-paragraph-length": 4,
@@ -1549,11 +1549,6 @@
       "internal/no-local-paths": 1,
       "internal/size-budget": 1
     },
-    "internal/records/2026-11-24-sprint7-knowledge-comparison.md": {
-      "internal/no-inline-forensics": 5,
-      "prose/max-paragraph-length": 2,
-      "prose/structural-rhythm": 1
-    },
     "internal/records/2026-11-24-sprint7-zero-marginal-cost-study.md": {
       "internal/no-inline-forensics": 2,
       "prose/max-paragraph-length": 1,
@@ -1572,10 +1567,10 @@
       "prose/max-paragraph-length": 5,
       "prose/structural-rhythm": 1
     },
-    "internal/records/archive/2026-04/2026-04-11-Collection-Navigation-Hook \u6cbb\u7406\u4f53\u7cfb\u89c4\u5212.md": {
+    "internal/records/archive/2026-04/2026-04-11-Collection-Navigation-Hook 治理体系规划.md": {
       "internal/size-budget": 1
     },
-    "internal/records/archive/2026-04/2026-04-11-Value \u7c7b\u7ec4\u4ef6\u7684\u5b9e\u8df5\u63a2\u7d22\u8def\u7ebf.md": {
+    "internal/records/archive/2026-04/2026-04-11-Value 类组件的实践探索路线.md": {
       "internal/record-frontmatter": 3,
       "internal/size-budget": 1
     },
@@ -3934,12 +3929,6 @@
       "internal/size-budget": 1,
       "prose/max-paragraph-length": 3,
       "prose/structural-rhythm": 3
-    },
-    "internal/records/archive/2026-11/2026-11-16-compiler-native-acceptance.zh-CN.md": {
-      "internal/no-inline-forensics": 1,
-      "prose/max-paragraph-length": 4,
-      "prose/no-stacked-negatives": 1,
-      "prose/structural-rhythm": 2
     },
     "internal/records/archive/2026-11/2026-11-16-dart-ordinary-call-recovery.md": {
       "internal/no-inline-forensics": 1,
