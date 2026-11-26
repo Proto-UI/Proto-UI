@@ -22,6 +22,10 @@ window.addEventListener('error', event => {
   }
 });
 
+function trackRead(id: string, path: string) {
+  enqueue(id, path, true, { onStart: () => starts.push({ id, published: snapshot() }) });
+}
+
 const trace = {
   mount(expected: string) {
     provider = EXPECTED_DOCUMENT.createProvider(expected);
@@ -31,10 +35,14 @@ const trace = {
   },
   publish(expected: string) { provider.publish(expected); },
   begin(id: string, path: string) {
-    enqueue(id, path, true, { onStart: () => starts.push({ id, published: snapshot() }) });
+    trackRead(id, path);
     return reader.current!.begin(id).status;
   },
   cancelAndFail() { return reader.current!.cancelAndFail(); },
+  startAndFail(id: string, path: string) {
+    trackRead(id, path);
+    return reader.current!.startAndFail(id);
+  },
   snapshot,
   starts: () => starts,
   failures: () => failures,

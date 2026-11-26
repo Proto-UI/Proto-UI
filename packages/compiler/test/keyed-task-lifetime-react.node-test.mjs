@@ -791,3 +791,43 @@ test('a failed action discards its cancellation and both existing serial reads c
     active, outcome, afterFailure, pending, waiting, starts, rebound, completed, network, errors,
   }));
 });
+
+test('a failed action starts no read and the same reader can submit its first task later', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, resumedFailure, 'resumed-failure-client.tsx', 'resumed-failure-ir.json');
+  const amber = 'Obsolete amber record';
+  const refused = server.resource('B', 'Blue retained file');
+  const ordinary = server.resource('A', amber);
+  await page.evaluate(value => window.failureTrace.mount(value), amber);
+  const initial = await expectFailureView(page, 'idle', 0, amber);
+  const label = await page.locator('#app span').elementHandle();
+
+  const outcome = await page.evaluate(path => window.failureTrace.startAndFail('B', path), refused.path);
+  assert.deepEqual(outcome, { status: 'failed', reason: 'start-refused', source: failureSource });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+  const afterFailure = await expectFailureView(page, 'idle', 0, amber);
+  const unissued = await page.evaluate(() => ({ starts: window.failureTrace.starts(), network: window.failureTrace.history() }));
+  assert.deepEqual(unissued, { starts: [], network: { unexpected: [], requests: [] } });
+  assert.equal(refused.requests, 0);
+
+  await submitFailureRead(page, 'A', ordinary);
+  assert.equal(await ordinary.requested(), 'A');
+  const checking = await expectFailureView(page, 'checking@' + amber, 0, amber);
+  ordinary.release();
+  const completed = await expectFailureView(page, amber, 1, amber);
+  const starts = await page.evaluate(() => window.failureTrace.starts());
+  assert.deepEqual(starts, [{ id: 'A', published: checking }]);
+  const network = await page.evaluate(() => window.failureTrace.history());
+  assert.deepEqual(network, { unexpected: [], requests: [
+    { key: 'A', path: ordinary.path, state: 'returned', value: amber, aborted: false, reason: null },
+  ] });
+  const serverRequests = { B: refused.requests, A: ordinary.requests };
+  assert.deepEqual(serverRequests, { B: 0, A: 1 });
+  const sameLabel = await label.evaluate(node => node === document.querySelector('#app span'));
+  assert.equal(sameLabel, true);
+  await label.dispose();
+  assert.deepEqual(await page.evaluate(() => window.failureTrace.failures()), []);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'discarded-start-react-native.json'), JSON.stringify({
+    initial, outcome, afterFailure, unissued, checking, completed, starts, network, serverRequests, sameLabel, errors,
+  }));
+});

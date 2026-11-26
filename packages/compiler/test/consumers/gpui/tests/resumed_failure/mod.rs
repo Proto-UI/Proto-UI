@@ -235,3 +235,42 @@ fn failed_action_discards_task_cancellation_and_both_serial_reads_complete() {
     assert_eq!(files.len(), 2);
     cx.quit();
 }
+
+#[test]
+fn failed_action_discards_task_start_before_any_receipt_or_file_request() {
+    let (mut cx, text, files) = file_app();
+    let document = cx.new(|_| EXPECTED_DOCUMENT.provider(OLD.to_owned()));
+    let scope = ContextScope::default().with(EXPECTED_DOCUMENT, document);
+    let ObservedReader { reader, window, publications, _observation } = open_reader(&mut cx, &scope);
+    frame(&mut cx, window, &text, "idle", 0., OLD);
+    assert!(reader.read_with(&cx, |reader, _| reader.tasks().readItem().is_none()));
+    assert_eq!(files.len(), 0);
+    let before_failure = publications.borrow().len();
+
+    let action = reader.update(&mut cx, |reader, cx| reader.actions(cx).startAndFail("B".to_owned()));
+    assert_eq!(action, ActionOutcome::Failed(SegmentFailure {
+        reason: "start-refused",
+        file: "packages/compiler/test/fixtures/backend-programs.ts",
+        start: 0,
+        end: 0,
+    }));
+    frame(&mut cx, window, &text, "idle", 0., OLD);
+    assert_eq!(publications.borrow().len(), before_failure, "the failed start notified the reader");
+    assert!(reader.read_with(&cx, |reader, _| reader.tasks().readItem().is_none()), "the failed start created a task receipt");
+    assert_eq!(files.len(), 0);
+
+    let active_a = begin(&reader, "A", &mut cx);
+    frame(&mut cx, window, &text, &format!("checking@{OLD}"), 0., OLD);
+    let a_file = files.requests_for("A").pop().expect("missing ordinary A request");
+    assert_eq!(files.len(), 1);
+    assert_eq!(a_file.returned(), None);
+    assert_eq!(active_a.outcome(), None);
+
+    a_file.deliver("old");
+    frame(&mut cx, window, &text, OLD, 1., OLD);
+    assert_eq!(a_file.returned().as_deref(), Some(OLD));
+    assert_eq!(active_a.outcome(), Some(&TaskOutcome::Completed(())));
+    assert!(files.requests_for("B").is_empty());
+    assert_eq!(files.len(), 1);
+    cx.quit();
+}
