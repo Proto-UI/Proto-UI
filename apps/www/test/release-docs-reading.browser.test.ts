@@ -485,11 +485,19 @@ describe.sequential('current-source release documentation reading', () => {
             await expect.poll(() => shell.getAttribute('data-code-expanded')).toBe('true');
             expect(await toggle.isVisible()).toBe(false);
             expect(
-              await shell.locator('pre').evaluate((element) => element === document.activeElement)
+              await shell
+                .locator('pre')
+                .evaluate(
+                  (element) =>
+                    (element.closest('[data-code-scroll-ready] [data-code-scroll-viewport]') ??
+                      element) === document.activeElement
+                )
             ).toBe(true);
             facts.expansion = await shell.evaluate((root) => ({
               mask: getComputedStyle(root.querySelector('[data-code-content]')!).maskImage,
-              focused: root.querySelector('pre') === document.activeElement,
+              focused:
+                (root.querySelector('[data-code-scroll-ready] [data-code-scroll-viewport]') ??
+                  root.querySelector('pre')) === document.activeElement,
               label: root.querySelector('[data-code-toggle]')?.getAttribute('aria-label'),
             }));
             await shell.scrollIntoViewIfNeeded();
