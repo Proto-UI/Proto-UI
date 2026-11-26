@@ -206,7 +206,7 @@ describe('Docs Contents actual family Button command', () => {
             'ring-ring/30',
             'bg-secondary',
             'text-secondary-foreground',
-            'rounded-[var(--pui-radius-2xl)]',
+            'rounded-[var(--pui-radius-4xl)]',
           ])
             expect(tokens.split(/\s+/), tokens).toContain(token);
           expect(tokens.split(/\s+/)).not.toContain('bg-transparent');
