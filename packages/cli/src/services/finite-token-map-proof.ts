@@ -105,7 +105,8 @@ export function createFiniteTokenMapPathProof(
   return createTokenMapProof(loopRows, entry, true);
 }
 
-type TokenMapData = string | ReadonlyMap<string, TokenMapData>;
+const nullTokenMapValue = Symbol('null token-map value');
+type TokenMapData = string | typeof nullTokenMapValue | ReadonlyMap<string, TokenMapData>;
 type TokenMapTree = ReadonlyMap<string, TokenMapData>;
 
 function createTokenMapProof(
@@ -263,9 +264,12 @@ function createTokenMapProof(
         ? keys(node.argumentExpression)
         : null;
 
-  const literalTree = (input: ts.Node): TokenMapData | null => {
+  const literalTree = (input: ts.Node, depth = 0): TokenMapData | null => {
     const node = unwrap(input);
     if (ts.isStringLiteralLike(node)) return node.text;
+    // A root row may omit its whole recipe. Retained subtrees still contain
+    // only own string leaves; this does not admit arbitrary nullable fields.
+    if (node.kind === ts.SyntaxKind.NullKeyword) return depth === 1 ? nullTokenMapValue : null;
     if (!ts.isObjectLiteralExpression(node)) return null;
     const data = new Map<string, TokenMapData>();
     for (const property of node.properties) {
@@ -273,7 +277,7 @@ function createTokenMapProof(
       const name = property.name;
       if (!ts.isIdentifier(name) && !ts.isStringLiteralLike(name)) return null;
       if (name.text in Object.prototype || data.has(name.text)) return null;
-      const value = literalTree(property.initializer);
+      const value = literalTree(property.initializer, depth + 1);
       if (value === null) return null;
       data.set(name.text, value);
     }
@@ -298,7 +302,7 @@ function createTokenMapProof(
     if (!ts.isObjectLiteralExpression(initial)) return null;
     if (paths) {
       const tree = literalTree(initial);
-      if (tree === null || typeof tree === 'string') return null;
+      if (tree === null || typeof tree === 'string' || tree === nullTokenMapValue) return null;
       maps.set(declaration, tree);
       return tree;
     }
@@ -506,7 +510,7 @@ function createTokenMapProof(
     if (!names || names.length === 0) return null;
     const next = new Set<TokenMapData>();
     for (const value of values) {
-      if (typeof value === 'string') return null;
+      if (typeof value === 'string' || value === nullTokenMapValue) return null;
       for (const name of names) {
         const child = value.get(name);
         if (child === undefined) return null;
@@ -515,6 +519,32 @@ function createTokenMapProof(
     }
     return [...next];
   };
+
+  // A private const projection cannot change between its truthiness test and
+  // a callback created in that branch. The full owner-use proof below still
+  // rejects reassignment, mutation, aliases and escaped child objects. Only
+  // this exact binding's positive if branch removes an own literal null;
+  // unrelated conditions and reads outside that branch gain no evidence.
+  const truthyProjection = (reference: ts.Identifier): boolean => {
+    const declaration = binding(reference);
+    if (!declaration || !ts.isVariableDeclaration(declaration) || !isConst(declaration))
+      return false;
+    for (let child: ts.Node = reference; child.parent; child = child.parent) {
+      const parent = child.parent;
+      if (!ts.isIfStatement(parent) || parent.thenStatement !== child) continue;
+      const condition = unwrap(parent.expression);
+      if (ts.isIdentifier(condition) && binding(condition) === declaration) return true;
+    }
+    return false;
+  };
+
+  const guardedValues = (
+    reference: ts.Identifier,
+    values: readonly TokenMapData[]
+  ): readonly TokenMapData[] =>
+    values.includes(nullTokenMapValue) && truthyProjection(reference)
+      ? values.filter((value) => value !== nullTokenMapValue)
+      : values;
 
   type TokenMapPath = {
     owner: ts.Identifier;
@@ -532,6 +562,7 @@ function createTokenMapProof(
       owner = unwrap(owner.expression);
     }
     if (!ts.isIdentifier(owner)) return null;
+    const reference = owner;
     const held = binding(owner);
     if (
       !held ||
@@ -570,6 +601,8 @@ function createTokenMapProof(
       values = projection.values;
       depth += projection.depth;
     }
+    values = guardedValues(reference, values);
+    if (values.length === 0) return null;
     for (const member of members) {
       const children = childValues(values, member);
       if (!children) return null;
@@ -589,6 +622,10 @@ function createTokenMapProof(
     allowProjection: boolean
   ): boolean => {
     let node = outer(reference);
+    if (ts.isIfStatement(node.parent) && node.parent.expression === node)
+      return values.every((value) => typeof value !== 'string');
+    values = guardedValues(reference, values);
+    if (values.length === 0) return false;
     let depth = 0;
     while (
       node.parent &&
