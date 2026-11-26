@@ -49,11 +49,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The accepted website target remains 44px, not upstream Rhea's size-8.
-// Paint/focus/press literals follow the public passive Rhea contract; no
+// The accepted website target remains 44px, not upstream Luma's size-8.
+// Paint/focus/press literals follow the public passive Luma contract; no
 // Button, synthetic activation, or page-specific paint is installed here.
 for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
-  it(`Shadcn community ${emphasis}: real Rhea Surface/Text retires feedback without replacing the anchor`, async () => {
+  it(`Shadcn community ${emphasis}: real Luma Surface/Text retires feedback without replacing the anchor`, async () => {
     const link = document.createElement('a');
     link.href = 'https://github.com/Proto-UI/Proto-UI';
     link.target = '_blank';

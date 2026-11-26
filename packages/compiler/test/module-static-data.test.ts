@@ -95,6 +95,7 @@ describe('finite module data', () => {
     );
     if (!choice) throw new Error('Missing authored declareChoice');
     const context = readFileSync(resolve(styleScope, 'context.ts'), 'utf8');
+    const ids = readFileSync(resolve(styleScope, 'ids.ts'), 'utf8');
     const parsed = parsePrototype(
       `${core}
       import type {DefHandle} from '@proto.ui/core';
@@ -103,7 +104,7 @@ describe('finite module data', () => {
       export default definePrototype<ShadcnStyleProps>({name:'authored-choice',setup(def){declareChoice(def);}});`,
       {
         fileName: 'entry.proto.ts',
-        files: { 'context.ts': context },
+        files: { 'context.ts': context, 'ids.ts': ids },
       }
     );
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));

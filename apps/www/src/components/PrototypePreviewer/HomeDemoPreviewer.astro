@@ -87,14 +87,52 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
 <style>
   /* App-owned layout only. Text and Interactive surfaces belong to the selected PUI library. */
   .home-demo-previewer {
-    --homepage-gallery-column-gap: 1.25rem;
-    --homepage-gallery-row-gap: 1.25rem;
+    /* Upstream shadcn apps/v4 CardsDemo rhythm: --gap 2rem, lg 1.5rem,
+       >=1900px 2.5rem; top inset p-12, lg p-6, >=1900px p-12, pb-0. */
+    --homepage-gallery-gap: 2rem;
+    --homepage-gallery-inset-block-start: 3rem;
+    /* Upstream bottom fade h-48 / lg:h-80 / xl:h-64, bounded for short stages. */
+    --homepage-gallery-fade: min(12rem, 28%);
+    --homepage-gallery-column-gap: var(--homepage-gallery-gap);
+    --homepage-gallery-row-gap: var(--homepage-gallery-gap);
     --homepage-gallery-wide-columns: 5;
     position: relative;
     width: min(100%, 116rem);
     margin: 0 auto;
-    padding: 0;
+    padding: var(--homepage-gallery-inset-block-start) 0 0;
     scroll-margin-block: 8rem;
+  }
+  @media (min-width: 64rem) {
+    .home-demo-previewer {
+      --homepage-gallery-gap: 1.5rem;
+      --homepage-gallery-inset-block-start: 1.5rem;
+      --homepage-gallery-fade: min(20rem, 28%);
+    }
+  }
+  @media (min-width: 80rem) {
+    .home-demo-previewer {
+      --homepage-gallery-fade: min(16rem, 28%);
+    }
+  }
+  @media (min-width: 118.75rem) {
+    .home-demo-previewer {
+      --homepage-gallery-gap: 2.5rem;
+      --homepage-gallery-inset-block-start: 3rem;
+    }
+  }
+  /* Shadcn page style only: the full-bleed bg-muted stage with its upstream
+     top fade (background -> muted) and bottom fade back to background. Dark
+     mode keeps bg-background, as upstream does. border-image outset paints
+     edge to edge without creating horizontal scroll overflow. */
+  :global(html[data-site-library-family='shadcn']:not([data-theme='dark'])) .home-demo-previewer {
+    border-image: linear-gradient(
+        to bottom,
+        var(--color-background),
+        var(--color-muted) min(15rem, 30%),
+        var(--color-muted) calc(100% - var(--homepage-gallery-fade)),
+        var(--color-background)
+      )
+      fill 0 / 0 / 0 100vw;
   }
   /* Decorative continuation is clipped independently, never the live controls
      or their focus outlines. These are deliberately inert artwork, not demos. */
@@ -297,7 +335,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     overflow-wrap: anywhere;
   }
   .home-demo-previewer :global(.home-gallery) {
-    --homepage-gallery-compact-row-gap: 1.25rem;
+    --homepage-gallery-compact-row-gap: var(--homepage-gallery-gap);
   }
   .home-demo-previewer :global(.home-gallery__viewport) {
     position: relative;
@@ -326,6 +364,14 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       color-mix(in srgb, var(--color-background) 65%, transparent) 30%,
       transparent
     );
+  }
+  /* Shadcn: the card fade shares the stage's fade length and ends in the same
+     background, so cards and the full-bleed band dissolve together. */
+  :global(html[data-site-library-family='shadcn'])
+    .home-demo-previewer
+    :global(.home-gallery__viewport)::after {
+    height: var(--homepage-gallery-fade);
+    background-image: linear-gradient(to top, var(--color-background), transparent);
   }
   .home-demo-previewer :global(.home-gallery__viewport:focus-within)::after {
     visibility: hidden;
