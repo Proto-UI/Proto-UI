@@ -1,6 +1,6 @@
 # Sprint 4: recovered candidate and readiness evidence
 
-This non-normative continuation records the recovery of PR #1714 from `53194e0c01e6073b9ba3e7852c755ab57cfbe12d` with main `b715b8a6d08c2c79417272c8d4ca9254984feadb`. It supplements the [original integration record](2026-11-22-sprint4-integration.md) and [source-license repair](2026-11-23-sprint4-rust-data-license-metadata.md). It does not promote draft compiler contracts or close the separate IR10 contribution-rights, definition-owner, compatibility or consumer-migration requirements.
+This non-normative continuation records the recovery of PR #1714 from `53194e0c01e6073b9ba3e7852c755ab57cfbe12d` with main `b715b8a6d08c2c79417272c8d4ca9254984feadb`. It supplements the [original integration record](../../2026-11-22-sprint4-integration.md) and [source-license repair](2026-11-23-sprint4-rust-data-license-metadata.md). It does not promote draft compiler contracts or close the separate IR10 contribution-rights, definition-owner, compatibility or consumer-migration requirements.
 
 ## Recovered source and transport
 
@@ -19,7 +19,7 @@ The Git Data API transport receipt maps all five local commits to objects with i
 
 ## Actual local execution
 
-The [evidence manifest](evidence/2026-11-23-sprint4-ready-recovery/manifest.json) records raw and compressed SHA-256 values; [validation.json](evidence/2026-11-23-sprint4-ready-recovery/validation.json) retains commands, source bindings, execution provenance and limitations. Raw logs and JSON reports are gzip copies of their original bytes, not reformatted reconstructions.
+The [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint4-ready-recovery/manifest.json) records raw and compressed SHA-256 values; [validation.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint4-ready-recovery/validation.json) retains commands, source bindings, execution provenance and limitations. Raw logs and JSON reports are gzip copies of their original bytes, not reformatted reconstructions.
 
 | Boundary | Observed result |
 | --- | --- |

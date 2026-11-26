@@ -56,7 +56,7 @@ An independent agent read all six changed source/test files against their record
 
 ## Evidence and remaining acceptance
 
-[Manifest](evidence/2026-11-24-sprint1-general-ci-partition/manifest.json) and [raw evidence](evidence/2026-11-24-sprint1-general-ci-partition/raw-evidence.zip) retain the complete original cancelled log, parsed original selection, failure/count readbacks, current exact command and suite inventories, local control output, commands, independent review and source snapshots. The carrier records a dirty shared checkout plus exact file hashes; it does not label local work as a clean published candidate.
+[Manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-general-ci-partition/manifest.json) and [raw evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-general-ci-partition/raw-evidence.zip) retain the complete original cancelled log, parsed original selection, failure/count readbacks, current exact command and suite inventories, local control output, commands, independent review and source snapshots. The carrier records a dirty shared checkout plus exact file hashes; it does not label local work as a clean published candidate.
 
 The archive is **1,256,142 bytes**, SHA-256 `df39ce6141f83bcda70817c02646fbd3307e9cc1ca7ad5b47968059d630f1d4c`. All 29 entries passed CRC and every payload size/hash was read back and verified.
 

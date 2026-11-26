@@ -40,7 +40,7 @@ These are the recorded values from the August source audit and subsequent Issue 
 | Dark foreground on fixed canary/sky/coral/lavender | 1.07 / 1.22 / 1.29 / 1.27:1 | Historical inner-edge observations; actual exterior/alternative cues are conditional |
 | Black hard shadow against Dark page/panel | same low pair values | Per-call-site and per-state classification remains required |
 
-The [2026-08-26 record](2026-08-26-brutalist-wcag-contrast-evidence.md) is a source audit. Its old call-site classifications and its old theme values cannot become current native acceptance. The [September integrity correction](https://github.com/Proto-UI/Proto-UI/issues/469#issuecomment-5904086211) withdraws the 372-frame completeness, zero-gap, sole-focus-cue and blanket Dark-pass conclusions. The [corrected October carrier](https://github.com/Proto-UI/Proto-UI/issues/469#issuecomment-5939127866) remains partial. Historical failed/partial runs, unavailable uploads and the recorded Select 1:1 neighbor observation are not cleared by this candidate.
+The [2026-08-26 record](../2026-08/2026-08-26-brutalist-wcag-contrast-evidence.md) is a source audit. Its old call-site classifications and its old theme values cannot become current native acceptance. The [September integrity correction](https://github.com/Proto-UI/Proto-UI/issues/469#issuecomment-5904086211) withdraws the 372-frame completeness, zero-gap, sole-focus-cue and blanket Dark-pass conclusions. The [corrected October carrier](https://github.com/Proto-UI/Proto-UI/issues/469#issuecomment-5939127866) remains partial. Historical failed/partial runs, unavailable uploads and the recorded Select 1:1 neighbor observation are not cleared by this candidate.
 
 ## Frame authority and permitted repair boundaries
 

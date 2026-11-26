@@ -1,6 +1,6 @@
 # Sprint 6：共享主题、Header 与覆盖登记回归修复
 
-本记录保留 PR #1712 第八候选的修复依据，不改变规范生命周期，也不声明完整 Sprint 6 验收完成。候选父提交为 `050a1ded7726773486fa56211aa1df7820d19919`；本地执行使用该 checkout 加下述明确源码字节，原日志、失败和输入补丁均存入 [回归档案](evidence/2026-11-22-sprint-6/shared-theme-regression/summary.json)。
+本记录保留 PR #1712 第八候选的修复依据，不改变规范生命周期，也不声明完整 Sprint 6 验收完成。候选父提交为 `050a1ded7726773486fa56211aa1df7820d19919`；本地执行使用该 checkout 加下述明确源码字节，原日志、失败和输入补丁均存入 [回归档案](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/shared-theme-regression/summary.json)。
 
 ## 实际失败与责任层
 
@@ -35,7 +35,7 @@ Contents、命令图标、Copy 和 Typography 的四份测试 mock 还截断了�
 
 ## 覆盖登记与 CI owner
 
-本次还整合 [精确覆盖登记修复](2026-11-22-sprint-6-coverage-source-bindings.md)：Liquid state-controls 明确登记为四宿主测试 facade，native-composition helper 归属测试观察；更新已审查的本轮源指纹。静态 React、复制入口、普通 shell 的负控继续拒绝，两个既有 diagnostic production reach 不获豁免。聚焦检查 `20/20 pass`；完整 source checker 仍 exit 1，保留 hover 的八条 import 和三条既有 source fingerprint 问题，不能写成全仓覆盖检查通过。
+本次还整合 [精确覆盖登记修复](../../2026-11-22-sprint-6-coverage-source-bindings.md)：Liquid state-controls 明确登记为四宿主测试 facade，native-composition helper 归属测试观察；更新已审查的本轮源指纹。静态 React、复制入口、普通 shell 的负控继续拒绝，两个既有 diagnostic production reach 不获豁免。聚焦检查 `20/20 pass`；完整 source checker 仍 exit 1，保留 hover 的八条 import 和三条既有 source fingerprint 问题，不能写成全仓覆盖检查通过。
 
 父提交 `050a1ded` 已将三条 Bootstrap 和一条 Liquid controls suite 从通用浏览器分片移至其专用 production owner，并接入 Bootstrap workflow call。原 WIP guard、unexpected-skip 拒绝和原生断言保持；本次候选的实际工作流调用及原生结果须按其自己的运行回读。
 
@@ -47,6 +47,6 @@ Contents、命令图标、Copy 和 Typography 的四份测试 mock 还截断了�
 
 ## 条件回填与真实消费者
 
-[实际写回记录](evidence/2026-11-22-sprint-6/issue-tracking-787.json) 保留七条原 Issue 与四条父项的十一项真实 connector write/readback。父项 fresh preflight 发现 Sprint 2 / PR #1716 的并发正文后，先完整保全并重新验证请求，再追加已审查的 Sprint 6 证据；#1323 在原七项回读完成后最后写入。没有关闭 Issue 或宣称合入。
+[实际写回记录](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/issue-tracking-787.json) 保留七条原 Issue 与四条父项的十一项真实 connector write/readback。父项 fresh preflight 发现 Sprint 2 / PR #1716 的并发正文后，先完整保全并重新验证请求，再追加已审查的 Sprint 6 证据；#1323 在原七项回读完成后最后写入。没有关闭 Issue 或宣称合入。
 
 真实应用消费者包括 Shenko 与 OpenGreendam/verdant。S4 原有真实 App/compiler 执行证据已在父追踪中保留；本轮没有重新执行或升级这两个 App。完整 Bootstrap/Liquid 家族、Apple 光学剩余条件、真实设备 120 Hz / 10 ms、物理 IME/AT、Compiler 与 GPUI/Qt/Flutter 各路线仍按原条件开放。上述回归恢复与 DPR 局部通过不替代这些验收。

@@ -46,7 +46,7 @@ The original 1280 × 900 captures were opened separately from the automated chec
 
 An independent reviewer (`/root/lifecycle_audit`) also opened all three original images and accepted this bounded visual scope: the green/amber/green dots are visible to the left of the complete state labels and vertically aligned; the status, right-side tools and center navigation do not overlap or clip; the dark theme visibly differs from the light frames. No rebuild or observer change was needed for that review.
 
-The images and complete original receipts are linked from [the evidence index](./evidence/2026-11-24-shenko-props-application/receipt.json). Unmodified reviewable images are retained beside the compressed original ZIPs and logs.
+The images and complete original receipts are linked from [the evidence index](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-shenko-props-application/receipt.json). Unmodified reviewable images are retained beside the compressed original ZIPs and logs.
 
 ## Observation boundaries
 

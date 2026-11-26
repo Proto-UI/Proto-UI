@@ -65,6 +65,6 @@ The production-web gate, Adapter readOnly fix, browser retirement timing, remote
 
 ## Evidence and reproduction
 
-The accompanying [manifest](evidence/2026-11-24-gpui-native-composition-recovery/manifest.json) binds the nine changed source files, final test counts, earlier runs, scripts, patch, and independent source review. Each raw artifact is gzip-compressed with original and compressed SHA-256 and byte count; decompression was checked byte-for-byte. Historical artifacts elsewhere in the repository are untouched.
+The accompanying [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-gpui-native-composition-recovery/manifest.json) binds the nine changed source files, final test counts, earlier runs, scripts, patch, and independent source review. Each raw artifact is gzip-compressed with original and compressed SHA-256 and byte count; decompression was checked byte-for-byte. Historical artifacts elsewhere in the repository are untouched.
 
 The archived `native-sdk-phase.py` shows the exact commands and environment for the full run. Substitute a fresh checkout/output directory for its task-specific paths; use the repository's Node/pnpm baseline and the pinned Rust/GPUI dependencies. The three producer commands recreate the ordinary, numeric, and official ControlLabel workspaces. The generated-file manifest was captured after the successful run; it is explicitly not claimed to be a generated before/after comparison.

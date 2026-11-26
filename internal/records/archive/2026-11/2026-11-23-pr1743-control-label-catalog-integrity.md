@@ -6,7 +6,7 @@ Date: 2026-11-23. This is an observational repair record, not a new semantic def
 
 The active follow-up is [PR #1743](https://github.com/Proto-UI/Proto-UI/pull/1743), branch `work/sprint3-acceptance-followup-a507-20261123`. The reproduced source is `48ebbaa7139e5caf7730659ae827049a93e97ea3`, tree `f773661d2a3e8b43975af0833242d27448b47ad5`.
 
-The [release-rehearsal run 45222928664](https://github.com/Proto-UI/Proto-UI/actions/runs/45222928664) passed gates 01 and 02, then gate 03 rejected two criteria with the same ID, `HC-CONTROL-LABEL-0001-GPUI`, in [HC-CONTROL-LABEL-0001](../../spec/host-caps/HC-CONTROL-LABEL-0001.yaml). The seven following missing-target messages are consequences of that entity failing to load. Gates 04–15 were not run.
+The [release-rehearsal run 45222928664](https://github.com/Proto-UI/Proto-UI/actions/runs/45222928664) passed gates 01 and 02, then gate 03 rejected two criteria with the same ID, `HC-CONTROL-LABEL-0001-GPUI`, in [HC-CONTROL-LABEL-0001](../../../../spec/host-caps/HC-CONTROL-LABEL-0001.yaml). The seven following missing-target messages are consequences of that entity failing to load. Gates 04–15 were not run.
 
 Original artifact `14841752556` has SHA-256 `694aa47dcf3bfacd6748e41c07c17cf5cb82d1b41a7ad41269c044c1a91afcee`; its unmodified `rehearsal/step-03.log` has SHA-256 `a04563f29b739a26a3188c3dd2fff9cc040436c7523405322c6d5ed6f5228e52`. The archive and original failure remain preserved.
 
@@ -18,7 +18,7 @@ The correction retains the first row and appends the second row's complete Engli
 
 Both texts remain verbatim and jointly constrain the same provider. Current Window, semantic-node, frame and checked-pair identities remain required. The primary-pointer restriction does not introduce touch support: the second text still limits the provider to native mouse gestures on known passive content. Every cancellation, replacement, opaque-child and stale-action restriction remains. The visible text-node accessibility action still creates no Button role, Tab stop, independent keyboard binding or naming-only action. Neither text claims physical touch or assistive-technology delivery.
 
-All six distinct criterion IDs remain referenceable; seven authored rows become six unique rows. The other criteria, relations, source paths, revisions, `status: draft` and `lifecycleRationale` are unchanged. In particular, `HC-CONTROL-LABEL-0001-GPUI-OPAQUE-CHILD` and `HC-CONTROL-LABEL-0001-CALLBACK` remain intact. [T-CONTROL-LABEL-0001](../../spec/tests/T-CONTROL-LABEL-0001.yaml) and [T-COMPILER-GPUI-CONTROL-LABEL-0001](../../spec/tests/T-COMPILER-GPUI-CONTROL-LABEL-0001.yaml) retain their existing criterion mappings and draft lifecycle. The schema's duplicate-ID rejection is unchanged; no runtime or compiler implementation is modified.
+All six distinct criterion IDs remain referenceable; seven authored rows become six unique rows. The other criteria, relations, source paths, revisions, `status: draft` and `lifecycleRationale` are unchanged. In particular, `HC-CONTROL-LABEL-0001-GPUI-OPAQUE-CHILD` and `HC-CONTROL-LABEL-0001-CALLBACK` remain intact. [T-CONTROL-LABEL-0001](../../../../spec/tests/T-CONTROL-LABEL-0001.yaml) and [T-COMPILER-GPUI-CONTROL-LABEL-0001](../../../../spec/tests/T-COMPILER-GPUI-CONTROL-LABEL-0001.yaml) retain their existing criterion mappings and draft lifecycle. The schema's duplicate-ID rejection is unchanged; no runtime or compiler implementation is modified.
 
 ## Actual validation and its limits
 
@@ -50,4 +50,4 @@ This bounded repair establishes catalog integrity for the observed failure. It d
 
 ## Preserved evidence
 
-The [complete original evidence archive](evidence/2026-11-23-pr1743-control-label-catalog-integrity/raw.tar.gz) is 275,189 bytes with SHA-256 `f20869860909fb24858587a2854d0220bccf3f47b42c6210816dbbe0f2ad6813`. It retains the original CI artifact, CLI IPC failure, gate implementation red/green runs, full lifecycle report, catalog tests, source history and the independent patch packet. The archive is immutable; this integration adds its repository link without rewriting those observations.
+The [complete original evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-pr1743-control-label-catalog-integrity/raw.tar.gz) is 275,189 bytes with SHA-256 `f20869860909fb24858587a2854d0220bccf3f47b42c6210816dbbe0f2ad6813`. It retains the original CI artifact, CLI IPC failure, gate implementation red/green runs, full lifecycle report, catalog tests, source history and the independent patch packet. The archive is immutable; this integration adds its repository link without rewriting those observations.

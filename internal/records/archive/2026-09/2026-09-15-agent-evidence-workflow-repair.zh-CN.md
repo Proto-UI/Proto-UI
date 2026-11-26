@@ -26,7 +26,7 @@ flowchart LR
 
 ## 账本位置与数量更正
 
-可恢复的逐项账本现存于 [2026-09-15-issue-backfill-ledger.json](evidence/2026-09-15-issue-backfill-ledger.json)。它是本 PR 中受版本控制的持久执行记录，不是本机临时路径或产品生成文件。每行记录 Issue URL/state、请求来源与 prompt 未知边界、评论抓取和阅读状态、已有证据质量、复现范围、图片/源码 URL、评论回执、缺口和下一步。六条已发表材料沿用原回执，不伪称本次重跑；未读的其余讨论标为 unknown，而不是缺少图片。
+可恢复的逐项账本现存于 [2026-09-15-issue-backfill-ledger.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-15-issue-backfill-ledger.json)。它是本 PR 中受版本控制的持久执行记录，不是本机临时路径或产品生成文件。每行记录 Issue URL/state、请求来源与 prompt 未知边界、评论抓取和阅读状态、已有证据质量、复现范围、图片/源码 URL、评论回执、缺口和下一步。六条已发表材料沿用原回执，不伪称本次重跑；未读的其余讨论标为 unknown，而不是缺少图片。
 
 明确更正上一份续补记录把 **514** 条评论与“六条证据已回读”放在同一时间口径的问题：`2026-09-15T06:13:30.458Z` 的保存快照为 **228 Issues、515 comments**（61 open / 167 closed）。#3 的证据评论 `5673875673` 于 `2026-09-15T02:43:42Z` 发布，已经早于旧 head `4605458162cd2da499372e85c6c419756124c0a1`，所以 514 不能描述该 head 之后的完整总量。旧记录保留历史数值，由本条纠正其适用口径；并未声称今天任何更晚时刻仍只有 515 条。
 

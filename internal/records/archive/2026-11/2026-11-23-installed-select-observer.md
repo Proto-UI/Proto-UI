@@ -36,6 +36,6 @@ The current head still requires the real installed producer and its four hosts. 
 
 ## Retained evidence
 
-[Evidence manifest](evidence/2026-11-23-installed-select-observer/manifest.json) lists deterministic gzip files with both raw and stored byte counts and SHA-256 values. It retains the original pipeline/native receipts, failed Select log, verified extraction record, counterfactual red controls and exact prepared green controls. Decompress a file with `gzip -dc FILE.gz`.
+[Evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-installed-select-observer/manifest.json) lists deterministic gzip files with both raw and stored byte counts and SHA-256 values. It retains the original pipeline/native receipts, failed Select log, verified extraction record, counterfactual red controls and exact prepared green controls. Decompress a file with `gzip -dc FILE.gz`.
 
 The source branch intentionally excludes the 32 MB ZIP and ephemeral browser captures. The original artifact link remains the source for those supplementary visuals; no durable inline-image upload is claimed.

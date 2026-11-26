@@ -20,7 +20,7 @@ The workspace dependency-link correction is separately proven against all import
 
 Public parent `d71d04b` has a successful [startup/theme run 45191139156](https://github.com/Proto-UI/Proto-UI/actions/runs/45191139156). Its original [Sprint 1 run 45191126888](https://github.com/Proto-UI/Proto-UI/actions/runs/45191126888) passed eleven of twelve stages, including the original 600 source cases, 348 integration cases and the four production Search cases. The original Matrix activation phase exceeded **60,000 ms**; one case failed and its three dependent cases did not run. This remains a failed whole-run result. These are parent-source observations, not final merged-head execution.
 
-The [manifest](evidence/2026-11-23-sprint1-d71-reconciliation/manifest.json) binds the complete raw reconciliation/recheck archive and independent source review.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint1-d71-reconciliation/manifest.json) binds the complete raw reconciliation/recheck archive and independent source review.
 
 ## Review boundary
 

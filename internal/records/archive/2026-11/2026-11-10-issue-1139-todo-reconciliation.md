@@ -4,7 +4,7 @@ This dated record repairs the source accounting for [Issue1139](https://github.c
 
 The source candidate is based on `0607c6c5c386b8a932ab850e92a8873b2121dc45` in `fix/release03-thirty-issue-1139-sol-20261110`. The source projection and ledger are new files at that base. The historical records, global release ledger/corrections, product implementations, Compiler/IR, thread policy and GitHub objects remain unchanged.
 
-- [Exact source projection](2026-11-10-issue-1139-todo-reconciliation-sources.json): original native task content/status/blocker, public clause/line, current captured Issues/discussions, PR state and the five original thread bodies.
+- [Exact source projection](../../2026-11-10-issue-1139-todo-reconciliation-sources.json): original native task content/status/blocker, public clause/line, current captured Issues/discussions, PR state and the five original thread bodies.
 - [Reconciliation ledger](2026-11-10-issue-1139-todo-reconciliation.json): every original condition/key, current owner, evidence limits, next operation and remaining acceptance.
 - Source projection SHA-256: `43009036308b89991e519d65d3c9a45cf88fb36805b51422e2f8583ae79ff02b`.
 - Ledger SHA-256: `e64e94359c0717774cedd7229f31e14ae81a773f08ea19be6ee31307e0788f69`.

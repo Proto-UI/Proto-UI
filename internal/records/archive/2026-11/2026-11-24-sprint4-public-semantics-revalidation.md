@@ -6,7 +6,7 @@ Date: 2026-11-24 (Asia/Shanghai); execution: 2026-11-23 UTC.
 
 The public compiler's selected dormant-callable, optional/default-callable, readonly-getter and guaranteed-abrupt tests pass on main `d0eb81d3c61c3d3e93e46c4151e78031273d6116`: **127 assertions in eight files**. The public frozen-packet and object-rest verifier tests separately pass **9/9** synthetic controls. No compiler implementation, fixture or assertion changed in this revalidation.
 
-These are new, bounded executions of the public compiler. They are not executions of the original private IR10 candidate or its recovered original failure graphs. The earlier original-input receipts remain bound to their actual executed source revisions in [the Sprint 4 integration record](2026-11-22-sprint4-integration.md) and [the public semantic record](2026-11-22-sprint4-public-compiler-semantics.md). In particular, the original 270-byte getter input has not been relabeled as a new run, and the original object-rest TS2322 remains an expected language rejection.
+These are new, bounded executions of the public compiler. They are not executions of the original private IR10 candidate or its recovered original failure graphs. The earlier original-input receipts remain bound to their actual executed source revisions in [the Sprint 4 integration record](../../2026-11-22-sprint4-integration.md) and [the public semantic record](../../2026-11-22-sprint4-public-compiler-semantics.md). In particular, the original 270-byte getter input has not been relabeled as a new run, and the original object-rest TS2322 remains an expected language rejection.
 
 The source tree identifiers are:
 
@@ -53,6 +53,6 @@ PR [#1714](https://github.com/Proto-UI/Proto-UI/pull/1714) is merged at `3551b85
 - **#893:** public readonly getter and guaranteed-abrupt behavior is integrated and the selected current controls pass. The original 270-byte input's historical `c857471` receipt remains its own evidence.
 - **#894:** public optional/default callable selection and real generated effects are integrated and the selected current controls pass. The complete original three-file graph's `ef60557` receipt remains separate from this current suite.
 
-The original full IR10 candidate conditions remain open: genuine source rights and DCO, precise shared-definition owner decisions, reconstructable public dependency layers, the original compiler's full source and input closure, and independent acceptance. The public IR7 results do not authorize checking those conditions as complete. See [the original recovery ledger](2026-11-22-sprint4-ir10-recovery.md) and #913–#915.
+The original full IR10 candidate conditions remain open: genuine source rights and DCO, precise shared-definition owner decisions, reconstructable public dependency layers, the original compiler's full source and input closure, and independent acceptance. The public IR7 results do not authorize checking those conditions as complete. See [the original recovery ledger](../../2026-11-22-sprint4-ir10-recovery.md) and #913–#915.
 
 This selection does not claim a full compiler, full workspace, physical browser, hardware, assistive-technology, non-Web, release or original IR10 acceptance run.

@@ -19,7 +19,7 @@ Release rehearsal passed its workspace/docs type stage, then the release-script 
 - CI scheduling policy, formal public-manifest check, formatting and diff checks passed.
 - The parent agent independently reviewed the complete four-file patch and found no blocking issue within this scope. This is not GitHub approval.
 
-Node 24.22.3 and the locked pnpm 10.32.1 workspace were used. Each worktree installed its own frozen dependencies; no cross-worktree dependency symlink was used as proof of the repository-bound asset case. Original decoded logs and ZIP bytes, candidate patch and source hashes are sealed in [evidence/2026-11-23-sprint3-ci-prerequisites/manifest.json](evidence/2026-11-23-sprint3-ci-prerequisites/manifest.json). No prior artifact or failed receipt is rewritten.
+Node 24.22.3 and the locked pnpm 10.32.1 workspace were used. Each worktree installed its own frozen dependencies; no cross-worktree dependency symlink was used as proof of the repository-bound asset case. Original decoded logs and ZIP bytes, candidate patch and source hashes are sealed in [evidence/2026-11-23-sprint3-ci-prerequisites/manifest.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint3-ci-prerequisites/manifest.json). No prior artifact or failed receipt is rewritten.
 
 ## Remaining acceptance
 
@@ -29,8 +29,8 @@ New-head direct/native/production browser acceptance and the complete release re
 
 ## Follow-up on the integrated 6a2 source
 
-The later original native job 137806713683 and rehearsal job 137806713175 in run 45206446598 each reached the same stalled 61.2 MB Ubuntu font download, then hit their original five-minute setup deadline before their product cases. Those complete original ZIPs are retained separately in [evidence/2026-11-23-sprint3-font-retry-followup/manifest.json](evidence/2026-11-23-sprint3-font-retry-followup/manifest.json).
+The later original native job 137806713683 and rehearsal job 137806713175 in run 45206446598 each reached the same stalled 61.2 MB Ubuntu font download, then hit their original five-minute setup deadline before their product cases. Those complete original ZIPs are retained separately in [evidence/2026-11-23-sprint3-font-retry-followup/manifest.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint3-font-retry-followup/manifest.json).
 
 On the separately published numeric-transaction baseline 15963a323d9a6d8a0f61aae32942e2172128bdab, the same 20-second HTTP/HTTPS read timeout and two retries now cover all three original CJK steps (native, separate Base Select, rehearsal). All three keep their original five-minute total bound, mandatory font install, dpkg records and independent complete producers. No browser case or original assertion is removed. The complete workflow/receipt controls passed 32/32 with zero skips and the scheduling policy passed.
 
-The earlier four package-budget failures above remain historical facts; their standalone cost transaction is recorded separately in [2026-11-23-sprint3-package-budget.json](2026-11-23-sprint3-package-budget.json). The current follow-up does not claim a repaired mirror, a new native pass or final canonical package acceptance. The production cleanup failure remains separately owned by the source-input repair.
+The earlier four package-budget failures above remain historical facts; their standalone cost transaction is recorded separately in [2026-11-23-sprint3-package-budget.json](../../2026-11-23-sprint3-package-budget.json). The current follow-up does not claim a repaired mirror, a new native pass or final canonical package acceptance. The production cleanup failure remains separately owned by the source-input repair.

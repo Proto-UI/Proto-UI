@@ -36,7 +36,7 @@ The standalone probes execute the extracted Rust input-selection code. They do n
 
 Final `native/gpui/crates/proto-ui-gpui/tests/key_names.rs` SHA-256: `57eff6f260934bdd55b342464b483460c04e5d2f115d0cced8392c0af65a8e14`.
 
-The [evidence archive](evidence/2026-11-24-gpui-function-key-oracle.tar.gz) retains before/after sources, the unchanged input fixture, exact standalone Rust probe sources, commands, raw stdout/stderr, tool versions, exit receipts, the source patch, and a SHA-256 member manifest. No binaries or external approval claims are included.
+The [evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-gpui-function-key-oracle.tar.gz) retains before/after sources, the unchanged input fixture, exact standalone Rust probe sources, commands, raw stdout/stderr, tool versions, exit receipts, the source patch, and a SHA-256 member manifest. No binaries or external approval claims are included.
 
 ## Remaining acceptance
 

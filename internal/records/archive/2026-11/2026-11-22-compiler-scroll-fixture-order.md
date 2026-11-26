@@ -49,7 +49,7 @@ corepack pnpm@10.32.1 exec prettier packages/compiler/test/scroll-reveal-consume
 git diff --check
 ```
 
-The final tested TypeScript SHA-256 is `3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e`. [Machine evidence](./evidence/2026-11-22-compiler-scroll-fixture-order.json) retains run commands, exit codes, before/after selected-input hashes, the original failed assertion, complete React observation excerpts, the diagnostic patch and raw-artifact hashes. Instrumentation adds synchronous trace I/O; controlled-frame runs explicitly inject ordering. The temporary diagnostic is not part of the executable test change.
+The final tested TypeScript SHA-256 is `3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e`. [Machine evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-compiler-scroll-fixture-order.json) retains run commands, exit codes, before/after selected-input hashes, the original failed assertion, complete React observation excerpts, the diagnostic patch and raw-artifact hashes. Instrumentation adds synchronous trace I/O; controlled-frame runs explicitly inject ordering. The temporary diagnostic is not part of the executable test change.
 
 The full compiler suite, real browser geometry, native upstream CI/DCO and an independent published review remain separate work for the actual submitted revision. The source branch intentionally starts at the downstream pin: observed upstream `main` at `a4583a0873b0b7742171f5b66279204b13f7332e` has unrelated production changes. A downstream pin to this focused fix need not adopt those changes.
 

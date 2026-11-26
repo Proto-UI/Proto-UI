@@ -1,6 +1,6 @@
 # General queue: observe lowered paint with its actual state facts
 
-Four original `d0392fb3` failures came from two observation assumptions. The [original errors and complete validation receipts](./evidence/2026-11-23-lowered-state-paint-observations/manifest.json) remain preserved. No product rule, input, timeout or controlled-owner assertion changes.
+Four original `d0392fb3` failures came from two observation assumptions. The [original errors and complete validation receipts](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-lowered-state-paint-observations/manifest.json) remain preserved. No product rule, input, timeout or controlled-owner assertion changes.
 
 ## Calendar selected endpoints
 

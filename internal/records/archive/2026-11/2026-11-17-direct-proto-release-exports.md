@@ -18,7 +18,7 @@ Three focused regression cases were added to `proto-source-package.test.mjs`: re
 
 ## Executed evidence
 
-The [machine receipt](evidence/2026-11-17-direct-proto-release-exports.json) retains the source hashes, command results, original failures, package metadata, installed-file hashes and compiler source-resolution observations. The implementation was tested as an uncommitted delta on the exact base above; a base SHA alone is not the candidate identity.
+The [machine receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-direct-proto-release-exports.json) retains the source hashes, command results, original failures, package metadata, installed-file hashes and compiler source-resolution observations. The implementation was tested as an uncommitted delta on the exact base above; a base SHA alone is not the candidate identity.
 
 | Check | Actual result |
 | --- | --- |

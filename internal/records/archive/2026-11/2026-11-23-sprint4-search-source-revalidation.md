@@ -16,7 +16,7 @@ The repair changes only this source hash in the checker and the corresponding ma
 
 ## Executed evidence
 
-The [manifest](evidence/2026-11-23-sprint4-search-source-revalidation/manifest.json) binds compressed original-byte logs and receipts. The source-admission runs used Node 24.22.3 and the exact two-file working patch `11eb678d9b9241005c63141fbbfb53ad4935f8dd9786f2ff4b196712d71036a8` on top of the published candidate.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint4-search-source-revalidation/manifest.json) binds compressed original-byte logs and receipts. The source-admission runs used Node 24.22.3 and the exact two-file working patch `11eb678d9b9241005c63141fbbfb53ad4935f8dd9786f2ff4b196712d71036a8` on top of the published candidate.
 
 | Boundary | Actual result |
 | --- | --- |

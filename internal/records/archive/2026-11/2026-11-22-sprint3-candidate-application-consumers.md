@@ -4,7 +4,7 @@
 
 On 2026-11-22, Proto-UI candidate `830287f95959a4a1a4fb797df68b0bd6889e0bae` (tree `f7b2851e7e6fa6b7d9e64fd1e687d316a4c51644`) passed the unchanged actual Shenko and Verdant consumer commands in isolated local worktrees. All nine commands returned exit 0 between `2026-11-22T11:41:11.987437+00:00` and `2026-11-22T11:42:42.315328+00:00`.
 
-This is an **isolated explicit-pin adoption experiment**. Neither application's main pin was changed, committed or pushed. It adds candidate evidence alongside the earlier main-pin baseline record; it does not replace that baseline, an original historical acceptance, or a release/native gate. The machine record is [2026-11-22-sprint3-candidate-application-consumers.json](./2026-11-22-sprint3-candidate-application-consumers.json).
+This is an **isolated explicit-pin adoption experiment**. Neither application's main pin was changed, committed or pushed. It adds candidate evidence alongside the earlier main-pin baseline record; it does not replace that baseline, an original historical acceptance, or a release/native gate. The machine record is [2026-11-22-sprint3-candidate-application-consumers.json](../../2026-11-22-sprint3-candidate-application-consumers.json).
 
 | Consumer | Actual application base | Main pin retained | Pin in isolated experiment |
 | --- | --- | --- | --- |

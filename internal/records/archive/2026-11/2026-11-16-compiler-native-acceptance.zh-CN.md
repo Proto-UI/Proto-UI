@@ -4,7 +4,7 @@
 
 十个文件中的 **97 个原用例均获得了真实、保持 sandbox 的 Chromium 成功执行记录**，分布于三个明确记录的源码修订。执行暴露的两个过期夹具前提已经修复，原断言、超时和负控制保留。随后核对依赖解析时发现，第一次 Box 完整 `check:types` 虽然退出 0，网站类型程序却读取了另一个 checkout 的一份旧声明文件。因此该结果降为历史执行记录，**不作为最终同源完整类型验收**。当前源码已补上缺失的 TypeScript 路径，并在独立离线依赖下验证三个真实导入都解析到当前源文件；最终合并候选上的完整诊断和隔离浏览器复验由集成工作继续完成。
 
-机器记录、逐项日志、原始失败、源码映射和可恢复压缩收据位于 [2026-11-16-compiler-native-acceptance.json](evidence/2026-11-16-compiler-native-acceptance.json)。
+机器记录、逐项日志、原始失败、源码映射和可恢复压缩收据位于 [2026-11-16-compiler-native-acceptance.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-16-compiler-native-acceptance.json)。
 
 ## 源码与实现来源
 

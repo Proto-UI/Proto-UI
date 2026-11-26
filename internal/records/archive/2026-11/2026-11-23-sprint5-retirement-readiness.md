@@ -2,7 +2,7 @@
 
 This non-normative continuation advances [PR #1715](https://github.com/Proto-UI/Proto-UI/pull/1715) from public parent `32cf4b2f9c9ca22dd016de2981396df9ba49b626`. It preserves that branch's normal mainline merge, production repository-root/Worker repairs, original browser/native workflows and earlier evidence. Codex prepared the four-file correction under the current user's instruction to advance drafts through substantive work to Ready for review.
 
-The [manifest](evidence/2026-11-23-sprint5-retirement-readiness/manifest.json) identifies the exact four source hashes, original preimages, final patch, producer output, commands and raw failing/passing evidence. Results below concern that recorded candidate source on the parent; they are not a fabricated whole-PR run at a later commit SHA.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-retirement-readiness/manifest.json) identifies the exact four source hashes, original preimages, final patch, producer output, commands and raw failing/passing evidence. Results below concern that recorded candidate source on the parent; they are not a fabricated whole-PR run at a later commit SHA.
 
 ## Corrected behavior and test boundaries
 

@@ -82,7 +82,7 @@ Vue 2 的四条 strict 诊断来自已检查的 Anatomy nominal type 在 JSDoc �
 
 ### 独立复核发现的严格祖先边界
 
-只读复核核对了 [身份合同](../../spec/contracts/C-SCROLL-TARGET-REVEAL-0001.yaml) 与 `packages/modules/anatomy/src/impl.ts` 的 `resolveAncestorInstance`：Runtime 从 part 的 parent 开始找同角色祖先，Compiler 候选却调用了包含自身的 `ancestor(participant, ...)`。当 target 本身是后代 surface 时，当前外层 surface 是它最近的严格同角色祖先，合法请求会被候选错误拒绝。内层 surface 下的 item 仍归内层，这是另一个判断，原负控保持。
+只读复核核对了 [身份合同](../../../../spec/contracts/C-SCROLL-TARGET-REVEAL-0001.yaml) 与 `packages/modules/anatomy/src/impl.ts` 的 `resolveAncestorInstance`：Runtime 从 part 的 parent 开始找同角色祖先，Compiler 候选却调用了包含自身的 `ancestor(participant, ...)`。当 target 本身是后代 surface 时，当前外层 surface 是它最近的严格同角色祖先，合法请求会被候选错误拒绝。内层 surface 下的 item 仍归内层，这是另一个判断，原负控保持。
 
 `scroll-strict-ancestor-four-red` 在冻结 v3 产品上执行四目标普通消费者：4 failed / 24 明确过滤。四项均已真实编译、挂载并调用；实际 `unavailable`、外层 offset 50 → 50，预期 dispatched、50 → 70，内层自身 offset 23 保持。7 个产品文件和 2 个 fixture 的 before / after 散列实际一致。最小修复经本地 source review 后，只在当前 reveal 的 surface-role predicate 排除 participant 自身，保留 domain 查找、self 拒绝和其他 ancestor 使用。
 
@@ -134,7 +134,7 @@ root 将上述冻结 v4 补丁按 hunk 应用到已发布的 `7d0e2dfcaffcdf6007
 
 之后的格式检查指出六个文件的排版差异。首次格式备份因环境 ENOSPC 失败，尚未执行 formatter 或改变源码；清理三个已结束工作树的可重建依赖后，455 个输入仍与成功运行完全一致。格式修复只改变排版：六文件的 TypeScript AST、literal／raw template 内容与声明标志均逐一等价。150 项结果仍绑定格式化前的实际输入，此处记录这次机械转换，没有伪称格式化后重新执行了整轮测试。最终 diff 检查另行保留。
 
-[机器证据](./evidence/2026-11-17-compiler-scroll-recovery.json) 保存冻结补丁、19 轮历史记录的原 JSON 内容、独立审查及严格祖先闭环、组合命令的实际 receipt／JSON 和格式转换证明。历史失败与各阶段的 before-only 限制保持，不用本次组合通过改写旧记录。
+[机器证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-compiler-scroll-recovery.json) 保存冻结补丁、19 轮历史记录的原 JSON 内容、独立审查及严格祖先闭环、组合命令的实际 receipt／JSON 和格式转换证明。历史失败与各阶段的 before-only 限制保持，不用本次组合通过改写旧记录。
 
 组合验证后的有界诊断还复现了既有 `to-end` 尾部重入缺陷：两个新增 emitted host case 为 1 passed / 1 failed、原 17 项明确过滤。普通 to-end 正控得到 300 / atEnd / following / applied；applied watcher 内新的合法 reveal 返回 150 / 非 atEnd / paused 后，旧 outer 尾部仍把 state 写回 following。requestStatus 保持 applied，未发生第二次即时位移。该尾部在 base `385d7c` 已存在；本检查点记录真实失败和独立后续修复，不将 150 项通过扩充为此场景已通过，也不把模型的 no-op phase guard 冒充普通 framework 证明。
 

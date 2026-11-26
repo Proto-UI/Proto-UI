@@ -4,7 +4,7 @@
 
 ## 合法输入与实际缺陷
 
-普通函数可以在必需参数之前声明默认值，例如 `(first = 7, last: number) => first + last`。调用方仍需提供第二个位置；传入 `undefined` 才会在第一个位置使用默认值。[TypeScript 官方函数说明](https://www.typescriptlang.org/docs/handbook/functions.html#optional-and-default-parameters)明确区分了这种默认参数与只能位于尾部的可选参数。项目的 [thin compiler 标准](../compiler/atomic-lowering-completion.md)要求保留合法作者函数和目标语言语义；此次没有把默认参数位置改成新的 Core 限制。
+普通函数可以在必需参数之前声明默认值，例如 `(first = 7, last: number) => first + last`。调用方仍需提供第二个位置；传入 `undefined` 才会在第一个位置使用默认值。[TypeScript 官方函数说明](https://www.typescriptlang.org/docs/handbook/functions.html#optional-and-default-parameters)明确区分了这种默认参数与只能位于尾部的可选参数。项目的 [thin compiler 标准](../../../compiler/atomic-lowering-completion.md)要求保留合法作者函数和目标语言语义；此次没有把默认参数位置改成新的 Core 限制。
 
 当前 `checkedCall` 已按最后一个必需参数的位置计算最少实参数量。新增 local source 与 portable 负控制实际通过，因此本修复不把正确的通用调用检查误记为旧缺陷。真正不一致的路径是：
 
@@ -31,7 +31,7 @@ Callable 赋值仍按参数逆变检查，现有 `erasesRuntimeAuthority` 前置
 
 环境为 Node `24.22.1`、pnpm `10.32.1`、TypeScript `5.9.3`、Vitest `2.1.9`。本树实际离线 frozen/ignore-scripts 安装依赖，2.537 秒、exit 0；各测试使用单 worker，禁用文件并行。两组执行前后 24 个枚举输入保持一致，全部 21 个测试断言在当前产品补丁中保持原字节。已有 esbuild `ES2024` target warnings 保留在原始日志。
 
-机器记录位于 [对应证据](evidence/2026-11-17-non-trailing-default-arguments.json)。基线与候选分别绑定源码和文件摘要；生成临时目录按测试清理，原命令、诊断、日志与 Vitest JSON 均保留。
+机器记录位于 [对应证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-non-trailing-default-arguments.json)。基线与候选分别绑定源码和文件摘要；生成临时目录按测试清理，原命令、诊断、日志与 Vitest JSON 均保留。
 
 ## 当前候选验证
 
