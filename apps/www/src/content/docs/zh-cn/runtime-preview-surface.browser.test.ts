@@ -348,7 +348,7 @@ describe('RuntimeBox single actual Prototype surface', () => {
                 (root as any).__selectionSource = content;
                 return {
                   text: selection.toString(),
-                  family: root.getAttribute('data-site-library-family'),
+                  family: root.getAttribute('data-preview-control-family'),
                 };
               },
               { boundary, backward }
@@ -356,7 +356,7 @@ describe('RuntimeBox single actual Prototype surface', () => {
             expect(before.text.length).toBeGreaterThan(0);
             const family = before.family === 'brutalist' ? 'shadcn' : 'brutalist';
             await root.evaluate(
-              (root, family) => root.setAttribute('data-site-library-family', family),
+              (root, family) => root.setAttribute('data-preview-control-family', family),
               family
             );
             await expect

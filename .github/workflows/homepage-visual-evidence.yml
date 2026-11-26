@@ -281,8 +281,13 @@ jobs:
           - name: runtime-box
             suite: runtime-preview-surface
             contract: runtime-preview-evidence
-          - name: search-commands
-            suite: site-search-commands
+          - name: search-activation
+            suite: site-search-activation
+            contract: site-search-browser-inventory
+          - name: search-layout
+            suite: site-search-layout
+          - name: search-menu
+            suite: site-search-menu
     steps:
       - uses: actions/checkout@v4
         with:

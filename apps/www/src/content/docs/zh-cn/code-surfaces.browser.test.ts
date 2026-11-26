@@ -292,6 +292,15 @@ async function expectCopyControls(
     await control.waitFor({ state: 'visible' });
     await page.mouse.move(0, 0);
     await control.evaluate((element: HTMLElement) => element.blur());
+    await expect
+      .poll(() =>
+        control.evaluate((element) =>
+          element
+            .getAnimations()
+            .every((animation) => !animation.pending && animation.playState !== 'running')
+        )
+      )
+      .toBe(true);
     const facts = await control.evaluate((element) => {
       const style = getComputedStyle(element);
       const icon = element.querySelector('svg')!;
@@ -376,6 +385,7 @@ async function expectCopyControls(
     }));
     expect(focused.focused).toBe(true);
     expect(focused.shadow).not.toBe(facts.shadow);
+    await control.evaluate((element) => (element as HTMLElement).blur());
   }
   // Floating overlay Copy buttons own an opaque single-owner outline surface so
   // code text never bleeds behind the icon; dedicated header/toolbar/docs slots
@@ -875,7 +885,13 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
             overflow: 'auto',
             scrollable: true,
           });
-          await pre.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+          await pre.evaluate((element) => {
+            const scroll =
+              element.closest<HTMLElement>(
+                '[data-code-scroll-ready] [data-code-scroll-viewport]'
+              ) ?? element;
+            scroll.scrollIntoView({ block: 'center' });
+          });
           const token = pre
             .locator('.line')
             .first()

@@ -1010,6 +1010,7 @@ const reviewedWcHelpers = [
   'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/platform/portal-direction.ts',
   'packages/adapters/web-component/src/focus-scope-targets.ts',
+  'packages/adapters/web-component/src/native-focus-candidate.ts',
   'packages/adapters/web-component/src/keyed-meta-sources.ts',
   'packages/adapters/web-component/src/portal-conceal.ts',
   'packages/adapters/web-component/src/portal-mount.ts',

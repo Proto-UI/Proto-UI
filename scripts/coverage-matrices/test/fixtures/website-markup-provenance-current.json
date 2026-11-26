@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "eacbed64e47a54f04376c7a49d7fd16bd20f2d45",
-  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 final-1922 integration source commit eacbed64e47a54f04376c7a49d7fd16bd20f2d45. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-eaa21b6.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "a56f93cfd585b69ba9f731310d061c4198b3f910",
+  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1915 integration source commit a56f93cfd585b69ba9f731310d061c4198b3f910. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-eaa21b6.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -11,7 +11,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "a27c498665d894c4cb94248ebe616b93659bcc2f824c8412e4538eb22c80ada3"
+      "sha256": "f96be6d05a5c95aee447618cecae03dee7661fe98b8fe22ebc80ecf4cdf6f1a4"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-format.ts",
@@ -91,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6"
+      "sha256": "50cb2a3862c7875afd270b10567e9202baa2223e00016a13242041381eb8e56b"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
