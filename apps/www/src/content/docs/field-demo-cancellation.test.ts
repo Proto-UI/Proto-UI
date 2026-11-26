@@ -94,13 +94,14 @@ async function mount(family: string) {
   return { ref, root, requests, edit, reset };
 }
 describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])(
-  'Field %s demo cancellation consumer (synthetic WC)',
+  'Field %s demo validation reset (synthetic WC)',
   (family) => {
     it('retires a pending reply after delivered pointer activation and permits a fresh request', async () => {
       const f = await mount(family);
       await f.edit('taken');
       expect(f.root.pending.get()).toBe(true);
       const old = f.requests.at(-1);
+      expect(old).toEqual(expect.stringMatching(/.+/));
       await f.reset();
       expect(f.ref('handleStatus').textContent).toContain('Handle ready');
       expect(f.root.pending.get()).toBe(false);
@@ -117,8 +118,10 @@ describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']
       const f = await mount(family);
       await f.edit('taken');
       const retired = f.requests.at(-1);
+      expect(retired).toEqual(expect.stringMatching(/.+/));
       await f.reset();
       await f.edit('taken', 'change');
+      expect(f.requests.at(-1)).toEqual(expect.stringMatching(/.+/));
       expect(f.requests.at(-1)).not.toBe(retired);
       expect(f.root.resolveValidation(retired, { invalid: false })).toBe(false);
       await vi.advanceTimersByTimeAsync(500);

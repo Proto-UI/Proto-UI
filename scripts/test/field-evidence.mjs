@@ -15,11 +15,14 @@ export const FIELD_CASE_TITLES = [
     )
   ),
   ...FIELD_FAMILIES.map((family) => `${family} Chinese public route consumes the same six atoms`),
+  'Brutalist contact Cancel clears validation while retaining the edited name',
+  'Base Form Cancel submit retires the submission while its field reply can still land',
 ];
 
 export function assertFieldReport(report) {
   assert.equal(report.success, true);
-  for (const key of ['numTotalTests', 'numPassedTests']) assert.equal(report[key], 25, key);
+  for (const key of ['numTotalTests', 'numPassedTests'])
+    assert.equal(report[key], FIELD_CASE_TITLES.length, key);
   for (const key of [
     'numFailedTests',
     'numPendingTests',
@@ -28,7 +31,7 @@ export function assertFieldReport(report) {
     'numPendingTestSuites',
   ])
     assert.equal(report[key], 0, key);
-  assert.equal(report.testResults.length, 1, 'Exactly the unchanged Field suite must execute');
+  assert.equal(report.testResults.length, 1, 'Exactly the Field suite must execute');
   const file = report.testResults[0];
   const normalized = file.name.replaceAll('\\', '/');
   assert.ok(
@@ -36,13 +39,13 @@ export function assertFieldReport(report) {
     'Wrong test file'
   );
   assert.equal(file.status, 'passed');
-  assert.equal(file.assertionResults.length, 25);
+  assert.equal(file.assertionResults.length, FIELD_CASE_TITLES.length);
   for (const test of file.assertionResults)
     assert.equal(test.status, 'passed', test.fullName ?? test.title);
   assert.deepEqual(
     file.assertionResults.map((test) => test.title).sort(),
     [...FIELD_CASE_TITLES].sort(),
-    'Every family/runtime and Chinese case must execute exactly once'
+    'Every named Field case must execute exactly once'
   );
 }
 

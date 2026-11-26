@@ -339,3 +339,92 @@ describe('Field real browser journeys', () => {
       }
     }, 120000);
 });
+
+async function waitForDefaultWc(preview: Locator) {
+  await preview.scrollIntoViewIfNeeded();
+  await expect.poll(() => preview.evaluate((element) => {
+    const root = element as HTMLElement & { __previewer__?: { getCurrentRuntime(): string | null } };
+    return root.__previewer__?.getCurrentRuntime();
+  })).toBe('wc');
+}
+
+it('Brutalist contact Cancel clears validation while retaining the edited name', async () => {
+  const { context, page } = await openRoute(browser, baseUrl, route('brutalist'), {
+    width: 1100,
+    height: 1000,
+  });
+  try {
+    const preview = page.locator('[data-previewer-id][data-demo-id="demo-brutalist-field-contact"]');
+    await waitForDefaultWc(preview);
+    const name = editor(preview, 'contactName');
+    const email = editor(preview, 'contactEmail');
+    const message = preview.locator('.host textarea');
+    const send = preview.getByRole('button', { name: 'Send message', exact: true });
+    const cancel = preview.getByRole('button', { name: 'Cancel', exact: true });
+    await name.fill('Ada');
+    await send.click();
+    const invalidFields = [[email, 'contactEmailError'], [message, 'contactMsgError']] as const;
+    for (const [control, errorRef] of invalidFields) {
+      await expect.poll(() => control.getAttribute('aria-invalid')).toBe('true');
+      const error = ref(preview, errorRef);
+      await error.waitFor({ state: 'visible' });
+      const id = await error.getAttribute('id');
+      expect(id).toBeTruthy();
+      expect(await control.getAttribute('aria-errormessage')).toBe(id);
+    }
+    await send.focus();
+    await page.keyboard.press('Tab');
+    expect(await cancel.evaluate((el) => el.matches(':focus'))).toBe(true);
+    await page.keyboard.press('Space');
+    for (const control of [email, message]) {
+      await expect.poll(() => control.getAttribute('aria-invalid')).toBe('false');
+      expect(await control.getAttribute('aria-errormessage')).toBeNull();
+    }
+    expect(await name.inputValue()).toBe('Ada');
+  } finally {
+    await context.close();
+  }
+}, 120_000);
+
+it('Base Form Cancel submit retires the submission while its field reply can still land', async () => {
+  const { context, page } = await openRoute(browser, baseUrl, '/en/ui-libraries/base/form/', {
+    width: 1100,
+    height: 1000,
+  });
+  try {
+    const preview = page.locator('[data-previewer-id][data-demo-id="demo-base-form-validation"]');
+    await waitForDefaultWc(preview);
+    const host = preview.locator('.host');
+    const form = host.getByRole('form', { name: 'Account validation form', exact: true });
+    const submit = form.getByRole('button', { name: 'Submit', exact: true });
+    const cancel = host.getByRole('button', { name: 'Cancel submit', exact: true });
+    const approve = host.getByRole('button', { name: 'Approve', exact: true });
+    const account = editor(preview, 'account');
+    const status = ref(preview, 'submissionStatus');
+    await account.fill('lin');
+    await submit.click();
+    await expect.poll(() => form.getAttribute('aria-busy')).toBe('true');
+    expect(await account.getAttribute('aria-busy')).toBe('true');
+    expect(await status.textContent()).toBe('Not submitted yet.');
+    await cancel.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => status.textContent()).toBe('Submission canceled.');
+    expect(await form.getAttribute('aria-busy')).not.toBe('true');
+    expect(await account.getAttribute('aria-busy')).toBe('true');
+    await approve.click();
+    await expect.poll(() => ref(preview, 'validatorStatus').textContent())
+      .toBe('Accepted success for "lin"');
+    expect(await account.getAttribute('aria-busy')).not.toBe('true');
+    expect(await account.inputValue()).toBe('lin');
+    expect(await status.textContent()).toBe('Submission canceled.');
+
+    await submit.click();
+    await expect.poll(() => form.getAttribute('aria-busy')).toBe('true');
+    await approve.click();
+    await expect.poll(() => status.textContent()).toMatch(/^Submitted \(#1\): /);
+    const payload = (await status.textContent())!.slice('Submitted (#1): '.length);
+    expect(JSON.parse(payload)).toMatchObject({ account: 'lin' });
+  } finally {
+    await context.close();
+  }
+}, 120_000);
