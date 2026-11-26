@@ -168,8 +168,14 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     await flush();
     const svg = (el: any) => el.shadowRoot?.querySelector('svg') ?? el.querySelector('svg');
     const glyph = (el: any) => svg(el)?.querySelector('path')?.getAttribute('d') ?? null;
-    const glyphPaint = (el: any) =>
-      (svg(el)?.parentElement?.getAttribute('data-pui-style') ?? '').split(/\s+/);
+    const glyphPaint = (el: any) => {
+      // An unchecked indicator keeps its painted box while it has no SVG glyph.
+      const boxes = (el.shadowRoot ?? el).querySelectorAll(
+        'span[data-pui-style~="pointer-events-none"][data-pui-style~="size-5"]'
+      );
+      expect(boxes).toHaveLength(1);
+      return (boxes[0].getAttribute('data-pui-style') ?? '').split(/\s+/);
+    };
     if (family === 'liquid-glass') {
       expect(glyphPaint(a)).toEqual(
         expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
@@ -179,17 +185,25 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
       );
       expect(glyphPaint(b)).toEqual(expect.arrayContaining(['bg-background', 'text-foreground']));
     }
-    expect(glyph(a)).toBe(family === 'bootstrap-2-3-2' ? 'M5 12L10 17L19 7' : 'm20 6-11 11-5-5');
+    const checkedPath =
+      family === 'bootstrap-2-3-2'
+        ? 'M5 12L10 17L19 7'
+        : family === 'liquid-glass'
+          ? 'M4.5 8 7 11 11.5 5'
+          : 'm20 6-11 11-5-5';
+    expect(glyph(a)).toBe(checkedPath);
     expect(glyph(b)).toBe(null);
-    expect(glyph(all)).toBe(family === 'bootstrap-2-3-2' ? 'M5 12H19' : 'M5 12h14');
+    const mixedPath =
+      family === 'bootstrap-2-3-2' ? 'M5 12H19' : family === 'liquid-glass' ? 'M6 8h4' : 'M5 12h14';
+    expect(glyph(all)).toBe(mixedPath);
     expect(svg(a).getAttribute('aria-hidden')).toBe('true');
     expect(svg(a).getAttribute('tabindex')).toBe(null);
     expect(svg(a).getAttribute('role')).toBe(null);
-    expect(svg(a).getAttribute('width')).toBe(family === 'liquid-glass' ? '14' : '16');
-    expect(svg(a).getAttribute('height')).toBe(family === 'liquid-glass' ? '14' : '16');
-    expect(svg(a).getAttribute('stroke-width')).toBe(
-      family === 'brutalist' ? '3' : family === 'liquid-glass' ? '2.25' : '2'
-    );
+    // Liquid's public HIG glyph now uses its 16-unit viewport and 2px stroke.
+    if (family === 'liquid-glass') expect(svg(a).getAttribute('viewBox')).toBe('0 0 16 16');
+    expect(svg(a).getAttribute('width')).toBe('16');
+    expect(svg(a).getAttribute('height')).toBe('16');
+    expect(svg(a).getAttribute('stroke-width')).toBe(family === 'brutalist' ? '3' : '2');
     let proposals = 0;
     root.addEventListener('valueChange', () => proposals++);
     b.click();

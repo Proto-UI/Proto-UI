@@ -1,6 +1,7 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { NEW_YORK_BASE, NEW_YORK_SIZES, NEW_YORK_VARIANTS } from '../button/new-york';
-import { SHADCN_STYLE_IDS, type ShadcnStyleProps } from '../style-scope';
+import { SHADCN_STYLE_IDS } from '../style-scope';
+import type { PopoverTriggerProps } from './types';
 import { MODERN_OVERLAY_STYLES, setupOverlayStyle } from '../dialog/style';
 import {
   SHADCN_ACTION_BASE,
@@ -49,29 +50,24 @@ const DARK_OUTLINE_HOVER = {
  * explicit modern profile maps its own default outline Button paint only.
  * No Button hook, event, variant/size API or second activation owner is added.
  */
-export function setupPopoverCommandPaint<
-  Props extends ShadcnStyleProps,
-  Exposes = Record<string, unknown>,
->(
-  def: DefHandle<Props, Exposes>,
+export function setupPopoverCommandPaint<Exposes = Record<string, unknown>>(
+  def: DefHandle<PopoverTriggerProps, Exposes>,
   state: {
     hovered: State<boolean>;
     focusVisible: State<boolean>;
     disabled: State<boolean>;
     pressed: State<boolean>;
   },
-  command: 'trigger' | 'close',
-  rules?: {
-    defaultRule: DefHandle<Props, Exposes>['rule'];
-    navigationRule: DefHandle<Props, Exposes>['rule'];
-  }
+  command: 'trigger' | 'close'
 ) {
-  // Presentation is authored by the concrete Trigger. These pure installers
-  // add its rule condition without mirrored State or lifecycle subscriptions.
+  // Only Trigger declares presentation. Close keeps its original conditions
+  // and never reads that prop; neither command mirrors it into State.
   const style = setupOverlayStyle(def, 'nova');
-  const defaultRule: typeof def.rule = rules?.defaultRule ?? ((rule) => def.rule(rule));
-  defaultRule({
-    when: (w) => w.state(style).eq('new-york-v4'),
+  def.rule({
+    when: (w) =>
+      command === 'trigger'
+        ? w.all(w.prop('presentation').eq('default'), w.state(style).eq('new-york-v4'))
+        : w.state(style).eq('new-york-v4'),
     intent: (i) =>
       i.feedback.style.use(
         tw(
@@ -81,22 +77,40 @@ export function setupPopoverCommandPaint<
         )
       ),
   });
-  defaultRule({
+  def.rule({
     when: (w) =>
-      w.all(
-        w.state(style).eq('new-york-v4'),
-        w.state(state.hovered).eq(true),
-        w.state(state.disabled).eq(false)
-      ),
+      command === 'trigger'
+        ? w.all(
+            w.prop('presentation').eq('default'),
+            w.all(
+              w.state(style).eq('new-york-v4'),
+              w.state(state.hovered).eq(true),
+              w.state(state.disabled).eq(false)
+            )
+          )
+        : w.all(
+            w.state(style).eq('new-york-v4'),
+            w.state(state.hovered).eq(true),
+            w.state(state.disabled).eq(false)
+          ),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_OUTLINE_HOVER_TOKENS)),
   });
-  defaultRule({
-    when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(state.focusVisible).eq(true)),
+  def.rule({
+    when: (w) =>
+      command === 'trigger'
+        ? w.all(
+            w.prop('presentation').eq('default'),
+            w.all(w.state(style).eq('new-york-v4'), w.state(state.focusVisible).eq(true))
+          )
+        : w.all(w.state(style).eq('new-york-v4'), w.state(state.focusVisible).eq(true)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_FOCUS_TOKENS)),
   });
   for (const profile of MODERN_OVERLAY_STYLES) {
-    defaultRule({
-      when: (w) => w.state(style).eq(profile),
+    def.rule({
+      when: (w) =>
+        command === 'trigger'
+          ? w.all(w.prop('presentation').eq('default'), w.state(style).eq(profile))
+          : w.state(style).eq(profile),
       intent: (i) =>
         i.feedback.style.use(
           tw(
@@ -108,41 +122,72 @@ export function setupPopoverCommandPaint<
           )
         ),
     });
-    defaultRule({
+    def.rule({
       when: (w) =>
-        w.all(
-          w.state(style).eq(profile),
-          w.state(state.hovered).eq(true),
-          w.state(state.disabled).eq(false)
-        ),
+        command === 'trigger'
+          ? w.all(
+              w.prop('presentation').eq('default'),
+              w.all(
+                w.state(style).eq(profile),
+                w.state(state.hovered).eq(true),
+                w.state(state.disabled).eq(false)
+              )
+            )
+          : w.all(
+              w.state(style).eq(profile),
+              w.state(state.hovered).eq(true),
+              w.state(state.disabled).eq(false)
+            ),
       intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_OUTLINE_HOVER[profile])),
     });
-    defaultRule({
-      when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
+    def.rule({
+      when: (w) =>
+        command === 'trigger'
+          ? w.all(
+              w.prop('presentation').eq('default'),
+              w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true))
+            )
+          : w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
       intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS[profile])),
     });
   }
   for (const profile of SHADCN_STYLE_IDS) {
     if (DARK_OUTLINE[profile])
-      defaultRule({
-        when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
+      def.rule({
+        when: (w) =>
+          command === 'trigger'
+            ? w.all(
+                w.prop('presentation').eq('default'),
+                w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark'))
+              )
+            : w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
         intent: (i) => i.feedback.style.use(tw(DARK_OUTLINE[profile])),
       });
-    defaultRule({
+    def.rule({
       when: (w) =>
-        w.all(
-          w.state(style).eq(profile),
-          w.meta('colorScheme').eq('dark'),
-          w.state(state.hovered).eq(true),
-          w.state(state.disabled).eq(false)
-        ),
+        command === 'trigger'
+          ? w.all(
+              w.prop('presentation').eq('default'),
+              w.all(
+                w.state(style).eq(profile),
+                w.meta('colorScheme').eq('dark'),
+                w.state(state.hovered).eq(true),
+                w.state(state.disabled).eq(false)
+              )
+            )
+          : w.all(
+              w.state(style).eq(profile),
+              w.meta('colorScheme').eq('dark'),
+              w.state(state.hovered).eq(true),
+              w.state(state.disabled).eq(false)
+            ),
       intent: (i) => i.feedback.style.use(tw(DARK_OUTLINE_HOVER[profile])),
     });
   }
   // The trigger carries hasPopup=dialog; upstream's active movement excludes
   // popup triggers. The separate Close has no popup and borrows its own press.
   if (command === 'close') {
-    defaultRule({
+    def.rule({
       when: (w) =>
         w.all(
           w.not(w.state(style).eq('new-york-v4')),
@@ -152,11 +197,10 @@ export function setupPopoverCommandPaint<
       intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
   }
-  if (command === 'trigger' && rules) {
-    const navigationRule = rules.navigationRule;
+  if (command === 'trigger') {
     for (const profile of SHADCN_STYLE_IDS) {
-      navigationRule({
-        when: (w) => w.state(style).eq(profile),
+      def.rule({
+        when: (w) => w.all(w.prop('presentation').eq('navigation'), w.state(style).eq(profile)),
         intent: (i) =>
           i.feedback.style.use(
             profile === 'new-york-v4'
@@ -170,30 +214,40 @@ export function setupPopoverCommandPaint<
                 )
           ),
       });
-      navigationRule({
+      def.rule({
         when: (w) =>
           w.all(
-            w.state(style).eq(profile),
-            w.state(state.hovered).eq(true),
-            w.state(state.disabled).eq(false)
+            w.prop('presentation').eq('navigation'),
+            w.all(
+              w.state(style).eq(profile),
+              w.state(state.hovered).eq(true),
+              w.state(state.disabled).eq(false)
+            )
           ),
         intent: (i) =>
           i.feedback.style.use(
             tw(profile === 'new-york-v4' ? 'bg-secondary/80' : SHADCN_SECONDARY_HOVER)
           ),
       });
-      navigationRule({
-        when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('presentation').eq('navigation'),
+            w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true))
+          ),
         intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS[profile])),
       });
     }
-    navigationRule({
-      when: (w) => w.state(state.disabled).eq(true),
+    def.rule({
+      when: (w) => w.all(w.prop('presentation').eq('navigation'), w.state(state.disabled).eq(true)),
       intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DISABLED_TOKENS)),
     });
   }
-  defaultRule({
-    when: (w) => w.state(state.disabled).eq(true),
+  def.rule({
+    when: (w) =>
+      command === 'trigger'
+        ? w.all(w.prop('presentation').eq('default'), w.state(state.disabled).eq(true))
+        : w.state(state.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DISABLED_TOKENS)),
   });
 }
