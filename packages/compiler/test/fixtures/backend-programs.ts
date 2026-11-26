@@ -242,3 +242,65 @@ export function controlledSelection(): ComponentIR {
     view: { ...textView('button', 'label'), disabled: 'locked', activate: 'activate' },
   };
 }
+
+/** A read can succeed at the host and still be rejected by the resumed segment. */
+export function resumedFailure(): ComponentIR {
+  const expected: Value = { kind: 'context', id: 'expected' };
+  const write = (target: string, value: Value): Instruction => ({ kind: 'write', target, value, source });
+  return {
+    version: 5,
+    id: 'failure-reader',
+    name: 'FailureReader',
+    source,
+    components: [],
+    types: [],
+    props: [],
+    provides: [],
+    signals: [],
+    created: [],
+    keys: [{ binding: bind('documentKey', 'text'), debugName: 'expected document', exportName: 'EXPECTED_DOCUMENT' }],
+    consumes: [{ key: 'documentKey', binding: bind('expected', 'text') }],
+    externs: [{
+      binding: bind('readDocument', 'text'),
+      name: 'fixture.load-keyed-item',
+      params: [bind('fileId', 'text')],
+      effect: 'after-state-commit',
+      lifetime: 'task',
+      async: true,
+      targets: ['react', 'gpui'],
+    }],
+    fields: [
+      { kind: 'state', binding: bind('stage', 'text'), init: 'idle' },
+      { kind: 'state', binding: bind('accepted', 'number'), init: 'zero' },
+    ],
+    projections: [
+      { name: 'stage', fn: 'label' },
+      { name: 'accepted', fn: 'count' },
+      { name: 'expected', fn: 'currentDocument' },
+    ],
+    actions: [{ name: 'begin', fn: 'begin' }],
+    tasks: [{ fn: 'readItem', policy: 'serial', source }],
+    behaviors: [
+      read('idle', 'text', [], text('idle'), 'init'),
+      read('zero', 'number', [], number('0000000000000000'), 'init'),
+      read('label', 'text', ['stage'], ref('state', 'stage')),
+      read('count', 'number', ['accepted'], ref('state', 'accepted')),
+      read('currentDocument', 'text', ['expected'], expected),
+      behavior('begin', 'unit', 'action', [], [
+        block('entry', ret(), [{ kind: 'start', task: 'readItem', args: [ref('local', 'document')], source }]),
+      ], [bind('document', 'text')]),
+      behavior('readItem', 'unit', 'task', ['expected', 'stage', 'accepted'], [
+        block('entry', {
+          kind: 'await', extern: 'readDocument', args: [ref('local', 'id')], resume: { block: 'resume', args: [] }, source,
+        }, [write('stage', binary('concat', text('checking@'), expected))]),
+        block('resume', branch(binary('equal', call('label'), expected), 'accept', 'reject'), [
+          write('stage', ref('local', 'body')),
+          write('accepted', binary('add', call('count'), number('3ff0000000000000'))),
+        ], [bind('body', 'text')]),
+        block('accept', ret()),
+        block('reject', { kind: 'fail', reason: 'document-changed', source }),
+      ], [bind('id', 'text')]),
+    ],
+    view: textView('span', 'label'),
+  };
+}

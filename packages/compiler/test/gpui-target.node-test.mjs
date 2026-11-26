@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { emitGpui } from '@proto.ui/compiler/targets/gpui';
-import { controlledSelection, readonlyBadge } from './fixtures/backend-programs.ts';
+import { controlledSelection, readonlyBadge, resumedFailure } from './fixtures/backend-programs.ts';
 import { authoredBadgeSource, authoredContextSource, authoredKeyedTaskSource, authoredPairSource, authoredSource, authoredSyncRetirementSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
 
 const sdkRepository = 'https://github.com/zed-industries/zed';
@@ -102,6 +102,7 @@ test('external Rust consumer renders and interacts with generated views in headl
   assert.equal(keyedOwner.status, 'produced', JSON.stringify(keyedOwner.diagnostics));
   const pairReader = authoredPairSource();
   assert.equal(pairReader.status, 'produced', JSON.stringify(pairReader.diagnostics));
+  const failureReader = resumedFailure();
   const policyReader = authoredTaskPolicySource();
   assert.equal(policyReader.status, 'produced', JSON.stringify(policyReader.diagnostics));
   const syncTree = authoredSyncRetirementSource();
@@ -132,6 +133,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     writeFileSync(join(crate, 'context-source.json'), JSON.stringify(contextOwner));
     writeFileSync(join(crate, 'keyed-task-source.json'), JSON.stringify(keyedOwner));
     writeFileSync(join(crate, 'pair-source.json'), JSON.stringify(pairReader));
+    writeFileSync(join(crate, 'resumed-failure-ir.json'), JSON.stringify(failureReader));
     writeFileSync(join(crate, 'task-policy-source.json'), JSON.stringify(policyReader));
     writeFileSync(join(crate, 'sync-retirement-source.json'), JSON.stringify(syncTree));
     writeFileSync(join(crate, 'tabs-owner-source.json'), JSON.stringify(tabsOwner));
@@ -141,6 +143,7 @@ test('external Rust consumer renders and interacts with generated views in headl
   const programs = [
     ['delivery_badge', readonlyBadge()],
     ['selection_control', controlledSelection()],
+    ['failure_reader', failureReader, keyedFileBinding],
     ['authoring_badge', authoredInput.component],
     ['controlled_toggle', toggle.component],
     ['context_owner', contextOwner.component],
@@ -204,6 +207,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test keyed_task_source::releasing_the_parent_ends_retained_keyed_tasks_before_their_files_can_publish \.\.\. ok\r?$/m,
     /^test pair_source::two_file_awaits_publish_each_stage_and_read_current_context \.\.\. ok\r?$/m,
     /^test pair_source::ending_the_owner_during_the_second_await_isolates_its_replacement \.\.\. ok\r?$/m,
+    /^test resumed_failure::failed_resumed_writes_stay_unpublished_and_the_next_read_commits \.\.\. ok\r?$/m,
     /^test task_policy_source::declared_serial_and_parallel_tasks_capture_context_at_their_own_start \.\.\. ok\r?$/m,
     /^test task_policy_source::disposing_a_reader_retires_its_active_and_queued_serial_submissions \.\.\. ok\r?$/m,
     /^test context_source::authored_owner_keeps_the_keyed_reader_and_supplies_a_reader_in_another_window \.\.\. ok\r?$/m,

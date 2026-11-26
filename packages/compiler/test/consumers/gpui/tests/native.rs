@@ -6,6 +6,7 @@ mod context_source;
 mod controlled_source;
 mod keyed_task_source;
 mod pair_source;
+mod resumed_failure;
 mod support;
 mod sync_retirement;
 mod tabs_source;

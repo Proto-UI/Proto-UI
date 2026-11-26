@@ -10,12 +10,13 @@ import { chromium } from 'playwright-core';
 import ts from 'typescript';
 import { emitReact } from '@proto.ui/compiler/targets/react';
 import { authoredKeyedTaskSource, authoredPairSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
+import { resumedFailure } from './fixtures/backend-programs.ts';
 import { openTabsServer } from './consumers/react/tabs-server.mjs';
 
 const require = createRequire(import.meta.url);
 const compiler = fileURLToPath(new URL('../', import.meta.url));
 
-async function openConsumer(t, produce, client, record) {
+async function openConsumer(t, loadInput, client, record) {
   const retained = process.env.PROTO_UI_REACT_CONSUMER_DIR;
   if (retained) await mkdir(retained, { recursive: true });
   const directory = await mkdtemp(path.join(retained || tmpdir(), 'proto-keyed-task-react-'));
@@ -27,11 +28,15 @@ async function openConsumer(t, produce, client, record) {
   for (const name of ['react', 'react-dom', '@types/react', '@types/react-dom']) {
     await symlink(path.dirname(require.resolve(`${name}/package.json`)), path.join(modules, name), 'dir');
   }
-  const source = produce();
-  assert.equal(source.status, 'produced', JSON.stringify(source.diagnostics));
-  if (retained) await writeFile(path.join(directory, record), JSON.stringify(source));
+  const input = loadInput();
+  let component = input;
+  if ('status' in input) {
+    assert.equal(input.status, 'produced', JSON.stringify(input.diagnostics));
+    component = input.component;
+  }
+  if (retained) await writeFile(path.join(directory, record), JSON.stringify(input));
   const bindings = { 'fixture.load-keyed-item': { module: './keyed-loader', export: 'loadKeyedItem' } };
-  await writeFile(path.join(directory, `${source.component.name}.ts`), emitReact(source.component, { bindings }));
+  await writeFile(path.join(directory, `${component.name}.ts`), emitReact(component, { bindings }));
   for (const name of ['keyed-loader.ts', client]) {
     await copyFile(new URL(`./consumers/react/${name}.in`, import.meta.url), path.join(directory, name));
   }
@@ -47,7 +52,7 @@ async function openConsumer(t, produce, client, record) {
   const bundle = await build({
     entryPoints: [app], bundle: true, write: false, jsx: 'automatic', define: { 'process.env.NODE_ENV': '"development"' },
   });
-  if (retained) t.diagnostic(`Generated ${source.component.name} React consumer: ${directory}`);
+  if (retained) t.diagnostic(`Generated ${component.name} React consumer: ${directory}`);
   const server = await openTabsServer(t);
   const browser = await chromium.launch({ executablePath: process.env.PUI_CHROMIUM_EXECUTABLE });
   t.after(() => browser.close());
@@ -507,4 +512,54 @@ test('direct IR preserves an original parameter first read after two awaits and 
   second.release();
   await expectPairStage(page, 'caller supplied: second document');
   assert.deepEqual(errors, []);
+});
+
+test('a failed task resumption keeps the previous commit and the same reader can accept a later document', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, resumedFailure, 'resumed-failure-client.tsx', 'resumed-failure-ir.json');
+  const original = 'Obsolete amber record';
+  const replacement = 'Apricot replacement';
+  const source = { file: 'packages/compiler/test/fixtures/backend-programs.ts', start: 0, end: 0 };
+  const old = server.resource('A', original);
+  const fresh = server.resource('A', replacement);
+  const span = page.locator('#app span');
+  async function expectView(stage, accepted, expected) {
+    await page.waitForFunction(stage => document.querySelector('#app span')?.innerText === stage, stage);
+    await span.waitFor({ state: 'visible' });
+    const snapshot = await page.evaluate(() => window.failureTrace.snapshot());
+    assert.deepEqual(snapshot, { stage, accepted, expected });
+    return snapshot;
+  }
+  async function begin(resource) {
+    assert.equal(await page.evaluate(path => window.failureTrace.begin('A', path), resource.path), 'committed');
+    assert.equal(await resource.requested(), 'A');
+  }
+
+  await page.evaluate(value => window.failureTrace.mount(value), original);
+  const views = [await expectView('idle', 0, original)];
+  await begin(old);
+  const checking = 'checking@' + original;
+  views.push(await expectView(checking, 0, original));
+  await page.evaluate(value => window.failureTrace.publish(value), replacement);
+  views.push(await expectView(checking, 0, replacement));
+  const reported = page.waitForEvent('pageerror');
+  old.release();
+  const error = await reported;
+  assert.equal(error.name, 'ActionFailure');
+  assert.equal(error.message, `${source.file}:0-0: document-changed`);
+  const afterFailure = await expectView(checking, 0, replacement);
+  views.push(afterFailure);
+  const failures = await page.evaluate(() => window.failureTrace.failures());
+  assert.deepEqual(failures, [{ reason: 'document-changed', source, published: afterFailure }]);
+
+  await begin(fresh);
+  views.push(await expectView('checking@' + replacement, 0, replacement));
+  fresh.release();
+  views.push(await expectView(replacement, 1, replacement));
+  const network = await page.evaluate(() => window.failureTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(r => [r.path, r.state, r.value, r.aborted]), [
+    [old.path, 'returned', original, false], [fresh.path, 'returned', replacement, false],
+  ]);
+  assert.deepEqual(errors, [error.message]);
+  if (evidence) await writeFile(path.join(evidence, 'resumed-failure-react-native.json'), JSON.stringify({ views, failures, network, errors }));
 });
