@@ -127,6 +127,8 @@ const cases = [
   // Combined retained owner-lifetime and native-focus costs; the original red
   // runs, three bounded increases and unchanged strict policy are recorded in:
   // internal/records/2026-11-26-retained-owner-package-budget.json
+  // The separately measured main-only mount-ticket and cursor delta remains in:
+  // internal/records/2026-11-27-mount-ticket-package-budget.json
   ['adapter-react root', 'packages/adapters/react/src/index.ts', 182_450],
   ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 181_300],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at

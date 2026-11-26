@@ -40,6 +40,11 @@ function sha256(bytes: string | Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
+/** Locale-independent UTF-16 order; byte-distinct Unicode keys stay distinct. */
+export function compareCanonicalText(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /** A deterministic JSON representation, independent of object insertion order. */
 export function canonicalJson(value: unknown): string {
   // JSON.stringify(-0) erases an observable numeric distinction in binding
@@ -49,7 +54,7 @@ export function canonicalJson(value: unknown): string {
   if (value !== null && typeof value === 'object') {
     return `{${Object.entries(value)
       .filter(([, item]) => item !== undefined && typeof item !== 'function')
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => compareCanonicalText(a, b))
       .map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`)
       .join(',')}}`;
   }
@@ -373,16 +378,16 @@ export function getProtoSourceClosure(program: ts.Program): ProtoSourceClosure {
   const resolutionFiles = [...data.files.values()]
     .filter((file) => !fileNames.has(file.path))
     .map(stripText)
-    .sort((a, b) => a.path.localeCompare(b.path));
+    .sort((a, b) => compareCanonicalText(a.path, b.path));
   const resolutions = [
     ...new Map(data.resolutions.map((entry) => [canonicalJson(entry), entry])).values(),
-  ].sort((a, b) => canonicalJson(a).localeCompare(canonicalJson(b)));
+  ].sort((a, b) => compareCanonicalText(canonicalJson(a), canonicalJson(b)));
   const uniqueMissing = [
     ...new Map(missing.map((entry) => [canonicalJson(entry), entry])).values(),
-  ].sort((a, b) => canonicalJson(a).localeCompare(canonicalJson(b)));
+  ].sort((a, b) => compareCanonicalText(canonicalJson(a), canonicalJson(b)));
   const resolutionProbes = [...data.resolutionProbes.values()]
     .map((probe) => ({ ...probe }))
-    .sort((a, b) => canonicalJson(a).localeCompare(canonicalJson(b)));
+    .sort((a, b) => compareCanonicalText(canonicalJson(a), canonicalJson(b)));
   const compilerOptions = JSON.parse(canonicalJson(data.options)) as Record<string, unknown>;
   const configuration = {
     currentDirectory: data.currentDirectory,

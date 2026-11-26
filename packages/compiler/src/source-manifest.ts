@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { canonicalJson } from './frontend/program.ts';
+import { canonicalJson, compareCanonicalText } from './frontend/program.ts';
 import { PROTO_TARGETS } from './frontend/types.ts';
 import type { ProtoAnalysis, ProtoTarget } from './frontend/types.ts';
 
@@ -354,9 +354,9 @@ export function parseSourceManifest(value: unknown): SourceManifest {
   }
   if (value.provenance !== undefined) object(value.provenance, 'provenance');
   const result = JSON.parse(canonicalJson(value)) as SourceManifest;
-  result.repositories.sort((a, b) => a.id.localeCompare(b.id));
-  result.files.sort((a, b) => fileKey(a).localeCompare(fileKey(b)));
-  result.entrypoints.sort((a, b) => a.id.localeCompare(b.id));
+  result.repositories.sort((a, b) => compareCanonicalText(a.id, b.id));
+  result.files.sort((a, b) => compareCanonicalText(fileKey(a), fileKey(b)));
+  result.entrypoints.sort((a, b) => compareCanonicalText(a.id, b.id));
   result.configuration.requiredTargets = [...PROTO_TARGETS];
   return result;
 }

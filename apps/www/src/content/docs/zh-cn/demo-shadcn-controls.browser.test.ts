@@ -439,6 +439,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
             );
             return editor && getComputedStyle(editor).transitionProperty !== 'none';
           },
+          undefined,
           { timeout: 10_000 }
         );
 
@@ -580,6 +581,9 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         expect(light[UNCHECKED].alpha, `${runtime}/light-resting`).toBeCloseTo(0.9, 2);
         expect(light[CHECKED].alpha, `${runtime}/light-checked`).toBeGreaterThan(0);
         expect(light[MIXED].background, `${runtime}/light-mixed`).toBe(light[CHECKED].background);
+        expect(light[FOCUS_TARGET].background, `${runtime}/light-card-checked`).toBe(
+          light[CHECKED].background
+        );
 
         await applyColorScheme(page, 'dark');
         const dark = await boxPaints(page);
@@ -592,6 +596,12 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         );
         expect(dark[MIXED].background, `${runtime}/dark-mixed`).toBe(dark[CHECKED].background);
         expect(dark[MIXED].alpha, `${runtime}/dark-mixed-alpha`).toBe(dark[CHECKED].alpha);
+        expect(dark[FOCUS_TARGET].background, `${runtime}/dark-card-checked`).toBe(
+          dark[CHECKED].background
+        );
+        expect(dark[FOCUS_TARGET].alpha, `${runtime}/dark-card-checked-alpha`).toBe(
+          dark[CHECKED].alpha
+        );
 
         await applyColorScheme(page, 'light');
         expect((await boxPaints(page))[UNCHECKED].alpha, `${runtime}/light-after`).toBeCloseTo(
@@ -644,6 +654,8 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         expect(paints[CHECKED].glyphs, `${runtime}/checked-glyph`).toBe(1);
         expect(paints[MIXED].glyphs, `${runtime}/mixed-glyph`).toBe(1);
         expect(paints[UNCHECKED].glyphs, `${runtime}/unchecked-glyph`).toBe(0);
+        expect(paints[FOCUS_TARGET].glyphs, `${runtime}/card-checked-glyph`).toBe(1);
+        expect(paints[DISABLED].glyphs, `${runtime}/disabled-glyph`).toBe(0);
 
         // The glyph hides its own root, so the checkbox is the only node the
         // accessibility tree reports for each instance.
