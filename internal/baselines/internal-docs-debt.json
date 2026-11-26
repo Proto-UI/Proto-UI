@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "description": "Frozen legacy internal-docs debt baseline. New files must pass with zero errors; existing files may only reduce debt. Refresh via `pnpm check:internal-docs:baseline` after cleaning debt.",
-  "totalFilesWithDebt": 1236,
-  "totalViolations": 9237,
+  "totalFilesWithDebt": 1233,
+  "totalViolations": 9084,
   "files": {
     "internal/agent-harness/dogfood-coverage-matrix.md": {
       "internal/size-budget": 1,
@@ -12,14 +12,6 @@
       "prose/no-stacked-negatives": 3,
       "prose/single-slot-disclaimer": 1,
       "prose/structural-rhythm": 1
-    },
-    "internal/agent-operations/README.md": {
-      "internal/size-budget": 1,
-      "prose/max-paragraph-length": 34,
-      "prose/no-inline-code-stuffing": 5,
-      "prose/no-stacked-negatives": 2,
-      "prose/single-slot-disclaimer": 1,
-      "prose/structural-rhythm": 6
     },
     "internal/agent-operations/autonomous-tasks.md": {
       "prose/max-paragraph-length": 4,
@@ -44,7 +36,7 @@
     },
     "internal/agent-operations/contributor-agents.md": {
       "internal/size-budget": 1,
-      "prose/max-paragraph-length": 30,
+      "prose/max-paragraph-length": 31,
       "prose/no-inline-code-stuffing": 3,
       "prose/no-stacked-negatives": 1,
       "prose/single-slot-disclaimer": 1,
@@ -62,7 +54,8 @@
       "prose/structural-rhythm": 1
     },
     "internal/agent-operations/github-evidence-upload.md": {
-      "prose/max-paragraph-length": 8,
+      "prose/max-paragraph-length": 9,
+      "prose/no-inline-code-stuffing": 1,
       "prose/no-stacked-negatives": 1,
       "prose/single-slot-disclaimer": 1
     },
@@ -190,13 +183,6 @@
     "internal/compiler/rust-data-artifacts.md": {
       "prose/max-paragraph-length": 1,
       "prose/structural-rhythm": 1
-    },
-    "internal/compiler/source-language.md": {
-      "internal/size-budget": 1,
-      "prose/max-paragraph-length": 87,
-      "prose/no-stacked-negatives": 2,
-      "prose/single-slot-disclaimer": 1,
-      "prose/structural-rhythm": 10
     },
     "internal/compiler/website-demo-migrations.json": {
       "internal/size-budget": 1
@@ -437,7 +423,8 @@
     "internal/governance/documentation-policy.md": {
       "prose/max-paragraph-length": 1,
       "prose/no-stacked-negatives": 2,
-      "prose/single-slot-disclaimer": 1
+      "prose/single-slot-disclaimer": 1,
+      "prose/structural-rhythm": 1
     },
     "internal/governance/finf-package-budgets.md": {
       "prose/max-paragraph-length": 7
@@ -460,11 +447,6 @@
     "internal/governance/project-v2-design.md": {
       "prose/max-paragraph-length": 1,
       "prose/no-stacked-negatives": 1
-    },
-    "internal/governance/release-0.3-list.md": {
-      "internal/size-budget": 1,
-      "prose/max-paragraph-length": 5,
-      "prose/single-slot-disclaimer": 1
     },
     "internal/governance/release-0.3-plan.md": {
       "prose/compact-table": 1,

@@ -1,54 +1,48 @@
 # Internal Records
 
-This directory is for short-term project direction and daily engineering records.
+This directory stores dated engineering records: design memos, ADRs, audits, investigations, and time-bound decisions.
 
-These documents exist to preserve:
+## Scope & Limits
 
-- what the project is trying to do next
-- what actually happened
-- what problem was observed
-- which alternatives were considered
-- which decision was taken for now
-- what remains open
+- Records are **non-normative, time-bound observations**; they never override `spec/**` entities or establish release commitments.
+- Read records by topic and date—do not assume the newest file supersedes older records on other topics, and do not rewrite history to make the past look cleaner.
+- Binary evidence (`.png`, `.mp4`, `.log`, `.tar.gz`, raw test dumps) is **banned from `main`**. Historical binary evidence lives on the unmerged orphan branch documented in [EVIDENCE_ARCHIVE.md](EVIDENCE_ARCHIVE.md).
 
-They are intentionally:
+## Directory layout and retention
 
-- not normative specifications
-- not external-facing engineering guides
-- not durable release commitments
-- not substitutes for spec entities or executable coverage
+| Bucket | Path | What belongs here |
+| --- | --- | --- |
+| Active records & design memos | `internal/records/YYYY-MM-DD-topic.md` | Current investigations, ADRs, and active sprint notes referenced by open work. |
+| Archived history | `internal/records/archive/YYYY-MM/` | Superseded, unreferenced historical records kept for factual traceability. |
+| Binary / raw evidence | GitHub PR attachments, Actions artifacts, or unmerged archive branch | Screenshots, browser traces, logs, and `.tar.gz` bundles (never `main`). |
 
-Records may contain roadmaps, priorities, milestone hypotheses, audits, implementation logs, design explorations, and temporary decisions. Their authority is time-bound: a newer relevant record may revise short-term direction from an older record, but no record overrides an applicable entity under `spec/**`.
+When a decision stabilizes, promote it into `spec/**`, `internal/contracts/**`, `internal/governance/**`, or `apps/www/src/content/docs/**` instead of letting a record act as a shadow spec.
 
-Read records by topic and date. Do not assume that the newest file in this directory supersedes every earlier record, and do not interpret an old plan as current merely because no one edited it in place.
+## Recommended frontmatter and structure
 
-If a decision later stabilizes, the relevant parts should be promoted into one or more of:
+Follow the [internal engineering writing guide](../governance/engineering-writing-guide.md) (conclusion first, single-slot scope & limits, narrative–receipt split):
 
-- `spec/knowledge/*`
-- `spec/decisions/*`
-- `spec/contracts/*`
-- `spec/prototypes/*`, `spec/modules/*`, or `spec/host-caps/*`
-- `spec/tests/*` and executable coverage
-- `apps/www/src/content/docs/*/specifications`
-- `apps/www/src/content/docs/*/build`
-- readable contract documents where additional explanation remains useful
+```yaml
+---
+kind: decision | investigation | audit | sprint-note
+status: active | superseded | archived
+date: YYYY-MM-DD
+baseline: <commit-sha-or-spec-id>
+receipts:
+  - <PR / Actions URL or companion .json path>
+---
+```
 
-Recommended structure:
+Recommended sections (target ≤ 200 lines; place large inventories or SHA tables in a companion `.json`):
 
-1. Context
-2. Observed facts
-3. Problem statement
-4. Decision
-5. Rationale
-6. Rejected or deferred alternatives
-7. Follow-up work
+1. **Conclusion / Decision** (in the first 5 lines)
+2. **Scope & Limits** (one slot for baseline, non-goals, and unknowns)
+3. **Observed facts & problem statement**
+4. **Rationale & rejected alternatives**
+5. **Follow-up work**
 
-For a short-term direction record, also make the comparison baseline, review trigger, and non-goals explicit. For an implementation record, include exact paths, commands, versions, or evidence when they matter to reconstruction.
+## In-repo reference examples
 
-Naming suggestion:
-
-- `YYYY-MM-DD-topic.md`
-
-These records should prefer factual reconstruction over retrospective cleanup.
-
-When direction changes, add a newer dated record and link the previous baseline. Do not rewrite an old record to imply that the later decision was always known.
+- `2026-04-06-dialog-design.md` — concise design exploration with clean structure
+- `2026-06-29-focus-logical-tree-model.zh-CN.md` — focused conceptual model with diagrams
+- `AUDIT-2026-08-20.zh-CN.md` — structured engineering audit without defensive bloat
