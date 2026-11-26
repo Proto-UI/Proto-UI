@@ -229,7 +229,7 @@ it.each(['shadcn', 'brutalist'] as const)(
         family === 'brutalist'
           ? { variant: 'surface', size: 'default', disabled: false }
           : inHeader
-            ? { styleProfile: 'rhea', variant: 'secondary', size: 'default', disabled: false }
+            ? { styleProfile: 'luma', variant: 'secondary', size: 'default', disabled: false }
             : { variant: 'ghost', size: 'default', disabled: false },
         { variant: family === 'brutalist' ? 'surface' : 'ghost', size: 'sm', disabled: false },
         { variant: family === 'brutalist' ? 'surface' : 'secondary', size: 'sm', disabled: false },

@@ -1,0 +1,24 @@
+{
+  "status": "rejected analysis; not scheduling policy or acceptance evidence",
+  "initialClaim": "14244 total estimated seconds require at least 20 shards with unchanged 720-second work budget.",
+  "whyIncorrect": "The initial simulation used max(previous planning weight, newest terminal cost) for every suite. That incorrectly retained the 120-second unknown fallback as a permanent floor even after a first observation. The existing implementation replaces that fallback with the first terminal sample, while retaining all authored weights, reserves and larger historical observations.",
+  "correctedObservation": {
+    "totalEstimatedSeconds": 12095,
+    "unchangedShardCount": 18,
+    "minEstimatedShardSeconds": 668,
+    "maxEstimatedShardSeconds": 694,
+    "setupReserveSeconds": 180,
+    "watchdogSeconds": 900
+  },
+  "rejectedControlRun": {
+    "observedTests": 206,
+    "passed": 204,
+    "failed": 2,
+    "failures": [
+      "new assertion that 19 shards must exceed capacity: missing expected exception",
+      "existing Sprint1 workflow scope assertion omitted main contents-wheel owner"
+    ],
+    "rawLogStatus": "Original local raw control log was lost in the execution-environment reset before archival. Counts and errors were observed in the tool output; they are not a reconstructed native log."
+  },
+  "disposition": "Withdraw the uncommitted 20-shard proposal and false minimum claim. Preserve the existing weight function, 18 shards and all watchdog/case deadlines. Correct the independent existing scope fixture against its real owner."
+}

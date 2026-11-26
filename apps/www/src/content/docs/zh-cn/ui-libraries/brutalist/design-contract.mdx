@@ -38,7 +38,8 @@ Brutalist 按组件类别定义静止阴影与交互反馈，而不是套用单�
 | --- | --- | --- |
 | 抬起型操作控件 — Button、raised Surface、Dialog / Dropdown / Select / Collapsible Trigger、Accordion Item | 4px 4px 零模糊黑影 | 按压时沿阴影方向位移 `+4px, +4px` 并收起外影，无额外悬停抬升 |
 | 抬起型面板 — Card、Dialog / Alert Dialog / Command Dialog / Drawer Content、Calendar | 4px 4px 零模糊黑影 | 保持静止，不添加按压位移 |
-| 浮层内容面板 — Dropdown / Context / Menubar / Navigation Menu Content、Autocomplete / Combobox / Select / Hover Card Content、Popover | 3px 3px 零模糊前景影 | 无悬停或按压位移，由浮层定位决定位置 |
+| 浮层内容面板 — Dropdown / Context / Menubar / Navigation Menu Content、Autocomplete / Combobox / Select Content、Popover | 3px 3px 零模糊前景影 | 无悬停或按压位移，由浮层定位决定位置 |
+| 浮层内容例外 — Hover Card Content | 无硬阴影 | 保留组件的 200ms 进入/退出过渡与浮层定位 |
 | 扁平选择控件 — Toggle、Tabs Trigger | 无阴影、无位移 | Toggle 悬停与按压保持 `border-black`，激活态 2px 内框在按压期间持续显示；未选中 Tabs Trigger 在悬停时显示填充与边框，选中项保持配色不变 |
 | 二态胶囊开关 — Switch | Root 与 Thumb 均无阴影 | 悬停与按压保持几何不变，仅 Thumb 以 150ms 过渡滑动 20px |
 | 可编辑表面 — Input、Textarea、Number Field、Input OTP | Input / Textarea 无阴影；Number Field / Input OTP 辅控为 2px 2px 边框色阴影 | 无位移反馈，聚焦时显示 focus ring |

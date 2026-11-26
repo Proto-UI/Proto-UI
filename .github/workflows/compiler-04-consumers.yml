@@ -1,0 +1,140 @@
+name: Compiler 0.4 complete consumers
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact same-repository compiler source commit to validate
+        required: true
+        type: string
+        default: 9c7a44fe057ab29f200cc61be08e7d0ffbe7bb2e
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compiler-04-consumers-${{ inputs.candidate_sha }}
+  cancel-in-progress: false
+
+jobs:
+  complete-consumers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      DRIVER_SHA: ${{ github.workflow_sha }}
+      RUSTUP_TOOLCHAIN: 1.98.1
+      CARGO_BUILD_JOBS: '1'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+    steps:
+      - name: Allocate fresh evidence and consumer directories
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$DRIVER_SHA" =~ ^[a-f0-9]{40}$ ]]
+          mkdir "$RUNNER_TEMP/compiler-04-evidence" "$RUNNER_TEMP/compiler-04-consumers"
+          mkdir "$RUNNER_TEMP/compiler-04-consumers/react" "$RUNNER_TEMP/compiler-04-consumers/gpui"
+          {
+            echo "COMPILER_EVIDENCE=$RUNNER_TEMP/compiler-04-evidence"
+            echo "CARGO_TARGET_DIR=$RUNNER_TEMP/compiler-04-cargo-target"
+            echo "PROTO_UI_REACT_CONSUMER_DIR=$RUNNER_TEMP/compiler-04-consumers/react"
+            echo "PROTO_UI_GPUI_CONSUMER_DIR=$RUNNER_TEMP/compiler-04-consumers/gpui"
+          } >> "$GITHUB_ENV"
+      - name: Check out the immutable workflow driver
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DRIVER_SHA }}
+          path: driver
+          persist-credentials: false
+      - name: Check out the exact independent source subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check receipt integrity controls
+        id: controls
+        run: node --test driver/scripts/ci/test/compiler-04-hosted.test.mjs
+      - name: Bind both source revisions and the complete compiler inventory
+        id: source
+        run: node driver/scripts/ci/compiler-04-hosted.mjs prepare candidate "$COMPILER_EVIDENCE" "$CANDIDATE_SHA" "$DRIVER_SHA"
+      - name: Install the original frozen dependency graph
+        id: dependencies
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$COMPILER_EVIDENCE/dependencies.log"
+      - name: Prepare and identify real Chromium and Rust
+        id: toolchain
+        run: |
+          set -euo pipefail
+          {
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y build-essential pkg-config libssl-dev
+            rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
+            rustc --version --verbose
+            cargo --version
+            CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+            test -x "$CHROME"
+            "$CHROME" --version
+            echo "PUI_CHROMIUM_EXECUTABLE=$CHROME" >> "$GITHUB_ENV"
+          } 2>&1 | tee "$COMPILER_EVIDENCE/toolchain.log"
+      - name: Select current and previous React from their locked workspace installations
+        id: environment
+        run: node driver/scripts/ci/compiler-04-hosted.mjs environment candidate "$COMPILER_EVIDENCE"
+      - name: Cache source-checked Cargo compilation
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ${{ runner.temp }}/compiler-04-cargo-target
+          key: compiler-04-linux-rust-1.98.1-${{ hashFiles('candidate/packages/compiler/targets/gpui/Cargo.lock', 'candidate/native/gpui/Cargo.lock') }}
+      - name: Build the real generator from the bound compiler source
+        id: generator
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          cargo build --locked --manifest-path packages/compiler/targets/gpui/Cargo.toml 2>&1 | tee "$COMPILER_EVIDENCE/generator-build.log"
+          test -x "$CARGO_TARGET_DIR/debug/proto-ui-gpui-codegen"
+          echo "PROTO_UI_GPUI_GENERATOR=$CARGO_TARGET_DIR/debug/proto-ui-gpui-codegen" >> "$GITHUB_ENV"
+      - name: Build every public package with the existing producer
+        id: build
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.dependencies.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 15
+        run: node driver/scripts/ci/compiler-04-hosted.mjs run candidate "$COMPILER_EVIDENCE" build
+      - name: Execute every original compiler Node file including native consumers
+        id: compiler
+        if: ${{ !cancelled() && steps.generator.outcome == 'success' }}
+        continue-on-error: true
+        run: node driver/scripts/ci/compiler-04-hosted.mjs run candidate "$COMPILER_EVIDENCE" compiler
+      - name: Build the complete production website with the original command
+        id: docs
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.dependencies.outcome == 'success' }}
+        continue-on-error: true
+        # Executes corepack pnpm@10.32.1 -s docs:build, retaining its original output and status.
+        run: node driver/scripts/ci/compiler-04-hosted.mjs run candidate "$COMPILER_EVIDENCE" docs
+      - name: Check the actual production graph with its original owner
+        id: website
+        if: ${{ !cancelled() && steps.docs.outcome == 'success' }}
+        continue-on-error: true
+        run: node driver/scripts/ci/compiler-04-hosted.mjs run candidate "$COMPILER_EVIDENCE" website
+      - name: Require complete unskipped results and preserve exact generated source
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: node driver/scripts/ci/compiler-04-hosted.mjs finish candidate "$COMPILER_EVIDENCE"
+      - name: Retain original logs, failures, source bindings and consumer artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-04-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compiler-04-evidence
+          if-no-files-found: error
+          retention-days: 30

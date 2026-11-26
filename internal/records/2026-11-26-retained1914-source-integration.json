@@ -1,0 +1,210 @@
+{
+  "kind": "retained1914-source-integration-checkpoint",
+  "date": "2026-11-26",
+  "originalPr": 1914,
+  "originalHead": "834f4c12c316f69fea237c50c192aafb84f8622e",
+  "mergeParent": "e8e0f3389807041ff2a075f50502fb1e0a41805d",
+  "history": "Merge complete original1914 history into the already source-preserving1913 carrier. Final1908/main and diagnostic metadata will be merged subsequently; source proof is refreshed only after final source integration.",
+  "conflictDecisions": [
+    {
+      "path": "apps/www/scripts/capture-documentation-evidence.ts",
+      "beforeSha256": "5f52b5c4888f3b72d945bd28d704b73f4c18bf4f7b4b78e9834110c4c590e944",
+      "afterSha256": "36994e3775673326d91ba7b2d0458f0920d7291dbaef1faab4e0fc8efd1b8e46",
+      "reason": "Keep the factored actual interaction and disclosure/cleanup owner already validated by 1913 capture contract cases; do not restore older inline copies."
+    },
+    {
+      "path": "apps/www/scripts/capture-homepage-evidence.ts",
+      "beforeSha256": "ab7c4cc8b1538f2947fa9d4e1cc8514803243ef480850fa45027c93f22ca90ee",
+      "afterSha256": "eb918e1e0a104545b42eb66ce2de57c2a9c8e0260b7374c460eee42aeefdf2bb",
+      "reason": "Keep the factored actual interaction and disclosure/cleanup owner already validated by 1913 capture contract cases; do not restore older inline copies."
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "beforeSha256": "c1f526ec4bcf55cf1910f865e77579d731726517b1329ecbd4fef3ffdd871262",
+      "afterSha256": "7bb28f4703b19c02775660e5f890c40bcd384433e15850be5e0e81b60ad84dfc",
+      "reason": "Retain current-main eligibility for both pill and text eyebrow links with the same consumer region."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.post-render-cleanup.test.ts",
+      "beforeSha256": "d23851d9ed0d9baf19c6cf468316c73c3ba2ae1d45e3f4e3eca647fbe0d921b2",
+      "afterSha256": "ea556755786a8dd7d6fc1d17707dad30a16589e4b62264d579bd6c3243c701aa",
+      "reason": "Same watch-boundary fault injection on both sides; keep existing reviewed comment and real runtime cleanup cases."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-toggle.demo.ts",
+      "beforeSha256": "b951de1ecc971a9506e8dad1fa65ba15c93952c6fcfa9e41ad80c811f9c7cd93",
+      "afterSha256": "a447514ee7d90964b2a1fc6f106d33e160fbc7e125334b3dcd6dbcad2fec5225",
+      "reason": "Preserve the explicit empty consumer class field from current main; it adds no family paint or semantic owner."
+    },
+    {
+      "path": "packages/adapters/web-component/src/focus-scope-targets.ts",
+      "beforeSha256": "d5254e04e17c7fe3f79d1dc1f61b2bd1db454b49ca3839941a267f7f18eece25",
+      "afterSha256": "ed7f7c53a0c0ad0915798fc7cf2c4c68c4bd98628a62e2a6718c0e493ae4e037",
+      "reason": "Use 1914 closed native-predicate identity gate and fresh composed-subtree scan, including slots and owned portals; custom callbacks retain the original sampler."
+    },
+    {
+      "path": "packages/cli/src/services/lowered-hook-coverage.ts",
+      "beforeSha256": "28733e3ed321e49bf8fd6842b0cb3c222ad46464685028c8dd12e7506281d605",
+      "afterSha256": "4af57f8226755a41520ab390251f5d3a590e069dc194efe4c65138c2d31580c4",
+      "reason": "Use the narrower original1914 existing-identifier State marker and explicit callable/new/tag rejection. Retain 1913 positive/negative selected-leaf tests for integration validation."
+    },
+    {
+      "path": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "beforeSha256": "479b21ba776789ef216b8ba228377719b0cb086cbc3262be2ba86bdde2b1320e",
+      "afterSha256": "b61bb216dbe954318a5e2ca5efce0a27061b57d182847aced1002c95d7c20b38",
+      "reason": "Temporary exact existing source fingerprint; renew after the whole merged Search source is reviewed and formatted."
+    },
+    {
+      "path": "scripts/gpui/test/style-fixture.test.mjs",
+      "beforeSha256": "494775c1c91b3d354ceb92f838193c0b354d5b66a39d4539070b0b7221e9e01d",
+      "afterSha256": "9f1c3c0ea00cf744d5e845ecc317ef076632108b3d439c2f0a993df2908d51a4",
+      "reason": "Preserve all real Toast stack token guards and existing coherent comment instead of dropping six independently sourced expectations."
+    },
+    {
+      "path": "internal/coverage-matrices/github-governance-snapshot.json",
+      "beforeSha256": "fbeb2ddf56584a32a939d74e130a1b40db07040dc1b764f3abeaf23833b1cfa4",
+      "afterSha256": "9cf85d210833368d0ff27e498be29e912deade229155731bbff0abedcad9bc0f",
+      "reason": "The six full issue records differ only in #1323: retain the later original1914 19:10 native title/body snapshot for the new0.4 Compiler scope, without changing state/owners or permission facts."
+    },
+    {
+      "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+      "beforeSha256": "73330082d96ccb2537a81820a6adce9ab196dbdca77b1e15f0e175750351948b",
+      "afterSha256": "10b12ebf79175c9d380b94287aec5babee98c94c62ec0e3abace56cb40f87302",
+      "reason": "Retain complete previous source-proof object as one atomic placeholder; only candidateSource differs, and the owning generator will bind the final source commit."
+    },
+    {
+      "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+      "beforeSha256": "9ebb52c3d2d0dd012169543443a24059216841a5e33eb0a314d64f025ad1d111",
+      "afterSha256": "f16bca6a226bd0fbb7cf84aede3ca1ca688acacb0ecc2198d1cd81cfb80db145",
+      "reason": "Retain complete previous source-proof object as one atomic placeholder; only candidateSource differs, and the owning generator will bind the final source commit."
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "beforeSha256": "39873928427ba8faa6dd1eea4561a5ee3c4391be265120e7b56b90cb2e6ded5b",
+      "afterSha256": "9ee60bcbf97cdfe1fadbdaf61f6f9778164c619e8c608d5295088fe05a05c37a",
+      "reason": "Preserve both dated source review records and current existing owner mappings, then renew only complete reviewed merged source fingerprints."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+      "beforeSha256": "fc6407f1b308ee166319d8b33a1a2b9d4f150a43db1c97151117ab0218fe6814",
+      "afterSha256": "a7a3726179041697b63b3e9aabe1b401c0bed8fe5183dc7f8fea7f1983598b96",
+      "reason": "Migrate the sole current-main monolithic Search test correction into the exact corresponding split activation case. Keep all original84 tests and deadlines."
+    }
+  ],
+  "additionalSearchSplitDecision": "Keep native1914 three-file Search suite with all84 original cases and15 static callback ASTs. Carry the single current-main Bootstrap label assertion into site-search-activation; do not restore the removed monolithic suite.",
+  "reviewedRepairs": {
+    "queryCache": {
+      "patchSha256": "e487f6e2d76e8c4886b9a83f0810cc4c4801da5d3a8bb1a0259dba30ca7f6f04",
+      "boundary": "Reset native Def/returned State proof cache at each synchronous public query while restoring outer nested-query state. Real same-AST safe-to-unsafe and unsafe-to-safe import controls preserve query lifetime."
+    },
+    "proofCore": {
+      "patchSha256": "0ce75acfa8b86340007111d96eb2915e54f6d26d73726cdacef40f3e74240a9a",
+      "files": [
+        {
+          "path": "packages/cli/src/services/closed-when-state-presence.ts",
+          "beforeGitBlob": "74a6f652fbd97691bbc7333128b2f88f8e6b6f91",
+          "afterGitBlob": "deab6b8cecc34f88887c1328d3cd46dd63cc9392",
+          "beforeSha256": "2926d043c760071caa8f9b2cb1edf27564c0e681916d614fcb2846e28dd03897",
+          "afterSha256": "9ddc4a07d354a8f0c5903ee6f9f1e223dd58b5d4fbdd96a079e7757908c7df7f"
+        },
+        {
+          "path": "packages/cli/src/services/finite-row-lifetime.ts",
+          "beforeGitBlob": "b964ec3b24163545ac4265a20bbe9d7e44c9f44f",
+          "afterGitBlob": "92a8759fbab7fa5414d65200b9c881bf58fb1c1a",
+          "beforeSha256": "f931b6c02e899add5f1ff4911af7faf36ce64786bebc9323b41e9e6ab6a85440",
+          "afterSha256": "6689c314e7cf6739b86c800c603a323a79071fad2151e76981299026b51d32a9"
+        },
+        {
+          "path": "packages/cli/src/services/finite-token-map-proof.ts",
+          "beforeGitBlob": "493f681d005bc8089f37e57602f95aa0773f8775",
+          "afterGitBlob": "8808fcca49ce972b07b82f44c9961090cf635f00",
+          "beforeSha256": "0b17fddcbcdeaf3466f93987737c9a79de26d774bbf2129cbeb267cf20fd8d49",
+          "afterSha256": "e0ff40c01e3424206c1f9caa8239cf91b1d2b8f2ee04d13f82e89270ad33093c"
+        },
+        {
+          "path": "packages/cli/src/services/lowered-hook-coverage.ts",
+          "beforeGitBlob": "29f88650079a00e8381bc68ebd7c8184862cf358",
+          "afterGitBlob": "40ac78a54ff737bb44a7a7d1bb26c4f2eb60fdf5",
+          "beforeSha256": "4af57f8226755a41520ab390251f5d3a590e069dc194efe4c65138c2d31580c4",
+          "afterSha256": "20644c1946cfacdfbf556f054c79f1acb5dcb8f19d4ba3069b2f8bff14249e4e"
+        },
+        {
+          "path": "packages/cli/src/services/prototype-style-tokens.ts",
+          "beforeGitBlob": "40d0f4bd1f46232ff8f512bece07b5a4cd82c4fc",
+          "afterGitBlob": "1681e84d10c89f3c973a208ea5814644f877c46b",
+          "beforeSha256": "d660184cc06fcedb89e716f11f6f20efe7ee14135989f6ab7d17758a7bbaacdd",
+          "afterSha256": "0cf03cef1ac59172203a349d9d2d1f9c886617c4c695c2f445b7ece00b04d744"
+        },
+        {
+          "path": "packages/cli/test/lowered-finite-token-map.test.ts",
+          "beforeGitBlob": "8570975f63848309a513ecd34a8b1625dd95211b",
+          "afterGitBlob": "d1572b40a93a0f871f35c3c1123c21054d77a1e5",
+          "beforeSha256": "85e824ebfb02695de4746d52fbaa3ad7f3bf248805756e61fc6710e6b8371ef2",
+          "afterSha256": "d7be098064ec6a0ec1813f5af9293786049a2925532f2299bb19f0607c50e6ba"
+        },
+        {
+          "path": "packages/cli/test/lowered-nested-token-alias.test.ts",
+          "beforeGitBlob": "b988030d28fed94c2737df53ac7c93cae60815a5",
+          "afterGitBlob": "b38dcd23170c7769a9fe44f6ac8ff1709c8638fd",
+          "beforeSha256": "b4fa988565c7af3fdbf40d76deb5c7ff97f323fac7bd6c07eb864a4f3da91810",
+          "afterSha256": "37d3d2d55462329c3daa299c17d8af50d2134326097c288bef3a7c7205923d9c"
+        },
+        {
+          "path": "packages/cli/test/lowered-nested-token-map.test.ts",
+          "beforeGitBlob": "5251f800f66e3abfd2bb4b35b6c150995d279b0e",
+          "afterGitBlob": "47ab475558772f4c5949319290eca5992f36ebe8",
+          "beforeSha256": "183a6a0fb6c73c0355040d0bbe406c0fde7eb06a2b2898ed24692a0401c100bb",
+          "afterSha256": "64f559b246ddd9a958533e8217fbcffb7a325758abc6ed27176813eae282e71d"
+        },
+        {
+          "path": "packages/cli/test/lowered-shared-token-map.test.ts",
+          "beforeGitBlob": "f07b2b97fbf7d8c618df4e658007d6e95f256a64",
+          "afterGitBlob": "c7109af16e4e99bbadede611ce37ceb2dc66899c",
+          "beforeSha256": "cbc21fb081503a531101807e1e659b73f5426dee71db40a14c77b8003f72237f",
+          "afterSha256": "045b7ad691db850f7ba932c1d8afdb11cb58250e62a9b1d1d0485b5186ed147b"
+        },
+        {
+          "path": "packages/cli/test/rule-omitted-helper-parameters.test.ts",
+          "beforeGitBlob": "ec76bf8dc39e4f24170bb3dd4d3ced79e3d222c8",
+          "afterGitBlob": "fe303a95274d7d4285d0371b28aa3aafa5d737d6",
+          "beforeSha256": "b2e6d00b09ba1e7259e13a873f4aa3306d3480a7305b2165281c5cff90decd4e",
+          "afterSha256": "5c7cc9b6d40578bc042d3f55ea896fbdb810669a9cae32ff730abc56e811669f"
+        }
+      ],
+      "scope": [
+        "An actually omitted argument selects only its native When branch; the complete selected callback still must pass the existing purity and binding boundary.",
+        "Exported mutable token-map owners are refused, including named/default/reexport identity. Outgoing runtime import graphs do not certify incoming consumers.",
+        "The CSS collector can retain independently known passive string rows of a write-free list while scanner const/domain certification stays conservative.",
+        "The unchanged supplied-false fixture is now an explicit scalar positive; all original public-mutable fixtures remain present and refuse readiness."
+      ],
+      "sourceReview": "Compiler agent source review and website agent second-view PASS; all10 before/after files matched exact provided bytes on application."
+    },
+    "nativePredicateFixture": {
+      "path": "packages/adapters/web-component/test/focus-scope-empty-region.test.ts",
+      "sha256": "3d0ceca96f9d64eec1bf8fe3f52ba5912a35d2781f3509a36cb5cb0279491b01",
+      "boundary": "All original13 native-entry assertions/setup/teardown retained. Use actual Adapter-owned predicate identity; existing19 custom wrapper/bound/effect/order controls remain unchanged.",
+      "secondView": "Coordinating root exact source PASS."
+    }
+  },
+  "localIntegrationValidation": {
+    "cacheAndQueryFilesPassed": 58,
+    "wcAnd1913SelectedLeafCasesPassed": 119,
+    "wcBreakdown": {
+      "coalescing": 22,
+      "observer": 57,
+      "emptyRegion": 13,
+      "descendantPotential": 19
+    },
+    "selectedLeaf": 8,
+    "themeBatch": 12,
+    "existingTheme": 28,
+    "realTypography": 98,
+    "ownershipAfterCurrentMainLiteralCorrection": 41
+  },
+  "remainingBlockers": [
+    "The two existing reflective Array iterator negative controls are not repaired by the delivered core patch; incomplete iterator experiment is explicitly excluded.",
+    "The historical full1914 CLI inventory1356 unresolved/164files is not relabeled passed. Current native-Def/source proof work is separate and no complete new inventory pass is claimed.",
+    "Final source/generator bindings, exact-head types/strict9 package budgets and native Matrix/Search/browser acceptance remain separate."
+  ],
+  "agentAssistance": "ChatGPT current-user-directed source integration. No GitHub mutation, native approval, final ready-to-merge or release assertion is made."
+}

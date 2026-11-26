@@ -8,7 +8,7 @@ import { createWebComponentPortalMount } from '../src/portal-mount';
 
 type Session = ReturnType<typeof sessions.createWebComponentHostSession>;
 
-describe('WC portal first rendering across mounted diagnostic reentry', () => {
+describe('WC portal first rendering across mounted ownership reentry', () => {
   let captured: Session | undefined;
   let portal: ReturnType<typeof createWebComponentPortalMount>;
   let host: HTMLElement | undefined;
@@ -58,17 +58,32 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
     vi.restoreAllMocks();
   });
 
-  it.each(['presence', 'scheduled'] as const)(
-    'a stale mount cannot retire the replacement while it is %s',
-    async (replacementGate) => {
+  it.each([
+    ['diagnostic', 'presence'],
+    ['diagnostic', 'scheduled'],
+    ['schedule', 'presence'],
+    ['schedule', 'scheduled'],
+  ] as const)(
+    'a mount invalidated during %s cannot retire the replacement while it is %s',
+    async (reentryPoint, replacementGate) => {
       let presence: PresenceHandle | undefined;
       let mounted = 0;
       let replacement: Promise<void> | undefined;
       const scheduled: Array<() => void> = [];
       const actualMountedEpochs: number[] = [];
       const phases: Array<{ phase: string; epoch: number }> = [];
+      let reentered = false;
+      const replaceMount = () => {
+        if (reentered) return;
+        reentered = true;
+        if (!captured || !presence) throw new Error('The real session must already exist.');
+        presence.setIntent('leave');
+        void captured.unmount();
+        if (replacementGate === 'scheduled') presence.setIntent('enter');
+        replacement = captured.mount();
+      };
       const capturePresence = defineAsHook({
-        name: `portal-reentry-presence-${replacementGate}`,
+        name: `portal-reentry-presence-${reentryPoint}-${replacementGate}`,
         setup() {
           const { facades } = getActiveAsHookContext('portal reentry presence fixture');
           const facade = facades.presence as PresenceFacade | undefined;
@@ -78,7 +93,7 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
         },
       });
       const proto: Prototype = {
-        name: `portal-mounted-reentry-${replacementGate}`,
+        name: `portal-mounted-reentry-${reentryPoint}-${replacementGate}`,
         setup(def) {
           capturePresence();
           def.lifecycle.onMounted(() => {
@@ -94,8 +109,13 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
         schedule: (task) => {
           // Retain the original default microtask policy for focus readiness;
           // only actual Runtime mounted completions use this controlled queue.
-          if (runtimeScheduleDepth) scheduled.push(task);
-          else queueMicrotask(task);
+          if (runtimeScheduleDepth) {
+            scheduled.push(task);
+            // Retain an actual epoch-1 task before reentry. The separate
+            // diagnostic case verifies that an already stale epoch is never
+            // queued; this case still executes a genuinely queued stale task.
+            if (reentryPoint === 'schedule') replaceMount();
+          } else queueMicrotask(task);
         },
         diagnostics: {
           onLifecycleEvent(event) {
@@ -103,11 +123,7 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
             if (event.type !== 'mount.phase') return;
             phases.push({ phase: event.phase, epoch: event.epoch });
             if (event.phase !== 'mounted' || event.epoch !== 1) return;
-            if (!captured || !presence) throw new Error('The real session must already exist.');
-            presence.setIntent('leave');
-            void captured.unmount();
-            if (replacementGate === 'scheduled') presence.setIntent('enter');
-            replacement = captured.mount();
+            if (reentryPoint === 'diagnostic') replaceMount();
           },
         },
       });
@@ -118,17 +134,21 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
 
       expect(phases).toContainEqual({ phase: 'mounting', epoch: 2 });
       expect(mounted).toBe(0);
+      const staleTaskCount = reentryPoint === 'schedule' ? 1 : 0;
       if (replacementGate === 'presence') {
-        expect(scheduled).toHaveLength(1);
-        scheduled.shift()!(); // Invalidated epoch 1; epoch 2 is still awaiting Presence.
+        expect(scheduled).toHaveLength(staleTaskCount);
+        if (staleTaskCount) scheduled.shift()!();
+        expect(actualMountedEpochs).toEqual([]);
+        expect(mounted).toBe(0);
+        expect(host.parentElement).toBe(origin);
         presence!.setIntent('enter');
         await new Promise<void>((resolve) => queueMicrotask(resolve));
         expect(scheduled).toHaveLength(1);
       } else {
-        expect(scheduled).toHaveLength(2);
-        // The configured host owns task order. Epoch 2 was queued recursively
-        // before epoch 1 returned to schedule; execute the stale task first.
-        scheduled.pop()!();
+        expect(scheduled).toHaveLength(staleTaskCount + 1);
+        // Reentry inside schedule happens after it retained epoch 1, so its
+        // real stale task precedes the recursively queued epoch-2 task.
+        if (staleTaskCount) scheduled.shift()!();
         expect(scheduled).toHaveLength(1);
       }
       expect(actualMountedEpochs).toEqual([]);

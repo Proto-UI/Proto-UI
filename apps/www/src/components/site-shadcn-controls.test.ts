@@ -426,9 +426,7 @@ it.each(['shadcn', 'brutalist'] as const)(
     expect(trigger.style.height).toBe('auto');
     expect(trigger.style.minHeight).toBe('var(--site-control-height, 2.75rem)');
     expect(trigger.style.fontSize).toBe('0.875rem');
-    expect(trigger.getAttribute('data-pui-style')).toContain(
-      family === 'brutalist' ? 'h-8' : 'h-7'
-    );
+    expect(trigger.getAttribute('data-pui-style')).toContain('h-8');
     expect(trigger.getAttribute('data-pui-style')).toContain(
       family === 'brutalist' ? 'border-black' : 'border-transparent'
     );

@@ -18,7 +18,7 @@ export function parseContrastRuntimeOptions(serialized, supported) {
 }
 
 // These are the current authored reference controls, not a new state model.
-// Enabled checked and mixed Checkbox controls from demo-brutalist-checkbox.
+// The current Checkbox hero has updates, mixed channels and a checked card.
 export function contrastHeldBinaryTargets(family) {
   if (family === 'switch')
     return [{ ref: 'releaseAlertsSwitch', state: 'checked', ariaChecked: 'true' }];

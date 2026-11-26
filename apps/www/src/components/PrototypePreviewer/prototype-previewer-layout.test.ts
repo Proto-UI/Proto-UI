@@ -23,6 +23,19 @@ describe('PrototypePreviewer fixed-family consumer layout', () => {
       expect(fixedFamilyRule(className), className).toContain('min-width: 0;');
     }
   });
+
+  it('does not stretch fixed-family runtime Tabs lists to full row width', () => {
+    const runtimeBoxCss = readFileSync(
+      new URL('../../styles/runtime-box.css', import.meta.url),
+      'utf8'
+    );
+    expect(runtimeBoxCss).toContain(
+      '.pui-runtime-box .pui-projection-control:not(.pui-runtime-tabs-control) > [data-pui-root]'
+    );
+    expect(runtimeBoxCss).not.toMatch(
+      /\.pui-runtime-box\s+\.pui-projection-control\s*>\s*\[data-pui-root\]\s*\{\s*flex:\s*1 1 auto;/
+    );
+  });
 });
 
 it('keeps readable no-JS runtime labels without a fake interactive tab or dropdown', () => {

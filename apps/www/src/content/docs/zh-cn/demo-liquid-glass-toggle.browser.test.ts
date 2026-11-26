@@ -17,6 +17,7 @@ import {
 import {
   RUNTIMES,
   choosePreviewRuntime,
+  waitForPreviewRuntime,
   runtimeSelectTrigger,
   chromeExecutable,
   startServer,
@@ -1094,8 +1095,14 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           }
           await choosePreviewRuntime(page, selector, runtime);
           diagnostics.stage({ stage: 'panel-visible' });
-          const panel = page.locator(`[data-adapter-panel="${runtime}"]`);
-          await panel.waitFor({ state: 'visible' });
+          const panel = page.locator(
+            '.proto-previewer[data-demo-id="demo-liquid-glass-toggle"][data-projection-mode="fixed-family"]'
+          );
+          await deadline(
+            'public-toggle-preview-ready',
+            () => waitForPreviewRuntime(page, runtime, '[aria-pressed]', 4),
+            15_000
+          );
           const target = panel.getByRole('button', { name: 'Bold', exact: true });
           diagnostics.stage({ stage: 'inactive-optics' });
           await quality(target, 'self-optical');

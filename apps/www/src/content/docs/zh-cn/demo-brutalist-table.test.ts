@@ -72,17 +72,7 @@ describe('Brutalist Table demo contract', () => {
         node.kind === 'proto' && node.prototypeId === 'brutalist-table-row'
     );
     const sections = rows.map((row) => row.props?.section);
-    expect(sections).toEqual([
-      'header',
-      'body',
-      'body',
-      'body',
-      'body',
-      'body',
-      'body',
-      'body',
-      'footer',
-    ]);
+    expect(sections).toEqual(['header', ...Array(7).fill('body'), 'footer']);
     const lastFlags = rows.map((row) => row.props?.lastInSection);
     expect(lastFlags).toEqual([true, false, false, false, false, false, false, true, true]);
   });

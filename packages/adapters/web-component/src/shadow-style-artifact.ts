@@ -136,9 +136,13 @@ function validateSharedShadowSelectorAbi(cssText: string): void {
   validatedSelectorCodeUnits += cssText.length;
 }
 
+function maskShadowCssStrings(value: string): string {
+  return value.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+}
+
 function validateShadowSelectorAbi(cssText: string): void {
   const selectors = stripShadowCssComments(cssText);
-  const structuralCss = selectors.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+  const structuralCss = maskShadowCssStrings(selectors);
   const documentRule = structuralCss.match(
     /(?:^|[;{}])(?:(?!\s*@)[^;{}]*(:where\(\.dark\)|:where\(\[data-theme=|:root))[^;{}]*\{/
   );
@@ -186,7 +190,7 @@ function validateShadowSelectorAbi(cssText: string): void {
 // not impose a second theme gate on the host. Keep quoted text and escaped
 // delimiters out of the scan, and preserve whitespace consumed by CSS escapes.
 function hasShadowHostThemeGate(selector: string): boolean {
-  const structuralSelector = selector.trimStart().replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+  const structuralSelector = maskShadowCssStrings(selector.trimStart());
   const tokens = structuralSelector.matchAll(
     /\\(?:[0-9a-f]{1,6}\s?|.)|([.[])\s*((?:[-\w\u0080-\uFFFF]|\\(?:[0-9a-f]{1,6}\s?|.))+)|([()[\]])|([\s>+~]+)/gi
   );
@@ -224,45 +228,16 @@ function findShadowDocumentThemeHostContext(cssText: string): string | undefined
 // already isolated prelude or identifier: decoding before structural scanning could
 // incorrectly promote an escaped delimiter into CSS syntax.
 function decodeShadowCssEscapes(value: string): string {
-  let decoded = '';
-  for (let index = 0; index < value.length; index += 1) {
-    const character = value[index]!;
-    if (character !== '\\') {
-      decoded += character;
-      continue;
-    }
-
-    const escaped = value[index + 1];
-    if (escaped === undefined) break;
-    if (escaped === '\n' || escaped === '\f') {
-      index += 1;
-      continue;
-    }
-    if (escaped === '\r') {
-      index += value[index + 2] === '\n' ? 2 : 1;
-      continue;
-    }
-    if (!/[0-9a-f]/i.test(escaped)) {
-      decoded += escaped;
-      index += 1;
-      continue;
-    }
-
-    let end = index + 1;
-    while (end < value.length && end <= index + 6 && /[0-9a-f]/i.test(value[end]!)) end += 1;
-    const codePoint = Number.parseInt(value.slice(index + 1, end), 16);
-    decoded +=
-      codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)
+  return value.replace(
+    /\\(?:([0-9a-f]{1,6})(?:\r\n|\s)?|\r\n|[\n\f\r]|([\s\S])|$)/gi,
+    (_escape, hex: string | undefined, literal: string | undefined) => {
+      if (hex === undefined) return literal ?? '';
+      const codePoint = Number.parseInt(hex, 16);
+      return codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)
         ? '\uFFFD'
         : String.fromCodePoint(codePoint);
-    if (/\s/.test(value[end] ?? '')) {
-      if (value[end] === '\r' && value[end + 1] === '\n') end += 1;
-      index = end;
-    } else {
-      index = end - 1;
     }
-  }
-  return decoded;
+  );
 }
 
 // Split rule preludes and top-level selector-list branches without treating
@@ -272,77 +247,36 @@ function decodeShadowCssEscapes(value: string): string {
 function splitShadowSelectorFragments(cssText: string): string[] {
   const fragments: string[] = [];
   let start = 0;
-  let quote: '"' | "'" | null = null;
   let parentheses = 0;
   let brackets = 0;
-
-  const push = (end: number) => {
-    fragments.push(cssText.slice(start, end));
-    start = end + 1;
-  };
-
-  for (let index = 0; index < cssText.length; index += 1) {
-    const char = cssText[index]!;
-    if (char === '\\') {
-      index += 1;
-      continue;
+  for (const token of cssText.matchAll(
+    /\\[\s\S]?|"(?:\\[\s\S]?|[^"\\])*"?|'(?:\\[\s\S]?|[^'\\])*'?|[()[\]{},]/g
+  )) {
+    const character = token[0];
+    if (character === '(') parentheses += 1;
+    else if (character === ')') parentheses = Math.max(0, parentheses - 1);
+    else if (character === '[') brackets += 1;
+    else if (character === ']') brackets = Math.max(0, brackets - 1);
+    else if (
+      character === '{' ||
+      character === '}' ||
+      (character === ',' && !parentheses && !brackets)
+    ) {
+      fragments.push(cssText.slice(start, token.index));
+      start = token.index! + 1;
     }
-    if (quote) {
-      if (char === quote) quote = null;
-      continue;
-    }
-    if (char === '"' || char === "'") {
-      quote = char;
-      continue;
-    }
-    if (char === '(') parentheses += 1;
-    else if (char === ')') parentheses = Math.max(0, parentheses - 1);
-    else if (char === '[') brackets += 1;
-    else if (char === ']') brackets = Math.max(0, brackets - 1);
-    else if (char === '{' || char === '}' || (char === ',' && parentheses === 0 && brackets === 0))
-      push(index);
   }
   fragments.push(cssText.slice(start));
   return fragments;
 }
 
+// Literal fragments stay byte-for-byte intact. Consume an unterminated comment
+// as one preserved fragment, so malformed input is neither removed nor rescanned.
 export function stripShadowCssComments(cssText: string): string {
-  let result = '';
-  let quote: '"' | "'" | null = null;
-
-  for (let index = 0; index < cssText.length; index += 1) {
-    const char = cssText[index]!;
-    if (char === '\\') {
-      result += char;
-      if (index + 1 < cssText.length) result += cssText[++index];
-      continue;
-    }
-    if (quote) {
-      result += char;
-      if (char === quote) quote = null;
-      continue;
-    }
-    if (char === '"' || char === "'") {
-      quote = char;
-      result += char;
-      continue;
-    }
-    if (char !== '/' || cssText[index + 1] !== '*') {
-      result += char;
-      continue;
-    }
-
-    const commentEnd = cssText.indexOf('*/', index + 2);
-    if (commentEnd === -1) {
-      // Preserve the existing bounded behavior for malformed, unterminated
-      // input; this helper only removes complete CSS comments.
-      result += cssText.slice(index);
-      break;
-    }
-    index = commentEnd + 1;
-  }
-
-  return result;
+  return cssText.replace(
+    /\\[\s\S]?|"(?:\\[\s\S]?|[^"\\])*"?|'(?:\\[\s\S]?|[^'\\])*'?|\/\*[\s\S]*?(\*\/|$)/g,
+    (fragment, closing: string | undefined) => (closing === '*/' ? '' : fragment)
+  );
 }
 
 function invalidArtifact(reason: string): Error {

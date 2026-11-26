@@ -102,6 +102,22 @@ describe.sequential('lowered literal token-map coverage agrees with actual colle
       },
       ['bg-primary'],
     ],
+    [
+      'literal element beside a proven State handle',
+      {
+        declarations: "const TOKENS = { handle: ready, active: 'bg-primary' };",
+        argument: "TOKENS['active']",
+      },
+      ['bg-primary'],
+    ],
+    [
+      'nested literal dot beside a proven State handle',
+      {
+        declarations: "const TOKENS = { handle: ready, palette: { active: 'bg-primary' } };",
+        argument: 'TOKENS.palette.active',
+      },
+      ['bg-primary'],
+    ],
   ] as const) {
     it(name, async () => {
       const { scan, tokens, producer } = await observeTokenMap(fixture);
@@ -127,6 +143,42 @@ describe.sequential('lowered literal token-map coverage agrees with actual colle
       ]);
     });
   }
+
+  it.each(["controls['className']", 'controls.className'])(
+    'retains the actual exposed-State variant for %s in a mixed container',
+    async (argument) => {
+      const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'lowered-mixed-token-')));
+      try {
+        const file = path.join(directory, 'mixed.proto.ts');
+        const source = [
+          "import { definePrototype, tw } from '@proto.ui/core';",
+          "export default definePrototype({ name: 'mixed-tokens', setup(def) {",
+          "  const flag = def.state.bool('internalFlag', false);",
+          "  def.expose.state('visible', flag);",
+          "  const controls = { ready: flag, className: 'bg-red' };",
+          '  def.rule({',
+          '    when: (w) => w.state(controls.ready).eq(true),',
+          `    intent: (i) => i.feedback.style.use(tw(${argument})),`,
+          '  });',
+          '} });',
+        ].join('\n');
+        await writeFile(file, source);
+        const tokens = await collectProtoStyleTokensFromFiles([file]);
+        expect(tokens.filter((token) => token.endsWith('bg-red'))).toEqual([
+          'bg-red',
+          'data-[internal-flag]:bg-red',
+        ]);
+        const scan = scanRuleStateReads(source, file);
+        expect(scan.unresolved).toEqual([]);
+        expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([
+          { state: 'flag', exposedAs: 'visible', attribute: 'internal-flag' },
+        ]);
+      } finally {
+        await rm(directory, { recursive: true, force: true });
+      }
+    }
+  );
 
   for (const [name, declarations, argument, inventory] of [
     ['missing own member', literal, 'TOKENS.missing', []],
@@ -154,6 +206,36 @@ describe.sequential('lowered literal token-map coverage agrees with actual colle
       'unknown index before dot',
       "const TOKENS = { palette: { active: 'bg-primary' } };",
       'TOKENS[key].active',
+      ['bg-primary'],
+    ],
+    [
+      'a State handle used as token data',
+      "const TOKENS = { handle: ready, active: 'bg-primary' };",
+      'TOKENS.handle',
+      [],
+    ],
+    [
+      'an unknown sibling value',
+      "const TOKENS = { handle: foreignHandle, active: 'bg-primary' };",
+      'TOKENS.active',
+      ['bg-primary'],
+    ],
+    [
+      'a getter beside a proven State handle',
+      "const TOKENS = { handle: ready, get active() { return 'bg-primary'; } };",
+      'TOKENS.active',
+      [],
+    ],
+    [
+      'a mutable mixed owner',
+      "let TOKENS = { handle: ready, active: 'bg-primary' };",
+      'TOKENS.active',
+      ['bg-primary'],
+    ],
+    [
+      'an alias of a mixed owner',
+      "const TOKENS = { handle: ready, active: 'bg-primary' }; const alias = TOKENS;",
+      'TOKENS.active',
       ['bg-primary'],
     ],
   ] as const) {

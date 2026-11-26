@@ -2,6 +2,7 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import { libraryCardPrototypes } from './library-card-prototypes';
 import { withNativeContentLease } from './PrototypePreviewer/native-content-lease';
 import { bindNativeLinkFacts } from './site-native-link-facts';
+import { withLibraryStyleSeed } from './library-style-seed';
 
 const bound = new WeakSet<HTMLElement>();
 const releases = new WeakMap<ParentNode, () => void>();
@@ -22,11 +23,13 @@ export function initLibraryCards(scope: ParentNode = document) {
       withNativeContentLease(document.documentElement, () => {
         customElements.define(
           tag,
-          AdaptToWebComponent(prototype, {
-            register: false,
-            registerAs: tag,
-            getProps: (element) => JSON.parse(element.dataset.libraryProps ?? '{}'),
-          })
+          withLibraryStyleSeed(
+            AdaptToWebComponent(prototype, {
+              register: false,
+              registerAs: tag,
+              getProps: (element) => JSON.parse(element.dataset.libraryProps ?? '{}'),
+            })
+          )
         );
       });
   }

@@ -15,7 +15,7 @@ const tabsDemo = tabsDemoDefinition as DemoSpec;
 const SWITCH_EXAMPLES = [
   {
     switchRef: 'emailAlertsSwitch',
-    label: 'Email alerts',
+    label: 'Airplane Mode',
   },
   {
     switchRef: 'releaseAlertsSwitch',
@@ -42,7 +42,7 @@ function textContent(node: DemoChild): string {
 }
 
 describe('Brutalist documentation demo state contracts', () => {
-  it('keeps each visible Switch label inside its naming content', () => {
+  it('keeps each Switch name equal to its visible sibling caption', () => {
     const nodes = collectNodes(switchDemo.root);
 
     for (const example of SWITCH_EXAMPLES) {
@@ -59,19 +59,30 @@ describe('Brutalist documentation demo state contracts', () => {
         throw new Error(`Missing Switch demo node: ${example.switchRef}`);
       }
 
-      expect((switchNode.className ?? '').split(/\s+/)).toContain('relative');
       const thumb = switchNode.children?.find(
         (child) =>
           typeof child !== 'string' &&
           child.kind === 'proto' &&
           child.prototypeId === 'brutalist-switch-thumb'
       );
-      const visibleLabel = switchNode.children?.find(
+      const namingContent = switchNode.children?.find(
         (child) =>
           typeof child !== 'string' &&
           child.kind === 'box' &&
-          (child.className ?? '').split(/\s+/).includes('absolute')
+          (child.className ?? '').split(/\s+/).includes('sr-only')
       );
+      const row = nodes.find((node) => node.kind === 'box' && node.children?.includes(switchNode));
+      const visibleLabels =
+        row?.kind === 'box'
+          ? (row.children ?? []).filter(
+              (child) =>
+                typeof child !== 'string' &&
+                child.kind === 'box' &&
+                !(child.className ?? '').split(/\s+/).includes('sr-only')
+            )
+          : [];
+      expect(visibleLabels).toHaveLength(1);
+      const visibleLabel = visibleLabels[0];
 
       expect(thumb).toBeDefined();
       if (!thumb || typeof thumb === 'string' || thumb.kind !== 'proto') {
@@ -83,6 +94,9 @@ describe('Brutalist documentation demo state contracts', () => {
       if (!visibleLabel || typeof visibleLabel === 'string' || visibleLabel.kind !== 'box') {
         throw new Error(`Missing visible Switch label: ${example.switchRef}`);
       }
+      expect(namingContent).toBeDefined();
+      expect(textContent(namingContent!)).toBe(example.label);
+      expect(textContent(switchNode)).toBe(example.label);
       expect(textContent(visibleLabel)).toBe(example.label);
       expect(visibleLabel.className).not.toContain('sr-only');
     }
@@ -121,8 +135,8 @@ describe('Brutalist documentation demo state contracts', () => {
     if (tabsDemo.root.kind !== 'proto') throw new Error('Expected a Tabs prototype root.');
 
     const tokens = new Set((tabsDemo.root.className ?? '').split(/\s+/).filter(Boolean));
-    expect(tokens.has('w-full')).toBe(true);
-    expect(tokens.has('max-w-sm')).toBe(true);
-    expect([...tokens].some((token) => token.startsWith('w-['))).toBe(false);
+    expect(tokens.has('w-[420px]')).toBe(true);
+    expect(tokens.has('max-w-full')).toBe(true);
+    expect([...tokens].filter((token) => token.startsWith('w-['))).toEqual(['w-[420px]']);
   });
 });

@@ -1,12 +1,12 @@
 /* One website-owned layout for the homepage and documentation. Actual PUI
    Button/Select surfaces still belong to the selected library and runtime. */
 .site-header {
-  --site-header-row-height: 4.5rem;
+  --site-header-row-height: 3.75rem;
   --site-control-height: 2.75rem;
   --site-select-control-height: 2.75rem;
   --site-select-control-padding-block: 0.25rem;
   --site-header-navigation-gap: 1.5rem;
-  --site-header-brand-navigation-gap: 2rem;
+  --site-header-brand-navigation-gap: 1.75rem;
   box-sizing: border-box;
   position: relative;
   display: grid;
@@ -849,10 +849,10 @@
   /* Shadcn matches all popup rows to the Trigger. Reserve room for the
      complete family option even when the shorter selected value is shown. */
   [data-site-library-family='shadcn'] .home-runtime-header {
-    grid-template-columns: auto auto minmax(0, 1fr) 23.5rem minmax(10rem, 13rem) 2.75rem 2.75rem;
+    grid-template-columns: auto auto minmax(0, 1fr) 20.5rem minmax(10rem, 13rem) 2.75rem 2.75rem;
   }
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-header {
-    grid-template-columns: auto auto minmax(0, 1fr) 25rem minmax(10rem, 13rem) 40px 40px;
+    grid-template-columns: auto auto minmax(0, 1fr) 24.5rem minmax(10rem, 13rem) 40px 40px;
   }
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-preferences .pui-projection-controls {
     grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr);

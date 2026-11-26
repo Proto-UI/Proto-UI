@@ -1,10 +1,8 @@
 import { createRuntimeLoadingMask } from '../PrototypePreviewer/runtime-loading-mask';
-import type {
-  ProjectionFamilyId,
-  SharedBaseFamilyId,
-} from '../PrototypePreviewer/projection-families';
+import type { SharedBaseFamilyId } from '../PrototypePreviewer/projection-families';
 import type { ProjectionScopeCommit } from '../PrototypePreviewer/projection-scope';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
+import type { SiteLibraryFamily } from '../site-library-family';
 import { createHomepageShowcase, HOMEPAGE_SHOWCASE_ID } from './homepage-showcase';
 
 export function homepageDemoParticipant(
@@ -90,7 +88,12 @@ export function homepageDemoParticipant(
         root,
         content: mount,
         status,
-        family: () => (root.dataset.projectionFamily === 'brutalist' ? 'brutalist' : 'shadcn'),
+        family: () =>
+          root.dataset.projectionFamily === 'brutalist'
+            ? 'brutalist'
+            : root.dataset.projectionFamily === 'bootstrap-2-3-2'
+              ? 'bootstrap-2-3-2'
+              : 'shadcn',
         ...actions,
       })
     : null;
@@ -126,11 +129,11 @@ export function homepageDemoParticipant(
     },
     // The existing materializer requires a known lane member even when an explicit
     // app recipe supplies all content. No component picker is rendered for this task.
-    initialFamily: 'shadcn' as ProjectionFamilyId,
+    initialFamily: 'shadcn' as SiteLibraryFamily,
     initialComponent: 'button' as SharedBaseFamilyId,
     setStatus,
     createContent(
-      family: ProjectionFamilyId,
+      family: SiteLibraryFamily,
       runtime: RuntimeId,
       isActive: () => boolean,
       isCurrentGeneration: () => boolean

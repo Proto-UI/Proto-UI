@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { registerWebPortalDestination, subscribeWebPortalProjection } from '@proto.ui/adapter-base';
 import { createVue2OverlayGlobalMount } from '../src/runtime/modules';
+import { registerPortalViewReadiness } from '../src/platform/portal-readiness';
 import {
   bindLogicalParent,
   createLogicalInstance,
@@ -104,4 +105,42 @@ it('Vue2 release before the first mount acquires no destination or projection le
   expect(f.target.parentNode).toBe(f.owner);
   expect(f.owner.childNodes).toHaveLength(1);
   expect(projected).not.toHaveBeenCalled();
+});
+
+it('Vue2 reconnect publishes current descendant readiness and excludes released views', () => {
+  const f = fixture();
+  const child = document.createElement('div');
+  f.target.append(child);
+  const mount = createVue2OverlayGlobalMount(f.token);
+  retain(() => mount.unmount(f.target));
+  const retired = vi.fn();
+  const releaseOldView = retain(registerPortalViewReadiness(child, retired));
+  const current = vi.fn(() =>
+    expect(child.isConnected && f.destination.contains(child)).toBe(true)
+  );
+  retain(registerPortalViewReadiness(child, current));
+  releaseOldView();
+  mount.mount(f.target);
+  expect(current).toHaveBeenCalledOnce();
+  expect(retired).not.toHaveBeenCalled();
+});
+
+it('Vue2 readiness reentry cannot publish remaining children from a retired Portal epoch', () => {
+  const f = fixture();
+  const first = document.createElement('div');
+  const second = document.createElement('div');
+  f.target.append(first, second);
+  const mount = createVue2OverlayGlobalMount(f.token);
+  retain(() => mount.unmount(f.target));
+  const remaining = vi.fn();
+  const projected = vi.fn();
+  retain(registerPortalViewReadiness(first, () => mount.unmount(f.target)));
+  retain(registerPortalViewReadiness(second, remaining));
+  retain(subscribeWebPortalProjection(f.target, projected));
+  mount.mount(f.target);
+  expect(f.target.parentNode).toBe(f.owner);
+  expect(f.owner.childNodes).toHaveLength(1);
+  expect(remaining).not.toHaveBeenCalled();
+  // The only public notification is the actual release, not stale mount success.
+  expect(projected).toHaveBeenCalledOnce();
 });

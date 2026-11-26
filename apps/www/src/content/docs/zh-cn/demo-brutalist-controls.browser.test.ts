@@ -3,7 +3,7 @@ import { documentRect, type GeometryRect } from './browser-geometry';
 
 import { spawn, type ChildProcess } from 'node:child_process';
 import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
-import { access } from 'node:fs/promises';
+import { access, mkdir, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import {
   chromium,
@@ -36,17 +36,74 @@ const GEOMETRY_EPSILON = 0.5;
 const COLOR_SCHEMES = ['light', 'dark'] as const;
 type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
-/** Scopes assertions to this demo so unrelated page chrome cannot satisfy them. */
-const TEXTAREA_DEMO_SCOPE = '[data-demo-id="demo-brutalist-textarea"]';
+/** Current public Textarea consumers; source panels and page chrome are excluded. */
+const TEXTAREA_EXAMPLES: readonly {
+  id: string;
+  surfaces: Readonly<Record<string, string>>;
+  borders: readonly string[];
+  disabled?: boolean;
+  invalid?: boolean;
+}[] = [
+  { id: 'demo-brutalist-textarea', surfaces: { control: 'textarea' }, borders: ['control'] },
+  {
+    id: 'demo-brutalist-textarea-field',
+    surfaces: {
+      control: 'textarea',
+      label: '@aria-labelledby',
+      description: '@aria-describedby',
+    },
+    borders: ['control'],
+  },
+  {
+    id: 'demo-brutalist-textarea-disabled',
+    surfaces: {
+      control: 'textarea',
+      label: '@aria-labelledby',
+    },
+    borders: [],
+    disabled: true,
+  },
+  {
+    id: 'demo-brutalist-textarea-invalid',
+    surfaces: {
+      control: 'textarea',
+      label: '@aria-labelledby',
+      error: '@aria-errormessage',
+    },
+    borders: ['control'],
+    invalid: true,
+  },
+  {
+    id: 'demo-brutalist-textarea-button',
+    surfaces: {
+      control: 'textarea',
+      send: '.pui-runtime-preview-surface [role="button"]',
+    },
+    borders: ['control', 'send'],
+  },
+];
 
-/** Demo-authored surfaces around the Textarea; the physical control is styled by the Prototype. */
-const TEXTAREA_DEMO_SURFACES = [
-  'toggleProps',
-  'focusButton',
-  'blurButton',
-  'stateLabel',
-  'eventLog',
-] as const;
+async function textareaSurfaceSelectors(
+  previewer: Locator,
+  example: (typeof TEXTAREA_EXAMPLES)[number]
+): Promise<Record<string, string>> {
+  const selectors: Record<string, string> = {};
+  for (const [name, selector] of Object.entries(example.surfaces)) {
+    if (!selector.startsWith('@')) {
+      selectors[name] = selector;
+      continue;
+    }
+    // Read the real native association, including in ordinary examples that
+    // have no fixed-family projection metadata on their Prototype roots.
+    const ids =
+      (await previewer.locator('textarea').getAttribute(selector.slice(1)))
+        ?.split(/\s+/)
+        .filter(Boolean) ?? [];
+    expect(ids, `${example.id}/${name}/native association`).toHaveLength(1);
+    selectors[name] = `[id=${JSON.stringify(ids[0])}]`;
+  }
+  return selectors;
+}
 
 /** WCAG 2.1 AA for normal text. */
 const MIN_TEXT_CONTRAST = 4.5;
@@ -296,10 +353,10 @@ async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocu
 async function demoSurfaceContrast(
   page: Page,
   scope: string,
-  refs: readonly string[]
+  selectors: Readonly<Record<string, string>>
 ): Promise<Record<string, { text: number; border: number }>> {
   return page.evaluate(
-    ({ scope: scopeSelector, refs: surfaceRefs }) => {
+    ({ scope: scopeSelector, selectors: surfaceSelectors }) => {
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
@@ -341,9 +398,9 @@ async function demoSurfaceContrast(
       if (!previewer) throw new Error(`Demo scope ${scopeSelector} is missing.`);
 
       const result: Record<string, { text: number; border: number }> = {};
-      for (const ref of surfaceRefs) {
-        const element = previewer.querySelector(`[data-demo-ref="${ref}"]`);
-        if (!element) throw new Error(`Demo ref ${ref} is missing.`);
+      for (const [ref, selector] of Object.entries(surfaceSelectors)) {
+        const element = previewer.querySelector(selector);
+        if (!element) throw new Error(`Demo surface ${ref} (${selector}) is missing.`);
         const style = getComputedStyle(element);
         const background = luminance(backdrop(element));
         result[ref] = {
@@ -353,7 +410,7 @@ async function demoSurfaceContrast(
       }
       return result;
     },
-    { scope, refs }
+    { scope, selectors }
   );
 }
 
@@ -804,7 +861,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           const snapshot = await switches.nth(index).ariaSnapshot();
           names.push(snapshot.match(/switch "([^"]+)"/)?.[1] ?? '');
         }
-        expect(names, runtime).toEqual(['Email alerts', 'Release alerts', 'Archived alerts']);
+        expect(names, runtime).toEqual(['Airplane Mode', 'Release alerts', 'Archived alerts']);
         expect(await switches.nth(0).getAttribute('aria-checked'), runtime).toBe('false');
         expect(await switches.nth(1).getAttribute('aria-checked'), runtime).toBe('true');
         expect(await switches.nth(2).getAttribute('aria-disabled'), runtime).toBe('true');
@@ -831,7 +888,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         const before = await root.boundingBox();
         expect(before, runtime).not.toBeNull();
 
-        const details = previewer.getByRole('tab', { name: 'Details' });
+        const details = previewer.getByRole('tab', { name: 'Password', exact: true });
         await details.click();
         await page.waitForFunction(
           () =>
@@ -861,8 +918,8 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     });
     try {
       for (const runtime of RUNTIMES) {
-        // The authored demo has 25 prototype nodes, including the destructive command.
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 25);
+        // The current authored account menu has 24 prototype nodes.
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 24);
         const trigger = previewer
           .locator(
             '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
@@ -948,8 +1005,84 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           paddingBlock: style.paddingBlock,
           width: rect.width,
           height: rect.height,
+          transitionProperty: style.transitionProperty,
+          transitionDuration: style.transitionDuration,
+          animationName: style.animationName,
+          animationDuration: style.animationDuration,
         };
       });
+      if (paint.borderRadius !== '5px') {
+        console.error(
+          '[tooltip-current-paint]',
+          JSON.stringify({
+            frame,
+            paint,
+            timeline: await tooltip.evaluate(async (element) => {
+              const started = performance.now();
+              const samples = [];
+              do {
+                const css = getComputedStyle(element);
+                samples.push({
+                  elapsed: performance.now() - started,
+                  phase: element.getAttribute('data-transition-state'),
+                  radius: css.borderRadius,
+                  themeRadius: css.getPropertyValue('--pui-radius'),
+                  background: css.backgroundColor,
+                  foreground: css.color,
+                  transitions: element.getAnimations().map((animation) => ({
+                    name:
+                      'transitionProperty' in animation
+                        ? (animation as CSSTransition).transitionProperty
+                        : (animation as CSSAnimation).animationName,
+                    state: animation.playState,
+                    currentTime: animation.currentTime,
+                  })),
+                });
+                await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+              } while (performance.now() - started < 250);
+              return samples;
+            }),
+            owner: await tooltip.evaluate((element) => {
+              const css = getComputedStyle(element);
+              const ancestors = [];
+              for (
+                let at: Element | null = element;
+                at && ancestors.length < 5;
+                at = at.parentElement
+              ) {
+                ancestors.push({
+                  tag: at.localName,
+                  attributes: Object.fromEntries(
+                    Array.from(at.attributes, (a) => [a.name, a.value])
+                  ),
+                  radius: getComputedStyle(at).getPropertyValue('--pui-radius'),
+                });
+              }
+              const rules: unknown[] = [];
+              const visit = (list: CSSRuleList) => {
+                for (const rule of Array.from(list)) {
+                  if (
+                    rule instanceof CSSStyleRule &&
+                    rule.style.borderRadius &&
+                    element.matches(rule.selectorText)
+                  ) {
+                    rules.push({ selector: rule.selectorText, radius: rule.style.borderRadius });
+                  }
+                  if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules);
+                }
+              };
+              for (const sheet of Array.from(document.styleSheets)) {
+                try {
+                  visit(sheet.cssRules);
+                } catch {
+                  /* Cross-origin sheets are not inspectable. */
+                }
+              }
+              return { radius: css.getPropertyValue('--pui-radius'), ancestors, rules };
+            }),
+          })
+        );
+      }
       expect(paint.text, frame).toContain(expectedText);
       expect(paint.tabIndex, frame).toBe(-1);
       expect(paint.interactive, frame).toBe(0);
@@ -1017,20 +1150,18 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         );
         expect(await roots.count(), runtime).toBe(7);
         expect(await roots.nth(0).getAttribute('data-pui-root'), runtime).toBe('');
-        const firstTrigger = roots.filter({ hasText: 'Hover or focus for details' }).last();
-        const secondTrigger = roots.filter({ hasText: 'Move to the second trigger' }).last();
+        const firstTrigger = roots.filter({ hasText: /^Account$/ }).last();
+        const secondTrigger = roots.filter({ hasText: /^Notifications$/ }).last();
         await expect.poll(() => page.getByRole('tooltip').count(), { message: runtime }).toBe(0);
 
         await firstTrigger.hover();
         await page.waitForTimeout(100);
         expect(await page.getByRole('tooltip').count(), `${runtime}/cold-delay`).toBe(0);
-        const firstTooltip = page
-          .getByRole('tooltip')
-          .filter({ hasText: 'Portable Base behavior, Brutalist visual grammar' });
+        const firstTooltip = page.getByRole('tooltip').filter({ hasText: 'View account settings' });
         await expect.poll(() => firstTooltip.count(), { message: runtime }).toBe(1);
         const lightPaint = await expectTooltipPaint(
           firstTooltip,
-          'Portable Base behavior, Brutalist visual grammar',
+          'View account settings',
           `${runtime}/light`
         );
         const lightTooltipNode = await firstTooltip.elementHandle();
@@ -1050,7 +1181,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         }, tooltipCanaries);
         const canaryPaint = await expectTooltipPaint(
           firstTooltip,
-          'Portable Base behavior, Brutalist visual grammar',
+          'View account settings',
           `${runtime}/canary`
         );
         expect(canaryPaint.backgroundColor, `${runtime}/canary/fill-closure`).toBe(
@@ -1071,7 +1202,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await applyHostTheme(page, 'dark');
         const darkPaint = await expectTooltipPaint(
           firstTooltip,
-          'Portable Base behavior, Brutalist visual grammar',
+          'View account settings',
           `${runtime}/dark-repaint`
         );
         const darkTooltipNode = await firstTooltip.elementHandle();
@@ -1097,7 +1228,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await secondTrigger.hover();
         const secondTooltip = page
           .getByRole('tooltip')
-          .filter({ hasText: 'Group preserves the shared warm-delay domain' });
+          .filter({ hasText: 'Manage notification preferences' });
         await expect
           .poll(
             async () => ({
@@ -1114,7 +1245,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           .toEqual({ second: 1, first: 0, total: 1, firstOwnsDescription: false });
         await expectTooltipPaint(
           secondTooltip,
-          'Group preserves the shared warm-delay domain',
+          'Manage notification preferences',
           `${runtime}/dark-warm-owner`
         );
 
@@ -1144,6 +1275,157 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       await context.close();
     }
   }, 90_000);
+
+  it('keeps every public Tooltip example in its own theme on first visible paint', async () => {
+    const { context, page } = await openRoute(TOOLTIP_ROUTE, { width: 1440, height: 900 });
+    // Read actual animation frames while the unchanged native interactions run.
+    // No timing/style overrides or artificial animation completion are applied.
+    const motion = await page.evaluateHandle(() => {
+      let runtime = '';
+      let frame = 0;
+      const samples: Array<{
+        runtime: string;
+        ref: string | null;
+        animation: string;
+        duration: number | string;
+        opacity: number;
+        transform: string;
+      }> = [];
+      const tick = () => {
+        for (const element of document.querySelectorAll(
+          '[role="tooltip"][data-demo-ref^="brutalist"]'
+        )) {
+          const css = getComputedStyle(element);
+          if (css.display === 'none' || css.visibility !== 'visible') continue;
+          for (const animation of element.getAnimations()) {
+            const name = (animation as CSSAnimation).animationName;
+            if (animation.playState !== 'running' || !['pui-enter', 'pui-exit'].includes(name))
+              continue;
+            const duration = animation.effect?.getTiming().duration;
+            samples.push({
+              runtime,
+              ref: element.getAttribute('data-demo-ref'),
+              animation: name,
+              duration: typeof duration === 'number' ? duration : String(duration ?? ''),
+              opacity: Number(css.opacity),
+              transform: css.transform,
+            });
+          }
+        }
+        frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+      return {
+        setRuntime(next: string) {
+          runtime = next;
+        },
+        stop() {
+          cancelAnimationFrame(frame);
+          return samples;
+        },
+      };
+    });
+    const examples = [
+      { id: 'disabled', refs: ['brutalistDisabled'] },
+      { id: 'shortcut', refs: ['brutalistShortcut'] },
+      {
+        id: 'sides',
+        refs: ['left', 'top', 'bottom', 'right'].map((side) => `brutalistSide-${side}`),
+      },
+    ];
+    try {
+      await page.emulateMedia({ colorScheme: 'light' });
+      for (const runtime of EVERY_RUNTIME) {
+        await motion.evaluate((probe, current) => probe.setRuntime(current), runtime);
+        for (const example of examples) {
+          const previewer = page.locator(
+            `[data-previewer-id][data-demo-id="demo-brutalist-tooltip-${example.id}"]`
+          );
+          await previewer.scrollIntoViewIfNeeded();
+          await selectRuntime(
+            page,
+            previewer,
+            runtime,
+            '[data-pui-root][tabindex="0"]',
+            example.refs.length
+          );
+          for (const scheme of COLOR_SCHEMES) {
+            await applyHostTheme(page, scheme);
+            for (const ref of example.refs) {
+              const side = ref.startsWith('brutalistSide-')
+                ? ref.slice('brutalistSide-'.length)
+                : null;
+              const triggerRef = side ? `brutalistSideTrigger-${side}` : `${ref}Trigger`;
+              const contentRef = side ? `brutalistSideContent-${side}` : `${ref}Content`;
+              const trigger = previewer.locator(`[data-demo-ref="${triggerRef}"]`);
+              await trigger.hover();
+              const content = page.getByRole('tooltip');
+              await expect
+                .poll(() => content.count(), {
+                  message: `${runtime}/${scheme}/${contentRef}/visible`,
+                })
+                .toBe(1);
+              expect(await content.getAttribute('data-demo-ref')).toBe(contentRef);
+              const paint = await content.evaluate((element) => {
+                const css = getComputedStyle(element);
+                return {
+                  radius: css.borderRadius,
+                  border: css.borderTopColor,
+                  width: css.borderTopWidth,
+                  themeRadius: css.getPropertyValue('--pui-radius'),
+                };
+              });
+              expect(paint, `${runtime}/${scheme}/${contentRef}`).toEqual({
+                radius: '5px',
+                border: 'rgb(0, 0, 0)',
+                width: '2px',
+                themeRadius: '5px',
+              });
+              const id = await content.getAttribute('id');
+              expect((await trigger.getAttribute('aria-describedby'))?.split(/\s+/)).toContain(id);
+              await page.mouse.move(0, 0);
+              await expect
+                .poll(() => content.count(), {
+                  message: `${runtime}/${scheme}/${contentRef}/closed`,
+                })
+                .toBe(0);
+            }
+          }
+        }
+      }
+      const samples = await motion.evaluate((probe) => probe.stop());
+      for (const runtime of EVERY_RUNTIME) {
+        for (const [animation, duration] of [
+          ['pui-enter', 150],
+          ['pui-exit', 100],
+        ] as const) {
+          expect(
+            samples.some(
+              (sample) =>
+                sample.runtime === runtime &&
+                sample.animation === animation &&
+                sample.duration === duration &&
+                sample.opacity > 0 &&
+                sample.opacity < 1
+            ),
+            `${runtime}/${animation}/actual intermediate frame`
+          ).toBe(true);
+        }
+      }
+    } finally {
+      const samples = await motion.evaluate((probe) => probe.stop());
+      const output = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+      if (output) {
+        await mkdir(`${output}/tooltip`, { recursive: true });
+        await writeFile(
+          `${output}/tooltip/public-example-motion.json`,
+          JSON.stringify(samples, null, 2)
+        );
+      }
+      await motion.dispose();
+      await context.close();
+    }
+  }, 120_000);
 
   it('contains Scroll Area and its scrollbar at 320px without document overflow', async () => {
     const viewportWidth = 320;
@@ -1381,78 +1663,73 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     }
   }, 90_000);
 
-  it('keeps Textarea demo controls and logs readable in both themes and all runtimes', async () => {
-    const { context, page, previewer } = await openRoute(TEXTAREA_ROUTE, {
-      width: 1440,
-      height: 900,
-    });
-
+  it('keeps Textarea controls, labels and errors readable in both themes and all runtimes', async () => {
+    const { context, page } = await openRoute(TEXTAREA_ROUTE, { width: 1440, height: 900 });
     try {
-      await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-demo-ref="eventLog"]', 1);
-
-        for (const colorScheme of COLOR_SCHEMES) {
-          await applyColorScheme(page, colorScheme);
-
-          const atRest = await demoSurfaceContrast(
-            page,
-            TEXTAREA_DEMO_SCOPE,
-            TEXTAREA_DEMO_SURFACES
+        for (const example of TEXTAREA_EXAMPLES) {
+          const scope = `[data-demo-id="${example.id}"]`;
+          const previewer = page.locator(scope);
+          await previewer.scrollIntoViewIfNeeded();
+          await selectRuntime(page, previewer, runtime, 'textarea', 1);
+          const control = previewer.locator('textarea');
+          const surfaces = await textareaSurfaceSelectors(previewer, example);
+          expect(await control.isDisabled(), `${runtime}/${example.id}/disabled`).toBe(
+            Boolean(example.disabled)
           );
-          for (const ref of TEXTAREA_DEMO_SURFACES) {
-            expect(
-              atRest[ref].text,
-              `${runtime}/${colorScheme}/${ref}/rest text`
-            ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
-            expect(
-              atRest[ref].border,
-              `${runtime}/${colorScheme}/${ref}/rest border`
-            ).toBeGreaterThanOrEqual(MIN_BOUNDARY_CONTRAST);
+          if (!example.disabled) {
+            await control.fill('A readable message in the current public example');
+            expect(await control.inputValue()).toBe(
+              'A readable message in the current public example'
+            );
           }
-
-          await previewer.locator('[data-demo-ref="focusButton"]').hover();
-          await previewer.locator('[data-demo-ref="focusButton"]').focus();
-          const whileActive = await demoSurfaceContrast(page, TEXTAREA_DEMO_SCOPE, ['focusButton']);
-          expect(
-            whileActive.focusButton.text,
-            `${runtime}/${colorScheme}/focusButton/hover-focus`
-          ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
-
-          await previewer.locator('[data-demo-ref="toggleProps"]').click();
-          await page.waitForFunction(
-            () =>
-              document
-                .querySelector(
-                  '[data-demo-id="demo-brutalist-textarea"] [data-demo-ref="stateLabel"]'
-                )
-                ?.textContent?.includes('disabled=true') === true
-          );
-          const whileDisabled = await demoSurfaceContrast(
-            page,
-            TEXTAREA_DEMO_SCOPE,
-            TEXTAREA_DEMO_SURFACES
-          );
-          for (const ref of TEXTAREA_DEMO_SURFACES) {
-            expect(
-              whileDisabled[ref].text,
-              `${runtime}/${colorScheme}/${ref}/disabled text`
-            ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
-            expect(
-              whileDisabled[ref].border,
-              `${runtime}/${colorScheme}/${ref}/disabled border`
-            ).toBeGreaterThanOrEqual(MIN_BOUNDARY_CONTRAST);
+          if (example.invalid) {
+            expect(await control.getAttribute('aria-invalid')).toBe('true');
+            expect(await previewer.locator(surfaces.error!).innerText()).toBe(
+              'Please enter a valid message.'
+            );
           }
-
-          await previewer.locator('[data-demo-ref="toggleProps"]').click();
-          await page.waitForFunction(
-            () =>
-              document
-                .querySelector(
-                  '[data-demo-id="demo-brutalist-textarea"] [data-demo-ref="stateLabel"]'
-                )
-                ?.textContent?.includes('disabled=false') === true
-          );
+          for (const colorScheme of COLOR_SCHEMES) {
+            await applyColorScheme(page, colorScheme);
+            // Disabled controls retain their native disabled/geometry checks;
+            // the text/boundary thresholds apply to the operable consumers.
+            if (example.disabled) continue;
+            const atRest = await demoSurfaceContrast(page, scope, surfaces);
+            for (const key of Object.keys(surfaces)) {
+              expect(
+                atRest[key].text,
+                `${runtime}/${colorScheme}/${example.id}/${key}/rest text`
+              ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+            }
+            for (const key of example.borders) {
+              expect(
+                atRest[key].border,
+                `${runtime}/${colorScheme}/${example.id}/${key}/rest border`
+              ).toBeGreaterThanOrEqual(MIN_BOUNDARY_CONTRAST);
+            }
+            if (surfaces.send) {
+              const send = previewer.getByRole('button', { name: 'Send message', exact: true });
+              await send.hover();
+              await send.focus();
+              expect(await send.evaluate((element) => document.activeElement === element)).toBe(
+                true
+              );
+              const active = await demoSurfaceContrast(page, scope, {
+                send: surfaces.send,
+              });
+              expect(
+                active.send.text,
+                `${runtime}/${colorScheme}/send/hover-focus`
+              ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+              await control.focus();
+              expect(await control.evaluate((element) => document.activeElement === element)).toBe(
+                true
+              );
+              expect(await control.inputValue()).toBe(
+                'A readable message in the current public example'
+              );
+            }
+          }
         }
       }
     } finally {
@@ -1463,31 +1740,34 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
 
   it('contains the Textarea demo at 320px without document overflow', async () => {
     const viewportWidth = 320;
-    const { context, page, previewer } = await openRoute(TEXTAREA_ROUTE, {
+    const { context, page } = await openRoute(TEXTAREA_ROUTE, {
       width: viewportWidth,
       height: 844,
     });
-
     try {
-      // The previewer mounts its demo lazily, so it has to reach the viewport
-      // before a runtime switch can settle at this width.
-      await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-demo-ref="eventLog"]', 1);
-        for (const ref of TEXTAREA_DEMO_SURFACES) {
-          const box = await previewer.locator(`[data-demo-ref="${ref}"]`).boundingBox();
-          expect(box, `${runtime}/${ref}`).not.toBeNull();
-          expect(box!.x, `${runtime}/${ref}`).toBeGreaterThanOrEqual(-GEOMETRY_EPSILON);
-          expect(box!.x + box!.width, `${runtime}/${ref}`).toBeLessThanOrEqual(
-            viewportWidth + GEOMETRY_EPSILON
-          );
+        for (const example of TEXTAREA_EXAMPLES) {
+          const previewer = page.locator(`[data-demo-id="${example.id}"]`);
+          await previewer.scrollIntoViewIfNeeded();
+          await selectRuntime(page, previewer, runtime, 'textarea', 1);
+          const surfaces = await textareaSurfaceSelectors(previewer, example);
+          for (const [key, selector] of Object.entries(surfaces)) {
+            const box = await previewer.locator(selector).boundingBox();
+            expect(box, `${runtime}/${example.id}/${key}`).not.toBeNull();
+            expect(box!.x, `${runtime}/${example.id}/${key}`).toBeGreaterThanOrEqual(
+              -GEOMETRY_EPSILON
+            );
+            expect(box!.x + box!.width, `${runtime}/${example.id}/${key}`).toBeLessThanOrEqual(
+              viewportWidth + GEOMETRY_EPSILON
+            );
+          }
+          expect(
+            await page.evaluate(
+              () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+            ),
+            `${runtime}/${example.id}`
+          ).toBe(0);
         }
-        expect(
-          await page.evaluate(
-            () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-          ),
-          runtime
-        ).toBe(0);
       }
     } finally {
       await context.close();

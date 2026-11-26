@@ -16,6 +16,10 @@ export const ShadcnCardHeader = definePrototype<ShadcnCardHeaderProps, ShadcnCar
         i.feedback.style.use(tw('rounded-t-[min(var(--pui-radius-4xl),24px)] gap-1.5')),
     });
     def.rule({
+      when: (w) => w.state(style).eq('luma'),
+      intent: (i) => i.feedback.style.use(tw('rounded-t-[var(--pui-radius-4xl)] gap-1.5')),
+    });
+    def.rule({
       when: (w) => w.state(style).eq('new-york-v4'),
       intent: (i) => i.feedback.style.use(tw('gap-2')),
     });
@@ -35,6 +39,16 @@ export const ShadcnCardHeader = definePrototype<ShadcnCardHeaderProps, ShadcnCar
     def.rule({
       when: (w) =>
         w.all(w.prop('divider').eq(true), w.state(style).eq('rhea'), w.state(size).eq('sm')),
+      intent: (i) => i.feedback.style.use(tw('pb-4')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.prop('divider').eq(true), w.state(style).eq('luma'), w.state(size).eq('default')),
+      intent: (i) => i.feedback.style.use(tw('pb-6')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.prop('divider').eq(true), w.state(style).eq('luma'), w.state(size).eq('sm')),
       intent: (i) => i.feedback.style.use(tw('pb-4')),
     });
     return (r) => [r.r.slot()];

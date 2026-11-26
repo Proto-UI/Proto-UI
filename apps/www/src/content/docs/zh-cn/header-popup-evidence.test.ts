@@ -2,9 +2,11 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { transformSync } from 'esbuild';
 import { runInNewContext } from 'node:vm';
 import {
+  headerOptionTextClipping,
   headerPopupSettled,
   popupOptionContrast,
   readHeaderPopupPaint,
+  readHeaderPopupTextGeometry,
 } from './header-popup-evidence';
 
 afterEach(() => {
@@ -30,7 +32,7 @@ it('rejects entering, faded and running-animation popup frames', () => {
   expect(headerPopupSettled(popup)).toBe(false);
 });
 it('keeps browser capture callbacks self-contained under TSX name preservation', () => {
-  for (const callback of [headerPopupSettled, readHeaderPopupPaint]) {
+  for (const callback of [headerPopupSettled, readHeaderPopupPaint, readHeaderPopupTextGeometry]) {
     const compiled = transformSync(`const probe = ${String(callback)};`, {
       loader: 'ts',
       format: 'cjs',
@@ -130,4 +132,89 @@ it('keeps non-Shadcn popup paint on the Content itself', () => {
   expect(paint.shadow).toBe('none');
   expect(paint.tokens).toBe('outer-token');
   expect(paint.paintOwner.prototype).toBe('brutalist-select-content');
+});
+
+// Synthetic geometry tests the oracle only. The browser test supplies actual Range/client metrics.
+function optionGeometry(): ReturnType<typeof readHeaderPopupTextGeometry>[number] {
+  const rect = (left: number, right: number, top: number) => ({
+    left,
+    right,
+    top,
+    bottom: top + 20,
+    width: right - left,
+    height: 20,
+  });
+  return {
+    text: 'Bootstrap 2.3.2 · WIP',
+    rect: rect(10, 132, 20),
+    clientWidth: 122,
+    scrollWidth: 122,
+    viewportWidth: 1440,
+    runs: [
+      {
+        text: 'Bootstrap 2.3.2 · WIP',
+        words: [
+          { text: 'Bootstrap', rects: [rect(16, 85, 20)] },
+          { text: '2.3.2', rects: [rect(16, 51, 40)] },
+          { text: '·', rects: [rect(55, 60, 40)] },
+          { text: 'WIP', rects: [rect(65, 90, 40)] },
+        ],
+        ancestors: [
+          {
+            tag: 'div',
+            role: 'listbox',
+            prototype: 'brutalist-select-content',
+            whiteSpace: 'normal',
+            overflowWrap: 'anywhere',
+            overflowX: 'hidden',
+            clipsX: true,
+            rect: rect(8, 134, 16),
+            clientWidth: 122,
+            scrollWidth: 122,
+            offsetWidth: 126,
+            clipLeft: 10,
+            clipRight: 132,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+it('accepts complete wrapped option fragments inside their measured horizontal clips', () => {
+  expect(headerOptionTextClipping(optionGeometry())).toEqual([]);
+});
+it('rejects clipped WIP glyphs even when textContent still contains the full label', () => {
+  const geometry = optionGeometry();
+  geometry.runs[0]!.words[3]!.rects[0] = {
+    left: 120,
+    right: 145,
+    top: 20,
+    bottom: 40,
+    width: 25,
+    height: 20,
+  };
+  expect(geometry.text).toBe('Bootstrap 2.3.2 · WIP');
+  expect(headerOptionTextClipping(geometry)).toEqual(['WIP: text exceeds div horizontal clip']);
+});
+it('checks inner text clipping even when the popup itself has ample width', () => {
+  const geometry = optionGeometry();
+  const popup = geometry.runs[0]!.ancestors[0]!;
+  popup.clipRight = 300;
+  geometry.runs[0]!.ancestors.unshift({ ...popup, tag: 'span', clipRight: 80 });
+  expect(headerOptionTextClipping(geometry)).toContain('WIP: text exceeds span horizontal clip');
+});
+it('rejects labels without actual text fragments instead of accepting their textContent', () => {
+  const geometry = optionGeometry();
+  geometry.runs[0]!.words[3]!.rects = [];
+  expect(headerOptionTextClipping(geometry)).toEqual(['WIP: no text fragments']);
+});
+it('rejects invalid geometry instead of treating it as unclipped', () => {
+  const geometry = optionGeometry();
+  geometry.runs[0]!.ancestors[0]!.clipRight = Number.NaN;
+  geometry.runs[0]!.words[0]!.rects[0]!.width = 0;
+  expect(headerOptionTextClipping(geometry)).toEqual([
+    'div: invalid horizontal clip bounds',
+    'Bootstrap: invalid text fragment',
+  ]);
 });

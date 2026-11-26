@@ -57,5 +57,6 @@ const snapshotScope = `[data-library-snapshot="${snapshotId}"]`;
   data-library-snapshot={snapshotId}
   data-library-props={JSON.stringify(props)}
   data-library-prototype={libraryCardPrototypes[part].name}
+  data-library-style-seed={JSON.stringify(tokens)}
   data-pui-style={tokens.length ? tokens.join(' ') : undefined}><slot /></Tag
 >

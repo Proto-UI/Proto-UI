@@ -84,6 +84,12 @@ export const READY_ROUTES = Object.freeze([
   '/zh-cn/ui-libraries/shadcn/tooltip/',
 ]);
 
+export const SEARCH_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
+]);
+
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
@@ -102,6 +108,7 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/prototypes/base/test/async-region.browser.test.ts',
   'packages/prototypes/base/test/toast-pointer.browser.test.ts',
   'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
+  'packages/adapters/web-component/test/focus-entry-potential-dependencies.browser.test.ts',
   'packages/adapters/react/test/focus-entry-readiness.browser.test.ts',
   'packages/adapters/vue/test/focus-request-readiness.browser.test.ts',
   'apps/www/test/template-style.browser.test.ts',
@@ -110,6 +117,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/components/documentation-image-preview.browser.test.ts',
   'apps/www/test/message-composition.browser.test.ts',
   'apps/www/test/color-scheme.browser.test.ts',
+  'apps/www/test/shadow-percentage-translation.browser.test.ts',
   'apps/www/test/preferences.browser.test.ts',
   'apps/www/test/button-view-lifetime.browser.test.ts',
   'apps/www/test/radio-group-entry.browser.test.ts',
@@ -165,7 +173,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
+  ...SEARCH_BROWSER_SUITES,
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
@@ -327,7 +335,11 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 // Header suite alone took 641s rather than its 52s fallback. Preserve the 900s
 // deadline and complete inventory; use more bounded, less concurrent workers.
 // These estimates are planning admission, never executed acceptance evidence.
-export const BROWSER_SHARD_COUNT = 18;
+// Adding native focus dependency coverage takes the complete inventory above
+// eighteen workers' capacity, even with a measured local planning estimate.
+// Retain every historical cost and the default reserve for the new suite;
+// add one bounded worker while CI's maximum concurrency remains unchanged.
+export const BROWSER_SHARD_COUNT = 19;
 export const BROWSER_EXECUTION_BUDGET_SECONDS = 900;
 export const BROWSER_SETUP_RESERVE_SECONDS = 180;
 export const BROWSER_MAX_ESTIMATED_SECONDS =
@@ -479,8 +491,23 @@ for (const file of [
 }
 // The passive-atoms file was still running when the old shard was killed. Its
 // 600s reserve is explicitly an estimate, not an invented completion sample.
-const interruptedSuiteReserves = {
+const estimatedSuiteReserves = {
+  // Split from the original 84-case serial Search file after run45663672911
+  // reached its unchanged 900s worker cap with 58 passing cases. These are
+  // planning estimates, never terminal-file observations: the activation
+  // group completed in 403.693s; layout completed 21/22 cases in 379.685s.
+  'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts': 410,
+  'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts': 400,
+  // The complete local native menu group passed 25/25 on 2026-11-25 in
+  // 191.877s including Vitest/reporting (189.61s tests). Reserve 240s, a 25%
+  // margin over that observation. This dirty-source planning sample proves
+  // no hosted CI or release result; all old full-suite observations remain.
+  'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts': 240,
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts': 600,
+  // The restored Field journey checks both the current public form and the
+  // complete companion. Its local native run took 280.9s; reserve 300s here.
+  // This is a planning estimate, not an invented historical CI observation.
+  'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts': 300,
 };
 export const DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS = 120;
 
@@ -488,7 +515,7 @@ export function browserSuiteWeightSeconds(suite) {
   const known = [
     BROWSER_SUITE_WEIGHT_SECONDS[suite],
     observedCosts[suite],
-    interruptedSuiteReserves[suite],
+    estimatedSuiteReserves[suite],
   ].filter((value) => value !== undefined);
   return known.length ? Math.max(...known) : DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS;
 }
@@ -529,10 +556,10 @@ export function browserShards(suites = BROWSER_SUITES, count = BROWSER_SHARD_COU
   // by (weight desc, name asc) makes the result independent of input order,
   // and the per-shard count cap keeps every shard bounded and nonempty.
   const capacity = Math.ceil(suites.length / count);
+  const weights = new Map(suites.map((suite) => [suite, browserSuiteWeightSeconds(suite)]));
   const ordered = [...suites].sort(
     (left, right) =>
-      browserSuiteWeightSeconds(right) - browserSuiteWeightSeconds(left) ||
-      (left < right ? -1 : left > right ? 1 : 0)
+      weights.get(right) - weights.get(left) || (left < right ? -1 : left > right ? 1 : 0)
   );
   const shards = Array.from({ length: count }, () => []);
   const loads = new Array(count).fill(0);
@@ -543,7 +570,62 @@ export function browserShards(suites = BROWSER_SUITES, count = BROWSER_SHARD_COU
       if (target === -1 || loads[index] < loads[target]) target = index;
     }
     shards[target].push(suite);
-    loads[target] += browserSuiteWeightSeconds(suite);
+    loads[target] += weights.get(suite);
+  }
+  // LPT can leave a worker just over capacity even when the same inventory
+  // fits. Exchange complete suites only; neither suite-count caps nor the
+  // setup reserve change. A strictly improving finite score makes this
+  // deterministic. If exchanges cannot fit an impossible workload, the
+  // original hard capacity check still rejects it.
+  const score = (current) => [
+    current.reduce((sum, cost) => sum + Math.max(0, cost - BROWSER_MAX_ESTIMATED_SECONDS), 0),
+    Math.max(...current),
+    current.reduce((sum, cost) => sum + cost * cost, 0),
+  ];
+  const less = (left, right) =>
+    left[0] < right[0] ||
+    (left[0] === right[0] && (left[1] < right[1] || (left[1] === right[1] && left[2] < right[2])));
+  for (;;) {
+    const previous = score(loads);
+    if (previous[0] === 0) break;
+    let best;
+    for (let left = 0; left < shards.length; left += 1) {
+      for (let right = left + 1; right < shards.length; right += 1) {
+        const leftCost = loads[left];
+        const rightCost = loads[right];
+        const otherMaximum = Math.max(
+          0,
+          ...loads.filter((_, index) => index !== left && index !== right)
+        );
+        const otherExcess =
+          previous[0] -
+          Math.max(0, leftCost - BROWSER_MAX_ESTIMATED_SECONDS) -
+          Math.max(0, rightCost - BROWSER_MAX_ESTIMATED_SECONDS);
+        const otherSquares = previous[2] - leftCost * leftCost - rightCost * rightCost;
+        for (let a = 0; a < shards[left].length; a += 1) {
+          for (let b = 0; b < shards[right].length; b += 1) {
+            const delta = weights.get(shards[right][b]) - weights.get(shards[left][a]);
+            if (delta === 0) continue;
+            const nextLeft = leftCost + delta;
+            const nextRight = rightCost - delta;
+            const next = [
+              otherExcess +
+                Math.max(0, nextLeft - BROWSER_MAX_ESTIMATED_SECONDS) +
+                Math.max(0, nextRight - BROWSER_MAX_ESTIMATED_SECONDS),
+              Math.max(otherMaximum, nextLeft, nextRight),
+              otherSquares + nextLeft * nextLeft + nextRight * nextRight,
+            ];
+            if (less(next, previous) && (!best || less(next, best.score)))
+              best = { left, right, a, b, delta, score: next };
+          }
+        }
+      }
+    }
+    if (!best) break;
+    const { left, right, a, b, delta } = best;
+    [shards[left][a], shards[right][b]] = [shards[right][b], shards[left][a]];
+    loads[left] += delta;
+    loads[right] -= delta;
   }
   // Restore deterministic name order within each shard for stable receipts.
   return shards.map((shard) => shard.sort());

@@ -29,6 +29,7 @@ export default {
             kind: 'proto',
             prototypeId: 'brutalist-tooltip-content',
             ref: 'brutalistDisabledContent',
+            previewTheme: 'portal',
             props: { side: 'top', align: 'center' },
             children: ['This feature is currently unavailable'],
           },

@@ -17,7 +17,7 @@ function collectNodes(node: DemoChild, result: DemoNode[] = []): DemoNode[] {
 }
 
 describe('Brutalist Image demo contract', () => {
-  it('uses only brutalist image roots with consumer-owned sizing and the a11y binary', () => {
+  it('uses only brutalist image roots with consumer-owned sizing and the authored informative names', () => {
     const nodes = collectNodes(imageDemo.root);
     const images = nodes.filter(
       (node) => node.kind === 'proto' && node.prototypeId === 'brutalist-image-root'
@@ -45,5 +45,15 @@ describe('Brutalist Image demo contract', () => {
     }
     expect(fits).toEqual(new Set(['contain', 'cover', 'fill']));
     expect(modes).toEqual(new Set(['informative']));
+    expect(images.map((item) => (item.kind === 'proto' ? item.ref : null))).toEqual([
+      'hero-frame',
+      'fit-contain',
+      'fit-cover',
+      'fit-fill',
+    ]);
+    for (const item of images) {
+      if (item.kind !== 'proto') throw new Error('Expected Image Root');
+      expect(item.props?.source).toMatch(/^\/images\/base-image\/.+\.svg$/);
+    }
   });
 });

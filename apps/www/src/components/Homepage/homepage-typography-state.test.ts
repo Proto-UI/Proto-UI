@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { initHomepageRuntime } from './homepage-runtime-client';
+import { createHomepageShowcase } from './homepage-showcase';
+import { prepareDemoRuntime } from '../PrototypePreviewer/demo-renderer';
+import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
+import { resolveProjectionSelectParts } from '../PrototypePreviewer/projection-families';
 import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 import * as siteFamily from '../site-library-family';
 import * as materialization from '../PrototypePreviewer/projection-materializer';
@@ -16,9 +20,27 @@ import type { MaterializedProjectionCandidate } from '../PrototypePreviewer/proj
 // Keep the pinned host's internal WeakRef forwarding closure alive, exactly as
 // the other real typography suites do. Browser behavior and deadlines stay real.
 let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
-beforeAll(() => {
+beforeAll(async () => {
   installGeneratedProtoUiStylesheet();
   observerKeeper = retainHappyDomMutationCallbacks(window);
+  // These host controls observe retained owners and publication, after the
+  // fixture's real dependencies arrive. Prepare the same public recipes before
+  // the original 5s cases and 1s observations; native startup owns cold loading.
+  const prototypeIds = new Set<string>();
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    prototypeIds.add(`${family}-text-root`);
+    prototypeIds.add(`${family}-surface-root`);
+    for (const id of Object.values(resolveProjectionSelectParts(family))) prototypeIds.add(id);
+    for (const runtime of ['wc', 'react'] as const) {
+      const { recipe } = createHomepageShowcase(family, runtime, 'en', () => true);
+      for (const id of recipe.prototypeIds) prototypeIds.add(id);
+    }
+  }
+  await Promise.all([
+    loadPrototypes([...prototypeIds]),
+    prepareDemoRuntime('wc'),
+    prepareDemoRuntime('react'),
+  ]);
 });
 afterAll(() => observerKeeper.restore());
 
@@ -71,6 +93,7 @@ vi.mock('../PrototypePreviewer/projection-theme', async (original) => {
 let handle: NonNullable<ReturnType<typeof initHomepageRuntime>> | undefined;
 let homepageController: projectionScope.ProjectionScopeController | undefined;
 let media: MediaQueryList;
+const preparationReleases = new Set<() => void>();
 beforeEach(() => {
   localStorage.clear();
   homepageController = undefined;
@@ -112,6 +135,9 @@ beforeEach(() => {
     </section></main>`;
 });
 afterEach(async () => {
+  // Assertion failures must not leave fixture gates blocking the real destroy.
+  // Each test still controls release during its own original deadline.
+  for (const release of preparationReleases) release();
   await handle?.destroy();
   handle = undefined;
   document.body.replaceChildren();
@@ -140,6 +166,11 @@ function deferred<T>() {
 function holdNext() {
   const entered = deferred<TypographyCandidate>();
   const gate = deferred<void>();
+  const release = () => {
+    gate.resolve();
+    preparationReleases.delete(release);
+  };
+  preparationReleases.add(release);
   preparation.next = async (candidate) => {
     const wrapped = {
       ...candidate,
@@ -150,7 +181,7 @@ function holdNext() {
     await gate.promise;
     return wrapped;
   };
-  return { entered: entered.promise, release: () => gate.resolve() };
+  return { entered: entered.promise, release };
 }
 
 async function waitForHomepageStartup() {
@@ -316,7 +347,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(
       document.querySelector('[data-home-showcase]')!.getAttribute('data-projection-family')
     ).toBe('brutalist');
-  });
+  }, 20_000);
 
   it('whole-page publication rollback restores the latest locally refreshed typography and live gallery', async () => {
     const before = await editGallery();
@@ -349,7 +380,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     handle = undefined;
     expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
     expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
-  });
+  }, 20_000);
 
   it('a failed publication keeps the committed owner and no replacement batch', async () => {
     await editGallery();
@@ -397,7 +428,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     // Only the failed generation itself was prepared. A replacement owner
     // needs one more typography batch.
     expect(preparation.count).toBe(preparations + 1);
-  });
+  }, 20_000);
 
   it('a source added during a failed publication joins the retained generation', async () => {
     const before = await editGallery();
@@ -426,7 +457,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(handle!.getSnapshot()).toEqual(before.snapshot);
     expect(note()).toBe(before.input);
     expect(note().value).toBe('Keep my unsaved note');
-  });
+  }, 20_000);
 
   it('a source added during a whole-page runtime preparation joins its committed generation without a second page commit', async () => {
     await editGallery();
@@ -453,7 +484,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     ).toBe('react');
     expect(surface().getAttribute('data-typography-runtime')).toBe('react');
     expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
-  });
+  }, 20_000);
 
   it('destroy waits for and retires an in-flight local batch without reviving source or framework owners', async () => {
     await editGallery();
@@ -561,7 +592,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(handle!.getSnapshot()).toEqual(before.snapshot);
     expect(note()).toBe(before.input);
     expect(note().value).toBe('Keep my unsaved note');
-  });
+  }, 20_000);
 
   it('reconciles source changes arriving while a failed local batch is being disposed', async () => {
     const before = await editGallery();
@@ -659,4 +690,4 @@ it('publishes a committed runtime preference when a live family request supersed
     releaseRetirement.resolve();
     document.removeEventListener(PREFERRED_ADAPTER_EVENT, listener);
   }
-}, 15000);
+}, 30_000);

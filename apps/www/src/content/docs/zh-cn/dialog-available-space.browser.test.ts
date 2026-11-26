@@ -304,7 +304,7 @@ async function readableBrutalistTitle(dialog: Locator, id: string) {
   observations.push({ id: `${id}-title-clearance`, sourceSha, fact });
   expect(fact.missing, 'Dialog retains its named Title and CloseIcon').toBe(false);
   if (fact.missing) return;
-  expect(fact.text).toBe('Neo-Brutalist modal');
+  expect(fact.text).toBe('Edit profile');
   expect(fact.titleVisible, 'Title remains painted').toBe(true);
   expect(fact.closeVisible, 'CloseIcon remains painted').toBe(true);
   expect(fact.title.width).toBeGreaterThan(0);

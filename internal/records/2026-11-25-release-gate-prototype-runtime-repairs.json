@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-25",
+  "status": "local integrated prototype regression verified; release and official browser gates remain separate",
+  "scope": "Repair the 0.3 release-gate prototype failures without reducing the baseline inventory. This receipt covers the integrated working tree, including the parent-owned Toast/Collapsible fixes and merged PR 1838. It is not a clean exact-commit CI result.",
+  "source": {
+    "head": "acfa206d9f2772fb189bc5742d5cc96f337983f2",
+    "dirty": true,
+    "ownedFiles": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts",
+        "sha256": "39d90e0deea1d2c81fc747a4e35f545f0209463629aab971c75d5b0d4638e66d"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-family-recipes.test.ts",
+        "sha256": "00e666486e7bc89b2b5e77d34a7ac604c61da517036b775978b383d71b23ad01"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-variable-weeks.test.ts",
+        "sha256": "0f6cc0e40f157a0e4113cf793278529c9867651e6cb125732e65eea7d7753d37"
+      },
+      {
+        "path": "packages/prototypes/base/test/checkbox-group-row-paint.test.ts",
+        "sha256": "7a421867b18b3a649cfdaeaa5e31c55b496d1c20746f9089bc6e25c9e193b9a3"
+      },
+      {
+        "path": "packages/prototypes/base/test/collection-nested-audit.test.ts",
+        "sha256": "cf9a9c640153a24a86e195befbb8e05f210293054338dd6b16cb5820a08a8d6e"
+      },
+      {
+        "path": "packages/prototypes/base/test/collection-nested-feedback.test.ts",
+        "sha256": "1da8e99572f47f505a7b74de02dcf1d73aef4bfc9e2407d1f66fc97b175c5b89"
+      },
+      {
+        "path": "packages/prototypes/base/test/data-table-header-row.test.ts",
+        "sha256": "0230e6c7ff0a3a2e8548185966e4edc99b7d90b294c95866a6042a94f569fc75"
+      },
+      {
+        "path": "packages/prototypes/base/test/field-nested-consumer.test.ts",
+        "sha256": "4a3536cf0d2502afb7017cc7c239317a5ad1b238ec4f638f39a089ac0d053492"
+      },
+      {
+        "path": "packages/prototypes/base/test/form-actions-quality.test.ts",
+        "sha256": "789557317a94113784de5d93b3caa7735da85878bcd26e61e5c8ffe5ef6ea660"
+      },
+      {
+        "path": "packages/prototypes/base/test/form-field-invalid-feedback.test.ts",
+        "sha256": "f712d754e30e1c7e8e30a44729b1a8beeaf3354e5c6c9ae330a71f31cbff427b"
+      },
+      {
+        "path": "packages/prototypes/base/test/form-upstream-paint.test.ts",
+        "sha256": "c688d3fa2cc14c6e960bf21f6ce94f50ceb033699651f8850e1a3f7fd4a82fa5"
+      },
+      {
+        "path": "packages/prototypes/base/test/number-field-step-feedback.test.ts",
+        "sha256": "47d05aa4418ea221f5ec5ab1b20b46ef33c2ae65e5e33c67459be58d695e4bdb"
+      },
+      {
+        "path": "packages/prototypes/base/test/runtime-tabs-appearance.test.ts",
+        "sha256": "740a5d27c74ad23e024c9aa91337a49bab1f9c37e7dc9696f4e84bd213903b46"
+      },
+      {
+        "path": "packages/prototypes/base/test/select.test.ts",
+        "sha256": "3a2bb121ba5b1d55d052fc262b46a4b7f1b8d30f7cbfc646abb9060c42c9e019"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/carousel/carousel.proto.ts",
+        "sha256": "5f1f2ffc8540fa6bbca0ecdbe384ff4eb365e2f1f940ee7573272fa5c2240e2d"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/dialog/footer.proto.ts",
+        "sha256": "459426de33a03b54107ccd1ed59d6aaa4ebf9c583a1c0f38b2361a5f0ea477a3"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/number-field/decrement.proto.ts",
+        "sha256": "f408d0886e67b1fc3c47e897229dc1e8910645a4d8a614f791ee18f12696bade"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/number-field/increment.proto.ts",
+        "sha256": "dc360b2c0caa8ae47d984592b100392b11ab12303e84cffff8cff16a38ec02fe"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/number-field/step-visual.ts",
+        "sha256": "daddc028f0f8d23c7703773aa77a350b583f5e2ffbf69931219c5b188e0825da"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/test/draft-overlay-projections.test.ts",
+        "sha256": "b38cfc77a0da6b7b6f1c92a003ac560270c12849fd98ff50220eb18d7b5b264c"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/test/historical-overlays-collections-r91.test.ts",
+        "sha256": "d2fba731452e9ae364f4856dde51f9060cd9b2cd7b9f72054b7057b45d2d2d6d"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/test/modal-semantic-palette.test.ts",
+        "sha256": "138121440665127d5dd908fa7af6682b710a2b43627ee6d449fbf3228a61d72e"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/test/theme-contrast.test.ts",
+        "sha256": "ca4e25673ab6039acf88d80c2d256db171e26915689797bae9a5037b205e38d1"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/carousel/carousel.proto.ts",
+        "sha256": "b6c507bce1ab3e6041637f08c01876cdd2f34099dad8c040572a23e1932c1828"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/drawer/close.proto.ts",
+        "sha256": "d648e2890a569cc67eeae50b7e17c3e235c78700c6d12f1af78d0aad62bb4b0d"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/drawer/trigger.proto.ts",
+        "sha256": "cfb855626ae991b1c2fa044e460d0f64cc1c8e69294b03602ae152cfa33a30ff"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/number-field/decrement.proto.ts",
+        "sha256": "92a26ea2c46ce87864e31e9441bcc16d4998e347fa7ef408c8cc83137fe58671"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/number-field/increment.proto.ts",
+        "sha256": "4e4252d32e7f7041c4203b4ca813c83fd74d5fb9932d8a97b9f694bc626e645c"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/number-field/step-visual.ts",
+        "sha256": "75e6eb4cbd0257b734d5cc9418604672b1403151a0e13f728b7d37326c00c592"
+      },
+      {
+        "path": "packages/prototypes/brutalist/test/alert-dialog.test.ts",
+        "sha256": "61980101f601246187d33e541906fadb1d7b70e275c15a04a346cef22061458e"
+      },
+      {
+        "path": "packages/prototypes/brutalist/test/drawer-command-density.test.ts",
+        "sha256": "70b8fd3aabd9258ea7e12ad99bc381b864aba3d9ff3b104dc3901de4852de889"
+      },
+      {
+        "path": "packages/prototypes/brutalist/test/popover-title.test.ts",
+        "sha256": "e811949c77388ec9e1d69b07700bcd0cffcfb7b3f768b29565f20da0d1ad6eab"
+      },
+      {
+        "path": "packages/prototypes/brutalist/test/select-current-recipe.test.ts",
+        "sha256": "51ff3d4e66f8486577f6485500ab73112bc440f86859b676ba5af76647c12b3f"
+      },
+      {
+        "path": "packages/prototypes/brutalist/test/select.test.ts",
+        "sha256": "c5e31a630c7a52665dea6ff78158aef34d4aea312ca42f910f7edeab6abbe719"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/carousel/carousel.proto.ts",
+        "sha256": "339523f5e4bcffe43b7354e709bd65b4b74aa9d77dea908f6f4d04d48dbd4fc8"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/drawer/content.proto.ts",
+        "sha256": "339cf46ba349af4c149341f77c3c7f46686548ad1e8d76eeacf970818f46af12"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/number-field/decrement.proto.ts",
+        "sha256": "c96b74c8d7fa4582386aabf530193d2a2879a1cfced5d8f50a20aee6f4978c64"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/number-field/increment.proto.ts",
+        "sha256": "609e3cd176dbcdfd84ed1d7bf511925e6e2160447b6620195486887ddb2d7381"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/number-field/step-visual.ts",
+        "sha256": "eef74e4c0b4b879bee36ae5ab12e3bed72592940c03309f3f3f61602c4d9aa97"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+        "sha256": "ca3a5e64cc0b0a299bc10a8496ac79de436700aad0b9680ba7790bdce92def87"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/interactive-surface.test.ts",
+        "sha256": "51a64dab4b30f6971e2772ed330248ed931684a1f193a6d2c2289396a63a1ce9"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/liquid-content-source-r91.test.ts",
+        "sha256": "2072bb2ae611f3727471e68bd4eac5fdc6895ddb8835ce9fe9b70c139f04897b"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts",
+        "sha256": "c66a7dabbf4c0fa1c9fa31db16377f1df739b4206ebe3dc391124a814c1042c0"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/liquid-surface-fieldset-r91.test.ts",
+        "sha256": "fdb1ba43a077b9922d49462ad0eaee70300f94189f3421b3ec68443c58c5d611"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/select-complete-projection.test.ts",
+        "sha256": "87bc85e1ef89d39922554ba0635d8c505f7612c982cc0a21184df22a70faffaf"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/tabs-draft-projection.test.ts",
+        "sha256": "5fda2fa1d8a2e42adf9acbb3097c20618cfcaea4abd86fb4674c7f587b3bc37c"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/carousel/visual.ts",
+        "sha256": "084225a765a65c0d136093558d5f72d396b20340203598d493ed2ab3fcf70408"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/collection-profiles-r91.test.ts",
+        "sha256": "0bcc234996131f951a1b15185cc62dc0828d5637da1cff6d83a6271e97495743"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/command-profile-transitions.test.ts",
+        "sha256": "3913cc0e52f56c84769e7083657d3033b2d006c621c12cdf3284d0025702a433"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+        "sha256": "c8d58eaf73c797c858afe56b5829e0fc0b325bed9575ba475c52f22945802e33"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+        "sha256": "a1da63af634739ff9c2abca1d530ec89f5d9b5011c05784543ae18ee5cf25823"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-public-entry.test.ts",
+        "sha256": "d13d71ac0277c2cd4843ff95dca1932d55a4627fc5ff209147f15b9c492a1605"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/dropdown-pointer-foreground.test.ts",
+        "sha256": "5b08cc99d2ec45f5366d83ff0244789c9a143cc51250edb5b66b510d1ac97f1b"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/overlay-profiles-r91.test.ts",
+        "sha256": "6aa48562999566fd6c78d651f53442808e1567a824e090617a1ad2bb586abbbe"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/select.test.ts",
+        "sha256": "28740385082d3eba81e7358bdffdcd238261085587da9836071801d5a213086e"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/tree-embedded.test.ts",
+        "sha256": "94eedf6dabb8bd746ea5bf36c1a3493e44709854b2eac70913e27942d0b12734"
+      },
+      {
+        "path": "packages/prototypes/test-utils/test/popover-recipes.test.ts",
+        "sha256": "b1c2f8c7f58cf4faeba525206bfe5be31e3430ed80452c498ef7009d0f083c41"
+      }
+    ]
+  },
+  "sourceRepairs": [
+    {
+      "area": "NumberField steps",
+      "change": "Replace forbidden authored hover/active variants in Brutalist, Bootstrap and Liquid with borrowed hovered/pressed paint that clears on cancel, disabled and unmount. Base retains the only value and activation owner.",
+      "evidence": "Six new real-WC pointer, proposal, disabled, cancellation and remount cases fail before and pass after; all existing numeric families pass in the final set."
+    },
+    {
+      "area": "Carousel Context",
+      "change": "Use required Context read/subscribe consistently in the four family visual projections. Do not mix required subscriptions with optional trySubscribe on the same key.",
+      "evidence": "All four-family continuous, nested feedback, nested audit, disabled and navigation cases pass."
+    },
+    {
+      "area": "Liquid Drawer Content",
+      "change": "Restore the supported zero-duration Base transition policy while retaining the declared material owner, opt-out, edge recipes and controlled refusal.",
+      "authority": "P-LIQUID-GLASS-DRAWER requires Content material but does not guarantee motion; simultaneous material and typed-motion ownership remains unsupported and is not claimed by this repair.",
+      "evidence": "Real Runtime callback capability, actual zero-duration scheduler, entering/entered/closed observations, controlled refusal and material candidate withdrawal retained."
+    },
+    {
+      "area": "Brutalist Drawer Trigger and Close",
+      "classification": "actual regression, not fixture drift",
+      "change": "Restore the bounded flat recipe with existing min-height, wrapping, color, focus and disabled behavior. Remove shared elevated control/hit-envelope bundles; retain exactly one matching Base hook.",
+      "authority": "internal/contracts/overlay/brutalist-drawer-command-density.presentation.v0.md",
+      "history": {
+        "regressionCommit": "c049606db4a93fa15e7e9a97708d2ea6364a0557",
+        "pr": "https://github.com/Proto-UI/Proto-UI/pull/1818",
+        "releaseIntake": "https://github.com/Proto-UI/Proto-UI/pull/1818#issuecomment-7144047242",
+        "priorSource": "26a9bd1c2ec0fbef260728d0703add94cf99b181",
+        "lastDensityContractChange": "00dc091f846f7f92985835e1a24df340dfcb5b50",
+        "finding": "PR 1818 admits Header/Footer catalog work but contains no explicit supersession of the independent command-density boundary. The typed depth grammar does not name Drawer Trigger or Close as elevated controls."
+      },
+      "evidence": "Original no-shadow and no-transform oracles retained; actual pointer enter/down/cancel and disabled activation checks added. A disabled Trigger pointerdown can still produce the existing panel outside.press dismissal; it never adds trigger.press or close.press. Source-host/CSS evidence is not native hit-geometry acceptance."
+    },
+    {
+      "area": "Bootstrap Dialog Footer",
+      "classification": "actual regression, not fixture drift",
+      "change": "Restore shadow-none in place of the fixed white inset highlight.",
+      "authority": [
+        "spec/prototypes/P-BOOTSTRAP-2-3-2-DIALOG-FOOTER.yaml",
+        "spec/prototypes/P-BOOTSTRAP-2-3-2-DIALOG-CONTENT.yaml",
+        "internal/records/2026-11-09-bootstrap-modal-repair.md"
+      ],
+      "evidence": "All three modal-family forbidden-white-highlight assertions retained; semantic title/description contrast checked against both palettes."
+    }
+  ],
+  "fixtureRepairs": [
+    "Preserve current family-specific geometry, ink, hover/press, disabled, focus-visible, controlled-refusal and lifecycle assertions while replacing superseded static recipes. Dynamic material paint is observed as resolved tokens; simple CSS-lowered rules retain their guarded prefixes.",
+    "Select portal retirement observes both host-render opportunities and still checks retained identity, pending detach and the final unmount pair.",
+    "Bootstrap typed presence uses the actual Web presentation sink and its real completion receipt; tests delay only delivery to observe entering/leaving. No fabricated phase or state is injected.",
+    "Public Drawer tests follow the current goal editor, including increase, decrease and submit callbacks, while preserving sole-physical-action and root identity checks.",
+    "Popover anchored 3px shadow is explicitly admitted by D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001; tests continue to forbid the generic 4px panel and displacement.",
+    "The complete-family Popover collector was separately retried serially with identical inventory: it needed 11019ms and then exposed an obsolete font-black assertion. Only that full-family case receives the existing 120000ms family-closure budget; its complete normal/shadow CSS assertions remain intact."
+  ],
+  "verification": {
+    "command": "corepack pnpm@10.32.1 exec vitest run <all finalFiles> --maxWorkers=2 --minWorkers=1 --reporter=json",
+    "files": 50,
+    "tests": 643,
+    "passed": 643,
+    "failed": 0,
+    "pending": 0,
+    "finalFiles": [
+      "packages/prototypes/base/test/calendar-family-recipes.test.ts",
+      "packages/prototypes/base/test/calendar-variable-weeks.test.ts",
+      "packages/prototypes/base/test/carousel-continuous.test.ts",
+      "packages/prototypes/base/test/checkbox-group-row-paint.test.ts",
+      "packages/prototypes/base/test/collection-nested-audit.test.ts",
+      "packages/prototypes/base/test/collection-nested-feedback.test.ts",
+      "packages/prototypes/base/test/data-table-header-row.test.ts",
+      "packages/prototypes/base/test/field-nested-consumer.test.ts",
+      "packages/prototypes/base/test/finf-collection-projections.test.ts",
+      "packages/prototypes/base/test/form-actions-quality.test.ts",
+      "packages/prototypes/base/test/form-field-invalid-feedback.test.ts",
+      "packages/prototypes/base/test/form-upstream-paint.test.ts",
+      "packages/prototypes/base/test/navigation-overlays/drawer-gesture.test.ts",
+      "packages/prototypes/base/test/number-field-capabilities.test.ts",
+      "packages/prototypes/base/test/number-field-format.test.ts",
+      "packages/prototypes/base/test/number-field-step-feedback.test.ts",
+      "packages/prototypes/base/test/numeric-family-projections.test.ts",
+      "packages/prototypes/base/test/numeric-parts-public.test.ts",
+      "packages/prototypes/base/test/runtime-tabs-appearance.test.ts",
+      "packages/prototypes/base/test/select.test.ts",
+      "packages/prototypes/bootstrap-2-3-2/test/draft-overlay-projections.test.ts",
+      "packages/prototypes/bootstrap-2-3-2/test/historical-overlays-collections-r91.test.ts",
+      "packages/prototypes/bootstrap-2-3-2/test/historical-primitives-layout-r91.test.ts",
+      "packages/prototypes/bootstrap-2-3-2/test/modal-semantic-palette.test.ts",
+      "packages/prototypes/bootstrap-2-3-2/test/theme-contrast.test.ts",
+      "packages/prototypes/brutalist/test/alert-dialog.test.ts",
+      "packages/prototypes/brutalist/test/drawer-command-density.test.ts",
+      "packages/prototypes/brutalist/test/popover-title.test.ts",
+      "packages/prototypes/brutalist/test/select-current-recipe.test.ts",
+      "packages/prototypes/brutalist/test/select.test.ts",
+      "packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts",
+      "packages/prototypes/liquid-glass/test/interactive-surface.test.ts",
+      "packages/prototypes/liquid-glass/test/liquid-content-source-r91.test.ts",
+      "packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts",
+      "packages/prototypes/liquid-glass/test/liquid-surface-fieldset-r91.test.ts",
+      "packages/prototypes/liquid-glass/test/select-complete-projection.test.ts",
+      "packages/prototypes/liquid-glass/test/tabs-draft-projection.test.ts",
+      "packages/prototypes/shadcn/test/button-ghost-style.test.ts",
+      "packages/prototypes/shadcn/test/collection-profiles-r91.test.ts",
+      "packages/prototypes/shadcn/test/command-profile-transitions.test.ts",
+      "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+      "packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts",
+      "packages/prototypes/shadcn/test/drawer-public-entry.test.ts",
+      "packages/prototypes/shadcn/test/dropdown-pointer-foreground.test.ts",
+      "packages/prototypes/shadcn/test/layout-profiles-r91.test.ts",
+      "packages/prototypes/shadcn/test/overlay-profiles-r91.test.ts",
+      "packages/prototypes/shadcn/test/select.test.ts",
+      "packages/prototypes/shadcn/test/tree-embedded.test.ts",
+      "packages/prototypes/test-utils/test/collapsible-projections.test.ts",
+      "packages/prototypes/test-utils/test/popover-recipes.test.ts"
+    ],
+    "typecheck": "corepack pnpm@10.32.1 exec tsc --noEmit --project /tmp/cb5d-runtime-repairs-tsconfig.json (exit 0; changed prototype sources/tests plus existing virtual-module declaration)",
+    "format": "Owned source/test files formatted; git diff --check passes.",
+    "rawReceipts": [
+      {
+        "name": "numeric-before",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/numeric-before.json.gz",
+        "rawSha256": "5c9312ed2397cf63dc7956db64e81e0d844a18334392a0dc1f10af273db38f02",
+        "gzipSha256": "c083540d2be14bbac8f3fb3d75153ddda3a62f9ea101299949233aa96b1f1551",
+        "tests": 105,
+        "passed": 91,
+        "failed": 14,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "step-feedback-before",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/step-feedback-before.json.gz",
+        "rawSha256": "9d37e94d86c0906a8fe53ab97e5264f4567b1b1a9c5cb6259b7c96357edfb7e6",
+        "gzipSha256": "b272fb6c3ce687ca30b847e1510fa129224025de9e315487865e3368c5837e0f",
+        "tests": 6,
+        "passed": 0,
+        "failed": 6,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "step-feedback-after",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/step-feedback-after.json.gz",
+        "rawSha256": "028987e51608a46a091c22fe6bdab4e8d2da8d104a1a6ee56c9a25cae52707c9",
+        "gzipSha256": "3c257a35cd7241c2a1b6fe2f9ae6d19b0a3bd9a51f42f9bf3099a46b2b618ab8",
+        "tests": 6,
+        "passed": 6,
+        "failed": 0,
+        "pending": 0,
+        "success": true
+      },
+      {
+        "name": "liquid-content-after",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/liquid-content-after.json.gz",
+        "rawSha256": "f15f6417eb74ea2f1a159dd7eb10f7181013f1441240c7b837334a9b564e5a73",
+        "gzipSha256": "a004b09e3013e575af22edd91310839056b1962486abb8b5f7395c1a407d4675",
+        "tests": 27,
+        "passed": 27,
+        "failed": 0,
+        "pending": 0,
+        "success": true
+      },
+      {
+        "name": "residual-batch1-before",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch1-before.json.gz",
+        "rawSha256": "6fe4c9d569f0160e5248b1729ae85253e9bcc75d844eb464ca26efa0b2c32795",
+        "gzipSha256": "ef59e83fa7c7461a9e32dedf7d1b8a0f04c8d6dc25fc60cb99c1a1b210cfe6f1",
+        "tests": 353,
+        "passed": 318,
+        "failed": 35,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "residual-batch2-before",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch2-before.json.gz",
+        "rawSha256": "bf325744c8b7148939008fa5ec1e96c4bd10b00a7256257fe2eb33b135eb9575",
+        "gzipSha256": "6d729501ecb0442d57346b523643586560c7b5aa0ecf0ae88e4331e16314098e",
+        "tests": 127,
+        "passed": 101,
+        "failed": 26,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "residual-batch3-before",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch3-before.json.gz",
+        "rawSha256": "bd5cf69777b40c439448b0511bd921bec50511350ef1b200d628ed756e74c223",
+        "gzipSha256": "7d53dcd47692f3322fbe865732fad41e02cf55b7e44cced52aa499cb8bd001cd",
+        "tests": 19,
+        "passed": 11,
+        "failed": 8,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "residual-batch4-before",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/residual-batch4-before.json.gz",
+        "rawSha256": "d64c5613d228e6ae9160638ea9fb3e576ea061a24d6769b88bbd63344556257d",
+        "gzipSha256": "6c62d9f93caeb5377a79456b4a68b036dc5b4d8890a899742fa933e0b988a029",
+        "tests": 172,
+        "passed": 169,
+        "failed": 3,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "popover-serial-diagnostic",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/popover-serial-diagnostic.json.gz",
+        "rawSha256": "817473612fb08def553f6a13283704832dd41b1dbcbbb831a0bcf08ab3bf623a",
+        "gzipSha256": "ef30d25935d1344c678647e931f64cb35588cce37139da6eb1b154c299dc0a34",
+        "tests": 5,
+        "passed": 4,
+        "failed": 1,
+        "pending": 0,
+        "success": false
+      },
+      {
+        "name": "prototype-final",
+        "path": "internal/records/evidence/2026-11-25-release-gate-prototypes/prototype-final.json.gz",
+        "rawSha256": "0b079cc2b5701fc6369808290cfd2c3ce5cd8ea01da19ae3d0e55a449000be6f",
+        "gzipSha256": "f6efa6fdda91e45da96f2e71166f32e5a0d15705fe761278b1bd0425e4bdb002",
+        "tests": 643,
+        "passed": 643,
+        "failed": 0,
+        "pending": 0,
+        "success": true
+      }
+    ]
+  },
+  "generatedManifests": {
+    "method": "All three source generators rerun after merged 1838 and Drawer restoration; draft generator rerun again after final Bootstrap Footer repair. No hand edits.",
+    "files": [
+      {
+        "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+        "sha256": "d395f3c54a9398c8da5abef6436163db7c2c736a37ad0c3d84b9faa25042eb95"
+      },
+      {
+        "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+        "sha256": "05bb9cf80df42eab0e88b5b75a9294bdb9f5792661092c14a4d8330e6283fcb2"
+      },
+      {
+        "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+        "sha256": "a988ff3dc62bf0d793c3e1e94a6c59549f7af0c190542366caa9f7cb18f5103e"
+      }
+    ]
+  },
+  "liquidBrowserDiagnostic": {
+    "status": "passed, local diagnostic only",
+    "head": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+    "browser": "Chromium 156.0.8078.79 with sandbox enabled",
+    "combinations": 8,
+    "inventory": "Four Web runtimes \u00d7 light/dark \u00d7 eight source-owned parts, with Separator auto\u2192opaque\u2192auto retained.",
+    "receipt": "doesvm:/home/ezra/proto-ui-liquid-gate-cb5d-control/source-paint-diagnostic.json",
+    "updates": "Use source-owned Checkbox secondary color pair, 14px indicator, and foreground/20 separator with opaque border fallback. All material and native-input assertions remain.",
+    "boundary": "The Actions-only exact-head/clean-checkout gate is unchanged and was not impersonated. A fresh official run remains required."
+  },
+  "remainingGates": [
+    "Clean integrated full Runtime CI",
+    "Official browser owner matrix including Liquid material/native-input gate",
+    "Native fixture synchronization and GPUI acceptance",
+    "Final canonical package-budget run after the separate bounded numeric transaction"
+  ]
+}

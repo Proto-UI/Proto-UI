@@ -27,6 +27,8 @@ const CALENDAR_STATES = [
 ] as const;
 type CalendarState = (typeof CALENDAR_STATES)[number];
 const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' } as const;
+const popoverTriggerName = (family: Family) =>
+  family === 'bootstrap-2-3-2' ? 'Click to toggle popover' : 'Open popover';
 const HOST_CLOCK = '2026-10-10T12:00:00Z';
 const RECORDS = {
   form: 'internal/records/2026-10-10-finf-form-upstream-paint.md',
@@ -430,6 +432,7 @@ export type PopoverFrame = {
   visibility: string | null;
   opacity: string | null;
   transform: string | null;
+  color: string | null;
   shadow: string | null;
   animations: Array<{
     sequence: number;
@@ -515,6 +518,7 @@ function createPopoverMotionProbe(
       visibility: style?.visibility ?? null,
       opacity: style?.opacity ?? null,
       transform: style?.transform ?? null,
+      color: style?.color ?? null,
       shadow: style?.boxShadow ?? null,
       animations:
         panel?.getAnimations().map((animation) => {
@@ -574,7 +578,10 @@ function createPopoverMotionProbe(
         // actual native endpoint, not the vacuous every([]) before it starts.
         // fill:both keeps a finished entry observable even to a late probe;
         // an animation retained from an older panel/open is not a new entry.
-        (expectedEntryAnimation === null ||
+        // The actual reduced-motion policy removes entry animation entirely;
+        // it still requires visible paint, no active timelines and stable frames.
+        (frame.reducedMotion ||
+          expectedEntryAnimation === null ||
           frame.animations.some(
             (animation) =>
               animation.currentOpen &&
@@ -618,12 +625,29 @@ function createPopoverMotionProbe(
   };
 }
 
-async function waitForSettledPopover(probe: PopoverProbe) {
-  // Retain the existing expect.poll default bound explicitly, not a sleep or an
-  // animation.finish()/cancel() that changes the state being measured.
+async function waitForSettledPopover(probe: PopoverProbe): Promise<PopoverFrame> {
+  // Admit the current read and the consecutive-frame observation atomically.
+  // Positioning can publish again between a successful poll and a second read.
+  // Keep the same 1s bound and the screenshot's independent before/after check.
+  let before: PopoverFrame | null = null;
   await expect
-    .poll(() => probe.evaluate((current) => current.settled), { timeout: 1_000 })
+    .poll(
+      async () => {
+        const observation = await probe.evaluate((current) => {
+          const frame = current.read();
+          return {
+            frame,
+            settled: current.settled && frame.signature === current.frames.at(-1)?.signature,
+          };
+        });
+        before = observation.settled ? observation.frame : null;
+        return observation.settled;
+      },
+      { timeout: 1_000 }
+    )
     .toBe(true);
+  if (!before) throw new Error('The Popover did not yield a settled capture observation.');
+  return before;
 }
 
 async function captureSettledPopover(
@@ -633,15 +657,7 @@ async function captureSettledPopover(
   capture: Journey['capture'],
   state: string
 ) {
-  await waitForSettledPopover(probe);
-  const { before, settled } = await probe.evaluate((current) => {
-    const before = current.read();
-    return {
-      before,
-      settled: current.settled && before.signature === current.frames.at(-1)?.signature,
-    };
-  });
-  expect(settled).toBe(true);
+  const before = await waitForSettledPopover(probe);
   expect(await panel.getAttribute('id')).toBe(before.contentId);
   const binding: PopoverCaptureObservation['captureBinding'] = {
     before,
@@ -659,8 +675,15 @@ async function captureSettledPopover(
     )
   ).toBe(true);
   if (family === 'shadcn' || family === 'brutalist') {
-    expect(Math.abs(before.rect!.width - 18 * before.rem)).toBeLessThanOrEqual(1);
-    if (family === 'brutalist') expect(before.shadow).toBe('none');
+    // These source-bound demo consumers explicitly override the 18rem primitive with w-80.
+    expect(Math.abs(before.rect!.width - 20 * before.rem)).toBeLessThanOrEqual(1);
+    if (family === 'brutalist') {
+      // D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 gives anchored panels one 3px foreground shadow.
+      const layers = (before.shadow ?? '').split(/,(?![^()]*\))/).map((layer) => layer.trim());
+      expect(layers.filter((layer) => !hasNoVisibleBoxShadow(layer))).toEqual([
+        `${before.color} 3px 3px 0px 0px`,
+      ]);
+    }
   }
 }
 
@@ -671,7 +694,7 @@ async function installPopoverNegativeControl(panel: Locator, control: string | u
   if (!['wrong-width', 'nonsettling'].includes(control))
     throw new Error(`Unknown Popover negative control: ${control}`);
   await panel.evaluate((element, fault) => {
-    if (fault === 'wrong-width') element.style.setProperty('width', '20rem', 'important');
+    if (fault === 'wrong-width') element.style.setProperty('width', '18rem', 'important');
     else
       element.animate([{ opacity: 0.5 }, { opacity: 1 }], { duration: 200, iterations: Infinity });
   }, control);
@@ -890,15 +913,11 @@ async function runCase(testCase: Case) {
   });
   const page = await context.newPage();
   page.setDefaultTimeout(15_000);
-  const previewer = page
-    .locator(
-      testCase.component === 'drawer'
-        ? '[data-demo-id="demo-shadcn-drawer-snap"]'
-        : testCase.component === 'calendar'
-          ? `[data-demo-id="demo-${testCase.family}-calendar"]`
-          : '[data-previewer-id]'
-    )
-    .first();
+  const demoId =
+    testCase.component === 'drawer'
+      ? 'demo-shadcn-drawer-snap'
+      : `demo-${testCase.family}-${testCase.component === 'runtime-tabs' ? 'form' : testCase.component}`;
+  const previewer = page.locator(`[data-previewer-id][data-demo-id=${JSON.stringify(demoId)}]`);
   const screenshots: Screenshot[] = [];
   const pageErrors: string[] = [];
   const captureErrors: string[] = [];
@@ -934,7 +953,10 @@ async function runCase(testCase: Case) {
       if (testCase.component === 'popover') {
         // Follow the current demo's relationship across its body portal; never
         // substitute another dialog or silently select one of several triggers.
-        const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
+        const trigger = previewer.getByRole('button', {
+          name: popoverTriggerName(testCase.family),
+          exact: true,
+        });
         triggerCount = await trigger.count();
         if (triggerCount === 1) ariaControls = await trigger.getAttribute('aria-controls');
         const ids = ariaControls?.split(/[\t\n\f\r ]+/).filter(Boolean) ?? [];
@@ -996,6 +1018,7 @@ async function runCase(testCase: Case) {
     await page.clock.setFixedTime(HOST_CLOCK);
     const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
+    expect(await previewer.count()).toBe(1);
     await previewer.waitFor({ state: 'visible' });
     await testCase.run({ page, previewer, family: testCase.family, capture });
     expect(pageErrors).toEqual([]);
@@ -1064,10 +1087,10 @@ async function runCase(testCase: Case) {
 async function formJourney({ page, previewer, family, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="form"]', 1);
   const form = previewer.locator('[data-demo-ref="form"]');
-  const editor = form.locator('input').first();
-  const label = form.getByText('displayName', { exact: true });
+  const editor = form.getByRole('textbox', { name: 'Display name', exact: true });
+  const label = form.getByText('Display name', { exact: true });
   const field = label.locator('..');
-  const submit = form.getByRole('button', { name: /Validate and submit/ });
+  const submit = form.getByRole('button', { name: 'Save changes', exact: true });
   const rest = { editor: await paint(editor), label: await paint(label) };
   await capture('rest', rest, previewer);
   // Real user submission supplies invalidity. No Prop/state injection or direct expose call.
@@ -1114,12 +1137,12 @@ async function formJourney({ page, previewer, family, capture }: Journey) {
   );
   await editor.fill('Finf sample');
   expect(await editor.inputValue()).toBe('Finf sample');
-  await form.getByRole('button', { name: /Reset values/ }).click();
+  await form.getByRole('button', { name: 'Reset', exact: true }).click();
   await expect.poll(() => editor.inputValue()).toBe('');
   await capture('reset', { value: await editor.inputValue() }, previewer);
   await editor.fill('Finf sample');
-  const email = form.getByRole('checkbox', { name: 'Email · 邮件', exact: true });
-  const sms = form.getByRole('checkbox', { name: 'SMS · 短信', exact: true });
+  const email = form.getByRole('checkbox', { name: 'Email', exact: true });
+  const sms = form.getByRole('checkbox', { name: 'SMS', exact: true });
   await sms.click();
   await expect.poll(() => sms.getAttribute('aria-checked')).toBe('true');
   const rows = { email: await paint(email), sms: await paint(sms) };
@@ -1158,11 +1181,11 @@ async function fieldsetJourney({ page, previewer, family, capture }: Journey) {
 
 async function checkboxGroupJourney({ page, previewer, family, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[role="checkbox"]', 4);
-  const all = previewer.getByRole('checkbox', { name: 'All channels · 全选', exact: true });
-  const email = previewer.getByRole('checkbox', { name: 'Email · 邮件', exact: true });
-  const sms = previewer.getByRole('checkbox', { name: 'SMS · 短信', exact: true });
+  const all = previewer.getByRole('checkbox', { name: 'All notifications', exact: true });
+  const email = previewer.getByRole('checkbox', { name: 'Email updates', exact: true });
+  const sms = previewer.getByRole('checkbox', { name: 'SMS alerts', exact: true });
   const disabled = previewer.getByRole('checkbox', {
-    name: 'Push disabled · 推送已禁用',
+    name: 'Push notifications (unavailable)',
     exact: true,
   });
   const rest = await paint(sms);
@@ -1420,13 +1443,20 @@ async function calendarCaptionJourney(journey: Journey, runtime: RuntimeId) {
   await caption('caption-november-2025-date-selected');
 }
 
+function isBottomDrawerAtEnteredTranslation(element: HTMLElement): boolean {
+  // Available layout anchors the bottom edge with -100% of the panel height.
+  // Entered presentation contributes zero; the composed translation stays -100%.
+  const axes = getComputedStyle(element).translate.trim().split(/\s+/);
+  return axes.length === 2 && /^0(?:px|%)?$/.test(axes[0]) && axes[1] === '-100%';
+}
+
 async function drawerJourney({ page, previewer, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="root"]', 1);
-  const trigger = previewer.getByRole('button', { name: 'Open Drawer', exact: true });
+  const trigger = previewer.getByRole('button', { name: 'Open Snap Drawer', exact: true });
   await trigger.click();
   const panel = page.locator('[data-demo-ref="panel"][role="dialog"]');
   await panel.waitFor({ state: 'visible' });
-  const handle = panel.getByRole('separator', { name: 'Resize drawer', exact: true });
+  const handle = panel.getByRole('separator', { name: 'Resize drawer height', exact: true });
   await handle.focus();
   await page.keyboard.press('Home');
   await expect
@@ -1436,6 +1466,11 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       )
     )
     .toBe('50');
+  // Snap state publishes before the authored 500ms physical entry settles.
+  // Observe zero presentation added to the bottom layout's -100% translation.
+  await expect
+    .poll(() => panel.evaluate(isBottomDrawerAtEnteredTranslation), { timeout: 1_000 })
+    .toBe(true);
   const geometry = await panel.evaluate((element) => {
     const rect = element.getBoundingClientRect(),
       style = getComputedStyle(element);
@@ -1446,6 +1481,7 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       height: rect.height,
       right: rect.right,
       bottom: rect.bottom,
+      translate: style.translate,
       rootTextSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
       availableHeight:
         Number.parseFloat(style.getPropertyValue('--proto-ui-available-region-height')) ||
@@ -1739,17 +1775,15 @@ async function accordionJourney(
   const controlled = previewer.locator('[data-demo-ref="controlled-a-trigger"]');
   await controlled.click();
   expect(await controlled.getAttribute('aria-expanded')).toBe('false');
-  await previewer
-    .getByRole('button', { name: 'Accept pending request · 接受请求', exact: true })
-    .click();
+  await previewer.getByRole('button', { name: 'Apply change', exact: true }).click();
   await expect.poll(() => controlled.getAttribute('aria-expanded')).toBe('true');
   await capture('controlled-accepted', {}, previewer);
 }
 
 async function popoverJourney({ page, previewer, family, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="root"]', 1);
-  const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
-  const panel = page.getByRole('dialog', { name: 'Popover settings', exact: true });
+  const trigger = previewer.getByRole('button', { name: popoverTriggerName(family), exact: true });
+  const panel = page.getByRole('dialog', { name: 'Dimensions', exact: true });
   await page.evaluate(() => document.fonts.ready);
   // Default Shadcn Content authors animate-in (motion.ts), emitted as retained
   // pui-enter by proto-style-css.ts. Other families keep their own motion policy.
@@ -1765,7 +1799,9 @@ async function popoverJourney({ page, previewer, family, capture }: Journey) {
     await probe.evaluate((current) => current.mark('entry-settlement'));
     await captureSettledPopover(probe, panel, family, capture, 'opened');
     await probe.evaluate((current) => current.mark('exit'));
-    await panel.getByRole('button', { name: 'Close', exact: true }).click();
+    await panel
+      .getByRole('button', { name: family === 'bootstrap-2-3-2' ? 'Close' : 'Done', exact: true })
+      .click();
     await expect.poll(() => panel.isVisible()).toBe(false);
     await probe.evaluate((current) => current.mark('exit-closed'));
     await capture('closed', { triggerFocused: await hasFocus(trigger) }, previewer);
@@ -1820,13 +1856,16 @@ async function popoverJourney({ page, previewer, family, capture }: Journey) {
   if (failure) throw failure.error;
 }
 
-async function alertDialogJourney({ page, previewer, capture }: Journey) {
-  await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="root"]', 1);
-  const trigger = previewer.getByRole('button', { name: 'Open AlertDialog', exact: true });
+async function alertDialogJourney({ page, previewer, family, capture }: Journey) {
+  await selectRealRuntime(page, previewer, 'react', '[aria-haspopup="dialog"][aria-controls]', 1);
+  const trigger = previewer.getByRole('button', {
+    name: family === 'brutalist' ? 'Open' : 'Show Dialog',
+    exact: true,
+  });
   await trigger.click();
   const panel = page.getByRole('alertdialog');
   await panel.waitFor({ state: 'visible' });
-  const action = panel.getByRole('button', { name: 'Confirm', exact: true });
+  const action = panel.getByRole('button', { name: 'Continue', exact: true });
   const cancel = panel.getByRole('button', { name: 'Cancel', exact: true });
   const initial = {
     panel: await paint(panel),
@@ -1873,7 +1912,7 @@ async function alertDialogJourney({ page, previewer, capture }: Journey) {
   await expect.poll(() => hasFocus(trigger)).toBe(true);
 }
 
-async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
+async function runtimeTabsJourney({ page, previewer, family, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'wc', '[data-demo-ref="form"]', 1);
   const hoverFacts = async () =>
     (await runtimeControls(previewer)).getByRole('tab').evaluateAll((tabs) =>
@@ -1894,6 +1933,30 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
     .poll(async () => (await hoverFacts()).some((tab) => tab.nativeHovered || tab.hovered))
     .toBe(false);
   const hoverAfterRest = await hoverFacts();
+  const restingSelected = await settledPaint(await runtimeTab(previewer, 'wc'));
+  expect(hasNoVisibleBoxShadow(restingSelected.shadow), restingSelected.shadow).toBe(true);
+  const focusedTabPaint = async (tab: Locator) => {
+    const observed = await settledPaint(tab);
+    // Brutalist's shared focus tokens specify a 2px ring with a 2px background
+    // offset. Normalize those independently authored tokens through a hidden
+    // probe; never alter the subject or its real keyboard focus for the check.
+    const expectedFocusShadow =
+      family === 'brutalist'
+        ? await tab.evaluate((element) => {
+            const style = getComputedStyle(element);
+            const probe = document.createElement('span');
+            probe.hidden = true;
+            probe.style.boxShadow = `0 0 0 2px ${style.getPropertyValue('--pui-background')}, 0 0 0 4px ${style.getPropertyValue('--pui-ring')}, 0 0 0 0 rgba(0, 0, 0, 0)`;
+            document.body.append(probe);
+            try {
+              return getComputedStyle(probe).boxShadow;
+            } finally {
+              probe.remove();
+            }
+          })
+        : null;
+    return { ...observed, expectedFocusShadow };
+  };
   // These Form pages are generic embeds. Observe their real public commit event
   // and DOM ownership, rather than inventing a fixed-family generation counter.
   expect(await previewer.getAttribute('data-projection-mode')).not.toBe('fixed-family');
@@ -1917,7 +1980,13 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
   try {
     await capture(
       'wc-rest',
-      { labels: await labels(), events: await publications(), hoverBeforeRest, hoverAfterRest },
+      {
+        labels: await labels(),
+        events: await publications(),
+        hoverBeforeRest,
+        hoverAfterRest,
+        restingSelected,
+      },
       previewer
     );
     expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));
@@ -1946,7 +2015,7 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
         await expect.poll(publications).toEqual(expectedEvents);
         expect(await previousSurface!.evaluate((element) => element.isConnected)).toBe(false);
         await expect.poll(async () => hasFocus(await runtimeTab(previewer, to))).toBe(true);
-        const selected = await paint(await runtimeTab(previewer, to));
+        const selected = await focusedTabPaint(await runtimeTab(previewer, to));
         const inactive = await paint(await runtimeTab(previewer, from));
         snapshots.push({
           from,
@@ -2008,7 +2077,12 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
     expect(selected.radius).toBe('0px');
     expect(selected.padding[1]).toBe('0px');
     expect(selected.padding[3]).toBe('0px');
-    expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
+    if (family === 'brutalist') {
+      expect(selected.expectedFocusShadow).not.toBe('none');
+      expect(selected.shadow).toBe(selected.expectedFocusShadow);
+    } else {
+      expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
+    }
     expect(selected.background).toBe('rgba(0, 0, 0, 0)');
     expect(selected.textWidth).toBeGreaterThan(0);
     expect(Math.abs(selected.rect.width - selected.textWidth)).toBeLessThanOrEqual(2);

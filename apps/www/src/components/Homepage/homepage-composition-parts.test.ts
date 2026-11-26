@@ -30,7 +30,8 @@ function fixture(family: (typeof families)[number], locale = 'en') {
   const result = createHomepageCompositionParts(family, locale, {
     p,
     box,
-    card: (title, caption, children, id) => box('card', [title, caption, ...children], id),
+    card: (title, caption, children, id, _options, media) =>
+      box('card', [title, caption, ...(media ?? []), ...children], id),
     button: (label, ref) => p(`${family}-button`, [label], { wrap: true }, ref),
     status: (value, ref) => box('status', [value], ref, { role: 'status' }),
   });

@@ -167,7 +167,7 @@ describe('independent typography owner review', () => {
           .getAttribute('data-pui-style')!
           .split(/\s+/);
       expect(tokens()).toEqual(
-        expect.arrayContaining(['font-medium', 'tracking-normal', 'leading-tight'])
+        expect.arrayContaining(['font-semibold', 'tracking-tight', 'leading-tight'])
       );
       expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(text);
       expect(participant.needsRefresh()).toBe(false);

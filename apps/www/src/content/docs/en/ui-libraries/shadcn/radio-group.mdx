@@ -73,6 +73,16 @@ RadioGroupRoot
 
 ## Examples
 
+### No initial selection
+
+Omit `value` and `defaultValue` when the reader must make an explicit choice. Tab enters the first enabled option without selecting it. Space selects the focused option; arrow keys move focus and select the next enabled option. Enter leaves an empty group unselected.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-empty"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ### Description
 
 Pair radio options with secondary descriptions to clarify each choice.

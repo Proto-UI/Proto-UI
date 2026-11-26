@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "owned-palette-oracle-reconciliation",
+  "previousSource": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+  "patch": {
+    "schemaVersion": 1,
+    "sourceHead": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+    "sourceTree": "7676e8606c2e28c7737bba096fea1a8c1ec04d47",
+    "file": "scripts/gpui/test/style-fixture.test.mjs",
+    "before": {
+      "sha256": "a18574a32004e99c8ecb5b6e6691cef4c91f1cf9df9dac94c9e38a737279411d",
+      "gitBlob": "b5dd22e59f153ca21a146fddd623a7b8f18c149d",
+      "bytes": 11993
+    },
+    "after": {
+      "sha256": "99f73386121645aeab7972a7c283791e9151a6461f432a224f1bd7e63e6da038",
+      "gitBlob": "f404e4be135c17aeefee4e878e2b2b77912d2218",
+      "bytes": 12217
+    },
+    "patch": {
+      "path": "liquid-owned-palette-key.patch",
+      "sha256": "9f0fe02bada14c4bc7a0e726885f0246af38124625676f368bb1fc1c3d2dfddf",
+      "gitBlob": "67f0801b025e5006491d9f3db49b71aecaadd59a",
+      "bytes": 1428
+    },
+    "sourcePalette": {
+      "path": "packages/prototypes/liquid-glass/src/theme.ts",
+      "sha256": "f01f7fbe119661f7601a6ce70f748d3525bbde9240c707fe7fe080cba5b95fb0",
+      "gitBlob": "26636098121f793e5743b18758568e5848010752",
+      "bytes": 2884,
+      "identicalAtB0": "b0a5f6ce29efb128ed52373d44c034515aeef633",
+      "ownedKey": "secondary-background",
+      "light": "#e9e9eb",
+      "dark": "#333335",
+      "consumer": "packages/prototypes/liquid-glass/src/checkbox/root.proto.ts uses bg-secondary-background"
+    },
+    "originalFailure": {
+      "command": "node --test scripts/gpui/test/style-fixture.test.mjs",
+      "tests": 14,
+      "passed": 12,
+      "failed": 2,
+      "skip": 0,
+      "todo": 0,
+      "cause": "Liquid exact finite list omitted an already authored and consumed family-owned palette key; committed fixture current check passed."
+    },
+    "preserved": [
+      "Exact deepEqual key-set equality",
+      "Every required key deletion negative in both modes",
+      "Unowned key negative",
+      "Double-prefix key negative",
+      "Bootstrap exact key set unchanged",
+      "Original 14 cases and execution budgets",
+      "Production and generator unchanged"
+    ],
+    "added": [
+      "One Liquid-only required key; automatically included in every-key omission negative",
+      "Exact light and dark value assertions for this owned key"
+    ],
+    "validation": "Patch preparation only; root executes all original 14 at actual frozen source."
+  },
+  "reasoning": "The authored Liquid palette at b0 and H2 already owns and consumes secondary-background. Its finite exact test inventory omitted that key. Production, generators and fixtures are unchanged. Exact key equality, deletion of every required key, unknown-key and double-prefix refusal remain.",
+  "confirmedH2Checks": [
+    {
+      "name": "wc-original74-plus5",
+      "source": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+      "total": 79,
+      "passed": 79,
+      "failed": 0,
+      "reportSha256": "905399bcec0d58627b0d01ae6b3c271b7a456e3a7bcb73734a789446900a1b9d"
+    },
+    {
+      "name": "website-original18-files",
+      "source": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+      "total": 476,
+      "passed": 476,
+      "failed": 0,
+      "reportSha256": "43a6ba9a643b4b9c9820b8900ab8a874961802752fd488e11a7b2d8f9af3cab2"
+    },
+    {
+      "name": "header-units",
+      "source": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+      "total": 87,
+      "passed": 87,
+      "failed": 0,
+      "reportSha256": "8f8b99bbc0de46728bc99b53c0206a0da2dadfce3620870310ccfafa7c6ce9b8"
+    },
+    {
+      "name": "prototype-reconciliation",
+      "source": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+      "total": 34,
+      "passed": 34,
+      "failed": 0,
+      "reportSha256": "d3083bc3ecbe9c2e4212c2ac0ee6b93c482fd71db226ca42625ad8d94d379907"
+    }
+  ],
+  "strictReport": {
+    "source": "e4c33b234978390e967aeb7db337122a88a8b7ca",
+    "sha256": "3bdb7cf703f3fdf78135c38788247490c2318442de18258a4e9d20b1fde27b1d",
+    "originalCeilingsRetained": true,
+    "result": "9/9; WC 217973/218100 bytes"
+  },
+  "retainedH2Failure": {
+    "command": "node --test scripts/gpui/test/style-fixture.test.mjs",
+    "registered": 14,
+    "passed": 12,
+    "failed": 2,
+    "logSha256": "7aaedad51d60b2e0785973eea27a19b7c8d75d6c0821c262f7107454428f7bfc",
+    "cause": "Exact Liquid test list omits an already-owned source key"
+  },
+  "validation": {
+    "finalFrozen14Pending": true,
+    "fullCoreDriverStillRunning": true,
+    "noProductChangesAfterH2": true,
+    "noMainAcceptanceClaimed": true,
+    "compilerIssuesDeferred20RemainOpen": true
+  }
+}

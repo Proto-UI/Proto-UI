@@ -199,7 +199,9 @@ test('the fixed serial selection preserves the full original criteria and bounde
   const search = steps.find((step) => step.id === 'search-native');
   assert.equal(search.timeoutMs, 1_200_000);
   assert.deepEqual(search.suites, [
-    'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
   ]);
   assert.ok(
     search.args.every(
@@ -225,7 +227,7 @@ test('the fixed serial selection preserves the full original criteria and bounde
   );
 });
 
-test('new native suites remain in the complete scheduled inventory and fit the existing 18 shards', () => {
+test('new native suites remain in the complete scheduled inventory and fit the bounded shards', () => {
   assertBrowserInventory();
   assertBrowserShardCapacity();
   const [general, browser] = createRuntimeTestPlan([]);
@@ -313,7 +315,11 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   );
   assert.deepEqual(Object.keys(workflow.on).sort(), ['workflow_call', 'workflow_dispatch']);
   assert.equal(workflow.on.workflow_dispatch.inputs.scope.default, 'repair');
-  assert.deepEqual(workflow.on.workflow_dispatch.inputs.scope.options, ['repair', 'sprint1', 'contents-wheel']);
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.scope.options, [
+    'repair',
+    'sprint1',
+    'contents-wheel',
+  ]);
   assert.equal(workflow.on.workflow_call.inputs.scope.default, 'repair');
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
@@ -338,6 +344,16 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
     'brutalist-spinner.capture.browser.test.ts',
   ])
     assert.ok(original.run.includes(suite));
+  const contentsWheel = workflow.jobs['contents-wheel'];
+  assert.equal(
+    contentsWheel.if,
+    "${{ inputs.scope == 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+  );
+  assert.ok(
+    contentsWheel.steps.some((step) =>
+      step.run?.includes('apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts')
+    )
+  );
   const job = workflow.jobs.sprint1;
   assert.equal(
     job.if,

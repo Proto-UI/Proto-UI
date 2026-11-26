@@ -253,6 +253,7 @@ function realSwitchFixture(shadow: boolean) {
     surface: HTMLElement;
     source: ReturnType<typeof createCanonicalMotionPalette>;
     reads: number;
+    subscriptions: number;
     invalidations: number;
     cleanups: number;
   }[] = [];
@@ -261,7 +262,14 @@ function realSwitchFixture(shadow: boolean) {
     residentMotion: {
       palette(surface: HTMLElement) {
         const source = createCanonicalMotionPalette(surface);
-        const binding = { surface, source, reads: 0, invalidations: 0, cleanups: 0 };
+        const binding = {
+          surface,
+          source,
+          reads: 0,
+          subscriptions: 0,
+          invalidations: 0,
+          cleanups: 0,
+        };
         bindings.push(binding);
         return {
           current() {
@@ -269,6 +277,7 @@ function realSwitchFixture(shadow: boolean) {
             return source.current();
           },
           subscribe(invalidate: () => void) {
+            binding.subscriptions++;
             const off = source.subscribe(() => {
               binding.invalidations++;
               invalidate();
@@ -362,6 +371,22 @@ describe('canonical palette with real Switch and Web Component lifecycle (DOM ha
         expect(h.root.getExposes().checked.get()).toBe(true);
         expect(h.bindings).toHaveLength(2);
         const old = [...h.bindings];
+        const forOwner = (bindings: typeof h.bindings, owner: HTMLElement) => {
+          const matches = bindings.filter(({ surface }) => {
+            const root = surface.getRootNode();
+            return surface === owner || ('host' in root && root.host === owner);
+          });
+          expect(matches).toHaveLength(1);
+          return matches[0]!;
+        };
+        const oldRoot = forOwner(old, h.root);
+        const oldThumb = forOwner(old, h.thumb);
+        expect(oldRoot.subscriptions).toBe(1);
+        expect(oldRoot.reads).toBeGreaterThan(0);
+        expect(oldRoot.cleanups).toBe(0);
+        expect(oldThumb.subscriptions).toBe(0);
+        expect(oldThumb.reads).toBe(0);
+        expect(oldThumb.cleanups).toBe(0);
         h.root.classList.add('queued-before-retirement');
         h.root.remove();
         // Exercise the real subscriber/runtime synchronously before terminal retirement.
@@ -375,12 +400,21 @@ describe('canonical palette with real Switch and Web Component lifecycle (DOM ha
           ]);
         }
         await settleLifecycle();
-        expect(old.map((binding) => binding.cleanups)).toEqual([1, 1]);
+        expect(oldRoot.cleanups).toBe(1);
+        expect(oldThumb.cleanups).toBe(0);
         const retiredInvalidations = old.map((binding) => binding.invalidations);
         h.dark.append(h.root);
         await settleLifecycle();
         expect(h.root.getExposes().checked.get()).toBe(true);
         expect(h.bindings).toHaveLength(4);
+        const liveRoot = forOwner(h.bindings.slice(2), h.root);
+        const liveThumb = forOwner(h.bindings.slice(2), h.thumb);
+        expect(liveRoot.subscriptions).toBe(1);
+        expect(liveRoot.reads).toBeGreaterThan(0);
+        expect(liveRoot.cleanups).toBe(0);
+        expect(liveThumb.subscriptions).toBe(0);
+        expect(liveThumb.reads).toBe(0);
+        expect(liveThumb.cleanups).toBe(0);
         for (const binding of h.bindings.slice(2)) {
           expect(binding.source.current().colors.primary).toEqual(
             SHADCN_MOTION_PALETTE.dark.colors.primary
@@ -400,6 +434,9 @@ describe('canonical palette with real Switch and Web Component lifecycle (DOM ha
         h.dark.remove();
         h.style.remove();
       }
+      expect(h.bindings.map(({ subscriptions, cleanups }) => cleanups - subscriptions)).toEqual([
+        0, 0, 0, 0,
+      ]);
     }
   );
 

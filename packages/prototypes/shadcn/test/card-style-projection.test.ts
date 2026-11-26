@@ -144,4 +144,42 @@ describe('public passive Card style scope', () => {
     await flush();
     expect(tokens(header)).toContain('px-6');
   });
+  it('projects Luma card shadow, radius, spacing, dividers, dark ring and descendant scope', async () => {
+    const root = el(ShadcnCardRoot.name, { styleProfile: 'luma' }),
+      header = el(ShadcnCardHeader.name, { divider: true }),
+      content = el(ShadcnCardContent.name),
+      footer = el(ShadcnCardFooter.name, { divider: true }),
+      control = el(textarea.name);
+    content.append(control);
+    root.append(header, content, footer);
+    document.body.append(root);
+    await flush();
+    expect(tokens(root)).toContain('rounded-[var(--pui-radius-4xl)]');
+    expect(tokens(root)).toContain('shadow-md');
+    expect(tokens(root)).not.toContain('shadow-sm');
+    expect(tokens(root)).toContain('ring-1');
+    expect(tokens(root)).toContain('ring-foreground/5');
+    expect(tokens(root)).toContain('gap-6');
+    expect(tokens(root)).toContain('py-6');
+    for (const part of [header, content, footer]) expect(tokens(part)).toContain('px-6');
+    expect(tokens(header)).toContain('rounded-t-[var(--pui-radius-4xl)]');
+    expect(tokens(header)).toContain('pb-6');
+    expect(tokens(footer)).toContain('rounded-b-[var(--pui-radius-4xl)]');
+    expect(tokens(footer)).toContain('pt-6');
+    const editor = control.querySelector('textarea')!;
+    expect(tokens(editor)).toContain('rounded-[var(--pui-radius-2xl)]');
+    expect(tokens(editor)).toContain('bg-input/50');
+    expect(tokens(editor)).toContain('py-3');
+
+    setElementProps(root, { styleProfile: 'luma', size: 'sm' });
+    document.documentElement.dataset.theme = 'dark';
+    await flush();
+    expect(tokens(root)).toContain('gap-4');
+    expect(tokens(root)).toContain('py-4');
+    expect(tokens(root)).toContain('ring-foreground/10');
+    expect(tokens(root)).not.toContain('ring-foreground/5');
+    for (const part of [header, content, footer]) expect(tokens(part)).toContain('px-4');
+    expect(tokens(header)).toContain('pb-4');
+    expect(tokens(footer)).toContain('pt-4');
+  });
 });

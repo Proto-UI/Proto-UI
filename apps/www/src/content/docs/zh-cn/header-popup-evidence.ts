@@ -81,6 +81,107 @@ export function readHeaderPopupPaint(element: Element) {
   };
 }
 
+/** Actual text fragments and horizontal clipping ancestors, without scrolling or restyling. */
+export function readHeaderPopupTextGeometry(element: Element) {
+  return [...element.querySelectorAll<HTMLElement>('[role="option"]')]
+    .filter((option) => option.closest('[role="listbox"]') === element)
+    .map((option) => {
+      const runs = [];
+      const walker = document.createTreeWalker(option, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const text = node.nodeValue ?? '';
+        if (!text.trim()) continue;
+        const words = [];
+        for (const match of text.matchAll(/\S+/gu)) {
+          const range = document.createRange();
+          range.setStart(node, match.index);
+          range.setEnd(node, match.index + match[0].length);
+          words.push({
+            text: match[0],
+            rects: [...range.getClientRects()].map((rect) => rect.toJSON()),
+          });
+        }
+        const ancestors = [];
+        for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+          if (!(parent instanceof HTMLElement)) continue;
+          const css = getComputedStyle(parent);
+          const rect = parent.getBoundingClientRect();
+          const scale = parent.offsetWidth ? rect.width / parent.offsetWidth : 1;
+          const left = rect.left + parent.clientLeft * scale;
+          ancestors.push({
+            tag: parent.localName,
+            role: parent.getAttribute('role'),
+            prototype: parent.getAttribute('data-projection-prototype'),
+            whiteSpace: css.whiteSpace,
+            overflowWrap: css.overflowWrap,
+            overflowX: css.overflowX,
+            clipsX:
+              ['hidden', 'clip', 'auto', 'scroll'].includes(css.overflowX) ||
+              /\b(paint|strict|content)\b/.test(css.contain),
+            rect: rect.toJSON(),
+            clientWidth: parent.clientWidth,
+            scrollWidth: parent.scrollWidth,
+            offsetWidth: parent.offsetWidth,
+            clipLeft: left,
+            clipRight: left + parent.clientWidth * scale,
+          });
+        }
+        runs.push({ text, words, ancestors });
+      }
+      return {
+        text: option.textContent?.trim() ?? '',
+        rect: option.getBoundingClientRect().toJSON(),
+        clientWidth: option.clientWidth,
+        scrollWidth: option.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+        runs,
+      };
+    });
+}
+
+/** Horizontal visibility only: a popup may legitimately scroll its rows vertically. */
+export function headerOptionTextClipping(
+  option: ReturnType<typeof readHeaderPopupTextGeometry>[number]
+): string[] {
+  const failures: string[] = [];
+  // The existing Header geometry tolerance is one CSS pixel, including rounded clientWidth.
+  const tolerance = 1;
+  if (!option.runs.length) failures.push('option has no measured text');
+  for (const run of option.runs) {
+    const clips = [
+      { tag: 'viewport', clipLeft: 0, clipRight: option.viewportWidth },
+      ...run.ancestors.filter((ancestor) => ancestor.clipsX),
+    ];
+    for (const clip of clips) {
+      if (
+        !Number.isFinite(clip.clipLeft) ||
+        !Number.isFinite(clip.clipRight) ||
+        clip.clipRight <= clip.clipLeft
+      )
+        failures.push(`${clip.tag}: invalid horizontal clip bounds`);
+    }
+    if (!run.words.length) failures.push('text run has no measured words');
+    for (const word of run.words) {
+      if (!word.rects.length) failures.push(`${word.text}: no text fragments`);
+      for (const rect of word.rects) {
+        if (
+          ![rect.left, rect.right, rect.width, rect.height].every(Number.isFinite) ||
+          rect.width <= 0 ||
+          rect.height <= 0
+        ) {
+          failures.push(`${word.text}: invalid text fragment`);
+          continue;
+        }
+        for (const clip of clips) {
+          if (rect.left < clip.clipLeft - tolerance || rect.right > clip.clipRight + tolerance)
+            failures.push(`${word.text}: text exceeds ${clip.tag} horizontal clip`);
+        }
+      }
+    }
+  }
+  return failures;
+}
+
 /** Opaque foreground over a measured popup/option background; WCAG relative luminance. */
 export function popupOptionContrast(
   foreground: readonly number[],

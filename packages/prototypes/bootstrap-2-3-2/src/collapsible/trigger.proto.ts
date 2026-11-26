@@ -45,21 +45,23 @@ const collapsibleTrigger = definePrototype<
     def.rule({
       when: (w) =>
         w.all(
-          w.not(w.meta('colorScheme').eq('dark')),
-          w.any(w.state(hovered).eq(true), w.state(pressed).eq(true))
+          w.state(disabled).eq(false),
+          w.any(w.state(hovered).eq(true), w.state(pressed).eq(true)),
+          w.not(w.meta('colorScheme').eq('dark'))
         ),
       intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.meta('colorScheme').eq('dark'),
-          w.any(w.state(hovered).eq(true), w.state(pressed).eq(true))
+          w.state(disabled).eq(false),
+          w.any(w.state(hovered).eq(true), w.state(pressed).eq(true)),
+          w.meta('colorScheme').eq('dark')
         ),
       intent: (i) => i.feedback.style.use(tw('text-foreground underline')),
     });
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
+      when: (w) => w.all(w.state(disabled).eq(false), w.state(pressed).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
     def.rule({

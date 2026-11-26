@@ -1264,3 +1264,234 @@ test('gallery activation requires one exact localized result rather than a remov
     window.happyDOM.abort();
   }
 });
+
+function homepageDisclosureFixture(initiallyOpen: boolean, restoreFocus = true) {
+  const calls: string[] = [];
+  let expanded = String(initiallyOpen);
+  const runtime = {};
+  const menu = { getAttribute: (name: string) => (name === 'aria-expanded' ? expanded : null) };
+  const document = {
+    activeElement: runtime,
+    querySelector(selector: string) {
+      assert.match(selector, /data-demo-ref="home-menu"/);
+      return menu;
+    },
+  };
+  const locator = {
+    getAttribute: async (name: string) => menu.getAttribute(name),
+    click: async () => {
+      calls.push('menu.click');
+      expanded = 'true';
+      document.activeElement = menu;
+    },
+    evaluate: async (read: (element: unknown) => unknown) => read(menu),
+  };
+  const page = {
+    locator(selector: string) {
+      assert.match(selector, /data-projection-generation-state="active"/);
+      assert.match(selector, /data-demo-ref="home-menu"/);
+      return locator;
+    },
+    keyboard: {
+      press: async (key: string) => {
+        assert.equal(key, 'Escape');
+        calls.push('keyboard.Escape');
+        expanded = 'false';
+        if (restoreFocus) document.activeElement = menu;
+      },
+    },
+    waitForFunction: async (read: () => boolean) => {
+      assert.equal(read(), true, 'The original expanded-state predicate must hold');
+    },
+  };
+  const compiled = captureDeclarations([
+    'homepageSettingsMenu',
+    'openHomepageSettings',
+    'closeHomepageSettings',
+  ]);
+  const driver = runInNewContext(
+    `${compiled}\n({ openHomepageSettings, closeHomepageSettings });`,
+    { document, assert }
+  );
+  return { calls, page, driver, document, runtime, menu, expanded: () => expanded };
+}
+
+test('actual capture opens full desktop settings even when Runtime preferences are already visible', async () => {
+  const f = homepageDisclosureFixture(false);
+  await f.driver.openHomepageSettings(f.page);
+  assert.equal(f.expanded(), 'true');
+  assert.deepEqual(f.calls, ['menu.click']);
+  await f.driver.openHomepageSettings(f.page);
+  assert.deepEqual(f.calls, ['menu.click'], 'An already-open menu must not be toggled closed');
+  await f.driver.closeHomepageSettings(f.page);
+  assert.equal(f.expanded(), 'false');
+  assert.equal(f.document.activeElement, f.menu);
+  assert.deepEqual(f.calls, ['menu.click', 'keyboard.Escape']);
+});
+
+test('actual capture dismisses compact settings after Select focus evidence and preserves closed desktop focus', async () => {
+  const compact = homepageDisclosureFixture(true);
+  assert.equal(compact.document.activeElement, compact.runtime);
+  await compact.driver.openHomepageSettings(compact.page);
+  assert.deepEqual(compact.calls, []);
+  assert.equal(
+    compact.document.activeElement,
+    compact.runtime,
+    'Observe Select return before dismissal'
+  );
+  await compact.driver.closeHomepageSettings(compact.page);
+  assert.deepEqual(compact.calls, ['keyboard.Escape']);
+  assert.equal(compact.document.activeElement, compact.menu);
+  const desktop = homepageDisclosureFixture(false);
+  await desktop.driver.closeHomepageSettings(desktop.page);
+  assert.deepEqual(desktop.calls, []);
+  assert.equal(desktop.document.activeElement, desktop.runtime);
+});
+
+test('actual capture still rejects settings dismissal that loses the original menu focus return', async () => {
+  const f = homepageDisclosureFixture(true, false);
+  await assert.rejects(
+    f.driver.closeHomepageSettings(f.page),
+    /Closing settings must restore focus to the real menu control/
+  );
+});
+
+function documentationCaptureDeclaration() {
+  const source = ts.createSourceFile(
+    'capture-documentation-evidence.ts',
+    readFileSync(new URL('capture-documentation-evidence.ts', import.meta.url), 'utf8'),
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TS
+  );
+  const declaration = source.statements.find(
+    (node): node is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(node) && node.name?.text === 'exerciseDocumentationExample'
+  );
+  assert.ok(declaration, 'Execute the actual documentation interaction driver');
+  return transformSync(declaration.getText(source), {
+    loader: 'ts',
+    target: 'es2022',
+    keepNames: true,
+  }).code;
+}
+
+function documentationCaptureFixture(
+  revision: 'baseline' | 'candidate',
+  family: 'base' | 'shadcn' | 'brutalist',
+  responds = true
+) {
+  const calls: string[] = [];
+  let checked = 'false';
+  let hovered = false;
+  const radioSelector =
+    revision === 'candidate'
+      ? '[data-demo-ref="hero-default"]'
+      : '[data-demo-ref="density-default"]';
+  const triggerText = revision === 'candidate' ? 'Account' : 'Hover or focus for details';
+  const tooltipText = revision === 'candidate' ? 'View account settings' : 'Portable Base behavior';
+  const element = {
+    getAttribute(name: string) {
+      assert(['aria-checked', 'aria-pressed', 'aria-describedby'].includes(name));
+      return name === 'aria-describedby' ? 'actual-tooltip-content' : checked;
+    },
+    textContent: 'Pin',
+  };
+  const control = {
+    getAttribute: async (name: string) => element.getAttribute(name),
+    click: async () => {
+      calls.push('click');
+      if (responds) checked = 'true';
+    },
+    hover: async () => {
+      calls.push('hover');
+      if (responds) hovered = true;
+    },
+  };
+  const document = {
+    querySelector(selector: string) {
+      assert.equal(
+        selector,
+        family === 'base'
+          ? '[data-previewer-id] [role="button"][aria-pressed="true"]'
+          : radioSelector
+      );
+      return family === 'base' && checked !== 'true' ? null : element;
+    },
+  };
+  const preview = {
+    locator(selector: string) {
+      assert.equal(selector, radioSelector);
+      calls.push(selector);
+      return control;
+    },
+    getByRole(role: string, options: { name: string; exact: boolean }) {
+      assert.equal(role, 'button');
+      assert.equal(options.name, 'Pin');
+      assert.equal(options.exact, true);
+      return control;
+    },
+    getByText(text: string, options: { exact: boolean }) {
+      assert.equal(text, triggerText);
+      assert.equal(options.exact, true);
+      calls.push(text);
+      return control;
+    },
+  };
+  const page = {
+    waitForFunction: async (read: (selector?: string) => boolean, selector?: string) => {
+      assert.equal(read(selector), true, 'The original checked-state predicate must hold');
+    },
+    getByRole(role: string) {
+      assert.equal(role, 'tooltip');
+      return {
+        filter(options: { hasText: string }) {
+          assert.equal(options.hasText, tooltipText);
+          return {
+            waitFor: async (options: { state: string }) => {
+              assert.equal(options.state, 'visible');
+              assert.equal(hovered, true);
+            },
+            innerText: async () => tooltipText,
+          };
+        },
+      };
+    },
+  };
+  const run = runInNewContext(
+    `${documentationCaptureDeclaration()}\nexerciseDocumentationExample;`,
+    { document }
+  );
+  return {
+    calls,
+    run: () => run(page, preview, family, revision),
+    radioSelector,
+    triggerText,
+    tooltipText,
+  };
+}
+
+for (const revision of ['baseline', 'candidate'] as const) {
+  test(`actual ${revision} documentation capture preserves native Toggle, Radio and Tooltip tasks`, async () => {
+    for (const family of ['base', 'shadcn', 'brutalist'] as const) {
+      const f = documentationCaptureFixture(revision, family);
+      const interaction = await f.run();
+      if (family === 'brutalist') {
+        assert.deepEqual(f.calls, [f.triggerText, 'hover']);
+        assert.equal(interaction.action, 'Pointer hover first trigger');
+        assert.equal(interaction.tooltip, f.tooltipText);
+        assert.equal(interaction.describedBy, 'actual-tooltip-content');
+      } else {
+        assert.deepEqual(f.calls, family === 'base' ? ['click'] : [f.radioSelector, 'click']);
+        assert.equal(interaction.before, 'false');
+        assert.equal(interaction.after, 'true');
+      }
+    }
+  });
+}
+
+test('actual documentation capture rejects an interaction that fails to change its original native state', async () => {
+  for (const revision of ['baseline', 'candidate'] as const)
+    for (const family of ['base', 'shadcn', 'brutalist'] as const)
+      await assert.rejects(documentationCaptureFixture(revision, family, false).run());
+});

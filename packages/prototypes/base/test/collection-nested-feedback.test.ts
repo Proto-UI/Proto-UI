@@ -124,6 +124,7 @@ const pressedTokens = (family: string, component: string, part: string): string[
 // Profiles without a static press variant keep pressed feedback dynamic; the
 // New York profile and popup triggers intentionally register none.
 const dynamicPressed: Record<string, Record<string, string[]>> = {
+  'liquid-glass': { carousel: ['shadow-xs'], 'data-table': ['shadow-xs'] },
   shadcn: {
     tree: ['translate-y-px'],
     'data-table': ['translate-y-px'],
@@ -228,6 +229,11 @@ for (const [family, modules] of Object.entries(families)) {
         expect(tokens()).toContain('ring-ring/50');
         expect(tokens()).toContain('border-ring');
       }
+      if (family === 'liquid-glass' && (component === 'carousel' || component === 'data-table')) {
+        expect(tokens()).toEqual(
+          expect.arrayContaining(['ring-2', 'ring-ring', 'forced-colors-focus-outline'])
+        );
+      }
       control.dispatchEvent(new Event('pointerdown'));
       await flush();
       expect(exposed.pressed.get()).toBe(true);
@@ -237,6 +243,10 @@ for (const [family, modules] of Object.entries(families)) {
           ? shadcnDayPressed
           : (dynamicPressed[family]?.[component] ?? null);
       if (gained) for (const token of gained) expect(tokens()).toContain(token);
+      if (family === 'brutalist' && part === 'day') {
+        // Flat calendar cells retain pressed semantics without raised-button translation.
+        expect(tokens().some((token: string) => token.includes('translate-'))).toBe(false);
+      }
       if (dynamicLiquid) {
         expect(exposed.disabled.get()).toBe(false);
         expect(tokens()).toContain('shadow-xs');
@@ -307,35 +317,19 @@ for (const [family, modules] of Object.entries(families)) {
           // shared primary text/border recipe while the fill applies live.
           expect(tokens().some((token: string) => token.startsWith('data-[selected]:'))).toBe(true);
           expect(tokens().some((token: string) => token.startsWith('bg-[#006dcc_'))).toBe(true);
-        } else if (family === 'brutalist') {
-          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-main');
-          expect(tokens()).toContain(
-            'data-[selected]:not-[data-range-middle]:text-main-foreground'
-          );
-          expect(control.hasAttribute('data-selected')).toBe(true);
-          expect(exposed.rangeMiddle.get()).toBe(false);
-          expect(control.hasAttribute('data-range-middle')).toBe(false);
-          root.getExposes().requestValue('2026-10-01');
-          await flush();
-          expect(root.getExposes().value.get()).toBe('2026-10-01');
-          expect(control.getExposes().selected).toBe(exposed.selected);
-          expect(exposed.selected.get()).toBe(false);
-          expect(control.hasAttribute('data-selected')).toBe(false);
-          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-main');
         } else {
           // C-CALENDAR-SELECTION-0001-DAYS distinguishes range middles from
           // selected endpoints. Both exposed conditions lower to one selector;
           // the same recipe must match only the currently selected endpoint.
-          const selectedBg =
+          const selectedPrefix =
             family === 'shadcn'
-              ? 'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:bg-primary'
-              : 'data-[selected]:not-[data-range-middle]:bg-primary';
-          const selectedFg =
-            family === 'shadcn'
-              ? 'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:text-primary-foreground'
-              : 'data-[selected]:not-[data-range-middle]:text-primary-foreground';
-          expect(tokens()).toContain(selectedBg);
-          expect(tokens()).toContain(selectedFg);
+              ? 'data-[selected]:not-[data-range-middle]:not-[data-range-pending]:'
+              : 'data-[selected]:not-[data-range-middle]:';
+          const selectedFill = family === 'brutalist' ? 'bg-main' : 'bg-primary';
+          const selectedText =
+            family === 'brutalist' ? 'text-main-foreground' : 'text-primary-foreground';
+          expect(tokens()).toContain(`${selectedPrefix}${selectedFill}`);
+          expect(tokens()).toContain(`${selectedPrefix}${selectedText}`);
           expect(control.hasAttribute('data-selected')).toBe(true);
           expect(exposed.rangeMiddle.get()).toBe(false);
           expect(control.hasAttribute('data-range-middle')).toBe(false);
@@ -345,7 +339,7 @@ for (const [family, modules] of Object.entries(families)) {
           expect(control.getExposes().selected).toBe(exposed.selected);
           expect(exposed.selected.get()).toBe(false);
           expect(control.hasAttribute('data-selected')).toBe(false);
-          expect(tokens()).toContain(selectedBg);
+          expect(tokens()).toContain(`${selectedPrefix}${selectedFill}`);
         }
       }
     });
@@ -359,8 +353,9 @@ for (const family of Object.keys(families))
     roots.push(root);
     document.body.append(root);
     await flush();
-    if (family !== 'shadcn')
-      expect(viewport.getAttribute('data-pui-style')).toContain('data-[focus-visible]:ring-2');
+    if (family === 'shadcn')
+      expect((viewport.getAttribute('data-pui-style') ?? '').split(/\s+/)).not.toContain('ring-2');
+    else expect(viewport.getAttribute('data-pui-style')).toContain('data-[focus-visible]:ring-2');
     viewport.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     viewport.focus();
     await flush();
@@ -368,10 +363,8 @@ for (const family of Object.keys(families))
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
     expect(viewport.hasAttribute('data-focus-visible')).toBe(true);
     if (family === 'shadcn') {
-      const tokens = (viewport.getAttribute('data-pui-style') ?? '').split(/\s+/);
-      expect(tokens).toContain('ring-2');
-      expect(tokens).toContain('ring-ring');
-      expect(tokens).toContain('ring-inset');
-      expect(tokens).toContain('forced-colors-focus-outline');
+      expect((viewport.getAttribute('data-pui-style') ?? '').split(/\s+/)).toEqual(
+        expect.arrayContaining(['ring-2', 'ring-ring', 'ring-inset', 'forced-colors-focus-outline'])
+      );
     }
   });

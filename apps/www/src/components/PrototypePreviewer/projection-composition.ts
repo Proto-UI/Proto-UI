@@ -65,7 +65,7 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   triggerAppearance?: 'default' | 'ghost';
   compactTriggerAppearance?: 'default' | 'ghost';
   /** Explicit family projection; never overrides another family's recipe. */
-  shadcnStyleProfile?: 'new-york-v4' | 'rhea';
+  shadcnStyleProfile?: 'new-york-v4' | 'rhea' | 'luma';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -729,7 +729,22 @@ function createSelectControl<Value extends string>(
               children: [option.label],
             }),
           ]
-        : [option.label],
+        : config.wrapValue
+          ? [
+              {
+                kind: 'box',
+                tag: 'span',
+                attrs: {
+                  ...coordinateAttrs,
+                  // Families without ItemText still expose the consumer's own
+                  // label node; apply the same opt-in without styling Item.
+                  style:
+                    'min-width: 0; flex: 1 1 auto; white-space: normal; overflow-wrap: anywhere;',
+                },
+                children: [option.label],
+              } satisfies DemoBoxNode,
+            ]
+          : [option.label],
     })
   );
   const content = createProjectedProto(selectParts.content, coordinateAttrs, undefined, {

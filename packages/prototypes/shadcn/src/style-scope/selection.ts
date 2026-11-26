@@ -33,7 +33,8 @@ export function setupShadcnStyleSelection<
 ) {
   declareChoice(def);
   const selected = def.state.enum('shadcnStyleSelection', compatibilityStyle, {
-    options: SHADCN_STYLE_IDS,
+    // Keep the public membership list out of each mutable State spec.
+    options: [...SHADCN_STYLE_IDS],
   });
   const sync = (run: RunHandle<Props>) => {
     const explicit = normalizeShadcnStyle(run.props.getRaw().styleProfile);

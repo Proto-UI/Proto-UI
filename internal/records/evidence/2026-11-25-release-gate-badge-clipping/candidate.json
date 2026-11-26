@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "focused-candidate-validation; integrated Actions pending",
+  "baseCommit": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+  "group": {
+    "id": "badge-pr1827-clipping-restoration",
+    "files": [
+      {
+        "path": "packages/prototypes/brutalist/src/badge/root.proto.ts",
+        "sha256": "dc31b19cd81a3164d00d90e7363cc0c20eba5b8294ec63fb41b830a6d8c2afd6"
+      }
+    ],
+    "authority": [
+      "P-BRUTALIST-BADGE-PASSIVE-BOUNDARY",
+      "P-BRUTALIST-BADGE-VISUAL-GRAMMAR",
+      "T-WEB-COMPONENT-SHADOW-STYLE-0001 retained S1 Badge consumer",
+      "Parent explicit decision: restore option1; no canonical overflow role expansion"
+    ],
+    "scope": "Remove only the overflow-hidden introduced by PR1827. Keep gap-1, whitespace-nowrap, px-2.5 and all existing public Badge semantics.",
+    "observableCost": "Oversized/positioned overflowing author children regain pre-PR1827 visible paint; not complete equivalence to the newly copied upstream clipping behavior.",
+    "origin": "Pinned upstream 3306a802 really contains overflow-hidden; no claim that the token lacked upstream provenance. PR1827 changed no spec entity and did not admit a clipping owner.",
+    "unitReceipt": {
+      "path": "/tmp/cb5d-badge-retained.json",
+      "files": 4,
+      "passed": 116,
+      "failed": 0
+    },
+    "nativeReceipt": {
+      "path": "/home/ezra/proto-ui-browser-tail-cb5d-control/shadow-s1-candidate.json",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "owner": "release_gate_audit",
+      "sourceBinding": "/home/ezra/proto-ui-browser-tail-cb5d-control/shadow-candidate-inputs.json"
+    },
+    "generatorReceipts": [
+      "/tmp/cb5d-badge-brutalist-generator.log",
+      "/tmp/cb5d-badge-native-generator.log"
+    ],
+    "generatedOutputs": [
+      {
+        "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+        "sha256": "05bb9cf80df42eab0e88b5b75a9294bdb9f5792661092c14a4d8330e6283fcb2"
+      },
+      {
+        "path": "packages/cli/src/generated/brutalist-theme.ts",
+        "sha256": "d0d6f5001e740a5292a0a354160cd68e15e4079ad5c3fc380332a3c51dae295b"
+      },
+      {
+        "path": "native/gpui/fixtures/style-tokens.json",
+        "sha256": "36b983d3e3069f30c03b1ba3dd2b99a8608c5c5bbc180990feb5b6d5b1a21a04"
+      },
+      {
+        "path": "native/gpui/fixtures/theme-tokens.json",
+        "sha256": "126f7eecba69462ab39a7e0fd6ed389fc13d541187128c407eee4a0de5bd3155"
+      }
+    ],
+    "generatedChange": "Official generator rerun yields unchanged bytes: 737 Brutalist tokens; 1049 native compiled, 4 without declarations. No stale hand-edited manifest."
+  },
+  "verification": {
+    "specAuthoring": "/tmp/cb5d-thumb-spec-authoring-final.log",
+    "specGraph": {
+      "path": "/tmp/cb5d-thumb-spec-graph.json",
+      "passed": 5,
+      "failed": 0
+    },
+    "proportionalTypes": {
+      "path": "/tmp/cb5d-thumb-field-types.json",
+      "ownedFiles": 12,
+      "ownedErrors": 0,
+      "transitiveDiagnostics": 97,
+      "claim": "Only owned-file zero errors; not full application/workspace typecheck."
+    },
+    "catalogTracking": "New files must be committed by parent before catalog-integrity Git-tracking check can truthfully pass."
+  },
+  "archivedNativeReceipt": {
+    "path": "internal/records/evidence/2026-11-25-release-gate-badge-clipping/shadow-s1-candidate.json.gz",
+    "rawSha256": "f664cd3e7ea5af9fb1dec7c32717ef4961e0e02c7674339f384b51ac0820f2d9"
+  },
+  "archivedUnitReceipt": {
+    "path": "internal/records/evidence/2026-11-25-release-gate-badge-clipping/cb5d-badge-retained.json.gz",
+    "rawSha256": "65dd85eea2bc55799c779e85ac200d93d3bad10884df9717e369da05fbf929bf"
+  }
+}

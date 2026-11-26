@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   installSizingMotionTrace,
+  installSizingPublicOwner,
   sizingMotionIssues,
   sizingItemSizeIssues,
   type SizingMotionSelection,
@@ -13,7 +14,11 @@ afterEach(() => {
   vi.useRealTimers();
   document.body.replaceChildren();
 });
-function fixture(selection: SizingMotionSelection = 'selected') {
+function fixture(
+  selection: SizingMotionSelection = 'selected',
+  itemCount = 4,
+  expectedItemCount = itemCount
+) {
   vi.useFakeTimers();
   const frames = new Map<number, FrameRequestCallback>();
   let next = 0;
@@ -26,7 +31,7 @@ function fixture(selection: SizingMotionSelection = 'selected') {
   });
   document.body.innerHTML =
     '<button aria-controls="content" aria-expanded="false" data-projection-owner="owner" data-projection-runtime="wc"></button><div id="content" data-projection-owner="owner"><div data-projection-owner="owner" data-projection-prototype="shadcn-select-surface"><div data-projection-owner="owner" data-projection-prototype="shadcn-select-viewport">' +
-    '<button role="option" data-projection-owner="owner"></button>'.repeat(4) +
+    '<button role="option" data-projection-owner="owner"></button>'.repeat(itemCount) +
     '</div></div></div>';
   const trigger = document.querySelector('button')! as SizingMotionTrigger;
   const content = document.getElementById('content')!;
@@ -69,7 +74,10 @@ function fixture(selection: SizingMotionSelection = 'selected') {
     surface.style.transform = `matrix(${scale}, 0, 0, ${scale}, 0, 0)`;
   };
   update();
-  installSizingMotionTrace(trigger, selection);
+  installSizingMotionTrace(
+    trigger,
+    expectedItemCount === 4 ? selection : { selection, itemCount: expectedItemCount }
+  );
   const frame = () => {
     const callbacks = [...frames];
     frames.clear();
@@ -127,6 +135,24 @@ function fixture(selection: SizingMotionSelection = 'selected') {
   };
 }
 describe('Select sizing animation prerequisite', () => {
+  it('retains every row for a consumer with five declared items', async () => {
+    const f = fixture('selected', 5);
+    f.open();
+    f.settle();
+    const result = await f.done;
+    expect(result.samples.map((sample) => sample.items.length)).toEqual([5, 5, 5]);
+    expect(sizingMotionIssues(result, 'wc', 5)).toEqual([]);
+    expect(sizingMotionIssues(result, 'wc')).toContain('sample identity/time');
+  });
+  it.each([4, 6])('rejects %i actual rows when the consumer declares five', async (count) => {
+    const f = fixture('selected', count, 5);
+    f.open();
+    const result = await f.done;
+    expect(result.status).toBe('invalid-owner');
+    expect(sizingMotionIssues(result, 'wc', 5).length).toBeGreaterThan(0);
+    expect(f.frames.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
   it('retains the early scale95 frame and accepts only actual finished motion plus two frames', async () => {
     const f = fixture();
     f.open();
@@ -605,5 +631,167 @@ describe('all sibling sizes, not only the alignment row', () => {
         ]);
       }
     }
+  });
+});
+
+function publicFixture(runtime = 'wc', transport: 'attribute' | 'class' = 'attribute') {
+  const f = fixture('selected', 5);
+  f.trigger.__puiSizingMotion!.stop();
+  let committedRuntime = runtime;
+  const controller = { getCurrentRuntime: () => committedRuntime };
+  const previewer = Object.assign(document.createElement('div'), { __previewer__: controller });
+  previewer.dataset.demoId = 'public-select';
+  const root = document.createElement('div');
+  root.dataset.collectionCount = '5';
+  root.append(f.trigger);
+  previewer.append(root);
+  document.body.prepend(previewer);
+  f.trigger.setAttribute('role', 'combobox');
+  f.content.setAttribute('role', 'listbox');
+  const group = document.createElement('div');
+  group.setAttribute('role', 'group');
+  group.append(...f.items);
+  f.viewport.append(group);
+  for (const node of [root, f.trigger, f.content, f.surface, f.viewport, group, ...f.items]) {
+    node.removeAttribute('data-projection-owner');
+    node.removeAttribute('data-projection-runtime');
+    node.removeAttribute('data-projection-prototype');
+    node.setAttribute('data-pui-root', '');
+    if (transport === 'attribute') node.setAttribute('data-demo-owner', 'demo-owned');
+    else node.classList.add('pui-owner-demo-owned');
+  }
+  for (const [index, item] of f.items.entries()) item.dataset.collectionIndex = String(index);
+  const metadata = installSizingPublicOwner(f.trigger, { demoId: 'public-select', itemCount: 5 });
+  const handle = installSizingMotionTrace(f.trigger, { selection: 'selected', itemCount: 5 });
+  return {
+    ...f,
+    done: handle.done,
+    previewer,
+    root,
+    group,
+    controller,
+    metadata,
+    runtime(value: string) {
+      committedRuntime = value;
+    },
+  };
+}
+
+describe('ordinary public Select owner observation', () => {
+  it.each(['wc', 'react', 'vue', 'vue2'])(
+    'binds %s to the real controller, owner and all five registered rows',
+    async (runtime) => {
+      const f = publicFixture(runtime, runtime === 'wc' ? 'attribute' : 'class');
+      expect(f.metadata).toEqual({ owner: 'demo-owned', runtime, itemCount: 5 });
+      expect(f.trigger.hasAttribute('data-projection-runtime')).toBe(false);
+      expect(f.trigger.__puiSizingOwner!.read().items).toEqual(f.items);
+      f.open();
+      f.settle();
+      const result = await f.done;
+      expect(result.samples.map((sample) => sample.surface.transform[0])).toEqual([0.95, 1, 1]);
+      expect(sizingMotionIssues(result, runtime, 5)).toEqual([]);
+    }
+  );
+
+  it.each([
+    ['changed committed runtime', (f: ReturnType<typeof publicFixture>) => f.runtime('react')],
+    [
+      'replaced controller',
+      (f: ReturnType<typeof publicFixture>) => {
+        f.previewer.__previewer__ = { getCurrentRuntime: () => 'wc' };
+      },
+    ],
+    ['detached previewer', (f: ReturnType<typeof publicFixture>) => f.previewer.remove()],
+    [
+      'different trigger owner',
+      (f: ReturnType<typeof publicFixture>) => {
+        f.trigger.dataset.demoOwner = 'other';
+      },
+    ],
+    [
+      'ambiguous owner transports',
+      (f: ReturnType<typeof publicFixture>) => f.trigger.classList.add('pui-owner-other'),
+    ],
+    [
+      'changed Root registration',
+      (f: ReturnType<typeof publicFixture>) => {
+        f.root.dataset.collectionCount = '4';
+      },
+    ],
+    [
+      'replaced Root around the same trigger',
+      (f: ReturnType<typeof publicFixture>) => {
+        const next = f.root.cloneNode(false);
+        f.root.replaceWith(next);
+        next.appendChild(f.trigger);
+      },
+    ],
+    [
+      'foreign controlled Content',
+      (f: ReturnType<typeof publicFixture>) => {
+        f.content.dataset.demoOwner = 'other';
+      },
+    ],
+    [
+      'duplicate controlled ID',
+      (f: ReturnType<typeof publicFixture>) => document.body.append(f.content.cloneNode(true)),
+    ],
+    [
+      'replaced same-owner Surface',
+      (f: ReturnType<typeof publicFixture>) => f.surface.replaceWith(f.surface.cloneNode(true)),
+    ],
+    [
+      'ambiguous direct Surface',
+      (f: ReturnType<typeof publicFixture>) => f.content.append(f.surface.cloneNode(true)),
+    ],
+    [
+      'foreign registered option',
+      (f: ReturnType<typeof publicFixture>) => {
+        f.items[0].dataset.demoOwner = 'other';
+      },
+    ],
+    ['changed option order', (f: ReturnType<typeof publicFixture>) => f.group.append(f.items[0])],
+    ['missing declared option', (f: ReturnType<typeof publicFixture>) => f.items[4].remove()],
+  ] as const)('rejects %s without replacing the trace', async (_label, change) => {
+    const f = publicFixture();
+    f.open();
+    change(f);
+    f.frame();
+    const result = await f.done;
+    expect(result.status).toBe('invalid-owner');
+    expect(result.samples).toHaveLength(1);
+    expect(sizingMotionIssues(result, 'wc', 5).length).toBeGreaterThan(0);
+    expect(f.frames.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('public Select structure before the first sample', () => {
+  it.each(['Surface', 'Viewport'])(
+    'rejects a missing %s before it can bind the shifted descendants',
+    async (part) => {
+      const f = publicFixture();
+      if (part === 'Surface') f.surface.replaceWith(f.viewport);
+      else f.viewport.replaceWith(f.group);
+      f.open();
+      const result = await f.done;
+      expect(result.status).toBe('invalid-owner');
+      expect(result.samples).toEqual([]);
+      expect(f.frames.size).toBe(0);
+      expect(vi.getTimerCount()).toBe(0);
+    }
+  );
+  it('does not follow another same-owner Select controlled ID before the first sample', async () => {
+    const f = publicFixture();
+    const sibling = f.content.cloneNode(true) as HTMLElement;
+    sibling.id = 'other-select-content';
+    document.body.append(sibling);
+    f.trigger.setAttribute('aria-controls', sibling.id);
+    f.open();
+    const result = await f.done;
+    expect(result.status).toBe('invalid-owner');
+    expect(result.samples).toEqual([]);
+    expect(f.frames.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

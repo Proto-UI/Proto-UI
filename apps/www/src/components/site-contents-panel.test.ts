@@ -229,7 +229,7 @@ describe('Contents single native tree/public Popover composition boundary', () =
     const demo = rendered.demos[0]!;
     expect(demo.root).toMatchObject({
       prototypeId: 'shadcn-popover-root',
-      props: { styleProfile: 'rhea', open: false },
+      props: { styleProfile: 'luma', open: false },
     });
     const serialized = JSON.stringify(demo.root);
     for (const part of ['trigger', 'content', 'title'])

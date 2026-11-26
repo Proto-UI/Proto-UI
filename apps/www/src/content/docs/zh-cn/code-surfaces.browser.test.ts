@@ -882,6 +882,9 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
             .locator('span')
             .filter({ hasText: /^wc-base-transition$/ });
           const originalToken = (await token.elementHandle())!;
+          // Centering the whole tall <pre> can scroll its first line outside the
+          // collapsed viewport. Reveal this exact native drag target instead.
+          await originalToken.scrollIntoViewIfNeeded();
           const readGeometry = (element: HTMLElement | SVGElement) => {
             const rect = element.getBoundingClientRect();
             const pre =

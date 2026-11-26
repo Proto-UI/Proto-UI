@@ -87,9 +87,14 @@ describe('Bootstrap 2.3.2 partial-family public recipes', () => {
         count++;
         expect(node.children).toBeUndefined();
         expect(node.props?.ariaLabel).toBeTruthy();
-        expect(node.props?.defaultValue).toBeTypeOf('string');
+        expect(node.props?.value).toBeUndefined();
+        if (kind === 'input') expect(node.props?.defaultValue).toBeTypeOf('string');
+        else {
+          expect(node.props?.defaultValue).toBeUndefined();
+          expect(node.props?.placeholder).toBe('Type your message here.');
+        }
       });
-      expect(count).toBe(3);
+      expect(count).toBe(kind === 'input' ? 3 : 1);
     }
   });
 

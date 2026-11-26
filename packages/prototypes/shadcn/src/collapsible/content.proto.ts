@@ -3,16 +3,23 @@ import { asCollapsibleContent } from '@proto.ui/prototypes-base/collapsible';
 import { SHADCN_STYLE_IDS, setupShadcnStyleSelection, type ShadcnStyleId } from '../style-scope';
 import type { ShadcnCollapsibleContentProps, ShadcnCollapsibleContentExposes } from './types';
 
-const PROFILE_CONTENT_RECIPES: Partial<Record<ShadcnStyleId, string>> = {
-  rhea: 'rounded-xl bg-card text-card-foreground shadow-xs ring-1 ring-foreground/10 border-transparent p-3.5',
-  luma: 'rounded-xl bg-card text-card-foreground shadow-xs ring-1 ring-foreground/10 border-transparent p-3.5',
-  maia: 'rounded-2xl bg-card text-card-foreground shadow-xs p-3.5',
-  lyra: 'rounded-none',
-  vega: 'rounded-lg',
-  nova: 'rounded-lg',
-  mira: 'rounded-lg',
-  sera: 'rounded-lg',
-};
+// Keep the finite profile inventory visible to static package CSS collection.
+const PROFILE_CONTENT_RECIPES = [
+  [
+    'rhea',
+    'rounded-xl bg-card text-card-foreground shadow-xs ring-1 ring-foreground/10 border-transparent p-3.5',
+  ],
+  [
+    'luma',
+    'rounded-xl bg-card text-card-foreground shadow-xs ring-1 ring-foreground/10 border-transparent p-3.5',
+  ],
+  ['maia', 'rounded-2xl bg-card text-card-foreground shadow-xs p-3.5'],
+  ['lyra', 'rounded-none'],
+  ['vega', 'rounded-lg'],
+  ['nova', 'rounded-lg'],
+  ['mira', 'rounded-lg'],
+  ['sera', 'rounded-lg'],
+] as const satisfies readonly (readonly [ShadcnStyleId, string])[];
 
 // P-SHADCN-COLLAPSIBLE-CONTENT-BASE-INHERITANCE: Base is the only semantic owner.
 // The pinned reference primitives are unstyled; these safe host defaults are a Proto UI delta.
@@ -36,14 +43,14 @@ const collapsibleContent = definePrototype<
     });
     def.props.setDefaults({ variant: 'default' });
     // P-SHADCN-COLLAPSIBLE-CONTENT-VISUAL-SAFETY: no fixed width/height or clipped long label.
+    // duration-150 also sets transition-duration. Keep the entry fade without
+    // interpolating layout when the profile or the reader's font size changes.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground wrap-anywhere rounded-md border border-border bg-background p-3 text-sm animate-in fade-in-0 duration-150'
+        'min-w-0 max-w-full text-foreground wrap-anywhere rounded-md border border-border bg-background p-3 text-sm transition-none animate-in fade-in-0 duration-150'
       )
     );
-    for (const [profile, tokens] of Object.entries(PROFILE_CONTENT_RECIPES) as Array<
-      [ShadcnStyleId, string]
-    >) {
+    for (const [profile, tokens] of PROFILE_CONTENT_RECIPES) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.prop('variant').eq('default')),
         intent: (i) => i.feedback.style.use(tw(tokens)),

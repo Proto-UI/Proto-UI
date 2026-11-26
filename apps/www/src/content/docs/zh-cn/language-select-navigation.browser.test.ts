@@ -7,7 +7,9 @@ import { chromium, type Browser, type BrowserContext, type Page } from 'playwrig
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromeExecutable, startServer, stopServer } from './browser-harness';
 const FAMILIES = ['shadcn', 'brutalist'] as const;
-const CONTROLS = ['header', 'sidebar'] as const;
+// The authored Sidebar delegates language to the shared Header settings. Keep
+// independent desktop and mobile native journeys through that public owner.
+const CONTROLS = ['desktop-settings', 'mobile-settings'] as const;
 const OUTPUT = process.env.PROTO_UI_LANGUAGE_EVIDENCE_DIR ?? '/tmp/language-navigation';
 let browser: Browser;
 let base: URL;
@@ -212,10 +214,7 @@ async function waitForLocaleReady(
     )
     .toEqual({
       menuReady: true,
-      roots: [
-        { initialized: 'true', locale, triggerCount: 1, value: locale },
-        { initialized: 'true', locale, triggerCount: 1, value: locale },
-      ],
+      roots: [{ initialized: 'true', locale, triggerCount: 1, value: locale }],
     });
 }
 async function readWrites(
@@ -262,26 +261,16 @@ async function chooseLocale(
   input: 'pointer' | 'keyboard',
   expectedPath: string
 ) {
-  if (control === 'header') {
-    const languageTrigger = page.locator('header [data-language-select-root] [role="combobox"]');
-    if (!(await languageTrigger.isVisible())) {
-      const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
-      await expect.poll(() => menu.count()).toBe(1);
-      if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
-      await expect.poll(() => menu.getAttribute('aria-expanded')).toBe('true');
-      await languageTrigger.waitFor({ state: 'visible' });
-    }
-  } else {
-    const pane = page.locator('#starlight__sidebar');
-    if (!(await pane.isVisible())) {
-      const toggle = page.locator('[aria-controls="starlight__sidebar"]:visible');
-      await expect.poll(() => toggle.count()).toBe(1);
-      await toggle.click();
-    }
+  expect(page.viewportSize()?.width).toBe(control === 'desktop-settings' ? 1440 : 390);
+  const languageTrigger = page.locator('header [data-language-select-root] [role="combobox"]');
+  if (!(await languageTrigger.isVisible())) {
+    const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+    await expect.poll(() => menu.count()).toBe(1);
+    if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
+    await expect.poll(() => menu.getAttribute('aria-expanded')).toBe('true');
+    await languageTrigger.waitFor({ state: 'visible' });
   }
-  const root = page.locator(
-    `${control === 'header' ? 'header' : '.sidebar-pane'} [data-language-select-root]`
-  );
+  const root = page.locator('[data-docs-site-header] [data-language-select-root]');
   await expect.poll(() => root.count()).toBe(1);
   await expect.poll(() => root.getAttribute('data-language-select-initialized')).toBe('true');
   const paths = JSON.parse((await root.getAttribute('data-locale-paths'))!);
@@ -340,7 +329,7 @@ describe.sequential('Production language selector navigation', () => {
     for (const control of CONTROLS) {
       it(`${family} ${control}: real locale round trip with one binding`, async () => {
         const context = await browser.newContext({
-          viewport: { width: control === 'header' ? 1440 : 390, height: 1000 },
+          viewport: { width: control === 'desktop-settings' ? 1440 : 390, height: 1000 },
           serviceWorkers: 'block',
         });
         const blocked: string[] = [];
@@ -376,7 +365,7 @@ describe.sequential('Production language selector navigation', () => {
           const suffix = family === 'shadcn' ? 'shadcn/button/' : 'brutalist/components/button/';
           await page.goto(`${base.origin}/en/ui-libraries/${suffix}`, { waitUntil: 'networkidle' });
           await waitForLocaleReady(page, 'en', report, 'initial-ready');
-          expect(await page.locator('[data-language-select-root]').count()).toBe(2);
+          expect(await page.locator('[data-language-select-root]').count()).toBe(1);
           for (const [locale, input] of [
             ['zh-cn', 'pointer'],
             ['en', 'keyboard'],
@@ -404,7 +393,7 @@ describe.sequential('Production language selector navigation', () => {
                   .locator('[data-language-select-root][data-language-select-initialized="true"]')
                   .count()
               )
-              .toBe(2);
+              .toBe(1);
             const writes = (await readWrites(page)).slice(before.length);
             expect(navigations.slice(navigationCount)).toEqual([`${base.origin}${expectedPath}`]);
             expect(writes.filter((row) => row.kind === 'storage').map((row) => row.value)).toEqual([
@@ -429,7 +418,7 @@ describe.sequential('Production language selector navigation', () => {
                 .evaluateAll((nodes) =>
                   nodes.map((node) => node.getAttribute('data-current-locale'))
                 )
-            ).toEqual([locale, locale]);
+            ).toEqual([locale]);
             await expect
               .poll(() =>
                 page.locator('[data-language-select-root]').evaluateAll((nodes) =>
@@ -444,7 +433,7 @@ describe.sequential('Production language selector navigation', () => {
                   )
                 )
               )
-              .toEqual([locale, locale]);
+              .toEqual([locale]);
             (report.samples as unknown[]).push({
               stage: 'after',
               state: await inspect(page),
