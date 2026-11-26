@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "9d5c3f6c2498a1464b6c79edfe011e07e111f6f1",
-  "scope": "Direct source inventory for the sampled website routes after merging retained Runtime, Adapter, CLI and website work with the Compiler 0.4 foundation. All 32 current owners remain; 4 exact source hashes are renewed against source commit 9d5c3f6c2498a1464b6c79edfe011e07e111f6f1, and the two retired optional compiler-panel owners remain absent. Both preceding current references are preserved byte-for-byte as website-markup-provenance-524365a.json and website-markup-provenance-0ee5c60.json. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "eaa21b608db1bba8e8f10d8bcf5b65d309ab774b",
+  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 final-1915 integration source commit eaa21b608db1bba8e8f10d8bcf5b65d309ab774b. All 32 current owners remain; 0 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-9d5c3f6.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
