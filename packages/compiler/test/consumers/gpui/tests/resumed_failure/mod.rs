@@ -181,3 +181,57 @@ fn queued_read_starts_with_current_context_after_the_active_read_fails() {
     assert_eq!(published, [("idle".to_owned(), 0.), (checking_old, 0.), (checking_blue, 0.), (BLUE.to_owned(), 1.)]);
     cx.quit();
 }
+
+#[test]
+fn failed_action_discards_task_cancellation_and_both_serial_reads_complete() {
+    let (mut cx, text, files) = file_app();
+    let document = cx.new(|_| EXPECTED_DOCUMENT.provider(OLD.to_owned()));
+    let scope = ContextScope::default().with(EXPECTED_DOCUMENT, document.clone());
+    let ObservedReader { reader, window, publications, _observation } = open_reader(&mut cx, &scope);
+    frame(&mut cx, window, &text, "idle", 0., OLD);
+
+    let checking_old = format!("checking@{OLD}");
+    let active_a = begin(&reader, "A", &mut cx);
+    let queued_b = begin(&reader, "B", &mut cx);
+    frame(&mut cx, window, &text, &checking_old, 0., OLD);
+    let a_file = files.requests_for("A").pop().expect("missing active A request");
+    assert_eq!(files.len(), 1);
+    assert!(files.requests_for("B").is_empty());
+    assert_eq!(active_a.outcome(), None);
+    assert_eq!(queued_b.outcome(), None);
+
+    let action = reader.update(&mut cx, |reader, cx| reader.actions(cx).cancelAndFail());
+    assert_eq!(action, ActionOutcome::Failed(SegmentFailure {
+        reason: "cancel-refused",
+        file: "packages/compiler/test/fixtures/backend-programs.ts",
+        start: 0,
+        end: 0,
+    }));
+    frame(&mut cx, window, &text, &checking_old, 0., OLD);
+    let mut published = publications.take();
+    published.dedup();
+    assert_eq!(published, [("idle".to_owned(), 0.), (checking_old.clone(), 0.)]);
+    assert_eq!(a_file.returned(), None);
+    assert_eq!(active_a.outcome(), None);
+    assert_eq!(queued_b.outcome(), None);
+    assert_eq!(files.len(), 1);
+
+    a_file.deliver("old");
+    frame(&mut cx, window, &text, &checking_old, 1., OLD);
+    assert_eq!(a_file.returned().as_deref(), Some(OLD));
+    assert_eq!(active_a.outcome(), Some(&TaskOutcome::Completed(())));
+    let b_file = files.requests_for("B").pop().expect("serial B did not start after A completed");
+    assert_eq!(files.len(), 2);
+    assert_eq!(b_file.returned(), None);
+    assert_eq!(queued_b.outcome(), None);
+
+    document.update(&mut cx, |provider, cx| provider.publish(BLUE.to_owned(), cx));
+    frame(&mut cx, window, &text, &checking_old, 1., BLUE);
+    b_file.deliver("original");
+    frame(&mut cx, window, &text, BLUE, 2., BLUE);
+    assert_eq!(b_file.returned().as_deref(), Some(BLUE));
+    assert_eq!(queued_b.outcome(), Some(&TaskOutcome::Completed(())));
+    assert_eq!(active_a.outcome(), Some(&TaskOutcome::Completed(())));
+    assert_eq!(files.len(), 2);
+    cx.quit();
+}

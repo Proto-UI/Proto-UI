@@ -747,3 +747,47 @@ test('a serial read queued before a resumed failure starts with the current Cont
     submitted, beforeRelease, pending, waiting, starts, failures, completed, network, errors,
   }));
 });
+
+test('a failed action discards its cancellation and both existing serial reads complete', async t => {
+  const { server, page, errors, evidence } = await openConsumer(t, resumedFailure, 'resumed-failure-client.tsx', 'resumed-failure-ir.json');
+  const amber = 'Obsolete amber record';
+  const blue = 'Blue retained file';
+  const first = server.resource('A', amber);
+  const second = server.resource('B', blue);
+  const checking = 'checking@' + amber;
+
+  await page.evaluate(value => window.failureTrace.mount(value), amber);
+  await submitFailureRead(page, 'A', first);
+  assert.equal(await first.requested(), 'A');
+  await submitFailureRead(page, 'B', second);
+  const active = await expectFailureView(page, checking, 0, amber);
+  const outcome = await page.evaluate(() => window.failureTrace.cancelAndFail());
+  assert.deepEqual(outcome, { status: 'failed', reason: 'cancel-refused', source: failureSource });
+  const afterFailure = await expectFailureView(page, checking, 0, amber);
+  const pending = await page.evaluate(() => window.failureTrace.history());
+  assert.deepEqual(pending, {
+    unexpected: [], requests: [{ key: 'A', path: first.path, state: 'pending', value: null, aborted: false, reason: null }],
+  });
+  assert.equal(second.requests, 0);
+
+  first.release();
+  assert.equal(await second.requested(), 'B');
+  const waiting = await expectFailureView(page, checking, 1, amber);
+  const starts = await page.evaluate(() => window.failureTrace.starts());
+  assert.deepEqual(starts, [{ id: 'A', published: active }, { id: 'B', published: waiting }]);
+  await page.evaluate(value => window.failureTrace.publish(value), blue);
+  const rebound = await expectFailureView(page, checking, 1, blue);
+  second.release();
+  const completed = await expectFailureView(page, blue, 2, blue);
+  const network = await page.evaluate(() => window.failureTrace.history());
+  assert.deepEqual(network.unexpected, []);
+  assert.deepEqual(network.requests.map(r => [r.key, r.path, r.state, r.value, r.aborted, r.reason]), [
+    ['A', first.path, 'returned', amber, false, null], ['B', second.path, 'returned', blue, false, null],
+  ]);
+  assert.deepEqual([first.requests, second.requests], [1, 1]);
+  assert.deepEqual(await page.evaluate(() => window.failureTrace.failures()), []);
+  assert.deepEqual(errors, []);
+  if (evidence) await writeFile(path.join(evidence, 'discarded-cancellation-react-native.json'), JSON.stringify({
+    active, outcome, afterFailure, pending, waiting, starts, rebound, completed, network, errors,
+  }));
+});

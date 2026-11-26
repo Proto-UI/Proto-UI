@@ -243,7 +243,7 @@ export function controlledSelection(): ComponentIR {
   };
 }
 
-/** A read can succeed at the host and still be rejected by the resumed segment. */
+/** Exercises segment failures during a read and while requesting its cancellation. */
 export function resumedFailure(): ComponentIR {
   const expected: Value = { kind: 'context', id: 'expected' };
   const write = (target: string, value: Value): Instruction => ({ kind: 'write', target, value, source });
@@ -278,7 +278,7 @@ export function resumedFailure(): ComponentIR {
       { name: 'accepted', fn: 'count' },
       { name: 'expected', fn: 'currentDocument' },
     ],
-    actions: [{ name: 'begin', fn: 'begin' }],
+    actions: [{ name: 'begin', fn: 'begin' }, { name: 'cancelAndFail', fn: 'cancelAndFail' }],
     tasks: [{ fn: 'readItem', policy: 'serial', source }],
     behaviors: [
       read('idle', 'text', [], text('idle'), 'init'),
@@ -289,6 +289,11 @@ export function resumedFailure(): ComponentIR {
       behavior('begin', 'unit', 'action', [], [
         block('entry', ret(), [{ kind: 'start', task: 'readItem', args: [ref('local', 'document')], source }]),
       ], [bind('document', 'text')]),
+      behavior('cancelAndFail', 'unit', 'action', [], [
+        block('entry', { kind: 'fail', reason: 'cancel-refused', source }, [
+          { kind: 'cancel', task: 'readItem', source },
+        ]),
+      ]),
       behavior('readItem', 'unit', 'task', ['expected', 'stage', 'accepted'], [
         block('entry', {
           kind: 'await', extern: 'readDocument', args: [ref('local', 'id')], resume: { block: 'resume', args: [] }, source,

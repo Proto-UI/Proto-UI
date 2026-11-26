@@ -207,6 +207,7 @@ test('external Rust consumer renders and interacts with generated views in headl
     /^test keyed_task_source::releasing_the_parent_ends_retained_keyed_tasks_before_their_files_can_publish \.\.\. ok\r?$/m,
     /^test pair_source::two_file_awaits_publish_each_stage_and_read_current_context \.\.\. ok\r?$/m,
     /^test pair_source::ending_the_owner_during_the_second_await_isolates_its_replacement \.\.\. ok\r?$/m,
+    /^test resumed_failure::failed_action_discards_task_cancellation_and_both_serial_reads_complete \.\.\. ok\r?$/m,
     /^test resumed_failure::failed_resumed_writes_stay_unpublished_and_the_next_read_commits \.\.\. ok\r?$/m,
     /^test resumed_failure::queued_read_starts_with_current_context_after_the_active_read_fails \.\.\. ok\r?$/m,
     /^test task_policy_source::cancelling_serial_reads_keeps_parallel_work_live_and_allows_a_fresh_read \.\.\. ok\r?$/m,
