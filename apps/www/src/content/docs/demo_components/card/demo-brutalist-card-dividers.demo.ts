@@ -55,7 +55,7 @@ export default {
         kind: 'proto',
         prototypeId: 'brutalist-card-footer',
         props: { divider: true },
-        className: 'justify-end gap-2',
+        className: 'flex-wrap justify-end gap-2',
         children: [
           {
             kind: 'proto',

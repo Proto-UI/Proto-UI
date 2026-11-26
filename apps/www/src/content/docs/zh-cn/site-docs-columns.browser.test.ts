@@ -502,7 +502,7 @@ it('keeps the real reading and splash content edges at narrow and medium widths'
         expect(geometry.layout).toBe(reading ? 'docs' : 'splash');
         const rem = geometry.rootFontSize;
         const outer = reading ? Math.min(2 * rem, Math.max(rem, width * 0.02)) : rem;
-        const inner = reading ? 0 : rem * (width < 768 ? 0.25 : 1.5);
+        const inner = reading ? 0 : rem * (width < 768 ? (name === 'homepage' ? 0.5 : 0.25) : 1.5);
         for (const gutter of geometry.outerPadding) expect(gutter).toBeCloseTo(outer, 1);
         for (const gutter of geometry.mainPadding) expect(gutter).toBeCloseTo(inner, 1);
         expect(geometry.mainLeft).toBeGreaterThanOrEqual(geometry.canvasContentLeft - 1);

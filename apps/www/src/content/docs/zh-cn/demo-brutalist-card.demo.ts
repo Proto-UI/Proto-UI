@@ -49,6 +49,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-card-footer',
+            className: 'flex-wrap',
             children: [
               {
                 kind: 'box',

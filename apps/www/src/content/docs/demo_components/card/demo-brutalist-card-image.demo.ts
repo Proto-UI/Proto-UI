@@ -27,6 +27,7 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-card-header',
+        className: 'flex-wrap',
         children: [
           {
             kind: 'box',
