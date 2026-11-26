@@ -258,9 +258,7 @@ describe.sequential('Base Image public consumer browser evidence', () => {
     );
     try {
       await selectImageRuntime(page, previewer, 'vue2');
-      expect(
-        await page.getByRole('heading', { name: 'Props 与 Exposes', exact: true }).count()
-      ).toBe(1);
+      expect(await page.getByRole('heading', { name: 'API', exact: true }).count()).toBe(1);
       expect(await previewer.getAttribute('data-demo-id')).toBe('demo-base-image');
       expect(await physicalImage(previewer, 'fit-cover').getAttribute('alt')).toBe(
         'Mountains and a sun (cover)'
