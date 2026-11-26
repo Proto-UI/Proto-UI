@@ -1,0 +1,17 @@
+extends: existence
+message: "Watch for repetitive defensive hedging ('%s'); state scope/limits once in `## Scope & Limits`."
+level: warning
+ignorecase: true
+tokens:
+  - '\bdoes not by itself\b'
+  - '\bdoes not retroactively\b'
+  - '\bremains distinct from\b'
+  - '\bremains separate from\b'
+  - '\bremain separate from\b'
+  - '\bremain distinct from\b'
+  - '\bserves as an observation rather than\b'
+  - '\bis retained as historical\b'
+  - '\bnot an implicit amendment\b'
+  - '\bnot a blanket\b'
+  - '\bsupplies no\b'
+  - '\bgrants no\b'

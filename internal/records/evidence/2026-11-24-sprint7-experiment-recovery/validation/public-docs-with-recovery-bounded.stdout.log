@@ -1,5 +1,0 @@
-
-> proto-ui@ check:public-docs /tmp/proto-ui-s7-recovery-456f
-> node scripts/docs/check-public-docs.mjs
-
- ELIFECYCLE  Command failed with exit code 137.

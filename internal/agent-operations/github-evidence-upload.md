@@ -68,16 +68,16 @@ These are separately authorized storage alternatives, not commands to create dup
 
 ## Git or Contents API for versioned images
 
-Choose a verified authorized branch, never a direct write to `main`. Reuse existing Git/worktrees. Keep evidence-only assets out of product PRs; do not merge their branch. Assets that belong to maintained docs/tests use their owning directory and normal PR review. Preserve provenance/license and generators. Use content-specific filenames and pin image links to full commit SHA, not a moving branch.
+Choose a verified authorized branch, never a direct write to `main`. **Never commit binary evidence (`.png`, `.mp4`, `.log`, `.tar.gz`, raw test dumps) to `main` or `internal/records/**`—`check:internal-docs`blocks binary assets under`internal/**`.** Reuse existing Git/worktrees. Keep evidence-only assets out of product PRs on a dedicated unmerged evidence branch (`evidence/...`); do not merge that branch. Assets that belong to maintained docs/tests use their owning directory and normal PR review. Preserve provenance/license and generators. Use content-specific filenames and pin image links to full commit SHA, not a moving branch.
 
 For Agents, independently review and authorize the **entire** staged change and exact contributor branch, parent HEAD and tree. `git write-tree` records a candidate tree; computing it or viewing a stat does not approve unrelated staged user work. Stop if the index contains work outside the authorization. Prepare and review `evidence-commit-message.txt` and the actual source/provenance with the change before authorizing the commit. The publisher applies the configured contributor's sign-off. Do not use plain `git commit` as an Agent fallback.
 
 ```powershell
-# In the verified target worktree/branch, with no unrelated staged files:
+# In a dedicated unmerged evidence branch (NEVER main or a product PR branch):
 git status --short
 git branch --show-current
 git rev-parse HEAD
-git add -- internal/records/evidence/issue-123/before.png internal/records/evidence/issue-123/reproduce.html
+git add -- evidence/issue-123/before.png evidence/issue-123/reproduce.html
 git diff --cached --stat
 git diff --cached
 git write-tree

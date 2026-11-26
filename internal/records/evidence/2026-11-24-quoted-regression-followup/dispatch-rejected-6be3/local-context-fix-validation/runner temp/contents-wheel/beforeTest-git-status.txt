@@ -1,6 +1,0 @@
- M .github/workflows/browser-suite-repair-evidence.yml
- M internal/records/2026-11-24-quoted-regression-followup.md
-?? internal/records/evidence/2026-11-24-quoted-regression-followup/dispatch-rejected-6be3/readback.json
-?? internal/records/evidence/2026-11-24-quoted-regression-followup/dispatch-rejected-6be3/request.json
-?? internal/records/evidence/2026-11-24-quoted-regression-followup/dispatch-rejected-6be3/response.http
-?? internal/records/evidence/2026-11-24-quoted-regression-followup/dispatch-rejected-6be3/stderr.txt

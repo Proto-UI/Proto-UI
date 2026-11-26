@@ -1,0 +1,15 @@
+extends: existence
+message: "Avoid AI filler opener '%s'; state the technical point directly."
+level: warning
+ignorecase: true
+tokens:
+  - '\bFurthermore,'
+  - '\bMoreover,'
+  - '\bAdditionally,'
+  - '\bIt is worth noting that\b'
+  - '\bIt should be noted that\b'
+  - '\bIn conclusion,'
+  - '\bNeedless to say,'
+  - '\bIn this regard,'
+  - '\bAs previously mentioned,'
+  - '\bIt is important to note that\b'
