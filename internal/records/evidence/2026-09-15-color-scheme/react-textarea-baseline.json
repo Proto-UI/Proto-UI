@@ -1,0 +1,80 @@
+{
+  "baseline": "8f2eba12c2c980d0f4d92713106e798891738106",
+  "checks": [
+    {
+      "version": "current",
+      "strict": "on",
+      "readerMode": "default",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "current",
+      "strict": "on",
+      "readerMode": "explicit default getter",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "current",
+      "strict": "off",
+      "readerMode": "default",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "current",
+      "strict": "off",
+      "readerMode": "explicit default getter",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "baseline",
+      "strict": "on",
+      "readerMode": "default",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "baseline",
+      "strict": "on",
+      "readerMode": "explicit default getter",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "baseline",
+      "strict": "off",
+      "readerMode": "default",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    },
+    {
+      "version": "baseline",
+      "strict": "off",
+      "readerMode": "explicit default getter",
+      "initialGap": true,
+      "editedDraftPreserved": true
+    }
+  ],
+  "baselineSourceVerification": [
+    {
+      "path": "packages/adapters/react/src/adapt.ts",
+      "baselineBlob": "cdcbcdd36b095b1b69fdf82fb55c757eda6742fe"
+    },
+    {
+      "path": "packages/modules/text-control/src/web.ts",
+      "baselineBlob": "98d55c6f58700ac8510e86c4bcf7bf045498db34"
+    },
+    {
+      "path": "packages/modules/text-control/src/impl.ts",
+      "baselineBlob": "b5add09184ba8f1a5bf5707da15cd33ca0df7cc2"
+    },
+    {
+      "path": "packages/prototypes/base/src/textarea/root.proto.ts",
+      "baselineBlob": "822887442fe0360b508c423459d2bad56f07d7ba"
+    }
+  ],
+  "browser": "152.0.7977.83"
+}

@@ -1,0 +1,13 @@
+{
+  "test": "Vue2 compile-time root-data demand > preserves legal physical root attributes and style: text",
+  "oldCompleteResultSHA256": "d6a2c8c2f02c1ad82d5ce2ec8c2141113e1f143c4ef61dfc2bc4f25da0feadf6",
+  "finalCompleteResultSHA256": "d6a2c8c2f02c1ad82d5ce2ec8c2141113e1f143c4ef61dfc2bc4f25da0feadf6",
+  "wholeResultByteEqual": true,
+  "sameInput": true,
+  "earlierCompleteTextStrict": {
+    "diagnostics": 62,
+    "programFiles": 217,
+    "pass": false
+  },
+  "boundary": "Earlier actual complete Text strict graph is reused only because its complete GeneratedModule and checked input are byte-identical to final actual capture. It was not rerun or turned green."
+}

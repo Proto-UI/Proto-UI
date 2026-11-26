@@ -1,0 +1,18 @@
+{
+  "selectedInCompiler": [
+    "physical Text declaration",
+    "fixed input/textarea tag and lineMode configuration",
+    "canonical checked operation family"
+  ],
+  "forbiddenInSelectedTextOutput": [
+    "declarations.find",
+    "textDeclaration",
+    "runtime lineMode dispatch",
+    "createNativeAdapterModules whole factory",
+    "createNativeInteraction whole factory"
+  ],
+  "sharedAnalysis": "Reuse canonical checked operations; no replacement lexical analyzer or component-name/path dispatch. Unknown/reached unsupported families conservatively retain old full support.",
+  "soleNegativeControl": "Physical owner registration removal in the actual emitted Text helper must reveal outer Trigger activation.",
+  "pausedIndependentChange": "R13 CSR value ownership one-line change is not included; original seed failure remains.",
+  "otherBackends": "No React/Vue3/WC/GPUI emitter selection changes. SSR uses original output path, not new runtime acceptance."
+}

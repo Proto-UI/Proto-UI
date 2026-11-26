@@ -1,0 +1,473 @@
+{
+  "runtime": "react",
+  "browser": "152.0.7977.83",
+  "initialEditorValues": {
+    "native": "",
+    "customNative": "",
+    "logical": {
+      "textarea": "Theme follows the document",
+      "customTextarea": "Theme follows the document"
+    }
+  },
+  "initialResources": {
+    "rootObservers": 1,
+    "colorSchemeListeners": 1,
+    "observerStarts": 1,
+    "listenerStarts": 1
+  },
+  "light": {
+    "button": {
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+      "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+      "border": "rgba(0, 0, 0, 0)",
+      "color": "lab(48.4493 77.4328 61.5452)",
+      "visibility": "visible",
+      "width": 146.046875
+    },
+    "outline": {
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+      "background": "lab(100 0 0)",
+      "border": "lab(90.952 0 -0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "visibility": "visible",
+      "width": 117.28125
+    },
+    "textarea": {
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "lab(90.952 0 -0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "visibility": "visible",
+      "width": 494
+    },
+    "checkbox": {
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "lab(90.952 0 -0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "visibility": "visible",
+      "width": 16
+    },
+    "switch": {
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+      "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+      "border": "rgba(0, 0, 0, 0)",
+      "color": "lab(2.75381 0 0)",
+      "visibility": "visible",
+      "width": 44
+    },
+    "stats": {
+      "probeSetups": 1,
+      "probeRenders": 1,
+      "probeWatches": 0,
+      "probeUpdated": 0
+    }
+  },
+  "dark": {
+    "button": {
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "border": "rgba(0, 0, 0, 0)",
+      "color": "lab(63.7053 60.745 31.3109)",
+      "visibility": "visible",
+      "width": 146.046875
+    },
+    "outline": {
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5",
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "border": "lab(100 0 0 / 0.15)",
+      "color": "lab(98.26 0 0)",
+      "visibility": "visible",
+      "width": 117.28125
+    },
+    "textarea": {
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "border": "lab(100 0 0 / 0.15)",
+      "color": "lab(98.26 0 0)",
+      "visibility": "visible",
+      "width": 494
+    },
+    "checkbox": {
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "border": "lab(100 0 0 / 0.15)",
+      "color": "lab(98.26 0 0)",
+      "visibility": "visible",
+      "width": 16
+    },
+    "switch": {
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "border": "rgba(0, 0, 0, 0)",
+      "color": "lab(98.26 0 0)",
+      "visibility": "visible",
+      "width": 44
+    },
+    "custom": {
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.1)",
+      "border": "rgba(0, 0, 0, 0)",
+      "color": "lab(63.7053 60.745 31.3109)",
+      "visibility": "visible",
+      "width": 152.65625
+    },
+    "stats": {
+      "probeSetups": 1,
+      "probeRenders": 1,
+      "probeWatches": 0,
+      "probeUpdated": 0
+    }
+  },
+  "lightAgain": {
+    "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+    "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+    "border": "rgba(0, 0, 0, 0)",
+    "color": "lab(48.4493 77.4328 61.5452)",
+    "visibility": "visible",
+    "width": 146.046875
+  },
+  "checked": {
+    "light": {
+      "checkbox": {
+        "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+        "background": "lab(7.78201 -0.0000149012 0)",
+        "border": "lab(7.78201 -0.0000149012 0)",
+        "color": "lab(98.26 0 0)",
+        "visibility": "visible",
+        "width": 16
+      },
+      "switch": {
+        "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+        "background": "lab(7.78201 -0.0000149012 0)",
+        "border": "rgba(0, 0, 0, 0)",
+        "color": "lab(98.26 0 0)",
+        "visibility": "visible",
+        "width": 44
+      }
+    },
+    "dark": {
+      "checkbox": {
+        "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+        "background": "lab(90.952 0 -0.0000119209)",
+        "border": "lab(90.952 0 -0.0000119209)",
+        "color": "lab(7.78201 -0.0000149012 0)",
+        "visibility": "visible",
+        "width": 16
+      },
+      "switch": {
+        "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+        "background": "lab(90.952 0 -0.0000119209)",
+        "border": "rgba(0, 0, 0, 0)",
+        "color": "lab(7.78201 -0.0000149012 0)",
+        "visibility": "visible",
+        "width": 44
+      }
+    }
+  },
+  "system": {
+    "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+    "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+    "border": "rgba(0, 0, 0, 0)",
+    "color": "lab(48.4493 77.4328 61.5452)",
+    "visibility": "visible",
+    "width": 146.046875
+  },
+  "remountFrames": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    }
+  ],
+  "afterReplayResources": {
+    "rootObservers": 1,
+    "colorSchemeListeners": 1,
+    "observerStarts": 1,
+    "listenerStarts": 1
+  },
+  "props": {
+    "before": {
+      "probeSetups": 1,
+      "probeRenders": 2,
+      "probeWatches": 0,
+      "probeUpdated": 0
+    },
+    "afterHost": {
+      "probeSetups": 1,
+      "probeRenders": 2,
+      "probeWatches": 0,
+      "probeUpdated": 0
+    },
+    "afterUpdate": {
+      "probeSetups": 1,
+      "probeRenders": 3,
+      "probeWatches": 1,
+      "probeUpdated": 1
+    }
+  },
+  "portalFrames": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    }
+  ],
+  "portal": {
+    "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+    "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+    "border": "rgba(0, 0, 0, 0)",
+    "color": "lab(63.7053 60.745 31.3109)",
+    "visibility": "visible",
+    "width": 461.9093322753906
+  },
+  "leaving": {
+    "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+    "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+    "border": "rgba(0, 0, 0, 0)",
+    "color": "oklab(0.704006 0.176798 0.0722319)",
+    "visibility": "visible",
+    "width": 460.3544616699219
+  },
+  "transition": {
+    "completedLeave": {
+      "samples": [
+        {
+          "phase": "leaving",
+          "elapsed": 0.10000002384185791
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 8.800000011920929
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 24.80000001192093
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 41.39999997615814
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 58.10000002384186
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 74.69999998807907
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 91.60000002384186
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 106.39999997615814
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 124.80000001192093
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 141.39999997615814
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 158.30000001192093
+        },
+        {
+          "phase": "leaving",
+          "elapsed": 177
+        },
+        {
+          "phase": "closed",
+          "elapsed": 191.5
+        }
+      ],
+      "elapsed": 191.5,
+      "present": false,
+      "events": [
+        {
+          "name": "beforeLeave",
+          "elapsed": 0
+        },
+        {
+          "name": "afterLeave",
+          "elapsed": 181.89999997615814
+        }
+      ]
+    },
+    "completedEnter": {
+      "samples": [
+        {
+          "phase": "closed",
+          "elapsed": 0.09999996423721313
+        },
+        {
+          "phase": "entered",
+          "elapsed": 14.099999964237213
+        }
+      ],
+      "elapsed": 14.099999964237213,
+      "present": true,
+      "events": [
+        {
+          "name": "beforeEnter",
+          "elapsed": 1.5999999642372131
+        },
+        {
+          "name": "afterEnter",
+          "elapsed": 1.699999988079071
+        }
+      ]
+    }
+  },
+  "exclusions": {
+    "readerSamples": {
+      "default": "light",
+      "customTextarea": "dark"
+    },
+    "localDark": {
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+      "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.3)",
+      "border": "lab(90.952 0 -0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "visibility": "visible",
+      "width": 494
+    },
+    "customDark": {
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "lab(90.952 0 -0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "visibility": "visible",
+      "width": 494
+    }
+  },
+  "localLightUnderDark": {
+    "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+    "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+    "border": "lab(100 0 0 / 0.15)",
+    "color": "oklab(0.145 -0.00000143796 0.00000340492)",
+    "visibility": "visible",
+    "width": 494
+  },
+  "disposedResources": {
+    "rootObservers": 0,
+    "colorSchemeListeners": 0,
+    "observerStarts": 1,
+    "listenerStarts": 1
+  },
+  "errors": []
+}

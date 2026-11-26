@@ -1,0 +1,16 @@
+{
+  "kind": "original-github-actions-artifact-download-integrity",
+  "artifactId": 14759694693,
+  "runId": 45035380303,
+  "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "downloadedAt": "2026-11-22T15:15:59.554221+00:00",
+  "zipBytes": 61967328,
+  "zipSha256": "a2ad68dd205806976c845f44abc08eb4e5d72f812ce200b99d794c5aca26b9e6",
+  "apiDigest": "sha256:a2ad68dd205806976c845f44abc08eb4e5d72f812ce200b99d794c5aca26b9e6",
+  "digestMatches": true,
+  "zipEntries": 985,
+  "uncompressedBytes": 77440937,
+  "pathsChecked": true,
+  "symlinksRejected": true,
+  "rawArtifactsUnmodified": true
+}

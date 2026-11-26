@@ -1,0 +1,18 @@
+{
+  "label": "success",
+  "argv": [
+    "--import",
+    "tsx",
+    "packages/compiler/src/cli-entry.ts",
+    "migrate-native-support",
+    "<output>/plan.json",
+    "--output",
+    "<output>/migrated",
+    "--json"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"ok\":true,\"command\":\"migrate-native-support\",\"result\":{\"directory\":\"<output>/migrated\",\"files\":[\"<output>/migrated/.proto-ui/migration-inputs/new-image.json\",\"<output>/migrated/.proto-ui/migration-inputs/old-trigger.json\",\"<output>/migrated/.proto-ui/shared/context/scope-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/adapter-modules-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/image-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/native-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/ownership-v1.ts\",\"<output>/migrated/new-image/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/new-image/.proto-ui/interaction/image-v1.ts\",\"<output>/migrated/new-image/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/new-image/Component.js\",\"<output>/migrated/new-image/Component.js.map\",\"<output>/migrated/new-image/provenance.json\",\"<output>/migrated/old-trigger/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/old-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/old-trigger/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/old-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/old-trigger/Component.js\",\"<output>/migrated/old-trigger/Component.js.map\",\"<output>/migrated/old-trigger/provenance.json\",\"<output>/migrated/provenance.json\"]},\"diagnostics\":[]}\n",
+  "stderr": ""
+}

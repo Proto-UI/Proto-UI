@@ -1,0 +1,355 @@
+{
+  "source": "a1b11ba1b2e4319ec221cba6f89101153bac9883",
+  "tree": "8badc37fab8a1f7d8aaab666e549a1a5c85d5c23",
+  "parents": [
+    "d01d24ffe5c1b85fa6b99e31ebc6fcca1822f3e9",
+    "ca28a4db278f948e34c57ae779385673d37d391b"
+  ],
+  "scope": "main synchronization only; later visual/Select batch excluded",
+  "checks": {
+    "combinedControls": 13,
+    "publicPackagesBuilt": 45,
+    "publicConsumer": {
+      "packages": 15,
+      "entries": 27,
+      "esm": true,
+      "strictNodeNext": true,
+      "strictBundler": true,
+      "workspaceLinks": false
+    },
+    "privateConsumer": {
+      "packages": 15,
+      "entries": 18,
+      "esm": true,
+      "strictNodeNext": true,
+      "strictBundler": true,
+      "workspaceLinks": false
+    },
+    "sourceWallMatrices": 2,
+    "canonicalPaths": 4206,
+    "proofNegativeControls": 113
+  },
+  "budgetCapsUnchanged": {
+    "runtime": 78500,
+    "react": 106000,
+    "vue": 106000,
+    "webComponent": 132000
+  },
+  "budgetActualGzip": {
+    "react": 106445,
+    "vue": 106280,
+    "webComponent": 132030
+  },
+  "strictBudgetExit": 1,
+  "finfAdvisoryExit": 0,
+  "withinBudgets": false,
+  "sourceChangesAgainstPublished": [
+    "internal/governance/package-surface-map.md",
+    "internal/governance/package-surface-map.zh-CN.md",
+    "scripts/build/public-packages.mjs",
+    "scripts/release/test/public-package-export-roots.test.mjs",
+    "scripts/release/test/public-package-plan.test.mjs"
+  ],
+  "retainedTarballs": [
+    {
+      "kind": "public",
+      "name": "@proto.ui/core",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-core-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-core-0.3.0-alpha.1.tgz",
+      "sha256": "15b3a8a8344d7a78a7b07b95e88a4b61ab271445665ef88cf967cd181a17a5a1"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/hooks",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-hooks-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-hooks-0.3.0-alpha.1.tgz",
+      "sha256": "74e4408b22234f21d130fb027ca52f2aff85e2589173fc2e92b9eb403096e4c8"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-a11y",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-a11y-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-a11y-0.3.0-alpha.1.tgz",
+      "sha256": "828ecc04309153608185980cd3fa2ef6acbb30b3a249388bbe4a7ae0a5f8dd91"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-anatomy",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-anatomy-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-anatomy-0.3.0-alpha.1.tgz",
+      "sha256": "5f116264160dbed73a4f794845401ef01dbb47de2454079ab7b4cc5dfb80676b"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-base",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-base-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-base-0.3.0-alpha.1.tgz",
+      "sha256": "e400613e83d677873333a1a56ecb2a7536a63394162f6ef8e0d104cbf988b33b"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-collection",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-collection-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-collection-0.3.0-alpha.1.tgz",
+      "sha256": "eae061cdc635d050b30d40044394f7ab4aaef6ab969d9ad77a714a5ccbcbd4f5"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-expose",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-expose-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-expose-0.3.0-alpha.1.tgz",
+      "sha256": "adaff58c7f4626d0d74d8d37feee299d6350d3714a1468b0a9ad854a7318e2ab"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-image-view",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-image-view-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-image-view-0.3.0-alpha.1.tgz",
+      "sha256": "9a103e37bb1376f8cf1f3f233c7cc56ff644c954d055161b206c63fd06214c58"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-state",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-state-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-state-0.3.0-alpha.1.tgz",
+      "sha256": "21f837c29527b6000ca58cd0d5e23e214078dd66726cf28b010a81145f8e1f21"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-table-structure",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-table-structure-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-table-structure-0.3.0-alpha.1.tgz",
+      "sha256": "2195825d2a57d4898ea584986d7c82c92c54229ccb1c3613096f5c4d89e64177"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/module-text-control",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-module-text-control-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-module-text-control-0.3.0-alpha.1.tgz",
+      "sha256": "202ce54a0e3ded7bc5970f8f7a667c5a8310d6f00e08322397dc03334dd2c2d2"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/prototypes-base",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-prototypes-base-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-prototypes-base-0.3.0-alpha.1.tgz",
+      "sha256": "e99bea2ccd290ca9f7bf40c21f9d50e866b0787f4f1f7979ccbd214d546ebd4f"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/prototypes-brutalist",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-prototypes-brutalist-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-prototypes-brutalist-0.3.0-alpha.1.tgz",
+      "sha256": "49f36cd5ed1f614edde8ad414a5a0f82d6e061bae7aefe59e1a47ca77d297187"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/prototypes-shadcn",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-prototypes-shadcn-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-prototypes-shadcn-0.3.0-alpha.1.tgz",
+      "sha256": "50926ea609e6267b156437ec7a3db016cfa1b1f072000aa16687ffbbc2df6ea4"
+    },
+    {
+      "kind": "public",
+      "name": "@proto.ui/types",
+      "originalPath": "/tmp/finf-ca28-public-consumer/stage/proto.ui-types-0.3.0-alpha.1.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/public/proto.ui-types-0.3.0-alpha.1.tgz",
+      "sha256": "59ae92f9ceaee038a75569017116fbd576932c1e822aa3adb0bd598de638b67b"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/types",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-types-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-types-0.0.0-draft.tgz",
+      "sha256": "3ccfc5022e9431038c1906e77361c514ca4b7c568907688c7aa67a400e8e4a6f"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/core",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-core-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-core-0.0.0-draft.tgz",
+      "sha256": "b540ee2ba4a1f3e2ce9b69687fe4c6bba0fc960247f9d5b2c6d2a5f88b84db50"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-base",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-base-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-base-0.0.0-draft.tgz",
+      "sha256": "84cf5d1063905b08d2471b1e6a4efc4a8416999ac4110e314200c963b94c187d"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-expose",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-expose-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-expose-0.0.0-draft.tgz",
+      "sha256": "b5fe6fce2e58595e6328a0f7fcaa72900f01cce0c6947b854d74a65b4340f12f"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-state",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-state-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-state-0.0.0-draft.tgz",
+      "sha256": "5698f347b789bc45a2bd4e3b4b040de25fd4c12f2bf59d8192ccc94a8ebc525e"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-anatomy",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-anatomy-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-anatomy-0.0.0-draft.tgz",
+      "sha256": "dc0cbc16dc5c142c84d21a8ff67f945022c0c668e1e70c9443a72952e06c3efc"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-collection",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-collection-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-collection-0.0.0-draft.tgz",
+      "sha256": "71f6a19b20cc0b79c4a8a7e027de790b77e67952eb69df59abcd1a3d5b0f7e1a"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-a11y",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-a11y-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-a11y-0.0.0-draft.tgz",
+      "sha256": "e7adc9866842561f673380921d673bc09bea0b631db0f47b1076496c641bb8f4"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-table-structure",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-table-structure-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-table-structure-0.0.0-draft.tgz",
+      "sha256": "e2b6a12e298bc01054c9880786a0a18dcc04d50d1c36fff126c6400b19919cc1"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/hooks",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-hooks-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-hooks-0.0.0-draft.tgz",
+      "sha256": "e1263c7a12bbdd7484ccd1f66fce81323a7e9dedf693504ce492b05136a3dd51"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-image-view",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-image-view-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-image-view-0.0.0-draft.tgz",
+      "sha256": "b696e48eb94f5e5a3bba002aed97754c0688ab66175b8e7d69697df633aa2580"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/module-text-control",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-module-text-control-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-module-text-control-0.0.0-draft.tgz",
+      "sha256": "8a31820151cc700c9a905b04fe6d57c82061d6ad73217291352e11219c0126d8"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/prototypes-base",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-prototypes-base-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-prototypes-base-0.0.0-draft.tgz",
+      "sha256": "b53b4181e140833e15536a0043f7f931f2ed09d08bac25efa7e4c1abe7c3544b"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/prototypes-bootstrap-2-3-2",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-prototypes-bootstrap-2-3-2-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-prototypes-bootstrap-2-3-2-0.0.0-draft.tgz",
+      "sha256": "67b124761e3962019b21cd2b77fa1f0cba6f6f2312eab46f1a6d675cfa29c5da"
+    },
+    {
+      "kind": "private",
+      "name": "@proto.ui/prototypes-liquid-glass",
+      "originalPath": "/tmp/proto-ui-local-draft-2ccTP6/proto.ui-prototypes-liquid-glass-0.0.0-draft.tgz",
+      "retainedPath": "/workspace/shared/finf-ca28-integration-evidence/artifacts/private/proto.ui-prototypes-liquid-glass-0.0.0-draft.tgz",
+      "sha256": "eebacc186398ec2f37be686b8e3faba53aa547ac2d77301afa234354813d011b"
+    }
+  ],
+  "logs": {
+    "combined-build-final-green.log": {
+      "command": "node --test scripts/release/test/public-package-plan.test.mjs scripts/release/test/public-package-export-roots.test.mjs scripts/release/test/public-package-relative-specifiers.test.mjs scripts/release/test/draft-prototype-packages.test.mjs",
+      "exitCode": 0,
+      "sha256": "ed36fee06c2b809be54450f81700bcaa0d52651d2f597288d5218bf7c3652384",
+      "bytes": 1341
+    },
+    "public-build.log": {
+      "command": "node scripts/build/public-packages.mjs",
+      "exitCode": 1,
+      "sha256": "b05c23429f68bb82c52e894ee031acd52a0dbee5fc05d818d8989f7b419681f5",
+      "bytes": 1630
+    },
+    "public-build-restored.log": {
+      "command": "node scripts/build/public-packages.mjs",
+      "exitCode": 0,
+      "sha256": "81279b58ef1f0a879ae6c4fa1d755abcd0b2857fe99519ece5bd91c2dd122ea8",
+      "bytes": 2692
+    },
+    "private-consumer.log": {
+      "command": "node --test scripts/build/test/draft-prototype-consumer.test.mjs",
+      "exitCode": 0,
+      "sha256": "c35cdc02f3ae1c37347710b8b70563e882b06dd8a7da84f0a6dd1f916bd3836a",
+      "bytes": 318
+    },
+    "public-consumer.log": {
+      "command": "node /workspace/shared/finf-ca28-integration-evidence/public-consumer.mjs",
+      "exitCode": 0,
+      "sha256": "254a1053ad7aac21bc7d9e34ccd84066f3daf161dea57c3ede60f469ec5b20e0",
+      "bytes": 3357
+    },
+    "private-bundler-local.log": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node /workspace/shared/proto-ui-selector-name/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsc -p /tmp/proto-ui-draft-consumer-LlcC6u/tsconfig.json --module ESNext --moduleResolution Bundler --pretty false",
+      "exitCode": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "budgets-finf.json": {
+      "command": "node scripts/analysis/package-budgets.mjs --finf-development --json",
+      "exitCode": 0,
+      "sha256": "066dbfa4bc8884808bc5fed692f771978629360c237e49efcc09133cc2c5fa47",
+      "bytes": 5117
+    },
+    "budgets-strict.json": {
+      "command": "node scripts/analysis/package-budgets.mjs --json",
+      "exitCode": 1,
+      "sha256": "7aa1a7215fa790358cea30c1e40812541ddcd68a8c0112048c6a7857a6a7699d",
+      "bytes": 4212
+    },
+    "proof-refresh.log": {
+      "command": "node /workspace/shared/finf-ca28-integration-evidence/refresh-proof.mjs",
+      "exitCode": 0,
+      "sha256": "4138fcc000364df7755a40b6d9c0fa7ac5293eb5b5066c6163abd308df18d3a3",
+      "bytes": 162
+    },
+    "source-wall.log": {
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 0,
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4",
+      "bytes": 36
+    },
+    "types-only-red.log": {
+      "command": "node --test --test-name-pattern='declared subpaths build independently' scripts/release/test/public-package-plan.test.mjs",
+      "exitCode": 1,
+      "sha256": "6de8913faba7b21822fae8684d9de96955932b06ba4d14ae59bfab60e800c720",
+      "bytes": 1135,
+      "scope": "main regression fixture with previous published Finf source-entry helper before extension; not the final source"
+    },
+    "proof-negative.log": {
+      "command": "node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs",
+      "exitCode": 0,
+      "sha256": "d7fcb16fefd77e1b0a1da73076c910d14ce0f5c5b67094c6e09ff0b11456357b",
+      "bytes": 10711
+    }
+  },
+  "retainedFailures": [
+    "main declaration-only regression failed before helper extension",
+    "initial full build missing restored package-local workspace symlinks",
+    "combined command interrupted by tool-reported denied registry network access; unfinished stages not counted or retried via network",
+    "strict budgets retain all three genuine overruns"
+  ],
+  "nativeAcceptance": false,
+  "completedItems": 0,
+  "deliveryItems": 68,
+  "toolchain": {
+    "node": "24.19.0",
+    "typescript": "5.9.3",
+    "corepackNetworkEnabled": false,
+    "newDependencyInstall": false
+  }
+}

@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "status": "WIP_IDENTITY_ONLY_HELPER_FIXED_GENERATED_STRICT_REMAINS_RED",
+  "publicParent": "d496d6387b694363657c6ac84b26a0e4c908b602",
+  "publicParentTree": "c16135d177cdebd2ee87d9c18c314ec2add848d8",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "controlTree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+  "candidateTree": "24520b3c3a07db36419ed1491334e10d4cf8e549",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "sha256": "f6121a46d703cd7ead7f07499f4d11af4c55ab1cb7619e49540a1d3d2f6f0960",
+      "bytes": 70712
+    },
+    {
+      "path": "packages/compiler/src/vue2-native-template.ts",
+      "sha256": "1134c90ae4eeaf1a6e3c38a5aac8f38b0fc55c61965be582839b2b63f40771b9",
+      "bytes": 29690
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-template.test.ts",
+      "sha256": "9156c82c7b25c424539087f7ca117e2e6b2bfbf87d040e2002b7c3bb9a3a4038",
+      "bytes": 63841
+    }
+  ],
+  "runnerSHA256": "41df9f77fcd27334e16194812b52bd3299885683346b9dfc77234db7cd78fbb0",
+  "gateSHA256": "c0222987980a2f1b0c3c712f2c40a95eb6e12f44bb940f7320c0e97a2f8c73fa",
+  "PINS_SHA256": "33797598526e948756bd084aafb869bb596a404144abd3cf027fca7bfd9c461f",
+  "phases": [
+    {
+      "variant": "control",
+      "phase": "collect",
+      "tree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+      "receiptSHA256": "5f51d1492db355d36fee7b8e2bc122cd2d29781e41f763c714fa0b5db9f1ef97",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {},
+      "artifactFiles": 1,
+      "artifactBytes": 11287,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 1
+    },
+    {
+      "variant": "control",
+      "phase": "source-strict",
+      "tree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+      "receiptSHA256": "8f96497f479611b067c54ad985e239f4f06ea46eae4cbddc1ee442536ba0e058",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {},
+      "artifactFiles": 3,
+      "artifactBytes": 73178,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 1
+    },
+    {
+      "variant": "control",
+      "phase": "unit",
+      "tree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+      "receiptSHA256": "d6aa744046db0d114400349839a45fa6a80af6f6f62649c596e1bfb53acbed2a",
+      "processExit": 1,
+      "runnerExit": 1,
+      "groups": {
+        "original-behavior": {
+          "passed": 11
+        },
+        "generated-strict": {
+          "failed": 1
+        },
+        "native-controls": {
+          "passed": 36,
+          "failed": 1
+        }
+      },
+      "artifactFiles": 243,
+      "artifactBytes": 4955739,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 2
+    },
+    {
+      "variant": "control",
+      "phase": "regression-collect",
+      "tree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+      "receiptSHA256": "ad810dee08448f78ed9dbd5e691b30831c4c6184276dac711ea27d1444b2989d",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {},
+      "artifactFiles": 1,
+      "artifactBytes": 8766,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 1
+    },
+    {
+      "variant": "control",
+      "phase": "regression-unit",
+      "tree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+      "receiptSHA256": "0e690db5faaa2085b6c886e7c2ea93f3e4420dc511fd23dd75672bd10ee7efbf",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {
+        "existing-vue2-regression": {
+          "passed": 41
+        }
+      },
+      "artifactFiles": 367,
+      "artifactBytes": 6609881,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 2
+    },
+    {
+      "variant": "candidate",
+      "phase": "collect",
+      "tree": "24520b3c3a07db36419ed1491334e10d4cf8e549",
+      "receiptSHA256": "5187bff437ec8a1560d414bf149c5497062acaab6c19debe7afdded3c6816336",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {},
+      "artifactFiles": 1,
+      "artifactBytes": 15466,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 1
+    },
+    {
+      "variant": "candidate",
+      "phase": "source-strict",
+      "tree": "24520b3c3a07db36419ed1491334e10d4cf8e549",
+      "receiptSHA256": "b41e49e8f30a095c11f929e1f5d5eaa3379cb5071e88cb01b674b074120b9560",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {},
+      "artifactFiles": 3,
+      "artifactBytes": 73178,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 1
+    },
+    {
+      "variant": "candidate",
+      "phase": "unit",
+      "tree": "24520b3c3a07db36419ed1491334e10d4cf8e549",
+      "receiptSHA256": "1a370117fe8df3a1345411c2201d520a1421a400d265db524fe187dcdcdc6ed6",
+      "processExit": 1,
+      "runnerExit": 1,
+      "groups": {
+        "original-behavior": {
+          "passed": 11
+        },
+        "generated-strict": {
+          "failed": 1
+        },
+        "native-controls": {
+          "passed": 37
+        },
+        "identity-proof-controls": {
+          "passed": 20
+        }
+      },
+      "artifactFiles": 321,
+      "artifactBytes": 5993893,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 2
+    },
+    {
+      "variant": "candidate",
+      "phase": "regression-collect",
+      "tree": "24520b3c3a07db36419ed1491334e10d4cf8e549",
+      "receiptSHA256": "fcc17721022da523a7775f01b52296965c382e95088afe2f53722f29bb6858bc",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {},
+      "artifactFiles": 1,
+      "artifactBytes": 8766,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 1
+    },
+    {
+      "variant": "candidate",
+      "phase": "regression-unit",
+      "tree": "24520b3c3a07db36419ed1491334e10d4cf8e549",
+      "receiptSHA256": "5a2770d77e1d7369e2b0d7d82fb415d07ede95803440ff43d7989096e7fee9b9",
+      "processExit": 0,
+      "runnerExit": 0,
+      "groups": {
+        "existing-vue2-regression": {
+          "passed": 41
+        }
+      },
+      "artifactFiles": 367,
+      "artifactBytes": 6609895,
+      "sourceChanges": [],
+      "evidenceIssues": [],
+      "dependencyPostcheck": true,
+      "subprocessRootGuards": 2
+    }
+  ],
+  "results": {
+    "controlCore": "47 passed /49; helper and original strict failed",
+    "candidateCore": "68 passed /69; original strict failed",
+    "originalNative": "control36/37 ->candidate37/37",
+    "newCases": "20/20, separately classified",
+    "sourceStrict": "0 both",
+    "regressions": "41/41 both",
+    "originalStrict": {
+      "controlDiagnostics": 97,
+      "candidateDiagnostics": 97,
+      "commonOccurrences": 97,
+      "removed": 0,
+      "new": 0,
+      "exactMessageSourceLineColumnSpanMatches": 97
+    },
+    "additionalStrictGraphs": [
+      {
+        "name": "called-alias",
+        "test": "Vue2 closed identity-only body proof > keeps the full body when an identity-observed alias is actually invoked",
+        "diagnostics": 60,
+        "programEntries": 215,
+        "formalTypes": null,
+        "actualModuleRawSHA256": "400b4c87c3e4e82ef3849df6aa2be300cd55ac56c55a1886d6f9b540aa2b214a",
+        "moduleMetadata": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "c98c2748df799860a1a14074ccf0bc3467863d9d36d2db09ebfa835cae09243e"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          },
+          "codeSHA256": "4291d93789fc887771258612dc293acc4c907c28a8919ccb80fefcd0d376c155",
+          "supportingFiles": [
+            {
+              "path": ".proto-ui/context/scope-v1.ts",
+              "kind": "source",
+              "contentsSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+              "bytes": 8797
+            }
+          ]
+        },
+        "completeStrictPass": false
+      },
+      {
+        "name": "identity-arity",
+        "test": "Vue2 closed identity-only body proof > preserves separate function identities and original arity with no runtime projector",
+        "diagnostics": 59,
+        "programEntries": 215,
+        "formalTypes": [
+          {
+            "name": "text",
+            "flags": 2,
+            "type": "unknown"
+          },
+          {
+            "name": "extra",
+            "flags": 2,
+            "type": "unknown"
+          },
+          {
+            "name": "text",
+            "flags": 2,
+            "type": "unknown"
+          },
+          {
+            "name": "extra",
+            "flags": 2,
+            "type": "unknown"
+          }
+        ],
+        "actualModuleRawSHA256": "b54df325dcf88ecefaf9463ff6e8b1077af36ae7933612d08f49da04c5286435",
+        "moduleMetadata": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "92988c79ef1810da54a9b9800be0e10125a3e9f34c0e7b6e609701c1ba02a792"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          },
+          "codeSHA256": "e621e1a63f90349728f1f5a3078b667534f96a855edff7256246630857870b2a",
+          "supportingFiles": [
+            {
+              "path": ".proto-ui/context/scope-v1.ts",
+              "kind": "source",
+              "contentsSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+              "bytes": 8797
+            }
+          ]
+        },
+        "completeStrictPass": false
+      }
+    ],
+    "artifactsRehashed": 1308,
+    "artifactBytesRehashed": 24360049,
+    "rootChecks": 14,
+    "guardIssues": 0,
+    "rootAndStrictScratchResidue": 0
+  },
+  "originalStrictGraphReuse": {
+    "basePublicCommit": "d496d6387b694363657c6ac84b26a0e4c908b602",
+    "baseRecord": "internal/records/2026-11-02-vue2-commit-contract-r2/r10-private-registration",
+    "reconstructWith": "existing r10 reconstruct.py",
+    "allSixActualOutputsExact": [
+      {
+        "baseOutputPath": "graph/Component.js",
+        "bytes": 38681,
+        "sha256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2",
+        "actualRawSHA256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2"
+      },
+      {
+        "baseOutputPath": "graph/Consumer.ts",
+        "bytes": 178,
+        "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+        "actualRawSHA256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+      },
+      {
+        "baseOutputPath": "graph/.proto-ui/context/scope-v1.ts",
+        "bytes": 8797,
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+        "actualRawSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+      },
+      {
+        "baseOutputPath": "strict-request.portable.json",
+        "bytes": 4142,
+        "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5",
+        "actualRawSHA256": "35c06e64724e3fcf2334d16e471fba5adb9104e4032aec5ada9ef5f649559f18"
+      },
+      {
+        "baseOutputPath": "strict-program.portable.json",
+        "bytes": 41791,
+        "sha256": "970be4d5ef5b94ec2db31815a1f0c49604b61417f3b9ededf9075ac56b90bd50",
+        "actualRawSHA256": "87c252fcec6bd86a7273324c5814d499ab97500f06ef375dbc3c079566a422ef"
+      },
+      {
+        "baseOutputPath": "diagnostics.portable.json",
+        "bytes": 26534,
+        "sha256": "5a018220709b372666f5de55da9eab4afc5c3efcc42018a99609cd3360abad4a",
+        "actualRawSHA256": "eb08d6683e08f0246a7b11268ab8db7258ac85d1741103ace69cdcc4b75debc0"
+      }
+    ],
+    "notHistoricalReuse": "Each actual R11 candidate graph output was independently compared to the immutable reconstructed R10 output, not substituted for a new run."
+  },
+  "pairedLawfulHelper": {
+    "test": "Vue2 compiler-native child construction > retains an uncalled identity-observed callable with a legacy template formal",
+    "controlCandidateInputBytesExactlyEqual": true,
+    "inputSHA256": "aca247e472b22503e981a62fea9191c3600f643c77ba96edde53fdcf6d78bf6c",
+    "controlEmittedModule": false,
+    "candidateActualResultSHA256": "f5a2c3dbbcb410d8124e9e2ec8c6ddebe3b32d8046a2a6d70d4b4e53fb353ad2"
+  },
+  "rawPortableBindings": [
+    {
+      "recordPath": "identity-only/input.json",
+      "rawSHA256": "aca247e472b22503e981a62fea9191c3600f643c77ba96edde53fdcf6d78bf6c",
+      "rawBytes": 14304,
+      "portableSHA256": "aca247e472b22503e981a62fea9191c3600f643c77ba96edde53fdcf6d78bf6c",
+      "portableBytes": 14304
+    },
+    {
+      "recordPath": "identity-only/result.json",
+      "rawSHA256": "f5a2c3dbbcb410d8124e9e2ec8c6ddebe3b32d8046a2a6d70d4b4e53fb353ad2",
+      "rawBytes": 40227,
+      "portableSHA256": "f5a2c3dbbcb410d8124e9e2ec8c6ddebe3b32d8046a2a6d70d4b4e53fb353ad2",
+      "portableBytes": 40227
+    },
+    {
+      "recordPath": "called-alias/input.json",
+      "rawSHA256": "56def3d5bd64507c24307365b41b211f076e1d175c0559608399650ccfd21a8d",
+      "rawBytes": 13213,
+      "portableSHA256": "56def3d5bd64507c24307365b41b211f076e1d175c0559608399650ccfd21a8d",
+      "portableBytes": 13213
+    },
+    {
+      "recordPath": "called-alias/request.portable.json",
+      "rawSHA256": "22bd6fca295c481278a51fdeaf303b83f498bd98c8a566c58b882d531814bd6b",
+      "rawBytes": 4617,
+      "portableSHA256": "aa4839b10b7e758c96c04cc5afcc11a5b37bfbbdb177ef70eb4a5542fda38b23",
+      "portableBytes": 4389
+    },
+    {
+      "recordPath": "called-alias/program.portable.json",
+      "rawSHA256": "fa2eb9a309d2edbfbe5cb7be448f6f59951342c46f1387e8cc71c48785dea8e3",
+      "rawBytes": 40600,
+      "portableSHA256": "68c3b7a938817eac9197021f3feb92de244be9b93fc81fd2f70992323dcff765",
+      "portableBytes": 41790
+    },
+    {
+      "recordPath": "called-alias/diagnostics.portable.json",
+      "rawSHA256": "7ebb313f63a8385e99b204e08b092c3ce0a626122db3bbea6676dea2f8b385f3",
+      "rawBytes": 20425,
+      "portableSHA256": "a74e601bbae073fa94708d291bcf0c6f6ad76bd5573eddd02c0fc137151bdde0",
+      "portableBytes": 16345
+    },
+    {
+      "recordPath": "called-alias/graph/.proto-ui/context/scope-v1.ts.txt",
+      "rawSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+      "rawBytes": 8797,
+      "portableSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+      "portableBytes": 8797
+    },
+    {
+      "recordPath": "called-alias/graph/Component.js.txt",
+      "rawSHA256": "4291d93789fc887771258612dc293acc4c907c28a8919ccb80fefcd0d376c155",
+      "rawBytes": 30011,
+      "portableSHA256": "4291d93789fc887771258612dc293acc4c907c28a8919ccb80fefcd0d376c155",
+      "portableBytes": 30011
+    },
+    {
+      "recordPath": "called-alias/graph/Consumer.ts.txt",
+      "rawSHA256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+      "rawBytes": 178,
+      "portableSHA256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+      "portableBytes": 178
+    },
+    {
+      "recordPath": "identity-arity/input.json",
+      "rawSHA256": "575291a6bbeeb5515eab8bbe2ad1376a34e4b567d8a4be8bdaead375fb0129ac",
+      "rawBytes": 28463,
+      "portableSHA256": "575291a6bbeeb5515eab8bbe2ad1376a34e4b567d8a4be8bdaead375fb0129ac",
+      "portableBytes": 28463
+    },
+    {
+      "recordPath": "identity-arity/request.portable.json",
+      "rawSHA256": "ca4857628fccde35443086e454634c1aec8ad1b71cefba43ab08afd112ef53cf",
+      "rawBytes": 4629,
+      "portableSHA256": "7229af6904880176cd164f5491adbd9e3ef8938df3f4526aa3d1c81b813cc527",
+      "portableBytes": 4401
+    },
+    {
+      "recordPath": "identity-arity/program.portable.json",
+      "rawSHA256": "2c3273060124fd8bd6079f24467104710316f14ad28aff0b8b379ab35987d23a",
+      "rawBytes": 40600,
+      "portableSHA256": "a62e435839e6cdacca4ffa3ffe266c7b1317a9d0799b7ee163fc2841d6039be5",
+      "portableBytes": 41790
+    },
+    {
+      "recordPath": "identity-arity/diagnostics.portable.json",
+      "rawSHA256": "d75dbf18bc5ad68fd5787968d0f45582f0e66432f57af939f687a8007e14ad9b",
+      "rawBytes": 20101,
+      "portableSHA256": "9dc8c5429f6ed744fe06ed62539caf2e20989595301a347e3034f713b4209c83",
+      "portableBytes": 16089
+    },
+    {
+      "recordPath": "identity-arity/graph/.proto-ui/context/scope-v1.ts.txt",
+      "rawSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+      "rawBytes": 8797,
+      "portableSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+      "portableBytes": 8797
+    },
+    {
+      "recordPath": "identity-arity/graph/Component.js.txt",
+      "rawSHA256": "e621e1a63f90349728f1f5a3078b667534f96a855edff7256246630857870b2a",
+      "rawBytes": 31117,
+      "portableSHA256": "e621e1a63f90349728f1f5a3078b667534f96a855edff7256246630857870b2a",
+      "portableBytes": 31117
+    },
+    {
+      "recordPath": "identity-arity/graph/Consumer.ts.txt",
+      "rawSHA256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+      "rawBytes": 178,
+      "portableSHA256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+      "portableBytes": 178
+    },
+    {
+      "recordPath": "identity-arity/formal-types.json",
+      "rawSHA256": "badd4e1930d6ca4d5875b2e7da4c8cbdb6537d4806a0926b0a76076721559273",
+      "rawBytes": 272,
+      "portableSHA256": "badd4e1930d6ca4d5875b2e7da4c8cbdb6537d4806a0926b0a76076721559273",
+      "portableBytes": 272
+    }
+  ],
+  "normalization": "Only temporary generated graph root, real Vue2 declaration root, /deps/packages and /work/repo prefixes become named placeholders. All diagnostic messageText, relatedInformation, positions, program entries and options stay intact. Every file inverse-restores exact original raw bytes locally; source/generated graph files are never normalized.",
+  "format": {
+    "exportExit": 0,
+    "recheckExit": 0,
+    "strictASTComparatorExit": 1,
+    "sixNegativeControlsRejected": true,
+    "nativeAttribution": "11 multiLine flags +2 parentheses enclosing exact unchanged subtrees; derived nodeCount/path changes",
+    "testAttribution": "4 multiLine flags, all in appended controls",
+    "sourceAttribution": "AST/literals/flags/parentheses/comments all strictly identical",
+    "manualFullDiffCommentsAttachmentReviewed": true,
+    "comparatorUnchangedSHA256": "46481540c6d891b53c79794f42a06d6815f15932e31c5afdb2a9797bc10bf17a",
+    "manualAttributionSHA256": "3db29c9b93da0b7299af52e856da4071593fdd27a742688a8003c92a24eb079c"
+  },
+  "publicationBoundary": "Three source/test leaves are exact executed bytes. Public continuation on d496 ancestry is not execution of full public head/current main. No shared analyzer, public IR, dependency, runtime interpreter, projector, component-specific dispatch or added runtime formal.",
+  "remaining": [
+    "Original full generated strict97; new identity/arity59 and called-alias60 full graph diagnostics remain unfiltered and unresolved. Different graphs are not a97-to59/60 improvement comparison.",
+    "Full callable/domain lowering is not solved by the closed identity-only proof. Canonical-normalization combinations beyond actual fixtures are not universally certified.",
+    "Native SSR/hydration, browser/production native mixing, all backend/operation closure, final bundle and initialization/heap/time evidence remain unfinished."
+  ]
+}

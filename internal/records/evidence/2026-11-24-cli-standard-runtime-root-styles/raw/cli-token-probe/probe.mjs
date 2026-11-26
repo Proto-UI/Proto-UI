@@ -1,0 +1,15 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+const root = path.resolve(process.argv[2]);
+const { collectProtoStyleTokensFromFiles } = await import(pathToFileURL(path.join(root, 'packages/cli/dist/services/prototype-style-tokens.js')));
+const { renderProtoStyleTokenCss } = await import(pathToFileURL(path.join(root, 'packages/cli/dist/services/proto-style-css.js')));
+const entry = path.join(root, 'packages/prototypes/shadcn/src/tabs/trigger.proto.ts');
+const started = performance.now();
+const tokens = await collectProtoStyleTokensFromFiles([entry]);
+const css = renderProtoStyleTokenCss(tokens);
+const hashes = {};
+for (const file of ['packages/cli/src/services/prototype-style-tokens.ts', 'packages/cli/dist/services/prototype-style-tokens.js', 'packages/prototypes/shadcn/src/tabs/trigger.proto.ts']) hashes[file] = createHash('sha256').update(await fs.readFile(path.join(root,file))).digest('hex');
+console.log(JSON.stringify({head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),node:process.version,elapsedMs:performance.now()-started,hashes,totalTokens:tokens.length,selectedTokens:tokens.filter(x=>x.includes('selected')),focusTokens:tokens.filter(x=>x.includes('focus-visible')),bareBackground:tokens.includes('bg-background'),expectedToken:tokens.includes('data-[selected]:bg-background'),expectedCss:css.includes('data-[selected]:bg-background"])[data-selected]'),tokens},null,2));

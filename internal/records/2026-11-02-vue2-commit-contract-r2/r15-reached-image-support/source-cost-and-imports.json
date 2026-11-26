@@ -1,0 +1,117 @@
+{
+  "control": {
+    "dependencies": [
+      {
+        "name": "vue",
+        "version": "2.6.14",
+        "role": "target"
+      },
+      {
+        "name": "@floating-ui/dom",
+        "version": "1.8.0",
+        "role": "target"
+      }
+    ],
+    "files": [
+      {
+        "path": "Component.ts",
+        "bytes": 40587,
+        "sha256": "263c4725118c4f25cd6fda7b71519e07ce7382bb732731488a62f118db3cc743",
+        "imports": [
+          "./.proto-ui/interaction/native-v1",
+          "./.proto-ui/context/scope-v1"
+        ],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      },
+      {
+        "path": ".proto-ui/context/scope-v1.ts",
+        "bytes": 8797,
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+        "imports": [],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      },
+      {
+        "path": ".proto-ui/interaction/ownership-v1.ts",
+        "bytes": 4229,
+        "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+        "imports": [],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      },
+      {
+        "path": ".proto-ui/interaction/native-v1.ts",
+        "bytes": 38998,
+        "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+        "imports": [
+          "./adapter-modules-v1",
+          "./ownership-v1"
+        ],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 2
+      },
+      {
+        "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+        "bytes": 129577,
+        "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+        "imports": [
+          "./ownership-v1",
+          "@floating-ui/dom"
+        ],
+        "declarationFinds": 2,
+        "fullFactoryIdentifierOccurrences": 1
+      }
+    ]
+  },
+  "candidate": {
+    "dependencies": [
+      {
+        "name": "vue",
+        "version": "2.6.14",
+        "role": "target"
+      }
+    ],
+    "files": [
+      {
+        "path": "Component.ts",
+        "bytes": 32667,
+        "sha256": "5dd5bc7412fcecf83a281d5be6ea5474c55277f1e0a6f98b6b7598014f8f9128",
+        "imports": [
+          "./.proto-ui/interaction/image-v1",
+          "./.proto-ui/context/scope-v1"
+        ],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      },
+      {
+        "path": ".proto-ui/context/scope-v1.ts",
+        "bytes": 8797,
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+        "imports": [],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      },
+      {
+        "path": ".proto-ui/interaction/ownership-v1.ts",
+        "bytes": 4229,
+        "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+        "imports": [],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      },
+      {
+        "path": ".proto-ui/interaction/image-v1.ts",
+        "bytes": 14247,
+        "sha256": "0e9dba13c41e7359a04059c01fe8a8d46e833d99e99a9fb5463b4a1e82ca3640",
+        "imports": [
+          "./ownership-v1"
+        ],
+        "declarationFinds": 0,
+        "fullFactoryIdentifierOccurrences": 0
+      }
+    ]
+  },
+  "boundary": "Generated source/import bytes only. Runtime generic/full families remain in mixed fallback, no bundle or initialization measurement.",
+  "metricCorrection": "Full factory metric counts the explicit identifier, not a call regex that omitted generic type arguments. Import graph and original source remain authoritative; occurrence count is not runtime-call cost."
+}

@@ -1,0 +1,1922 @@
+{
+  "source": "import {definePrototype} from '@proto.ui/core';\nimport {asImageView as usePicture,asOverlay} from '@proto.ui/hooks';\nimport {declareImageView} from '@proto.ui/module-image-view';\nexport default definePrototype({name:\"image-demand\",\n modules:[declareImageView({source:'',alternativeText:'Image',a11yMode:'informative',fit:'cover'})],\n setup(def){const image=usePicture();def.props.define({source:{type:'string',default:'image:a'},present:{type:'boolean',default:true}});\n       def.expose.event('status',{payload:'json'});\n       def.expose.event('cancelled',{payload:'json'});\n       const cancelled=image.on('loadingStatusChange',(run,event)=>run.expose.emit('cancelled',event));cancelled();\n       image.on('loadingStatusChange',(run,event)=>run.expose.emit('status',event));\n       def.lifecycle.onCreated(run=>image.sync({source:run.props.get().source,loadingStatus:'loaded'}));\n       def.props.watch(['source'],(run,next)=>image.sync({source:next.source}));\n       def.props.watch(['present'],(run,next)=>run.lifecycle.setPresent(next.present));\n       def.expose.method('read',()=>image.snapshot());return()=>null;}\n});",
+  "parsed": {
+    "ok": true,
+    "value": {
+      "schemaVersion": 5,
+      "name": "image-demand",
+      "source": {
+        "file": "image-journey.proto.ts",
+        "exportName": "default",
+        "sha256": "be4ce54564d84dc70265fd175f03fa051df7a920efb8cdd78dc565d93d99c77a"
+      },
+      "sourceFiles": [
+        {
+          "file": "image-journey.proto.ts",
+          "content": "import {definePrototype} from '@proto.ui/core';\nimport {asImageView as usePicture,asOverlay} from '@proto.ui/hooks';\nimport {declareImageView} from '@proto.ui/module-image-view';\nexport default definePrototype({name:\"image-demand\",\n modules:[declareImageView({source:'',alternativeText:'Image',a11yMode:'informative',fit:'cover'})],\n setup(def){const image=usePicture();def.props.define({source:{type:'string',default:'image:a'},present:{type:'boolean',default:true}});\n       def.expose.event('status',{payload:'json'});\n       def.expose.event('cancelled',{payload:'json'});\n       const cancelled=image.on('loadingStatusChange',(run,event)=>run.expose.emit('cancelled',event));cancelled();\n       image.on('loadingStatusChange',(run,event)=>run.expose.emit('status',event));\n       def.lifecycle.onCreated(run=>image.sync({source:run.props.get().source,loadingStatus:'loaded'}));\n       def.props.watch(['source'],(run,next)=>image.sync({source:next.source}));\n       def.props.watch(['present'],(run,next)=>run.lifecycle.setPresent(next.present));\n       def.expose.method('read',()=>image.snapshot());return()=>null;}\n});",
+          "sha256": "047997546018b5b336a755103486887c8a13e64cc25dade526c9ea446263d48b"
+        }
+      ],
+      "setup": {
+        "parameters": [
+          {
+            "name": "def",
+            "type": "def"
+          }
+        ],
+        "body": [
+          {
+            "kind": "const",
+            "name": "image",
+            "value": {
+              "kind": "operation",
+              "operation": "hook.asImageView",
+              "arguments": [],
+              "type": "image-view",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 357,
+                "end": 369,
+                "line": 6,
+                "column": 25,
+                "endLine": 6,
+                "endColumn": 37
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 351,
+              "end": 369,
+              "line": 6,
+              "column": 19,
+              "endLine": 6,
+              "endColumn": 37
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "props.define",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 370,
+                  "end": 373,
+                  "line": 6,
+                  "column": 38,
+                  "endLine": 6,
+                  "endColumn": 41
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "record",
+                  "type": {
+                    "kind": "record",
+                    "fields": [
+                      {
+                        "name": "source",
+                        "type": {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "type",
+                              "type": "string"
+                            },
+                            {
+                              "name": "default",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "present",
+                        "type": {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "type",
+                              "type": "string"
+                            },
+                            {
+                              "name": "default",
+                              "type": "boolean"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "entries": [
+                    {
+                      "key": "source",
+                      "value": {
+                        "kind": "record",
+                        "type": {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "type",
+                              "type": "string"
+                            },
+                            {
+                              "name": "default",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "entries": [
+                          {
+                            "key": "type",
+                            "value": {
+                              "kind": "literal",
+                              "value": "string",
+                              "type": "string",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 401,
+                                "end": 409,
+                                "line": 6,
+                                "column": 69,
+                                "endLine": 6,
+                                "endColumn": 77
+                              }
+                            }
+                          },
+                          {
+                            "key": "default",
+                            "value": {
+                              "kind": "literal",
+                              "value": "image:a",
+                              "type": "string",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 418,
+                                "end": 427,
+                                "line": 6,
+                                "column": 86,
+                                "endLine": 6,
+                                "endColumn": 95
+                              }
+                            }
+                          }
+                        ],
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 395,
+                          "end": 428,
+                          "line": 6,
+                          "column": 63,
+                          "endLine": 6,
+                          "endColumn": 96
+                        }
+                      }
+                    },
+                    {
+                      "key": "present",
+                      "value": {
+                        "kind": "record",
+                        "type": {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "type",
+                              "type": "string"
+                            },
+                            {
+                              "name": "default",
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "entries": [
+                          {
+                            "key": "type",
+                            "value": {
+                              "kind": "literal",
+                              "value": "boolean",
+                              "type": "string",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 443,
+                                "end": 452,
+                                "line": 6,
+                                "column": 111,
+                                "endLine": 6,
+                                "endColumn": 120
+                              }
+                            }
+                          },
+                          {
+                            "key": "default",
+                            "value": {
+                              "kind": "literal",
+                              "value": true,
+                              "type": "boolean",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 461,
+                                "end": 465,
+                                "line": 6,
+                                "column": 129,
+                                "endLine": 6,
+                                "endColumn": 133
+                              }
+                            }
+                          }
+                        ],
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 437,
+                          "end": 466,
+                          "line": 6,
+                          "column": 105,
+                          "endLine": 6,
+                          "endColumn": 134
+                        }
+                      }
+                    }
+                  ],
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 387,
+                    "end": 467,
+                    "line": 6,
+                    "column": 55,
+                    "endLine": 6,
+                    "endColumn": 135
+                  }
+                }
+              ],
+              "type": "void",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 370,
+                "end": 468,
+                "line": 6,
+                "column": 38,
+                "endLine": 6,
+                "endColumn": 136
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 370,
+              "end": 469,
+              "line": 6,
+              "column": 38,
+              "endLine": 6,
+              "endColumn": 137
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "expose.event",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 477,
+                  "end": 480,
+                  "line": 7,
+                  "column": 8,
+                  "endLine": 7,
+                  "endColumn": 11
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "literal",
+                  "value": "status",
+                  "type": "string",
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 494,
+                    "end": 502,
+                    "line": 7,
+                    "column": 25,
+                    "endLine": 7,
+                    "endColumn": 33
+                  }
+                },
+                {
+                  "kind": "record",
+                  "type": {
+                    "kind": "record",
+                    "fields": [
+                      {
+                        "name": "payload",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "entries": [
+                    {
+                      "key": "payload",
+                      "value": {
+                        "kind": "literal",
+                        "value": "json",
+                        "type": "string",
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 512,
+                          "end": 518,
+                          "line": 7,
+                          "column": 43,
+                          "endLine": 7,
+                          "endColumn": 49
+                        }
+                      }
+                    }
+                  ],
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 503,
+                    "end": 519,
+                    "line": 7,
+                    "column": 34,
+                    "endLine": 7,
+                    "endColumn": 50
+                  }
+                }
+              ],
+              "type": "void",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 477,
+                "end": 520,
+                "line": 7,
+                "column": 8,
+                "endLine": 7,
+                "endColumn": 51
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 477,
+              "end": 521,
+              "line": 7,
+              "column": 8,
+              "endLine": 7,
+              "endColumn": 52
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "expose.event",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 529,
+                  "end": 532,
+                  "line": 8,
+                  "column": 8,
+                  "endLine": 8,
+                  "endColumn": 11
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "literal",
+                  "value": "cancelled",
+                  "type": "string",
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 546,
+                    "end": 557,
+                    "line": 8,
+                    "column": 25,
+                    "endLine": 8,
+                    "endColumn": 36
+                  }
+                },
+                {
+                  "kind": "record",
+                  "type": {
+                    "kind": "record",
+                    "fields": [
+                      {
+                        "name": "payload",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "entries": [
+                    {
+                      "key": "payload",
+                      "value": {
+                        "kind": "literal",
+                        "value": "json",
+                        "type": "string",
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 567,
+                          "end": 573,
+                          "line": 8,
+                          "column": 46,
+                          "endLine": 8,
+                          "endColumn": 52
+                        }
+                      }
+                    }
+                  ],
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 558,
+                    "end": 574,
+                    "line": 8,
+                    "column": 37,
+                    "endLine": 8,
+                    "endColumn": 53
+                  }
+                }
+              ],
+              "type": "void",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 529,
+                "end": 575,
+                "line": 8,
+                "column": 8,
+                "endLine": 8,
+                "endColumn": 54
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 529,
+              "end": 576,
+              "line": 8,
+              "column": 8,
+              "endLine": 8,
+              "endColumn": 55
+            }
+          },
+          {
+            "kind": "const",
+            "name": "cancelled",
+            "value": {
+              "kind": "operation",
+              "operation": "imageView.on",
+              "receiver": {
+                "kind": "reference",
+                "name": "image",
+                "type": "image-view",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 600,
+                  "end": 605,
+                  "line": 9,
+                  "column": 24,
+                  "endLine": 9,
+                  "endColumn": 29
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "literal",
+                  "value": "loadingStatusChange",
+                  "type": "string",
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 609,
+                    "end": 630,
+                    "line": 9,
+                    "column": 33,
+                    "endLine": 9,
+                    "endColumn": 54
+                  }
+                },
+                {
+                  "kind": "function",
+                  "type": "function",
+                  "function": {
+                    "parameters": [
+                      {
+                        "name": "run",
+                        "type": "run"
+                      },
+                      {
+                        "name": "event",
+                        "type": {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "status",
+                              "type": "string"
+                            },
+                            {
+                              "name": "previousStatus",
+                              "type": "string"
+                            },
+                            {
+                              "name": "source",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "return",
+                        "value": {
+                          "kind": "operation",
+                          "operation": "expose.emit",
+                          "receiver": {
+                            "kind": "reference",
+                            "name": "run",
+                            "type": "run",
+                            "span": {
+                              "file": "image-journey.proto.ts",
+                              "start": 644,
+                              "end": 647,
+                              "line": 9,
+                              "column": 68,
+                              "endLine": 9,
+                              "endColumn": 71
+                            }
+                          },
+                          "arguments": [
+                            {
+                              "kind": "literal",
+                              "value": "cancelled",
+                              "type": "string",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 660,
+                                "end": 671,
+                                "line": 9,
+                                "column": 84,
+                                "endLine": 9,
+                                "endColumn": 95
+                              }
+                            },
+                            {
+                              "kind": "reference",
+                              "name": "event",
+                              "type": {
+                                "kind": "record",
+                                "fields": [
+                                  {
+                                    "name": "status",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "previousStatus",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "source",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 672,
+                                "end": 677,
+                                "line": 9,
+                                "column": 96,
+                                "endLine": 9,
+                                "endColumn": 101
+                              }
+                            }
+                          ],
+                          "type": "void",
+                          "span": {
+                            "file": "image-journey.proto.ts",
+                            "start": 644,
+                            "end": 678,
+                            "line": 9,
+                            "column": 68,
+                            "endLine": 9,
+                            "endColumn": 102
+                          }
+                        },
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 644,
+                          "end": 678,
+                          "line": 9,
+                          "column": 68,
+                          "endLine": 9,
+                          "endColumn": 102
+                        }
+                      }
+                    ],
+                    "phase": "callback",
+                    "context": "event",
+                    "returnType": "void",
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 631,
+                      "end": 678,
+                      "line": 9,
+                      "column": 55,
+                      "endLine": 9,
+                      "endColumn": 102
+                    }
+                  },
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 631,
+                    "end": 678,
+                    "line": 9,
+                    "column": 55,
+                    "endLine": 9,
+                    "endColumn": 102
+                  }
+                }
+              ],
+              "type": "subscription-disposer",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 600,
+                "end": 679,
+                "line": 9,
+                "column": 24,
+                "endLine": 9,
+                "endColumn": 103
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 590,
+              "end": 679,
+              "line": 9,
+              "column": 14,
+              "endLine": 9,
+              "endColumn": 103
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "subscription.release",
+              "receiver": {
+                "kind": "reference",
+                "name": "cancelled",
+                "type": "subscription-disposer",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 680,
+                  "end": 689,
+                  "line": 9,
+                  "column": 104,
+                  "endLine": 9,
+                  "endColumn": 113
+                }
+              },
+              "arguments": [],
+              "type": "void",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 680,
+                "end": 691,
+                "line": 9,
+                "column": 104,
+                "endLine": 9,
+                "endColumn": 115
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 680,
+              "end": 692,
+              "line": 9,
+              "column": 104,
+              "endLine": 9,
+              "endColumn": 116
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "imageView.on",
+              "receiver": {
+                "kind": "reference",
+                "name": "image",
+                "type": "image-view",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 700,
+                  "end": 705,
+                  "line": 10,
+                  "column": 8,
+                  "endLine": 10,
+                  "endColumn": 13
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "literal",
+                  "value": "loadingStatusChange",
+                  "type": "string",
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 709,
+                    "end": 730,
+                    "line": 10,
+                    "column": 17,
+                    "endLine": 10,
+                    "endColumn": 38
+                  }
+                },
+                {
+                  "kind": "function",
+                  "type": "function",
+                  "function": {
+                    "parameters": [
+                      {
+                        "name": "run",
+                        "type": "run"
+                      },
+                      {
+                        "name": "event",
+                        "type": {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "status",
+                              "type": "string"
+                            },
+                            {
+                              "name": "previousStatus",
+                              "type": "string"
+                            },
+                            {
+                              "name": "source",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "return",
+                        "value": {
+                          "kind": "operation",
+                          "operation": "expose.emit",
+                          "receiver": {
+                            "kind": "reference",
+                            "name": "run",
+                            "type": "run",
+                            "span": {
+                              "file": "image-journey.proto.ts",
+                              "start": 744,
+                              "end": 747,
+                              "line": 10,
+                              "column": 52,
+                              "endLine": 10,
+                              "endColumn": 55
+                            }
+                          },
+                          "arguments": [
+                            {
+                              "kind": "literal",
+                              "value": "status",
+                              "type": "string",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 760,
+                                "end": 768,
+                                "line": 10,
+                                "column": 68,
+                                "endLine": 10,
+                                "endColumn": 76
+                              }
+                            },
+                            {
+                              "kind": "reference",
+                              "name": "event",
+                              "type": {
+                                "kind": "record",
+                                "fields": [
+                                  {
+                                    "name": "status",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "previousStatus",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "source",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 769,
+                                "end": 774,
+                                "line": 10,
+                                "column": 77,
+                                "endLine": 10,
+                                "endColumn": 82
+                              }
+                            }
+                          ],
+                          "type": "void",
+                          "span": {
+                            "file": "image-journey.proto.ts",
+                            "start": 744,
+                            "end": 775,
+                            "line": 10,
+                            "column": 52,
+                            "endLine": 10,
+                            "endColumn": 83
+                          }
+                        },
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 744,
+                          "end": 775,
+                          "line": 10,
+                          "column": 52,
+                          "endLine": 10,
+                          "endColumn": 83
+                        }
+                      }
+                    ],
+                    "phase": "callback",
+                    "context": "event",
+                    "returnType": "void",
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 731,
+                      "end": 775,
+                      "line": 10,
+                      "column": 39,
+                      "endLine": 10,
+                      "endColumn": 83
+                    }
+                  },
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 731,
+                    "end": 775,
+                    "line": 10,
+                    "column": 39,
+                    "endLine": 10,
+                    "endColumn": 83
+                  }
+                }
+              ],
+              "type": "subscription-disposer",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 700,
+                "end": 776,
+                "line": 10,
+                "column": 8,
+                "endLine": 10,
+                "endColumn": 84
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 700,
+              "end": 777,
+              "line": 10,
+              "column": 8,
+              "endLine": 10,
+              "endColumn": 85
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "lifecycle.onCreated",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 785,
+                  "end": 788,
+                  "line": 11,
+                  "column": 8,
+                  "endLine": 11,
+                  "endColumn": 11
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "function",
+                  "type": "function",
+                  "function": {
+                    "parameters": [
+                      {
+                        "name": "run",
+                        "type": "run"
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "return",
+                        "value": {
+                          "kind": "operation",
+                          "operation": "imageView.sync",
+                          "receiver": {
+                            "kind": "reference",
+                            "name": "image",
+                            "type": "image-view",
+                            "span": {
+                              "file": "image-journey.proto.ts",
+                              "start": 814,
+                              "end": 819,
+                              "line": 11,
+                              "column": 37,
+                              "endLine": 11,
+                              "endColumn": 42
+                            }
+                          },
+                          "arguments": [
+                            {
+                              "kind": "record",
+                              "type": {
+                                "kind": "record",
+                                "fields": [
+                                  {
+                                    "name": "source",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "loadingStatus",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "entries": [
+                                {
+                                  "key": "source",
+                                  "value": {
+                                    "kind": "member",
+                                    "object": {
+                                      "kind": "operation",
+                                      "operation": "props.get",
+                                      "receiver": {
+                                        "kind": "reference",
+                                        "name": "run",
+                                        "type": "run",
+                                        "span": {
+                                          "file": "image-journey.proto.ts",
+                                          "start": 833,
+                                          "end": 836,
+                                          "line": 11,
+                                          "column": 56,
+                                          "endLine": 11,
+                                          "endColumn": 59
+                                        }
+                                      },
+                                      "arguments": [],
+                                      "type": "props",
+                                      "span": {
+                                        "file": "image-journey.proto.ts",
+                                        "start": 833,
+                                        "end": 848,
+                                        "line": 11,
+                                        "column": 56,
+                                        "endLine": 11,
+                                        "endColumn": 71
+                                      }
+                                    },
+                                    "property": "source",
+                                    "optional": false,
+                                    "type": "string",
+                                    "span": {
+                                      "file": "image-journey.proto.ts",
+                                      "start": 833,
+                                      "end": 855,
+                                      "line": 11,
+                                      "column": 56,
+                                      "endLine": 11,
+                                      "endColumn": 78
+                                    }
+                                  }
+                                },
+                                {
+                                  "key": "loadingStatus",
+                                  "value": {
+                                    "kind": "literal",
+                                    "value": "loaded",
+                                    "type": "string",
+                                    "span": {
+                                      "file": "image-journey.proto.ts",
+                                      "start": 870,
+                                      "end": 878,
+                                      "line": 11,
+                                      "column": 93,
+                                      "endLine": 11,
+                                      "endColumn": 101
+                                    }
+                                  }
+                                }
+                              ],
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 825,
+                                "end": 879,
+                                "line": 11,
+                                "column": 48,
+                                "endLine": 11,
+                                "endColumn": 102
+                              }
+                            }
+                          ],
+                          "type": "void",
+                          "span": {
+                            "file": "image-journey.proto.ts",
+                            "start": 814,
+                            "end": 880,
+                            "line": 11,
+                            "column": 37,
+                            "endLine": 11,
+                            "endColumn": 103
+                          }
+                        },
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 814,
+                          "end": 880,
+                          "line": 11,
+                          "column": 37,
+                          "endLine": 11,
+                          "endColumn": 103
+                        }
+                      }
+                    ],
+                    "phase": "callback",
+                    "context": "created",
+                    "returnType": "void",
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 809,
+                      "end": 880,
+                      "line": 11,
+                      "column": 32,
+                      "endLine": 11,
+                      "endColumn": 103
+                    }
+                  },
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 809,
+                    "end": 880,
+                    "line": 11,
+                    "column": 32,
+                    "endLine": 11,
+                    "endColumn": 103
+                  }
+                }
+              ],
+              "type": "void",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 785,
+                "end": 881,
+                "line": 11,
+                "column": 8,
+                "endLine": 11,
+                "endColumn": 104
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 785,
+              "end": 882,
+              "line": 11,
+              "column": 8,
+              "endLine": 11,
+              "endColumn": 105
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "props.watch",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 890,
+                  "end": 893,
+                  "line": 12,
+                  "column": 8,
+                  "endLine": 12,
+                  "endColumn": 11
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "array",
+                  "type": {
+                    "kind": "array",
+                    "element": "string"
+                  },
+                  "elements": [
+                    {
+                      "kind": "literal",
+                      "value": "source",
+                      "type": "string",
+                      "span": {
+                        "file": "image-journey.proto.ts",
+                        "start": 907,
+                        "end": 915,
+                        "line": 12,
+                        "column": 25,
+                        "endLine": 12,
+                        "endColumn": 33
+                      }
+                    }
+                  ],
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 906,
+                    "end": 916,
+                    "line": 12,
+                    "column": 24,
+                    "endLine": 12,
+                    "endColumn": 34
+                  }
+                },
+                {
+                  "kind": "function",
+                  "type": "function",
+                  "function": {
+                    "parameters": [
+                      {
+                        "name": "run",
+                        "type": "run"
+                      },
+                      {
+                        "name": "next",
+                        "type": "props"
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "return",
+                        "value": {
+                          "kind": "operation",
+                          "operation": "imageView.sync",
+                          "receiver": {
+                            "kind": "reference",
+                            "name": "image",
+                            "type": "image-view",
+                            "span": {
+                              "file": "image-journey.proto.ts",
+                              "start": 929,
+                              "end": 934,
+                              "line": 12,
+                              "column": 47,
+                              "endLine": 12,
+                              "endColumn": 52
+                            }
+                          },
+                          "arguments": [
+                            {
+                              "kind": "record",
+                              "type": {
+                                "kind": "record",
+                                "fields": [
+                                  {
+                                    "name": "source",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "entries": [
+                                {
+                                  "key": "source",
+                                  "value": {
+                                    "kind": "member",
+                                    "object": {
+                                      "kind": "reference",
+                                      "name": "next",
+                                      "type": "props",
+                                      "span": {
+                                        "file": "image-journey.proto.ts",
+                                        "start": 948,
+                                        "end": 952,
+                                        "line": 12,
+                                        "column": 66,
+                                        "endLine": 12,
+                                        "endColumn": 70
+                                      }
+                                    },
+                                    "property": "source",
+                                    "optional": false,
+                                    "type": "string",
+                                    "span": {
+                                      "file": "image-journey.proto.ts",
+                                      "start": 948,
+                                      "end": 959,
+                                      "line": 12,
+                                      "column": 66,
+                                      "endLine": 12,
+                                      "endColumn": 77
+                                    }
+                                  }
+                                }
+                              ],
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 940,
+                                "end": 960,
+                                "line": 12,
+                                "column": 58,
+                                "endLine": 12,
+                                "endColumn": 78
+                              }
+                            }
+                          ],
+                          "type": "void",
+                          "span": {
+                            "file": "image-journey.proto.ts",
+                            "start": 929,
+                            "end": 961,
+                            "line": 12,
+                            "column": 47,
+                            "endLine": 12,
+                            "endColumn": 79
+                          }
+                        },
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 929,
+                          "end": 961,
+                          "line": 12,
+                          "column": 47,
+                          "endLine": 12,
+                          "endColumn": 79
+                        }
+                      }
+                    ],
+                    "phase": "callback",
+                    "context": "props-watch",
+                    "returnType": "void",
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 917,
+                      "end": 961,
+                      "line": 12,
+                      "column": 35,
+                      "endLine": 12,
+                      "endColumn": 79
+                    }
+                  },
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 917,
+                    "end": 961,
+                    "line": 12,
+                    "column": 35,
+                    "endLine": 12,
+                    "endColumn": 79
+                  }
+                }
+              ],
+              "type": "function",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 890,
+                "end": 962,
+                "line": 12,
+                "column": 8,
+                "endLine": 12,
+                "endColumn": 80
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 890,
+              "end": 963,
+              "line": 12,
+              "column": 8,
+              "endLine": 12,
+              "endColumn": 81
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "props.watch",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 971,
+                  "end": 974,
+                  "line": 13,
+                  "column": 8,
+                  "endLine": 13,
+                  "endColumn": 11
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "array",
+                  "type": {
+                    "kind": "array",
+                    "element": "string"
+                  },
+                  "elements": [
+                    {
+                      "kind": "literal",
+                      "value": "present",
+                      "type": "string",
+                      "span": {
+                        "file": "image-journey.proto.ts",
+                        "start": 988,
+                        "end": 997,
+                        "line": 13,
+                        "column": 25,
+                        "endLine": 13,
+                        "endColumn": 34
+                      }
+                    }
+                  ],
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 987,
+                    "end": 998,
+                    "line": 13,
+                    "column": 24,
+                    "endLine": 13,
+                    "endColumn": 35
+                  }
+                },
+                {
+                  "kind": "function",
+                  "type": "function",
+                  "function": {
+                    "parameters": [
+                      {
+                        "name": "run",
+                        "type": "run"
+                      },
+                      {
+                        "name": "next",
+                        "type": "props"
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "return",
+                        "value": {
+                          "kind": "operation",
+                          "operation": "lifecycle.setPresent",
+                          "receiver": {
+                            "kind": "reference",
+                            "name": "run",
+                            "type": "run",
+                            "span": {
+                              "file": "image-journey.proto.ts",
+                              "start": 1011,
+                              "end": 1014,
+                              "line": 13,
+                              "column": 48,
+                              "endLine": 13,
+                              "endColumn": 51
+                            }
+                          },
+                          "arguments": [
+                            {
+                              "kind": "member",
+                              "object": {
+                                "kind": "reference",
+                                "name": "next",
+                                "type": "props",
+                                "span": {
+                                  "file": "image-journey.proto.ts",
+                                  "start": 1036,
+                                  "end": 1040,
+                                  "line": 13,
+                                  "column": 73,
+                                  "endLine": 13,
+                                  "endColumn": 77
+                                }
+                              },
+                              "property": "present",
+                              "optional": false,
+                              "type": "boolean",
+                              "span": {
+                                "file": "image-journey.proto.ts",
+                                "start": 1036,
+                                "end": 1048,
+                                "line": 13,
+                                "column": 73,
+                                "endLine": 13,
+                                "endColumn": 85
+                              }
+                            }
+                          ],
+                          "type": "void",
+                          "span": {
+                            "file": "image-journey.proto.ts",
+                            "start": 1011,
+                            "end": 1049,
+                            "line": 13,
+                            "column": 48,
+                            "endLine": 13,
+                            "endColumn": 86
+                          }
+                        },
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 1011,
+                          "end": 1049,
+                          "line": 13,
+                          "column": 48,
+                          "endLine": 13,
+                          "endColumn": 86
+                        }
+                      }
+                    ],
+                    "phase": "callback",
+                    "context": "props-watch",
+                    "returnType": "void",
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 999,
+                      "end": 1049,
+                      "line": 13,
+                      "column": 36,
+                      "endLine": 13,
+                      "endColumn": 86
+                    }
+                  },
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 999,
+                    "end": 1049,
+                    "line": 13,
+                    "column": 36,
+                    "endLine": 13,
+                    "endColumn": 86
+                  }
+                }
+              ],
+              "type": "function",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 971,
+                "end": 1050,
+                "line": 13,
+                "column": 8,
+                "endLine": 13,
+                "endColumn": 87
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 971,
+              "end": 1051,
+              "line": 13,
+              "column": 8,
+              "endLine": 13,
+              "endColumn": 88
+            }
+          },
+          {
+            "kind": "effect",
+            "expression": {
+              "kind": "operation",
+              "operation": "expose.method",
+              "receiver": {
+                "kind": "reference",
+                "name": "def",
+                "type": "def",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 1059,
+                  "end": 1062,
+                  "line": 14,
+                  "column": 8,
+                  "endLine": 14,
+                  "endColumn": 11
+                }
+              },
+              "arguments": [
+                {
+                  "kind": "literal",
+                  "value": "read",
+                  "type": "string",
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 1077,
+                    "end": 1083,
+                    "line": 14,
+                    "column": 26,
+                    "endLine": 14,
+                    "endColumn": 32
+                  }
+                },
+                {
+                  "kind": "function",
+                  "type": "function",
+                  "function": {
+                    "parameters": [],
+                    "body": [
+                      {
+                        "kind": "return",
+                        "value": {
+                          "kind": "operation",
+                          "operation": "imageView.snapshot",
+                          "receiver": {
+                            "kind": "reference",
+                            "name": "image",
+                            "type": "image-view",
+                            "span": {
+                              "file": "image-journey.proto.ts",
+                              "start": 1088,
+                              "end": 1093,
+                              "line": 14,
+                              "column": 37,
+                              "endLine": 14,
+                              "endColumn": 42
+                            }
+                          },
+                          "arguments": [],
+                          "type": {
+                            "kind": "union",
+                            "members": [
+                              {
+                                "kind": "record",
+                                "fields": [
+                                  {
+                                    "name": "source",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "loadingStatus",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "name": "fit",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "null"
+                            ]
+                          },
+                          "span": {
+                            "file": "image-journey.proto.ts",
+                            "start": 1088,
+                            "end": 1104,
+                            "line": 14,
+                            "column": 37,
+                            "endLine": 14,
+                            "endColumn": 53
+                          }
+                        },
+                        "span": {
+                          "file": "image-journey.proto.ts",
+                          "start": 1088,
+                          "end": 1104,
+                          "line": 14,
+                          "column": 37,
+                          "endLine": 14,
+                          "endColumn": 53
+                        }
+                      }
+                    ],
+                    "phase": "callback",
+                    "context": "expose-method",
+                    "returnType": {
+                      "kind": "union",
+                      "members": [
+                        {
+                          "kind": "record",
+                          "fields": [
+                            {
+                              "name": "source",
+                              "type": "string"
+                            },
+                            {
+                              "name": "loadingStatus",
+                              "type": "string"
+                            },
+                            {
+                              "name": "fit",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "null"
+                      ]
+                    },
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 1084,
+                      "end": 1104,
+                      "line": 14,
+                      "column": 33,
+                      "endLine": 14,
+                      "endColumn": 53
+                    }
+                  },
+                  "span": {
+                    "file": "image-journey.proto.ts",
+                    "start": 1084,
+                    "end": 1104,
+                    "line": 14,
+                    "column": 33,
+                    "endLine": 14,
+                    "endColumn": 53
+                  }
+                }
+              ],
+              "type": "void",
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 1059,
+                "end": 1105,
+                "line": 14,
+                "column": 8,
+                "endLine": 14,
+                "endColumn": 54
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 1059,
+              "end": 1106,
+              "line": 14,
+              "column": 8,
+              "endLine": 14,
+              "endColumn": 55
+            }
+          },
+          {
+            "kind": "return",
+            "value": {
+              "kind": "function",
+              "type": "function",
+              "function": {
+                "parameters": [],
+                "body": [
+                  {
+                    "kind": "return",
+                    "value": {
+                      "kind": "literal",
+                      "value": null,
+                      "type": "null",
+                      "span": {
+                        "file": "image-journey.proto.ts",
+                        "start": 1116,
+                        "end": 1120,
+                        "line": 14,
+                        "column": 65,
+                        "endLine": 14,
+                        "endColumn": 69
+                      }
+                    },
+                    "span": {
+                      "file": "image-journey.proto.ts",
+                      "start": 1116,
+                      "end": 1120,
+                      "line": 14,
+                      "column": 65,
+                      "endLine": 14,
+                      "endColumn": 69
+                    }
+                  }
+                ],
+                "phase": "render",
+                "context": "render",
+                "returnType": "null",
+                "span": {
+                  "file": "image-journey.proto.ts",
+                  "start": 1112,
+                  "end": 1120,
+                  "line": 14,
+                  "column": 61,
+                  "endLine": 14,
+                  "endColumn": 69
+                }
+              },
+              "span": {
+                "file": "image-journey.proto.ts",
+                "start": 1112,
+                "end": 1120,
+                "line": 14,
+                "column": 61,
+                "endLine": 14,
+                "endColumn": 69
+              }
+            },
+            "span": {
+              "file": "image-journey.proto.ts",
+              "start": 1106,
+              "end": 1121,
+              "line": 14,
+              "column": 55,
+              "endLine": 14,
+              "endColumn": 70
+            }
+          }
+        ],
+        "phase": "setup",
+        "context": "setup",
+        "returnType": "function",
+        "span": {
+          "file": "image-journey.proto.ts",
+          "start": 334,
+          "end": 1122,
+          "line": 6,
+          "column": 2,
+          "endLine": 14,
+          "endColumn": 71
+        }
+      },
+      "hooks": [],
+      "contextKeys": [],
+      "staticDeclarations": [],
+      "moduleDeclarations": [
+        {
+          "id": "@proto.ui/image-view/declaration",
+          "config": {
+            "source": "",
+            "alternativeText": "Image",
+            "a11yMode": "informative",
+            "fit": "cover"
+          },
+          "span": {
+            "file": "image-journey.proto.ts",
+            "start": 242,
+            "end": 330,
+            "line": 5,
+            "column": 11,
+            "endLine": 5,
+            "endColumn": 99
+          }
+        }
+      ],
+      "props": [
+        {
+          "name": "source",
+          "type": "string",
+          "span": {
+            "file": "image-journey.proto.ts",
+            "start": 395,
+            "end": 428,
+            "line": 6,
+            "column": 63,
+            "endLine": 6,
+            "endColumn": 96
+          }
+        },
+        {
+          "name": "present",
+          "type": "boolean",
+          "span": {
+            "file": "image-journey.proto.ts",
+            "start": 437,
+            "end": 466,
+            "line": 6,
+            "column": 105,
+            "endLine": 6,
+            "endColumn": 134
+          }
+        }
+      ],
+      "exposes": [
+        {
+          "name": "status",
+          "kind": "event",
+          "payload": {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "status",
+                "type": "string"
+              },
+              {
+                "name": "previousStatus",
+                "type": "string"
+              },
+              {
+                "name": "source",
+                "type": "string"
+              }
+            ]
+          },
+          "span": {
+            "file": "image-journey.proto.ts",
+            "start": 477,
+            "end": 520,
+            "line": 7,
+            "column": 8,
+            "endLine": 7,
+            "endColumn": 51
+          }
+        },
+        {
+          "name": "cancelled",
+          "kind": "event",
+          "payload": {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "status",
+                "type": "string"
+              },
+              {
+                "name": "previousStatus",
+                "type": "string"
+              },
+              {
+                "name": "source",
+                "type": "string"
+              }
+            ]
+          },
+          "span": {
+            "file": "image-journey.proto.ts",
+            "start": 529,
+            "end": 575,
+            "line": 8,
+            "column": 8,
+            "endLine": 8,
+            "endColumn": 54
+          }
+        },
+        {
+          "name": "read",
+          "kind": "method",
+          "parameters": [],
+          "returnType": {
+            "kind": "union",
+            "members": [
+              {
+                "kind": "record",
+                "fields": [
+                  {
+                    "name": "source",
+                    "type": "string"
+                  },
+                  {
+                    "name": "loadingStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "fit",
+                    "type": "string"
+                  }
+                ]
+              },
+              "null"
+            ]
+          },
+          "span": {
+            "file": "image-journey.proto.ts",
+            "start": 1059,
+            "end": 1105,
+            "line": 14,
+            "column": 8,
+            "endLine": 14,
+            "endColumn": 54
+          }
+        }
+      ],
+      "requirements": [
+        "expose",
+        "hook",
+        "imageView",
+        "lifecycle",
+        "props",
+        "subscription"
+      ]
+    }
+  }
+}

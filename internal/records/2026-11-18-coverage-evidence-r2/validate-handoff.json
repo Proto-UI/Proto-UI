@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-validate",
+  "nextSkillId": null,
+  "artifacts": [
+    {
+      "type": "authority-map",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/authority-map.json"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/candidate-change.json",
+      "digest": "sha256:0787e81d5468e9635884b4753e6ee7fe1af87faac580bb4465f3ca20688d12f8"
+    },
+    {
+      "type": "evidence-report",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/validation/results.json",
+      "digest": "sha256:e538e38a89fd856ee3e84420b76221ccb8398911865b4a7b9e3a096c0b53bdb4"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Implementation finished; checker diagnostic identities unchanged. Projection failure retained; full-test startup timeout retained and Harness control UNVERIFIED.",
+    "No independent acceptance or earned coverage claimed. Parent owns fresh independent review and future decisions D1/D2; no external write authorized."
+  ]
+}

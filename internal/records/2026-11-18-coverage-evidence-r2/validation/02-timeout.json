@@ -1,0 +1,22 @@
+{
+  "command": "node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+  "outcome": "Python subprocess supervisor killed outer node --test after its 240-second deadline. No terminal test result.",
+  "deadlineSeconds": 240,
+  "partialOutput": "Not retained: initial capture used pipes and TimeoutExpired output was not persisted. This is an evidence loss, not a passing test.",
+  "ownedProcessObservation": [
+    {
+      "pid": 2024234,
+      "args": "/tmp/pui-node24-1155/node-v24.21.0-linux-x64/bin/node --test-coverage-functions=0 --test-concurrency=0 --inspect-publish-uid=stderr,http --inspect-port=127.0.0.1:9229 --stack-trace-limit=10 --report-signal=SIGUSR2 --test-coverage-lines=0 --test-isolation=process --heap-prof-interval=524288 --cpu-prof-interval=1000 --v8-pool-size=4 --trace-event-file-pattern=node_trace.${rotation}.log --secure-heap-min=2 --test-coverage-branches=0 --watch-kill-signal=SIGTERM --tls-cipher-list=TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA --experimental-addon-modules --use-largepages=off --max-http-header-size=16384 --test-timeout=0 --node-snapshot --secure-heap=0 --network-family-autoselection-attempt-timeout=250 --heapsnapshot-near-heap-limit=0 scripts/coverage-matrices/test/check-coverage-matrices.test.mjs ",
+      "status": [
+        "Name:\tMainThread",
+        "Umask:\t0022",
+        "State:\tS (sleeping)",
+        "Tgid:\t2024234",
+        "Ngid:\t0",
+        "Pid:\t2024234",
+        "PPid:\t1",
+        "TracerPid:\t0"
+      ]
+    }
+  ]
+}

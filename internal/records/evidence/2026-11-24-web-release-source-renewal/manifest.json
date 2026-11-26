@@ -1,0 +1,60 @@
+{
+  "sourceRevision": "a54155f36de41a4fe47de6adc203d907bc117a25",
+  "environment": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "platform": "linux-x64"
+  },
+  "checks": [
+    {
+      "command": "node scripts/docs/check-public-docs.mjs",
+      "exitCode": 0,
+      "scope": "static documentation projection"
+    },
+    {
+      "command": "node scripts/docs/check-repository-docs.mjs",
+      "exitCode": 0,
+      "scope": "repository documentation structure"
+    },
+    {
+      "command": "node --test scripts/coverage-matrices/test/website-markup-provenance.test.mjs",
+      "exitCode": 0,
+      "passed": 36,
+      "failed": 0,
+      "scope": "unchanged provenance negative controls"
+    },
+    {
+      "command": "sourceBindingIssues(reference, currentSourceHashes)",
+      "exitCode": 0,
+      "issues": [],
+      "scope": "33 direct source bytes; no runtime acceptance"
+    }
+  ],
+  "browser": "pending authorized-device execution; previous local setup failed before cases",
+  "files": [
+    {
+      "path": "negative-controls.log.gz",
+      "sha256": "934204acd709f86c9fba3da93af588703bc816bb9053da686c91c3c6c8125c3a"
+    },
+    {
+      "path": "public-docs.log.gz",
+      "sha256": "58a9d048e04e4097dedb60973a6a9f7bc22d6af30378a21e48fe6da4fd3d5720"
+    },
+    {
+      "path": "renew-reference.mjs",
+      "sha256": "f43c99c6c12c3fe4b79d5d1d1f2d3837b9d39a87cad453ad9b780f6eb57d7c0c"
+    },
+    {
+      "path": "repository-docs.log.gz",
+      "sha256": "39a2c1ecc8261420fba5d2f457f3497a1fb7401d81b42fabdfa2649a1982354b"
+    },
+    {
+      "path": "source-binding.json",
+      "sha256": "b6f5bc97c03f5fd735fb330d09416d6765acd73e47b7a08eae9d7ac72edfc214"
+    },
+    {
+      "path": "source-renewal.json",
+      "sha256": "f6f44cf42aa6387d3782653ebd1e37b950b2e1e289f6ac56af08ca464827f36a"
+    }
+  ]
+}

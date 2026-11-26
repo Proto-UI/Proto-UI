@@ -1,0 +1,172 @@
+{
+  "test": "Vue2 compile-time root-data demand > preserves legal physical root attributes and style: image",
+  "checkedIR": {
+    "schemaVersion": 5,
+    "name": "root-data-image",
+    "source": {
+      "file": "root-data-image.proto.ts",
+      "exportName": "default",
+      "sha256": "30aebe01231c31c1d376e1c0ea83353cef7d0c4541b075199c1356a8b15a1be4"
+    },
+    "sourceFiles": [
+      {
+        "file": "root-data-image.proto.ts",
+        "content": "import {definePrototype} from '@proto.ui/core';\n      import {asImageView,asTextControl} from '@proto.ui/hooks';\n      import {declareImageView} from '@proto.ui/module-image-view';\n      import {declareTextControl} from '@proto.ui/module-text-control';\n      export default definePrototype({name:'root-data-image',modules:[declareImageView({source:'',alternativeText:'',a11yMode:'decorative',fit:'contain'})],setup(def){asImageView();return()=>null;}});",
+        "sha256": "2c83d39a8d3552b0f4be15b47ced5336ee4274427d2a00142ba7d95504d363df"
+      }
+    ],
+    "setup": {
+      "parameters": [
+        {
+          "name": "def",
+          "type": "def"
+        }
+      ],
+      "body": [
+        {
+          "kind": "effect",
+          "expression": {
+            "kind": "operation",
+            "operation": "hook.asImageView",
+            "arguments": [],
+            "type": "image-view",
+            "span": {
+              "file": "root-data-image.proto.ts",
+              "start": 420,
+              "end": 433,
+              "line": 5,
+              "column": 168,
+              "endLine": 5,
+              "endColumn": 181
+            }
+          },
+          "span": {
+            "file": "root-data-image.proto.ts",
+            "start": 420,
+            "end": 434,
+            "line": 5,
+            "column": 168,
+            "endLine": 5,
+            "endColumn": 182
+          }
+        },
+        {
+          "kind": "return",
+          "value": {
+            "kind": "function",
+            "type": "function",
+            "function": {
+              "parameters": [],
+              "body": [
+                {
+                  "kind": "return",
+                  "value": {
+                    "kind": "literal",
+                    "value": null,
+                    "type": "null",
+                    "span": {
+                      "file": "root-data-image.proto.ts",
+                      "start": 444,
+                      "end": 448,
+                      "line": 5,
+                      "column": 192,
+                      "endLine": 5,
+                      "endColumn": 196
+                    }
+                  },
+                  "span": {
+                    "file": "root-data-image.proto.ts",
+                    "start": 444,
+                    "end": 448,
+                    "line": 5,
+                    "column": 192,
+                    "endLine": 5,
+                    "endColumn": 196
+                  }
+                }
+              ],
+              "phase": "render",
+              "context": "render",
+              "returnType": "null",
+              "span": {
+                "file": "root-data-image.proto.ts",
+                "start": 440,
+                "end": 448,
+                "line": 5,
+                "column": 188,
+                "endLine": 5,
+                "endColumn": 196
+              }
+            },
+            "span": {
+              "file": "root-data-image.proto.ts",
+              "start": 440,
+              "end": 448,
+              "line": 5,
+              "column": 188,
+              "endLine": 5,
+              "endColumn": 196
+            }
+          },
+          "span": {
+            "file": "root-data-image.proto.ts",
+            "start": 434,
+            "end": 449,
+            "line": 5,
+            "column": 182,
+            "endLine": 5,
+            "endColumn": 197
+          }
+        }
+      ],
+      "phase": "setup",
+      "context": "setup",
+      "returnType": "function",
+      "span": {
+        "file": "root-data-image.proto.ts",
+        "start": 409,
+        "end": 450,
+        "line": 5,
+        "column": 157,
+        "endLine": 5,
+        "endColumn": 198
+      }
+    },
+    "hooks": [],
+    "contextKeys": [],
+    "staticDeclarations": [],
+    "moduleDeclarations": [
+      {
+        "id": "@proto.ui/image-view/declaration",
+        "config": {
+          "source": "",
+          "alternativeText": "",
+          "a11yMode": "decorative",
+          "fit": "contain"
+        },
+        "span": {
+          "file": "root-data-image.proto.ts",
+          "start": 323,
+          "end": 407,
+          "line": 5,
+          "column": 71,
+          "endLine": 5,
+          "endColumn": 155
+        }
+      }
+    ],
+    "props": [],
+    "exposes": [],
+    "requirements": [
+      "hook"
+    ]
+  },
+  "authoredGraph": [
+    {
+      "file": "root-data-image.proto.ts",
+      "content": "import {definePrototype} from '@proto.ui/core';\n      import {asImageView,asTextControl} from '@proto.ui/hooks';\n      import {declareImageView} from '@proto.ui/module-image-view';\n      import {declareTextControl} from '@proto.ui/module-text-control';\n      export default definePrototype({name:'root-data-image',modules:[declareImageView({source:'',alternativeText:'',a11yMode:'decorative',fit:'contain'})],setup(def){asImageView();return()=>null;}});",
+      "sha256": "2c83d39a8d3552b0f4be15b47ced5336ee4274427d2a00142ba7d95504d363df"
+    }
+  ],
+  "note": "Actual checked-IR emitter input; runtime transpilation is not strict validation."
+}

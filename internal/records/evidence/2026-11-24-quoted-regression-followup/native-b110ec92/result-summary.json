@@ -1,0 +1,908 @@
+{
+  "runId": 45398259913,
+  "jobId": 138459735307,
+  "head": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+  "event": "workflow_dispatch",
+  "attempt": 1,
+  "conclusion": "failure",
+  "artifactId": 14922293422,
+  "artifactBytes": 736357,
+  "artifactSha256": "481c083413e3781b43aded9c0cda781ecaa00e1b0b2a314fe790a453b11612da",
+  "artifactMembers": 65,
+  "sourceFilesVerifiedAgainstGitCommit": [
+    {
+      "phase": "beforeTest",
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 18995,
+      "sha256": "e801829655de84593104b60fd5e0f51a5342973472b9401594927fe5d8f3f443"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "pnpm-lock.yaml",
+      "bytes": 270989,
+      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/package.json",
+      "bytes": 2970,
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "bytes": 1646,
+      "sha256": "63e7dc2b1892fb1b7e1424a2c2e40e2b58c9c11618347bd09218b64290d8f920"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "bytes": 7109,
+      "sha256": "105ba726bdb77425ece17da47c3d5780b3733a0ec228e8e0ab4001da0fc871eb"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "bytes": 30579,
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "bytes": 8309,
+      "sha256": "1ad810bd1748eb566ff455c972850bc4eed2b4d2f2851cdea510f77d7ad1a136"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "bytes": 7370,
+      "sha256": "b0d1c3426db0dbc47ba35e3f1e81fdd2ca7ae235f5e5095f44f97ab7d90457b1"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "bytes": 123530,
+      "sha256": "26a5298f760604803719fbe220adb7ccfaa7f0e2a8477c52cc83a47b9bef2fe4"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "bytes": 784,
+      "sha256": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 28348,
+      "sha256": "f9fc1f2cb64e08ce452b693ae054f439430e3abb6f98d31013c59ea5d44b9715"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "bytes": 3302,
+      "sha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/src/web/root-space-observer.ts",
+      "bytes": 4042,
+      "sha256": "d26b44d0f6f1cf9102f39c7835219eedc2b0d7ea72902cfe990daef1c9d174b5"
+    },
+    {
+      "phase": "beforeTest",
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 25859,
+      "sha256": "46cbe728958f3f4e03c8b007221b0d65037d3814d57cc3bd61087a02e435d3e4"
+    },
+    {
+      "phase": "afterTest",
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 18995,
+      "sha256": "e801829655de84593104b60fd5e0f51a5342973472b9401594927fe5d8f3f443"
+    },
+    {
+      "phase": "afterTest",
+      "path": "pnpm-lock.yaml",
+      "bytes": 270989,
+      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/package.json",
+      "bytes": 2970,
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "bytes": 1646,
+      "sha256": "63e7dc2b1892fb1b7e1424a2c2e40e2b58c9c11618347bd09218b64290d8f920"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "bytes": 7109,
+      "sha256": "105ba726bdb77425ece17da47c3d5780b3733a0ec228e8e0ab4001da0fc871eb"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "bytes": 30579,
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "bytes": 8309,
+      "sha256": "1ad810bd1748eb566ff455c972850bc4eed2b4d2f2851cdea510f77d7ad1a136"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "bytes": 7370,
+      "sha256": "b0d1c3426db0dbc47ba35e3f1e81fdd2ca7ae235f5e5095f44f97ab7d90457b1"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "bytes": 123530,
+      "sha256": "26a5298f760604803719fbe220adb7ccfaa7f0e2a8477c52cc83a47b9bef2fe4"
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "bytes": 784,
+      "sha256": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748"
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 28348,
+      "sha256": "f9fc1f2cb64e08ce452b693ae054f439430e3abb6f98d31013c59ea5d44b9715"
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "bytes": 3302,
+      "sha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f"
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/src/web/root-space-observer.ts",
+      "bytes": 4042,
+      "sha256": "d26b44d0f6f1cf9102f39c7835219eedc2b0d7ea72902cfe990daef1c9d174b5"
+    },
+    {
+      "phase": "afterTest",
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 25859,
+      "sha256": "46cbe728958f3f4e03c8b007221b0d65037d3814d57cc3bd61087a02e435d3e4"
+    }
+  ],
+  "generatedFilesVerifiedAgainstBytes": [
+    {
+      "phase": "beforeTest",
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "sameBytesAs92dActualOutput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "bytes": 6473,
+      "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96",
+      "sameBytesAs92dActualOutput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "sameBytesAs92dActualOutput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "bytes": 249803,
+      "sha256": "e503f7dff500dd7894d122b808f623f971fb590bb88fba7859126ee3ca20e1d7",
+      "sameBytesAs92dActualOutput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "bytes": 629704,
+      "sha256": "08415c4d6276a790c2a5538aa8bc70279ad4a060624dc8e3e024fd36e44f7036",
+      "sameBytesAs92dActualOutput": true
+    },
+    {
+      "phase": "afterTest",
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "bytes": 261,
+      "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8",
+      "sameBytesAs92dActualOutput": true
+    }
+  ],
+  "beforeAndAfterDirty": false,
+  "controls": [
+    {
+      "cancel": false,
+      "beforeTop": 0,
+      "afterTop": 400,
+      "wheels": [
+        {
+          "trusted": true,
+          "deltaY": 400,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": false
+        }
+      ],
+      "browser": "157.0.8103.78",
+      "completionErrors": []
+    },
+    {
+      "cancel": true,
+      "beforeTop": 0,
+      "afterTop": 0,
+      "wheels": [
+        {
+          "trusted": true,
+          "deltaY": 400,
+          "surfaceInPath": true,
+          "contentInPath": true,
+          "defaultPrevented": true
+        }
+      ],
+      "browser": "157.0.8103.78",
+      "completionErrors": []
+    }
+  ],
+  "selection": {
+    "expectedSha": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+    "scope": "Two authored native oracle controls and one original public Popover matrix; not complete homepage or CI acceptance",
+    "results": [
+      {
+        "id": "controls",
+        "file": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+        "titles": [
+          "preserves native cancellation=false and current dialog identity",
+          "preserves native cancellation=true and current dialog identity"
+        ],
+        "exactScope": true,
+        "passed": true,
+        "collected": 2,
+        "executed": 2,
+        "skipped": 0,
+        "selected": [
+          {
+            "title": "preserves native cancellation=false and current dialog identity",
+            "fullName": "Contents wheel observer / native event controls preserves native cancellation=false and current dialog identity",
+            "status": "passed",
+            "failureMessages": []
+          },
+          {
+            "title": "preserves native cancellation=true and current dialog identity",
+            "fullName": "Contents wheel observer / native event controls preserves native cancellation=true and current dialog identity",
+            "status": "passed",
+            "failureMessages": []
+          }
+        ]
+      },
+      {
+        "id": "popover",
+        "file": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+        "titles": [
+          "uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence"
+        ],
+        "exactScope": true,
+        "passed": false,
+        "collected": 10,
+        "executed": 1,
+        "skipped": 9,
+        "selected": [
+          {
+            "title": "uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence",
+            "fullName": "Homepage end-to-end dogfood boundary uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence",
+            "status": "failed",
+            "failureMessages": [
+              "AssertionError: expected +0 not to be +0 // Object.is equality\n    at __vite_ssr_import_12__.vi.waitFor.timeout (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts:1260:35)"
+            ]
+          }
+        ]
+      }
+    ],
+    "generatedEvidence": {
+      "complete": true,
+      "files": [
+        {
+          "path": "apps/www/src/styles/shadcn-theme.css",
+          "bytes": 6473,
+          "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+          "bytes": 249803,
+          "sha256": "e503f7dff500dd7894d122b808f623f971fb590bb88fba7859126ee3ca20e1d7"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+          "bytes": 629704,
+          "sha256": "08415c4d6276a790c2a5538aa8bc70279ad4a060624dc8e3e024fd36e44f7036"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+          "bytes": 261,
+          "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+        }
+      ]
+    }
+  },
+  "publicWheelEvidence": {
+    "expectedCombinations": 36,
+    "observedCombinations": 13,
+    "wheelSuccesses": 12,
+    "recordedFailures": 1,
+    "unexecutedCombinations": [
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "react",
+        "action": "Enter"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "react",
+        "action": "Space"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "react",
+        "action": "click"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "vue",
+        "action": "Enter"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "vue",
+        "action": "Space"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "vue",
+        "action": "click"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "vue2",
+        "action": "Enter"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "vue2",
+        "action": "Space"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "vue2",
+        "action": "click"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "wc",
+        "action": "Enter"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "wc",
+        "action": "Space"
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "runtime": "wc",
+        "action": "click"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "react",
+        "action": "Enter"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "react",
+        "action": "Space"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "react",
+        "action": "click"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "vue",
+        "action": "Enter"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "vue",
+        "action": "Space"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "vue",
+        "action": "click"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "vue2",
+        "action": "Enter"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "vue2",
+        "action": "Space"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "vue2",
+        "action": "click"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "wc",
+        "action": "Enter"
+      },
+      {
+        "family": "brutalist",
+        "runtime": "wc",
+        "action": "Space"
+      }
+    ],
+    "observations": [
+      {
+        "family": "brutalist",
+        "runtime": "wc",
+        "action": "click",
+        "file": "runtime/contents-command/brutalist-wc-click-wheel.json",
+        "checks": {
+          "noRecordedError": false,
+          "retainedOwner": true,
+          "movementInDirection": false,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": false,
+        "beforeTop": 0,
+        "afterTop": 0,
+        "error": "AssertionError: expected +0 not to be +0 // Object.is equality",
+        "scrolls": [
+          {
+            "at": 5593.299999999988,
+            "eventTimeStamp": 5588.700000000012,
+            "trusted": true,
+            "target": "wc-brutalist-popover-content",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          },
+          {
+            "at": 5653.799999999988,
+            "eventTimeStamp": 5649.899999999965,
+            "trusted": true,
+            "target": "wc-brutalist-popover-content",
+            "isContent": true,
+            "isSurface": true,
+            "top": 0
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "react",
+        "action": "Enter",
+        "file": "runtime/contents-command/shadcn-react-Enter-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 45814.09999999998,
+            "eventTimeStamp": 45807.899999999994,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "react",
+        "action": "Space",
+        "file": "runtime/contents-command/shadcn-react-Space-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 47612.09999999998,
+            "eventTimeStamp": 47606.29999999999,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "react",
+        "action": "click",
+        "file": "runtime/contents-command/shadcn-react-click-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 43704,
+            "eventTimeStamp": 43696.19999999998,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue",
+        "action": "Enter",
+        "file": "runtime/contents-command/shadcn-vue-Enter-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 56996.69999999998,
+            "eventTimeStamp": 56990.5,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue",
+        "action": "Space",
+        "file": "runtime/contents-command/shadcn-vue-Space-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 59462.29999999999,
+            "eventTimeStamp": 59456.20000000001,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue",
+        "action": "click",
+        "file": "runtime/contents-command/shadcn-vue-click-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 54541.59999999998,
+            "eventTimeStamp": 54535.59999999998,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue2",
+        "action": "Enter",
+        "file": "runtime/contents-command/shadcn-vue2-Enter-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 70627,
+            "eventTimeStamp": 70621.20000000001,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue2",
+        "action": "Space",
+        "file": "runtime/contents-command/shadcn-vue2-Space-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 72675.89999999997,
+            "eventTimeStamp": 72669.79999999999,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue2",
+        "action": "click",
+        "file": "runtime/contents-command/shadcn-vue2-click-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 68200.29999999999,
+            "eventTimeStamp": 68194.39999999997,
+            "trusted": true,
+            "target": "div",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "wc",
+        "action": "Enter",
+        "file": "runtime/contents-command/shadcn-wc-Enter-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 36897.69999999998,
+            "eventTimeStamp": 36892.59999999998,
+            "trusted": true,
+            "target": "wc-shadcn-popover-content",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "wc",
+        "action": "Space",
+        "file": "runtime/contents-command/shadcn-wc-Space-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 38635.399999999994,
+            "eventTimeStamp": 38630.29999999999,
+            "trusted": true,
+            "target": "wc-shadcn-popover-content",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      },
+      {
+        "family": "shadcn",
+        "runtime": "wc",
+        "action": "click",
+        "file": "runtime/contents-command/shadcn-wc-click-wheel.json",
+        "checks": {
+          "noRecordedError": true,
+          "retainedOwner": true,
+          "movementInDirection": true,
+          "documentUnchanged": true,
+          "trustedUncancelledWheel": true,
+          "deadline1000": true
+        },
+        "wheelSucceeded": true,
+        "beforeTop": 0,
+        "afterTop": 500,
+        "error": null,
+        "scrolls": [
+          {
+            "at": 35002.79999999999,
+            "eventTimeStamp": 34996.59999999998,
+            "trusted": true,
+            "target": "wc-shadcn-popover-content",
+            "isContent": true,
+            "isSurface": true,
+            "top": 500
+          }
+        ],
+        "droppedScrolls": 0
+      }
+    ],
+    "subsequentCloseObservations": 12,
+    "keyboardFocusReceipts": [
+      {
+        "family": "shadcn",
+        "runtime": "react",
+        "screenshotComplete": true,
+        "file": "runtime/contents-command/shadcn-react-keyboard-focus.json"
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue",
+        "screenshotComplete": true,
+        "file": "runtime/contents-command/shadcn-vue-keyboard-focus.json"
+      },
+      {
+        "family": "shadcn",
+        "runtime": "vue2",
+        "screenshotComplete": true,
+        "file": "runtime/contents-command/shadcn-vue2-keyboard-focus.json"
+      },
+      {
+        "family": "shadcn",
+        "runtime": "wc",
+        "screenshotComplete": true,
+        "file": "runtime/contents-command/shadcn-wc-keyboard-focus.json"
+      }
+    ]
+  },
+  "limits": [
+    "The original single matrix case failed; 12 successful Shadcn wheel observations are not a complete 36-combination acceptance.",
+    "The first Brutalist/WC/click receipt now directly records positive500 then zero scroll observations on the same Content; the resetting operation is not identified by the trace.",
+    "No additional native run, source change or platform mutation was performed by this watcher."
+  ],
+  "environment": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "chrome": "Google Chrome 157.0.8103.78",
+    "fontEvidence": "artifact/fonts/font-environment.txt"
+  }
+}

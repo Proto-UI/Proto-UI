@@ -1,0 +1,1201 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "selectedAcceptance": "62 actual CLI/filesystem migration tests; not whole-compiler acceptance.",
+    "threeDistinctGroups": [
+      "Untouched independently emitted legacy directories, observed with their actual failures.",
+      "Explicit test-only shared legacy-support assembly with original component/map bytes and static facades; not untouched old directories.",
+      "New directories produced by the actual migrate-native-support CLI."
+    ],
+    "additionalControls": [
+      "Unmigrated old-Trigger/new-Text routing counterexample.",
+      "Deliberately duplicated full helper with shared ownership; only the recorded facade and two helper copies differ."
+    ],
+    "limits": [
+      "No full compiler, browser, hydration, all-backend or performance acceptance is inferred.",
+      "Existing unrelated generated strict and Text failures are not claimed fixed by these 62 tests."
+    ]
+  },
+  "normalization": {
+    "status": "Normalized derivative, not original evidence bytes.",
+    "rules": [
+      "Every distinct temporary fixture root receives one stable distinct <fixture-NNN> token across all documents. Relative esbuild paths to that root receive the same token.",
+      "Dependency installation roots become <locked-dependencies>; repository roots become <repo>. Module-relative paths, package IDs and all other project data remain unchanged.",
+      "Normalization applies to object keys and string values, including nested CLI JSON stdout strings. Original record SHA256 and byte length are retained. Internal occurrence-aware reversal reconstructs each original JSON file byte-for-byte."
+    ],
+    "fixtureRootCount": 68,
+    "omitted": "No bundle code, broad legacy helper bodies, execution receipts/logs, process data or supervision records are included."
+  },
+  "records": [
+    {
+      "sourceArtifact": "foreign-replacement-rollback.json",
+      "originalSHA256": "4296ccfc28f5e438897f8d45bbed341dcd30542f4db7c1a1442e5eff0ab18ba2",
+      "originalBytes": 2179,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI3003",
+              "category": "output-write",
+              "message": "Cannot write an artifact file: Injected ownership rollback failure; publication failed; no artifact set committed; incomplete artifacts: .proto-ui/shared/context/scope-v1.ts, .proto-ui/shared/interaction/adapter-modules-v1.ts, .proto-ui/shared/interaction/native-v1.ts, .proto-ui/shared/interaction/ownership-v1.ts, provenance.json, subject/.proto-ui/context/scope-v1.ts, subject/.proto-ui/interaction/adapter-modules-v1.ts, subject/.proto-ui/interaction/native-v1.ts, subject/.proto-ui/interaction/ownership-v1.ts, subject/Component.js, subject/Component.js.map, subject/provenance.json, valid/.proto-ui/context/scope-v1.ts, valid/.proto-ui/interaction/adapter-modules-v1.ts, valid/.proto-ui/interaction/native-v1.ts, valid/.proto-ui/interaction/ownership-v1.ts, valid/Component.js, valid/Component.js.map, valid/provenance.json; rollback incomplete; unresolved owned entries: <fixture-053>/output/.proto-ui/migration-inputs/subject.json (original owned file cleanup could not be verified after replacement); <fixture-053>/output/.proto-ui/migration-inputs (remaining contents preserved; ENOTEMPTY: directory not empty, rmdir '<fixture-053>/output/.proto-ui/migration-inputs'); <fixture-053>/output/.proto-ui (remaining contents preserved; ENOTEMPTY: directory not empty, rmdir '<fixture-053>/output/.proto-ui'); <fixture-053>/output (remaining contents preserved; ENOTEMPTY: directory not empty, rmdir '<fixture-053>/output'); foreign replacements preserved: <fixture-053>/output/.proto-ui/migration-inputs/subject.json (foreign replacement)",
+              "span": {
+                "file": "<fixture-053>/output/.proto-ui/shared/context/scope-v1.ts",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "writes": 3,
+        "preserved": ".proto-ui/migration-inputs/subject.json"
+      }
+    },
+    {
+      "sourceArtifact": "invalid-cli-irrelevant-profile.json",
+      "originalSHA256": "765463269ee3f6f675d96a93593659e5e278b049023762b5316cae7e0c3e2044",
+      "originalBytes": 388,
+      "data": {
+        "code": 2,
+        "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI9001\",\"category\":\"invalid-input\",\"message\":\"migrate-native-support accepts only an entry plan, output, json and explicit configuration\",\"span\":{\"file\":\"<cli>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "invalid-cli-missing-output.json",
+      "originalSHA256": "2b9aa86b588477f8a4a52c0f05b3c835789703b766f4a28c9721ef53803e2549",
+      "originalBytes": 360,
+      "data": {
+        "code": 2,
+        "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI9001\",\"category\":\"invalid-input\",\"message\":\"migrate-native-support requires an explicit --output directory\",\"span\":{\"file\":\"<cli>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "invalid-cli-missing-plan.json",
+      "originalSHA256": "12f6489599a696930df492377d0cd17c82fc3d1227d841d3bf39417417f3748d",
+      "originalBytes": 348,
+      "data": {
+        "code": 2,
+        "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI9001\",\"category\":\"invalid-input\",\"message\":\"An entry is required (--entry or positional entry)\",\"span\":{\"file\":\"<cli>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "output-parent-symlink.json",
+      "originalSHA256": "1ada23aaa58e20aa6fb1679cb6e6c95cae3d235edb08e25c0386ad383cfa0696",
+      "originalBytes": 1149,
+      "data": {
+        "api": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Migration output parent cannot contain a symbolic-link ancestor",
+              "span": {
+                "file": "<fixture-036>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Migration output parent cannot contain a symbolic-link ancestor\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0,
+        "foreignBefore": {
+          "sentinel.txt": "053d94775e4ca5b2a318d3310740c21b59aab01764799042496c53668bde648e"
+        },
+        "foreignAfter": {
+          "sentinel.txt": "053d94775e4ca5b2a318d3310740c21b59aab01764799042496c53668bde648e"
+        }
+      }
+    },
+    {
+      "sourceArtifact": "partial-write-rollback.json",
+      "originalSHA256": "e37fe4b170c1da180fcce25b340d38fcc365208a4f7d99e56864f67f9a64f86e",
+      "originalBytes": 3622,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI3003",
+              "category": "output-write",
+              "message": "Cannot write an artifact file: Injected migration write failure; publication failed; no artifact set committed; incomplete artifacts: .proto-ui/shared/context/scope-v1.ts, .proto-ui/shared/interaction/adapter-modules-v1.ts, .proto-ui/shared/interaction/native-v1.ts, .proto-ui/shared/interaction/ownership-v1.ts, provenance.json, subject/.proto-ui/context/scope-v1.ts, subject/.proto-ui/interaction/adapter-modules-v1.ts, subject/.proto-ui/interaction/native-v1.ts, subject/.proto-ui/interaction/ownership-v1.ts, subject/Component.js, subject/Component.js.map, subject/provenance.json, valid/.proto-ui/context/scope-v1.ts, valid/.proto-ui/interaction/adapter-modules-v1.ts, valid/.proto-ui/interaction/native-v1.ts, valid/.proto-ui/interaction/ownership-v1.ts, valid/Component.js, valid/Component.js.map, valid/provenance.json",
+              "span": {
+                "file": "<fixture-040>/output/.proto-ui/shared/context/scope-v1.ts",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "writes": 3,
+        "retryInventory": {
+          ".proto-ui/migration-inputs/subject.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/migration-inputs/valid.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          "provenance.json": "54c61f9e9ef8b3f7015ed559c5cc5efdc1e8be1f97341f41fb7e056182806b71",
+          "subject/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "subject/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "subject/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "subject/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "subject/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "subject/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "subject/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "valid/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "valid/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "valid/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "valid/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "valid/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "valid/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "valid/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b"
+        }
+      }
+    },
+    {
+      "sourceArtifact": "reject-anchor.json",
+      "originalSHA256": "6a27ce89a29dc44f5bb36e0e83e9b15ea1c5b1c063b50a95ad972b67a102c969",
+      "originalBytes": 905,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Trusted provenance SHA does not match input: subject",
+              "span": {
+                "file": "<fixture-037>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Trusted provenance SHA does not match input: subject\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-case-collision.json",
+      "originalSHA256": "7e028bbcb450789f1d1ba849f7f85ef455d5449cb35d7af8c6810165021ae373",
+      "originalBytes": 903,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: component.js",
+              "span": {
+                "file": "<fixture-051>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: component.js\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-case-id.json",
+      "originalSHA256": "2135ea4179d576a49d3b73a9160ac82c4defc2250c8ed161b19b5880b55ee929",
+      "originalBytes": 883,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Duplicate migration input id or directory",
+              "span": {
+                "file": "<fixture-049>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Duplicate migration input id or directory\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-changed-component-js-map.json",
+      "originalSHA256": "47d9eddc71371f7e3080d894a82f91f9f4f905b50d8690092322d99183ba2432",
+      "originalBytes": 911,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: Component.js.map",
+              "span": {
+                "file": "<fixture-032>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: Component.js.map\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-changed-component-js.json",
+      "originalSHA256": "cd382e4e41568c17c9650480f5a6581f5095fad9441a1dd751d59dfeadf55dea",
+      "originalBytes": 903,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: Component.js",
+              "span": {
+                "file": "<fixture-057>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: Component.js\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-changed-native-v1-ts.json",
+      "originalSHA256": "a4e156b06b2a238418943ec47f84b66300c50a3c8a17e5f4869add64fc32696d",
+      "originalBytes": 947,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: .proto-ui/interaction/native-v1.ts",
+              "span": {
+                "file": "<fixture-046>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: .proto-ui/interaction/native-v1.ts\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-duplicate-directory.json",
+      "originalSHA256": "b3a53d35151358c852767ce4c7f6bb37a91baf145521f0d66cc76f798f0924df",
+      "originalBytes": 883,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Duplicate migration input id or directory",
+              "span": {
+                "file": "<fixture-035>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Duplicate migration input id or directory\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-duplicate-id.json",
+      "originalSHA256": "544cebd061e58e6ba9b67a224d38d5b6d0dd0b64b0fa1e8206c2c1d556d3e4d7",
+      "originalBytes": 883,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Duplicate migration input id or directory",
+              "span": {
+                "file": "<fixture-030>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Duplicate migration input id or directory\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-duplicate.json",
+      "originalSHA256": "cc31051629f2656a21c2f94f5e42ef5a725a6a0aa2b5c31103ce09c07c308ae6",
+      "originalBytes": 959,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Artifact paths have a duplicate or file/directory collision: \"Component.js\"",
+              "span": {
+                "file": "<fixture-026>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Artifact paths have a duplicate or file/directory collision: \\\"Component.js\\\"\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-extra-directory.json",
+      "originalSHA256": "53f7d3ab0e77f5a04b31b44240a392a2929d7512dbc6ba8d1d31c63d5a40b06c",
+      "originalBytes": 947,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Additional unrecorded migration input directory: empty-consumer-directory",
+              "span": {
+                "file": "<fixture-038>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Additional unrecorded migration input directory: empty-consumer-directory\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-extra.json",
+      "originalSHA256": "39694d840fb108a7d966e4f67fc23be94cb08d236acad4d45bb6df7fc170860f",
+      "originalBytes": 887,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Additional unrecorded migration input files",
+              "span": {
+                "file": "<fixture-059>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Additional unrecorded migration input files\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-file-directory-collision.json",
+      "originalSHA256": "5c4949ecab439dd7ee7d9372228a6937a38ed5842fc330569a6f03c25c834a3d",
+      "originalBytes": 921,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: Component.js/child.ts",
+              "span": {
+                "file": "<fixture-033>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: Component.js/child.ts\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-missing.json",
+      "originalSHA256": "953f33e88249af4ffad2a5a36e53f665e95c0b895386c78f87c886ea5acaec1a",
+      "originalBytes": 947,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: .proto-ui/interaction/native-v1.ts",
+              "span": {
+                "file": "<fixture-039>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: .proto-ui/interaction/native-v1.ts\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-plan-array.json",
+      "originalSHA256": "37f324df68afd958672479ba27a70c0e863718ea8992412f02577abdec13f44b",
+      "originalBytes": 863,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Invalid explicit migration plan",
+              "span": {
+                "file": "<fixture-028>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Invalid explicit migration plan\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-plan-empty-inputs.json",
+      "originalSHA256": "03edc274da9e67884e7d60c100a944c88f3b496049f521196cbc9f00b0843205",
+      "originalBytes": 863,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Invalid explicit migration plan",
+              "span": {
+                "file": "<fixture-031>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Invalid explicit migration plan\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-plan-invalid-json.json",
+      "originalSHA256": "769a5c00f33e23624b0057ef58eb201088ce238133b1f661b277e6c5d2fe8d9f",
+      "originalBytes": 939,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
+              "span": {
+                "file": "<fixture-034>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Expected property name or '}' in JSON at position 1 (line 1 column 2)\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-plan-missing-anchor.json",
+      "originalSHA256": "db91d0b56b052325397459d3217c8d17680d404a174c4daed18a92877bb46ed8",
+      "originalBytes": 861,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Invalid migration input/anchor",
+              "span": {
+                "file": "<fixture-050>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Invalid migration input/anchor\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-plan-unknown-key.json",
+      "originalSHA256": "9c041c8b9a8b6766c7c6e9c5927f095770f497999aa0eaccba89f3d12c24d423",
+      "originalBytes": 863,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Invalid explicit migration plan",
+              "span": {
+                "file": "<fixture-060>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Invalid explicit migration plan\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-plan-version.json",
+      "originalSHA256": "632f8ed56d0492f59dfeb39b72ce96c9fdfd154554f68e95c51c1c2826d7e3fc",
+      "originalBytes": 863,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Invalid explicit migration plan",
+              "span": {
+                "file": "<fixture-054>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Invalid explicit migration plan\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-resealed-context.json",
+      "originalSHA256": "b693f8ea563b94532760af821680fc189eb78580551fd7a11bd4bab6787355cf",
+      "originalBytes": 875,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Unknown or modified Context scope ABI",
+              "span": {
+                "file": "<fixture-048>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Unknown or modified Context scope ABI\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-resealed-helper.json",
+      "originalSHA256": "f499731e43dd5644d2f1f77d34ac81b9382c8ba6de0e2aba058a920c946114f5",
+      "originalBytes": 933,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Unknown or modified native support ABI; migration refuses to guess",
+              "span": {
+                "file": "<fixture-044>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Unknown or modified native support ABI; migration refuses to guess\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-reserved-id.json",
+      "originalSHA256": "191f96721eb971ec41d5dc8b869368c710c94158b1e4fdb7490bed8120cb48b8",
+      "originalBytes": 939,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Artifact path contains a reserved device name: \"CON/Component.js\"",
+              "span": {
+                "file": "<fixture-042>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Artifact path contains a reserved device name: \\\"CON/Component.js\\\"\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-symlink-artifact.json",
+      "originalSHA256": "c639af4f2024b7db64a30de43f34fa5e6f9470814cebb02221e4642d17abe717",
+      "originalBytes": 989,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Migration input must be an unlinked regular file: <fixture-027>/subject/.proto-ui/interaction/native-v1.ts",
+              "span": {
+                "file": "<fixture-027>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Migration input must be an unlinked regular file: <absolute-path>\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-symlink-directory.json",
+      "originalSHA256": "39159fe3d2ae66ac4ab4a4505ad3eebad9b27e12eae321e24032a6c8193c708d",
+      "originalBytes": 931,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Migration input directory cannot contain a symbolic-link ancestor",
+              "span": {
+                "file": "<fixture-029>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Migration input directory cannot contain a symbolic-link ancestor\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-symlink-manifest.json",
+      "originalSHA256": "6e8d6f82811cd86b2876778ee2d2fb0cd69887d6516e67e92cf272fe2485c554",
+      "originalBytes": 970,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Migration input must be an unlinked regular file: <fixture-056>/subject/provenance.json",
+              "span": {
+                "file": "<fixture-056>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Migration input must be an unlinked regular file: <absolute-path>\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-symlink-parent.json",
+      "originalSHA256": "8868b3bd19c7720a9023823b26a806ee18decec93c7a1e6a719824733136b82c",
+      "originalBytes": 964,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Migration input must be an unlinked regular file: <fixture-055>/subject/.proto-ui",
+              "span": {
+                "file": "<fixture-055>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Migration input must be an unlinked regular file: <absolute-path>\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-symlink-plan.json",
+      "originalSHA256": "72157d27f5e2c6227956433100c6bb60ffa0c8438f87557529e75fd2814fdd8a",
+      "originalBytes": 909,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Migration plan cannot contain a symbolic-link ancestor",
+              "span": {
+                "file": "<fixture-041>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Migration plan cannot contain a symbolic-link ancestor\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-target-dependency.json",
+      "originalSHA256": "4d68bcb7868d1f8f515960f029ce7091c7bce38526dd72842d23a6c47780b9ed",
+      "originalBytes": 875,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Unknown native support dependency ABI",
+              "span": {
+                "file": "<fixture-052>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Unknown native support dependency ABI\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-traversal-id.json",
+      "originalSHA256": "bd5cc393a6a5dde663c13f47b83f8ff8d55bc8f22a1198d6b7ec010ffc086b94",
+      "originalBytes": 861,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Invalid migration input/anchor",
+              "span": {
+                "file": "<fixture-047>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Invalid migration input/anchor\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-traversal.json",
+      "originalSHA256": "026a45f4744b6ace5ea7d9782be95781136d3e395fa41e9fcc016db954c873c4",
+      "originalBytes": 905,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Missing or modified original artifact: ../outside.ts",
+              "span": {
+                "file": "<fixture-043>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Missing or modified original artifact: ../outside.ts\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-unknown-context.json",
+      "originalSHA256": "6ebd7a1b94b881aa1eadff555413ab990ef9d23a75da678d321b046cbb517db7",
+      "originalBytes": 865,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Unknown Context key artifact ABI",
+              "span": {
+                "file": "<fixture-058>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Unknown Context key artifact ABI\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    },
+    {
+      "sourceArtifact": "reject-unknown-helper.json",
+      "originalSHA256": "00b448c18cc47a1fa4f9f646b6d853ecf3c28dcc5e73b52b18056daa040edebf",
+      "originalBytes": 933,
+      "data": {
+        "result": {
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI5001",
+              "category": "output-conflict",
+              "message": "Native support migration rejected: Unknown or modified native support ABI; migration refuses to guess",
+              "span": {
+                "file": "<fixture-045>/plan.json",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        "cli": {
+          "code": 1,
+          "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Unknown or modified native support ABI; migration refuses to guess\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+          "stderr": ""
+        },
+        "opens": 0
+      }
+    }
+  ]
+}

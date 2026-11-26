@@ -1,0 +1,3700 @@
+{
+  "kind": "independent-diagnostic-receipt-audit",
+  "reviewer": "/root/final_review",
+  "auditedAt": "2026-11-22T15:36:45.666511+00:00",
+  "runId": 45037951016,
+  "artifactId": 14760836024,
+  "carrierHead": "8da8222204d4101eb4334b1afc7f2bba096f2289",
+  "candidateHead": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "zipSha256": "463e074d2a79c1d4a6d0c4249775d65275ce67a49a9bf01dc4da89f3bf5226a5",
+  "sourceVerification": {
+    "originalSha256": "1da3edc6f320435bddb7318b0f4dc3160c160688f648025820962c56dc8c3278",
+    "originalExactGitBlob": true,
+    "instrumentedSha256": "7ae7d75091f88d4c6d33bafdb4661ef382344656334eed8aa7ba18a39f0b1765",
+    "patchSha256": "ae3cc75dba99f79984f511fcbd248cea703d5abfe3d7cb7c6723c72ef1a28ae9",
+    "onlyChangedFile": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+    "dirtySourceExplicit": true,
+    "everyHitSourceMatches": true
+  },
+  "inventory": {
+    "expected": 61,
+    "observed": 61,
+    "passed": 54,
+    "failed": 7,
+    "incomplete": 0,
+    "original42ScenarioCoverageExact": true,
+    "targetRepeated20": {
+      "passed": 13,
+      "failed": 7
+    },
+    "additional19": {
+      "passed": 12,
+      "failed": 7
+    },
+    "hitObservations": 79,
+    "falseHitObservations": 7
+  },
+  "cases": [
+    {
+      "name": "B: en/wc switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 6798.42240499999
+    },
+    {
+      "name": "B: en/react switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3336.4210750000057
+    },
+    {
+      "name": "B: en/vue switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3059.311496999988
+    },
+    {
+      "name": "B: en/vue2 switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3257.446274999995
+    },
+    {
+      "name": "B: zh-cn/wc switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3718.911745999998
+    },
+    {
+      "name": "B: zh-cn/react switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3145.1570120000106
+    },
+    {
+      "name": "B: zh-cn/vue switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3251.980621999988
+    },
+    {
+      "name": "B: zh-cn/vue2 switches one live Tabs owner through all three exhibition profiles",
+      "status": "passed",
+      "durationMs": 3099.1456000000035
+    },
+    {
+      "name": "C: en/light/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 4333.943184000003
+    },
+    {
+      "name": "C: en/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 1021.0335199999972
+    },
+    {
+      "name": "C: en/light/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 5214.815478000019
+    },
+    {
+      "name": "C: en/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 795.3173810000008
+    },
+    {
+      "name": "C: en/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 4300.660527
+    },
+    {
+      "name": "C: en/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 1023.1371849999996
+    },
+    {
+      "name": "C: en/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 4944.4441989999905
+    },
+    {
+      "name": "C: en/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 764.1004059999832
+    },
+    {
+      "name": "C: zh-cn/light/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 4293.602909999987
+    },
+    {
+      "name": "C: zh-cn/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 1016.8187080000062
+    },
+    {
+      "name": "C: zh-cn/light/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 5131.096582999977
+    },
+    {
+      "name": "C: zh-cn/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 758.604650000023
+    },
+    {
+      "name": "C: zh-cn/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 4359.380908000021
+    },
+    {
+      "name": "C: zh-cn/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 1070.852257999999
+    },
+    {
+      "name": "C: zh-cn/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 4981.925883999997
+    },
+    {
+      "name": "C: zh-cn/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+      "status": "passed",
+      "durationMs": 753.7193329999864
+    },
+    {
+      "name": "C: en/shadcn/enhanced keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 2780.470892000012
+    },
+    {
+      "name": "C: en/shadcn/no-js keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 760.2745029999933
+    },
+    {
+      "name": "C: en/brutalist/enhanced keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 2384.376122000016
+    },
+    {
+      "name": "C: en/brutalist/no-js keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 580.6385469999805
+    },
+    {
+      "name": "C: zh-cn/shadcn/enhanced keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 2811.694684999995
+    },
+    {
+      "name": "C: zh-cn/shadcn/no-js keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 840.6169790000131
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 2401.872613000014
+    },
+    {
+      "name": "C: zh-cn/brutalist/no-js keeps full mobile navigation targets [diagnostic 0]",
+      "status": "passed",
+      "durationMs": 595.4537589999964
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 1]",
+      "status": "failed",
+      "durationMs": 1969.9860819999885
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 2]",
+      "status": "passed",
+      "durationMs": 2350.443907000008
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 3]",
+      "status": "passed",
+      "durationMs": 2382.2305360000173
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 4]",
+      "status": "failed",
+      "durationMs": 2009.121622000006
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 5]",
+      "status": "passed",
+      "durationMs": 2553.1429960000096
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 6]",
+      "status": "failed",
+      "durationMs": 2004.786632000003
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 7]",
+      "status": "passed",
+      "durationMs": 2497.217479999992
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 8]",
+      "status": "passed",
+      "durationMs": 2448.5780530000047
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 9]",
+      "status": "failed",
+      "durationMs": 1967.3738520000188
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 10]",
+      "status": "passed",
+      "durationMs": 2419.01333300001
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 11]",
+      "status": "passed",
+      "durationMs": 2400.1401540000224
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 12]",
+      "status": "failed",
+      "durationMs": 1930.9390589999966
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 13]",
+      "status": "passed",
+      "durationMs": 2418.704051000008
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 14]",
+      "status": "failed",
+      "durationMs": 1963.5910779999977
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 15]",
+      "status": "passed",
+      "durationMs": 2319.6831319999765
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 16]",
+      "status": "failed",
+      "durationMs": 1982.0295530000003
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 17]",
+      "status": "passed",
+      "durationMs": 2385.785227000015
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 18]",
+      "status": "passed",
+      "durationMs": 2281.490696999972
+    },
+    {
+      "name": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 19]",
+      "status": "passed",
+      "durationMs": 2350.96132100001
+    },
+    {
+      "name": "D: en/light/enhanced preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 4154.18865299999
+    },
+    {
+      "name": "D: en/light/failed-scripts preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 965.581468999997
+    },
+    {
+      "name": "D: en/dark/enhanced preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 3517.0798880000075
+    },
+    {
+      "name": "D: en/dark/failed-scripts preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 842.2062980000046
+    },
+    {
+      "name": "D: zh-cn/light/enhanced preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 3890.036752999993
+    },
+    {
+      "name": "D: zh-cn/light/failed-scripts preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 856.6804030000058
+    },
+    {
+      "name": "D: zh-cn/dark/enhanced preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 3489.4456619999837
+    },
+    {
+      "name": "D: zh-cn/dark/failed-scripts preserves a native, focused Hero pill without prose underline",
+      "status": "passed",
+      "durationMs": 813.585321999999
+    },
+    {
+      "name": "#1154: en renders the current public Hook evidence without accepting the historical candidate",
+      "status": "passed",
+      "durationMs": 2079.8987239999988
+    },
+    {
+      "name": "#1154: zh-cn renders the current public Hook evidence without accepting the historical candidate",
+      "status": "passed",
+      "durationMs": 1954.133589999983
+    }
+  ],
+  "falseObservations": [
+    {
+      "file": "hit-0049.json",
+      "sha256": "ebd02c9fc15cade4d31d928bc8bbea5f9fa0cefe37438904d506e1e32ff290cb",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:41.811Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0049-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 1]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    },
+    {
+      "file": "hit-0054.json",
+      "sha256": "d0e7b7ea041851fa60c591a47f9f6f9a2b4847f3c368db6791b6f6aad74551b9",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:48.542Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0054-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 4]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    },
+    {
+      "file": "hit-0057.json",
+      "sha256": "59af112412ff70b98ad797b86ba8ab5eee0e927fee844ea31c3c4d9d91ab389a",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:53.091Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0057-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 6]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    },
+    {
+      "file": "hit-0062.json",
+      "sha256": "943275abd8b563b8234394b667e7d5cac216cfff3a3046e4ff16d175c1aa7307",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:00.020Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0062-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 9]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    },
+    {
+      "file": "hit-0067.json",
+      "sha256": "83a0f6167aafeec3e2ff70e2d64e8336579729ca55f12c2729e3782c6ee62868",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:06.791Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0067-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 12]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    },
+    {
+      "file": "hit-0070.json",
+      "sha256": "c9473e341883fc3aec70e37ca816a76bc73f63d8619bae1efa272476fb003022",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:11.153Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0070-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 14]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    },
+    {
+      "file": "hit-0073.json",
+      "sha256": "97f581c6f2464f6e06d3fcc5d4eb0d003080f4db7c27a7db3b36d8b0ff8ac5dd",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:15.466Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      },
+      "points": [
+        {
+          "x": 37,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 353,
+          "y": -1100,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1119,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        },
+        {
+          "x": 195,
+          "y": -1081,
+          "matchesOwner": false,
+          "hit": null,
+          "closest": null
+        }
+      ],
+      "windowScroll": [
+        0,
+        0
+      ],
+      "ancestors": [
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1122,
+            "width": 322,
+            "height": 2802,
+            "top": -1122,
+            "right": 356,
+            "bottom": 1680,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 2802,
+          "clientHeight": 2802,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1260,
+            "width": 322,
+            "height": 3032,
+            "top": -1260,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3032,
+          "clientHeight": 3032,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "details",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "li",
+          "className": "astro-osdwpxxd",
+          "bounds": {
+            "x": 34,
+            "y": -1304,
+            "width": 322,
+            "height": 3076,
+            "top": -1304,
+            "right": 356,
+            "bottom": 1772,
+            "left": 34
+          },
+          "scrollTop": 0,
+          "scrollHeight": 3076,
+          "clientHeight": 3076,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "ul",
+          "className": "top-level astro-osdwpxxd",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "sl-sidebar-state-persist",
+          "className": "contents",
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "scrollTop": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "overflow": "visible",
+          "position": "static"
+        },
+        {
+          "tag": "div",
+          "className": "mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+          "bounds": {
+            "x": 26,
+            "y": -2166,
+            "width": 338,
+            "height": 6290,
+            "top": -2166,
+            "right": 364,
+            "bottom": 4124,
+            "left": 26
+          },
+          "scrollTop": 0,
+          "scrollHeight": 6290,
+          "clientHeight": 6290,
+          "overflow": "visible",
+          "position": "static"
+        }
+      ],
+      "animations": [],
+      "afterObservationImage": "hit-0073-after-failure.png",
+      "imageSha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+      "seriallyCorrespondingFailedCase": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [diagnostic 16]",
+      "correspondenceMethod": "Serial single-worker case order; each failure is the first group assertion with one false observation before throwing. Observations themselves do not include the case name."
+    }
+  ],
+  "allHitInventory": [
+    {
+      "file": "hit-0001.json",
+      "sha256": "bccb61e4df13fc784b807a10fd76f8d0dd457b9482700015cac90d2bf67d0748",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:46.023Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 488,
+        "width": 224,
+        "height": 32,
+        "top": 488,
+        "right": 260.796875,
+        "bottom": 520,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0002.json",
+      "sha256": "f9f5f45842eb535c3dba55f8b58067368f6beb168d76c125c404eeee7bd9b47c",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:46.109Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 968,
+        "width": 203,
+        "height": 32,
+        "top": 968,
+        "right": 260.796875,
+        "bottom": 1000,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0003.json",
+      "sha256": "917eeb9d3606cc9cd7b09fd24c3b83ae1aee40a3e82143dd0ba039316b29b5f3",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:47.164Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0004.json",
+      "sha256": "59e240b6f40c6dcad4a531e6a54177249a02f5f77fbcd792942589836e344354",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:47.213Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0005.json",
+      "sha256": "3fb80c9cb18cd32bfc18d794d12498c20ef89614e26bed00b4df0d66bc03e93c",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:52.325Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0006.json",
+      "sha256": "1758ac8e59ed631aae4cab9ff644a71af14e90e0f923829bbf52daa22f39be95",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:52.402Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0007.json",
+      "sha256": "3ad37fcb81c4c2c195e8b1345106491ab195d3cff30a680bec93ae080d4cfa79",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:53.217Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0008.json",
+      "sha256": "3044fa9893233cb59b78a8476cedbd1ac82e2a92664a9e8395f269a36913e923",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:53.262Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0009.json",
+      "sha256": "a8fe8b87d6157772e912b44eab002b712262a57f0b7b4224432abdfb4d5ce52c",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:57.351Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 488,
+        "width": 224,
+        "height": 32,
+        "top": 488,
+        "right": 260.796875,
+        "bottom": 520,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0010.json",
+      "sha256": "0b60e449f0cb27ae8d30e3e9ec4bcb56ce95695828cefc70b71e44aaaf75a3df",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:57.435Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 968,
+        "width": 203,
+        "height": 32,
+        "top": 968,
+        "right": 260.796875,
+        "bottom": 1000,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0011.json",
+      "sha256": "b011614a4e81d5d9b27d626e7fc684db92907736bb5668063ee4e77237ab6335",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:58.514Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0012.json",
+      "sha256": "6c83176e00c384dbf40d35824b09b2477851e7463576e7f0955c6738ebd5511b",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:27:58.562Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0013.json",
+      "sha256": "ab8d1eaf735e1239a70365b310a4cd9856e09b1edf049d4255bb5f070cc51bdc",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:03.411Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0014.json",
+      "sha256": "bba03a5ae48236d1429f9f17ca68d32a0a8afe54c6e04c2a71863256c7dc6981",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:03.481Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0015.json",
+      "sha256": "8d5e8b9e49e87bc77adec3b020698f2217076eaf00e0a13af8c1ce938bc11689",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:04.248Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0016.json",
+      "sha256": "7e74c2647bdb8757da1cc036b01f0baac681dd5f95af35b8740ceff817200455",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:04.295Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0017.json",
+      "sha256": "f41a62ccc75d3ee0d12691f74b513bb7e46b97f5afaf72ab5d7da4fd862510f5",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:08.383Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 488,
+        "width": 224,
+        "height": 32,
+        "top": 488,
+        "right": 260.796875,
+        "bottom": 520,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0018.json",
+      "sha256": "3b2bbd9b9048732c15ec7881d0ff786fa956c16fe849cf870243656d7d019d4f",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:08.455Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 968,
+        "width": 203,
+        "height": 32,
+        "top": 968,
+        "right": 260.796875,
+        "bottom": 1000,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0019.json",
+      "sha256": "2535d702286dfebbb32f2df1df908df207fe97276679aa3365cf065a1856dd98",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:09.531Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0020.json",
+      "sha256": "779e50040735b734fa5a510bae5d1376e33464e8b13198ee6d4075e5889b18f0",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:09.579Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0021.json",
+      "sha256": "1f45287dae7f5a055cba7614c3842fb1affcaa17ddfba1b2324593f17295bbc8",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:14.601Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0022.json",
+      "sha256": "bc9343fbde77651e65924181593954f680b1810ff63e4211438cd03bde7fe689",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:14.673Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0023.json",
+      "sha256": "f441dc7e404f108c97672b6f4bae3b05b5b76c38ab184f8979a6a5921ca97d83",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:15.447Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0024.json",
+      "sha256": "5121d39c0e99355bdb202776091dd1d741d12a93666987615256b183c32cf07a",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:15.496Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0025.json",
+      "sha256": "5c1bfe2935fc28e272de8bb2b765f5853fbd4fbe5fe54a7e8a9b7b542360d012",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:19.617Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 488,
+        "width": 224,
+        "height": 32,
+        "top": 488,
+        "right": 260.796875,
+        "bottom": 520,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0026.json",
+      "sha256": "f58b84b6008b4cf4bb58ec1c9c7c9c385749044d7019f4833b17b296e19025b3",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:19.727Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 968,
+        "width": 203,
+        "height": 32,
+        "top": 968,
+        "right": 260.796875,
+        "bottom": 1000,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0027.json",
+      "sha256": "3c229f8f51f786e3b476e697a44d7fe5689ef00ff0eac7c16e5cb12d3f75a752",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:20.864Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0028.json",
+      "sha256": "cbbd9be4dfc4480a724bfcb9316808c01f2a134db5b835727f092c35008855e2",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:20.912Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0029.json",
+      "sha256": "081294facff69ad020972e11d4b399fa8b7beffa6714a7a44e386da843b8cd65",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:25.748Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0030.json",
+      "sha256": "9fbd93037592962d55e251df4f2deaddbfd267a8b44bfb36957c220e538cc688",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:25.819Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0031.json",
+      "sha256": "7c1dae9d8432de6736545e44101de2d9081c392d15f2c5111db00b620eb9ffbb",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:26.613Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 36.796875,
+        "y": 520,
+        "width": 224,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 36.796875
+      }
+    },
+    {
+      "file": "hit-0032.json",
+      "sha256": "d8815ea1ae435827af78bc8e0b01c6cc71921ae2722c5ccfa7ece0d3d84ae740",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:26.661Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 57.796875,
+        "y": 520,
+        "width": 203,
+        "height": 32,
+        "top": 520,
+        "right": 260.796875,
+        "bottom": 552,
+        "left": 57.796875
+      }
+    },
+    {
+      "file": "hit-0033.json",
+      "sha256": "a7bbbacdd4312ce537235e8bc6e269416714d6c36f793a2d6db59ce930530116",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:29.173Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 32,
+        "y": 306,
+        "width": 326,
+        "height": 44,
+        "top": 306,
+        "right": 358,
+        "bottom": 350,
+        "left": 32
+      }
+    },
+    {
+      "file": "hit-0034.json",
+      "sha256": "2bd2f79b4a2b6f1ca52c0e760ee2fb54cc7c5fb4d94cc7c397733da5f4bcd5e0",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:29.337Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 53,
+        "y": 948,
+        "width": 305,
+        "height": 44,
+        "top": 948,
+        "right": 358,
+        "bottom": 992,
+        "left": 53
+      }
+    },
+    {
+      "file": "hit-0035.json",
+      "sha256": "4f9fd9d7d88fb5e55b7336067b46b9c5bb7066cdf8048948f4d7012bda20b0cd",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:30.129Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 40,
+        "y": 317,
+        "width": 310,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 40
+      }
+    },
+    {
+      "file": "hit-0036.json",
+      "sha256": "b3961ee8fefad9b53a7394346eae58d350030d98a0a087d0fbf7789e5ec883e5",
+      "allHit": true,
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:30.211Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 61,
+        "y": 317,
+        "width": 289,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 61
+      }
+    },
+    {
+      "file": "hit-0037.json",
+      "sha256": "cb687878a1d28efc6a9af9b75c9fe10d23ac806b6b6ff61f390f8144f83dd8b2",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:32.218Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0038.json",
+      "sha256": "0d300f4bf22bd01fd22c73685344ece321001d131a6468c368b3179830a2ad37",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:32.537Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0039.json",
+      "sha256": "51e3ab1fb559d72aebe5f61ba20d1cd2de19dc09350ec20117340b5d03c80765",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:33.079Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 40,
+        "y": 317,
+        "width": 310,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 40
+      }
+    },
+    {
+      "file": "hit-0040.json",
+      "sha256": "834f9ec6e55711ab7a46f5b518e8617c57acaafb3c255a5ad0284ab6010cbaf6",
+      "allHit": true,
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:33.161Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 61,
+        "y": 317,
+        "width": 289,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 61
+      }
+    },
+    {
+      "file": "hit-0041.json",
+      "sha256": "90e42238b1be2be96a78d038a106920cb58562a8d6bfa58ba965998dea63e0a2",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:35.679Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 32,
+        "y": 306,
+        "width": 326,
+        "height": 44,
+        "top": 306,
+        "right": 358,
+        "bottom": 350,
+        "left": 32
+      }
+    },
+    {
+      "file": "hit-0042.json",
+      "sha256": "91e63e0fce4d363d19fdf62fbc5d079e5fd6830535bf341b6b783ec379c6db60",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:35.839Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 53,
+        "y": 948,
+        "width": 305,
+        "height": 44,
+        "top": 948,
+        "right": 358,
+        "bottom": 992,
+        "left": 53
+      }
+    },
+    {
+      "file": "hit-0043.json",
+      "sha256": "d5a4f1e15406684284bef57122f8766c858dfef6117c568424ffc7a39d1e147b",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:36.735Z",
+      "ownerTag": "summary",
+      "ownerText": "Shadcn",
+      "ownerBounds": {
+        "x": 40,
+        "y": 317,
+        "width": 310,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 40
+      }
+    },
+    {
+      "file": "hit-0044.json",
+      "sha256": "4d6d6e0ae19929eb3c52d84c78e0bf4ad3e33464d0bd478f8583164a5788f9ea",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:36.828Z",
+      "ownerTag": "a",
+      "ownerText": "Tabs",
+      "ownerBounds": {
+        "x": 61,
+        "y": 317,
+        "width": 289,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 61
+      }
+    },
+    {
+      "file": "hit-0045.json",
+      "sha256": "b20795a38cb5e42e8b1b6cc1a3db5b88779133b1c9bac9e09f513cee5cefde4b",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:38.860Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0046.json",
+      "sha256": "15be95f5a3a2a992149ab6c30356ca8d5ec12acdae27baba7cca4de60486b50e",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:39.189Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0047.json",
+      "sha256": "cd478e6d3d914f6a2db231a4caa1c9dcce2c198a3380944fe1a3c2c607df3d37",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:39.730Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 40,
+        "y": 317,
+        "width": 310,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 40
+      }
+    },
+    {
+      "file": "hit-0048.json",
+      "sha256": "3125c1a2ceb0e53bce7cdfb4aa1f5ffbab8f37d49154df20294ac9a4eb828d5c",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:39.812Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 61,
+        "y": 317,
+        "width": 289,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 61
+      }
+    },
+    {
+      "file": "hit-0049.json",
+      "sha256": "ebd02c9fc15cade4d31d928bc8bbea5f9fa0cefe37438904d506e1e32ff290cb",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:41.811Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0050.json",
+      "sha256": "a1ec0b8c81ef0e3b28616f11c093f4a4e2db0e8bbebe933e2797be3f9ab791ae",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:43.761Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0051.json",
+      "sha256": "6acbf0dba1611e2e59031a34bdb2f6f5e67ee6dc01e0e27cf7b2f5cf2ff20eec",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:44.112Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0052.json",
+      "sha256": "43a59059232870475edfad2763ca133cbba601f134ec6b3347be28461b7dfb40",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:46.157Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0053.json",
+      "sha256": "96f1d7f5b79d5489828046e14bae8f500e288126b199d6d2f02f186f08bea1b2",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:46.487Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0054.json",
+      "sha256": "d0e7b7ea041851fa60c591a47f9f6f9a2b4847f3c368db6791b6f6aad74551b9",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:48.542Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0055.json",
+      "sha256": "5b9b7850f897742c7e6f5e6d57fcf60f69f4532f861cd9833d6fe769d4ff3afd",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:50.722Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0056.json",
+      "sha256": "7ddc95d8d7e45bae7c0139ae1f00e8e89a4688c1ddba96bdaac80340914980e7",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:51.036Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0057.json",
+      "sha256": "59af112412ff70b98ad797b86ba8ab5eee0e927fee844ea31c3c4d9d91ab389a",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:53.091Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0058.json",
+      "sha256": "3978897c6150391fefacce4d028a9eba2458e1ffcde7617e8bebe077afd6719d",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:55.183Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0059.json",
+      "sha256": "455750bb2ab35d97042621627df24714709b584d44c53b93ce2c2b2d76a5db44",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:55.515Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0060.json",
+      "sha256": "2452b363e1ebf5b642893ac6680be1b41917301c86bdb9c1e20e9e7c3413457c",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:57.626Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0061.json",
+      "sha256": "deb8b0e7d8a2d415affd910e5d184a6681481c6b77c7c42efd1d1a6d89d42ad6",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:28:57.936Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0062.json",
+      "sha256": "943275abd8b563b8234394b667e7d5cac216cfff3a3046e4ff16d175c1aa7307",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:00.020Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0063.json",
+      "sha256": "18d85c3aafb630d1f54a74d2a29aa15ffa91f911354e9a589ba8e61df9f6bcbe",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:02.057Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0064.json",
+      "sha256": "6eaa130d780dd75206143efd17143a9ec9959387093be1ee8fd8bfc762e132c3",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:02.370Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0065.json",
+      "sha256": "0fbcee7a8acd2621d8fcf63a5c14f91cf79bc5bff1a8f11844477e46d72c7563",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:04.455Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0066.json",
+      "sha256": "243815b3d339fcb51ba5dec236194d2cd21a55e76d08b66708f11d713ebac8f6",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:04.789Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0067.json",
+      "sha256": "83a0f6167aafeec3e2ff70e2d64e8336579729ca55f12c2729e3782c6ee62868",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:06.791Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0068.json",
+      "sha256": "2139fb32fb304513aca87878adeac738114d666be297037855cfb917b75a5ef2",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:08.801Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0069.json",
+      "sha256": "2d6090114506bc6d656f4d2978817f9799a8e9f99fb4b02dec8f97f99900503f",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:09.113Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0070.json",
+      "sha256": "c9473e341883fc3aec70e37ca816a76bc73f63d8619bae1efa272476fb003022",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:11.153Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0071.json",
+      "sha256": "26ce6f8a6c4f3f000bc260fe133ab719f3fef42f0e9cb9d54947f15959ba778d",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:13.079Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0072.json",
+      "sha256": "9d37a1f00a8760266f03b8f9a810c457b05f03fefe7c939ce8570c716b3b8820",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:13.402Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0073.json",
+      "sha256": "97f581c6f2464f6e06d3fcc5d4eb0d003080f4db7c27a7db3b36d8b0ff8ac5dd",
+      "allHit": false,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:15.466Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": -1122,
+        "width": 322,
+        "height": 44,
+        "top": -1122,
+        "right": 356,
+        "bottom": -1078,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0074.json",
+      "sha256": "1ab9dc30717fe31cb54ea10479e0d3a699b054c3d5a868e86ce1cd527e0a2ea0",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:17.468Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0075.json",
+      "sha256": "b3df88c30a308784906e1e04bb16e60ef13873fd2dce6bbd77803cfea572c057",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:17.787Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0076.json",
+      "sha256": "960341c1c41444343f914678a7d31bd0fc6b8ab5776eee3370f4e7c89ffd17a7",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:19.739Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0077.json",
+      "sha256": "da3c118bbaa10c110ccb7b4c71238ca6de8721b3f8fa716bde6a301eb5d9c4d2",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:20.054Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    },
+    {
+      "file": "hit-0078.json",
+      "sha256": "444966d62d9d7a07f604ff38e5dc3c621c184a45ab1f9187fbed2f40549a5a6c",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:22.082Z",
+      "ownerTag": "summary",
+      "ownerText": "Brutalist",
+      "ownerBounds": {
+        "x": 34,
+        "y": 506,
+        "width": 322,
+        "height": 44,
+        "top": 506,
+        "right": 356,
+        "bottom": 550,
+        "left": 34
+      }
+    },
+    {
+      "file": "hit-0079.json",
+      "sha256": "f7db44d746fdd21bf33937e10a1394550ca0c37c9efaa6845ba4e934ad37b5bb",
+      "allHit": true,
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "at": "2026-11-22T15:29:22.401Z",
+      "ownerTag": "a",
+      "ownerText": "Button",
+      "ownerBounds": {
+        "x": 55,
+        "y": 504,
+        "width": 301,
+        "height": 44,
+        "top": 504,
+        "right": 356,
+        "bottom": 548,
+        "left": 55
+      }
+    }
+  ],
+  "visualReview": {
+    "actuallyViewed": "/workspace/scratch/44c416809288/evidence/hosted-site-hit-diagnostic-r1/artifact/captures/hit-0049-after-failure.png",
+    "sha256": "46397a7c7b9039a701a8f9025afd4593f24b4c1dad2748bed796da72fb6d7555",
+    "allSevenAfterFailureImagesByteIdentical": true,
+    "observed": "The mobile menu shows later Brutalist entries, with the current Button leaf near the bottom; the Brutalist summary is not visible. This is a post-observation screenshot, not proof of the instantaneous failure state."
+  },
+  "finding": {
+    "id": "SITE-MOBILE-HIT-R2-001",
+    "status": "REPRODUCED_WITH_POINT_FACTS",
+    "provenFacts": [
+      "Seven measurements have every original point above the viewport and all hits null, with no active animation and no document scroll.",
+      "The same target also passes 13 of 20 diagnostic attempts; passing group bounds have y506 while failed group bounds have y-1122.",
+      "All failed native summary snapshots lack data-site-link-enhanced. Existing mobile enhanced test only waited for the contents trigger, not the group/leaf projection population."
+    ],
+    "causeBoundary": "No scroll writer stack or enclosing scroll-owner state beyond the recorded eight ancestors was captured; a specific writer is not proven by this artifact. The current visibility policy can legitimately continue reveal before actual user input.",
+    "acceptedNextStep": "Wait for actual group/leaf enhancement under the existing 20s condition, establish and observe real native wheel user control, retain all original hit/height/radius assertions, compare the same twenty attempts and rerun final clean acceptance."
+  },
+  "boundaries": [
+    "Diagnostic observation and repetition modify the test source; this is not clean 42-case or 304-case acceptance.",
+    "All original failed evidence remains unchanged.",
+    "Only one original failure-after-observation PNG was visually opened; the six others were proven byte-for-byte identical to it.",
+    "No product edits, browser replay or GitHub writes performed by this reviewer."
+  ]
+}

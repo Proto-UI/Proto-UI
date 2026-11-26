@@ -1,0 +1,3640 @@
+{
+  "schemaVersion": 1,
+  "source": "packages/prototypes/base/src/button/button.proto.ts",
+  "profile": "react-runtime-v1",
+  "styleFamily": "base-unstyled-with-consumer-css",
+  "runId": "pointer-props-verified",
+  "revision": "c74b698dc651d11aea842336218de745287deeba",
+  "environment": "real-browser",
+  "browser": "145.0.7632.6",
+  "node": "v22.23.2",
+  "result": {
+    "id": "button.pointer-props",
+    "requiredCriteria": [
+      "P-BASE-BUTTON-POINTER-HOVER",
+      "P-BASE-BUTTON-PROP-DISABLED",
+      "P-BASE-BUTTON-DISABLED-EXPOSE",
+      "P-BASE-BUTTON-PRESS-LIFECYCLE",
+      "P-BASE-BUTTON-CLICK-SIGNAL",
+      "P-BASE-BUTTON-ROLE-COMMAND",
+      "P-BASE-BUTTON-PROP-DISABLED-CONTROLLED",
+      "P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT",
+      "P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION",
+      "P-BASE-BUTTON-CLICK-PROTOCOL-NAME",
+      "C-LIFECYCLE-0002-G",
+      "C-EXPOSE-STATE-0001-I"
+    ],
+    "status": "PASS",
+    "reasons": [],
+    "failures": [],
+    "oracleCoverage": {
+      "reference": [
+        {
+          "criterion": "P-BASE-BUTTON-POINTER-HOVER",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-POINTER-HOVER expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-PROP-DISABLED",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-PROP-DISABLED expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-DISABLED-EXPOSE",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-DISABLED-EXPOSE expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-PRESS-LIFECYCLE",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-PRESS-LIFECYCLE expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-CLICK-SIGNAL",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-CLICK-SIGNAL expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-ROLE-COMMAND",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-ROLE-COMMAND expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-PROP-DISABLED-CONTROLLED",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-PROP-DISABLED-CONTROLLED expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-CLICK-PROTOCOL-NAME",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-CLICK-PROTOCOL-NAME expectations for button.pointer-props"
+        },
+        {
+          "criterion": "C-LIFECYCLE-0002-G",
+          "outcome": "PASS",
+          "detail": "Declared C-LIFECYCLE-0002-G expectations for button.pointer-props"
+        },
+        {
+          "criterion": "C-EXPOSE-STATE-0001-I",
+          "outcome": "PASS",
+          "detail": "Declared C-EXPOSE-STATE-0001-I expectations for button.pointer-props"
+        }
+      ],
+      "candidate": [
+        {
+          "criterion": "P-BASE-BUTTON-POINTER-HOVER",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-POINTER-HOVER expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-PROP-DISABLED",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-PROP-DISABLED expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-DISABLED-EXPOSE",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-DISABLED-EXPOSE expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-PRESS-LIFECYCLE",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-PRESS-LIFECYCLE expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-CLICK-SIGNAL",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-CLICK-SIGNAL expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-ROLE-COMMAND",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-ROLE-COMMAND expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-PROP-DISABLED-CONTROLLED",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-PROP-DISABLED-CONTROLLED expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION expectations for button.pointer-props"
+        },
+        {
+          "criterion": "P-BASE-BUTTON-CLICK-PROTOCOL-NAME",
+          "outcome": "PASS",
+          "detail": "Declared P-BASE-BUTTON-CLICK-PROTOCOL-NAME expectations for button.pointer-props"
+        },
+        {
+          "criterion": "C-LIFECYCLE-0002-G",
+          "outcome": "PASS",
+          "detail": "Declared C-LIFECYCLE-0002-G expectations for button.pointer-props"
+        },
+        {
+          "criterion": "C-EXPOSE-STATE-0001-I",
+          "outcome": "PASS",
+          "detail": "Declared C-EXPOSE-STATE-0001-I expectations for button.pointer-props"
+        }
+      ]
+    },
+    "comparison": {
+      "equal": true
+    }
+  },
+  "reference": [
+    {
+      "step": "hover",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "outwardEvents": [],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "down",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": true,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 0,
+        "outwardEvents": [],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "up",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "down-before-disable",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": true,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "disable",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "host-api"
+      ],
+      "data": {
+        "disabled": true,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "true",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "0.4",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "release-disabled",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": true,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "true",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "0.4",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "disabled-click",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": true,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "true",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "0.4",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "omit-disabled",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "host-api"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": false,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          }
+        ]
+      }
+    },
+    {
+      "step": "enabled-click",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": false,
+        "pressed": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": false,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          }
+        ]
+      }
+    },
+    {
+      "step": "leave",
+      "phase": "mounted",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": false,
+        "pressed": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "leave",
+            "type": "pointerleave",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": false,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          }
+        ]
+      }
+    },
+    {
+      "step": "dispose",
+      "phase": "terminal",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "host-api"
+      ],
+      "data": {
+        "disabled": null,
+        "hovered": null,
+        "pressed": null,
+        "focused": null,
+        "focusVisible": null,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "leave",
+            "type": "pointerleave",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": false,
+        "hasDisabledProp": false,
+        "present": false,
+        "ariaDisabled": null,
+        "background": null,
+        "opacity": null,
+        "hit": false,
+        "refCleared": true,
+        "staleHandleInvalid": true,
+        "setupCount": 1,
+        "disposeCount": 1,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "mount.phase",
+            "phase": "unmounting",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.begin",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "detached",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.done",
+            "epoch": 1
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposing"
+          },
+          {
+            "type": "instance.dispose.begin"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposed"
+          },
+          {
+            "type": "instance.dispose.done"
+          }
+        ]
+      }
+    },
+    {
+      "step": "stale-after-dispose",
+      "phase": "terminal",
+      "ownerId": "reference-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "synthetic-dispatch"
+      ],
+      "data": {
+        "disabled": null,
+        "hovered": null,
+        "pressed": null,
+        "focused": null,
+        "focusVisible": null,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "leave",
+            "type": "pointerleave",
+            "trusted": true
+          },
+          {
+            "step": "stale-after-dispose",
+            "type": "click",
+            "trusted": false
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": false,
+        "hasDisabledProp": false,
+        "present": false,
+        "ariaDisabled": null,
+        "background": null,
+        "opacity": null,
+        "hit": false,
+        "refCleared": true,
+        "staleHandleInvalid": true,
+        "setupCount": 1,
+        "disposeCount": 1,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "mount.phase",
+            "phase": "unmounting",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.begin",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "detached",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.done",
+            "epoch": 1
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposing"
+          },
+          {
+            "type": "instance.dispose.begin"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposed"
+          },
+          {
+            "type": "instance.dispose.done"
+          }
+        ]
+      }
+    }
+  ],
+  "candidate": [
+    {
+      "step": "hover",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "outwardEvents": [],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "down",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": true,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 0,
+        "outwardEvents": [],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "up",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "down-before-disable",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": true,
+        "pressed": true,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "disable",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "host-api"
+      ],
+      "data": {
+        "disabled": true,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "true",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "0.4",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "release-disabled",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": true,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "true",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "0.4",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "disabled-click",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": true,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": true,
+        "present": true,
+        "ariaDisabled": "true",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "0.4",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "step": "omit-disabled",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "host-api"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": false,
+        "pressed": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 1,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": false,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          }
+        ]
+      }
+    },
+    {
+      "step": "enabled-click",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": false,
+        "pressed": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": false,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(207, 232, 207)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          }
+        ]
+      }
+    },
+    {
+      "step": "leave",
+      "phase": "mounted",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "browser-automation"
+      ],
+      "data": {
+        "disabled": false,
+        "hovered": false,
+        "pressed": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "leave",
+            "type": "pointerleave",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": true,
+        "hasDisabledProp": false,
+        "present": true,
+        "ariaDisabled": "false",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "1",
+        "hit": true,
+        "refCleared": false,
+        "staleHandleInvalid": false,
+        "setupCount": 1,
+        "disposeCount": 0,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          }
+        ]
+      }
+    },
+    {
+      "step": "dispose",
+      "phase": "terminal",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "host-api"
+      ],
+      "data": {
+        "disabled": null,
+        "hovered": null,
+        "pressed": null,
+        "focused": null,
+        "focusVisible": null,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "leave",
+            "type": "pointerleave",
+            "trusted": true
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": false,
+        "hasDisabledProp": false,
+        "present": false,
+        "ariaDisabled": null,
+        "background": null,
+        "opacity": null,
+        "hit": false,
+        "refCleared": true,
+        "staleHandleInvalid": true,
+        "setupCount": 1,
+        "disposeCount": 1,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "mount.phase",
+            "phase": "unmounting",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.begin",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "detached",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.done",
+            "epoch": 1
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposing"
+          },
+          {
+            "type": "instance.dispose.begin"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposed"
+          },
+          {
+            "type": "instance.dispose.done"
+          }
+        ]
+      }
+    },
+    {
+      "step": "stale-after-dispose",
+      "phase": "terminal",
+      "ownerId": "candidate-owner-1",
+      "parentId": null,
+      "viewEpoch": 1,
+      "kind": "snapshot",
+      "inputSources": [
+        "synthetic-dispatch"
+      ],
+      "data": {
+        "disabled": null,
+        "hovered": null,
+        "pressed": null,
+        "focused": null,
+        "focusVisible": null,
+        "clicks": 2,
+        "outwardEvents": [
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "up"
+          },
+          {
+            "name": "click",
+            "payload": {
+              "kind": "void"
+            },
+            "step": "enabled-click"
+          }
+        ],
+        "inputs": [
+          {
+            "step": "hover",
+            "type": "pointerenter",
+            "trusted": true
+          },
+          {
+            "step": "down",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "up",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "down-before-disable",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "release-disabled",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "disabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerdown",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "pointerup",
+            "trusted": true
+          },
+          {
+            "step": "enabled-click",
+            "type": "click",
+            "trusted": true
+          },
+          {
+            "step": "leave",
+            "type": "pointerleave",
+            "trusted": true
+          },
+          {
+            "step": "stale-after-dispose",
+            "type": "click",
+            "trusted": false
+          }
+        ],
+        "sameOwner": true,
+        "sameHandles": false,
+        "hasDisabledProp": false,
+        "present": false,
+        "ariaDisabled": null,
+        "background": null,
+        "opacity": null,
+        "hit": false,
+        "refCleared": true,
+        "staleHandleInvalid": true,
+        "setupCount": 1,
+        "disposeCount": 1,
+        "lifecycle": [
+          {
+            "type": "instance.setup.exit"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "alive"
+          },
+          {
+            "type": "instance.created"
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounting",
+            "epoch": 1
+          },
+          {
+            "type": "mount.render",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.start",
+            "epoch": 1
+          },
+          {
+            "type": "mount.commit.done",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "mounted",
+            "epoch": 1
+          },
+          {
+            "type": "mount.mounted",
+            "epoch": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 1
+          },
+          {
+            "type": "update.render",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.commit.done",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "update.updated",
+            "epoch": 1,
+            "revision": 2
+          },
+          {
+            "type": "mount.phase",
+            "phase": "unmounting",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.begin",
+            "epoch": 1
+          },
+          {
+            "type": "mount.phase",
+            "phase": "detached",
+            "epoch": 1
+          },
+          {
+            "type": "unmount.done",
+            "epoch": 1
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposing"
+          },
+          {
+            "type": "instance.dispose.begin"
+          },
+          {
+            "type": "instance.phase",
+            "phase": "disposed"
+          },
+          {
+            "type": "instance.dispose.done"
+          }
+        ]
+      }
+    }
+  ],
+  "identities": {
+    "reference": {
+      "reason": "Corresponding actual single-owner Adapter tokens; no subsequent owner is normalized",
+      "aliases": {
+        "reference-owner-1": "pointer-button"
+      }
+    },
+    "candidate": {
+      "reason": "Corresponding actual single-owner Adapter token on emitted path",
+      "aliases": {
+        "candidate-owner-1": "pointer-button"
+      }
+    }
+  }
+}

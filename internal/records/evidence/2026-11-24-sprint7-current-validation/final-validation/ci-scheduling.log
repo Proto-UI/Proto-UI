@@ -1,0 +1,39 @@
+✔ the live workflow inventory passes the scheduling policy (620.60286ms)
+✔ a push trigger anywhere fails closed (16.401121ms)
+✔ a second regression schedule owner is rejected (5.500595ms)
+✔ unguarded pull_request context under a non-PR trigger is rejected (4.865592ms)
+✔ guard expressions on the same line satisfy the context rule (5.130286ms)
+✔ a drifted cron set on the owner is rejected (10.656483ms)
+✔ workflow-level permissions on the owner violate token-escalation hygiene (4.905045ms)
+✔ a missing cycle-report job grant is rejected (3.201846ms)
+✔ a pull_request trigger outside the lightweight allowlist is rejected (3.549674ms)
+✔ an expensive owner job cannot turn each PR update into a full cycle (2.396305ms)
+✔ an OR bypass cannot turn a scheduled-only condition into a PR flood (1.998614ms)
+✔ nested cycle evidence cannot be cancelled by a manual dispatch (25.45057ms)
+✔ a nested cycle rejects a missing browser source even when its job is conditional (22.299227ms)
+✔ sizing evidence remains reachable once from the full cycle and binds its exact source (201.310645ms)
+✔ a detached sizing owner is rejected even when its workflow still exists (148.915347ms)
+✔ an independently stale checkout, receipt or artifact identity is rejected (390.825278ms)
+✔ a restored PR-number-only condition cannot impersonate scheduled reachability (120.758216ms)
+✔ active evidence cancellation and missing callable admission are rejected (236.045737ms)
+✔ removing serial admission or failure continuation is rejected (197.271866ms)
+✔ GPUI source consumers run once per full cycle with retained, exact-source evidence (104.131382ms)
+✔ reusable compiler inputs preserve Adapter and manual browser acceptance boundaries (173.799838ms)
+✔ manual compiler evidence can explicitly request the unchanged strict package gate (380.115853ms)
+✔ native generated evidence executes five complete locked targets once in the existing owner (331.916852ms)
+✔ native generated evidence rejects missing, duplicated, filtered, optional or swallowed execution (172.045356ms)
+✔ dormant direct Flutter emission has mandatory real Widget evidence in the existing cycle (128.37907ms)
+✔ Flutter evidence rejects skipped wrappers and incomplete native execution (22.368571ms)
+✔ GPUI Cargo target is initialized after runner allocation in the shared step environment (216.185447ms)
+✔ manual Website shader evidence preserves full source, all original Docs and strict failure ownership (134.546611ms)
+✔ Website evidence rejects automatic expansion, stale source, coupling and swallowed failures (220.076858ms)
+✔ Website evidence shell preserves complete diagnostic output and the real producer exit code (261.694358ms)
+✔ Docs evidence cannot accept a skipped, filtered, missing or failing case as ten passes (1797.486722ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6723.953121

@@ -1,0 +1,41 @@
+{
+  "environment": "Vue2.6.14 + HappyDOM15.11.7, not Chromium",
+  "traces": {
+    "routing": {
+      "textSnapshot": {
+        "value": "native edit",
+        "composing": false
+      },
+      "afterTextInput": [],
+      "afterOuterClick": [
+        "outer"
+      ]
+    },
+    "routing-fault": {
+      "fault": {
+        "path": ".proto-ui/interaction/text-multiline-v1.ts",
+        "before": "    rootOwners.set(root, routeOwner); rootOwners.set(host, routeOwner); logicalOwners.set(options.identity, routeOwner);",
+        "after": "    logicalOwners.set(options.identity, routeOwner);"
+      },
+      "afterTextClick": [
+        "outer"
+      ]
+    },
+    "lifetime": {
+      "detached": {
+        "physical": false,
+        "logical": false,
+        "module": true,
+        "target": null
+      },
+      "remountedSameOwner": true,
+      "disposed": {
+        "physical": false,
+        "logical": false,
+        "module": false
+      }
+    }
+  },
+  "counterfactual": "Only two physical root-owner registrations removed from actual emitted Text support; other semantics/inputs/expectations unchanged. This reveals outer activation.",
+  "lifetime": "Module owner survives detach; physical/logical owners unregister, reappear and dispose separately."
+}

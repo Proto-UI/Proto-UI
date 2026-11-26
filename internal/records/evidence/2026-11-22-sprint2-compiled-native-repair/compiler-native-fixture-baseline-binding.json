@@ -1,0 +1,9 @@
+{
+  "baselineHead": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+  "baselineSourcePath": "packages/compiler/test/sprint2-browser-consumer.ts",
+  "baselineSourceSha256": "5bd9f0ab3ef0e605fcd7a74732c3d1222fce3493586b21e9afab6f90e540cb10",
+  "testSha256": "fb61e9b1732954a563cec834c571b2a1bcfb8e108581b3b62ed4fd1d698d175c",
+  "baselineReplaySha256": "741ba0954f5d59f4ffd93675395a783fe9e0b36d1576860f0e1927034b5a34e4",
+  "replayDifference": "only import routes to the untouched same-directory baseline source",
+  "selectedTest": "waits for a real physical Root before capturing initial identity or marking a deferred React view"
+}

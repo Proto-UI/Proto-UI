@@ -1,0 +1,444 @@
+{
+  "profile": {
+    "id": "gpui-source-v1",
+    "framework": "gpui",
+    "version": "git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+    "mode": "source",
+    "implemented": true,
+    "operations": [
+      "scheduler.delay",
+      "delay.cancel",
+      "presence.owner",
+      "presence.onCompletionRequest",
+      "presence.publish",
+      "presence.settle",
+      "presence.isCurrent",
+      "presentation.snapshotCompletion",
+      "meta.get",
+      "capture.getState",
+      "capture.getMethod",
+      "capture.getAsHook",
+      "capture.getAsHookHandle",
+      "run.update",
+      "style.tw",
+      "rule.declare",
+      "rule.dispose",
+      "feedback.style.use",
+      "feedback.style.declareDecoration",
+      "feedback.style.to",
+      "decoration.style.use",
+      "feedback.style.presence",
+      "render.decoration",
+      "feedback.style.release",
+      "feedback.style.patch",
+      "feedback.style.suppress",
+      "feedback.style.clearPatch",
+      "subscription.release",
+      "binding.release",
+      "props.define",
+      "props.setDefaults",
+      "props.watch",
+      "props.watchAll",
+      "props.watchRaw",
+      "props.watchRawAll",
+      "props.get",
+      "props.getRaw",
+      "props.isProvided",
+      "hook.asTrigger",
+      "hook.asFocusable",
+      "hook.asAccessible",
+      "hook.asFocusScope",
+      "hook.asFocusRoving",
+      "hook.asOverlay",
+      "hook.asScrollSurface",
+      "hook.asTextControl",
+      "hook.asImageView",
+      "hook.asTableStructure",
+      "hook.asBoundary",
+      "hook.asHitParticipation",
+      "hook.asCollection",
+      "hook.asCollectionItem",
+      "event.on",
+      "event.onGlobal",
+      "event.requestDefaultActionPrevention",
+      "focus.configure",
+      "focus.setDisabled",
+      "focus.focusSelf",
+      "focus.focus",
+      "focus.blur",
+      "focus.setNavParticipation",
+      "focus.setRovingStatus",
+      "focus.focusFirst",
+      "focus.focusLast",
+      "focus.focusNext",
+      "focus.focusPrev",
+      "focus.focusSelected",
+      "focus.restoreFocus",
+      "focus.activate",
+      "focus.deactivate",
+      "focus.setLoop",
+      "focus.setOrientation",
+      "focus.isActive",
+      "focus.isFocused",
+      "focusScope.getRoving",
+      "focusScope.configure",
+      "focusRoving.configure",
+      "focusRoving.focusFirst",
+      "focusRoving.focusLast",
+      "focusRoving.focusNext",
+      "focusRoving.focusPrev",
+      "focusRoving.focusSelected",
+      "accessible.state",
+      "accessible.action",
+      "accessible.role",
+      "accessible.nameFromContent",
+      "accessible.id",
+      "accessible.name",
+      "accessible.description",
+      "accessible.relation",
+      "accessible.tree",
+      "accessible.level",
+      "anatomy.claim",
+      "anatomy.subscribeParts",
+      "anatomy.has",
+      "anatomy.parts",
+      "anatomy.partsOf",
+      "anatomy.order.version",
+      "anatomy.order.parts",
+      "anatomy.order.partsOf",
+      "anatomy.order.indexOfSelf",
+      "anatomy.order.prevOfSelf",
+      "anatomy.order.nextOfSelf",
+      "anatomyPart.hasExpose",
+      "anatomyPart.getExpose",
+      "anatomyPart.hasHook",
+      "tableStructure.configure",
+      "tableStructure.getObjectRef",
+      "tableStructure.getSnapshot",
+      "host.get",
+      "collection.configure",
+      "collection.getItems",
+      "collection.getCount",
+      "collectionItem.configure",
+      "collectionItem.getSnapshot",
+      "boundary.configure",
+      "boundary.observe",
+      "boundary.setStackActive",
+      "boundary.registerRegion",
+      "boundary.unregisterRegion",
+      "boundary.classify",
+      "boundary.notify",
+      "boundary.subscribeOutside",
+      "hitParticipation.configure",
+      "hitParticipation.registerRegion",
+      "hitParticipation.unregisterRegion",
+      "overlay.isOpen",
+      "overlay.openOverlay",
+      "overlay.close",
+      "overlay.toggle",
+      "overlay.configure",
+      "overlay.updatePosition",
+      "overlay.registerTrigger",
+      "overlay.registerAnchor",
+      "overlay.registerAnchorPart",
+      "overlay.registerContent",
+      "overlay.getPositionSnapshot",
+      "overlay.keepMounted",
+      "overlay.bindPresence",
+      "scroll.configure",
+      "scroll.bindComposedChrome",
+      "scroll.request",
+      "scroll.pauseFollowing",
+      "scroll.getSnapshot",
+      "textControl.on",
+      "textControl.sync",
+      "textControl.snapshot",
+      "textControl.resetValue",
+      "imageView.on",
+      "imageView.sync",
+      "imageView.snapshot",
+      "positioning.connect",
+      "positioning.update",
+      "positioning.requestUpdate",
+      "positioning.disconnect",
+      "positioning.getSnapshot",
+      "state.bool",
+      "state.string",
+      "state.enum",
+      "state.numberDiscrete",
+      "state.numberRange",
+      "state.get",
+      "state.set",
+      "state.setDefault",
+      "state.watch",
+      "expose.state",
+      "expose.event",
+      "expose.method",
+      "expose.emit",
+      "expose.value",
+      "lifecycle.setPresent",
+      "lifecycle.onCreated",
+      "lifecycle.onMounted",
+      "lifecycle.onUpdated",
+      "lifecycle.onUnmounted",
+      "lifecycle.onBeforeDispose",
+      "render.el",
+      "render.slot",
+      "render.read.props.get",
+      "render.read.props.getRaw",
+      "render.read.props.isProvided",
+      "context.provide",
+      "context.subscribe",
+      "context.trySubscribe",
+      "context.read",
+      "context.tryRead",
+      "context.update",
+      "context.tryUpdate",
+      "render.read.context.read",
+      "render.read.context.tryRead",
+      "eventControl.requestDefaultActionPrevention",
+      "hook.asControlLabel",
+      "controlLabel.label",
+      "controlLabel.target",
+      "controlLabel.sync",
+      "controlLabelRequest.isCurrent",
+      "scroll.sync",
+      "eventControl.requestDefaultActionPrevention"
+    ],
+    "hostCapabilities": [
+      "view-render",
+      "context-scope",
+      "style-projection",
+      "input-events",
+      "focus-target",
+      "accessibility-tree"
+    ],
+    "dependencies": [
+      {
+        "name": "gpui",
+        "version": "git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+        "role": "target"
+      },
+      {
+        "name": "serde",
+        "version": "1.0",
+        "role": "target"
+      },
+      {
+        "name": "serde_json",
+        "version": "1.0",
+        "role": "target"
+      },
+      {
+        "name": "proto-ui-gpui-native",
+        "version": "0.2.0",
+        "role": "host-bridge"
+      },
+      {
+        "name": "unicode-segmentation",
+        "version": "=1.13.3",
+        "role": "target"
+      },
+      {
+        "name": "data-url",
+        "version": "=0.3.2",
+        "role": "target"
+      },
+      {
+        "name": "image",
+        "version": "=0.25.10",
+        "role": "target"
+      }
+    ],
+    "helpers": [
+      {
+        "name": "proto-ui-gpui-native",
+        "version": "0.2.0",
+        "classification": "native-lowering",
+        "delivery": "supporting-file"
+      },
+      {
+        "name": "prototype-style-vocabulary",
+        "version": "1",
+        "classification": "native-lowering",
+        "delivery": "supporting-file"
+      }
+    ],
+    "observableSemantics": {
+      "version": "proto-ui-observables-v1",
+      "props": {
+        "input": "full-raw-snapshot",
+        "update": "explicit",
+        "initialNotification": "silent"
+      },
+      "state": {
+        "write": "synchronous",
+        "notifications": "fifo-recorded-snapshot-v1",
+        "update": "explicit"
+      },
+      "context": {
+        "update": "explicit",
+        "identity": "nominal"
+      },
+      "lifecycle": {
+        "update": "coalescible-intent",
+        "completion": "host-commit-before-updated",
+        "detach": "preserve-owner",
+        "disposal": "invalidate-retained-handles"
+      },
+      "composition": {
+        "nativeChildren": "ordinary-host-slots",
+        "sharedIdentity": "explicit-artifact-link"
+      }
+    }
+  },
+  "diagnostic": "The published GPUI revision 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 does not provide Window::resolve_focus_entry, focus_tree_generation or observe_focus_tree. Physical FocusEntry requires a separately verified SDK with that API; no focus-moving probe or logical-only fallback is emitted.",
+  "modes": [
+    {
+      "workspace": false,
+      "sdk": {
+        "schemaVersion": 1,
+        "name": "proto-ui-gpui-native",
+        "version": "0.2.0",
+        "dependencyMode": "profile",
+        "contentSha256": "ef99c6f2c5544dab2b0428ad9007cb496360357b865c7eee5be43a87d4b73287"
+      },
+      "files": [
+        {
+          "path": ".proto-ui/gpui-native/LICENSE",
+          "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+        },
+        {
+          "path": ".proto-ui/gpui-native/Cargo.toml",
+          "sha256": "13f292bef5ae9349703ca315b122c799aad29d2d5b739bb89b00028840fd06b6"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/lib.rs",
+          "sha256": "183ba4e0400b81db3cda82aac4ce1a640033b2e446d560349ca6063f8dc7af1a"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-owner.rs",
+          "sha256": "96346d8e32c9b0f9d2bf30044150d8b6753049ad352b3b824d99dc7096a717aa"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-a11y.rs",
+          "sha256": "090128f73bd6376130a548ff7fab027b28b5d1cb3e14ffc6bc9b50bfa1d3dbeb"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-host.rs",
+          "sha256": "2c850c912c1b50f7c111bb6b9e021be9b7be68672290491078b326f43b839b8c"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-key.rs",
+          "sha256": "b78508e097f3f829334d19f09e78576c2534356d1a76c496e602c07f406750fe"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-move.rs",
+          "sha256": "32e23b120e05c46d30dfdc9b25934e4399cc5345eb0155c7dcf4b10377f61498"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/mod.rs",
+          "sha256": "20b3733f2b4425d4defc74b3f0498905ce0365f2a93c739d02d9c1ce8c838d6c"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/color.rs",
+          "sha256": "c59e1b254d2fc6657c64eaf6b2774478f672fbcfe752439c3e627013366c92e5"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/length.rs",
+          "sha256": "8d0652598bca59dd632c5037f201690e0a3adc9e60ab745c798226e2babc6ad9"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/theme.rs",
+          "sha256": "e4e6fc0660ec8b6b8f3ff3efabfb64373706638816c436bd6752191bc5e96730"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/mapping.rs",
+          "sha256": "f0e46712db27ed6aec1417f5bbc451cd2c9a3842caef5257790985fa05fca6ab"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/fixtures/style-tokens.json",
+          "sha256": "3df6fc5b2e1829daf10101fdd08b6d838c1049affa0f645b13aa11997b7ecc65"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/fixtures/theme-tokens.json",
+          "sha256": "8d2ec62460854fc19e1f69cfdf2b4937be9e302b6adbb5385794852a682d91c7"
+        }
+      ],
+      "compilationSha256": "5de7ddb93f19456853d1c9f1530678800e0e838959d16fb2d4cef7fc719e7ebd"
+    },
+    {
+      "workspace": true,
+      "sdk": {
+        "schemaVersion": 1,
+        "name": "proto-ui-gpui-native",
+        "version": "0.2.0",
+        "dependencyMode": "workspace",
+        "contentSha256": "ba00ffc174350aea92033850039c53909ff4942100ea9fa6581dc390a82283ac"
+      },
+      "files": [
+        {
+          "path": ".proto-ui/gpui-native/LICENSE",
+          "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+        },
+        {
+          "path": ".proto-ui/gpui-native/Cargo.toml",
+          "sha256": "0445c63fb76ec734234269db002bbce74c8c3177fa075840e7222daee5be6f59"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/lib.rs",
+          "sha256": "183ba4e0400b81db3cda82aac4ce1a640033b2e446d560349ca6063f8dc7af1a"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-owner.rs",
+          "sha256": "96346d8e32c9b0f9d2bf30044150d8b6753049ad352b3b824d99dc7096a717aa"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-a11y.rs",
+          "sha256": "090128f73bd6376130a548ff7fab027b28b5d1cb3e14ffc6bc9b50bfa1d3dbeb"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-host.rs",
+          "sha256": "2c850c912c1b50f7c111bb6b9e021be9b7be68672290491078b326f43b839b8c"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-key.rs",
+          "sha256": "b78508e097f3f829334d19f09e78576c2534356d1a76c496e602c07f406750fe"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-move.rs",
+          "sha256": "32e23b120e05c46d30dfdc9b25934e4399cc5345eb0155c7dcf4b10377f61498"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/mod.rs",
+          "sha256": "20b3733f2b4425d4defc74b3f0498905ce0365f2a93c739d02d9c1ce8c838d6c"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/color.rs",
+          "sha256": "c59e1b254d2fc6657c64eaf6b2774478f672fbcfe752439c3e627013366c92e5"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/length.rs",
+          "sha256": "8d0652598bca59dd632c5037f201690e0a3adc9e60ab745c798226e2babc6ad9"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/theme.rs",
+          "sha256": "e4e6fc0660ec8b6b8f3ff3efabfb64373706638816c436bd6752191bc5e96730"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/mapping.rs",
+          "sha256": "f0e46712db27ed6aec1417f5bbc451cd2c9a3842caef5257790985fa05fca6ab"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/fixtures/style-tokens.json",
+          "sha256": "3df6fc5b2e1829daf10101fdd08b6d838c1049affa0f645b13aa11997b7ecc65"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/fixtures/theme-tokens.json",
+          "sha256": "8d2ec62460854fc19e1f69cfdf2b4937be9e302b6adbb5385794852a682d91c7"
+        }
+      ],
+      "compilationSha256": "270b6d8fd3035b5d8468c14b8a99de5d1928ba92a7651508316a65b31c89e66f"
+    }
+  ]
+}

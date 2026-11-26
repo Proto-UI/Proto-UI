@@ -1,0 +1,30 @@
+{
+  "source": {
+    "packages/cli/src/services/hook-source-summary.ts": "4f151c31d232f29950be761b324fb71645ae0a3ee8baf6014f81a0888f3aabdb",
+    "packages/cli/src/services/prototype-style-tokens.ts": "5c7391c5a000fc6ba4e2a50af32336a2ef11cde32216ef752360f6c5488a43ca",
+    "packages/cli/test/hook-source-props-initialization.test.ts": "e1ea242e62b51ad24b4b12486a298a1cba209ce621a7518adf59743cf42ab1f1"
+  },
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/cli/test/hook-source-props-initialization.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/root-style18.json"
+  ],
+  "exitCode": 0,
+  "elapsedMs": 5836,
+  "report": {
+    "success": true,
+    "numTotalTests": 18,
+    "numPassedTests": 18,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "failed": []
+}

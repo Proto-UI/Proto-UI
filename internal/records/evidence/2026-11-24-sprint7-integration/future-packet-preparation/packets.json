@@ -1,0 +1,482 @@
+{
+  "kind": "public-development-study-participant-packets",
+  "preparedAt": "2026-11-23T21:24:40.677Z",
+  "taskSha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+  "knowledgeSha256": "8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f",
+  "lockSha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+  "orders": [
+    [
+      "library",
+      "unassisted",
+      "knowledge"
+    ],
+    [
+      "unassisted",
+      "knowledge",
+      "library"
+    ],
+    [
+      "knowledge",
+      "library",
+      "unassisted"
+    ]
+  ],
+  "packets": [
+    {
+      "id": "library-1",
+      "arm": "library",
+      "repeat": 1,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/library-1",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "e615bb6d529565891c4da4e1afde4aae6de7a3c344904425772604c23257c085",
+          "bytes": 192
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        }
+      ],
+      "inventorySha256": "bf2d97a5708cc268a20fd96e63a00239a8dfa5b335e4b37f6940274116a86ecd"
+    },
+    {
+      "id": "unassisted-1",
+      "arm": "unassisted",
+      "repeat": 1,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/unassisted-1",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "37da09984662253a9d27d8b72800c21f0c01199cfd1a8de242fbad8645cb2961",
+          "bytes": 176
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        }
+      ],
+      "inventorySha256": "a6fcc89f0dddbc061033790b935c6f645e0528aa947043fefcd0ed17a1caa145"
+    },
+    {
+      "id": "knowledge-1",
+      "arm": "knowledge",
+      "repeat": 1,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/knowledge-1",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "000dc61383fdc867d92ab676e8658d0cf22608ce7e9bf45b366de928e2ac5561",
+          "bytes": 214
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        },
+        {
+          "path": "KNOWLEDGE.md",
+          "sha256": "8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f",
+          "bytes": 3673
+        }
+      ],
+      "inventorySha256": "6e92051c1903bc707600454ea1bab967446f8a2df60c3f954e3393241dddbde0"
+    },
+    {
+      "id": "unassisted-2",
+      "arm": "unassisted",
+      "repeat": 2,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/unassisted-2",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "37da09984662253a9d27d8b72800c21f0c01199cfd1a8de242fbad8645cb2961",
+          "bytes": 176
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        }
+      ],
+      "inventorySha256": "a6fcc89f0dddbc061033790b935c6f645e0528aa947043fefcd0ed17a1caa145"
+    },
+    {
+      "id": "knowledge-2",
+      "arm": "knowledge",
+      "repeat": 2,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/knowledge-2",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "000dc61383fdc867d92ab676e8658d0cf22608ce7e9bf45b366de928e2ac5561",
+          "bytes": 214
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        },
+        {
+          "path": "KNOWLEDGE.md",
+          "sha256": "8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f",
+          "bytes": 3673
+        }
+      ],
+      "inventorySha256": "6e92051c1903bc707600454ea1bab967446f8a2df60c3f954e3393241dddbde0"
+    },
+    {
+      "id": "library-2",
+      "arm": "library",
+      "repeat": 2,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/library-2",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "e615bb6d529565891c4da4e1afde4aae6de7a3c344904425772604c23257c085",
+          "bytes": 192
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        }
+      ],
+      "inventorySha256": "bf2d97a5708cc268a20fd96e63a00239a8dfa5b335e4b37f6940274116a86ecd"
+    },
+    {
+      "id": "knowledge-3",
+      "arm": "knowledge",
+      "repeat": 3,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/knowledge-3",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "000dc61383fdc867d92ab676e8658d0cf22608ce7e9bf45b366de928e2ac5561",
+          "bytes": 214
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        },
+        {
+          "path": "KNOWLEDGE.md",
+          "sha256": "8c22907544c0ee34d6523fbc1a45f772fd538f01ef4e6f7b0505fdb7e072814f",
+          "bytes": 3673
+        }
+      ],
+      "inventorySha256": "6e92051c1903bc707600454ea1bab967446f8a2df60c3f954e3393241dddbde0"
+    },
+    {
+      "id": "library-3",
+      "arm": "library",
+      "repeat": 3,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/library-3",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "e615bb6d529565891c4da4e1afde4aae6de7a3c344904425772604c23257c085",
+          "bytes": 192
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        }
+      ],
+      "inventorySha256": "bf2d97a5708cc268a20fd96e63a00239a8dfa5b335e4b37f6940274116a86ecd"
+    },
+    {
+      "id": "unassisted-3",
+      "arm": "unassisted",
+      "repeat": 3,
+      "root": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01/unassisted-3",
+      "inventory": [
+        {
+          "path": "TASK.txt",
+          "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+          "bytes": 1544
+        },
+        {
+          "path": "PARTICIPANT.md",
+          "sha256": "c254db34acb995ab9c5bb51430ccf695321f726d29725ffc46adf80ef15dd47e",
+          "bytes": 2112
+        },
+        {
+          "path": "ARM.txt",
+          "sha256": "37da09984662253a9d27d8b72800c21f0c01199cfd1a8de242fbad8645cb2961",
+          "bytes": 176
+        },
+        {
+          "path": "project/package.json",
+          "sha256": "0f4b4b7520df1e37aaf807d402fb8d03e299099a26c4be0c952c411f0fcf23d6",
+          "bytes": 507
+        },
+        {
+          "path": "project/package-lock.json",
+          "sha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+          "bytes": 48665
+        },
+        {
+          "path": "project/index.html",
+          "sha256": "c5d6baec69e2f80c600f2dbb1d59f57d30901767c12dba8f6698874ecc2c39dc",
+          "bytes": 260
+        },
+        {
+          "path": "project/src/main.jsx",
+          "sha256": "921426ed13ce21c2bf4d505b0fe54ed672ab7bf6830f53082237c27a28d2ce9e",
+          "bytes": 37
+        },
+        {
+          "path": "project/src/style.css",
+          "sha256": "fa4d3fc251a01b5f564eef8391f2b9f55d2e8077f87db389daaef3f258fa99ee",
+          "bytes": 23
+        }
+      ],
+      "inventorySha256": "a6fcc89f0dddbc061033790b935c6f645e0528aa947043fefcd0ed17a1caa145"
+    }
+  ]
+}

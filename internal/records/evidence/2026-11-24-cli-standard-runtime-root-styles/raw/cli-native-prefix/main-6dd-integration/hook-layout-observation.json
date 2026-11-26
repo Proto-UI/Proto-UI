@@ -1,0 +1,8 @@
+{
+  "head": "80b48039ede5938e9a956ffe0032a8dc35956b5b",
+  "reviewedTreeRecoveredFromNormalLintStagedIndexBackup": "3a2db8a6b576fefcabf116b99048b7efa60d1b3c",
+  "backupCommit": "2efab9fdca795536f01834ff5af4c121bc27ca60",
+  "changedPaths": [
+    "apps/www/src/content/docs/zh-cn/input-visual-evidence.ts"
+  ]
+}

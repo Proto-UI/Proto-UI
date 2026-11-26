@@ -1,0 +1,20 @@
+{
+  "head": "8c882c64dac1071fb2ed834eac6650a08aa1c8f0",
+  "workingTreeFiles": [
+    {
+      "path": "scripts/analysis/run-sprint2-consumers.mjs",
+      "sha256": "a2f44704a2feea96dfaf679bf8e2c329ec357766cb2ebe9bdcef52f64f8996b0",
+      "snapshot": "/workspace/scratch/44c416809288/evidence/reviewed-original-run-sprint2-consumers.mjs"
+    },
+    {
+      "path": "scripts/analysis/test/sprint2-consumer-queue.test.mjs",
+      "sha256": "0f37a611cd9c362cbd092dae8e85a6116286683578ad5a0c5166ac584d934bf5",
+      "snapshot": "/workspace/scratch/44c416809288/evidence/reviewed-original-sprint2-consumer-queue.test.mjs"
+    },
+    {
+      "path": ".github/workflows/projection-family-evidence.yml",
+      "sha256": "4e8a8d6b68dcc9667bd62246a9afb4fa7cd5db8b90fdcbf07c3d373f7da0d732",
+      "snapshot": "/workspace/scratch/44c416809288/evidence/reviewed-original-projection-family-evidence.yml"
+    }
+  ]
+}

@@ -1,0 +1,560 @@
+[
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5383,
+    "length": 10,
+    "messageText": "Parameter 'properties' implicitly has an 'any' type.",
+    "message": "Parameter 'properties' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5395,
+    "length": 5,
+    "messageText": "Parameter 'attrs' implicitly has an 'any' type.",
+    "message": "Parameter 'attrs' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5402,
+    "length": 7,
+    "messageText": "Parameter 'initial' implicitly has an 'any' type.",
+    "message": "Parameter 'initial' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 2339,
+    "file": "<generated>/Component.js",
+    "start": 5572,
+    "length": 8,
+    "messageText": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'.",
+    "message": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'."
+  },
+  {
+    "category": 1,
+    "code": 2339,
+    "file": "<generated>/Component.js",
+    "start": 5633,
+    "length": 5,
+    "messageText": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'.",
+    "message": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5780,
+    "length": 2,
+    "messageText": "Parameter 'vm' implicitly has an 'any' type.",
+    "message": "Parameter 'vm' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5784,
+    "length": 5,
+    "messageText": "Parameter 'setup' implicitly has an 'any' type.",
+    "message": "Parameter 'setup' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5791,
+    "length": 5,
+    "messageText": "Parameter 'types' implicitly has an 'any' type.",
+    "message": "Parameter 'types' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5798,
+    "length": 7,
+    "messageText": "Parameter 'rootTag' implicitly has an 'any' type.",
+    "message": "Parameter 'rootTag' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 5807,
+    "length": 10,
+    "messageText": "Parameter 'autoUpdate' implicitly has an 'any' type.",
+    "message": "Parameter 'autoUpdate' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7034,
+    "file": "<generated>/Component.js",
+    "start": 6249,
+    "length": 10,
+    "messageText": "Variable 'activeRoot' implicitly has type 'any' in some locations where its type cannot be determined.",
+    "message": "Variable 'activeRoot' implicitly has type 'any' in some locations where its type cannot be determined."
+  },
+  {
+    "category": 1,
+    "code": 7034,
+    "file": "<generated>/Component.js",
+    "start": 6298,
+    "length": 8,
+    "messageText": "Variable 'template' implicitly has type 'any' in some locations where its type cannot be determined.",
+    "message": "Variable 'template' implicitly has type 'any' in some locations where its type cannot be determined."
+  },
+  {
+    "category": 1,
+    "code": 7034,
+    "file": "<generated>/Component.js",
+    "start": 6321,
+    "length": 14,
+    "messageText": "Variable 'renderFunction' implicitly has type 'any' in some locations where its type cannot be determined.",
+    "message": "Variable 'renderFunction' implicitly has type 'any' in some locations where its type cannot be determined."
+  },
+  {
+    "category": 1,
+    "code": 7034,
+    "file": "<generated>/Component.js",
+    "start": 6614,
+    "length": 8,
+    "messageText": "Variable 'defaults' implicitly has type 'any[]' in some locations where its type cannot be determined.",
+    "message": "Variable 'defaults' implicitly has type 'any[]' in some locations where its type cannot be determined."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 8711,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 8716,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 10288,
+    "length": 9,
+    "messageText": "Parameter 'candidate' implicitly has an 'any' type.",
+    "message": "Parameter 'candidate' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 10299,
+    "length": 11,
+    "messageText": "Parameter 'fromDefault' implicitly has an 'any' type.",
+    "message": "Parameter 'fromDefault' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7005,
+    "file": "<generated>/Component.js",
+    "start": 10686,
+    "length": 8,
+    "messageText": "Variable 'defaults' implicitly has an 'any[]' type.",
+    "message": "Variable 'defaults' implicitly has an 'any[]' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 11276,
+    "length": 2,
+    "messageText": "Parameter 'fn' implicitly has an 'any' type.",
+    "message": "Parameter 'fn' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 11498,
+    "length": 7,
+    "messageText": "Parameter 'request' implicitly has an 'any' type.",
+    "message": "Parameter 'request' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7005,
+    "file": "<generated>/Component.js",
+    "start": 13831,
+    "length": 14,
+    "messageText": "Variable 'renderFunction' implicitly has an 'any' type.",
+    "message": "Variable 'renderFunction' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 14303,
+    "length": 4,
+    "messageText": "Parameter 'next' implicitly has an 'any' type.",
+    "message": "Parameter 'next' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 15726,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 15789,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 15905,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 15910,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 15982,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 15987,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 16235,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 16343,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 16348,
+    "length": 7,
+    "messageText": "Parameter 'payload' implicitly has an 'any' type.",
+    "message": "Parameter 'payload' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 16357,
+    "length": 7,
+    "messageText": "Parameter 'options' implicitly has an 'any' type.",
+    "message": "Parameter 'options' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7005,
+    "file": "<generated>/Component.js",
+    "start": 17260,
+    "length": 10,
+    "messageText": "Variable 'activeRoot' implicitly has an 'any' type.",
+    "message": "Variable 'activeRoot' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 17954,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 18057,
+    "length": 5,
+    "messageText": "Parameter 'input' implicitly has an 'any' type.",
+    "message": "Parameter 'input' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 18656,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7053,
+    "file": "<generated>/Component.js",
+    "start": 19138,
+    "length": 16,
+    "messageText": "Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'.",
+    "message": "Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'."
+  },
+  {
+    "category": 1,
+    "code": 7053,
+    "file": "<generated>/Component.js",
+    "start": 19157,
+    "length": 31,
+    "messageText": "Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'.",
+    "message": "Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 19312,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 20639,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 20644,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 20718,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 20723,
+    "length": 2,
+    "messageText": "Parameter 'fn' implicitly has an 'any' type.",
+    "message": "Parameter 'fn' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 20865,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 20870,
+    "length": 2,
+    "messageText": "Parameter 'fn' implicitly has an 'any' type.",
+    "message": "Parameter 'fn' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 21069,
+    "length": 5,
+    "messageText": "Parameter 'layer' implicitly has an 'any' type.",
+    "message": "Parameter 'layer' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22154,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22159,
+    "length": 5,
+    "messageText": "Parameter 'value' implicitly has an 'any' type.",
+    "message": "Parameter 'value' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22302,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22307,
+    "length": 6,
+    "messageText": "Parameter 'handle' implicitly has an 'any' type.",
+    "message": "Parameter 'handle' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22416,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22421,
+    "length": 2,
+    "messageText": "Parameter 'fn' implicitly has an 'any' type.",
+    "message": "Parameter 'fn' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7019,
+    "file": "<generated>/Component.js",
+    "start": 22459,
+    "length": 7,
+    "messageText": "Rest parameter 'args' implicitly has an 'any[]' type.",
+    "message": "Rest parameter 'args' implicitly has an 'any[]' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22542,
+    "length": 3,
+    "messageText": "Parameter 'key' implicitly has an 'any' type.",
+    "message": "Parameter 'key' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 22547,
+    "length": 4,
+    "messageText": "Parameter 'spec' implicitly has an 'any' type.",
+    "message": "Parameter 'spec' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7005,
+    "file": "<generated>/Component.js",
+    "start": 24259,
+    "length": 10,
+    "messageText": "Variable 'activeRoot' implicitly has an 'any' type.",
+    "message": "Variable 'activeRoot' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 25118,
+    "length": 8,
+    "messageText": "Parameter 'renderer' implicitly has an 'any' type.",
+    "message": "Parameter 'renderer' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7005,
+    "file": "<generated>/Component.js",
+    "start": 26030,
+    "length": 8,
+    "messageText": "Variable 'template' implicitly has an 'any' type.",
+    "message": "Variable 'template' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 26658,
+    "length": 2,
+    "messageText": "Parameter 'fn' implicitly has an 'any' type.",
+    "message": "Parameter 'fn' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 7006,
+    "file": "<generated>/Component.js",
+    "start": 28074,
+    "length": 10,
+    "messageText": "Parameter '__puiOwner' implicitly has an 'any' type.",
+    "message": "Parameter '__puiOwner' implicitly has an 'any' type."
+  },
+  {
+    "category": 1,
+    "code": 2554,
+    "file": "<generated>/Component.js",
+    "start": 29234,
+    "length": 13,
+    "messageText": "Expected 0 arguments, but got 1.",
+    "message": "Expected 0 arguments, but got 1."
+  }
+]

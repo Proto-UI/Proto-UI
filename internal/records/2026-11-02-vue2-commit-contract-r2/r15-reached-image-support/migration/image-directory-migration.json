@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "code": 0,
+    "stdout": "{\"ok\":true,\"command\":\"migrate-native-support\",\"result\":{\"directory\":\"<project-temp-1>/output\",\"files\":[\"<project-temp-1>/output/.proto-ui/migration-inputs/new-image.json\",\"<project-temp-1>/output/.proto-ui/migration-inputs/old-trigger.json\",\"<project-temp-1>/output/.proto-ui/shared/context/scope-v1.ts\",\"<project-temp-1>/output/.proto-ui/shared/interaction/adapter-modules-v1.ts\",\"<project-temp-1>/output/.proto-ui/shared/interaction/image-v1.ts\",\"<project-temp-1>/output/.proto-ui/shared/interaction/native-v1.ts\",\"<project-temp-1>/output/.proto-ui/shared/interaction/ownership-v1.ts\",\"<project-temp-1>/output/new-image/.proto-ui/context/scope-v1.ts\",\"<project-temp-1>/output/new-image/.proto-ui/interaction/image-v1.ts\",\"<project-temp-1>/output/new-image/.proto-ui/interaction/ownership-v1.ts\",\"<project-temp-1>/output/new-image/Component.js\",\"<project-temp-1>/output/new-image/Component.js.map\",\"<project-temp-1>/output/new-image/provenance.json\",\"<project-temp-1>/output/old-trigger/.proto-ui/context/scope-v1.ts\",\"<project-temp-1>/output/old-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<project-temp-1>/output/old-trigger/.proto-ui/interaction/native-v1.ts\",\"<project-temp-1>/output/old-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<project-temp-1>/output/old-trigger/Component.js\",\"<project-temp-1>/output/old-trigger/Component.js.map\",\"<project-temp-1>/output/old-trigger/provenance.json\",\"<project-temp-1>/output/provenance.json\"]},\"diagnostics\":[]}\n",
+    "stderr": ""
+  },
+  "inputs": [
+    {
+      "id": "old-trigger",
+      "directory": "old-trigger",
+      "provenanceSHA256": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664"
+    },
+    {
+      "id": "new-image",
+      "directory": "new-image",
+      "provenanceSHA256": "bff912f27851dfc7120d2268d9bd6ab3ec29e321267babe05b91092a1431e88d"
+    }
+  ],
+  "before": {
+    "inputs/picture.proto.ts": "d8cb68d40f4ecfd30a69ee4d0ec6c1877d1ac876962275929f4856686441dfe2",
+    "new-image/.proto-ui/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+    "new-image/.proto-ui/interaction/image-v1.ts": "0e9dba13c41e7359a04059c01fe8a8d46e833d99e99a9fb5463b4a1e82ca3640",
+    "new-image/.proto-ui/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+    "new-image/Component.js": "b4f65e948497ec3ea91a632065c2bcdc41049f4e4894333cb29ca17b1d55e1eb",
+    "new-image/Component.js.map": "a8921e75510daa786cebaacbcd9644bef593bbee01029a5303d001d08d6e9145",
+    "new-image/provenance.json": "bff912f27851dfc7120d2268d9bd6ab3ec29e321267babe05b91092a1431e88d",
+    "old-trigger/.proto-ui/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+    "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+    "old-trigger/.proto-ui/interaction/native-v1.ts": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+    "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+    "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+    "old-trigger/provenance.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+    "plan.json": "f02eee0649342ee7f2fdfa7d9bdd0459319b6e10f7edc6296af773e93dd1b82f"
+  }
+}

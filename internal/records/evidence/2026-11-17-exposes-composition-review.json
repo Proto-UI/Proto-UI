@@ -1,0 +1,548 @@
+{
+  "schemaVersion": 1,
+  "kind": "exposes-composition-review-evidence",
+  "recordedAt": "2026-11-17T10:34:40.948356+00:00",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "documentationParent": "0b8b403179759250664587a4a0e990a5354e02e4",
+  "sourcePublication": {
+    "cancellationCommit": "0b8b403179759250664587a4a0e990a5354e02e4",
+    "rawGraphPR": "https://github.com/Proto-UI/Proto-UI/pull/1491",
+    "rawGraphHead": "a23bf1b24f07742ef8852cda474eff958a4dc845",
+    "rawGraphAdoptedIntoPR1490": false
+  },
+  "composition": {
+    "scopeId": "exposes-combined-e329-input-shell-pr1491-20261117",
+    "createdAt": "2026-11-17T10:17:46.771836+00:00",
+    "worktree": "/workspace/scratch/8077f6e9f3a8/proto-ui-exposes-combined",
+    "branch": "verify/exposes-combined-20261117",
+    "base": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+    "inputShellSource": {
+      "base": "c22e02f4613b5a890e436f633309f3c2debbf9a3",
+      "candidatePatchSha256": "015f8ca047115685f8534d1d16d687f06b414e19be9e436f6781b604fe6a886b"
+    },
+    "rawGraphSource": {
+      "publishedHead": "a23bf1b24f07742ef8852cda474eff958a4dc845",
+      "publishedBase": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "paths": [
+        "packages/adapters/base/src/host/exposes.ts",
+        "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts"
+      ]
+    },
+    "reactFixture": {
+      "source": "a23bf1b24f07742ef8852cda474eff958a4dc845",
+      "path": "packages/adapters/react/test/expose-returned-callables.integration.test.ts",
+      "sha256": "f3be595a6d3d584de49c1fb9b15e16cb5153af6033011acb4ad0a60909ca684b",
+      "alreadyIdenticalToE329": true,
+      "changed": false
+    },
+    "steps": [
+      {
+        "label": "input-shell",
+        "phase": "check",
+        "command": [
+          "git",
+          "apply",
+          "--check",
+          "/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/candidate.patch"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "",
+        "patchSha256": "015f8ca047115685f8534d1d16d687f06b414e19be9e436f6781b604fe6a886b"
+      },
+      {
+        "label": "input-shell",
+        "phase": "apply",
+        "command": [
+          "git",
+          "apply",
+          "/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/candidate.patch"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "",
+        "patchSha256": "015f8ca047115685f8534d1d16d687f06b414e19be9e436f6781b604fe6a886b"
+      },
+      {
+        "label": "published-raw-graph",
+        "phase": "check",
+        "command": [
+          "git",
+          "apply",
+          "--check",
+          "/workspace/scratch/8077f6e9f3a8/current-ci-review/pr1491-raw-graph/published-raw-graph.patch"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "",
+        "patchSha256": "cdf7723691f17f9e0c8ec86adfc3099b521ee8c20528fb492702a54125d78347"
+      },
+      {
+        "label": "published-raw-graph",
+        "phase": "apply",
+        "command": [
+          "git",
+          "apply",
+          "/workspace/scratch/8077f6e9f3a8/current-ci-review/pr1491-raw-graph/published-raw-graph.patch"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "",
+        "patchSha256": "cdf7723691f17f9e0c8ec86adfc3099b521ee8c20528fb492702a54125d78347"
+      }
+    ],
+    "conflicts": [],
+    "instructionsEqualPreviouslyRead": {
+      "AGENTS.md": {
+        "combined": "ebc148bcf223e812ae02bfd87d6565f6f85cf92bc6c48cd3c48cb317a6559e84",
+        "previouslyReadTree": "ebc148bcf223e812ae02bfd87d6565f6f85cf92bc6c48cd3c48cb317a6559e84"
+      },
+      ".agents/skills/pui-dev/SKILL.md": {
+        "combined": "9d2d78a0ef085bb1f1ac362ab7692ee9a5898d2594335534fbe03e19436ee9cd",
+        "previouslyReadTree": "9d2d78a0ef085bb1f1ac362ab7692ee9a5898d2594335534fbe03e19436ee9cd"
+      },
+      "internal/agent-operations/testing-method.md": {
+        "combined": "02b0f8eeb1bab2e40a9f7a918493b342c813d2e2a2ed09c32724081efbf46ef7",
+        "previouslyReadTree": "02b0f8eeb1bab2e40a9f7a918493b342c813d2e2a2ed09c32724081efbf46ef7"
+      },
+      "internal/agent-operations/visual-evidence.md": {
+        "combined": "d8249c01b8beea5f2c7067566ef8ed40d312b65e1790c3a780070210ec2e96b2",
+        "previouslyReadTree": "d8249c01b8beea5f2c7067566ef8ed40d312b65e1790c3a780070210ec2e96b2"
+      },
+      "spec/README.md": {
+        "combined": "22faec23ddc66ebaaf117a2f5351037b5cc5e3f564c384e7dfaf70900e1e8504",
+        "previouslyReadTree": "22faec23ddc66ebaaf117a2f5351037b5cc5e3f564c384e7dfaf70900e1e8504"
+      },
+      "internal/agent-operations/contributor-agents.md": {
+        "combined": "fc7d49dd1521d1077ec64022cc9a366cea2d4e5e2424c49926ce467f130ef125",
+        "previouslyReadTree": "fc7d49dd1521d1077ec64022cc9a366cea2d4e5e2424c49926ce467f130ef125"
+      }
+    },
+    "validation": "not-run",
+    "sourceBranchesModified": false
+  },
+  "authority": {
+    "scopeId": "exposes-combined-e329-input-shell-pr1491-20261117",
+    "repositoryId": "github.com:Proto-UI/Proto-UI",
+    "inputShellAuthority": {
+      "path": "/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/authority-map.json",
+      "sha256": "36d345045e4430722762e27263265b131f0a15868300f5630f3924da7078c1fd"
+    },
+    "rawGraphReview": {
+      "path": "/workspace/scratch/8077f6e9f3a8/current-ci-review/pr1491-raw-graph/static-review.json",
+      "sha256": "2aceb5c319fe7a4a9d6b7c5970c8e2d5c9c0364eef811a4b2285dd161b10392f"
+    },
+    "governedBoundary": [
+      "M-EXPOSE-0001-G/H: public value identity survives view epochs and nested callables remain owner-scoped",
+      "C-EXPOSE-0006-C/D/E: no JSON-only constraint or automatic reactive subscription",
+      "C-EXPOSE-0008-B/C/D/E: instance lifetime and terminal safety",
+      "C-CONTEXT-0003-A: actual ContextKey reference identity",
+      "P-SHADCN-INPUT-SHELL-BINDING-LIFETIME: every unsubscribe attempted, current generation retired",
+      "M-EXPOSE-STATE-0001-C/D/E: actual issued cancellation and specialized State lifetime"
+    ],
+    "status": "Existing draft directions; this verification changes no governing definition",
+    "criterion": "The two separately repaired boundaries compose without losing genuine cancellation or ordinary callable guard/nominal identity/registry filtering."
+  },
+  "validation": {
+    "scopeId": "exposes-combined-e329-input-shell-pr1491-20261117",
+    "recordedAt": "2026-11-17T10:22:08.511311+00:00",
+    "base": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+    "branch": "verify/exposes-combined-20261117",
+    "combinedPatchSha256": "f33ca8cf2b5ec8cde728eb61530e433944a41d128e211acba7c5db3a1af26b6a",
+    "changedFiles": {
+      "internal/records/2026-11-17-expose-state-terminal-cancellation.md": "9be0253bebc1976ce1496bd239e20be517cc87cb850db52042e25fdfc3a7684f",
+      "internal/records/evidence/2026-11-17-expose-state-terminal-cancellation.json": "0486c7a4938383f42008dcae174cfeb56084e37d44894a0191bfc63f8250a308",
+      "packages/adapters/base/src/host/exposes.ts": "ca2613163ed7a165d819233b2d949fd34e737e0474a51d88c8d155d223228741",
+      "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts": "39ecb98d7fbc76743a96d88f6541a50c7509d435ed8b24524262d249440a7420",
+      "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911",
+      "packages/modules/expose-state/src/impl.ts": "1670bf6c98775baf4c484298da7b5bb5e2e89ba106576cfa2114bd12ceb0bfad",
+      "packages/modules/expose-state/src/index.ts": "8f2a0aec500bde0a2e13fa1cceed3ad414d2edee4f431e5a5e3732e5cfab737d"
+    },
+    "inputCount": 28,
+    "inputBindingScope": "Every combined changed file, every selected test file, and explicitly enumerated boundary/configuration inputs are hashed before and after each run; all other tracked source is reproducible from the fixed e329 base. This is not a claim to dynamically enumerate every transitive import.",
+    "validationInputsSha256": "daa1dd394ad8913ca09d96e2be2c0c2bafe3461ab4d51e1ebf36946d3f59a4dd",
+    "compositionInputsSha256": "ce1358dc9392e8f54d8d46646a642c4f944647adf1378d64dfc99e4ce712cb84",
+    "runnerSha256": "d183a9d4e3b4a14caa95f16014b85dc3abf65029ae56c5eea5a0fd6bc613de17",
+    "runs": [
+      {
+        "label": "combined-install",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "install",
+          "--offline",
+          "--frozen-lockfile",
+          "--ignore-scripts",
+          "--reporter=append-only"
+        ],
+        "startSha256": "74da38ebe7d77b85281b1b8f6f15811e9ec025545d16a6671649d59e68a27e9e",
+        "resultSha256": "947d1be2c6b01b2a8de3f1bfbd0ea9029ab829b9d8e09d59aa5fbbbad6e6b029",
+        "logSha256": "385de51cc0e2c4a96f7f343bb1e68461e31db8d30297b2bb82458ad1ec2b8d20",
+        "jsonSha256": null,
+        "exitCode": 0,
+        "counts": null,
+        "wallSeconds": 2.749,
+        "fileResults": null,
+        "unhandledErrors": [],
+        "inputsUnchanged": true,
+        "exactSelectionMatches": null,
+        "exactAffectedFilesMatch": null
+      },
+      {
+        "label": "combined-affected",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--no-file-parallelism",
+          "--reporter=verbose",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/combined-affected.json",
+          "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts",
+          "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts",
+          "packages/modules/expose-state/test/impl-spec.test.ts",
+          "packages/prototypes/shadcn/test/input-shell-binding.test.ts",
+          "packages/adapters/react/test/expose-returned-callables.integration.test.ts"
+        ],
+        "startSha256": "324994c0eeccf07dcb39ebfd3c3202d09b966436488ab743653a5973d1c73ae4",
+        "resultSha256": "db37f47c63405726a8f300fd5ae0040f532e36f9eba81ae6baad88145f453747",
+        "logSha256": "996d7b3f5233831c795efce91d54ff362eca2d0f35a3cf4326623616c9c72800",
+        "jsonSha256": "464682f633a87bba517459e327e95fa11638e28ebfa674f2bc588bc2098e139f",
+        "exitCode": 0,
+        "counts": {
+          "numTotalTests": 106,
+          "numPassedTests": 106,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "success": true
+        },
+        "wallSeconds": 7.552,
+        "fileResults": [
+          {
+            "path": "packages/adapters/react/test/expose-returned-callables.integration.test.ts",
+            "executed": 5,
+            "passed": 5,
+            "failed": 0,
+            "unselected": 0
+          },
+          {
+            "path": "packages/prototypes/shadcn/test/input-shell-binding.test.ts",
+            "executed": 46,
+            "passed": 46,
+            "failed": 0,
+            "unselected": 0
+          },
+          {
+            "path": "packages/modules/expose-state/test/impl-spec.test.ts",
+            "executed": 9,
+            "passed": 9,
+            "failed": 0,
+            "unselected": 0
+          },
+          {
+            "path": "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts",
+            "executed": 31,
+            "passed": 31,
+            "failed": 0,
+            "unselected": 0
+          },
+          {
+            "path": "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts",
+            "executed": 15,
+            "passed": 15,
+            "failed": 0,
+            "unselected": 0
+          }
+        ],
+        "unhandledErrors": [],
+        "inputsUnchanged": true,
+        "exactSelectionMatches": null,
+        "exactAffectedFilesMatch": true
+      },
+      {
+        "label": "combined-vue2",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--no-file-parallelism",
+          "--reporter=verbose",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/combined-vue2.json",
+          "-t",
+          "^(?:Docs\\ shadcn/vue2\\ returns\\ focus\\ to\\ the\\ current\\ opener\\ after\\ a\\ runtime\\ replacement|public\\-mode\\ Search\\ through\\ the\\ actual\\ projection\\ materializer\\ vue2/shadcn:\\ staged\\ activation,\\ close/reopen\\ and\\ generation\\ replacement\\ retain\\ the\\ live\\ query)$",
+          "apps/www/src/components/site-search-commands.public-mode.test.ts"
+        ],
+        "startSha256": "d67fc11ed1e433f45d70314e64a4a298cc95077ff035e1242ed38ee82e76796c",
+        "resultSha256": "a0ef9d583f56de7cbbc4f9706d8c76c664d130bd5339e7b67155a06977cbe727",
+        "logSha256": "3c5e6af40417b56c1cc1eeb3e27a4161b99f78eb61b98992003b37cd1c35e85d",
+        "jsonSha256": "62c1d8ddafeb690f279dc0d76661e88464b8c85b4f580958067f2f72adc4e993",
+        "exitCode": 0,
+        "counts": {
+          "numTotalTests": 34,
+          "numPassedTests": 2,
+          "numFailedTests": 0,
+          "numPendingTests": 32,
+          "success": true
+        },
+        "wallSeconds": 8.022,
+        "fileResults": [
+          {
+            "path": "apps/www/src/components/site-search-commands.public-mode.test.ts",
+            "executed": 2,
+            "passed": 2,
+            "failed": 0,
+            "unselected": 32
+          }
+        ],
+        "unhandledErrors": [],
+        "inputsUnchanged": true,
+        "exactSelectionMatches": true,
+        "exactAffectedFilesMatch": null
+      }
+    ],
+    "result": "passed",
+    "boundedCriterion": "The exact local e329 + frozen InputShell + published a23bf1b2 raw graph composition preserves the selected public record/callable/nominal controls, genuine State cancellation and both previously failing Vue2 Search cases without unhandled errors.",
+    "unchangedOriginalInputShell": true,
+    "visualEvidence": {
+      "disposition": "internal-logic-executable-evidence",
+      "nativeBrowser": "not-run in this composition; any later Ready preview belongs to its own deployed source"
+    },
+    "limits": [
+      "These are two fresh combined test commands, not the published PR1491 105/52 executions.",
+      "The actual React 5-case fixture is byte-identical in e329 and a23bf1b2; it was reused unchanged.",
+      "No whole-workspace types, build, full CI, native browser or release acceptance is inferred.",
+      "This local verification is not GitHub approval or integration."
+    ]
+  },
+  "validationInputs": {
+    "scopeId": "exposes-combined-e329-input-shell-pr1491-20261117",
+    "createdAt": "2026-11-17T10:18:15.279234+00:00",
+    "base": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+    "inputBindingScope": "Every combined changed file, every selected test file, and explicitly enumerated boundary/configuration inputs are hashed before and after each run; all other tracked source is reproducible from the fixed e329 base. This is not a claim to dynamically enumerate every transitive import.",
+    "inputs": {
+      "AGENTS.md": "ebc148bcf223e812ae02bfd87d6565f6f85cf92bc6c48cd3c48cb317a6559e84",
+      ".agents/skills/pui-dev/SKILL.md": "9d2d78a0ef085bb1f1ac362ab7692ee9a5898d2594335534fbe03e19436ee9cd",
+      "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+      "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+      "pnpm-workspace.yaml": "d14b5597e55a86bf722be768e3bb1fbc8dd2df0fdd12af5e699f0c92b6aa3329",
+      "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da",
+      "tsconfig.json": "f0e0085455b433e6f1ad390815c9a00ee834a582dd7c1072a79052c475e30cb2",
+      "packages/adapters/base/src/host/exposes.ts": "ca2613163ed7a165d819233b2d949fd34e737e0474a51d88c8d155d223228741",
+      "packages/adapters/react/src/adapt.ts": "41b14b665732ad8ad58b4a5dcf559bfd9c4ab4a76a3160b35da3c9818cf690a9",
+      "packages/adapters/vue2/src/adapt.ts": "d3dbe1ef581402fbdd9bdb3f6995de1a30a1c19b3e8cd0b1fa09721d50295096",
+      "packages/modules/expose-state/src/impl.ts": "1670bf6c98775baf4c484298da7b5bb5e2e89ba106576cfa2114bd12ceb0bfad",
+      "packages/modules/expose-state/src/types.ts": "b02c5dbc17f5ae7566e6126013abeebb20faae673efb59a700c9c3eca2a34cd2",
+      "packages/modules/expose-state/src/index.ts": "8f2a0aec500bde0a2e13fa1cceed3ad414d2edee4f431e5a5e3732e5cfab737d",
+      "packages/modules/expose/src/impl.ts": "5bf1f1e02f8276f1b3bfb7f0223b410010f4e5a18f83bdfa963a3b270fcbfce5",
+      "packages/modules/expose/src/kernel.ts": "6a68d8dcfc1cfd9753bb6e6a1b1dd3059523c6fd358a6217b73eedbf5518a4b2",
+      "packages/modules/state/src/impl.ts": "4ff8c2e80bf1703481f6ff1632d78d327a6025099cea75d0c834dd9126ee19d0",
+      "packages/modules/state/src/kernel.ts": "0d3e405324ed20de5987f8fab89b9e8e7fb5302b8824f9c217e4bb619d54ed23",
+      "packages/core/src/context.ts": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+      "packages/prototypes/shadcn/src/input-shell/bind-control.ts": "92d0046c9d1b374caaf1df149f7917b178ff666e68300b9d2846d5e25f4c2315",
+      "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+      "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts": "39ecb98d7fbc76743a96d88f6541a50c7509d435ed8b24524262d249440a7420",
+      "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911",
+      "packages/modules/expose-state/test/impl-spec.test.ts": "6763e7b2ef7bcacb48f5a91528814646a81744eafef13c763748f200d3dec975",
+      "packages/prototypes/shadcn/test/input-shell-binding.test.ts": "7c0162a819f3af6a70e911edb14bbe0f6a62d71e4a4de9799730f41030316b17",
+      "packages/adapters/react/test/expose-returned-callables.integration.test.ts": "f3be595a6d3d584de49c1fb9b15e16cb5153af6033011acb4ad0a60909ca684b",
+      "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61",
+      "internal/records/2026-11-17-expose-state-terminal-cancellation.md": "9be0253bebc1976ce1496bd239e20be517cc87cb850db52042e25fdfc3a7684f",
+      "internal/records/evidence/2026-11-17-expose-state-terminal-cancellation.json": "0486c7a4938383f42008dcae174cfeb56084e37d44894a0191bfc63f8250a308"
+    },
+    "affectedFiles": {
+      "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts": 31,
+      "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": 15,
+      "packages/modules/expose-state/test/impl-spec.test.ts": 9,
+      "packages/prototypes/shadcn/test/input-shell-binding.test.ts": 46,
+      "packages/adapters/react/test/expose-returned-callables.integration.test.ts": 5
+    },
+    "searchFile": "apps/www/src/components/site-search-commands.public-mode.test.ts",
+    "searchCases": [
+      "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+      "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query"
+    ]
+  },
+  "rootReview": {
+    "reviewer": "root independent exact composition and raw evidence review",
+    "reviewedAt": "2026-11-17T10:31:47.218533+00:00",
+    "base": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+    "sourceAdoptedIntoPR1490": false,
+    "reconstructedChangedFiles": 7,
+    "allChangedFilesByteEqual": true,
+    "inputCount": 28,
+    "runs": [
+      {
+        "label": "combined-install",
+        "exitCode": 0,
+        "counts": null,
+        "28InputsUnchanged": true,
+        "rawHashesVerified": true
+      },
+      {
+        "label": "combined-affected",
+        "exitCode": 0,
+        "counts": {
+          "numTotalTests": 106,
+          "numPassedTests": 106,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "success": true
+        },
+        "28InputsUnchanged": true,
+        "rawHashesVerified": true
+      },
+      {
+        "label": "combined-vue2",
+        "exitCode": 0,
+        "counts": {
+          "numTotalTests": 34,
+          "numPassedTests": 2,
+          "numFailedTests": 0,
+          "numPendingTests": 32,
+          "success": true
+        },
+        "28InputsUnchanged": true,
+        "rawHashesVerified": true
+      }
+    ],
+    "boundedResult": "Published PR1491 raw graph and issued-cancellation changes compose in the examined local tree; this is not the PR1490 production tree or complete PR1491 acceptance.",
+    "reviewKind": "local engineering review; no GitHub APPROVED submission"
+  },
+  "localIndependentStaticReview": {
+    "scope": "published-pr1491-raw-graph-and-trusted-cancellation-composition",
+    "reviewer": "/root/current_ci_review",
+    "kind": "independent-local-static-review-not-GitHub-approval",
+    "recordedAt": "2026-11-17T10:15:27.271871+00:00",
+    "publishedHead": "a23bf1b24f07742ef8852cda474eff958a4dc845",
+    "publishedBase": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "reviewedFiles": [
+      {
+        "path": "packages/adapters/base/src/host/exposes.ts",
+        "sha256": "6cacd89777e7e7c88b761643dd7e4c825252fafd5b9e3dcafe1c3d17b2801db8",
+        "matchesPublishedManifest": true
+      },
+      {
+        "path": "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts",
+        "sha256": "39ecb98d7fbc76743a96d88f6541a50c7509d435ed8b24524262d249440a7420",
+        "matchesPublishedManifest": true
+      }
+    ],
+    "relatedBindings": {
+      "packages/core/src/context.ts": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+      "packages/adapters/react/test/expose-returned-callables.integration.test.ts": "f3be595a6d3d584de49c1fb9b15e16cb5153af6033011acb4ad0a60909ca684b",
+      "spec/modules/M-EXPOSE-0001.yaml": "ac45930d75248d19d5eff73b7e70b2fa6be7d062980b335e75e81250e8a4a727",
+      "spec/contracts/C-EXPOSE-0006.yaml": "8de02cf1d290c84aede598514a975b291ce59cb4985d9cd6f43b16babbececd9",
+      "spec/contracts/C-EXPOSE-0007.yaml": "0bf6dc228bf9e572205cffd4419dc54823fa76611c92e59d217c1af36e893074",
+      "spec/contracts/C-EXPOSE-0008.yaml": "20f67e6878c19b1bb8fc4f7586f9d2a2aa407f03b7a9bcc82f3cf33666cc66d6",
+      "spec/contracts/C-CONTEXT-0003.yaml": "3536a6cf283a114dfa67bb4a5182a783fe576164c5763d565c20f9a40ddd7ab1",
+      "spec/host-caps/HC-EXPOSES-RECORD-SINK-0001.yaml": "d797de822d1f576cc5d4e73b02786b6979af108dc5c42a23f97399556d5c3160"
+    },
+    "publishedGraphPatchSha256": "cdf7723691f17f9e0c8ec86adfc3099b521ee8c20528fb492702a54125d78347",
+    "inputShellCandidatePatchSha256": "015f8ca047115685f8534d1d16d687f06b414e19be9e436f6781b604fe6a886b",
+    "inputShellProductPatchSha256": "d63d3bf86329f6bcc6fb19d30a247f72c9b490273a96ae170019c01e02574d50",
+    "staticFindings": [],
+    "reviewedDecisions": [
+      {
+        "id": "RG-IDENTITY",
+        "observation": "Mutable ordinary records and arrays receive cached public projections from their first read. The graph retains public aliases/cycles and explicit read/result refresh identity. Frozen inert graphs remain raw, and mutable descendants or accessors force their frozen parents to project.",
+        "authority": [
+          "M-EXPOSE-0001-G/H",
+          "C-EXPOSE-0006-C/D/E",
+          "C-EXPOSE-0008-B/C/D",
+          "C-CONTEXT-0003-A"
+        ],
+        "compatibility": "The two changed mutable-data raw===public assertions were stronger than the catalog. Public-to-raw equality and write-through of ordinary mutable data are not preserved. This is an explicit compatibility change, not a general claim that all mutable-value changes are harmless."
+      },
+      {
+        "id": "RG-SNAPSHOT",
+        "observation": "This remains an explicit snapshot model. Each own accessor is sampled once at read/result; projected members remain writable data properties. Author raw mutation appears at the next explicit boundary; direct writes to a mutable public projection change that projection rather than its author source and are overwritten on a later raw refresh. Method receivers remain the author objects. Opaque values and immutable raw nodes retain their previous treatment.",
+        "limits": "This is not a general live object membrane. It does not promise automatic observation/wrapping of arbitrary consumer mutations or descriptor fidelity."
+      },
+      {
+        "id": "RG-KEYS",
+        "observation": "Reflect.ownKeys preserves nested symbol/nonenumerable members and enumerability. Array length has separate handling. Registry filtering is identity-scoped and propagates to cached root projections and detached root copies, including old registries returned after replacement. Mutable nominal StyleHandle is not universally frozen; raw-identity retention is limited to truly frozen inert graphs, not all presentation-shaped values."
+      },
+      {
+        "id": "RG-CANCEL-COMPOSITION",
+        "observation": "The graph funnels callable entries through the same wrapCallable function. The trusted-cancellation predicate runs before ordinary callable caches, leaves only actual Module-issued trackedOff identities exempt, and does not expose registration. New registryRecords tracks object roles only; it cannot bless a lookalike callback. Function values are not cloned, so actual trackedOff WeakSet membership survives the new graph path.",
+        "limits": "Static composition reasoning only; no combined runtime acceptance yet."
+      }
+    ],
+    "applyCheck": {
+      "command": "git apply --check current-ci-review/pr1491-raw-graph/published-raw-graph.patch",
+      "target": "proto-ui-input-shell-cancel with frozen six-file candidate",
+      "exitCode": 0,
+      "sourceTreesModified": false,
+      "meaning": "Textual two-path composition is clean; no runtime result follows from this check."
+    },
+    "executionEvidence": {
+      "publishedClaim": "The published record reports 105/105 affected and 52/52 public-boundary tests. This review inspected published source/evidence metadata but did not execute or independently recover its ZIP raw logs.",
+      "ourCombination": "not-run",
+      "testAssertions": "31 reader cases are authored coverage, not an independent execution claim."
+    },
+    "recommendedBoundedComposition": {
+      "files": [
+        {
+          "path": "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts",
+          "expectedCases": 31
+        },
+        {
+          "path": "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts",
+          "expectedCases": 15
+        },
+        {
+          "path": "packages/modules/expose-state/test/impl-spec.test.ts",
+          "expectedCases": 9
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/input-shell-binding.test.ts",
+          "expectedCases": 46
+        },
+        {
+          "path": "packages/adapters/react/test/expose-returned-callables.integration.test.ts",
+          "expectedCases": 5
+        }
+      ],
+      "expectedCombinedCount": 106,
+      "separateExactSearchCases": [
+        "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+        "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query"
+      ],
+      "conditions": "Use a separate tree, physically installed frozen dependencies, one worker, root-assigned CPU window and per-input SHA binding. Preserve exact two-case selection and actual unhandled error identities; do not use count-only success."
+    },
+    "overall": "No bounded source-level blocker found. Root decides integration after its independent review and new combination evidence. No external write or formal approval."
+  },
+  "sourceReceipts": {
+    "validation-report.json": {
+      "path": "/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/validation-report.json",
+      "sha256": "3276bc0d65b99d5018b311c848081d111bb737068ceb07a053bf8e031a941db8"
+    },
+    "validation-inputs.json": {
+      "path": "/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/validation-inputs.json",
+      "sha256": "daa1dd394ad8913ca09d96e2be2c0c2bafe3461ab4d51e1ebf36946d3f59a4dd"
+    },
+    "composition-inputs.json": {
+      "path": "/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/composition-inputs.json",
+      "sha256": "ce1358dc9392e8f54d8d46646a642c4f944647adf1378d64dfc99e4ce712cb84"
+    },
+    "root-independent-review.json": {
+      "path": "/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/root-independent-review.json",
+      "sha256": "69d5206e6a63a1fd21661f9db27dfff147530902cef917c36d63a4f2fcab9ced"
+    },
+    "combined-candidate.patch": {
+      "path": "/workspace/scratch/8077f6e9f3a8/exposes-combined-evidence/combined-candidate.patch",
+      "sha256": "f33ca8cf2b5ec8cde728eb61530e433944a41d128e211acba7c5db3a1af26b6a"
+    }
+  },
+  "publicationBoundary": "This commit persists bounded evidence only. It changes no production or test source and does not adopt the PR1491 raw-graph implementation."
+}

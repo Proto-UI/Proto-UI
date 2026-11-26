@@ -1,0 +1,1506 @@
+{
+  "kind": "sprint2-independent-original-receipt-audit",
+  "auditor": "/root/final_review",
+  "scope": "Read-only original artifact integrity and matrix recomputation; no product/browser replay and no Ready claim",
+  "runId": 45029016292,
+  "head": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+  "tree": "df8009cd19537fa64c315e6427337d1e3cc24026",
+  "zipSha256": "acd5bebb98575a3fb417f6b4897138f4861fee81b6f65b211a8eb91f0dad72ac",
+  "source": {
+    "head": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+    "tree": "df8009cd19537fa64c315e6427337d1e3cc24026",
+    "status": "",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "untracked": []
+  },
+  "queueStatus": "failed",
+  "totals": {
+    "expected": 304,
+    "observed": 304,
+    "passed": 242,
+    "failed": 62,
+    "incomplete": 0
+  },
+  "steps": [
+    {
+      "id": "public-packages",
+      "startedAt": "2026-11-22T13:44:33.864Z",
+      "status": "passed",
+      "invocation": {
+        "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+        "args": [
+          "scripts/build/public-packages.mjs"
+        ],
+        "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
+        "log": "/home/runner/work/_temp/sprint2-consumers/public-packages/run.log"
+      },
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "finishedAt": "2026-11-22T13:45:35.291Z"
+    },
+    {
+      "id": "styles",
+      "startedAt": "2026-11-22T13:45:35.291Z",
+      "status": "passed",
+      "invocation": {
+        "command": "corepack",
+        "args": [
+          "pnpm@10.32.1",
+          "--filter",
+          "apps-www",
+          "generate:proto-ui-style"
+        ],
+        "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
+        "log": "/home/runner/work/_temp/sprint2-consumers/styles/run.log"
+      },
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "finishedAt": "2026-11-22T13:46:26.683Z"
+    },
+    {
+      "id": "workspace-types",
+      "startedAt": "2026-11-22T13:46:26.684Z",
+      "status": "failed",
+      "invocation": {
+        "command": "corepack",
+        "args": [
+          "pnpm@10.32.1",
+          "check:types:workspace"
+        ],
+        "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
+        "log": "/home/runner/work/_temp/sprint2-consumers/workspace-types/run.log"
+      },
+      "process": {
+        "code": 2,
+        "signal": null,
+        "timeout": false
+      },
+      "finishedAt": "2026-11-22T13:46:57.406Z"
+    }
+  ],
+  "suites": [
+    {
+      "id": "input",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 72,
+        "observed": 72,
+        "passed": 72,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "base/wc/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/slider-values/directions",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/input-otp/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/input-otp/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/slider-values/uncontrolled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/slider-values/controlled",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/slider-values/lifecycle",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/slider-values/directions",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "8c68281b217779e2cde2f6eea373810d1c734927b075dc85a6d5088c4cc3faf9"
+    },
+    {
+      "id": "collections",
+      "status": "failed",
+      "process": {
+        "code": 1,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 36,
+        "observed": 36,
+        "passed": 0,
+        "failed": 36,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "base/wc/tree",
+            "status": "failed"
+          },
+          {
+            "id": "base/wc/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "base/wc/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "base/react/tree",
+            "status": "failed"
+          },
+          {
+            "id": "base/react/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "base/react/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue/tree",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue2/tree",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue2/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue2/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/wc/tree",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/wc/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/wc/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/react/tree",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/react/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/react/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue/tree",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue2/tree",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue2/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue2/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/wc/tree",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/wc/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/wc/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/react/tree",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/react/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/react/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue/tree",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue/virtual-list",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue2/tree",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue2/data-table",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue2/virtual-list",
+            "status": "failed"
+          }
+        ]
+      },
+      "reportSha256": "c221361b9b5a5d805d52c5b7627f4e2581cfb77c49e75dd6732b4e15b225eba2"
+    },
+    {
+      "id": "geometry",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 36,
+        "observed": 36,
+        "passed": 36,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "base/wc/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "base/wc/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/date-picker",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/resizable",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/carousel",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/date-picker",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "d58b9412d69b6a2987089760e03610da136d0c4e6330fc69a17e29ea6817cede"
+    },
+    {
+      "id": "form-select",
+      "status": "failed",
+      "process": {
+        "code": 1,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 36,
+        "observed": 36,
+        "passed": 18,
+        "failed": 18,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "base/wc/form",
+            "status": "failed"
+          },
+          {
+            "id": "base/wc/select",
+            "status": "failed"
+          },
+          {
+            "id": "base/wc/choices",
+            "status": "failed"
+          },
+          {
+            "id": "base/react/form",
+            "status": "failed"
+          },
+          {
+            "id": "base/react/select",
+            "status": "passed"
+          },
+          {
+            "id": "base/react/choices",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/form",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue/select",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue/choices",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/form",
+            "status": "failed"
+          },
+          {
+            "id": "base/vue2/select",
+            "status": "passed"
+          },
+          {
+            "id": "base/vue2/choices",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/wc/form",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/wc/select",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/wc/choices",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/react/form",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/react/select",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/react/choices",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/form",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue/select",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue/choices",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/form",
+            "status": "failed"
+          },
+          {
+            "id": "shadcn/vue2/select",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn/vue2/choices",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/wc/form",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/wc/select",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/wc/choices",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/react/form",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/react/select",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/react/choices",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/form",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue/select",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue/choices",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/form",
+            "status": "failed"
+          },
+          {
+            "id": "brutalist/vue2/select",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist/vue2/choices",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "001119d5fde76cc727e9111a4a773ec20448d3103f17d9005fee2306d97e7405"
+    },
+    {
+      "id": "ordinary-linked-consumers",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 12,
+        "observed": 12,
+        "passed": 12,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries fails visibly when an ordinary import evaluates an unlinked external obligation",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries uses React imports through native wrappers and portals, updates repeatedly and disposes subscriptions",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries uses Vue 3 native component slots, nearest providers and disposal",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries uses Vue 2 ordinary options imports and native children without a Proto launcher",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries uses registered Web Components through ordinary DOM wrappers and terminal disconnect",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries shares Anatomy membership and Focus Scope keys between different independently compiled feature closures",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries resolves structured A11y targets across independent feature closures without crossing domains or private families",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries rejects incompatible Focus metadata and declaration kinds before native import",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in react-dom-source-v1",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in vue-source-v1",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in vue2-source-v1",
+            "status": "passed"
+          },
+          {
+            "id": "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in web-component-source-v1",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "ab495cc6bc5702f03518e49a42d3d142ce84f648661434031ad643929c1fe86a"
+    },
+    {
+      "id": "compiled-consumers",
+      "status": "failed",
+      "process": {
+        "code": 1,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 20,
+        "observed": 20,
+        "passed": 12,
+        "failed": 8,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "react/base: native Button activation, preferences and terminal cleanup",
+            "status": "failed"
+          },
+          {
+            "id": "react/shadcn: native Button activation, preferences and terminal cleanup",
+            "status": "failed"
+          },
+          {
+            "id": "react/brutalist: native Button activation, preferences and terminal cleanup",
+            "status": "failed"
+          },
+          {
+            "id": "react/sync: trusted controlled typing preserves caret through candidate refresh",
+            "status": "failed"
+          },
+          {
+            "id": "react/queued: trusted controlled typing preserves caret through candidate refresh",
+            "status": "failed"
+          },
+          {
+            "id": "vue/base: native Button activation, preferences and terminal cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "vue/shadcn: native Button activation, preferences and terminal cleanup",
+            "status": "failed"
+          },
+          {
+            "id": "vue/brutalist: native Button activation, preferences and terminal cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "vue/sync: trusted controlled typing preserves caret through candidate refresh",
+            "status": "passed"
+          },
+          {
+            "id": "vue/queued: trusted controlled typing preserves caret through candidate refresh",
+            "status": "passed"
+          },
+          {
+            "id": "vue2/base: native Button activation, preferences and terminal cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "vue2/shadcn: native Button activation, preferences and terminal cleanup",
+            "status": "failed"
+          },
+          {
+            "id": "vue2/brutalist: native Button activation, preferences and terminal cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "vue2/sync: trusted controlled typing preserves caret through candidate refresh",
+            "status": "passed"
+          },
+          {
+            "id": "vue2/queued: trusted controlled typing preserves caret through candidate refresh",
+            "status": "passed"
+          },
+          {
+            "id": "wc/base: native Button activation, preferences and terminal cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "wc/shadcn: native Button activation, preferences and terminal cleanup",
+            "status": "failed"
+          },
+          {
+            "id": "wc/brutalist: native Button activation, preferences and terminal cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "wc/sync: trusted controlled typing preserves caret through candidate refresh",
+            "status": "passed"
+          },
+          {
+            "id": "wc/queued: trusted controlled typing preserves caret through candidate refresh",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "196bc1d5b124234560d67d523d5bf4cfeea3e4a704c3f14791f68db832fa9b38"
+    },
+    {
+      "id": "site",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 42,
+        "observed": 42,
+        "passed": 42,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "B: en/wc switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: en/react switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: en/vue switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: en/vue2 switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: zh-cn/wc switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: zh-cn/react switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: zh-cn/vue switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "B: zh-cn/vue2 switches one live Tabs owner through all three exhibition profiles",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/light/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/light/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/light/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/light/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/shadcn/enhanced keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/shadcn/no-js keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/brutalist/enhanced keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: en/brutalist/no-js keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/shadcn/enhanced keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/shadcn/no-js keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "C: zh-cn/brutalist/no-js keeps full mobile navigation targets",
+            "status": "passed"
+          },
+          {
+            "id": "D: en/light/enhanced preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: en/light/failed-scripts preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: en/dark/enhanced preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: en/dark/failed-scripts preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: zh-cn/light/enhanced preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: zh-cn/light/failed-scripts preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: zh-cn/dark/enhanced preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "D: zh-cn/dark/failed-scripts preserves a native, focused Hero pill without prose underline",
+            "status": "passed"
+          },
+          {
+            "id": "#1154: en renders the current public Hook evidence without accepting the historical candidate",
+            "status": "passed"
+          },
+          {
+            "id": "#1154: zh-cn renders the current public Hook evidence without accepting the historical candidate",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "2c7f8aeb0779b3a44acd8c517a56da885299584059af5aa883d04b7d6982cd19"
+    },
+    {
+      "id": "preferences",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 4,
+        "observed": 4,
+        "passed": 4,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 0,
+        "cases": [
+          {
+            "id": "bounded preferences in real Web hosts wc repaints live preferences and retains safe unknown fallback",
+            "status": "passed"
+          },
+          {
+            "id": "bounded preferences in real Web hosts react repaints live preferences and retains safe unknown fallback",
+            "status": "passed"
+          },
+          {
+            "id": "bounded preferences in real Web hosts vue repaints live preferences and retains safe unknown fallback",
+            "status": "passed"
+          },
+          {
+            "id": "bounded preferences in real Web hosts vue2 repaints live preferences and retains safe unknown fallback",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "5ac0a5925db304f6c3f6953b9b2af41e88df80e225148e367bb70ebb852799a8"
+    },
+    {
+      "id": "collapsible",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 23,
+        "observed": 23,
+        "passed": 23,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 18,
+        "cases": [
+          {
+            "id": "Base Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "Base Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "Base Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "Base Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "Base Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence wc preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence react preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence vue preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence vue2 preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "shadcn Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence wc preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence react preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence vue preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence vue2 preserves padding and wraps long text at 320px and 200% type",
+            "status": "passed"
+          },
+          {
+            "id": "brutalist Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "5ff51cef5b3c79299030b4141e0373a69fae972383caed5ba99128380a3a3834"
+    },
+    {
+      "id": "accordion",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      },
+      "summary": {
+        "expected": 23,
+        "observed": 23,
+        "passed": 23,
+        "failed": 0,
+        "incomplete": 0,
+        "notSelected": 5,
+        "cases": [
+          {
+            "id": "Accordion five families / four native Web consumers base wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers base react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers base vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers base vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers brutalist wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers brutalist react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers brutalist vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers brutalist vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers base Chinese 320px / 200% text keeps long labels and overflow inside the page",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn Chinese 320px / 200% text keeps long labels and overflow inside the page",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers brutalist Chinese 320px / 200% text keeps long labels and overflow inside the page",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 390px / 200% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 390px / 200% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 390px / 200% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 1180px / 100% text",
+            "status": "passed"
+          },
+          {
+            "id": "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 390px / 200% text",
+            "status": "passed"
+          }
+        ]
+      },
+      "reportSha256": "b39676d1fb64da3cf15603ef6df88097fe0a86484e8e107267010a9559dc37ee"
+    }
+  ]
+}

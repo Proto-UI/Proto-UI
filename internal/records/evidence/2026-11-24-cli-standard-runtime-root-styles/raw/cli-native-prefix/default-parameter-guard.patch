@@ -1,0 +1,11 @@
+diff --git a/packages/cli/src/services/hook-source-summary.ts b/packages/cli/src/services/hook-source-summary.ts
+--- a/packages/cli/src/services/hook-source-summary.ts
++++ b/packages/cli/src/services/hook-source-summary.ts
+@@ -2046,6 +2046,7 @@
+   ): boolean => {
+     const parameter = owner.parameters[0];
+     if (
++      owner.parameters.length !== 1 ||
+       !parameter ||
+       !ts.isIdentifier(parameter.name) ||
+       parameter.initializer ||

@@ -1,0 +1,7 @@
+
+> proto-ui@ check:styles:preset /workspace/scratch/3ca1e20addac/finf-togglegroup-orientation
+> node --import tsx scripts/styles/generate-shadcn-style-tokens.ts --check && node --import tsx scripts/styles/generate-brutalist-style-tokens.ts --check && node --import tsx scripts/styles/generate-draft-family-style-tokens.ts --check
+
+Shadcn preset token manifest is current (465 tokens).
+Brutalist preset token and theme manifests are current (434 tokens).
+Draft family physical token closure is current.

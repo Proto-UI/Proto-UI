@@ -1,0 +1,33 @@
+{
+  "baseHead": "e170ab59f16fc32c0840e74914ce40c97890fcb5",
+  "sourceSha256": {
+    "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts": "8cfc372b057c4c7e1b221738d3aa6eefc908f503d50b9c8ba78397c876b905bb",
+    "packages/modules/context/test/ancestor-compiler-boundary.test.ts": "75c3cd38339f320c0ad996316230fd11f60b48bda6d367dcd3241938de33e473",
+    "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts": "b90a05e18751725a7aca6111d475958dabac987c08f70a511d7f27b0c76056f9"
+  },
+  "candidate": {
+    "command": "node node_modules/vitest/vitest.mjs run packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts packages/modules/context/test/ancestor-compiler-boundary.test.ts packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts --pool=forks --no-file-parallelism",
+    "files": 3,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0
+  },
+  "logs": {
+    "s67-boundary-fixtures-final.log": {
+      "bytes": 251795,
+      "sha256": "1cfd0ce1fe0c36639fabafc8949ef494b09d48058e6bb339cf4aa5e8a9dd9d81",
+      "gzipSha256": "24c40beb64f98a60b83817f63742dec62c3223ff6fa93ee0c8b873c6ed71260d"
+    },
+    "s67-drawer-historical-green1.log": {
+      "bytes": 270954,
+      "sha256": "5268845d89ff2ea70de80f5f10ecad075e7a90a09405282242bc42a4237d5c40",
+      "gzipSha256": "4e92a39328838b9b7882c909606af61608f00cc7e7cf91ac2255cffda3b85890"
+    },
+    "s67-admission-oracles-green1.log": {
+      "bytes": 245495,
+      "sha256": "da4888517b702cc0ad3cf7ac51e690d51b7b800581e30d7e8b00ccae2c49e1ab",
+      "gzipSha256": "f37ebdbfefb7da7c323cb91ce746ba59bbca55085d8cc56e245e8788ab52aaef"
+    }
+  },
+  "scope": "Fixture-only correction with explicit type rejection and host prerequisites; no new compiler Context support or native geometry claim. Earlier combined admission log retains the independent unresolved Switch inventory failure."
+}

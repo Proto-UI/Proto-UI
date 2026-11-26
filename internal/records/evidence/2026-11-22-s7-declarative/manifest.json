@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "issue": 757,
+  "files": [
+    {
+      "path": "attempt-01/ordinary-automatic-1-failure.png",
+      "bytes": 33611,
+      "sha256": "1dfc4e4fddd27c7d98647eca8b12b9e8b919651b63dedbbad2238a21b18a88ba"
+    },
+    {
+      "path": "attempt-01/ordinary-manual-1-failure.png",
+      "bytes": 33323,
+      "sha256": "83a545259e82e44ce2459a8c2f05c3d7e32d9856ce96ebe6a7fb831ea7bcbbc5"
+    },
+    {
+      "path": "attempt-01/proto-automatic-1-updated.png",
+      "bytes": 36394,
+      "sha256": "0aec2a832af8e801d6edd74abd9e57ec5b19b4a8ed838ec6d82888fc6fa2907e"
+    },
+    {
+      "path": "attempt-01/proto-manual-1-updated.png",
+      "bytes": 36160,
+      "sha256": "806f247fbd25c21303974f3321ed230e64b03dad17f590390e5e25e40192bf5c"
+    },
+    {
+      "path": "attempt-01/result.json",
+      "bytes": 160289,
+      "sha256": "f074fef610d08cf8a1a7d0037927ba0f1fb94d408d8432326715fd908372dc0c"
+    },
+    {
+      "path": "attempt-01/traces/ordinary-automatic-1.zip",
+      "bytes": 47542,
+      "sha256": "c8ad547c1226f030cbe085e55e51666553b98ca9764e066d018d729771a6f92b"
+    },
+    {
+      "path": "attempt-01/traces/ordinary-manual-1.zip",
+      "bytes": 47433,
+      "sha256": "c75f77c1de82a372d9739990a21040dd34cda0911fbf6c053a34e8b0127d00ae"
+    },
+    {
+      "path": "attempt-01/traces/proto-automatic-1.zip",
+      "bytes": 336791,
+      "sha256": "fdbe619fcb2a4387ba89df46d0085bf6bf2d74ec90a3ebaeea2d6b4e155dd48e"
+    },
+    {
+      "path": "attempt-01/traces/proto-manual-1.zip",
+      "bytes": 437507,
+      "sha256": "6fe0fa50642fd7cfbb5849b4b2b8985e63b315104e9f2947ce5f5e012657503a"
+    },
+    {
+      "path": "attempt-02/ordinary-automatic-1-updated.png",
+      "bytes": 35624,
+      "sha256": "4ec0142eb04964654cf0127199899d1abd1af2c45731178496bd4ca6cd7122aa"
+    },
+    {
+      "path": "attempt-02/ordinary-manual-1-updated.png",
+      "bytes": 35335,
+      "sha256": "a87cf5c92e2d16d8c2829af5f973a8a335a0ff80f5bbf1e3d8d4a3ceaeba95f7"
+    },
+    {
+      "path": "attempt-02/proto-automatic-1-updated.png",
+      "bytes": 36394,
+      "sha256": "0aec2a832af8e801d6edd74abd9e57ec5b19b4a8ed838ec6d82888fc6fa2907e"
+    },
+    {
+      "path": "attempt-02/proto-manual-1-updated.png",
+      "bytes": 36160,
+      "sha256": "806f247fbd25c21303974f3321ed230e64b03dad17f590390e5e25e40192bf5c"
+    },
+    {
+      "path": "attempt-02/result.json",
+      "bytes": 420724,
+      "sha256": "d4173c5a7e522ccfa23ce58de4f76e4294751375e8fa64c61d1b75db83c8d27e"
+    },
+    {
+      "path": "attempt-02/source-binding.json",
+      "bytes": 852,
+      "sha256": "0b2e4dc0eadb334cbb984847a15a20a96dd9f49b28ec4df18464768fa92f5062"
+    },
+    {
+      "path": "attempt-02/source-overrides.patch",
+      "bytes": 4833,
+      "sha256": "df6ebcf130d3f6ce717e845c9625096bede11f8b361198b4e114121d974d8c5a"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-automatic-1.zip",
+      "bytes": 328012,
+      "sha256": "36e276a426ca35599eb3de5d3fe53ece79dca4b75b15c6ab275d365f7b1b888d"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-automatic-2.zip",
+      "bytes": 305736,
+      "sha256": "3416bcf4b92f394b4f8e628700984f74f88a0d3cce09ec5ed28eb958ab61e88c"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-automatic-3.zip",
+      "bytes": 305776,
+      "sha256": "8b3e146ef0d50314380da45038ac1d6996821a1692438c59cf17ff66f9e79651"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-dynamic-title.zip",
+      "bytes": 23979,
+      "sha256": "a5aa27ecb6a9c7fda72cee4a55d63617b2f2f6d24962bd0649251134e6379b2c"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-manual-1.zip",
+      "bytes": 371406,
+      "sha256": "d2f9dfe43af0cf8abc840c208c9267baa9048d30628f34e84fd52e0d14068148"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-manual-2.zip",
+      "bytes": 349143,
+      "sha256": "bdf5cb5437f8cd734d9aa909204000ef51954d93cea6c9088de098bfa705f3a1"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-manual-3.zip",
+      "bytes": 349103,
+      "sha256": "f4189ab27884c7ebc8a749482ecd7698dc168b883032f268bb7cbc94aa358a6c"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-missing-label.zip",
+      "bytes": 27086,
+      "sha256": "690be601f1398defd7c571dff9f2a11ac8a56f2876689f71b5a9acd578b17bd0"
+    },
+    {
+      "path": "attempt-02/traces/ordinary-swallowed-arrow.zip",
+      "bytes": 48485,
+      "sha256": "854c10df5878fb6b0a9353a085b04cf1141c8542f6281f0950e9296e6adcdb70"
+    },
+    {
+      "path": "attempt-02/traces/proto-automatic-1.zip",
+      "bytes": 336751,
+      "sha256": "a882757cd0432614c8b3a59938872bb9b721ec5355bf98e0a56b6ec7cfd5bc29"
+    },
+    {
+      "path": "attempt-02/traces/proto-automatic-2.zip",
+      "bytes": 314069,
+      "sha256": "c30c097901c20376cff23dffbb9d2b1495a5b9bc2eec2c89a0e56b0c970395bb"
+    },
+    {
+      "path": "attempt-02/traces/proto-automatic-3.zip",
+      "bytes": 314099,
+      "sha256": "29829973d59739727d9c7055708aff23a0ba14515c6217780919d93649a03682"
+    },
+    {
+      "path": "attempt-02/traces/proto-dynamic-title.zip",
+      "bytes": 24771,
+      "sha256": "762d99373236b2e05ca4ed4450bdbe44118faa9544b65b52f84ceb5bcf2212a8"
+    },
+    {
+      "path": "attempt-02/traces/proto-manual-1.zip",
+      "bytes": 437504,
+      "sha256": "c9a236010a1c00bb32dd83b4023846059420c220e7a4b0602e4978c32a50eb63"
+    },
+    {
+      "path": "attempt-02/traces/proto-manual-2.zip",
+      "bytes": 414825,
+      "sha256": "00257e92312f2561e5c3d62a9a304a4d21ee7e133639335074af560bd505e2cc"
+    },
+    {
+      "path": "attempt-02/traces/proto-manual-3.zip",
+      "bytes": 414677,
+      "sha256": "26e949303a60c6c3b215d8b148f93561571862421477e54d97b2393f1979de6a"
+    },
+    {
+      "path": "attempt-02/traces/proto-missing-label.zip",
+      "bytes": 27680,
+      "sha256": "f59acbd84fadb61b51ceed88d4024db4c94d509d291c25647e9932b4ed2e58c1"
+    },
+    {
+      "path": "attempt-02/traces/proto-swallowed-arrow.zip",
+      "bytes": 49718,
+      "sha256": "d7e592ba1c14a6b7193d2d3799561eea09639dc3afde3e9b8509432e49134ea7"
+    },
+    {
+      "path": "independent-final-review.json",
+      "bytes": 2285,
+      "sha256": "4d570551560996ca6f10975b16fbc7ee8ce6a8cd5358c6c3673245bb690871b5"
+    },
+    {
+      "path": "independent-protocol-review.md",
+      "bytes": 5903,
+      "sha256": "8b243cd9f0c92d925a8f0160b9399fc07385dca3eb482f13b1f3bce78b072470"
+    },
+    {
+      "path": "trace-manifest.json",
+      "bytes": 5219,
+      "sha256": "391e947834d931509830c7469a19bcab8579a0a4441fd16eb5a5edbb74e945f4"
+    }
+  ]
+}

@@ -1,0 +1,2455 @@
+{
+  "note": "20 actual proof/admission captures across 19 new cases; one additional case is native compile-only. Full input raw bytes stay bound by SHA; public test source supplies authored fixtures. identityGraph records actual shared FunctionIR identity. Admission rejections are not supported native reflection/container/recursion.",
+  "captures": [
+    {
+      "test": "Vue2 closed identity-only body proof > does not infer non-invocation from an empty collector set: after-return",
+      "inputSHA256": "54bb5e6ce3d5aae40af64be9d96cbd9e551b055b5718aa77ac0d53a529551620",
+      "inputBytes": 15907,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "5a896aeeb1df95dfa073727b05c268d617b0e63ecea2e66fa9827930fc8af57f",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "0f3817271c839efb7c9d77b1d5325f7cb1dd44cc129e977e2366e4740f304e1c",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 281,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 281,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 254,
+                  "end": 274,
+                  "line": 5,
+                  "column": 65,
+                  "endLine": 5,
+                  "endColumn": 85
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains upstream rejection of callable reflection: toString",
+      "inputSHA256": "4d81f85941fbb5505f862647f415b9d1f090fded841e46cb85704e0da47a9439",
+      "inputBytes": 15833,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "1c4351bd16bce93c50160985a05b7c087727016f85530164b4e1866bc2290656",
+      "admitted": false,
+      "admissionDiagnostics": [
+        {
+          "code": "PUI2002",
+          "category": "invalid-ir",
+          "message": "Unsupported IR property access.",
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 120,
+            "end": 260,
+            "line": 3,
+            "column": 72,
+            "endLine": 6,
+            "endColumn": 6
+          }
+        }
+      ],
+      "proofSHA256": null,
+      "proof": null
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > requires complete identity uses, preserves checked types, and honors an independent invocation veto",
+      "inputSHA256": "a39edc067672cee35aad0d1fe8e0a555c4fe282052684ba4be674cb71ab8fc48",
+      "inputBytes": 14450,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "8fb529810c244472e1082188b01dd96dbf2615915871c0a4cd6d9f2f6d895474",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "b690ca4ded5d1153acd3a348e9ca98d77c88a7f7be1b720ccca370a8d1263559",
+      "proof": {
+        "incomplete": [],
+        "eligible": [
+          {
+            "file": "native-shapes.proto.ts",
+            "start": 142,
+            "end": 171,
+            "line": 4,
+            "column": 18,
+            "endLine": 4,
+            "endColumn": 47
+          }
+        ],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 260,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 260,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains upstream rejection of callable reflection: length",
+      "inputSHA256": "df34bdcbbaa7254c94e627f5d1add2173b09c13848d81f7da42e6951466562cc",
+      "inputBytes": 15829,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "1c4351bd16bce93c50160985a05b7c087727016f85530164b4e1866bc2290656",
+      "admitted": false,
+      "admissionDiagnostics": [
+        {
+          "code": "PUI2002",
+          "category": "invalid-ir",
+          "message": "Unsupported IR property access.",
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 120,
+            "end": 260,
+            "line": 3,
+            "column": 72,
+            "endLine": 6,
+            "endColumn": 6
+          }
+        }
+      ],
+      "proofSHA256": null,
+      "proof": null
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains upstream rejection of callable reflection: name",
+      "inputSHA256": "8f6d39535bcdfc8513a43728a44b4dc73e9f11505ba7dadf3e804f03b99645b0",
+      "inputBytes": 15825,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "1c4351bd16bce93c50160985a05b7c087727016f85530164b4e1866bc2290656",
+      "admitted": false,
+      "admissionDiagnostics": [
+        {
+          "code": "PUI2002",
+          "category": "invalid-ir",
+          "message": "Unsupported IR property access.",
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 120,
+            "end": 260,
+            "line": 3,
+            "column": 72,
+            "endLine": 6,
+            "endColumn": 6
+          }
+        }
+      ],
+      "proofSHA256": null,
+      "proof": null
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > requires complete identity uses, preserves checked types, and honors an independent invocation veto",
+      "inputSHA256": "542a8f91b1304bd59a6730e16bd440aee79cc353109526a9ffcd67bdd6649682",
+      "inputBytes": 14635,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [
+          2
+        ],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [
+        {
+          "file": "native-shapes.proto.ts",
+          "start": 142,
+          "end": 171,
+          "line": 4,
+          "column": 18,
+          "endLine": 4,
+          "endColumn": 47
+        }
+      ],
+      "admissionSHA256": "8fb529810c244472e1082188b01dd96dbf2615915871c0a4cd6d9f2f6d895474",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "4d5091ddc2da9c1828e6ef86edd01957f49124b5a1bf2cbd40c7958162dda4a0",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 260,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 260,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "known-invoked"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > does not discard calls in a checked inline callback",
+      "inputSHA256": "e498d062a626d209a2c767e322871099e51b882469581bdc8892ee03857aebc1",
+      "inputBytes": 19941,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/4/expression/arguments/1/function"
+            ]
+          },
+          {
+            "id": 3,
+            "paths": [
+              "/setup/body/5/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "aa8c86d34f91976497065a7a01b2d365ef3d361591e08aad0cba990f22eb5a36",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "f056d5460faf1a7b97807ccf513ef92ce52576d82cd9312a6ec2ccddc025d56e",
+      "proof": {
+        "incomplete": [
+          "unresolved-function-result"
+        ],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 124,
+              "end": 143,
+              "line": 3,
+              "column": 76,
+              "endLine": 3,
+              "endColumn": 95
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 124,
+                  "end": 143,
+                  "line": 3,
+                  "column": 76,
+                  "endLine": 3,
+                  "endColumn": 95
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 156,
+                  "end": 160,
+                  "line": 3,
+                  "column": 108,
+                  "endLine": 3,
+                  "endColumn": 112
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 179,
+                  "end": 183,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 186,
+                  "end": 191,
+                  "line": 4,
+                  "column": 25,
+                  "endLine": 4,
+                  "endColumn": 30
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 301,
+                  "end": 318,
+                  "line": 6,
+                  "column": 50,
+                  "endLine": 6,
+                  "endColumn": 67
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 284,
+              "end": 320,
+              "line": 6,
+              "column": 33,
+              "endLine": 6,
+              "endColumn": 69
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 284,
+                  "end": 320,
+                  "line": 6,
+                  "column": 33,
+                  "endLine": 6,
+                  "endColumn": 69
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 336,
+              "end": 357,
+              "line": 7,
+              "column": 14,
+              "endLine": 7,
+              "endColumn": 35
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 336,
+                  "end": 357,
+                  "line": 7,
+                  "column": 14,
+                  "endLine": 7,
+                  "endColumn": 35
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains returned/factory callable bodies: const factory=()=>draw;return factory();",
+      "inputSHA256": "b8545d8335d91673e8086a84c336fc9de16db8e88e2582cc0f84225280ab1d20",
+      "inputBytes": 9646,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/1/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/4/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "6a3c0dcb63d70e833a8bd49d1923c327b10ea5697ec148c079addf19b622eb7c",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "a733c58ec730cdb836f7b4e787830001440b3d6fa3df4811b8aa4b89bfbf7080",
+      "proof": {
+        "incomplete": [
+          "unresolved-function-result"
+        ],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 146,
+              "end": 154,
+              "line": 3,
+              "column": 98,
+              "endLine": 3,
+              "endColumn": 106
+            },
+            "creations": 1,
+            "blocked": [
+              "other"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 146,
+                  "end": 154,
+                  "line": 3,
+                  "column": 98,
+                  "endLine": 3,
+                  "endColumn": 106
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 167,
+                  "end": 171,
+                  "line": 3,
+                  "column": 119,
+                  "endLine": 3,
+                  "endColumn": 123
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 192,
+                  "end": 196,
+                  "line": 4,
+                  "column": 20,
+                  "endLine": 4,
+                  "endColumn": 24
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 204,
+                  "line": 4,
+                  "column": 27,
+                  "endLine": 4,
+                  "endColumn": 32
+                }
+              },
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 223,
+                  "end": 227,
+                  "line": 4,
+                  "column": 51,
+                  "endLine": 4,
+                  "endColumn": 55
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 219,
+              "end": 227,
+              "line": 4,
+              "column": 47,
+              "endLine": 4,
+              "endColumn": 55
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 219,
+                  "end": 227,
+                  "line": 4,
+                  "column": 47,
+                  "endLine": 4,
+                  "endColumn": 55
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 235,
+                  "end": 244,
+                  "line": 4,
+                  "column": 63,
+                  "endLine": 4,
+                  "endColumn": 72
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains upstream rejection of callable container escape: record",
+      "inputSHA256": "247280d84faf7a468e9d065b3361c2e5963a0cfe459b8e3e6e2f926fe56b30e5",
+      "inputBytes": 15985,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "2f2c2b3a5538e9ef021ef1f5da46e01fb69a37d156bbe3f29750bb9869d46a17",
+      "admitted": false,
+      "admissionDiagnostics": [
+        {
+          "code": "PUI2002",
+          "category": "invalid-ir",
+          "message": "Configuration records cannot contain execution-scope handles or escaping callbacks.",
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 120,
+            "end": 260,
+            "line": 3,
+            "column": 72,
+            "endLine": 6,
+            "endColumn": 6
+          }
+        }
+      ],
+      "proofSHA256": null,
+      "proof": null
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > keeps the full body when an identity-observed alias is actually invoked",
+      "inputSHA256": "35f9d873b5ace23c537ee21f89a299de85ab9a2769afcc1c42c2202021222761",
+      "inputBytes": 13361,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "69e4481df145d6c29a6c1d53b864ec51a27e769eaf86066551cd0ce72ff46490",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "10c843e9d1e4c977c2ae5182ac68680bac9759841ac3bda4caff73645f9274c5",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 253,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 253,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 231,
+                  "end": 246,
+                  "line": 5,
+                  "column": 42,
+                  "endLine": 5,
+                  "endColumn": 57
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > does not infer non-invocation from an empty collector set: dead-branch",
+      "inputSHA256": "1bb0481a7fbdbc437dc71bd0fecb18475523ce84410657dcebbca95c8c020e64",
+      "inputBytes": 17015,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "b01ca3fdf350c458448cdd1d2d84625f8f8563c9ac43454217b7dcf771c05c67",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "04ef1fd9004059f0faf8211f9fe49e879ba9f817d3e8e70711386ac4ebbe37b2",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 290,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 290,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 240,
+                  "end": 253,
+                  "line": 5,
+                  "column": 51,
+                  "endLine": 5,
+                  "endColumn": 64
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > does not infer non-invocation from an empty collector set: alias",
+      "inputSHA256": "9237d57791884ea3e42fa49001d1eac5f1eb8113045b940736cb46807ed1d954",
+      "inputBytes": 13350,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "ebdd3c5b5e7c5e66e05e9183313a2142dd562f9e261ab17fcb8269fb50ed1b11",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "10c843e9d1e4c977c2ae5182ac68680bac9759841ac3bda4caff73645f9274c5",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 253,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 253,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 231,
+                  "end": 246,
+                  "line": 5,
+                  "column": 42,
+                  "endLine": 5,
+                  "endColumn": 57
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > does not infer non-invocation from an empty collector set: nested-unused-body",
+      "inputSHA256": "428bc560f05ca627368377539f06b8a3bfac13be734a293eac051a43905a7373",
+      "inputBytes": 17863,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          },
+          {
+            "id": 3,
+            "paths": [
+              "/setup/body/0/value/function/body/3/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "0ebec17b4ea0b5a53b0a074375afc5ad03a98c7cdd7adaed108154d3bd253172",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "35adccef545ec735ecef123e2a8354ac7dc1d5e6cd3f7a739a3411a2330e946a",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 292,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 292,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 240,
+                  "end": 255,
+                  "line": 5,
+                  "column": 51,
+                  "endLine": 5,
+                  "endColumn": 66
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 236,
+              "end": 255,
+              "line": 5,
+              "column": 47,
+              "endLine": 5,
+              "endColumn": 66
+            },
+            "creations": 1,
+            "blocked": [
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 236,
+                  "end": 255,
+                  "line": 5,
+                  "column": 47,
+                  "endLine": 5,
+                  "endColumn": 66
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > closes a direct alias chain using each declaration environment",
+      "inputSHA256": "49212cf3b396e4eeb2a4aef481cd7a91b5d405b72a3dee9abaf97676ac5174fb",
+      "inputBytes": 15334,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "644311dc014455e673cd5196be0d9653ea3b5fb4a09b3b19f56522a9a18397ad",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "cbb28ba83eeb9e9305639677ddde699a66bc984f7512740105f33b82d8b20655",
+      "proof": {
+        "incomplete": [],
+        "eligible": [
+          {
+            "file": "native-shapes.proto.ts",
+            "start": 142,
+            "end": 171,
+            "line": 4,
+            "column": 18,
+            "endLine": 4,
+            "endColumn": 47
+          }
+        ],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 280,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 280,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 185,
+                  "end": 189,
+                  "line": 4,
+                  "column": 61,
+                  "endLine": 4,
+                  "endColumn": 65
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 202,
+                  "end": 208,
+                  "line": 4,
+                  "column": 78,
+                  "endLine": 4,
+                  "endColumn": 84
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 219,
+                  "end": 223,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 226,
+                  "end": 231,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > does not infer non-invocation from an empty collector set: direct",
+      "inputSHA256": "bb37d0b547ccba9651f0e3e21bb2e2d8ec7a7d550542d6b4eafb8c5785cf9763",
+      "inputBytes": 13349,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "ad8098fe24c25ad944925bbc87f19405a4e1e7e6ee2fb1ff20bee327cec08f96",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "3b9d5589c0cdf82b45bb77887f5d1e556adfb7e7d7fb5e96b5b8c9170d23f3fe",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 252,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 252,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 231,
+                  "end": 245,
+                  "line": 5,
+                  "column": 42,
+                  "endLine": 5,
+                  "endColumn": 56
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > resolves a captured alias separately from a caller parameter with the same name",
+      "inputSHA256": "de43289327bf73ca8ca0634b42c24d1d0877c7e8a7906470651c43e6f5e262d5",
+      "inputBytes": 18047,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          },
+          {
+            "id": 3,
+            "paths": [
+              "/setup/body/0/value/function/body/3/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "c8c162be84fdd543f8911c68b2192a85c3be2f1dfd55fd2868c676771f872022",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "fedd76cb9af4def9a6ae70397b9aa2abb34405f8b3ec89d33ebcddcfe8ddd8eb",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 312,
+              "line": 3,
+              "column": 72,
+              "endLine": 7,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 312,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 7,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 142,
+              "end": 171,
+              "line": 4,
+              "column": 18,
+              "endLine": 4,
+              "endColumn": 47
+            },
+            "creations": 1,
+            "blocked": [
+              "invoke"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 142,
+                  "end": 171,
+                  "line": 4,
+                  "column": 18,
+                  "endLine": 4,
+                  "endColumn": 47
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 184,
+                  "end": 188,
+                  "line": 4,
+                  "column": 60,
+                  "endLine": 4,
+                  "endColumn": 64
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 203,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 14
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 206,
+                  "end": 211,
+                  "line": 5,
+                  "column": 17,
+                  "endLine": 5,
+                  "endColumn": 22
+                }
+              },
+              {
+                "use": "invoke",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 251,
+                  "end": 268,
+                  "line": 5,
+                  "column": 62,
+                  "endLine": 5,
+                  "endColumn": 79
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 236,
+              "end": 268,
+              "line": 5,
+              "column": 47,
+              "endLine": 5,
+              "endColumn": 79
+            },
+            "creations": 1,
+            "blocked": [
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 236,
+                  "end": 268,
+                  "line": 5,
+                  "column": 47,
+                  "endLine": 5,
+                  "endColumn": 79
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains upstream rejection of callable container escape: array",
+      "inputSHA256": "3f7b4aa537bc9c2b05033b5581edd8845692a80011e1516d07847fc8231aba6e",
+      "inputBytes": 15855,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "903cf7b4240f6e6909fd7a44907c5d3948214013ceda04cc53637294e3ba7dd6",
+      "admitted": false,
+      "admissionDiagnostics": [
+        {
+          "code": "PUI2002",
+          "category": "invalid-ir",
+          "message": "Data arrays cannot contain semantic handles.",
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 120,
+            "end": 260,
+            "line": 3,
+            "column": 72,
+            "endLine": 6,
+            "endColumn": 6
+          }
+        }
+      ],
+      "proofSHA256": null,
+      "proof": null
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains returned/factory callable bodies: return alias;",
+      "inputSHA256": "331fc5bfabc3da9e8a4353b90004f439aa9c2612bc79a1ee9fba6e88f30ef97d",
+      "inputBytes": 7446,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/1/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "6b28e143c45a1a32e539b2f022a3ab4b792bf612e3c885b5a16a5fbe087bafe5",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "05883b5620898d797de3ae79fa0c765ff9de0ca9cd7e2222895dc01036bfec14",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 146,
+              "end": 154,
+              "line": 3,
+              "column": 98,
+              "endLine": 3,
+              "endColumn": 106
+            },
+            "creations": 1,
+            "blocked": [
+              "other"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 146,
+                  "end": 154,
+                  "line": 3,
+                  "column": 98,
+                  "endLine": 3,
+                  "endColumn": 106
+                }
+              },
+              {
+                "use": "alias",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 167,
+                  "end": 171,
+                  "line": 3,
+                  "column": 119,
+                  "endLine": 3,
+                  "endColumn": 123
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 192,
+                  "end": 196,
+                  "line": 4,
+                  "column": 20,
+                  "endLine": 4,
+                  "endColumn": 24
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 199,
+                  "end": 204,
+                  "line": 4,
+                  "column": 27,
+                  "endLine": 4,
+                  "endColumn": 32
+                }
+              },
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 212,
+                  "end": 217,
+                  "line": 4,
+                  "column": 40,
+                  "endLine": 4,
+                  "endColumn": 45
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > retains upstream rejection of recursive aliases",
+      "inputSHA256": "118e394ea11f513504f7555edb349b442ba5ea1046d8cb1ce2f9e48255f0aa0b",
+      "inputBytes": 15518,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "f2d95083861e836515589bf0666be2f19ae5094987e43a8ef70c09489feefba4",
+      "admitted": false,
+      "admissionDiagnostics": [
+        {
+          "code": "PUI2002",
+          "category": "invalid-ir",
+          "message": "Unknown or recursive helper call.",
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 142,
+            "end": 171,
+            "line": 4,
+            "column": 18,
+            "endLine": 4,
+            "endColumn": 47
+          }
+        }
+      ],
+      "proofSHA256": null,
+      "proof": null
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > does not collapse multiple valid creations sharing one FunctionIR and the same captures",
+      "inputSHA256": "1f391531ae09a6ed12800cc418e8081f55259df1caf55467410c68bde60591c9",
+      "inputBytes": 18341,
+      "identityGraph": {
+        "functions": [
+          {
+            "id": 0,
+            "paths": [
+              "/setup"
+            ]
+          },
+          {
+            "id": 1,
+            "paths": [
+              "/setup/body/0/value/function"
+            ]
+          },
+          {
+            "id": 2,
+            "paths": [
+              "/setup/body/0/value/function/body/0/value/function",
+              "/setup/body/0/value/function/body/1/value/function"
+            ]
+          }
+        ],
+        "knownInvokedIds": [],
+        "note": "Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects."
+      },
+      "knownInvoked": [],
+      "admissionSHA256": "cc8b9bc5884ac801374e03d716706798a9260043e6cbd10a49e41b6a29afdf19",
+      "admitted": true,
+      "admissionDiagnostics": [],
+      "proofSHA256": "1a4aef51e26cbeb2258a201b8d5cc1ae50684e4a4614bed9bb6d462ce48492fb",
+      "proof": {
+        "incomplete": [],
+        "eligible": [],
+        "entries": [
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 120,
+              "end": 287,
+              "line": 3,
+              "column": 72,
+              "endLine": 6,
+              "endColumn": 6
+            },
+            "creations": 1,
+            "blocked": [
+              "other",
+              "non-helper-context",
+              "no-identity-observation"
+            ],
+            "uses": [
+              {
+                "use": "other",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 120,
+                  "end": 287,
+                  "line": 3,
+                  "column": 72,
+                  "endLine": 6,
+                  "endColumn": 6
+                }
+              }
+            ]
+          },
+          {
+            "function": {
+              "file": "native-shapes.proto.ts",
+              "start": 143,
+              "end": 172,
+              "line": 4,
+              "column": 19,
+              "endLine": 4,
+              "endColumn": 48
+            },
+            "creations": 2,
+            "blocked": [
+              "non-unique-creation-syntax"
+            ],
+            "uses": [
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 143,
+                  "end": 172,
+                  "line": 4,
+                  "column": 19,
+                  "endLine": 4,
+                  "endColumn": 48
+                }
+              },
+              {
+                "use": "declaration",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 186,
+                  "end": 215,
+                  "line": 4,
+                  "column": 62,
+                  "endLine": 4,
+                  "endColumn": 91
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 226,
+                  "end": 231,
+                  "line": 5,
+                  "column": 10,
+                  "endLine": 5,
+                  "endColumn": 15
+                }
+              },
+              {
+                "use": "identity",
+                "expression": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 234,
+                  "end": 240,
+                  "line": 5,
+                  "column": 18,
+                  "endLine": 5,
+                  "endColumn": 24
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

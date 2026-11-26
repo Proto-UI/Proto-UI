@@ -1,0 +1,16 @@
+{
+  "label": "missing-output",
+  "argv": [
+    "--import",
+    "tsx",
+    "packages/compiler/src/cli-entry.ts",
+    "migrate-native-support",
+    "<output>/plan.json",
+    "--json"
+  ],
+  "exitCode": 2,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI9001\",\"category\":\"invalid-input\",\"message\":\"migrate-native-support requires an explicit --output directory\",\"span\":{\"file\":\"<cli>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+  "stderr": ""
+}

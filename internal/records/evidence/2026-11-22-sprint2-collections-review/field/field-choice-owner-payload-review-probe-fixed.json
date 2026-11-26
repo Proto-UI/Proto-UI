@@ -1,0 +1,76 @@
+{
+  "ok": true,
+  "cases": [
+    {
+      "name": "ordinary-radio",
+      "scenario": "controlled-owner-updates-while-unmounted",
+      "before": "a",
+      "expected": "b",
+      "actual": "b",
+      "passed": true
+    },
+    {
+      "name": "field-radio",
+      "scenario": "controlled-owner-updates-while-unmounted",
+      "before": "a",
+      "expected": "b",
+      "actual": "b",
+      "passed": true
+    },
+    {
+      "name": "ordinary-checkbox",
+      "scenario": "controlled-owner-updates-while-unmounted",
+      "before": false,
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "field-checkbox",
+      "scenario": "controlled-owner-updates-while-unmounted",
+      "before": false,
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "ordinary-checkbox",
+      "scenario": "new-canonical-owner-in-mixed-callback",
+      "actions": [
+        "indeterminateChange"
+      ],
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": false
+          }
+        }
+      ],
+      "checked": true,
+      "mixed": false,
+      "expected": "new canonical checked=true remains authoritative; no stale checked=false inversion",
+      "passed": true
+    },
+    {
+      "name": "field-checkbox",
+      "scenario": "new-canonical-owner-in-mixed-callback",
+      "actions": [
+        "indeterminateChange"
+      ],
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": false
+          }
+        }
+      ],
+      "checked": true,
+      "mixed": false,
+      "expected": "new canonical checked=true remains authoritative; no stale checked=false inversion",
+      "passed": true
+    }
+  ],
+  "boundary": "Independent real Runtime/choice Root source probe; no native browser."
+}

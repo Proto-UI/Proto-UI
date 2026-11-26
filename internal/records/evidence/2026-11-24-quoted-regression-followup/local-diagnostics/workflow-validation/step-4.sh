@@ -1,0 +1,1 @@
+bash apps/www/scripts/prepare-homepage-composition-fonts.sh

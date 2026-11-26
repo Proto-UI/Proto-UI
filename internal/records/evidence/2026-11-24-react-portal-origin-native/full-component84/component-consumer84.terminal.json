@@ -1,0 +1,31 @@
+{
+  "exitCode": 0,
+  "timedOut": false,
+  "name": "component-consumer84",
+  "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "startedAt": "2026-11-24T03:21:12.746576+00:00",
+  "durationMs": 136800,
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "apps/www/test/component-consumer-repairs.browser.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/var/tmp/proto-ui-native-evidence-456f/full-component84/component-consumer84.json"
+  ],
+  "outerTimeoutSeconds": 300,
+  "headAfter": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "trackedStatusAfter": "",
+  "report": {
+    "success": true,
+    "numTotalTests": 84,
+    "numPassedTests": 84,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  }
+}

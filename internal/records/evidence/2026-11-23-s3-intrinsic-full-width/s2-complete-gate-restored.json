@@ -1,0 +1,12 @@
+{
+  "sourceParent": "fe0d7a7d",
+  "sourceChanges": ["packages/adapters/web-component/test/shadow-s2-admission.test.ts"],
+  "command": "node node_modules/vitest/vitest.mjs run packages/adapters/web-component/test/shadow-s2-admission.test.ts --pool=forks --no-file-parallelism",
+  "outcome": "failed",
+  "passed": 14,
+  "failed": 1,
+  "skipped": 0,
+  "failure": "Original complete Switch Thumb inventory requires zero unresolved; actual inventory has nine tokens.",
+  "rawLogSha256": "dc2e648c5c69089be0637940664aaa1d9e8a0c057eeeef3a1899bea275603cc4",
+  "testSourceSha256": "dd68c9d2f0b286dd94332c806965e56df8ee00e3726d4d4710264c09d4e448a8"
+}

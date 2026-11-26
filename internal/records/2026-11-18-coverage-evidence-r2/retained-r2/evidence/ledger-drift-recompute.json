@@ -1,0 +1,99 @@
+{
+  "revision": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447",
+  "matrix": "internal/website/self-hosting-coverage-matrix.md",
+  "rows": 158,
+  "matched": 77,
+  "mismatched": 81,
+  "mismatchedByOwnerState": {
+    "infrastructure-exempt-only": 7,
+    "other": 74
+  },
+  "unearnedRows": [
+    {
+      "line": 176,
+      "path": "apps/www/src/components/PrototypePreviewer/demo-associations.ts",
+      "owners": [
+        "www.demo.prototype-previewer"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt"
+      ],
+      "pinned": "fb14207f02391aef52b3fa1c113368c1953989ddb5298b55b5aae907938d3666",
+      "current": "ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365"
+    },
+    {
+      "line": 202,
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+      "owners": [
+        "www.demo.demo-matrix"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt"
+      ],
+      "pinned": "2e38950b1753e2a77481d0d43b8bbc8bd63b264bd3de741c5cffca0c456800c8",
+      "current": "384fb860d62e933f6c9eaeb90afc5f9a0674772e54e621f282f789a947dca762"
+    },
+    {
+      "line": 203,
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+      "owners": [
+        "www.demo.raw-adapter-runtimes"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt"
+      ],
+      "pinned": "d6c67d3aee7d6adb2bdb17dc72f9637f4a9ecf8ebe3e3d40a580d3a0747d5838",
+      "current": "7e32aeafb2e0dc92e524233a6999e8e43b812297e47f267262bb43dc5d6e2006"
+    },
+    {
+      "line": 215,
+      "path": "apps/www/src/components/PrototypePreviewer/projection-materializer.ts",
+      "owners": [
+        "www.demo.prototype-previewer"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt"
+      ],
+      "pinned": "20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a",
+      "current": "a9a174a9de802704781b7c0ec3d259b95380077a54f668730b1a11fb5355299d"
+    },
+    {
+      "line": 216,
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "owners": [
+        "www.demo.brutalist-theme-style",
+        "www.demo.demo-matrix"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt",
+        "infrastructure-exempt"
+      ],
+      "pinned": "d2fabc42580014e9a1cdb52be5207d1931ca5823d6019822b17f0b3f18d5cb0e",
+      "current": "357e2274d3f5d7e68889cf0aeec47663289fb7f7a3b0cf96e50f6621d93e4324"
+    },
+    {
+      "line": 219,
+      "path": "apps/www/src/components/PrototypePreviewer/wc-registry.ts",
+      "owners": [
+        "www.demo.raw-adapter-runtimes"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt"
+      ],
+      "pinned": "376b4407e8f93385a57979fc44ea96790a78e7c84b4f3b5a9e71371a30525102",
+      "current": "f90717fb29208d07dcd7635f5a0d1768ddb951e5d6bf1bb459b02c96021fa80e"
+    },
+    {
+      "line": 222,
+      "path": "apps/www/src/components/SiteLibraryStyle.astro",
+      "owners": [
+        "www.build.style-generation"
+      ],
+      "ownerStates": [
+        "infrastructure-exempt"
+      ],
+      "pinned": "f5c612c3841e7dd9e5441db733f6ac991aac7b9875338c167ffa1caa7667584e",
+      "current": "7fec23169c164d43f266b8fc71efbf55aaadba2bb4561f8670dc69e3d8c49e33"
+    }
+  ]
+}

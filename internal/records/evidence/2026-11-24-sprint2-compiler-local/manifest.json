@@ -1,0 +1,294 @@
+{
+  "kind": "bounded-sprint2-compiler-evidence",
+  "createdUtc": "2026-11-23T20:43:52.734831+00:00",
+  "baseCommit": "f8138caf5c",
+  "sourceCommits": [
+    "1d6c099200",
+    "ca76c11435",
+    "f5a2621d2f"
+  ],
+  "sourceHead": "f5a2621d2f890786d13ab7ef7da7ad87e8ff345b",
+  "sourceHashNote": "These are final archived source hashes. Individual independent review reports retain their own measured source hashes; earlier resource-exited attempts and isolated artifact recoveries are not represented as final whole-suite passes.",
+  "successfulFinalRuns": [
+    {
+      "file": "local-owner-frozen-ingress-final.log",
+      "testFiles": 3,
+      "passed": 69,
+      "failed": 0,
+      "scope": "local helper 23, lifecycle module 24, frozen arrays 22"
+    },
+    {
+      "file": "local-tabs-consumer-final.log",
+      "testFiles": 1,
+      "passed": 4,
+      "failed": 0,
+      "scope": "unchanged real Content with independent actual-Context provider; four Web source profiles"
+    },
+    {
+      "file": "lifecycle-module-types-final.log",
+      "testFiles": 1,
+      "passed": 4,
+      "failed": 0,
+      "scope": "complete enhanced lifecycle artifacts under strict TypeScript and checkJs"
+    },
+    {
+      "file": "local-final-typecheck.json",
+      "roots": 15,
+      "diagnostics": 0,
+      "scope": "changed compiler/test roots with complete imported graph"
+    }
+  ],
+  "artifactRecovery": {
+    "react": "local-types-react-dom-source-v1.log",
+    "vue3": "local-types-vue-source-v1.log",
+    "vue2": "local-types-vue2-single.log",
+    "wc": "local-types-wc-standalone.json",
+    "wcRoots": 17,
+    "note": "Real Content/provider profile recoveries precede the later owner-identity follow-up; its own complete strict four-profile artifact check is recorded separately. WC recovery is a separate producer plus fresh plain TypeScript program, not a successful Vitest process."
+  },
+  "remaining": [
+    "real Tabs Root opaque get assertion unsupported",
+    "full original library/profile denominator not established",
+    "physical browser/AT/native/SSR not established by these Happy DOM and type checks"
+  ],
+  "sources": [
+    {
+      "file": "packages/compiler/src/callable-effects.ts",
+      "sha256": "d907a5ea9f0e781fcba41fafab046f99aac147b082d4bd74f8053c7d88b531c1"
+    },
+    {
+      "file": "packages/compiler/src/native-value-lowering.ts",
+      "sha256": "1b79bcbd508aaa8871b09036ba09bacffb77ca242715645877eada3c10a334c9"
+    },
+    {
+      "file": "packages/compiler/src/operations.ts",
+      "sha256": "e66e481204a8e06d2b8d6a4a74557f86056c2809c3fa64ddd34f7feba6ea4e59"
+    },
+    {
+      "file": "packages/compiler/src/parser.ts",
+      "sha256": "75d86bc13fd11e784b197bb52e375f207ea2b3a25dbfc9779fd7002d310dc70e"
+    },
+    {
+      "file": "packages/compiler/src/vue2-source.ts",
+      "sha256": "517e6861e9bbd12ce9f7ce43997ee56d628268cc6db0c6343386bf5923c3752b"
+    },
+    {
+      "file": "packages/compiler/src/web-component-source.ts",
+      "sha256": "8cefc30b1b97bd0ffa6d791334f1089f9a9c5f45ba90f7cad50a91beb944776f"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/local-tabs-provider.proto.ts",
+      "sha256": "fbfae7ca73b301c39607b6141dcfa02591f74667721771b4652d28a371e14211"
+    },
+    {
+      "file": "packages/compiler/test/lifecycle-module-fixture.ts",
+      "sha256": "4027471489085a365569ba269a77a05d6a9115e952b32551db4808f1bf56e04f"
+    },
+    {
+      "file": "packages/compiler/test/lifecycle-module.test.ts",
+      "sha256": "a14e12f5dd73814481afad652c4b9add50f6ee105d3048d4dfddb21dc247febc"
+    },
+    {
+      "file": "packages/compiler/test/local-nominal-helper-fixture.ts",
+      "sha256": "a7b66a2e2bbee3ca19848fda9b463eec997fb570c044cdee964547d65cb412da"
+    },
+    {
+      "file": "packages/compiler/test/local-nominal-helper-types.test.ts",
+      "sha256": "75ab613a44ef1da4caca6db3c67817d39777de64153b24e7f1ce624393abfc73"
+    },
+    {
+      "file": "packages/compiler/test/local-nominal-helper.test.ts",
+      "sha256": "63677cce161cb8af4709643613bb89a8e39d97a5083c8b9a59e90b79d2148815"
+    },
+    {
+      "file": "packages/compiler/test/local-tabs-artifact.ts",
+      "sha256": "bfd8be977d956b5a04c69b3533ac84e3db045984a0f231b0c191af3f0db0788e"
+    },
+    {
+      "file": "packages/compiler/test/local-tabs-consumer.test.ts",
+      "sha256": "df7d0b4f49b5f528fe48548b04c87c0fafca2ce7e27c138ed2bb0e16cfbd0291"
+    }
+  ],
+  "receipts": [
+    {
+      "file": "local-helper-red.json",
+      "bytes": 362,
+      "sha256": "ab87edc5c116537a9b1507143ca99980fe6a16c7a8fea19fd2e82f88378b30da"
+    },
+    {
+      "file": "local-helper-probe-1.json",
+      "bytes": 1769,
+      "sha256": "f86076210fafe368f9c38851db685c4e4f27d19a69504aa579f73f5dfcc3aa25"
+    },
+    {
+      "file": "local-helper-probe-2.json",
+      "bytes": 1024,
+      "sha256": "82e7f10bc6004a581958dd611108b8b8d9ce91f8b0a36a828e22b4ee98f7e687"
+    },
+    {
+      "file": "local-helper-real-tabs-probe.json",
+      "bytes": 2437,
+      "sha256": "8dbcba53ab34fb79a29a1c0bdbc8546e6c6d06a9725ebec4e2cb792cb3400966"
+    },
+    {
+      "file": "local-helper-generic-context-red.json",
+      "bytes": 1020,
+      "sha256": "b99b4ef915d5e622cf47c07e8996f2172003edfd0c8ae11f6cd41d1f97a1d76c"
+    },
+    {
+      "file": "local-tabs-project-probe.json",
+      "bytes": 164,
+      "sha256": "16626b488cfb27a23e773e1481d51914c7f955e60cfa843f41910d135680f227"
+    },
+    {
+      "file": "local-tabs-red-artifacts.json",
+      "bytes": 344,
+      "sha256": "82c34d66f5d2fe9879b698f7d0e1a5c1713a072486a1f595fc26e1c1d733712e"
+    },
+    {
+      "file": "local-nominal-helper-green-1.log",
+      "bytes": 142222,
+      "sha256": "1ab6eda63dde66fa7308157025eb009fe28c18f4281a4d77437253651333c195"
+    },
+    {
+      "file": "local-nominal-helper-green-2.log",
+      "bytes": 178101,
+      "sha256": "ff77a2fecd98b52a37641a7b9c615def3d10463286f9eed4a7eb22fbaf1c467e"
+    },
+    {
+      "file": "local-nominal-helper-types-green-1.log",
+      "bytes": 78664,
+      "sha256": "b3c1d896732afb0666a35bc9bc5faa3c9a5e5940f61a37429dca0c060d207d7b"
+    },
+    {
+      "file": "local-types-react-dom-source-v1.log",
+      "bytes": 78225,
+      "sha256": "8dc0af99f1451891d51b8def441e20bf80916c48a47c65acbb1e80d22ef35268"
+    },
+    {
+      "file": "local-types-vue-source-v1.log",
+      "bytes": 78219,
+      "sha256": "2c10f477be099ffbb3e5b586d9bb087d7ba2c8db430afac35b7db356b679d556"
+    },
+    {
+      "file": "local-types-vue2.log",
+      "bytes": 78675,
+      "sha256": "0ac647a4bd41411b81f64d6dd4a7e0394d2a5ac768de31c84afd81b107fae064"
+    },
+    {
+      "file": "local-types-vue2-single.log",
+      "bytes": 78219,
+      "sha256": "faa8bf3a069fa7f0a2bf1b2b59a5018d71984c3723dff96d03d553615e76268c"
+    },
+    {
+      "file": "local-types-web-component-source-v1.log",
+      "bytes": 78127,
+      "sha256": "94566a56a647998004428ca3bdb02ec60a0c52c47dfd3fc7f45cef6f1afaa0cc"
+    },
+    {
+      "file": "local-types-other-profiles.json",
+      "bytes": 331,
+      "sha256": "279a4c12ff0cd19295c0711fa0ad418dbf5fd7d9c4dcfb31b802624aa0333657"
+    },
+    {
+      "file": "local-tabs-wc-artifact.json",
+      "bytes": 168,
+      "sha256": "35856d664f8f19bb77e91bd0c071196ead2615e54633c15409a0f4a531293a64"
+    },
+    {
+      "file": "local-types-wc-standalone.json",
+      "bytes": 218,
+      "sha256": "8810aca036a05067bb05f2bb81b92472128e26abaa633de03e42e8a2adfee84d"
+    },
+    {
+      "file": "lifecycle-module-cross-callback-red.log",
+      "bytes": 87387,
+      "sha256": "6aa8bfdeb26f68712e611056ff52f2c5b6b4316ca67d038d4e7532e196afcba6"
+    },
+    {
+      "file": "local-owner-frozen-final.log",
+      "bytes": 112205,
+      "sha256": "43e1cfcd4769769f14e9c0f232d98e8bd650b5dfb9d010618824f4e5316a0f59"
+    },
+    {
+      "file": "local-owner-frozen-ingress-final.log",
+      "bytes": 112343,
+      "sha256": "5b51b7a72f99f70286ea07c0c4278a51ae4c70052680e18ff37a4e698fbeb55b"
+    },
+    {
+      "file": "local-tabs-consumer-final.log",
+      "bytes": 125518,
+      "sha256": "da4d3bd3623266077f39dd0969626d7813fa216c9896c194f8685c0c6e0423f3"
+    },
+    {
+      "file": "lifecycle-module-types-final.log",
+      "bytes": 77314,
+      "sha256": "c7ebb9f742f8b80330d8251a1be6787291c36ed9fd03ba8492b873f05c35fcbe"
+    },
+    {
+      "file": "local-final-consumer-types.json",
+      "bytes": 274,
+      "sha256": "a38f24f319c2e4f5018bcafcc1e2a95902f99c0b58fec49423faa6f762dcaaf0"
+    },
+    {
+      "file": "local-final-typecheck-red.json",
+      "bytes": 1118,
+      "sha256": "14d984c0f526066becc3a5e28e0c1d6e827fb682bea1db30e85c374b3ca63789"
+    },
+    {
+      "file": "local-final-typecheck.json",
+      "bytes": 876,
+      "sha256": "dfe7e776149c4bcc73c6ec5cd9ba72e99d56bcfca71e1946be294b8e12f68ad9"
+    },
+    {
+      "file": "local-final-typecheck.mjs",
+      "bytes": 2191,
+      "sha256": "b3c0db9025acb6f58ea23a4d5ef578d4951833f94ffb2c62a3936abdc587125a"
+    },
+    {
+      "file": "review-lifecycle-cross-callback-red.json",
+      "bytes": 2029,
+      "sha256": "b2818537c4fd24f59b83e484fcc47efecaab3b13d0d949f8a1e91318d129d537"
+    },
+    {
+      "file": "review-lifecycle-cross-callback-red.log",
+      "bytes": 738,
+      "sha256": "fe30ffe7b9ff1f63a35090b9a6306d3b3a66e7207d19a4e119da369d432bc148"
+    },
+    {
+      "file": "review-lifecycle-cross-callback-green.json",
+      "bytes": 2028,
+      "sha256": "5d5831027e6e340a7ee1d48a989e4a699b7aca2c2df2ff07dfbcc0a87a272512"
+    },
+    {
+      "file": "review-lifecycle-cross-callback-green.log",
+      "bytes": 737,
+      "sha256": "9f310a5e16c9a6e1c7540d1012c83e065c6f426070b18121f73b201f91d8caf0"
+    },
+    {
+      "file": "review-lifecycle-cross-callback.mjs",
+      "bytes": 5692,
+      "sha256": "4ce167a65882a6e7ebae90a6efb89768bd0b93af1b31cc21fecd942b7c6cd177"
+    },
+    {
+      "file": "review-local-nominal-boundaries.json",
+      "bytes": 10129,
+      "sha256": "46bcacb3903bf548e4785948e161eb5d4ee7c75899192de59d886e7fd16f6977"
+    },
+    {
+      "file": "review-local-nominal-boundaries.log",
+      "bytes": 5078,
+      "sha256": "07d4002607ad906b7b9524bc9e9dc61515931bd0a95e8d3192bee3be971ebcba"
+    },
+    {
+      "file": "review-local-nominal-boundaries.mjs",
+      "bytes": 3566,
+      "sha256": "d87883cd40df7cddedc55b494941b631934e8af5d8d9720626d62af8156be6ec"
+    }
+  ],
+  "archive": {
+    "file": "receipts.tar.gz",
+    "bytes": 204902,
+    "sha256": "e68cd902ebe53711721137b16eb7008826b38db63b5560829ea4291215104174"
+  }
+}

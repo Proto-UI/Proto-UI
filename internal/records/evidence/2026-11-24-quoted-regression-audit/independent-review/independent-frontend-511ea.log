@@ -1,0 +1,57 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /tmp/proto-ui-audit-5e512bf106bf
+
+10:36:06 AM [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { afterEach, describe, expect, it, vi } from 'vitest';
+2  |  import { observeContentsWheel } from './contents-wheel-evidence';
+   |             ^
+3  |  
+4  |  // Injected layout is only an oracle control. Real scrolling is exercised by
+
+  Plugin: vite:esbuild
+  File: /tmp/proto-ui-audit-5e512bf106bf/apps/www/src/content/docs/zh-cn/contents-wheel-evidence.test.ts
+10:36:06 AM [vite] warning: Unrecognized target environment "ES2024"
+1  |  /** Read-only native-browser observations for the retained Contents Popover.
+   |                                                                           ^
+2  |   * This function is serialized by Playwright; keep its closure self-contained. */
+3  |  export function observeContentsWheel(element: HTMLElement) {
+
+  Plugin: vite:esbuild
+  File: /tmp/proto-ui-audit-5e512bf106bf/apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts
+ ✓ apps/www/src/content/docs/zh-cn/contents-wheel-evidence.test.ts (8 tests) 22ms
+10:36:06 AM [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { describe, expect, it } from 'vitest';
+2  |  import { assessViewport } from '../../scripts/capture-issue-1191-evidence.mjs';
+   |                            ^
+3  |  
+4  |  function mobileObservation() {
+
+  Plugin: vite:esbuild
+  File: /tmp/proto-ui-audit-5e512bf106bf/apps/www/src/components/site-contents-evidence.test.ts
+10:36:07 AM [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
+   |                                                                           ^
+2  |  // Shared server/browser plumbing for documentation browser regressions.
+3  |  // Extracted so a third suite does not need a third inline copy; the two existing
+
+  Plugin: vite:esbuild
+  File: /tmp/proto-ui-audit-5e512bf106bf/apps/www/src/content/docs/zh-cn/browser-harness.ts
+ ✓ apps/www/src/components/site-contents-evidence.test.ts (11 tests) 9ms
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  10:36:05
+   Duration  1.73s (transform 109ms, setup 0ms, collect 434ms, tests 31ms, environment 395ms, prepare 111ms)
+

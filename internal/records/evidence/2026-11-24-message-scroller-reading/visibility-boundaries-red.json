@@ -1,0 +1,343 @@
+{
+  "numTotalTestSuites": 3,
+  "numPassedTestSuites": 1,
+  "numFailedTestSuites": 2,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 33,
+  "numPassedTests": 30,
+  "numFailedTests": 3,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795514529995,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria distinguishes first crossing from visible primary preference and the bottom boundary",
+          "status": "passed",
+          "title": "distinguishes first crossing from visible primary preference and the bottom boundary",
+          "duration": 3.050810000000183,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria uses the authored inset and falls back to the first visible non-primary entry",
+          "status": "passed",
+          "title": "uses the authored inset and falls back to the first visible non-primary entry",
+          "duration": 0.4390250000001288,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria never lets a negative inset make an offscreen primary win visible-preferred capture",
+          "status": "failed",
+          "title": "never lets a negative inset make an offscreen primary win visible-preferred capture",
+          "duration": 8.332948000000215,
+          "failureMessages": [
+            "AssertionError: expected 'above-only' to be 'visible' // Object.is equality\n    at packages/prototypes/base/test/message-scroller-reading.test.ts:141:7\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria keeps the first visible primary instead of a later visible primary",
+          "status": "passed",
+          "title": "keeps the first visible primary instead of a later visible primary",
+          "duration": 0.29893200000014986,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria checks visible intersection when an entry partially visible above",
+          "status": "passed",
+          "title": "checks visible intersection when an entry partially visible above",
+          "duration": 0.35350500000004104,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria checks visible intersection when an entry ends at the top boundary",
+          "status": "failed",
+          "title": "checks visible intersection when an entry ends at the top boundary",
+          "duration": 1.092605000000276,
+          "failureMessages": [
+            "AssertionError: expected 'candidate' to be 'fallback' // Object.is equality\n    at packages/prototypes/base/test/message-scroller-reading.test.ts:178:7\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:629:21\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria checks visible intersection when an entry starts at the bottom boundary",
+          "status": "passed",
+          "title": "checks visible intersection when an entry starts at the bottom boundary",
+          "duration": 0.28074500000002445,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria captures no visible entry in an empty viewport while preserving first-crossing policy",
+          "status": "failed",
+          "title": "captures no visible entry in an empty viewport while preserving first-crossing policy",
+          "duration": 4.287693000000218,
+          "failureMessages": [
+            "AssertionError: expected { key: 'crosses-top', …(4) } to deeply equal { key: '', previousKey: '', …(3) }\n    at packages/prototypes/base/test/message-scroller-reading.test.ts:192:7\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file://<dependency-install>/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria restores exact identity before predecessor and never invents a key from saved index",
+          "status": "passed",
+          "title": "restores exact identity before predecessor and never invents a key from saved index",
+          "duration": 0.9272439999999733,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with missing record",
+          "status": "passed",
+          "title": "refuses selection restoration with missing record",
+          "duration": 0.39218399999981557,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with empty identity",
+          "status": "passed",
+          "title": "refuses selection restoration with empty identity",
+          "duration": 0.258150999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with different current entry",
+          "status": "passed",
+          "title": "refuses selection restoration with different current entry",
+          "duration": 0.26303900000038993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with negative start",
+          "status": "passed",
+          "title": "refuses selection restoration with negative start",
+          "duration": 0.23954300000013973,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with empty range",
+          "status": "passed",
+          "title": "refuses selection restoration with empty range",
+          "duration": 0.24017400000002453,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with short current text",
+          "status": "passed",
+          "title": "refuses selection restoration with short current text",
+          "duration": 0.19768900000008216,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with changed text prefix",
+          "status": "passed",
+          "title": "refuses selection restoration with changed text prefix",
+          "duration": 0.20998800000006668,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with missing selection capability",
+          "status": "passed",
+          "title": "refuses selection restoration with missing selection capability",
+          "duration": 0.19790000000011787,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with user already has a selection",
+          "status": "passed",
+          "title": "refuses selection restoration with user already has a selection",
+          "duration": 0.19905100000005405,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria refuses selection restoration with missing endpoints",
+          "status": "passed",
+          "title": "refuses selection restoration with missing endpoints",
+          "duration": 0.19806999999991604,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller finite-data reading criteria"],
+          "fullName": "MessageScroller finite-data reading criteria deduplicates complete selection identity, including changed content fingerprints",
+          "status": "passed",
+          "title": "deduplicates complete selection identity, including changed content fingerprints",
+          "duration": 0.4988250000001244,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter keeps the initial hint through empty, zero-height and fallback layouts until reader input",
+          "status": "passed",
+          "title": "keeps the initial hint through empty, zero-height and fallback layouts until reader input",
+          "duration": 92.19360499999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter leaves one anchor owner when the host observes a prepend",
+          "status": "passed",
+          "title": "leaves one anchor owner when the host observes a prepend",
+          "duration": 32.08951200000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter does not retire a hint for inactive input",
+          "status": "passed",
+          "title": "does not retire a hint for inactive input",
+          "duration": 25.520164000000022,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter does not retire a hint for outside input",
+          "status": "passed",
+          "title": "does not retire a hint for outside input",
+          "duration": 20.86382300000014,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter deduplicates selection replay without treating it as reader takeover",
+          "status": "passed",
+          "title": "deduplicates selection replay without treating it as reader takeover",
+          "duration": 39.48439999999982,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter revokes old exposed handles when a Web Component is terminally detached",
+          "status": "passed",
+          "title": "revokes old exposed handles when a Web Component is terminally detached",
+          "duration": 36.44929400000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter retires the initial hint for an explicit pointer reader handoff",
+          "status": "passed",
+          "title": "retires the initial hint for an explicit pointer reader handoff",
+          "duration": 19.259905000000344,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter retires the initial hint for an explicit key reader handoff",
+          "status": "passed",
+          "title": "retires the initial hint for an explicit key reader handoff",
+          "duration": 17.665230000000065,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter retires the initial hint for an explicit wheel reader handoff",
+          "status": "passed",
+          "title": "retires the initial hint for an explicit wheel reader handoff",
+          "duration": 19.42226000000028,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter retires the initial hint for an explicit focus reader handoff",
+          "status": "passed",
+          "title": "retires the initial hint for an explicit focus reader handoff",
+          "duration": 25.380502999999862,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter retires the initial hint for an explicit backfill reader handoff",
+          "status": "passed",
+          "title": "retires the initial hint for an explicit backfill reader handoff",
+          "duration": 17.896279999999933,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["MessageScroller reading Hook through the Web Component adapter"],
+          "fullName": "MessageScroller reading Hook through the Web Component adapter resumes the tail explicitly and stops offering history selection or persistence",
+          "status": "passed",
+          "title": "resumes the tail explicitly and stops offering history selection or persistence",
+          "duration": 28.070106000000123,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "isolates stale frames and selection tickets across one RuntimeSession mount epoch",
+          "status": "passed",
+          "title": "isolates stale frames and selection tickets across one RuntimeSession mount epoch",
+          "duration": 2.3710799999998926,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795514533276,
+      "endTime": 1795514533675.371,
+      "status": "failed",
+      "message": "",
+      "name": "packages/prototypes/base/test/message-scroller-reading.test.ts"
+    }
+  ]
+}

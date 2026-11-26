@@ -1,0 +1,779 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "selectedAcceptance": "62 actual CLI/filesystem migration tests; not whole-compiler acceptance.",
+    "threeDistinctGroups": [
+      "Untouched independently emitted legacy directories, observed with their actual failures.",
+      "Explicit test-only shared legacy-support assembly with original component/map bytes and static facades; not untouched old directories.",
+      "New directories produced by the actual migrate-native-support CLI."
+    ],
+    "additionalControls": [
+      "Unmigrated old-Trigger/new-Text routing counterexample.",
+      "Deliberately duplicated full helper with shared ownership; only the recorded facade and two helper copies differ."
+    ],
+    "limits": [
+      "No full compiler, browser, hydration, all-backend or performance acceptance is inferred.",
+      "Existing unrelated generated strict and Text failures are not claimed fixed by these 62 tests."
+    ]
+  },
+  "normalization": {
+    "status": "Normalized derivative, not original evidence bytes.",
+    "rules": [
+      "Every distinct temporary fixture root receives one stable distinct <fixture-NNN> token across all documents. Relative esbuild paths to that root receive the same token.",
+      "Dependency installation roots become <locked-dependencies>; repository roots become <repo>. Module-relative paths, package IDs and all other project data remain unchanged.",
+      "Normalization applies to object keys and string values, including nested CLI JSON stdout strings. Original record SHA256 and byte length are retained. Internal occurrence-aware reversal reconstructs each original JSON file byte-for-byte."
+    ],
+    "fixtureRootCount": 68,
+    "omitted": "No bundle code, broad legacy helper bodies, execution receipts/logs, process data or supervision records are included."
+  },
+  "records": [
+    {
+      "sourceArtifact": "compact-fixture-reconstruction.json",
+      "originalSHA256": "dbd8f319c77ac86284e88211f6742912d26371a1af9d487f80a74ff0a1670a90",
+      "originalBytes": 8122,
+      "data": {
+        "fixture": "<repo>/packages/compiler/test/fixtures/native-support-migration-v1.json",
+        "observations": {
+          "trigger": {
+            "cli": {
+              "code": 0,
+              "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-061>/trigger\",\"files\":[\"<fixture-061>/trigger/.proto-ui/context/scope-v1.ts\",\"<fixture-061>/trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-061>/trigger/.proto-ui/interaction/native-v1.ts\",\"<fixture-061>/trigger/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-061>/trigger/Component.js\",\"<fixture-061>/trigger/Component.js.map\",\"<fixture-061>/trigger/provenance.json\"]},\"diagnostics\":[]}\n",
+              "stderr": ""
+            },
+            "restored": {
+              ".proto-ui/context/scope-v1.ts": {
+                "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+                "origin": "same-input-context-helper-exact-old-sha"
+              },
+              ".proto-ui/interaction/adapter-modules-v1.ts": {
+                "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+                "origin": "known-public-legacy-adapter-literal"
+              },
+              ".proto-ui/interaction/native-v1.ts": {
+                "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+                "origin": "known-public-legacy-native-literal"
+              },
+              "Component.js": {
+                "sha256": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "Component.js.map": {
+                "sha256": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "provenance.json": {
+                "sha256": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+                "origin": "retained-exact-old-cli-bytes"
+              }
+            }
+          },
+          "text": {
+            "cli": {
+              "code": 0,
+              "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-061>/text\",\"files\":[\"<fixture-061>/text/.proto-ui/context/scope-v1.ts\",\"<fixture-061>/text/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-061>/text/.proto-ui/interaction/text-multiline-v1.ts\",\"<fixture-061>/text/Component.js\",\"<fixture-061>/text/Component.js.map\",\"<fixture-061>/text/provenance.json\"]},\"diagnostics\":[]}\n",
+              "stderr": ""
+            },
+            "restored": {
+              ".proto-ui/context/scope-v1.ts": {
+                "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+                "origin": "same-input-context-helper-exact-old-sha"
+              },
+              ".proto-ui/interaction/adapter-modules-v1.ts": {
+                "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+                "origin": "known-public-legacy-adapter-literal"
+              },
+              ".proto-ui/interaction/native-v1.ts": {
+                "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+                "origin": "known-public-legacy-native-literal"
+              },
+              "Component.js": {
+                "sha256": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "Component.js.map": {
+                "sha256": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "provenance.json": {
+                "sha256": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+                "origin": "retained-exact-old-cli-bytes"
+              }
+            }
+          },
+          "boundary": {
+            "cli": {
+              "code": 0,
+              "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-061>/boundary\",\"files\":[\"<fixture-061>/boundary/.proto-ui/context/scope-v1.ts\",\"<fixture-061>/boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-061>/boundary/.proto-ui/interaction/native-v1.ts\",\"<fixture-061>/boundary/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-061>/boundary/Component.js\",\"<fixture-061>/boundary/Component.js.map\",\"<fixture-061>/boundary/provenance.json\"]},\"diagnostics\":[]}\n",
+              "stderr": ""
+            },
+            "restored": {
+              ".proto-ui/context/scope-v1.ts": {
+                "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+                "origin": "same-input-context-helper-exact-old-sha"
+              },
+              ".proto-ui/interaction/adapter-modules-v1.ts": {
+                "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+                "origin": "known-public-legacy-adapter-literal"
+              },
+              ".proto-ui/interaction/native-v1.ts": {
+                "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+                "origin": "known-public-legacy-native-literal"
+              },
+              "Component.js": {
+                "sha256": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "Component.js.map": {
+                "sha256": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "provenance.json": {
+                "sha256": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+                "origin": "retained-exact-old-cli-bytes"
+              }
+            }
+          },
+          "modal": {
+            "cli": {
+              "code": 0,
+              "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-061>/modal\",\"files\":[\"<fixture-061>/modal/.proto-ui/context/scope-v1.ts\",\"<fixture-061>/modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-061>/modal/.proto-ui/interaction/native-v1.ts\",\"<fixture-061>/modal/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-061>/modal/Component.js\",\"<fixture-061>/modal/Component.js.map\",\"<fixture-061>/modal/provenance.json\"]},\"diagnostics\":[]}\n",
+              "stderr": ""
+            },
+            "restored": {
+              ".proto-ui/context/scope-v1.ts": {
+                "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+                "origin": "same-input-context-helper-exact-old-sha"
+              },
+              ".proto-ui/interaction/adapter-modules-v1.ts": {
+                "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+                "origin": "known-public-legacy-adapter-literal"
+              },
+              ".proto-ui/interaction/native-v1.ts": {
+                "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+                "origin": "known-public-legacy-native-literal"
+              },
+              "Component.js": {
+                "sha256": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "Component.js.map": {
+                "sha256": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+                "origin": "retained-exact-old-cli-bytes"
+              },
+              "provenance.json": {
+                "sha256": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+                "origin": "retained-exact-old-cli-bytes"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "sourceArtifact": "counterfactual-old-boundary-delta.json",
+      "originalSHA256": "6195ecd3729300612fa40578a340611238ffea3d79fef1eceddccfdae15a098c",
+      "originalBytes": 16283,
+      "data": {
+        "changed": [
+          "old-boundary/.proto-ui/interaction/native-v1.ts"
+        ],
+        "added": [
+          ".proto-ui/shared/interaction/adapter-counterfactual.ts",
+          ".proto-ui/shared/interaction/native-counterfactual.ts"
+        ],
+        "originalInventory": {
+          ".proto-ui/migration-inputs/new-boundary.json": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb",
+          ".proto-ui/migration-inputs/new-modal.json": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3",
+          ".proto-ui/migration-inputs/new-text.json": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c",
+          ".proto-ui/migration-inputs/new-trigger.json": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9",
+          ".proto-ui/migration-inputs/old-boundary.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          ".proto-ui/migration-inputs/old-modal.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          ".proto-ui/migration-inputs/old-text.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          ".proto-ui/migration-inputs/old-trigger.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          ".proto-ui/shared/interaction/text-multiline-v1.ts": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "new-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "new-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "new-boundary/provenance.json": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4",
+          "new-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "new-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "new-modal/provenance.json": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d",
+          "new-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-text/.proto-ui/interaction/text-multiline-v1.ts": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16",
+          "new-text/Component.js": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98",
+          "new-text/Component.js.map": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543",
+          "new-text/provenance.json": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7",
+          "new-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "new-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "new-trigger/provenance.json": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f",
+          "old-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "old-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "old-boundary/provenance.json": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c",
+          "old-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "old-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "old-modal/provenance.json": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4",
+          "old-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-text/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-text/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "old-text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "old-text/provenance.json": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047",
+          "old-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "old-trigger/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "provenance.json": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+        },
+        "changedInventory": {
+          ".proto-ui/migration-inputs/new-boundary.json": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb",
+          ".proto-ui/migration-inputs/new-modal.json": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3",
+          ".proto-ui/migration-inputs/new-text.json": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c",
+          ".proto-ui/migration-inputs/new-trigger.json": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9",
+          ".proto-ui/migration-inputs/old-boundary.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          ".proto-ui/migration-inputs/old-modal.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          ".proto-ui/migration-inputs/old-text.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          ".proto-ui/migration-inputs/old-trigger.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-counterfactual.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-counterfactual.ts": "0149bf76c5b8b58f4b8c2235234adcea22d805eab3a573417f23ab34a3ec3d08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          ".proto-ui/shared/interaction/text-multiline-v1.ts": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "new-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "new-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "new-boundary/provenance.json": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4",
+          "new-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "new-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "new-modal/provenance.json": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d",
+          "new-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-text/.proto-ui/interaction/text-multiline-v1.ts": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16",
+          "new-text/Component.js": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98",
+          "new-text/Component.js.map": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543",
+          "new-text/provenance.json": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7",
+          "new-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "new-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "new-trigger/provenance.json": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f",
+          "old-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-boundary/.proto-ui/interaction/native-v1.ts": "deb607bcdc69db844dcfa3e2ce350f16d95bacbeb44512c2f045d80adb4866a4",
+          "old-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "old-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "old-boundary/provenance.json": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c",
+          "old-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "old-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "old-modal/provenance.json": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4",
+          "old-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-text/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-text/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "old-text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "old-text/provenance.json": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047",
+          "old-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "old-trigger/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "provenance.json": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+        }
+      }
+    },
+    {
+      "sourceArtifact": "counterfactual-old-modal-delta.json",
+      "originalSHA256": "9f536e1f38ad989b51458b4c44fcf4148d821d562de7d4e4cbc1ed8d95cfb59e",
+      "originalBytes": 16280,
+      "data": {
+        "changed": [
+          "old-modal/.proto-ui/interaction/native-v1.ts"
+        ],
+        "added": [
+          ".proto-ui/shared/interaction/adapter-counterfactual.ts",
+          ".proto-ui/shared/interaction/native-counterfactual.ts"
+        ],
+        "originalInventory": {
+          ".proto-ui/migration-inputs/new-boundary.json": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb",
+          ".proto-ui/migration-inputs/new-modal.json": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3",
+          ".proto-ui/migration-inputs/new-text.json": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c",
+          ".proto-ui/migration-inputs/new-trigger.json": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9",
+          ".proto-ui/migration-inputs/old-boundary.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          ".proto-ui/migration-inputs/old-modal.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          ".proto-ui/migration-inputs/old-text.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          ".proto-ui/migration-inputs/old-trigger.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          ".proto-ui/shared/interaction/text-multiline-v1.ts": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "new-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "new-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "new-boundary/provenance.json": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4",
+          "new-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "new-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "new-modal/provenance.json": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d",
+          "new-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-text/.proto-ui/interaction/text-multiline-v1.ts": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16",
+          "new-text/Component.js": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98",
+          "new-text/Component.js.map": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543",
+          "new-text/provenance.json": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7",
+          "new-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "new-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "new-trigger/provenance.json": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f",
+          "old-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "old-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "old-boundary/provenance.json": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c",
+          "old-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "old-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "old-modal/provenance.json": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4",
+          "old-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-text/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-text/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "old-text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "old-text/provenance.json": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047",
+          "old-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "old-trigger/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "provenance.json": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+        },
+        "changedInventory": {
+          ".proto-ui/migration-inputs/new-boundary.json": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb",
+          ".proto-ui/migration-inputs/new-modal.json": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3",
+          ".proto-ui/migration-inputs/new-text.json": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c",
+          ".proto-ui/migration-inputs/new-trigger.json": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9",
+          ".proto-ui/migration-inputs/old-boundary.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          ".proto-ui/migration-inputs/old-modal.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          ".proto-ui/migration-inputs/old-text.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          ".proto-ui/migration-inputs/old-trigger.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-counterfactual.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-counterfactual.ts": "0149bf76c5b8b58f4b8c2235234adcea22d805eab3a573417f23ab34a3ec3d08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          ".proto-ui/shared/interaction/text-multiline-v1.ts": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "new-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "new-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "new-boundary/provenance.json": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4",
+          "new-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "new-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "new-modal/provenance.json": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d",
+          "new-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-text/.proto-ui/interaction/text-multiline-v1.ts": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16",
+          "new-text/Component.js": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98",
+          "new-text/Component.js.map": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543",
+          "new-text/provenance.json": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7",
+          "new-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "new-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "new-trigger/provenance.json": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f",
+          "old-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "old-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "old-boundary/provenance.json": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c",
+          "old-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-modal/.proto-ui/interaction/native-v1.ts": "deb607bcdc69db844dcfa3e2ce350f16d95bacbeb44512c2f045d80adb4866a4",
+          "old-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "old-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "old-modal/provenance.json": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4",
+          "old-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-text/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-text/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "old-text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "old-text/provenance.json": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047",
+          "old-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "old-trigger/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "provenance.json": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+        }
+      }
+    },
+    {
+      "sourceArtifact": "legacy-shared-baseline-assembly.json",
+      "originalSHA256": "b5a1b3833a18703d2e4d1156d5bf03fd140aa2b5d56340740fcfc11c5bc01b61",
+      "originalBytes": 4964,
+      "data": {
+        "origin": "test-only-shared-legacy-support-assembly",
+        "entries": [
+          [
+            "trigger",
+            "trigger"
+          ],
+          [
+            "text",
+            "text"
+          ],
+          [
+            "boundary-first",
+            "boundary"
+          ],
+          [
+            "boundary-second",
+            "boundary"
+          ],
+          [
+            "modal-first",
+            "modal"
+          ],
+          [
+            "modal-second",
+            "modal"
+          ]
+        ],
+        "note": "Exact old component/map/provenance bytes; local helper files are explicit test-only facades, so these are not untouched CLI output directories.",
+        "files": {
+          ".proto-ui/legacy-shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/legacy-shared/interaction/adapter-modules-v1.ts": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+          ".proto-ui/legacy-shared/interaction/native-v1.ts": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+          "boundary-first/.proto-ui/context/scope-v1.ts": "21da1bc173856badac9e38dead21dc10e55b85799a3e6511af4888998b0e7983",
+          "boundary-first/.proto-ui/interaction/adapter-modules-v1.ts": "986d9148f7f96d256efb66ca55d4250821391dfbdfd22b1e11717abba6813b0e",
+          "boundary-first/.proto-ui/interaction/native-v1.ts": "7869b77f2b35dbb4ffa13470062072b51b6a98ee4d3bcfb8df86796afc93f878",
+          "boundary-first/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "boundary-first/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "boundary-first/provenance.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          "boundary-second/.proto-ui/context/scope-v1.ts": "21da1bc173856badac9e38dead21dc10e55b85799a3e6511af4888998b0e7983",
+          "boundary-second/.proto-ui/interaction/adapter-modules-v1.ts": "986d9148f7f96d256efb66ca55d4250821391dfbdfd22b1e11717abba6813b0e",
+          "boundary-second/.proto-ui/interaction/native-v1.ts": "7869b77f2b35dbb4ffa13470062072b51b6a98ee4d3bcfb8df86796afc93f878",
+          "boundary-second/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "boundary-second/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "boundary-second/provenance.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          "modal-first/.proto-ui/context/scope-v1.ts": "21da1bc173856badac9e38dead21dc10e55b85799a3e6511af4888998b0e7983",
+          "modal-first/.proto-ui/interaction/adapter-modules-v1.ts": "986d9148f7f96d256efb66ca55d4250821391dfbdfd22b1e11717abba6813b0e",
+          "modal-first/.proto-ui/interaction/native-v1.ts": "7869b77f2b35dbb4ffa13470062072b51b6a98ee4d3bcfb8df86796afc93f878",
+          "modal-first/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "modal-first/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "modal-first/provenance.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          "modal-second/.proto-ui/context/scope-v1.ts": "21da1bc173856badac9e38dead21dc10e55b85799a3e6511af4888998b0e7983",
+          "modal-second/.proto-ui/interaction/adapter-modules-v1.ts": "986d9148f7f96d256efb66ca55d4250821391dfbdfd22b1e11717abba6813b0e",
+          "modal-second/.proto-ui/interaction/native-v1.ts": "7869b77f2b35dbb4ffa13470062072b51b6a98ee4d3bcfb8df86796afc93f878",
+          "modal-second/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "modal-second/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "modal-second/provenance.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          "text/.proto-ui/context/scope-v1.ts": "21da1bc173856badac9e38dead21dc10e55b85799a3e6511af4888998b0e7983",
+          "text/.proto-ui/interaction/adapter-modules-v1.ts": "986d9148f7f96d256efb66ca55d4250821391dfbdfd22b1e11717abba6813b0e",
+          "text/.proto-ui/interaction/native-v1.ts": "7869b77f2b35dbb4ffa13470062072b51b6a98ee4d3bcfb8df86796afc93f878",
+          "text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "text/provenance.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          "trigger/.proto-ui/context/scope-v1.ts": "21da1bc173856badac9e38dead21dc10e55b85799a3e6511af4888998b0e7983",
+          "trigger/.proto-ui/interaction/adapter-modules-v1.ts": "986d9148f7f96d256efb66ca55d4250821391dfbdfd22b1e11717abba6813b0e",
+          "trigger/.proto-ui/interaction/native-v1.ts": "7869b77f2b35dbb4ffa13470062072b51b6a98ee4d3bcfb8df86796afc93f878",
+          "trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "trigger/provenance.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664"
+        }
+      }
+    },
+    {
+      "sourceArtifact": "migration-cli.json",
+      "originalSHA256": "4482ee1f694e67ba8911053f8550aa6f7ac21375c85799ef29e6be3ffe311658",
+      "originalBytes": 6360,
+      "data": {
+        "code": 0,
+        "stdout": "{\"ok\":true,\"command\":\"migrate-native-support\",\"result\":{\"directory\":\"<fixture-001>/migrated\",\"files\":[\"<fixture-001>/migrated/.proto-ui/migration-inputs/new-boundary.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/new-modal.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/new-text.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/new-trigger.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/old-boundary.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/old-modal.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/old-text.json\",\"<fixture-001>/migrated/.proto-ui/migration-inputs/old-trigger.json\",\"<fixture-001>/migrated/.proto-ui/shared/context/scope-v1.ts\",\"<fixture-001>/migrated/.proto-ui/shared/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/.proto-ui/shared/interaction/native-v1.ts\",\"<fixture-001>/migrated/.proto-ui/shared/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/.proto-ui/shared/interaction/text-multiline-v1.ts\",\"<fixture-001>/migrated/new-boundary/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/new-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/new-boundary/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/new-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/new-boundary/Component.js\",\"<fixture-001>/migrated/new-boundary/Component.js.map\",\"<fixture-001>/migrated/new-boundary/provenance.json\",\"<fixture-001>/migrated/new-modal/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/new-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/new-modal/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/new-modal/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/new-modal/Component.js\",\"<fixture-001>/migrated/new-modal/Component.js.map\",\"<fixture-001>/migrated/new-modal/provenance.json\",\"<fixture-001>/migrated/new-text/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/new-text/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/new-text/.proto-ui/interaction/text-multiline-v1.ts\",\"<fixture-001>/migrated/new-text/Component.js\",\"<fixture-001>/migrated/new-text/Component.js.map\",\"<fixture-001>/migrated/new-text/provenance.json\",\"<fixture-001>/migrated/new-trigger/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/new-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/new-trigger/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/new-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/new-trigger/Component.js\",\"<fixture-001>/migrated/new-trigger/Component.js.map\",\"<fixture-001>/migrated/new-trigger/provenance.json\",\"<fixture-001>/migrated/old-boundary/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/old-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/old-boundary/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/old-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/old-boundary/Component.js\",\"<fixture-001>/migrated/old-boundary/Component.js.map\",\"<fixture-001>/migrated/old-boundary/provenance.json\",\"<fixture-001>/migrated/old-modal/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/old-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/old-modal/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/old-modal/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/old-modal/Component.js\",\"<fixture-001>/migrated/old-modal/Component.js.map\",\"<fixture-001>/migrated/old-modal/provenance.json\",\"<fixture-001>/migrated/old-text/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/old-text/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/old-text/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/old-text/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/old-text/Component.js\",\"<fixture-001>/migrated/old-text/Component.js.map\",\"<fixture-001>/migrated/old-text/provenance.json\",\"<fixture-001>/migrated/old-trigger/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/migrated/old-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/migrated/old-trigger/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/migrated/old-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/migrated/old-trigger/Component.js\",\"<fixture-001>/migrated/old-trigger/Component.js.map\",\"<fixture-001>/migrated/old-trigger/provenance.json\",\"<fixture-001>/migrated/provenance.json\"]},\"diagnostics\":[]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "new-boundary-cli.json",
+      "originalSHA256": "0e9079088708301c542de673d89c4dc65bdb007a01414d57125ca3ece9c0ec1a",
+      "originalBytes": 770,
+      "data": {
+        "code": 0,
+        "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-001>/new-boundary\",\"files\":[\"<fixture-001>/new-boundary/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/new-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/new-boundary/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/new-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/new-boundary/Component.js\",\"<fixture-001>/new-boundary/Component.js.map\",\"<fixture-001>/new-boundary/provenance.json\"]},\"diagnostics\":[]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "new-modal-cli.json",
+      "originalSHA256": "bcacb0e8aeb30e5a9b3ffaa32154a38c76a6ded80e989e5f617fa0b9b509f2fd",
+      "originalBytes": 746,
+      "data": {
+        "code": 0,
+        "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-001>/new-modal\",\"files\":[\"<fixture-001>/new-modal/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/new-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/new-modal/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/new-modal/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/new-modal/Component.js\",\"<fixture-001>/new-modal/Component.js.map\",\"<fixture-001>/new-modal/provenance.json\"]},\"diagnostics\":[]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "new-text-cli.json",
+      "originalSHA256": "88ae2b748374a3dd1f81d44680577294a1537be1869255aafad22c9b802df061",
+      "originalBytes": 652,
+      "data": {
+        "code": 0,
+        "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-001>/new-text\",\"files\":[\"<fixture-001>/new-text/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/new-text/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/new-text/.proto-ui/interaction/text-multiline-v1.ts\",\"<fixture-001>/new-text/Component.js\",\"<fixture-001>/new-text/Component.js.map\",\"<fixture-001>/new-text/provenance.json\"]},\"diagnostics\":[]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "new-trigger-cli.json",
+      "originalSHA256": "afda9a3cc45a97b15a175250e24fd1fbe9a2a7459d730a45181386204abb9a9e",
+      "originalBytes": 762,
+      "data": {
+        "code": 0,
+        "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<fixture-001>/new-trigger\",\"files\":[\"<fixture-001>/new-trigger/.proto-ui/context/scope-v1.ts\",\"<fixture-001>/new-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-001>/new-trigger/.proto-ui/interaction/native-v1.ts\",\"<fixture-001>/new-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-001>/new-trigger/Component.js\",\"<fixture-001>/new-trigger/Component.js.map\",\"<fixture-001>/new-trigger/provenance.json\"]},\"diagnostics\":[]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "plan-relative-cli.json",
+      "originalSHA256": "e53d925400fa57246d4406ec1f585e35c4c86b40cd864c88b83c9c21acb216b2",
+      "originalBytes": 1925,
+      "data": {
+        "code": 0,
+        "stdout": "{\"ok\":true,\"command\":\"migrate-native-support\",\"result\":{\"directory\":\"<fixture-065>/output\",\"files\":[\"<fixture-065>/output/.proto-ui/migration-inputs/subject.json\",\"<fixture-065>/output/.proto-ui/migration-inputs/valid.json\",\"<fixture-065>/output/.proto-ui/shared/context/scope-v1.ts\",\"<fixture-065>/output/.proto-ui/shared/interaction/adapter-modules-v1.ts\",\"<fixture-065>/output/.proto-ui/shared/interaction/native-v1.ts\",\"<fixture-065>/output/.proto-ui/shared/interaction/ownership-v1.ts\",\"<fixture-065>/output/provenance.json\",\"<fixture-065>/output/subject/.proto-ui/context/scope-v1.ts\",\"<fixture-065>/output/subject/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-065>/output/subject/.proto-ui/interaction/native-v1.ts\",\"<fixture-065>/output/subject/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-065>/output/subject/Component.js\",\"<fixture-065>/output/subject/Component.js.map\",\"<fixture-065>/output/subject/provenance.json\",\"<fixture-065>/output/valid/.proto-ui/context/scope-v1.ts\",\"<fixture-065>/output/valid/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-065>/output/valid/.proto-ui/interaction/native-v1.ts\",\"<fixture-065>/output/valid/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-065>/output/valid/Component.js\",\"<fixture-065>/output/valid/Component.js.map\",\"<fixture-065>/output/valid/provenance.json\"]},\"diagnostics\":[]}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "sourceArtifact": "relocation.json",
+      "originalSHA256": "52db795e367bcc062b29068c0d3d0d1df4f27e9add51e4a900f9ce78f06d35af",
+      "originalBytes": 22936,
+      "data": {
+        "cli": {
+          "code": 0,
+          "stdout": "{\"ok\":true,\"command\":\"migrate-native-support\",\"result\":{\"directory\":\"<fixture-066>/first/nested/output\",\"files\":[\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/new-boundary.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/new-modal.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/new-text.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/new-trigger.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/old-boundary.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/old-modal.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/old-text.json\",\"<fixture-066>/first/nested/output/.proto-ui/migration-inputs/old-trigger.json\",\"<fixture-066>/first/nested/output/.proto-ui/shared/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/.proto-ui/shared/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/.proto-ui/shared/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/.proto-ui/shared/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/.proto-ui/shared/interaction/text-multiline-v1.ts\",\"<fixture-066>/first/nested/output/new-boundary/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/new-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/new-boundary/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/new-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/new-boundary/Component.js\",\"<fixture-066>/first/nested/output/new-boundary/Component.js.map\",\"<fixture-066>/first/nested/output/new-boundary/provenance.json\",\"<fixture-066>/first/nested/output/new-modal/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/new-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/new-modal/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/new-modal/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/new-modal/Component.js\",\"<fixture-066>/first/nested/output/new-modal/Component.js.map\",\"<fixture-066>/first/nested/output/new-modal/provenance.json\",\"<fixture-066>/first/nested/output/new-text/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/new-text/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/new-text/.proto-ui/interaction/text-multiline-v1.ts\",\"<fixture-066>/first/nested/output/new-text/Component.js\",\"<fixture-066>/first/nested/output/new-text/Component.js.map\",\"<fixture-066>/first/nested/output/new-text/provenance.json\",\"<fixture-066>/first/nested/output/new-trigger/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/new-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/new-trigger/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/new-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/new-trigger/Component.js\",\"<fixture-066>/first/nested/output/new-trigger/Component.js.map\",\"<fixture-066>/first/nested/output/new-trigger/provenance.json\",\"<fixture-066>/first/nested/output/old-boundary/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/old-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/old-boundary/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/old-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/old-boundary/Component.js\",\"<fixture-066>/first/nested/output/old-boundary/Component.js.map\",\"<fixture-066>/first/nested/output/old-boundary/provenance.json\",\"<fixture-066>/first/nested/output/old-modal/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/old-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/old-modal/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/old-modal/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/old-modal/Component.js\",\"<fixture-066>/first/nested/output/old-modal/Component.js.map\",\"<fixture-066>/first/nested/output/old-modal/provenance.json\",\"<fixture-066>/first/nested/output/old-text/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/old-text/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/old-text/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/old-text/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/old-text/Component.js\",\"<fixture-066>/first/nested/output/old-text/Component.js.map\",\"<fixture-066>/first/nested/output/old-text/provenance.json\",\"<fixture-066>/first/nested/output/old-trigger/.proto-ui/context/scope-v1.ts\",\"<fixture-066>/first/nested/output/old-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<fixture-066>/first/nested/output/old-trigger/.proto-ui/interaction/native-v1.ts\",\"<fixture-066>/first/nested/output/old-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<fixture-066>/first/nested/output/old-trigger/Component.js\",\"<fixture-066>/first/nested/output/old-trigger/Component.js.map\",\"<fixture-066>/first/nested/output/old-trigger/provenance.json\",\"<fixture-066>/first/nested/output/provenance.json\"]},\"diagnostics\":[]}\n",
+          "stderr": ""
+        },
+        "before": {
+          ".proto-ui/migration-inputs/new-boundary.json": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb",
+          ".proto-ui/migration-inputs/new-modal.json": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3",
+          ".proto-ui/migration-inputs/new-text.json": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c",
+          ".proto-ui/migration-inputs/new-trigger.json": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9",
+          ".proto-ui/migration-inputs/old-boundary.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          ".proto-ui/migration-inputs/old-modal.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          ".proto-ui/migration-inputs/old-text.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          ".proto-ui/migration-inputs/old-trigger.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          ".proto-ui/shared/interaction/text-multiline-v1.ts": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "new-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "new-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "new-boundary/provenance.json": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4",
+          "new-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "new-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "new-modal/provenance.json": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d",
+          "new-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-text/.proto-ui/interaction/text-multiline-v1.ts": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16",
+          "new-text/Component.js": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98",
+          "new-text/Component.js.map": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543",
+          "new-text/provenance.json": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7",
+          "new-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "new-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "new-trigger/provenance.json": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f",
+          "old-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "old-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "old-boundary/provenance.json": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c",
+          "old-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "old-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "old-modal/provenance.json": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4",
+          "old-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-text/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-text/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "old-text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "old-text/provenance.json": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047",
+          "old-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "old-trigger/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "provenance.json": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+        },
+        "after": {
+          ".proto-ui/migration-inputs/new-boundary.json": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb",
+          ".proto-ui/migration-inputs/new-modal.json": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3",
+          ".proto-ui/migration-inputs/new-text.json": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c",
+          ".proto-ui/migration-inputs/new-trigger.json": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9",
+          ".proto-ui/migration-inputs/old-boundary.json": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac",
+          ".proto-ui/migration-inputs/old-modal.json": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a",
+          ".proto-ui/migration-inputs/old-text.json": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264",
+          ".proto-ui/migration-inputs/old-trigger.json": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664",
+          ".proto-ui/shared/context/scope-v1.ts": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          ".proto-ui/shared/interaction/adapter-modules-v1.ts": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+          ".proto-ui/shared/interaction/native-v1.ts": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+          ".proto-ui/shared/interaction/ownership-v1.ts": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          ".proto-ui/shared/interaction/text-multiline-v1.ts": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "new-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "new-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "new-boundary/provenance.json": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4",
+          "new-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "new-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "new-modal/provenance.json": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d",
+          "new-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-text/.proto-ui/interaction/text-multiline-v1.ts": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16",
+          "new-text/Component.js": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98",
+          "new-text/Component.js.map": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543",
+          "new-text/provenance.json": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7",
+          "new-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "new-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "new-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "new-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "new-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "new-trigger/provenance.json": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f",
+          "old-boundary/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-boundary/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-boundary/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-boundary/Component.js": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f",
+          "old-boundary/Component.js.map": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342",
+          "old-boundary/provenance.json": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c",
+          "old-modal/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-modal/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-modal/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-modal/Component.js": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5",
+          "old-modal/Component.js.map": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92",
+          "old-modal/provenance.json": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4",
+          "old-text/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-text/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-text/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-text/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-text/Component.js": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288",
+          "old-text/Component.js.map": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc",
+          "old-text/provenance.json": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047",
+          "old-trigger/.proto-ui/context/scope-v1.ts": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b",
+          "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f",
+          "old-trigger/.proto-ui/interaction/native-v1.ts": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d",
+          "old-trigger/.proto-ui/interaction/ownership-v1.ts": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2",
+          "old-trigger/Component.js": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb",
+          "old-trigger/Component.js.map": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242",
+          "old-trigger/provenance.json": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b",
+          "provenance.json": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-23T16:02:15.626313+00:00",
+  "baseCommit": "03c5b45c07a225f2a80d42034bd7a4b619b63d5b",
+  "candidateFiles": {
+    "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9",
+    "packages/compiler/test/browser-source-input.test.ts": "fc9ae17464da3ba1ebce99d0eac9c5755bdcad2c85b4f37c6e441142487f18e9",
+    ".github/workflows/compiler-browser-acceptance.yml": "8e1cad64c865b416129943dbfcfeb55ac50176b8b4922101c41284d8f9c47750"
+  },
+  "evidence": [
+    {
+      "name": "source-input-original-valid-fixture.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/source-input-original-valid-fixture.log",
+      "rawBytes": 5412,
+      "rawSha256": "4f0f3b1397b204d63107911f67089c6d860033de937d4cd96825a99c426e16a2",
+      "storedPath": "source-input-original-valid-fixture.log.gz",
+      "storedBytes": 1357,
+      "storedSha256": "b592035a77ac5caf2c5c8447be2734a2ad8af95831b553eb3eab4cceda1c14f4"
+    },
+    {
+      "name": "source-input-green.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/source-input-green.log",
+      "rawBytes": 5677,
+      "rawSha256": "2970854bb728fbfd31b2d901662337c2bb25c2c7360b55cde7ef30613b05f6c6",
+      "storedPath": "source-input-green.log.gz",
+      "storedBytes": 1072,
+      "storedSha256": "f667f733d87a01b3cb156bffd9b7e390db8a327aca829cada6a2d5b48895d7be"
+    },
+    {
+      "name": "initial-fixture-setup-failure.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/source-input-red.log",
+      "rawBytes": 4407,
+      "rawSha256": "4d09bb22aa425129685a11cd4f2fea090caeedbe007bd9399924423465265eff",
+      "storedPath": "initial-fixture-setup-failure.log.gz",
+      "storedBytes": 1168,
+      "storedSha256": "675b8037ed5c3e410266e38791ed7aeb4485d269649ace79cf001e805112c34e"
+    },
+    {
+      "name": "initial-fixture-diagnostic.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/source-input-fixture-diagnostic.log",
+      "rawBytes": 4640,
+      "rawSha256": "8e9dd13e0bb237c241bb4894b35cb844aeb1618c2a7f75e34fcbe8ce16ec8223",
+      "storedPath": "initial-fixture-diagnostic.log.gz",
+      "storedBytes": 1204,
+      "storedSha256": "ae5291eea1faa52e25a17901d8c714cb725e2b66bf25cb4e7a6609549f17e7d4"
+    },
+    {
+      "name": "format.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/format.log",
+      "rawBytes": 144,
+      "rawSha256": "5ca8fd574e1d5aa336fc48d82a96accde3249c9cea75013e0fb8a89931c62144",
+      "storedPath": "format.log.gz",
+      "storedBytes": 131,
+      "storedSha256": "b8ccce881c1b30f33bda159b45c3f7fa64b4ce1e4017bd169acef38ff97354f0"
+    },
+    {
+      "name": "diff-check.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/diff-check.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedPath": "diff-check.log.gz",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "name": "install-frozen.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/install.log",
+      "rawBytes": 2082,
+      "rawSha256": "286d77f634407b01bf570f9d13f4223eeedcab1535c7dd1f098751e886720935",
+      "storedPath": "install-frozen.log.gz",
+      "storedBytes": 579,
+      "storedSha256": "7a3c37cc38a43e4adffcc7b29a8f26f7b834c87518c15fdfed3df4ae01d1101d"
+    },
+    {
+      "name": "baseline-canonical.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-clean/canonical-browser.log",
+      "rawBytes": 3708,
+      "rawSha256": "17ad28453e0f98a0bcd8a5a84cc77d0aadabe0f193bdb373e06a768032d62f5a",
+      "storedPath": "baseline-canonical.log.gz",
+      "storedBytes": 1232,
+      "storedSha256": "fc2e9112b6c807de5ed82d0375ffb62c88af59172fdb49bd325ba0d9cc43072c"
+    },
+    {
+      "name": "baseline-status.json",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-clean/status.json",
+      "rawBytes": 1739,
+      "rawSha256": "abf0873e9d371e94f45adf4f51e399835f2013c30bc585937e89bf3c63903fa0",
+      "storedPath": "baseline-status.json.gz",
+      "storedBytes": 751,
+      "storedSha256": "074bfdc06c359d4e80071ee05e8aa0268803c5a474cecb7312c9363af2c6bdfb"
+    },
+    {
+      "name": "baseline-receipt.json",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-clean/browser/receipt.json",
+      "rawBytes": 1961277,
+      "rawSha256": "b67e2497277f1a0e87e7d4f32eec8f560523722ca8583c0b2b1710c1e06442a2",
+      "storedPath": "baseline-receipt.json.gz",
+      "storedBytes": 514312,
+      "storedSha256": "1229409730a708ee933064804e75ff6a84f5ea1c2ef70750b116f11029c6ac72"
+    },
+    {
+      "name": "observed-canonical.log",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-observed/canonical-browser-observed.log",
+      "rawBytes": 3711,
+      "rawSha256": "0f3c8c420870a67ef784de8e897b4bab020ba354557634b0156c0ad99026a7e3",
+      "storedPath": "observed-canonical.log.gz",
+      "storedBytes": 1233,
+      "storedSha256": "b54b8a1e13d18db432716dcdc6a0f3da15bb55fb7dff22a15a859813d193e5be"
+    },
+    {
+      "name": "observed-status.json",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-observed/status.json",
+      "rawBytes": 1342,
+      "rawSha256": "65951106496355f2579c8080f234ad732af220f6844ef5d79df1f7f9817cc2d4",
+      "storedPath": "observed-status.json.gz",
+      "storedBytes": 649,
+      "storedSha256": "a40e7b2829d1157732969a110eb82d63d29c89f5aa638781a9929b0262d42f5c"
+    },
+    {
+      "name": "observed-receipt.json",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-observed/browser/receipt.json",
+      "rawBytes": 1964562,
+      "rawSha256": "7f1493378d9c67d6b1512224a453ecf9d3c70c3e974a9fdf504afd2c0f43729c",
+      "storedPath": "observed-receipt.json.gz",
+      "storedBytes": 514367,
+      "storedSha256": "c21f7420dd65a85a8752b8d827a7cc326cf6685530d061bdbac277c7ecf6787a"
+    },
+    {
+      "name": "observed-trace.jsonl",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-observed/trace.jsonl",
+      "rawBytes": 636356,
+      "rawSha256": "e3abc7be508ef043d672b02b617cb78d67d521ee90d714ee68a33053200d976f",
+      "storedPath": "observed-trace.jsonl.gz",
+      "storedBytes": 23476,
+      "storedSha256": "7b3886dc3fb7e7286b2fcf0a621498f98fc6e645c7b5f0edc17ac8091ad1b255"
+    },
+    {
+      "name": "observer.cjs",
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-ready-75d5e28a-browser-observer.cjs",
+      "rawBytes": 4376,
+      "rawSha256": "240a03535e4940199c6fba8bcd4a3f0ee462ab3560b4e6b3131ef64a862372cf",
+      "storedPath": "observer.cjs.gz",
+      "storedBytes": 1801,
+      "storedSha256": "9d42be81dedef5aef7ed0a979f8f30adf55663a11787540117b670c7a0c5665b"
+    }
+  ],
+  "verification": {
+    "validFixtureBaseline": {
+      "passed": 1,
+      "failed": 3,
+      "total": 4
+    },
+    "candidateSourceRegression": {
+      "passed": 32,
+      "failed": 0,
+      "files": 5
+    },
+    "realBrowserCandidate": "pending unchanged canonical run on the combined commit"
+  },
+  "limitations": [
+    "Initial four fixture setup failures were caused by Happy DOM lacking Option and are not product-negative evidence.",
+    "Observed trace records source length and prefix, not full per-event source hashes. The guard itself compares exact complete content.",
+    "DOM/session tests mock compiler transport and are not WASM or real iframe acceptance.",
+    "Observer instrumentation can influence timing; baseline canonical and candidate canonical must be considered separately."
+  ]
+}

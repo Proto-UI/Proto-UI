@@ -1,0 +1,25 @@
+{
+  "head": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=compiler browser source binding",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "exitCode": 1,
+  "elapsedMs": 2433,
+  "summary": [
+    "\u2139 tests 3",
+    "\u2139 pass 2",
+    "\u2139 fail 1",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 0",
+    "\u2139 duration_ms 2337.046579"
+  ],
+  "failureLines": [
+    "\u2716 compiler browser source binding: foreign-owner (121.211645ms)",
+    "\u2716 failing tests:",
+    "\u2716 compiler browser source binding: foreign-owner (121.211645ms)"
+  ],
+  "scope": "Three original source-binding controls, selected only to diagnose one failure from the already executed full gate. Unselected cases are not passes."
+}

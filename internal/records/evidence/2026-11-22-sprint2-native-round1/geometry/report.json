@@ -1,0 +1,2467 @@
+{
+  "kind": "component-capabilities-native-chromium",
+  "capturedAt": "2026-11-22T13:48:31.161Z",
+  "source": {
+    "head": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+    "branch": "",
+    "treeFilesSha256": "4844fae710abc24bf78ffdd8764552383c079feeeadaf391feed6d0bbce4113b",
+    "styleSha256": {
+      "apps/www/src/styles/shadcn-theme.css": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96",
+      "apps/www/src/styles/proto-ui-tokens.generated.css": "456587619ef9617f11048c05712f84508b01bcc493479650faf419d9e3313d91",
+      "rendered-official-family-themes": "7a8f06893a6858265c1b389997628b8b8818d5209aea5a2390afee1bd0958e11"
+    }
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "linux",
+    "viewport": {
+      "width": 1100,
+      "height": 850
+    },
+    "theme": "light",
+    "runtimes": [
+      "wc",
+      "react",
+      "vue",
+      "vue2"
+    ],
+    "families": [
+      "base",
+      "shadcn",
+      "brutalist"
+    ],
+    "kinds": [
+      "resizable",
+      "carousel",
+      "date-picker"
+    ],
+    "browser": "157.0.8103.78"
+  },
+  "boundary": "Actual public prototypes and Web adapters with generated production CSS; native Chromium mouse, keyboard and wheel. Physical IME, touch hardware, screen-reader and non-Web hosts are not claimed.",
+  "cases": [
+    {
+      "runtime": "wc",
+      "family": "base",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 702,
+      "during": [
+        25,
+        39.99999652221332,
+        35.00000347778668
+      ],
+      "after": [
+        25,
+        45.00000173889334,
+        29.99999826110666
+      ],
+      "innerExtent": 272,
+      "pictures": [
+        "wc-base-resizable-before.png",
+        "wc-base-resizable-dragging.png",
+        "wc-base-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "base",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "wc-base-carousel-snapped.png",
+        "wc-base-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "base",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(2.75381 0 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "middle": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "end": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "contract": "headless; selection colors are consumer-owned"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "wc-base-date-picker-pending.png",
+        "wc-base-date-picker-complete.png",
+        "wc-base-date-picker-reopened-range.png",
+        "wc-base-date-picker-controlled-accepted.png",
+        "wc-base-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "shadcn",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 716,
+      "during": [
+        25,
+        39.99999829510737,
+        35.00000170489263
+      ],
+      "after": [
+        25,
+        44.999996590214735,
+        30.000003409785265
+      ],
+      "innerExtent": 279,
+      "pictures": [
+        "wc-shadcn-resizable-before.png",
+        "wc-shadcn-resizable-dragging.png",
+        "wc-shadcn-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "shadcn",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "wc-shadcn-carousel-snapped.png",
+        "wc-shadcn-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "shadcn",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(7.78201 -0.0000149012 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "middle": {
+          "background": "lab(96.52 -0.0000298023 0.0000119209)",
+          "image": "none",
+          "color": "lab(7.78201 -0.0000149012 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "end": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "lab(2.75381 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "wc-shadcn-date-picker-pending.png",
+        "wc-shadcn-date-picker-complete.png",
+        "wc-shadcn-date-picker-reopened-range.png",
+        "wc-shadcn-date-picker-controlled-accepted.png",
+        "wc-shadcn-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "brutalist",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 698,
+      "during": [
+        25,
+        40.00000349771669,
+        34.99999650228331
+      ],
+      "after": [
+        25,
+        44.999998251141655,
+        30.000001748858345
+      ],
+      "innerExtent": 264,
+      "pictures": [
+        "wc-brutalist-resizable-before.png",
+        "wc-brutalist-resizable-dragging.png",
+        "wc-brutalist-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "brutalist",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.1,
+      "narrowVisible": 1.3888888888888888,
+      "pictures": [
+        "wc-brutalist-carousel-snapped.png",
+        "wc-brutalist-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "wc",
+      "family": "brutalist",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "rgb(82, 148, 255)",
+          "endpointInk": "rgb(0, 0, 0)",
+          "middle": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "middleInk": "rgb(0, 0, 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "middle": {
+          "background": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "end": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "wc-brutalist-date-picker-pending.png",
+        "wc-brutalist-date-picker-complete.png",
+        "wc-brutalist-date-picker-reopened-range.png",
+        "wc-brutalist-date-picker-controlled-accepted.png",
+        "wc-brutalist-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "base",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 702,
+      "during": [
+        25,
+        39.99999652221332,
+        35.00000347778668
+      ],
+      "after": [
+        25,
+        45.00000173889334,
+        29.99999826110666
+      ],
+      "innerExtent": 272,
+      "pictures": [
+        "react-base-resizable-before.png",
+        "react-base-resizable-dragging.png",
+        "react-base-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "base",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "react-base-carousel-snapped.png",
+        "react-base-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "base",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(2.75381 0 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "middle": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "end": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "contract": "headless; selection colors are consumer-owned"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "react-base-date-picker-pending.png",
+        "react-base-date-picker-complete.png",
+        "react-base-date-picker-reopened-range.png",
+        "react-base-date-picker-controlled-accepted.png",
+        "react-base-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "shadcn",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 716,
+      "during": [
+        25,
+        39.99999829510737,
+        35.00000170489263
+      ],
+      "after": [
+        25,
+        44.999996590214735,
+        30.000003409785265
+      ],
+      "innerExtent": 279,
+      "pictures": [
+        "react-shadcn-resizable-before.png",
+        "react-shadcn-resizable-dragging.png",
+        "react-shadcn-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "shadcn",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "react-shadcn-carousel-snapped.png",
+        "react-shadcn-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "shadcn",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(7.78201 -0.0000149012 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "middle": {
+          "background": "lab(96.52 -0.0000298023 0.0000119209)",
+          "image": "none",
+          "color": "lab(7.78201 -0.0000149012 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "end": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "lab(2.75381 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "react-shadcn-date-picker-pending.png",
+        "react-shadcn-date-picker-complete.png",
+        "react-shadcn-date-picker-reopened-range.png",
+        "react-shadcn-date-picker-controlled-accepted.png",
+        "react-shadcn-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "brutalist",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 698,
+      "during": [
+        25,
+        40.00000349771669,
+        34.99999650228331
+      ],
+      "after": [
+        25,
+        44.999998251141655,
+        30.000001748858345
+      ],
+      "innerExtent": 264,
+      "pictures": [
+        "react-brutalist-resizable-before.png",
+        "react-brutalist-resizable-dragging.png",
+        "react-brutalist-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "brutalist",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.1,
+      "narrowVisible": 1.3888888888888888,
+      "pictures": [
+        "react-brutalist-carousel-snapped.png",
+        "react-brutalist-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "react",
+      "family": "brutalist",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "rgb(82, 148, 255)",
+          "endpointInk": "rgb(0, 0, 0)",
+          "middle": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "middleInk": "rgb(0, 0, 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "middle": {
+          "background": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "end": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "react-brutalist-date-picker-pending.png",
+        "react-brutalist-date-picker-complete.png",
+        "react-brutalist-date-picker-reopened-range.png",
+        "react-brutalist-date-picker-controlled-accepted.png",
+        "react-brutalist-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "base",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 702,
+      "during": [
+        25,
+        39.99999652221332,
+        35.00000347778668
+      ],
+      "after": [
+        25,
+        45.00000173889334,
+        29.99999826110666
+      ],
+      "innerExtent": 272,
+      "pictures": [
+        "vue-base-resizable-before.png",
+        "vue-base-resizable-dragging.png",
+        "vue-base-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "base",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "vue-base-carousel-snapped.png",
+        "vue-base-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "base",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(2.75381 0 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "middle": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "end": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "contract": "headless; selection colors are consumer-owned"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "vue-base-date-picker-pending.png",
+        "vue-base-date-picker-complete.png",
+        "vue-base-date-picker-reopened-range.png",
+        "vue-base-date-picker-controlled-accepted.png",
+        "vue-base-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "shadcn",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 716,
+      "during": [
+        25,
+        39.99999829510737,
+        35.00000170489263
+      ],
+      "after": [
+        25,
+        44.999996590214735,
+        30.000003409785265
+      ],
+      "innerExtent": 279,
+      "pictures": [
+        "vue-shadcn-resizable-before.png",
+        "vue-shadcn-resizable-dragging.png",
+        "vue-shadcn-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "shadcn",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "vue-shadcn-carousel-snapped.png",
+        "vue-shadcn-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "shadcn",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(7.78201 -0.0000149012 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "middle": {
+          "background": "lab(96.52 -0.0000298023 0.0000119209)",
+          "image": "none",
+          "color": "lab(7.78201 -0.0000149012 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "end": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "lab(2.75381 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "vue-shadcn-date-picker-pending.png",
+        "vue-shadcn-date-picker-complete.png",
+        "vue-shadcn-date-picker-reopened-range.png",
+        "vue-shadcn-date-picker-controlled-accepted.png",
+        "vue-shadcn-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "brutalist",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 698,
+      "during": [
+        25,
+        40.00000349771669,
+        34.99999650228331
+      ],
+      "after": [
+        25,
+        44.999998251141655,
+        30.000001748858345
+      ],
+      "innerExtent": 264,
+      "pictures": [
+        "vue-brutalist-resizable-before.png",
+        "vue-brutalist-resizable-dragging.png",
+        "vue-brutalist-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "brutalist",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.1,
+      "narrowVisible": 1.3888888888888888,
+      "pictures": [
+        "vue-brutalist-carousel-snapped.png",
+        "vue-brutalist-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "vue",
+      "family": "brutalist",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "rgb(82, 148, 255)",
+          "endpointInk": "rgb(0, 0, 0)",
+          "middle": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "middleInk": "rgb(0, 0, 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "middle": {
+          "background": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "end": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "vue-brutalist-date-picker-pending.png",
+        "vue-brutalist-date-picker-complete.png",
+        "vue-brutalist-date-picker-reopened-range.png",
+        "vue-brutalist-date-picker-controlled-accepted.png",
+        "vue-brutalist-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "base",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 702,
+      "during": [
+        25,
+        39.99999652221332,
+        35.00000347778668
+      ],
+      "after": [
+        25,
+        45.00000173889334,
+        29.99999826110666
+      ],
+      "innerExtent": 272,
+      "pictures": [
+        "vue2-base-resizable-before.png",
+        "vue2-base-resizable-dragging.png",
+        "vue2-base-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "base",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "vue2-base-carousel-snapped.png",
+        "vue2-base-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "base",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(2.75381 0 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "middle": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "end": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(23, 32, 51)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 40,
+          "height": 40
+        },
+        "contract": "headless; selection colors are consumer-owned"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "vue2-base-date-picker-pending.png",
+        "vue2-base-date-picker-complete.png",
+        "vue2-base-date-picker-reopened-range.png",
+        "vue2-base-date-picker-controlled-accepted.png",
+        "vue2-base-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "shadcn",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 716,
+      "during": [
+        25,
+        39.99999829510737,
+        35.00000170489263
+      ],
+      "after": [
+        25,
+        44.999996590214735,
+        30.000003409785265
+      ],
+      "innerExtent": 279,
+      "pictures": [
+        "vue2-shadcn-resizable-before.png",
+        "vue2-shadcn-resizable-dragging.png",
+        "vue2-shadcn-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "shadcn",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.10027855153203342,
+      "narrowVisible": 1.5444444444444445,
+      "pictures": [
+        "vue2-shadcn-carousel-snapped.png",
+        "vue2-shadcn-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "shadcn",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "lab(7.78201 -0.0000149012 0)",
+          "endpointInk": "lab(98.26 0 0)",
+          "middle": "lab(96.52 -0.0000298023 0.0000119209)",
+          "middleInk": "lab(7.78201 -0.0000149012 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "middle": {
+          "background": "lab(96.52 -0.0000298023 0.0000119209)",
+          "image": "none",
+          "color": "lab(7.78201 -0.0000149012 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "end": {
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "image": "none",
+          "color": "lab(98.26 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "lab(2.75381 0 0)",
+          "radius": "10px",
+          "opacity": "1",
+          "width": 28,
+          "height": 28
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "vue2-shadcn-date-picker-pending.png",
+        "vue2-shadcn-date-picker-complete.png",
+        "vue2-shadcn-date-picker-reopened-range.png",
+        "vue2-shadcn-date-picker-controlled-accepted.png",
+        "vue2-shadcn-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "brutalist",
+      "kind": "resizable",
+      "status": "passed",
+      "extent": 698,
+      "during": [
+        25,
+        40.00000349771669,
+        34.99999650228331
+      ],
+      "after": [
+        25,
+        44.999998251141655,
+        30.000001748858345
+      ],
+      "innerExtent": 264,
+      "pictures": [
+        "vue2-brutalist-resizable-before.png",
+        "vue2-brutalist-resizable-dragging.png",
+        "vue2-brutalist-resizable-after.png"
+      ],
+      "checks": [
+        "continuous adjacent drag",
+        "exact separator displacement",
+        "nested vertical isolation",
+        "controlled refusal",
+        "native keyboard collapse",
+        "zero physical collapsed width",
+        "inherited RTL isolation"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "brutalist",
+      "kind": "carousel",
+      "status": "passed",
+      "during": 0.1,
+      "narrowVisible": 1.3888888888888888,
+      "pictures": [
+        "vue2-brutalist-carousel-snapped.png",
+        "vue2-brutalist-carousel-narrow.png"
+      ],
+      "checks": [
+        "public control-label accessible names",
+        "native continuous drag",
+        "entering item paint",
+        "release snap",
+        "responsive capacity",
+        "controlled rollback",
+        "native wheel snap",
+        "native RTL snap",
+        "native vertical snap"
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "family": "brutalist",
+      "kind": "date-picker",
+      "status": "passed",
+      "closedPaint": {
+        "contentVisible": false,
+        "dayVisible": false,
+        "value": "2026-10-10 – 2026-10-14"
+      },
+      "rangePaint": {
+        "expected": {
+          "endpoint": "rgb(82, 148, 255)",
+          "endpointInk": "rgb(0, 0, 0)",
+          "middle": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "middleInk": "rgb(0, 0, 0)",
+          "transparent": "rgba(0, 0, 0, 0)"
+        },
+        "start": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "middle": {
+          "background": "oklab(0.674708 -0.0310783 -0.169657 / 0.2)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "0px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "end": {
+          "background": "rgb(82, 148, 255)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "unselected": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(0, 0, 0)",
+          "radius": "5px",
+          "opacity": "1",
+          "width": 36,
+          "height": 36
+        },
+        "contract": "family semantic fill/foreground and segment distinction"
+      },
+      "controlledCallbacks": [
+        {
+          "reopenOnSelection": false,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "date-selection",
+                "focusReason": "pointer"
+              }
+            }
+          ]
+        },
+        {
+          "reopenOnSelection": true,
+          "observations": [
+            {
+              "type": "rangeChange",
+              "beforeOpen": true,
+              "afterOwnerOpen": true,
+              "afterReopenOpen": true
+            }
+          ],
+          "events": [
+            {
+              "id": "root",
+              "type": "rangeChange",
+              "detail": {
+                "range": {
+                  "from": "2026-10-10",
+                  "to": "2026-10-14"
+                }
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": false,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            },
+            {
+              "id": "root",
+              "type": "openChange",
+              "detail": {
+                "open": true,
+                "reason": "consumer-selection-reopen",
+                "focusReason": "programmatic"
+              }
+            }
+          ]
+        }
+      ],
+      "pictures": [
+        "vue2-brutalist-date-picker-pending.png",
+        "vue2-brutalist-date-picker-complete.png",
+        "vue2-brutalist-date-picker-reopened-range.png",
+        "vue2-brutalist-date-picker-controlled-accepted.png",
+        "vue2-brutalist-date-picker-controlled-reopened.png"
+      ],
+      "checks": [
+        "native popup and partial range",
+        "accepted completion ends presence and hides popup descendants",
+        "retained range reopens with family day paint",
+        "controlled refusal remains open",
+        "controlled native range acceptance completes after the outward callback",
+        "callback close and reopen retires the old selection completion"
+      ]
+    }
+  ]
+}

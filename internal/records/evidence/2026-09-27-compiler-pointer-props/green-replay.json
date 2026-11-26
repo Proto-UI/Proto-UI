@@ -1,0 +1,109 @@
+{
+  "sourceRevision": "c74b698dc651d11aea842336218de745287deeba",
+  "runId": "pointer-props-verified",
+  "seed": 20260927,
+  "seedUse": "LCG chooses safe horizontal pointer fractions; ordered actions are fixed by registry",
+  "orderedInputs": [
+    {
+      "id": "hover",
+      "action": {
+        "kind": "hover"
+      },
+      "fraction": 0.5
+    },
+    {
+      "id": "down",
+      "action": {
+        "kind": "down"
+      },
+      "fraction": 0.5
+    },
+    {
+      "id": "up",
+      "action": {
+        "kind": "up"
+      },
+      "fraction": 0.35
+    },
+    {
+      "id": "down-before-disable",
+      "action": {
+        "kind": "down"
+      },
+      "fraction": 0.5
+    },
+    {
+      "id": "disable",
+      "action": {
+        "kind": "props",
+        "disabled": true
+      },
+      "fraction": 0.5
+    },
+    {
+      "id": "release-disabled",
+      "action": {
+        "kind": "up"
+      },
+      "fraction": 0.65
+    },
+    {
+      "id": "disabled-click",
+      "action": {
+        "kind": "click"
+      },
+      "fraction": 0.35
+    },
+    {
+      "id": "omit-disabled",
+      "action": {
+        "kind": "props",
+        "disabled": null
+      },
+      "fraction": 0.65
+    },
+    {
+      "id": "enabled-click",
+      "action": {
+        "kind": "click"
+      },
+      "fraction": 0.65
+    },
+    {
+      "id": "leave",
+      "action": {
+        "kind": "leave"
+      },
+      "fraction": 0.35
+    },
+    {
+      "id": "dispose",
+      "action": {
+        "kind": "dispose"
+      },
+      "fraction": 0.35
+    },
+    {
+      "id": "stale-after-dispose",
+      "action": {
+        "kind": "stale-click"
+      },
+      "fraction": 0.35
+    }
+  ],
+  "viewport": {
+    "width": 800,
+    "height": 500
+  },
+  "deviceScaleFactor": 1,
+  "browser": "145.0.7632.6",
+  "node": "v22.23.2",
+  "react": "19.2.6",
+  "source": "packages/prototypes/base/src/button/button.proto.ts",
+  "sourceSha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+  "lockfileSha256": "004539cde4d5bf48063fc6fe77530fbd3458d5e663e9509818ac0ceaa0446fa9",
+  "cssSha256": "90a01987912095fe33b86a53ec77232d9a963f940745cce7afdc6eebd5fcec6e",
+  "harnessSha256": "9f6ef5fc5e7cf8dc0e91ee45573bca2e97f8d271daaa1f8f6c1cf54a14b77db2",
+  "fixtureSha256": "b2f89566a54409c4816f79b4ea712856368e65e60bccb2ebd5a1925185198abf",
+  "styleFamily": "base-unstyled-with-consumer-css"
+}

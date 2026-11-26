@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1757",
+  "head": "49d8102da5421cade92de85afec6aa68d46ec85c",
+  "reviewUrl": "https://github.com/Proto-UI/Proto-UI/pull/1757#pullrequestreview-6029605765",
+  "nativeState": "COMMENTED",
+  "independentNativeApproval": false,
+  "archive": {
+    "path": "pr1757-review-publication-package.tar.gz",
+    "bytes": 24998,
+    "sha256": "6888b05e9ee53192d52d1cd0e1c5238da782df5d348981fb1da8cc6673903385"
+  },
+  "purpose": "Exact original source-bound review packet, input, handoff and support material passed to the governed COMMENT writer; publication is not native APPROVE."
+}

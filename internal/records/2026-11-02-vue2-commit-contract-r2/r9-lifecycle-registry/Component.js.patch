@@ -1,0 +1,55 @@
+--- a/Component.js
++++ b/Component.js
+@@ -45,6 +45,8 @@
+ /** @typedef {{ changedKeysAll: string[], changedKeysMatched: string[] }} __puiPropsWatchInfo */
+ /** @template Run @template Snapshot @typedef {(run: Run, next: Snapshot, previous: Snapshot, info: __puiPropsWatchInfo) => void} __puiPropsWatchCallback */
+ /** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiRawProps> }} __puiPropsWatchRegistration */
++/** @typedef {"created" | "mounted" | "updated" | "unmounted" | "beforeDispose"} __puiLifecycleKind */
++/** @template Run @typedef {(run: Run) => void} __puiLifecycleCallback */
+ /** @typedef {{ epoch: number, revision: number, kind: 'update' }} __puiPendingCommit */
+ /** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} __puiRenderedCommit */
+ /** @param {unknown} value @param {PropertyKey} key */
+@@ -120,7 +122,8 @@
+   const states = [];
+   const exposed = Object.create(null);
+   const eventDeclarations = Object.create(null);
+-  const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
++  /** @type {Record<__puiLifecycleKind, Array<__puiLifecycleCallback<typeof run>>>} */
++  const lifecycle = { "created": [], "mounted": [], "updated": [], "unmounted": [], "beforeDispose": [] };
+   /** @type {Array<() => void>} */
+   const notifications = [];
+   
+@@ -414,6 +417,8 @@
+     watchers.push(watch);
+     return () => { watch.active = false; };
+   };
++  /** @type {readonly __puiLifecycleKind[]} */
++  const lifecycleKeys = ["created","mounted","updated","unmounted","beforeDispose"];
+   const def = {
+     context: { provide: (key, value) => { setupOnly(); contextScope.provide(key, value); }, subscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'required', fn ? (next, prev) => fn(run, next, prev) : undefined); }, trySubscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'optional', fn ? (next, prev) => fn(run, next, prev) : undefined); } },
+     
+@@ -447,8 +452,13 @@
+       method: (key, fn) => { setupOnly(); exposed[key] = (...args) => { publicAlive(); return invoke(() => fn(...args)); }; },
+       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
+     },
+-    lifecycle: Object.fromEntries(Object.keys(lifecycle).map((key) => ['on' + key[0].toUpperCase() + key.slice(1), (fn) => { setupOnly(); lifecycle[key].push(fn); }])),
+-  };
++    lifecycle: Object.fromEntries(lifecycleKeys.map((key) => {
++      /** @type {[string, (fn: __puiLifecycleCallback<typeof run>) => void]} */
++      const entry = ['on' + key[0].toUpperCase() + key.slice(1), (fn) => { setupOnly(); lifecycle[key].push(fn); }];
++      return entry;
++    })),
++  };
++  /** @param {__puiLifecycleKind} kind */
+   const fire = (kind) => invoke(() => { for (const fn of lifecycle[kind]) fn(run); }, !terminal);
+   const detach = () => {
+     if (!viewActive) return;
+@@ -565,7 +575,7 @@
+       
+       disposed = true; phase = 'idle';
+       watchers.length = 0; notifications.length = 0; states.length = 0; defaults.length = 0;
+-      for (const key of Object.keys(lifecycle)) lifecycle[key].length = 0;
++      for (const callbacks of Object.values(lifecycle)) callbacks.length = 0;
+       for (const key of Object.keys(exposed)) delete exposed[key];
+       for (const key of Object.keys(eventDeclarations)) delete eventDeclarations[key];
+       specs = Object.create(null); previousValid = Object.create(null); raw = resolved = Object.freeze({}); template = renderFunction = null;

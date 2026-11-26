@@ -1,0 +1,26 @@
+--- a/apps/www/src/content/docs/zh-cn/contents-wheel-evidence.test.ts
++++ b/apps/www/src/content/docs/zh-cn/contents-wheel-evidence.test.ts
+@@ -349,3 +349,23 @@
+     }
+   });
+ });
++
++it('merge control: deduplicates propagation but records a reused Event on each dispatch', () => {
++  const { surface, observer } = fixture(true);
++  try {
++    observer.read();
++    const event = new Event('scroll', { bubbles: false, composed: true });
++    surface.scrollTop = 25;
++    surface.dispatchEvent(event);
++    surface.scrollTop = 0;
++    surface.dispatchEvent(event);
++    expect(observer.read().scrolls.map(({ top }) => top)).toEqual([25, 0]);
++    expect(observer.inspect().scrolls.map(({ top, target }) => [top, target.isSurface])).toEqual([
++      [25, true],
++      [0, true],
++    ]);
++    expect(observer.inspect().droppedScrolls).toBe(0);
++  } finally {
++    observer.dispose();
++  }
++});

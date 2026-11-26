@@ -1,0 +1,11 @@
+[
+  {
+    "category": 1,
+    "code": 2322,
+    "file": "<repo>/packages/compiler/test/native-support-migration.test.ts",
+    "start": 65433,
+    "length": 15,
+    "messageText": "Type 'undefined' is not assignable to type '(err: Error, vm: Vue, info: string) => void'.",
+    "message": "Type 'undefined' is not assignable to type '(err: Error, vm: Vue, info: string) => void'."
+  }
+]

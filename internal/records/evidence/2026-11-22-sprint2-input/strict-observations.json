@@ -1,0 +1,37 @@
+{
+  "schema": "proto-ui.sprint2-input-strict-observations.v1",
+  "independentRawToolTranscriptsArchived": false,
+  "sourceBinding": "Original execution observations preserved from the active work session. Exact dirty source digests were not captured. Integrated workspace strict verification belongs to the root queue.",
+  "observations": [
+    {
+      "stdout": "receipts/field-reset-reentry-types-final.log.gz",
+      "toolObservedExitCode": 0,
+      "candidateLaterCommittedAs": "3d5e556",
+      "emptyStdoutIsNotTheProof": true
+    },
+    {
+      "stdout": "receipts/field-choices-public-types-final.log.gz",
+      "sessionId": 73105,
+      "toolObservedExitCode": 0,
+      "candidateLaterCommittedAs": "e16e820",
+      "emptyStdoutIsNotTheProof": true
+    },
+    {
+      "stdout": "receipts/field-choices-reset-types-final.log.gz",
+      "result": "SIGKILL; incomplete",
+      "cause": "unknown",
+      "candidateLaterCommittedAs": "ebbfc57"
+    },
+    {
+      "stdout": "receipts/field-choices-reset-types-queued-final.log.gz",
+      "sessionId": 15989,
+      "toolObservedExitCode": 0,
+      "candidateLaterCommittedAs": "ebbfc57",
+      "excludesLaterFixes": [
+        "3693622",
+        "42ee3b9"
+      ],
+      "emptyStdoutIsNotTheProof": true
+    }
+  ]
+}

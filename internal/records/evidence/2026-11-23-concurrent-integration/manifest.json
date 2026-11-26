@@ -1,0 +1,93 @@
+{
+  "kind": "proto-ui.concurrent-integration-evidence",
+  "commit": "081e17b69aec1164c44ccb3e351b63587d781d99",
+  "parents": [
+    "a791d1be14227ded9a4de7326bde2ecf8df8ffe4",
+    "b8d20315ad028de77891071db0786b7350ee7d3c"
+  ],
+  "testedAndCommittedTree": "9099601166f82ebc5f96dcd90ea06c5aa6bd707e",
+  "originalFiles": 9,
+  "passed": 291,
+  "failed": 0,
+  "skipped": 0,
+  "sourceStable": true,
+  "nativeEvidenceScope": "Incoming b8 and ead are separately source-bound historical executions; no merged native run claimed.",
+  "files": {
+    "focused-vitest.json.gz": {
+      "bytes": 196578,
+      "sha256": "ca24268b4b234539755479c811a995aaec7733f492d56bc1962fcff70edb12c6",
+      "uncompressedBytes": 1021256,
+      "uncompressedSha256": "4cc5e93862f6452bb12aae9218ef294c64f07e12479b1642ac3bb74cea54d856"
+    },
+    "focused-vitest.log.gz": {
+      "bytes": 28917,
+      "sha256": "ce1b26b770af76590b2a35425a636f997527db98a53f0a8dd444eb8baac83d61",
+      "uncompressedBytes": 306919,
+      "uncompressedSha256": "4628c03be722a9c6d6a24872fb15aad64d34eefc49ce05bd41ef4854fe786b92"
+    },
+    "focused-receipt.json.gz": {
+      "bytes": 1107,
+      "sha256": "1b7ff244bfd990183983c1a6c0fc005f68af05a3117f517a8eae7ecc411dfb01",
+      "uncompressedBytes": 2737,
+      "uncompressedSha256": "ac573ba7fcd799a28cc6093fbd0459cf6db4556ca8ad33815a1cf8fa69a947ab"
+    },
+    "resolution-review.json.gz": {
+      "bytes": 2154,
+      "sha256": "bd85df5f7163def11d593f4cce52926d5c30821b2f57db9455c26928a55fb351",
+      "uncompressedBytes": 5995,
+      "uncompressedSha256": "85ce3923fef45927cd520f06aa57afd71ba7b4d6b551f9d1b6d15b4387c21532"
+    },
+    "incoming-native-evidence-review.json.gz": {
+      "bytes": 1463,
+      "sha256": "4445579ff01573a4073c4fedd379e874b3eea4ae65bd66df5a54378e639efc00",
+      "uncompressedBytes": 3840,
+      "uncompressedSha256": "dbda278145e9eed082852e03b1338ab3968d138d9bd8faaaa2e435934ae22750"
+    },
+    "applied-resolution.json.gz": {
+      "bytes": 1007,
+      "sha256": "0a48ad4f099a3e7b3e0d15c2baf8324a61704f3fbd9d12d66af8a99d325a506c",
+      "uncompressedBytes": 2191,
+      "uncompressedSha256": "59320ae2c97c76110690cbeebe1ec78371246c8db829afb0c235b08a6fd9357f"
+    },
+    "merge-commit-receipt.json.gz": {
+      "bytes": 141,
+      "sha256": "d4a7f2d97a82c1647e76b12e9d583bd1535ef6d1f5bddab038fba2a605d62401",
+      "uncompressedBytes": 201,
+      "uncompressedSha256": "9c0e52c59caa1f76f6eb2cda4d87f582570cabd01e64bcb321739eb87f9a9a86"
+    },
+    "merge-commit.log.gz": {
+      "bytes": 351,
+      "sha256": "511e90968ffe5fd39af1d0b5ea2f675aef0a1d814158aad7015d27d96d9367fd",
+      "uncompressedBytes": 772,
+      "uncompressedSha256": "e88a043aeb5a6d3cbac3b5d3ac5d5ffda692d2e087b57f23783063ace317e3ab"
+    },
+    "integrated-vitest.json.gz": {
+      "bytes": 6479,
+      "sha256": "770afe7dd4b81e738bd7cb51ccf82e93f4fb373932e6ede59fb4c806cde96232",
+      "uncompressedBytes": 62926,
+      "uncompressedSha256": "abe9cec093336ba65b3ed9059ee8a720ca3d06b5545c661df5ef0e95f5741a09"
+    },
+    "integrated-vitest.log.gz": {
+      "bytes": 22770,
+      "sha256": "c05b1ff4988a60578c62cee9f18449e7741a32f0bccd2d9aed59205b5bcb922b",
+      "uncompressedBytes": 207585,
+      "uncompressedSha256": "8db0ed39398a4517ba6945501319d2180c07f328610309690f2d6e9188be2f4e"
+    },
+    "integrated-receipt.json.gz": {
+      "bytes": 1498,
+      "sha256": "530821d0828e4e033868d812331024c81cc0123d575db67e299af318e1315743",
+      "uncompressedBytes": 6209,
+      "uncompressedSha256": "03459bee76714a2f5c6066976d250ff5af792d653fbe286aed771bfefa6a26d6"
+    }
+  },
+  "followupIntegration": {
+    "baseHead": "081e17b69aec1164c44ccb3e351b63587d781d99",
+    "workingSourcePatch": "bounded successful exact-string selector cache",
+    "files": 9,
+    "passed": 165,
+    "failed": 0,
+    "skipped": 0,
+    "sourceStable": true,
+    "scope": "Four complete Shadow artifact/owner files, three complete percentage/admission files, passive action profiles and website Select connected reactions."
+  }
+}

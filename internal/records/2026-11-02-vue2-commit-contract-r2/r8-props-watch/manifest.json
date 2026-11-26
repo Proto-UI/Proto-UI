@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "record": "vue2-r8-props-watch-increment",
+  "status": "WIP_FULL_STRICT102_AND_LAWFUL_HELPER_REGRESSION_REMAIN",
+  "basePublicCommit": "c4d90c98cc7814bdaa1cacc3862f13b06dc3cdeb",
+  "basePublicRecord": "internal/records/2026-11-02-vue2-commit-contract-r2/r7-owner-commit",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "controlTree": "81763496145c0f2fab5d1362118d11ff930ab6a5",
+  "candidateTree": "b260f143a70c15c6ae7524b0847c129be5a4e52d",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "bytes": 69156,
+      "sha256": "24d83ca88e534a305ee8bcb35a0f8b84d7aea67b29f198ba753511194d9e72df"
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-template.test.ts",
+      "bytes": 37499,
+      "sha256": "57690bcf5d953971b2b8c89a2f81667011b1e934d2fda054f3acda8a69136c24"
+    }
+  ],
+  "baseFiles": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 36092,
+      "sha256": "09a44716b24fea8c5dac140900e8fd21b00f2efb7a17050b0a7e3d937407e557"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 46434,
+      "sha256": "c5c518777378c9ac79f7a26ff890536f0e963438da047b6a4991d824054d20f6"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "ee1a7987645b1fa417a4b860fe32ef7e63d4c97587c9334107b8d61ef9967062"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "component": {
+    "basePath": "graph/Component.js",
+    "baseSHA256": "09a44716b24fea8c5dac140900e8fd21b00f2efb7a17050b0a7e3d937407e557",
+    "resultSHA256": "fb38cefb77a15ec6df0b70766fd3b7ebbe8b663db71701234923b49178ee10d9",
+    "edits": [
+      {
+        "byteOffset": 2503,
+        "delete": "",
+        "insert": "/** @typedef {Readonly<Record<string, unknown>>} __puiRawProps */\n/** @typedef {Readonly<GeneratedProps & Record<string, unknown>>} __puiResolvedProps */\n/** @typedef {{ changedKeysAll: string[], changedKeysMatched: string[] }} __puiPropsWatchInfo */\n/** @template Run @template Snapshot @typedef {(run: Run, next: Snapshot, previous: Snapshot, info: __puiPropsWatchInfo) => void} __puiPropsWatchCallback */\n/** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiRawProps> }} __puiPropsWatchRegistration */\n"
+      },
+      {
+        "byteOffset": 5574,
+        "delete": "",
+        "insert": "  /** @type {__puiRawProps} */\n"
+      },
+      {
+        "byteOffset": 5605,
+        "delete": "",
+        "insert": "  /** @type {__puiResolvedProps} */\n"
+      },
+      {
+        "byteOffset": 5742,
+        "delete": "",
+        "insert": "  /** @type {Array<__puiPropsWatchRegistration<typeof run> & { active: boolean }>} */\n"
+      },
+      {
+        "byteOffset": 6647,
+        "delete": "",
+        "insert": "  /** @returns {__puiRawProps} */\n"
+      },
+      {
+        "byteOffset": 7490,
+        "delete": "",
+        "insert": "  /** @param {__puiRawProps} a @param {__puiRawProps} b */\n"
+      },
+      {
+        "byteOffset": 8038,
+        "delete": "",
+        "insert": "  /** @param {__puiRawProps} input @param {boolean} strict */\n"
+      },
+      {
+        "byteOffset": 8082,
+        "delete": "",
+        "insert": "    /** @type {Record<string, unknown>} */\n"
+      },
+      {
+        "byteOffset": 10024,
+        "delete": "    return { snapshot: Object.freeze(out), meta };\n",
+        "insert": "    /** @type {__puiResolvedProps} */\n    const snapshot = Object.freeze(out);\n    return { snapshot, meta };\n"
+      },
+      {
+        "byteOffset": 11798,
+        "delete": "              if (changedKeysMatched.length) watch.fn(run, isRaw ? nextRaw : next.snapshot,\n                isRaw ? previousRaw : previous, { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] });\n",
+        "insert": "              if (changedKeysMatched.length) {\n                const info = { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] };\n                // The registration discriminant preserves the raw/resolved callback\n                // relation; the host group order and snapshot copies stay unchanged.\n                if (watch.kind === 'raw' || watch.kind === 'raw-all') watch.fn(run, nextRaw, previousRaw, info);\n                else watch.fn(run, next.snapshot, previous, info);\n              }\n"
+      },
+      {
+        "byteOffset": 20727,
+        "delete": "  const registerPropsWatch = (kind, keys, fn) => {\n",
+        "insert": "  /** @param {__puiPropsWatchRegistration<typeof run>} registration */\n  const registerPropsWatch = (registration) => {\n"
+      },
+      {
+        "byteOffset": 20795,
+        "delete": "",
+        "insert": "    const { kind, keys } = registration;\n"
+      },
+      {
+        "byteOffset": 21013,
+        "delete": "    const watch = { kind, keys: keys === null ? null : [...keys], fn, active: true };\n",
+        "insert": "    const watch = { ...registration, keys: keys === null ? null : [...keys], active: true };\n"
+      },
+      {
+        "byteOffset": 21935,
+        "delete": "      watch: (keys, fn) => registerPropsWatch('resolved', keys, fn),\n      watchAll: (fn) => registerPropsWatch('resolved-all', null, fn),\n      watchRaw: (keys, fn) => registerPropsWatch('raw', keys, fn),\n      watchRawAll: (fn) => registerPropsWatch('raw-all', null, fn),\n",
+        "insert": "      /** @param {readonly string[]} keys @param {__puiPropsWatchCallback<typeof run, __puiResolvedProps>} fn */\n      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn }),\n      /** @param {__puiPropsWatchCallback<typeof run, __puiResolvedProps>} fn */\n      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn }),\n      /** @param {readonly string[]} keys @param {__puiPropsWatchCallback<typeof run, __puiRawProps>} fn */\n      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn }),\n      /** @param {__puiPropsWatchCallback<typeof run, __puiRawProps>} fn */\n      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn }),\n"
+      }
+    ],
+    "runtimeStatementChanges": "Private own registration record and explicit raw/resolved callback dispatch; unchanged validation/order/copies/unsubscribe"
+  },
+  "moduleTransformation": "Only replace the exact JSON-quoted code string with the reconstructed actual Component; preserve every other byte and field.",
+  "programTransformation": {
+    "entries": 215,
+    "replacementCount": 1,
+    "oldComponentSHA256": "09a44716b24fea8c5dac140900e8fd21b00f2efb7a17050b0a7e3d937407e557",
+    "newComponentSHA256": "fb38cefb77a15ec6df0b70766fd3b7ebbe8b663db71701234923b49178ee10d9",
+    "allOtherBytesUnchanged": true
+  },
+  "copiedFiles": [
+    {
+      "basePath": "graph/.proto-ui/context/scope-v1.ts",
+      "outputPath": "graph/.proto-ui/context/scope-v1.ts"
+    },
+    {
+      "basePath": "graph/Consumer.ts",
+      "outputPath": "graph/Consumer.ts"
+    },
+    {
+      "basePath": "authored.proto.ts.txt",
+      "outputPath": "authored.proto.ts.txt"
+    },
+    {
+      "basePath": "strict-request.portable.json",
+      "outputPath": "strict-request.portable.json"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 38054,
+      "sha256": "fb38cefb77a15ec6df0b70766fd3b7ebbe8b663db71701234923b49178ee10d9"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 48421,
+      "sha256": "ac98094e9d6e9fa91406d821a5a8030fe29372e0dde6f404a05ded78d26384b2"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "67a5ebd924a954ed767c3d6b30ae319b46c20daa9a9a6996680d861e6bb6504a"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "diagnostics.portable.json",
+      "bytes": 29853,
+      "sha256": "5a4d929661a25322142403dcfe1ba50aa288874205dee6733bd415403439960a"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "rawStrictHashes": {
+    "diagnostics.json": "6e2041f5d87e6b51bd303078a3b87477115c72637af8bf35f7be62df92aedfd6",
+    "program.json": "3a5ac5010eb2e9d030c774fc1b8704b72400b09d8135be55b44616c5304e5d9e",
+    "request.json": "2c8678f9b5891d28e7aa5b6987f0c101035821ec2d784432227139143bd23c80"
+  },
+  "normalization": "Only four temporary prefix placeholders as the immutable R6 manifest; source/code/consumer/support not normalized. Every original diagnostic/program/request field and ordering is retained. Full inverse byte proof kept locally.",
+  "results": {
+    "coreEach": {
+      "collected": 47,
+      "passed": 45,
+      "failed": 2,
+      "skipped": 0
+    },
+    "regressionEach": {
+      "collected": 41,
+      "passed": 41
+    },
+    "sourceStrictEach": 0,
+    "generatedStrict": {
+      "control": 124,
+      "candidate": 102,
+      "common": 102,
+      "oldOnly": 22,
+      "newOnly": 0
+    },
+    "artifacts": 1214,
+    "artifactBytes": 22208273,
+    "allArtifactHashesVerified": true,
+    "newControlsPassedBoth": 2,
+    "originalR2Cases": 12,
+    "originalR2ExpectSites": 43,
+    "unsupportedRejectionControls": 3
+  },
+  "runnerSHA256": "9e1546b6080f48ca4e87f49bbae0c320966786ca360fc1a444f971f694f12abb",
+  "gateSHA256": "5320ff6323a960a1497b62647cbbfbc711ce2c1c92381e465a86a2c8a7c7dbfd",
+  "publicationBoundary": "Two source/test files are the exact executed candidate bytes. A public continuation on c4d is not a separate run of its complete ancestry/current main. No ready/merge/close or independent approval.",
+  "formatStatus": "Actual Prettier3.8.1 data export and read-only recheck both0 before the first R8 project run; these exact final files were executed. Original pre-format inputs retained.",
+  "remaining": [
+    "102 full generated strict diagnostics, lawful legacy-template helper regression, native SSR/hydration old walker path",
+    "Statefactory35/props14/owner14/Context12/Expose12/lifecycle5/rootVNode5/authoredEntry5",
+    "Ordinary production mixed consumers/browser, reachable capability cost and complete backend/operation acceptance",
+    "GeneratedProps annotation is not a static schema correspondence proof; unsupported watcher methods/WatchInfo member access/native helper-call admission are not newly implemented."
+  ],
+  "baseRecordMaterialization": "Use the immutable R7 reconstruct helper against R6 first, then pass its verified output directory as --base-record. No project execution.",
+  "formatEvidence": {
+    "formatter": "prettier@3.8.1",
+    "phaseExits": [
+      0,
+      0
+    ],
+    "inputProductSHA256": "24d83ca88e534a305ee8bcb35a0f8b84d7aea67b29f198ba753511194d9e72df",
+    "inputTestSHA256": "92deab3836023f279f0812d0d282c1d58ecdd9c7c077d7f7b1c245b9f6c4bd08",
+    "executedProductSHA256": "24d83ca88e534a305ee8bcb35a0f8b84d7aea67b29f198ba753511194d9e72df",
+    "executedTestSHA256": "57690bcf5d953971b2b8c89a2f81667011b1e934d2fda054f3acda8a69136c24",
+    "beforeFirstRuntime": true,
+    "prior33TestSuffixByteExact": true,
+    "guardsClean": true,
+    "receipts": [
+      {
+        "phase": "export",
+        "sha256": "44539f7a2a5eb71f5100707013da3c42b2a5912da45d7f07cd0885f1b68d4495"
+      },
+      {
+        "phase": "recheck",
+        "sha256": "98359c1cbe142781a259dbf0c9648ee643f29fedeb71b0a283041287b33d0556"
+      }
+    ]
+  }
+}

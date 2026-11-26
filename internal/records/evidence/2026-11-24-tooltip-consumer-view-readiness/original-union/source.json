@@ -1,0 +1,14 @@
+{
+  "head": "4f8c56486825afbb563c3aa159c7ad76a1d3d82a",
+  "tree": "7064afcc47513e7967828bd4ee6e1669ccf10ac7",
+  "parents": [
+    "f753c05a69f84d47cf3842f6bd5d8a8fb7454b90",
+    "6d6c3f7868e3415a79792dd5706dbcf20f34e294"
+  ],
+  "lockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+  "node": "v24.22.3",
+  "chrome": "Google Chrome for Testing 145.0.7632.6",
+  "nodeOptions": "--max-old-space-size=2048",
+  "temporaryDirectory": "/var/tmp/pui456f-pu",
+  "preservation": "Original complete test files, assertions, sandbox and case deadlines. No name filtering."
+}

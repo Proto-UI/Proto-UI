@@ -1,0 +1,43 @@
+--- executed/packages/prototypes/base/test/selection-reset-lifecycle.test.ts
++++ reviewed/packages/prototypes/base/test/selection-reset-lifecycle.test.ts
+@@ -148,6 +148,7 @@
+   const root = make(proto, null, { defaultValue: '2026-10-10', defaultMonth: '2026-10' });
+   await root.session.mount();
+   order.length = 0;
++  const retiredRequest = root.exposes.requestValue;
+   const off = root.exposes.value.subscribe((event: any) => {
+     if (event.type === 'next') order.push('state');
+   });
+@@ -173,7 +174,7 @@
+     off();
+     await root.session.dispose();
+   }
+-  expect(root.exposes.requestValue('2026-10-17')).toBe(false);
++  expect(retiredRequest('2026-10-17')).toBe(false);
+   expect(captures).toHaveLength(2);
+ });
+ 
+--- executed/spec/prototypes/P-BASE-POPOVER.yaml
++++ reviewed/spec/prototypes/P-BASE-POPOVER.yaml
+@@ -80,7 +80,9 @@
+     - C-AS-FOCUS-SCOPE-0002
+     - C-AS-FOCUS-ENTRY-0001
+ verifies:
+-  tests: [T-POPOVER-OPENING-ENTRY-0001, T-CALENDAR-SELECTION-0001]
++  tests:
++    - T-POPOVER-OPENING-ENTRY-0001
++    - { id: T-CALENDAR-SELECTION-0001, since: 0.3.0-alpha.2 }
+ sources:
+   - path: packages/prototypes/base/src/popover/
+   - path: packages/prototypes/base/test/navigation-overlays/popover-entry-focus-scroll.test.ts
+--- executed/spec/tests/T-CALENDAR-SELECTION-0001.yaml
++++ reviewed/spec/tests/T-CALENDAR-SELECTION-0001.yaml
+@@ -44,7 +44,7 @@
+ implementations:
+   - id: calendar-selection-causal-lifecycle
+     kind: runtime-test
+-    status: pending
++    status: passing
+     path: packages/prototypes/base/test/selection-reset-lifecycle.test.ts
+     required: true
+     consumesCases:

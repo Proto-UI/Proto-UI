@@ -1,0 +1,25 @@
+{
+  "scope": "coverage-evidence-r2",
+  "governedFacts": [
+    "AGENTS.md: source bindings and historical records are evidence, not normative admission",
+    "spec/README.md: draft or passing evidence is not stable promotion",
+    "internal/agent-harness/dogfood-coverage-matrix.md: harness.infrastructure.react-bootstrap owns #533 boundary",
+    "internal/website/self-hosting-coverage-matrix.md: existing owners and #420 retain source-review debt"
+  ],
+  "implementation": "scripts/coverage-matrices/check-coverage-matrices.mjs; retained Harness allowance and test remain executable authority for current gate behavior",
+  "candidate": "/tmp/contributor-eight-1117/coverage-unearned-repair-r1/r2/candidate.patch",
+  "negativeBoundaries": [
+    "No executable edits",
+    "No State/Evidence changes",
+    "No source hashes replaced",
+    "No historical narrative rewritten",
+    "No coverage earned"
+  ],
+  "validation": [
+    "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+    "node scripts/coverage-matrices/prototype-coverage.mjs --check",
+    "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check"
+  ],
+  "conflictResolution": "Insert only the two prepared paragraphs after Source-scan bindings; preserve every existing byte after that insertion including markup fingerprints, style-tint-profile row and startup closure prose."
+}

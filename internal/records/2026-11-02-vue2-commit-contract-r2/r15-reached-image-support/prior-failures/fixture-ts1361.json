@@ -1,0 +1,22 @@
+[
+  {
+    "category": 1,
+    "code": 1361,
+    "file": "<repo>/packages/compiler/test/native-support-migration.test.ts",
+    "start": 65484,
+    "length": 4,
+    "messageText": "'Vue2' cannot be used as a value because it was imported using 'import type'.",
+    "message": "'Vue2' cannot be used as a value because it was imported using 'import type'.",
+    "relatedInformation": [
+      {
+        "category": 3,
+        "code": 1376,
+        "file": "<repo>/packages/compiler/test/native-support-migration.test.ts",
+        "start": 519,
+        "length": 9,
+        "messageText": "'Vue2' was imported here.",
+        "message": "'Vue2' was imported here."
+      }
+    ]
+  }
+]

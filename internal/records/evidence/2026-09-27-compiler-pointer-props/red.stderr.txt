@@ -1,0 +1,18 @@
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/compiler/test/browser-pointer-props.test.ts > executed Button pointer/props evidence > red calibration: an extra generated outward event is a real semantic mismatch
+AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
+
+Expected: "PASS"
+Received: "FAIL"
+
+ ❯ packages/compiler/test/browser-pointer-props.test.ts:113:27
+    111|     expect(result.oracleCoverage?.reference.every((entry) => entry.out…
+    112|     // Intentionally red until the bounded runner separates healthy an…
+    113|     expect(result.status).toBe('PASS');
+       |                           ^
+    114|   }, 120_000);
+    115| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

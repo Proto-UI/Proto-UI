@@ -1,0 +1,1195 @@
+{
+  "normalization": {
+    "source": "Actual result.value.code and supportingFiles contents plus unchanged actual Consumer.ts. Every captured generated file hash independently matches the corresponding real program entry.",
+    "key": "Full file path relative to generated root; exact actual sourceLine; 1-based UTF-16 column; unchanged UTF-16 length; exact UTF-16 spanText; endLineDelta/endColumnUTF16; all remaining diagnostic fields including category/code/message/messageText kept unchanged. relatedInformation recursively uses the same normalization. No filtering. Counter preserves duplicate multiplicity.",
+    "absoluteStart": "Replaced by source coordinates in comparison key; original starts and line numbers retained for every removed diagnostic.",
+    "unmapped": [],
+    "relatedInformationEntries": {
+      "control": 0,
+      "candidate": 0
+    }
+  },
+  "result": {
+    "before": 107,
+    "after": 62,
+    "common": 62,
+    "removed": 45,
+    "added": 0,
+    "fullStrictPass": false,
+    "inference": "All candidate diagnostics exactly match prior control diagnostics under the stated complete normalization; no new diagnostic or unknown mapping. The 45 removals are from eliminated broad State/observed bridge source, not proof of full native Text conformance."
+  },
+  "removedCodeCounts": {
+    "2339": 21,
+    "2722": 1,
+    "7006": 21,
+    "7019": 2
+  },
+  "removed": [
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 18325,
+        "line": 338,
+        "columnUTF16": 43,
+        "length": 8,
+        "spanText": "external"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 43,
+        "endColumnUTF16": 51,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 8,
+        "message": "Property 'external' does not exist on type 'NativeState<unknown>'.",
+        "messageText": "Property 'external' does not exist on type 'NativeState<unknown>'.",
+        "sourceLine": "    subscribeState: (state, fn) => (state.external ?? observedExternals.get(state) ?? state).subscribe(fn),",
+        "spanText": "external"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 18930,
+        "line": 345,
+        "columnUTF16": 18,
+        "length": 8,
+        "spanText": "external"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 18,
+        "endColumnUTF16": 26,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 8,
+        "message": "Property 'external' does not exist on type '{}'.",
+        "messageText": "Property 'external' does not exist on type '{}'.",
+        "sourceLine": "      if (value?.external) exposed[key] = value.external;",
+        "spanText": "external"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 18961,
+        "line": 345,
+        "columnUTF16": 49,
+        "length": 8,
+        "spanText": "external"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 49,
+        "endColumnUTF16": 57,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 8,
+        "message": "Property 'external' does not exist on type '{}'.",
+        "messageText": "Property 'external' does not exist on type '{}'.",
+        "sourceLine": "      if (value?.external) exposed[key] = value.external;",
+        "spanText": "external"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 19031,
+        "line": 346,
+        "columnUTF16": 61,
+        "length": 7,
+        "spanText": "...args"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7019,
+        "columnUTF16": 61,
+        "endColumnUTF16": 68,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Rest parameter 'args' implicitly has an 'any[]' type.",
+        "messageText": "Rest parameter 'args' implicitly has an 'any[]' type.",
+        "sourceLine": "      else if (typeof value === 'function') exposed[key] = (...args) => { publicAlive(); return invoke(() => value(...args)); };",
+        "spanText": "...args"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 19232,
+        "line": 347,
+        "columnUTF16": 133,
+        "length": 7,
+        "spanText": "...args"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7019,
+        "columnUTF16": 133,
+        "endColumnUTF16": 140,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Rest parameter 'args' implicitly has an 'any[]' type.",
+        "messageText": "Rest parameter 'args' implicitly has an 'any[]' type.",
+        "sourceLine": "      else if (key === 'controls' && value) exposed[key] = Object.fromEntries(Object.entries(value).map(([name, action]) => [name, (...args) => { publicAlive(); return invoke(() => action(...args)); }]));",
+        "spanText": "...args"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 19593,
+        "line": 351,
+        "columnUTF16": 60,
+        "length": 8,
+        "spanText": "external"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 60,
+        "endColumnUTF16": 68,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 8,
+        "message": "Property 'external' does not exist on type '{ get(): T; }'.",
+        "messageText": "Property 'external' does not exist on type '{ get(): T; }'.",
+        "sourceLine": "    watchState: (state, fn) => { setupOnly(); return state.external.subscribe(event => invoke(() => fn(run, event))); },",
+        "spanText": "external"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 19612,
+        "line": 351,
+        "columnUTF16": 79,
+        "length": 5,
+        "spanText": "event"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 79,
+        "endColumnUTF16": 84,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'event' implicitly has an 'any' type.",
+        "messageText": "Parameter 'event' implicitly has an 'any' type.",
+        "sourceLine": "    watchState: (state, fn) => { setupOnly(); return state.external.subscribe(event => invoke(() => fn(run, event))); },",
+        "spanText": "event"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 20903,
+        "line": 368,
+        "columnUTF16": 44,
+        "length": 21,
+        "spanText": "notifications.shift()"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2722,
+        "columnUTF16": 44,
+        "endColumnUTF16": 65,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 21,
+        "message": "Cannot invoke an object which is possibly 'undefined'.",
+        "messageText": "Cannot invoke an object which is possibly 'undefined'.",
+        "sourceLine": "        try { while (notifications.length) notifications.shift()(); }",
+        "spanText": "notifications.shift()"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 21098,
+        "line": 373,
+        "columnUTF16": 21,
+        "length": 2,
+        "spanText": "fn"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 21,
+        "endColumnUTF16": 23,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 2,
+        "message": "Parameter 'fn' implicitly has an 'any' type.",
+        "messageText": "Parameter 'fn' implicitly has an 'any' type.",
+        "sourceLine": "        subscribe: (fn) => { publicAlive(); subscribers.add(fn); return () => subscribers.delete(fn); },",
+        "spanText": "fn"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 21205,
+        "line": 374,
+        "columnUTF16": 23,
+        "length": 11,
+        "spanText": "unsubscribe"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 23,
+        "endColumnUTF16": 34,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 11,
+        "message": "Parameter 'unsubscribe' implicitly has an 'any' type.",
+        "messageText": "Parameter 'unsubscribe' implicitly has an 'any' type.",
+        "sourceLine": "        unsubscribe: (unsubscribe) => { publicAlive(); if (typeof unsubscribe === 'function') unsubscribe(); },",
+        "spanText": "unsubscribe"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24089,
+        "line": 437,
+        "columnUTF16": 24,
+        "length": 4,
+        "spanText": "kind"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 24,
+        "endColumnUTF16": 28,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Parameter 'kind' implicitly has an 'any' type.",
+        "messageText": "Parameter 'kind' implicitly has an 'any' type.",
+        "sourceLine": "  const createState = (kind, key, initial, configuration = {}) => {",
+        "spanText": "kind"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24095,
+        "line": 437,
+        "columnUTF16": 30,
+        "length": 3,
+        "spanText": "key"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 30,
+        "endColumnUTF16": 33,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Parameter 'key' implicitly has an 'any' type.",
+        "messageText": "Parameter 'key' implicitly has an 'any' type.",
+        "sourceLine": "  const createState = (kind, key, initial, configuration = {}) => {",
+        "spanText": "key"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24100,
+        "line": 437,
+        "columnUTF16": 35,
+        "length": 7,
+        "spanText": "initial"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 35,
+        "endColumnUTF16": 42,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Parameter 'initial' implicitly has an 'any' type.",
+        "messageText": "Parameter 'initial' implicitly has an 'any' type.",
+        "sourceLine": "  const createState = (kind, key, initial, configuration = {}) => {",
+        "spanText": "initial"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24230,
+        "line": 440,
+        "columnUTF16": 20,
+        "length": 5,
+        "spanText": "value"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 20,
+        "endColumnUTF16": 25,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'value' implicitly has an 'any' type.",
+        "messageText": "Parameter 'value' implicitly has an 'any' type.",
+        "sourceLine": "    const check = (value, initialValue = false) => {",
+        "spanText": "value"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24547,
+        "line": 443,
+        "columnUTF16": 16,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 16,
+        "endColumnUTF16": 23,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (spec.options && spec.options.length && !spec.options.includes(value)) throw new Error('[Vue2 native] state value not in options: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24563,
+        "line": 443,
+        "columnUTF16": 32,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 32,
+        "endColumnUTF16": 39,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (spec.options && spec.options.length && !spec.options.includes(value)) throw new Error('[Vue2 native] state value not in options: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24587,
+        "line": 443,
+        "columnUTF16": 56,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 56,
+        "endColumnUTF16": 63,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (spec.options && spec.options.length && !spec.options.includes(value)) throw new Error('[Vue2 native] state value not in options: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24739,
+        "line": 444,
+        "columnUTF16": 59,
+        "length": 5,
+        "spanText": "clamp"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 59,
+        "endColumnUTF16": 64,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Property 'clamp' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'clamp' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.range' && initialValue && spec.clamp) value = Math.min(spec.max, Math.max(spec.min, value));",
+        "spanText": "clamp"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24768,
+        "line": 444,
+        "columnUTF16": 88,
+        "length": 3,
+        "spanText": "max"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 88,
+        "endColumnUTF16": 91,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.range' && initialValue && spec.clamp) value = Math.min(spec.max, Math.max(spec.min, value));",
+        "spanText": "max"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24787,
+        "line": 444,
+        "columnUTF16": 107,
+        "length": 3,
+        "spanText": "min"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 107,
+        "endColumnUTF16": 110,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.range' && initialValue && spec.clamp) value = Math.min(spec.max, Math.max(spec.min, value));",
+        "spanText": "min"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24848,
+        "line": 445,
+        "columnUTF16": 48,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 48,
+        "endColumnUTF16": 55,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24864,
+        "line": 445,
+        "columnUTF16": 64,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 64,
+        "endColumnUTF16": 71,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24889,
+        "line": 445,
+        "columnUTF16": 89,
+        "length": 3,
+        "spanText": "min"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 89,
+        "endColumnUTF16": 92,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);",
+        "spanText": "min"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24923,
+        "line": 445,
+        "columnUTF16": 123,
+        "length": 3,
+        "spanText": "min"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 123,
+        "endColumnUTF16": 126,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);",
+        "spanText": "min"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24935,
+        "line": 445,
+        "columnUTF16": 135,
+        "length": 3,
+        "spanText": "max"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 135,
+        "endColumnUTF16": 138,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);",
+        "spanText": "max"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 24969,
+        "line": 445,
+        "columnUTF16": 169,
+        "length": 3,
+        "spanText": "max"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 169,
+        "endColumnUTF16": 172,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);",
+        "spanText": "max"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 25089,
+        "line": 446,
+        "columnUTF16": 48,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 48,
+        "endColumnUTF16": 55,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && spec.step > 0 && !Number.isInteger((value - (spec.min ?? 0)) / spec.step)) throw new Error('[Vue2 native] state value violates step: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 25105,
+        "line": 446,
+        "columnUTF16": 64,
+        "length": 7,
+        "spanText": "options"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 64,
+        "endColumnUTF16": 71,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 7,
+        "message": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && spec.step > 0 && !Number.isInteger((value - (spec.min ?? 0)) / spec.step)) throw new Error('[Vue2 native] state value violates step: ' + key);",
+        "spanText": "options"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 25129,
+        "line": 446,
+        "columnUTF16": 88,
+        "length": 4,
+        "spanText": "step"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 88,
+        "endColumnUTF16": 92,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && spec.step > 0 && !Number.isInteger((value - (spec.min ?? 0)) / spec.step)) throw new Error('[Vue2 native] state value violates step: ' + key);",
+        "spanText": "step"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 25174,
+        "line": 446,
+        "columnUTF16": 133,
+        "length": 3,
+        "spanText": "min"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 133,
+        "endColumnUTF16": 136,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && spec.step > 0 && !Number.isInteger((value - (spec.min ?? 0)) / spec.step)) throw new Error('[Vue2 native] state value violates step: ' + key);",
+        "spanText": "min"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 25192,
+        "line": 446,
+        "columnUTF16": 151,
+        "length": 4,
+        "spanText": "step"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 2339,
+        "columnUTF16": 151,
+        "endColumnUTF16": 155,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "messageText": "Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.",
+        "sourceLine": "      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && spec.step > 0 && !Number.isInteger((value - (spec.min ?? 0)) / spec.step)) throw new Error('[Vue2 native] state value violates step: ' + key);",
+        "spanText": "step"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29492,
+        "line": 506,
+        "columnUTF16": 14,
+        "length": 3,
+        "spanText": "key"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 14,
+        "endColumnUTF16": 17,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Parameter 'key' implicitly has an 'any' type.",
+        "messageText": "Parameter 'key' implicitly has an 'any' type.",
+        "sourceLine": "      bool: (key, value) => createState('bool', key, value),",
+        "spanText": "key"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29497,
+        "line": 506,
+        "columnUTF16": 19,
+        "length": 5,
+        "spanText": "value"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 19,
+        "endColumnUTF16": 24,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'value' implicitly has an 'any' type.",
+        "messageText": "Parameter 'value' implicitly has an 'any' type.",
+        "sourceLine": "      bool: (key, value) => createState('bool', key, value),",
+        "spanText": "value"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29555,
+        "line": 507,
+        "columnUTF16": 16,
+        "length": 3,
+        "spanText": "key"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 16,
+        "endColumnUTF16": 19,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Parameter 'key' implicitly has an 'any' type.",
+        "messageText": "Parameter 'key' implicitly has an 'any' type.",
+        "sourceLine": "      string: (key, value, spec) => createState('string', key, value, spec),",
+        "spanText": "key"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29560,
+        "line": 507,
+        "columnUTF16": 21,
+        "length": 5,
+        "spanText": "value"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 21,
+        "endColumnUTF16": 26,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'value' implicitly has an 'any' type.",
+        "messageText": "Parameter 'value' implicitly has an 'any' type.",
+        "sourceLine": "      string: (key, value, spec) => createState('string', key, value, spec),",
+        "spanText": "value"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29567,
+        "line": 507,
+        "columnUTF16": 28,
+        "length": 4,
+        "spanText": "spec"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 28,
+        "endColumnUTF16": 32,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Parameter 'spec' implicitly has an 'any' type.",
+        "messageText": "Parameter 'spec' implicitly has an 'any' type.",
+        "sourceLine": "      string: (key, value, spec) => createState('string', key, value, spec),",
+        "spanText": "spec"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29630,
+        "line": 508,
+        "columnUTF16": 14,
+        "length": 3,
+        "spanText": "key"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 14,
+        "endColumnUTF16": 17,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Parameter 'key' implicitly has an 'any' type.",
+        "messageText": "Parameter 'key' implicitly has an 'any' type.",
+        "sourceLine": "      enum: (key, value, spec) => createState('enum', key, value, spec),",
+        "spanText": "key"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29635,
+        "line": 508,
+        "columnUTF16": 19,
+        "length": 5,
+        "spanText": "value"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 19,
+        "endColumnUTF16": 24,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'value' implicitly has an 'any' type.",
+        "messageText": "Parameter 'value' implicitly has an 'any' type.",
+        "sourceLine": "      enum: (key, value, spec) => createState('enum', key, value, spec),",
+        "spanText": "value"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29642,
+        "line": 508,
+        "columnUTF16": 26,
+        "length": 4,
+        "spanText": "spec"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 26,
+        "endColumnUTF16": 30,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Parameter 'spec' implicitly has an 'any' type.",
+        "messageText": "Parameter 'spec' implicitly has an 'any' type.",
+        "sourceLine": "      enum: (key, value, spec) => createState('enum', key, value, spec),",
+        "spanText": "spec"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29713,
+        "line": 509,
+        "columnUTF16": 24,
+        "length": 3,
+        "spanText": "key"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 24,
+        "endColumnUTF16": 27,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Parameter 'key' implicitly has an 'any' type.",
+        "messageText": "Parameter 'key' implicitly has an 'any' type.",
+        "sourceLine": "      numberDiscrete: (key, value, spec) => createState('number.discrete', key, value, spec),",
+        "spanText": "key"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29718,
+        "line": 509,
+        "columnUTF16": 29,
+        "length": 5,
+        "spanText": "value"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 29,
+        "endColumnUTF16": 34,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'value' implicitly has an 'any' type.",
+        "messageText": "Parameter 'value' implicitly has an 'any' type.",
+        "sourceLine": "      numberDiscrete: (key, value, spec) => createState('number.discrete', key, value, spec),",
+        "spanText": "value"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29725,
+        "line": 509,
+        "columnUTF16": 36,
+        "length": 4,
+        "spanText": "spec"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 36,
+        "endColumnUTF16": 40,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Parameter 'spec' implicitly has an 'any' type.",
+        "messageText": "Parameter 'spec' implicitly has an 'any' type.",
+        "sourceLine": "      numberDiscrete: (key, value, spec) => createState('number.discrete', key, value, spec),",
+        "spanText": "spec"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29804,
+        "line": 510,
+        "columnUTF16": 21,
+        "length": 3,
+        "spanText": "key"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 21,
+        "endColumnUTF16": 24,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 3,
+        "message": "Parameter 'key' implicitly has an 'any' type.",
+        "messageText": "Parameter 'key' implicitly has an 'any' type.",
+        "sourceLine": "      numberRange: (key, value, spec) => createState('number.range', key, value, spec),",
+        "spanText": "key"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29809,
+        "line": 510,
+        "columnUTF16": 26,
+        "length": 5,
+        "spanText": "value"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 26,
+        "endColumnUTF16": 31,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 5,
+        "message": "Parameter 'value' implicitly has an 'any' type.",
+        "messageText": "Parameter 'value' implicitly has an 'any' type.",
+        "sourceLine": "      numberRange: (key, value, spec) => createState('number.range', key, value, spec),",
+        "spanText": "value"
+      }
+    },
+    {
+      "count": 1,
+      "originalLocation": {
+        "file": "Component.js",
+        "rawStartUTF16": 29816,
+        "line": 510,
+        "columnUTF16": 33,
+        "length": 4,
+        "spanText": "spec"
+      },
+      "diagnostic": {
+        "category": 1,
+        "code": 7006,
+        "columnUTF16": 33,
+        "endColumnUTF16": 37,
+        "endLineDelta": 0,
+        "file": "Component.js",
+        "length": 4,
+        "message": "Parameter 'spec' implicitly has an 'any' type.",
+        "messageText": "Parameter 'spec' implicitly has an 'any' type.",
+        "sourceLine": "      numberRange: (key, value, spec) => createState('number.range', key, value, spec),",
+        "spanText": "spec"
+      }
+    }
+  ],
+  "added": [],
+  "commonMultisetSHA256": "5a7d6d8593d4b0d6893772923c0a042fe71dedf863bbfae6246b65ef793d1a76",
+  "sourceLineRepetitionNotes": [
+    {
+      "variant": "control",
+      "code": 7006,
+      "rawStartUTF16": 21098,
+      "line": 373,
+      "sourceLine": "        subscribe: (fn) => { publicAlive(); subscribers.add(fn); return () => subscribers.delete(fn); },",
+      "sameSourceLineOccurrences": 2,
+      "scope": "Repeated source-line text; exact raw UTF-16 location retained. Candidate has no same source line, so this is an unambiguous removal at Counter level."
+    }
+  ],
+  "programComparison": {
+    "beforeFiles": 221,
+    "afterFiles": 217,
+    "removed": [
+      ".proto-ui/interaction/adapter-modules-v1.ts",
+      ".proto-ui/interaction/native-v1.ts",
+      "<locked-dependencies>/1129bc7bc38786d6/dist/floating-ui.utils.d.mts",
+      "<locked-dependencies>/1129bc7bc38786d6/dist/floating-ui.utils.dom.d.mts",
+      "<locked-dependencies>/5f6c83603aa525d0/dist/floating-ui.dom.d.mts",
+      "<locked-dependencies>/bbbce88e33f704e4/dist/floating-ui.core.d.mts"
+    ],
+    "added": [
+      ".proto-ui/interaction/ownership-v1.ts",
+      ".proto-ui/interaction/text-multiline-v1.ts"
+    ],
+    "commonChanged": [
+      {
+        "file": "Component.js",
+        "before": {
+          "sha256": "14a5335f1f7dd9697e8afb2aa6904f5d2dbc87314b38d9e3956a4728f5d89267",
+          "isDeclarationFile": false
+        },
+        "after": {
+          "sha256": "dd38eb4a5933586bc7153cea477d9fdab67359a3bc2ff0cbdd88364ffbeeb8b2",
+          "isDeclarationFile": false
+        }
+      }
+    ],
+    "allOtherCommonEntriesIdentical": true
+  },
+  "remainingNotableDiagnostics": [
+    {
+      "category": 1,
+      "code": 2339,
+      "length": 8,
+      "messageText": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'.",
+      "message": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'.",
+      "file": "Component.js",
+      "sourceLine": "    if (key === 'value') { if (initial) result.domProps = { value }; }",
+      "columnUTF16": 48,
+      "spanText": "domProps",
+      "endLineDelta": 0,
+      "endColumnUTF16": 56
+    },
+    {
+      "category": 1,
+      "code": 2339,
+      "length": 5,
+      "messageText": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'.",
+      "message": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'.",
+      "file": "Component.js",
+      "sourceLine": "    else if (key === 'style') result.style = value;",
+      "columnUTF16": 38,
+      "spanText": "style",
+      "endLineDelta": 0,
+      "endColumnUTF16": 43
+    },
+    {
+      "category": 1,
+      "code": 2554,
+      "length": 13,
+      "messageText": "Expected 0 arguments, but got 1.",
+      "message": "Expected 0 arguments, but got 1.",
+      "file": "Component.js",
+      "sourceLine": "    }))(__puiAuthoredRenderer(__puiRenderer)));",
+      "columnUTF16": 31,
+      "spanText": "__puiRenderer",
+      "endLineDelta": 0,
+      "endColumnUTF16": 44
+    }
+  ],
+  "actualControlResultSHA256": "257425fccb9594525bc6bafafbe194a0a3eb57b5bff27ea374c2fc28d23ee63f",
+  "actualCandidateResultSHA256": "d6a2c8c2f02c1ad82d5ce2ec8c2141113e1f143c4ef61dfc2bc4f25da0feadf6"
+}

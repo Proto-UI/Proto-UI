@@ -1,0 +1,55 @@
+--- a/Component.js
++++ b/Component.js
+@@ -47,6 +47,7 @@
+ /** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiRawProps> }} __puiPropsWatchRegistration */
+ /** @typedef {"created" | "mounted" | "updated" | "unmounted" | "beforeDispose"} __puiLifecycleKind */
+ /** @template Run @typedef {(run: Run) => void} __puiLifecycleCallback */
++/** @template Run @typedef {__puiPropsWatchRegistration<Run> & { active: boolean }} __puiPropsWatcher */
+ /** @typedef {{ epoch: number, revision: number, kind: 'update' }} __puiPendingCommit */
+ /** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} __puiRenderedCommit */
+ /** @param {unknown} value @param {PropertyKey} key */
+@@ -116,7 +117,7 @@
+   let previousValid = Object.create(null);
+   let specs = Object.create(null);
+   const defaults = [];
+-  /** @type {Array<__puiPropsWatchRegistration<typeof run> & { active: boolean }>} */
++  /** @type {Array<__puiPropsWatcher<typeof run>>} */
+   const watchers = [];
+   /** @type {Array<{ dispose: () => void }>} */
+   const states = [];
+@@ -407,13 +408,13 @@
+     }
+     specs = next; resolved = resolveProps(raw, false).snapshot;
+   };
+-  /** @param {__puiPropsWatchRegistration<typeof run>} registration */
+-  const registerPropsWatch = (registration) => {
++  /** @param {__puiPropsWatcher<typeof run>} watch */
++  const registerPropsWatch = (watch) => {
+     setupOnly();
+-    const { kind, keys } = registration;
++    const { kind, keys } = watch;
+     if (keys !== null && (!keys.length || keys.some((key) => typeof key !== 'string'
+       || kind === 'resolved' && !__puiOwn(specs, key)))) throw new Error('[Vue2 native] watch requires non-empty valid prop keys.');
+-    const watch = { ...registration, keys: keys === null ? null : [...keys], active: true };
++    watch.keys = keys === null ? null : [...keys];
+     watchers.push(watch);
+     return () => { watch.active = false; };
+   };
+@@ -431,13 +432,13 @@
+         defaults.unshift({ ...layer }); resolved = resolveProps(raw, false).snapshot;
+       },
+       /** @param {readonly string[]} keys @param {__puiPropsWatchCallback<typeof run, __puiResolvedProps>} fn */
+-      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn }),
++      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn, active: true }),
+       /** @param {__puiPropsWatchCallback<typeof run, __puiResolvedProps>} fn */
+-      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn }),
++      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn, active: true }),
+       /** @param {readonly string[]} keys @param {__puiPropsWatchCallback<typeof run, __puiRawProps>} fn */
+-      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn }),
++      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn, active: true }),
+       /** @param {__puiPropsWatchCallback<typeof run, __puiRawProps>} fn */
+-      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn }),
++      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn, active: true }),
+     },
+     state: {
+       bool: (key, value) => createState('bool', key, value),

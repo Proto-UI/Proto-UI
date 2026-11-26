@@ -1,0 +1,49 @@
+{
+  "scope": "Independent public Context composition: an earlier old-close subscriber reopens and starts a new controlled selection while actual open=true. Later owner acceptance must complete that current request despite the stale old-close delivery.",
+  "ok": true,
+  "results": [
+    {
+      "mode": "single",
+      "before": true,
+      "beforeAcceptance": true,
+      "pendingSelection": "2026-10-10",
+      "nestedOpen": true,
+      "nestedRequest": true,
+      "after": false,
+      "observed": true,
+      "finalSelection": "2026-10-16",
+      "actions": [
+        "openChange",
+        "valueChange",
+        "openChange",
+        "openChange"
+      ],
+      "expectedOpenAfter": false,
+      "pass": true
+    },
+    {
+      "mode": "range",
+      "before": true,
+      "beforeAcceptance": true,
+      "pendingSelection": {
+        "from": "2026-10-10"
+      },
+      "nestedOpen": true,
+      "nestedRequest": true,
+      "after": false,
+      "observed": true,
+      "finalSelection": {
+        "from": "2026-10-10",
+        "to": "2026-10-16"
+      },
+      "actions": [
+        "openChange",
+        "rangeChange",
+        "openChange",
+        "openChange"
+      ],
+      "expectedOpenAfter": false,
+      "pass": true
+    }
+  ]
+}

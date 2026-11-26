@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "temporary-positioning-decision-diagnosis",
+  "base": "dca8f4f8f17ff1eba7198ad5aef8a018b3ac9434",
+  "files": {
+    "packages/modules/positioning/src/web/floating-ui-host.ts": "4f47f719c37e57cc0977ea33dcd852af34f00c5cebae7d4d60aedbacf5451460",
+    "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts": "6080fab7dc520f0683999f84ef38b04d4253c138ed55d164876567c67fa26b2c"
+  },
+  "checks": [
+    {
+      "name": "positioning-adapters",
+      "cwd": "/workspace/scratch/5e512bf106bf/proto-ui-recovery",
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/modules/positioning/test packages/adapters/react/test/positioning.integration.test.ts packages/adapters/vue/test/positioning.integration.test.ts packages/adapters/vue2/test/positioning.integration.test.ts packages/adapters/web-component/test/positioning.integration.test.ts --maxWorkers=1 --minWorkers=1 --reporter=verbose",
+      "exitCode": 0,
+      "log": "/tmp/contents-decision-trace-regression.log",
+      "logSha256": "fbf1a93ce826686866e966af2c11881d0dce6b0fc0af07c4e50df531a20de38a",
+      "filesPassed": 26,
+      "testsPassed": 337,
+      "durationSeconds": 27.42,
+      "session": 49043,
+      "completionChunk": "c4a765"
+    },
+    {
+      "name": "workspace-types",
+      "cwd": "/workspace/scratch/5e512bf106bf/proto-ui-recovery",
+      "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+      "exitCode": 0,
+      "log": "/tmp/contents-decision-trace-tsc.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "session": 4453,
+      "completionChunk": "04a692",
+      "scope": "workspace only, not full check:types/docs/native"
+    },
+    {
+      "name": "prettier",
+      "cwd": "/workspace/scratch/5e512bf106bf/proto-ui-recovery",
+      "command": "corepack pnpm@10.32.1 exec prettier --check packages/modules/positioning/src/web/floating-ui-host.ts apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "exitCode": 0,
+      "log": "/tmp/contents-decision-trace-prettier.log",
+      "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "session": 29490,
+      "completionChunk": "a8f4a4"
+    }
+  ],
+  "boundaries": {
+    "productPredicatesUnchanged": true,
+    "wheelDeadlineMs": 1000,
+    "outerCaseDeadlineMs": 180000,
+    "diagnosticSink": "Symbol.for(proto.ui.positioning.decision-trace)",
+    "entryLimit": 256,
+    "overflow": "retain latest entries, increment dropped",
+    "native": "not yet executed on this diagnostic source",
+    "priorNativeDca8": {
+      "shadcnPassed": 12,
+      "brutalistWcClickFailed": true,
+      "combinationsNotRun": 23
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "kind": "preserved-sprint6-evidence-verification",
+  "observedAt": "2026-11-22T17:31:08.713207+00:00",
+  "originalVerification": {
+    "method": "Extract all eight archives to a fresh temporary directory and compare every restored byte string against its original",
+    "files": 869,
+    "bytes": 31442326,
+    "status": "passed",
+    "reference": "manifest.json verification"
+  },
+  "reproducibleVerifier": {
+    "command": "python internal/records/evidence/2026-11-23-sprint6-preserved/verify-preserved.py",
+    "exitCode": 0,
+    "verifiedArchives": 8,
+    "verifiedFiles": 869,
+    "originalBytes": 31442326,
+    "includes": [
+      "archive SHA256/size",
+      "member path/type/no duplicates",
+      "file bytes/SHA256/Git blob SHA1/mode",
+      "complete inventory"
+    ]
+  },
+  "additionalRestoreAttempt": {
+    "status": "failed-environment",
+    "error": "OSError [Errno 28] No space left on device",
+    "completedBeforeFailure": "All archive hashes and all 869 members verified before extraction started",
+    "temporaryDirectory": "sprint6-restored-verification",
+    "cleanup": "Removed only the newly created incomplete restoration directory; originals and archives unchanged"
+  },
+  "newProductExecution": false,
+  "restoreAfterSpaceRecovery": {
+    "command": [
+      "python",
+      "internal/records/evidence/2026-11-23-sprint6-preserved/verify-preserved.py",
+      "--restore",
+      "/workspace/scratch/eb30117f7b2a/sprint6-restored-verification"
+    ],
+    "startedAt": "2026-11-22T17:32:16.229286+00:00",
+    "finishedAt": "2026-11-22T17:32:17.202212+00:00",
+    "exitCode": 0,
+    "result": {
+      "verifiedFiles": 869,
+      "verifiedArchives": 8,
+      "originalBytes": 31442326,
+      "restoredTo": "/workspace/scratch/eb30117f7b2a/sprint6-restored-verification"
+    },
+    "fullBytesComparedWithOriginalFiles": 869,
+    "allMatch": true,
+    "cleanup": "Removed only this newly restored duplicate after comparing all originals; original checkout and both evidence copies unchanged"
+  }
+}

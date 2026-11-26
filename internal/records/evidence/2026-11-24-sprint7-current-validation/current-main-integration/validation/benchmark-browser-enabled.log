@@ -1,0 +1,160 @@
+
+> proto-ui@ benchmark:test /var/tmp/proto-ui-s7-current-456f
+> node --test scripts/benchmark/test/*.test.mjs scripts/benchmark/browser-calibration.test.mjs
+
+✔ public fixtures identify the native calibration scope and contain no external resources (99.564994ms)
+✔ public oracle identities match source case metadata with explicit Dialog v3 and Tabs/Select v2 coverage (30.416275ms)
+✔ an unknown case is rejected rather than scored as passing (9.699703ms)
+✔ unavailable Chromium is a blocked setup with raw failure evidence, never a passing result (2452.425312ms)
+✔ real Chromium positive control: dialog-open-close (11405.943585ms)
+✔ real Chromium positive control: tabs-manual-activation (9015.677992ms)
+✔ real Chromium positive control: select-keyboard (6012.285445ms)
+✔ real Chromium positive variant: native disabled tabindex zero is not a second roving stop (7457.441372ms)
+✔ real Chromium negative control: removed tabs arrow behavior fails the intended keyboard check (5860.483907ms)
+✔ real Chromium negative control: canceled native dialog Escape fails the intended close check (5254.384419ms)
+✔ real Chromium negative control: removed dialog input label fails only the intended accessible-name check (4780.401752ms)
+✔ real Chromium negative control: changed dialog initial value fails only the intended value check (4260.750539ms)
+✔ real Chromium negative control: blocked native select keys fail keyboard checks (3243.412511ms)
+✔ requirement negative controls each target existing unique fixture sites; this is not browser evidence (11.747799ms)
+✔ real Chromium negative control: incorrect dialog action names preserve open/close behavior (3811.895712ms)
+✔ real Chromium negative control: incorrect cleanup button names preserve removal and keyboard navigation (4503.019861ms)
+✔ real Chromium negative control: a skipped Cancel control fails the full forward/reverse focus traversal (4081.240296ms)
+✔ real Chromium negative control: vertical tablist declaration fails horizontal configuration with working arrows (6788.266978ms)
+✔ real Chromium negative control: a renamed disabled tab fails identity with an unchanged keyboard journey (6577.320038ms)
+✔ real Chromium negative control: a second initial tab stop fails before navigation repairs the roving set (7183.209915ms)
+✔ real Chromium negative control: broken reverse disabled-skip fails while forward skip and both wraps work (4890.85583ms)
+✔ real Chromium negative control: CSS exposing an inactive panel fails rendered visibility despite unchanged hidden flags (2928.697919ms)
+✔ real Chromium negative control: a wrong disabled option label fails configuration with unchanged value transitions (2301.309478ms)
+✔ real Chromium negative control: a wrong disabled option value fails configuration though the option is never committed (2673.101636ms)
+✔ real Chromium negative control: moving the disabled option fails declared order despite unchanged enabled transitions (3648.326024ms)
+✔ real Chromium negative control: enabled Beta fails declared disabled configuration and skip behavior (2359.615747ms)
+✔ real Chromium negative control: Gamma selected initially fails both configuration and Alpha initial value (2482.097748ms)
+✔ real Chromium negative control: hidden output fails displayed synchronization despite correct DOM text and value (2544.691269ms)
+✔ real Chromium negative control: reversed cleanup controls fail their declared document order (2975.190195ms)
+✔ three cases bind the same source/dataset and all oracle layers (44.719365ms)
+✔ public cases cannot silently become evaluation or held-out (25.321251ms)
+✔ strict execution fails closed, including self-attested isolation (1990.207673ms)
+✔ packet projector does not serialize evaluator metadata or oracle identifiers (51.970771ms)
+✔ path traversal and symlink inputs fail (0.788331ms)
+✔ evidence writes never overwrite and inventory catches missing/extra/modified files (84.98752ms)
+✔ schema rejects unknown properties, missing provenance, invalid numbers and fake unavailable fields (48.426647ms)
+✔ empty or mixed check sets cannot manufacture complete pass (1.517169ms)
+✔ complete blocked-browser run retains raw errors, both arms and repeats and verifies bindings (9196.619708ms)
+✔ invalid selections and excessive repetition fail before executing (22.436862ms)
+✔ CI publishes the complete allowlisted archive, including its hidden source path (19.818796ms)
+✔ a later unavailable browser does not erase an earlier measured identity (2.242656ms)
+✔ rehashed wrong-fixture and fabricated-result archives fail semantic binding (8171.586303ms)
+✔ declared negative-control artifacts verify against the frozen source transformation (4600.002362ms)
+✔ CI browser watchdogs preserve time and streamed evidence for upload (11.686545ms)
+✔ a stuck browser-command stand-in is terminated while its raw log survives (270.474972ms)
+✔ rehashed provenance and source-policy contradictions are rejected (3274.359333ms)
+✔ a raw measured browser remains bound after a subsequent blocked launch (2837.732279ms)
+✔ missing cells need typed, count-bound failure evidence and matching abort events (2979.864288ms)
+✔ initialization failure is typed and cannot claim completed cells without a manifest (6.361449ms)
+✔ all observed harness provenance is bound to retained sources and raw environments (2966.731457ms)
+✔ every completed cell needs exactly one preceding start in declared order (2932.341397ms)
+✔ calibration cannot claim model participants, verified isolation, repairs or unmeasured costs (1950.650155ms)
+✔ reports, mandatory source, orphan cells, task identity and duplicate failure evidence are bound (3745.663063ms)
+✔ public capture excludes undeclared files and dirty patches, and rejects unselected private cases (9641.813497ms)
+✔ current capture profile cannot retain history, omit its receipt, or downgrade its identity (2527.696099ms)
+✔ aborted cells retain input, scope, evidence and failure bindings without inventing a result (6389.742127ms)
+✔ initialization cannot hide cell lifecycle entries or evaluated artifacts (20.48482ms)
+✔ relative source closure includes side-effect, named, re-export and dynamic imports (15.328214ms)
+✔ calibration rejects unknown or duplicate deviations in manifests, results and transforms (1627.419261ms)
+✔ calibration repeat bounds reject oversized plans before expansion with bounded verifier resources (4837.848496ms)
+✔ evaluator dependency workspace files, metadata and observed version are source-bound (5749.411026ms)
+✔ a completed plan cannot be relabelled as an aborted producer state (2060.999418ms)
+✔ result and run timestamps must be canonical and ordered inside their observed lifecycle intervals (4882.95522ms)
+✔ interrupted preparation is an ordered file prefix and every started cell has complete inputs (7153.249783ms)
+✔ cell journal identities cannot be coerced from arrays or string repeats (2936.661361ms)
+✔ freeze captures exact public sources and participant prompt split (500.29318ms)
+✔ freeze still rejects changed source bytes from a pinned fixture (169.615981ms)
+✔ analysis still rejects an unretained available run (193.505608ms)
+✔ analysis still rejects an unretained planned cell (159.671656ms)
+✔ review and report distinguish discovered, ambiguous and pending dispositions without inferring facts (302.246248ms)
+✔ injected control observations cannot produce a supported result (185.097723ms)
+✔ extra blind material makes the recorded attempt unusable (196.801668ms)
+✔ exposure boundary is declared rather than upgraded to isolation (0.632443ms)
+✔ roundtrip retains synthetic completed without execution admission (211.896669ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-837NBX
+✔ roundtrip retains synthetic failed without execution admission (100.176037ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-UBjmzn
+✔ roundtrip retains synthetic aborted without execution admission (89.979898ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-JZZIgQ
+✔ roundtrip retains synthetic excluded without execution admission (97.242294ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-VrTDs3
+✔ wrong expected source is rejected and receipt retained (46.35354ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-1JBQPf
+✔ wrong expected packet is rejected and receipt retained (60.26548ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-waJk8g
+✔ wrong expected attemptId is rejected and receipt retained (67.758948ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-vNoXFi
+✔ wrong expected submissionId is rejected and receipt retained (49.623869ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-4Qoqgq
+✔ reject unsafe or unsupported path ../secret (32.313493ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-u8h6Li
+✔ reject unsafe or unsupported path /tmp/secret (15.494672ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-6fnu2N
+✔ reject unsafe or unsupported path candidate/../secret (24.430424ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-EO4dfU
+✔ reject unsafe or unsupported path candidate/.hidden (30.846137ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-QQW9oS
+✔ reject unsafe or unsupported path candidate/nested/file (28.080834ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-pzCg9B
+✔ reject unsafe or unsupported path candidate\escape (24.368021ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-ITsSHY
+✔ reject unsafe or unsupported path evidence/unknown.log (27.687133ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-hPnYjQ
+✔ undeclared hidden file is rejected without capturing its contents (25.110119ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-pRripV
+✔ extra empty directory is rejected (38.510653ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-p9S1PV
+✔ reject symlink payload (34.222762ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-ok9TN5
+✔ reject hardlink payload (12.675056ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-Dy9yLp
+✔ reject fifo payload (71.339603ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-73AMZB
+✔ symlink input root is rejected (40.891817ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-7Ba1Bj
+✔ missing raw evidence rejects instead of fabricating success (24.300268ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-rDNwsH
+✔ unknown status, participant and fields cannot become model results (16.559157ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-yBpzoc
+✔ inventory and document resource limits apply before reading payload (25.804406ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-DAHmCm
+✔ digest changes and duplicate inventories reject before output (29.75148ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-vqFCkw
+✔ post-snapshot mutation and extra receipt fields reject inspection (58.091568ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-SNa1KV
+✔ mismatched typed failure disposition is retained but rejected (23.346398ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-oNOcRt
+✔ output collision cannot overwrite an earlier attempt (120.910709ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-7EmtjU
+✔ incomplete transported attempt remains rejected with raw files intact (31.051768ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-RJkpgM
+✔ packet metadata cannot be silently included in participant bytes (24.938601ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-wNyWpI
+✔ an empty task cannot be a valid packet (28.325067ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-eUCfRs
+✔ source object field order is not part of provenance meaning (32.669021ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-u54Mmr
+✔ output nested inside an input cannot contaminate it (29.105477ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-jNevr3
+✔ unknown or mismatched disposition codes are rejected (3.153563ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-3uEekT
+✔ resealed contradictory receipt still fails coordinator binding (27.489323ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-SS2G3b
+✔ old calibration documents are not accepted as exchange documents (16.148656ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-s2YsNJ
+✔ CLI pack, submit and inspect preserve complete public synthetic receipts (1326.401218ms)
+ℹ /var/tmp/pui456f-s7v/round0-exchange-test-rfac5k
+✔ existing formal CLI entry stays fail closed (2432.793666ms)
+ℹ tests 111
+ℹ suites 0
+ℹ pass 111
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 120074.865912

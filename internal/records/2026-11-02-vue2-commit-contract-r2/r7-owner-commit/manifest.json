@@ -1,0 +1,516 @@
+{
+  "schemaVersion": 1,
+  "record": "vue2-r7-owner-commit-increment",
+  "status": "WIP_FULL_STRICT124_AND_LAWFUL_HELPER_REGRESSION_REMAIN",
+  "basePublicCommit": "c81d6a64ce638c1f69e477f25245dad1c1b7cf83",
+  "basePublicRecord": "internal/records/2026-11-02-vue2-commit-contract-r2/r6-owned-state-cell",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "controlTree": "b47fdd8b086821563f4bec617cd2f07b8c8d6133",
+  "candidateTree": "256cc4daba517d93498c7fd59bb3a682e0b13ce3",
+  "baseFiles": [
+    {
+      "path": "graph/Component.js.txt",
+      "bytes": 35633,
+      "sha256": "fe8b34cb17bd975bc3e447a01077a522eceeb4757a92edf3af0eab7f5e2617b5"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 45969,
+      "sha256": "b91c9e9178c64662c6c1a8847b204899bb89573138607e9bf38435fe4a003daf"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "1569feb3193429f3c3b2c5fcad14724aaa7741ee310c369e4b9e05337dda93da"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts.txt",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts.txt",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "component": {
+    "basePath": "graph/Component.js.txt",
+    "baseSHA256": "fe8b34cb17bd975bc3e447a01077a522eceeb4757a92edf3af0eab7f5e2617b5",
+    "resultSHA256": "09a44716b24fea8c5dac140900e8fd21b00f2efb7a17050b0a7e3d937407e557",
+    "insertions": [
+      {
+        "byteOffset": 2503,
+        "insert": "/** @typedef {{ epoch: number, revision: number, kind: 'update' }} __puiPendingCommit */\n/** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} __puiRenderedCommit */\n"
+      },
+      {
+        "byteOffset": 5048,
+        "insert": "  /** @type {__puiPendingCommit | null} */\n"
+      },
+      {
+        "byteOffset": 5070,
+        "insert": "  /** @type {__puiRenderedCommit | null} */\n"
+      },
+      {
+        "byteOffset": 5150,
+        "insert": "  /** @type {(() => void) | undefined} */\n"
+      },
+      {
+        "byteOffset": 25061,
+        "insert": "    /** @param {import('vue').CreateElement} h */\n"
+      }
+    ],
+    "runtimeStatementChanges": 0
+  },
+  "moduleTransformation": "Only replace the exact JSON-quoted code string with the reconstructed actual Component; preserve every other byte and field.",
+  "programTransformation": {
+    "entries": 215,
+    "replacementCount": 1,
+    "oldComponentSHA256": "fe8b34cb17bd975bc3e447a01077a522eceeb4757a92edf3af0eab7f5e2617b5",
+    "newComponentSHA256": "09a44716b24fea8c5dac140900e8fd21b00f2efb7a17050b0a7e3d937407e557",
+    "allOtherBytesUnchanged": true
+  },
+  "copiedFiles": [
+    {
+      "basePath": "graph/.proto-ui/context/scope-v1.ts.txt",
+      "outputPath": "graph/.proto-ui/context/scope-v1.ts"
+    },
+    {
+      "basePath": "graph/Consumer.ts.txt",
+      "outputPath": "graph/Consumer.ts"
+    },
+    {
+      "basePath": "authored.proto.ts.txt",
+      "outputPath": "authored.proto.ts.txt"
+    },
+    {
+      "basePath": "strict-request.portable.json",
+      "outputPath": "strict-request.portable.json"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 36092,
+      "sha256": "09a44716b24fea8c5dac140900e8fd21b00f2efb7a17050b0a7e3d937407e557"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 46434,
+      "sha256": "c5c518777378c9ac79f7a26ff890536f0e963438da047b6a4991d824054d20f6"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "ee1a7987645b1fa417a4b860fe32ef7e63d4c97587c9334107b8d61ef9967062"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "diagnostics.portable.json",
+      "bytes": 37614,
+      "sha256": "bcb417aac3eaf89d45d19bc1a04e321450e4b5f68a939aa30d0d39d2995cce70"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "rawStrictHashes": {
+    "diagnostics.json": "916e7e5d96303cdc771cd09cd58a4613a667deb8edc360b14fe75c6399a7b6b7",
+    "program.json": "6e2f47f5f3a5df75188f52a7d42f1935a9a0f0874a66e6791e6f5fc7700879cd",
+    "request.json": "21ec0e8427754e6e871f21748af7ed17a4166fdb561861450180750dfaa714ad"
+  },
+  "normalization": "Only four temporary prefix placeholders as the immutable R6 manifest; source/code/consumer/support not normalized. Every original diagnostic/program/request field and ordering is retained. Full inverse byte proof kept locally.",
+  "results": {
+    "coreEach": {
+      "collected": 45,
+      "passed": 43,
+      "failed": 2,
+      "skipped": 0
+    },
+    "regressionEach": {
+      "collected": 41,
+      "passed": 41
+    },
+    "sourceStrictEach": 0,
+    "generatedStrict": {
+      "control": 134,
+      "candidate": 124,
+      "common": 124,
+      "oldOnly": 10,
+      "newOnly": 0
+    },
+    "artifacts": 1198,
+    "artifactBytes": 21443135,
+    "allArtifactHashesVerified": true,
+    "newControlsPassedBoth": 2,
+    "originalR2Cases": 12,
+    "originalR2ExpectSites": 43,
+    "unsupportedRejectionControls": 3
+  },
+  "runnerSHA256": "2375b3fd4d27a1014f5eede9c3945ee0d64f39fce33d3eae20cf863e0d171e88",
+  "gateSHA256": "e52e7b3888ca7a3f9e26a48a3c39cc904e6b030ad96173af98a93d001f722d32",
+  "publicationBoundary": "Two source/test files are official formatted copies of executed R7 with exact source-bound parser-trivia evidence. Actual graph is captured from original256 tree; no new run of formatted source/public c81 ancestry/currentmain. No ready/merge/close or independent approval.",
+  "formatStatus": "Official separate-copy recheck0; exact source-bound parser-trivia accounting0. Original raw check1/full AST equality1/ES2022 grammar oracle1 retained.",
+  "remaining": [
+    "124 full generated strict diagnostics, lawful legacy-template helper regression, native SSR/hydration old walker path",
+    "Statefactory35/props36/owner14/Context12/Expose12/lifecycle5/rootVNode5/authoredEntry5",
+    "Ordinary production mixed consumers/browser, reachable capability cost and complete backend/operation acceptance"
+  ],
+  "executedSourceFiles": [
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "bytes": 67016,
+      "sha256": "b3a61bef1137a5375f2cbefbd5a73d5e5dbe9e147bb77a2831aa689c0351746a"
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-template.test.ts",
+      "bytes": 31398,
+      "sha256": "19e3c5ad4c4a92427e479323d3a1e2557b00301872609bc04bc775f9b92d868b"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "bytes": 67248,
+      "sha256": "1ee3eac0513e81792ad853ee5db703ba5016d2af0d0940ecd44204da0fa87321",
+      "executedSHA256": "b3a61bef1137a5375f2cbefbd5a73d5e5dbe9e147bb77a2831aa689c0351746a",
+      "relationship": "Official Prettier3.8.1 formatted copy; exact parser-trivia accounting, not a new behavioral run"
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-template.test.ts",
+      "bytes": 32756,
+      "sha256": "d0fb1a24f6e7be9fcccd2e10f4477aac5e71a6b66980904525098f270b1167c4",
+      "executedSHA256": "19e3c5ad4c4a92427e479323d3a1e2557b00301872609bc04bc775f9b92d868b",
+      "relationship": "Official Prettier3.8.1 formatted copy; exact parser-trivia accounting, not a new behavioral run"
+    }
+  ],
+  "formatEvidence": {
+    "formatter": "Prettier3.8.1 with fixed783 root configuration and original105 packages",
+    "originalCheckExit": 1,
+    "separateExportExit": 0,
+    "officialRecheckExit": 0,
+    "originalFullEqualityExit": 1,
+    "firstGrammarOracleExit": 1,
+    "exactTriviaAccountingExit": 0,
+    "completedAt": "2026-11-02T14:08:50.949874Z",
+    "historicalFailuresRetained": true,
+    "rawFullEqualityLogSHA256": "408cd218a94209380fafead5c8f025d08a9c3c58e36d025513d8f4834171cbcc",
+    "exactAccountingLogSHA256": "c5750f414c5b7fdde34c888bb87ec6b646f64e8b2b56501b09df76cea85107ee",
+    "exactAccountingReceiptSHA256": "20971b0224f7572779da39d78e21a1d02d5ee66b5a218c37cdd2a2679713168e",
+    "fixedComparatorSHA256": "0c01842dabf53cd0491f936a2fcc2536b2d6402af30561371738a1c33332fe94",
+    "typescriptSourceSHA256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+    "templateRawAndCookedCommentsAndExpressionParentheses": "All equal on both files",
+    "explanation": "Exactly30 multiLine layout metadata changes plus two AwaitContext flags on unchanged non-async arrow error Parameter/Identifier after official parameter-parentheses formatting. No globally masked flags. Source-bound complete differences below.",
+    "files": [
+      {
+        "file": "packages/compiler/src/vue2-source.ts",
+        "beforeSHA256": "b3a61bef1137a5375f2cbefbd5a73d5e5dbe9e147bb77a2831aa689c0351746a",
+        "afterSHA256": "1ee3eac0513e81792ad853ee5db703ba5016d2af0d0940ecd44204da0fa87321",
+        "rawChecks": {
+          "ast": false,
+          "literals": true,
+          "parentheses": true,
+          "flags": true,
+          "comments": true
+        },
+        "astDifferences": [
+          [
+            "/children/15/children/5/children/46/children/4/children/1/children/2/children/0/children/0/children/2/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/15/children/5/children/46/children/4/children/2/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/15/children/5/children/49/children/5/children/2/children/2/children/1/children/2/children/2/children/2/children/0/children/0/children/0/children/1/children/2/children/1/children/0/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/15/children/5/children/49/children/5/children/2/children/2/children/1/children/2/children/2/children/2/children/0/children/0/children/0/children/1/children/2/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ]
+        ],
+        "flagDifferences": [],
+        "exactTriviaAccounted": true,
+        "mutationControls": [
+          {
+            "name": "unexpected binding payload",
+            "rejected": true
+          },
+          {
+            "name": "different flag value",
+            "rejected": true
+          },
+          {
+            "name": "different flag path",
+            "rejected": true
+          }
+        ]
+      },
+      {
+        "file": "packages/compiler/test/vue2-native-template.test.ts",
+        "beforeSHA256": "19e3c5ad4c4a92427e479323d3a1e2557b00301872609bc04bc775f9b92d868b",
+        "afterSHA256": "d0fb1a24f6e7be9fcccd2e10f4477aac5e71a6b66980904525098f270b1167c4",
+        "rawChecks": {
+          "ast": false,
+          "literals": true,
+          "parentheses": true,
+          "flags": false,
+          "comments": true
+        },
+        "astDifferences": [
+          [
+            "/children/13/children/3/children/1/children/1/children/3/children/0/children/3/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/13/children/3/children/5/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/14/children/3/children/0/children/0/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/14/children/3/children/2/children/3/children/6/children/0/children/0/children/1/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/18/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/19/children/4/children/4/children/0/children/0/children/1/children/1/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/19/children/4/children/4/children/0/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/19/children/4/children/7/children/0/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/1/children/0/children/2/children/2/children/2/children/0/children/0/children/1/children/1/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/1/children/0/children/2/children/2/children/2/children/0/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/1/children/0/children/2/children/2/children/5/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/2/children/0/children/2/children/2/children/7/children/0/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/5/children/0/children/2/children/2/children/6/children/0/children/1/children/2/children/0/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/5/children/0/children/2/children/2/children/9/children/0/children/2/children/0/children/0/scalars/flags",
+            65536,
+            0
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/5/children/0/children/2/children/2/children/9/children/0/children/2/children/0/scalars/flags",
+            65536,
+            0
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/5/children/0/children/2/children/2/children/9/children/0/children/2/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/5/children/0/children/2/children/2/children/10/children/0/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/5/children/0/children/2/children/2/children/10/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/7/children/0/children/2/children/2/children/1/children/0/children/0/children/1/children/1/children/0/children/2/children/0/children/0/children/0/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/7/children/0/children/2/children/2/children/1/children/0/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/7/children/0/children/2/children/2/children/4/children/0/children/1/children/1/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/9/children/0/children/2/children/2/children/0/children/0/children/0/children/2/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/9/children/0/children/2/children/2/children/0/children/0/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/9/children/0/children/2/children/2/children/1/children/0/children/0/children/1/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/10/children/0/children/2/children/2/children/0/children/0/children/0/children/2/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/10/children/0/children/2/children/2/children/0/children/0/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/16/children/0/children/2/children/2/children/12/children/0/children/0/children/2/scalars/multiLine",
+            false,
+            true
+          ],
+          [
+            "/children/21/children/0/children/2/children/1/children/16/children/0/children/2/children/2/children/15/children/0/children/1/scalars/multiLine",
+            false,
+            true
+          ]
+        ],
+        "flagDifferences": [
+          [
+            "/2857/2",
+            65536,
+            0
+          ],
+          [
+            "/2858/2",
+            65536,
+            0
+          ]
+        ],
+        "exactTriviaAccounted": true,
+        "mutationControls": [
+          {
+            "name": "unexpected binding payload",
+            "rejected": true
+          },
+          {
+            "name": "different flag value",
+            "rejected": true
+          },
+          {
+            "name": "different flag path",
+            "rejected": true
+          }
+        ]
+      }
+    ],
+    "originalNegativeControls": [
+      {
+        "name": "literal",
+        "rejected": true
+      },
+      {
+        "name": "template raw",
+        "rejected": true
+      },
+      {
+        "name": "empty body comment",
+        "rejected": true
+      },
+      {
+        "name": "parentheses",
+        "rejected": true
+      },
+      {
+        "name": "declaration flags",
+        "rejected": true
+      },
+      {
+        "name": "type",
+        "rejected": true
+      }
+    ],
+    "grammarControls": [
+      {
+        "name": "async modifier",
+        "rejected": true
+      },
+      {
+        "name": "await body",
+        "rejected": true
+      },
+      {
+        "name": "binding name",
+        "rejected": true
+      },
+      {
+        "name": "parameter initializer",
+        "rejected": true
+      }
+    ],
+    "ownGrammarES5OutputsEqual": true,
+    "boundary": "Only these two fixed files. Original ten-phase results remain on unformatted256 tree. Raw AST equality failed and remains failed; exact TS-parser trivia accounting is separate evidence, not execution of generated code or a global normalization policy."
+  },
+  "sourceReconstruction": {
+    "patch": "executed-source.patch",
+    "sha256": "8d9d076cb58b9d4b12f13d19ec58348a2c8a577ba2e916d9cf9aa173fa542c56",
+    "baseCommit": "c81d6a64ce638c1f69e477f25245dad1c1b7cf83",
+    "instruction": "Apply this two-file patch in a clean checkout of basePublicCommit to recover the exact unformatted executed R7 source/test. Verify executedSourceFiles SHA256; this is a small source carrier, not a new run."
+  }
+}

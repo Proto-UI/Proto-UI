@@ -1,0 +1,30 @@
+{
+  "previousRevision": "bd2d1cf66f72532c0aa529349a40893d00f513bc",
+  "revision": "a54155f36de41a4fe47de6adc203d907bc117a25",
+  "sourceAdmission": "unverified",
+  "sourceCount": 33,
+  "archivePath": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-bd2d1cf.json",
+  "archiveSha256": "9cdf917f98664379d57ae77fce9f3be6e13b4e47cfbdd21904c7c9f1c30fbe62",
+  "changed": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
+      "previous": "9ce21e5ae6885a62ffc038fc363a330e8411b7242fbbaf139d402d942a3b06db",
+      "current": "ef13d6a667bbbe8b48ea3f6599732681b88c14a5a7afb26c738219990b9d4bd1"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
+      "previous": "d22631b1ce4efd6aedaa8ea03de1e8507ff5ce3b76d5e4dc04d8b9337a5ff54f",
+      "current": "bd4296cbeb5840a10923d210379b420c127b15fe3902f638f80274756fc3e429"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "previous": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+      "current": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
+      "previous": "0651680190b40b18a93e09103a26474b62df5d587ddad08366af720e759fee13",
+      "current": "7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e"
+    }
+  ]
+}

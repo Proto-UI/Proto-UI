@@ -1,0 +1,105 @@
+{
+  "baseline": "Previous actual R14 final80, itself source-bound to public R12 complete graphs.",
+  "normalization": "Random generated directory prefix, repository and locked dependency prefixes only. All diagnostic message chains, starts/lengths, source lines and UTF16 spans compared. No filtering or count-only inference.",
+  "graphs": [
+    {
+      "graph": "original",
+      "count": 92,
+      "common": 92,
+      "removed": [],
+      "added": [],
+      "allDiagnosticFieldsAndSourceUTF16SpansEqual": true,
+      "normalizedDiagnosticsSHA256": "d2f86b4a71b004d2e673bf23e243676852a2bc830b51e16064105727e509cf86",
+      "sameFullRequest": true,
+      "sameFullProgram": true,
+      "programFiles": 215,
+      "generatedFiles": [
+        {
+          "file": ".proto-ui/context/scope-v1.ts",
+          "bytes": 8797,
+          "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          "byteEqual": true
+        },
+        {
+          "file": "Component.js",
+          "bytes": 38311,
+          "sha256": "e4b3b4d236222e3f8ad441eee272d758fb0fc6ddd0c56e0433ab612c3d74e975",
+          "byteEqual": true
+        },
+        {
+          "file": "Consumer.ts",
+          "bytes": 178,
+          "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+          "byteEqual": true
+        }
+      ],
+      "fullStrictPass": false
+    },
+    {
+      "graph": "identity-arity",
+      "count": 54,
+      "common": 54,
+      "removed": [],
+      "added": [],
+      "allDiagnosticFieldsAndSourceUTF16SpansEqual": true,
+      "normalizedDiagnosticsSHA256": "b8b1717e164dfca3b7ff3e6d9babcb3223230ece36c6585ef74ce78315799563",
+      "sameFullRequest": true,
+      "sameFullProgram": true,
+      "programFiles": 215,
+      "generatedFiles": [
+        {
+          "file": ".proto-ui/context/scope-v1.ts",
+          "bytes": 8797,
+          "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          "byteEqual": true
+        },
+        {
+          "file": "Component.js",
+          "bytes": 30747,
+          "sha256": "14a71c6a51f6ddbdb429e237a7ce7ffeb1ea03f0db633ab01eddc88b40836b46",
+          "byteEqual": true
+        },
+        {
+          "file": "Consumer.ts",
+          "bytes": 178,
+          "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+          "byteEqual": true
+        }
+      ],
+      "fullStrictPass": false
+    },
+    {
+      "graph": "called-alias",
+      "count": 55,
+      "common": 55,
+      "removed": [],
+      "added": [],
+      "allDiagnosticFieldsAndSourceUTF16SpansEqual": true,
+      "normalizedDiagnosticsSHA256": "34817655ac2eff72d7c8e863e2f74c35554d0c914b134e058c9fc7b235a10032",
+      "sameFullRequest": true,
+      "sameFullProgram": true,
+      "programFiles": 215,
+      "generatedFiles": [
+        {
+          "file": ".proto-ui/context/scope-v1.ts",
+          "bytes": 8797,
+          "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          "byteEqual": true
+        },
+        {
+          "file": "Component.js",
+          "bytes": 29641,
+          "sha256": "b0b33903abfc64a94ac0eb853b2217b6bd5c7fc6f55c1fa1a157fbd0c2d8a417",
+          "byteEqual": true
+        },
+        {
+          "file": "Consumer.ts",
+          "bytes": 178,
+          "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+          "byteEqual": true
+        }
+      ],
+      "fullStrictPass": false
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "reviewedCommit": "ee943e59d6f6bd9a418c2ba6f11487e349d5ccc1",
+  "assemblyManifest": "/tmp/sprint2-native-kVanLX/build.json",
+  "assemblyManifestSha256": "b9d510cdfc66497fa42212bfd2d0fe9a7bfb924aa47ab0361af3d56a83995e59",
+  "assemblyCandidate": {
+    "head": "a165c4058188aa802b475d1d50ce46ab0d574320",
+    "tree": "d95e52a263ca71d38234d31a262ffa3aa521841b",
+    "status": " M scripts/compiler/shenko-consumer-smoke.mjs\n?? packages/compiler/test/sprint2-browser-consumer.ts\n?? packages/compiler/test/sprint2-native-browser-fixture.ts\n?? packages/compiler/test/sprint2-native.browser.test.ts\n",
+    "diffSha256": "9cc4bb5cb73625dacd7706cb5fcf0975878893cc3ace59a0798621c8be1c389f"
+  },
+  "compiledDefinitions": 16,
+  "generatedArtifactsVerified": 207,
+  "actualBundleInputsVerified": 181,
+  "sourceFilesComparedWithReviewedCommit": 164,
+  "sourceMismatches": [
+    "packages/compiler/test/sprint2-native-browser-fixture.ts"
+  ],
+  "bundleBytes": 4587670,
+  "bundleSha256": "ad9693622d3a1161d47d511db8688fdcc9883ca2bea6836d1adbf1621e9a055b",
+  "nativeBrowserCasesExecutedByReviewer": 0,
+  "boundary": "Static assembly artifact/readback only; no Chromium result.",
+  "originalExecutedFixture": {
+    "path": "/tmp/sprint2-native-kVanLX/executed-fixture.ts",
+    "sha256": "ef457dec029dd8d5a93cbb2ac4b890170b19aec2ce5f239eb85c0933332e93b3",
+    "bytes": 8645,
+    "matchesRecordedSource": true
+  },
+  "executedToReviewedFixtureDiff": "--- executed-fixture.ts\n+++ ee943e5 fixture\n@@ -205,6 +205,7 @@\n   };\n   await writeFile(path.join(evidenceDir, 'entry.ts'), entry);\n   await writeFile(path.join(evidenceDir, 'client.js'), bundle);\n-  await writeFile(path.join(evidenceDir, 'build.json'), JSON.stringify(manifest, null, 2) + '\\n');\n-  return { evidenceDir, bundle, head: candidate.head, buildSha256: hash(JSON.stringify(manifest)) };\n+  const manifestText = JSON.stringify(manifest, null, 2) + '\\n';\n+  await writeFile(path.join(evidenceDir, 'build.json'), manifestText);\n+  return { evidenceDir, bundle, head: candidate.head, buildSha256: hash(manifestText) };\n }\n",
+  "hashDiscrepancyResolution": {
+    "reportedCompactObjectSha256": "a8e58a6fb6cc663ab0f17df7d32a35884375f92af06e5094175793812a8caac3",
+    "actualPrettyFileSha256": "b9d510cdfc66497fa42212bfd2d0fe9a7bfb924aa47ab0361af3d56a83995e59",
+    "exactCompactHashIndependentlyRecomputed": true,
+    "currentSourceHashesActualFileBytes": true
+  }
+}

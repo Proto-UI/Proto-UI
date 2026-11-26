@@ -1,0 +1,296 @@
+[
+  {
+    "graph": "original",
+    "before": 97,
+    "after": 92,
+    "common": 92,
+    "removed": [
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 24,
+        "file": "Component.js",
+        "length": 10,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'properties' implicitly has an 'any' type.",
+        "messageText": "Parameter 'properties' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 36,
+        "file": "Component.js",
+        "length": 5,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'attrs' implicitly has an 'any' type.",
+        "messageText": "Parameter 'attrs' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 43,
+        "file": "Component.js",
+        "length": 7,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'initial' implicitly has an 'any' type.",
+        "messageText": "Parameter 'initial' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 2339,
+        "column": 48,
+        "file": "Component.js",
+        "length": 8,
+        "lineText": "    if (key === 'value') { if (initial) result.domProps = { value }; }",
+        "message": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'.",
+        "messageText": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'."
+      },
+      {
+        "category": 1,
+        "code": 2339,
+        "column": 38,
+        "file": "Component.js",
+        "length": 5,
+        "lineText": "    else if (key === 'style') result.style = value;",
+        "message": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'.",
+        "messageText": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'."
+      }
+    ],
+    "added": [],
+    "completeProgramFiles": 215,
+    "sameRequestAndOptions": true,
+    "onlyProgramContentChange": "<generated>/Component.js",
+    "controlComparedToExistingPublicCarrier": [
+      {
+        "file": "graph/Component.js",
+        "sha256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2",
+        "bytes": 38681
+      },
+      {
+        "file": "graph/Consumer.ts",
+        "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+        "bytes": 178
+      },
+      {
+        "file": "graph/.proto-ui/context/scope-v1.ts",
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+        "bytes": 8797
+      },
+      {
+        "file": "strict-request.portable.json",
+        "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5",
+        "bytes": 4142
+      },
+      {
+        "file": "strict-program.portable.json",
+        "sha256": "970be4d5ef5b94ec2db31815a1f0c49604b61417f3b9ededf9075ac56b90bd50",
+        "bytes": 41791
+      },
+      {
+        "file": "diagnostics.portable.json",
+        "sha256": "5a018220709b372666f5de55da9eab4afc5c3efcc42018a99609cd3360abad4a",
+        "bytes": 26534
+      }
+    ],
+    "candidateComponentSHA256": "e4b3b4d236222e3f8ad441eee272d758fb0fc6ddd0c56e0433ab612c3d74e975",
+    "controlComponentSHA256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2",
+    "sourceByteDelta": -370,
+    "fullStrictPass": false
+  },
+  {
+    "graph": "identity-arity",
+    "before": 59,
+    "after": 54,
+    "common": 54,
+    "removed": [
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 24,
+        "file": "Component.js",
+        "length": 10,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'properties' implicitly has an 'any' type.",
+        "messageText": "Parameter 'properties' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 36,
+        "file": "Component.js",
+        "length": 5,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'attrs' implicitly has an 'any' type.",
+        "messageText": "Parameter 'attrs' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 43,
+        "file": "Component.js",
+        "length": 7,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'initial' implicitly has an 'any' type.",
+        "messageText": "Parameter 'initial' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 2339,
+        "column": 48,
+        "file": "Component.js",
+        "length": 8,
+        "lineText": "    if (key === 'value') { if (initial) result.domProps = { value }; }",
+        "message": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'.",
+        "messageText": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'."
+      },
+      {
+        "category": 1,
+        "code": 2339,
+        "column": 38,
+        "file": "Component.js",
+        "length": 5,
+        "lineText": "    else if (key === 'style') result.style = value;",
+        "message": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'.",
+        "messageText": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'."
+      }
+    ],
+    "added": [],
+    "completeProgramFiles": 215,
+    "sameRequestAndOptions": true,
+    "onlyProgramContentChange": "<generated>/Component.js",
+    "controlComparedToExistingPublicCarrier": [
+      {
+        "file": "graph/Component.js.txt",
+        "sha256": "e621e1a63f90349728f1f5a3078b667534f96a855edff7256246630857870b2a",
+        "bytes": 31117
+      },
+      {
+        "file": "graph/Consumer.ts.txt",
+        "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+        "bytes": 178
+      },
+      {
+        "file": "graph/.proto-ui/context/scope-v1.ts.txt",
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+        "bytes": 8797
+      },
+      {
+        "file": "request.portable.json",
+        "sha256": "7229af6904880176cd164f5491adbd9e3ef8938df3f4526aa3d1c81b813cc527",
+        "bytes": 4401
+      },
+      {
+        "file": "program.portable.json",
+        "sha256": "a62e435839e6cdacca4ffa3ffe266c7b1317a9d0799b7ee163fc2841d6039be5",
+        "bytes": 41790
+      },
+      {
+        "file": "diagnostics.portable.json",
+        "sha256": "9dc8c5429f6ed744fe06ed62539caf2e20989595301a347e3034f713b4209c83",
+        "bytes": 16089
+      }
+    ],
+    "candidateComponentSHA256": "14a71c6a51f6ddbdb429e237a7ce7ffeb1ea03f0db633ab01eddc88b40836b46",
+    "controlComponentSHA256": "e621e1a63f90349728f1f5a3078b667534f96a855edff7256246630857870b2a",
+    "sourceByteDelta": -370,
+    "fullStrictPass": false
+  },
+  {
+    "graph": "called-alias",
+    "before": 60,
+    "after": 55,
+    "common": 55,
+    "removed": [
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 24,
+        "file": "Component.js",
+        "length": 10,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'properties' implicitly has an 'any' type.",
+        "messageText": "Parameter 'properties' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 36,
+        "file": "Component.js",
+        "length": 5,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'attrs' implicitly has an 'any' type.",
+        "messageText": "Parameter 'attrs' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 7006,
+        "column": 43,
+        "file": "Component.js",
+        "length": 7,
+        "lineText": "function __puiRootData(properties, attrs, initial) {",
+        "message": "Parameter 'initial' implicitly has an 'any' type.",
+        "messageText": "Parameter 'initial' implicitly has an 'any' type."
+      },
+      {
+        "category": 1,
+        "code": 2339,
+        "column": 48,
+        "file": "Component.js",
+        "length": 8,
+        "lineText": "    if (key === 'value') { if (initial) result.domProps = { value }; }",
+        "message": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'.",
+        "messageText": "Property 'domProps' does not exist on type '{ pre: boolean; attrs: any; }'."
+      },
+      {
+        "category": 1,
+        "code": 2339,
+        "column": 38,
+        "file": "Component.js",
+        "length": 5,
+        "lineText": "    else if (key === 'style') result.style = value;",
+        "message": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'.",
+        "messageText": "Property 'style' does not exist on type '{ pre: boolean; attrs: any; }'."
+      }
+    ],
+    "added": [],
+    "completeProgramFiles": 215,
+    "sameRequestAndOptions": true,
+    "onlyProgramContentChange": "<generated>/Component.js",
+    "controlComparedToExistingPublicCarrier": [
+      {
+        "file": "graph/Component.js.txt",
+        "sha256": "4291d93789fc887771258612dc293acc4c907c28a8919ccb80fefcd0d376c155",
+        "bytes": 30011
+      },
+      {
+        "file": "graph/Consumer.ts.txt",
+        "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+        "bytes": 178
+      },
+      {
+        "file": "graph/.proto-ui/context/scope-v1.ts.txt",
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+        "bytes": 8797
+      },
+      {
+        "file": "request.portable.json",
+        "sha256": "aa4839b10b7e758c96c04cc5afcc11a5b37bfbbdb177ef70eb4a5542fda38b23",
+        "bytes": 4389
+      },
+      {
+        "file": "program.portable.json",
+        "sha256": "68c3b7a938817eac9197021f3feb92de244be9b93fc81fd2f70992323dcff765",
+        "bytes": 41790
+      },
+      {
+        "file": "diagnostics.portable.json",
+        "sha256": "a74e601bbae073fa94708d291bcf0c6f6ad76bd5573eddd02c0fc137151bdde0",
+        "bytes": 16345
+      }
+    ],
+    "candidateComponentSHA256": "b0b33903abfc64a94ac0eb853b2217b6bd5c7fc6f55c1fa1a157fbd0c2d8a417",
+    "controlComponentSHA256": "4291d93789fc887771258612dc293acc4c907c28a8919ccb80fefcd0d376c155",
+    "sourceByteDelta": -370,
+    "fullStrictPass": false
+  }
+]

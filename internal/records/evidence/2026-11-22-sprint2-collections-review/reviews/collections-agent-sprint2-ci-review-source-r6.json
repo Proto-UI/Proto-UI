@@ -1,0 +1,46 @@
+{
+  "sourceCommit": "dbcdecb077283d4e3fe11fe1077b74708f24fa4b",
+  "scope": "Read-only independent source delta; no new native/type execution",
+  "workspaceTypes": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "check:types:workspace"
+    ],
+    "resolvedScript": "tsc -p tsconfig.workspace.json --noEmit",
+    "requires": [
+      "public-packages",
+      "styles"
+    ],
+    "subsequentSuitesRequire": [
+      "public-packages",
+      "styles"
+    ],
+    "failedTypesFailsAggregateButDoesNotSuppressIndependentSuites": true
+  },
+  "suiteCount": 10,
+  "caseCount": 304,
+  "browserCases": 292,
+  "ordinaryCases": 12,
+  "sequentialStages": 13,
+  "perStageTimeoutMinutes": 15,
+  "maximumStageMinutes": 195,
+  "maximumGraceSeconds": 65,
+  "installMinutes": 10,
+  "uploadMinutes": 3,
+  "jobMinutes": 225,
+  "files": [
+    {
+      "path": "scripts/analysis/run-sprint2-consumers.mjs",
+      "snapshot": "reviewed-types-run-sprint2-consumers.mjs",
+      "sha256": "347583fd9f8df858599e190968cf384e53bebaabc2c46303a86cbe4c87a3bb47",
+      "bytes": 15700
+    },
+    {
+      "path": ".github/workflows/projection-family-evidence.yml",
+      "snapshot": "reviewed-types-projection-family-evidence.yml",
+      "sha256": "a0cf38cf8a30259a32a2a49ef3bc481eae889a537e1e809c3dd51bef47a6bbb4",
+      "bytes": 4178
+    }
+  ]
+}

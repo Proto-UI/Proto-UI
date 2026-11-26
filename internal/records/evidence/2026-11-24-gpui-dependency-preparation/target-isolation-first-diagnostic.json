@@ -1,0 +1,16 @@
+{
+  "kind": "post-test-isolation-diagnostic",
+  "tests": {
+    "passed": 53,
+    "failed": 0,
+    "skipped": 0,
+    "nodeExitCode": 0
+  },
+  "postTestAssertion": "the inherited external Cargo target must be entirely empty after both test files",
+  "postTestAssertionExitCode": 1,
+  "observedEntries": [
+    ".rustc_info.json"
+  ],
+  "explanation": "The complete suite includes the existing Cargo graph/manifest tests, whose Cargo metadata may write its rustc probe cache. No synthetic registry archive reached this external directory. Separate registry-only validation tests its no-write guarantee; full-suite validation checks absence of fixture artifacts.",
+  "sourceLog": "cargo-graph-tests-target-isolation-first.log"
+}

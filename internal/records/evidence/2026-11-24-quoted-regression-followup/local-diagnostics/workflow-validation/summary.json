@@ -1,0 +1,80 @@
+{
+  "sourceHead": "4aaac6ac60348dc99896c34cd1186abcda98ff0d",
+  "workflowSha256": "7aabdc5998cc596d50651bd58d0e61eff8ab8f5e41f3bfdd822d5b8b8c1dba43",
+  "yaml": "valid",
+  "originalJobs": "unchanged except repair exclusion of new scope",
+  "shellAndNodeSyntax": "passed",
+  "collection": {
+    "controls": 2,
+    "popover": 1,
+    "nativeExecution": false
+  },
+  "guardFixtures": {
+    "synthetic": true,
+    "passed": 8,
+    "cases": [
+      {
+        "name": "exact-executed",
+        "expected": 0,
+        "status": 0
+      },
+      {
+        "name": "all-skipped",
+        "expected": 1,
+        "status": 1
+      },
+      {
+        "name": "missing-control",
+        "expected": 1,
+        "status": 1
+      },
+      {
+        "name": "unexpected-extra",
+        "expected": 1,
+        "status": 1
+      },
+      {
+        "name": "failed-original",
+        "expected": 1,
+        "status": 1
+      },
+      {
+        "name": "stale-path",
+        "expected": 1,
+        "status": 1
+      },
+      {
+        "name": "missing-generated-file",
+        "expected": 1,
+        "status": 1
+      },
+      {
+        "name": "missing-report",
+        "expected": 1,
+        "status": 1
+      }
+    ]
+  },
+  "sourceRecorder": {
+    "localOnly": true,
+    "dirty": true,
+    "observedGeneratedFiles": 1
+  },
+  "nativeHostedLane": "not yet dispatched",
+  "output": "/tmp/contents-wheel-workflow-validation",
+  "existingPolicyChecks": {
+    "command": "node --test scripts/test/browser-suite-repair-toolbar.test.mjs scripts/ci/test/ci-scheduling-policy.test.mjs",
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0
+  },
+  "format": "Prettier passed",
+  "finalScope": {
+    "scope": "contents-wheel",
+    "otherOptIns": false,
+    "jobTimeoutMinutes": 15,
+    "installTimeoutMinutes": 4,
+    "fontTimeoutMinutes": 3,
+    "originalTestTimeoutsUnchanged": true
+  }
+}

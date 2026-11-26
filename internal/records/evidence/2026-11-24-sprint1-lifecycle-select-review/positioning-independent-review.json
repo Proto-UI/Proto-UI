@@ -1,0 +1,124 @@
+{
+  "dateUtc": "2026-11-23T19:19:33.461288+00:00",
+  "reviewer": "Independent ChatGPT lifecycle_audit agent; no human approval claimed.",
+  "head": "ad6f64587f3a45c096a51fcdea98f47b36362b12",
+  "sourceFiles": [
+    {
+      "file": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "sha256": "bf448f4f54828a4672de68eada99f27b5829455f659180aaefd2eda33e6d54d5",
+      "bytes": 25569
+    },
+    {
+      "file": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "sha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f",
+      "bytes": 3302
+    },
+    {
+      "file": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "sha256": "d0d5c9da748e3d3dc3ede38130bba792cb88d93d9b7241db1283a30791a65527",
+      "bytes": 14446
+    },
+    {
+      "file": "packages/modules/positioning/test/available-projection-ownership.test.ts",
+      "sha256": "e920f44f671265d7d2d64b4ee4cd217e3f37da7115dc407432cf2b36e8ffa545",
+      "bytes": 8221
+    }
+  ],
+  "binding": "Reviewed working-tree source after the final reported run; these are per-file hashes, not a claim of clean-commit execution.",
+  "findings": [
+    {
+      "id": "restore-reentry",
+      "original": "A disposed lease reacquired fixed/top/left preparation during a custom-element style callback.",
+      "disposition": "Resolved by checking the computation generation after projected-style and strategy-pin retirement.",
+      "regression": "does not reacquire preparation when restoring a custom element style disposes the lease"
+    },
+    {
+      "id": "publication-reentry",
+      "original": "Disposal during size-variable setProperty left anchor-width behind because its claim was recorded after the observable write.",
+      "disposition": "Resolved by browser normalization and claim publication before the setter, followed by identity and value checks.",
+      "regression": "retires a size publication when its own custom-element style callback disposes the lease"
+    },
+    {
+      "id": "pending-successor-coordinate-publication",
+      "original": "A previous owner already finished one solve and retired its strategy pin. Its second pending solve later published left=99px over a successor result at20px because only pin ownership was checked.",
+      "disposition": "Resolved by including the current projected-size claim identity in isCurrent() before middleware and final coordinate publication. The old pending callback can no longer publish after another lease acquires those fields.",
+      "regression": "a previously solved owner cannot publish a pending result after a successor owns the size projection"
+    }
+  ],
+  "reviewResult": "Bounded source and evidence review accepted; native Search 200% layout and the 1,000 ms production guard still need final-source CI.",
+  "priorReviews": [
+    {
+      "dateUtc": "2026-11-23T19:05:59.365067+00:00",
+      "reviewer": "Independent ChatGPT lifecycle_audit agent; no human approval claimed.",
+      "head": "170768578616adb0a4cdfc70f604e50fc4510657",
+      "sourceFiles": [
+        {
+          "file": "packages/modules/positioning/src/web/floating-ui-host.ts",
+          "sha256": "6aa6b2074e2935c3866995b232a918196de1d3e5c01c8daa0f859f19bface80e",
+          "bytes": 25510
+        },
+        {
+          "file": "packages/modules/positioning/src/web/owned-style-lease.ts",
+          "sha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f",
+          "bytes": 3302
+        },
+        {
+          "file": "packages/modules/positioning/test/floating-ui-host.test.ts",
+          "sha256": "d0d5c9da748e3d3dc3ede38130bba792cb88d93d9b7241db1283a30791a65527",
+          "bytes": 14446
+        },
+        {
+          "file": "packages/modules/positioning/test/available-projection-ownership.test.ts",
+          "sha256": "c37d30f4b4b7a812bb97540d3b5c57b9b7209fdb2daa1b2f4205b3fae50bcf6a",
+          "bytes": 7046
+        }
+      ],
+      "binding": "Reviewed working-tree source after the final reported run; these are per-file hashes, not a claim of clean-commit execution.",
+      "findings": [
+        {
+          "id": "restore-reentry",
+          "original": "A disposed lease reacquired fixed/top/left preparation during a custom-element style callback.",
+          "disposition": "Resolved by checking the computation generation after projected-style and strategy-pin retirement.",
+          "regression": "does not reacquire preparation when restoring a custom element style disposes the lease"
+        },
+        {
+          "id": "publication-reentry",
+          "original": "Disposal during size-variable setProperty left anchor-width behind because its claim was recorded after the observable write.",
+          "disposition": "Resolved by browser normalization and claim publication before the setter, followed by identity and value checks.",
+          "regression": "retires a size publication when its own custom-element style callback disposes the lease"
+        }
+      ],
+      "reviewResult": "Bounded source and evidence review accepted; native Search 200% layout and the 1,000 ms production guard still need final-source CI."
+    }
+  ],
+  "finalFocusedEvidence": {
+    "red": {
+      "report": "positioning-review-successor-red.json.gz",
+      "passed": 5,
+      "failed": 1,
+      "pending": 0,
+      "actualFailure": "expected '99px' to be '20px'"
+    },
+    "green": {
+      "report": "search-positioning-successor-green.json.gz",
+      "files": 2,
+      "passed": 15,
+      "failed": 0,
+      "pending": 0
+    },
+    "retainedEarlierFullSuite": {
+      "report": "search-positioning-final.json.gz",
+      "files": 21,
+      "passed": 299,
+      "scope": "Earlier projection/normalization source before the final added identity guard; not relabelled as final-source full execution."
+    },
+    "finalFullSuite": {
+      "report": "search-positioning-final-successor.json.gz",
+      "files": 21,
+      "passed": 300,
+      "failed": 0,
+      "pending": 0,
+      "scope": "Independent readback of root final-source full suite after the last projection identity guard; source file hashes above unchanged."
+    }
+  }
+}

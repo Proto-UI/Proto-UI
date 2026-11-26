@@ -1,0 +1,670 @@
+{
+  "originalHead": "ecf057b681e8b2eeaa43ef36bf6d2c5a060a4d81",
+  "originalFrozenIndexTree": "439985db0ae779ef4294e24b4e59fb783c1f8594",
+  "recoveredFiles": [
+    {
+      "path": ".github/workflows/gpui-adapter-acceptance.yml",
+      "sha256": "c22f3e4d7ccc8241b2003fff67b9160bc492aa8f8041c47cb3719af73dff0942",
+      "matchesOriginalIndex": true,
+      "bytes": 6081
+    },
+    {
+      "path": "apps/www/astro.config.mjs",
+      "sha256": "18d2d5240117889c039bf4f0245e18665f78864df76f4550feeff57faea30b78",
+      "matchesOriginalIndex": true,
+      "bytes": 91289
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts",
+      "sha256": "73527fed2be1f4e9655afef01053ae615f85385c1c0a4f1020dd79a233ead592",
+      "matchesOriginalIndex": true,
+      "bytes": 11162
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint5-browser-delivery.md",
+      "sha256": "df9a84e3c30200163bac9569f3babb83a4470ad84abf3c0dec1a061fcc82ab69",
+      "matchesOriginalIndex": true,
+      "bytes": 15736
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint5-gpui-public-source-binding.md",
+      "sha256": "69c1028e13e0debc6db9eed60fa540ebca0e8525ddd392295c4d429167d1a38d",
+      "matchesOriginalIndex": true,
+      "bytes": 8363
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint5-integration-continuation.md",
+      "sha256": "db9f1facee1126cd01dbba29418823a40e2044d43a4ca4c60c708c34c2d66453",
+      "matchesOriginalIndex": true,
+      "bytes": 31530
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/equivalence.json",
+      "sha256": "1481a923b1f2cb787501c24cbd58b3f80f18a7bc07934555cf9016d272b271a9",
+      "matchesOriginalIndex": true,
+      "bytes": 68631
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/native-source-receipt.json.gz",
+      "sha256": "443dd86897ecde8cae31ebb199af3264778351d59af1c1d1d9878166e19f135a",
+      "matchesOriginalIndex": true,
+      "bytes": 6548
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/native-tests.log.gz",
+      "sha256": "e563fec19b7b39cb6ec9daefa7d881f22a979d20c4b17cadc83ca697112d278d",
+      "matchesOriginalIndex": true,
+      "bytes": 35816
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/source-lowering-inventory.json",
+      "sha256": "2a0200c9bc7b0a9d38efa4ffb5b762b52b9e2b4eabb6ab5756ef90a1f70622bb",
+      "matchesOriginalIndex": true,
+      "bytes": 139523
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/validation.json",
+      "sha256": "b82c43b1956b5d89e91aec2f0846e335980fa4464ff1ce01fb5ea961101ed41a",
+      "matchesOriginalIndex": true,
+      "bytes": 17111
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/verdant-candidate.patch.gz",
+      "sha256": "a7cbbaeb76b9ec647ff3a0be3c98faceb5d71b606ee667deef96204f0a2c53f3",
+      "matchesOriginalIndex": true,
+      "bytes": 30264
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/verdant-receipt.json.gz",
+      "sha256": "ee9e62d0eb9a15b200c730f9b4fc47669c1a90a98f77743080d182a845a5d28d",
+      "matchesOriginalIndex": true,
+      "bytes": 1506
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-gpui-public/verdant-tests.log.gz",
+      "sha256": "832ec2fcc9a42e04a422dcd4a32140a16f8e767330cd496bb8d287b440f04688",
+      "matchesOriginalIndex": true,
+      "bytes": 12598
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-black-capture-regression.log.gz",
+      "sha256": "656e563aa6d5de9e89e89bf472b38a1f7b907efe0a90ea6de69e851359a6f403",
+      "matchesOriginalIndex": true,
+      "bytes": 287
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-bounded-typecheck-aligned.log.gz",
+      "sha256": "d2c3c43d3f88bdfe754c514fffa568bcbed2f7ffd9d762b5a6bcdd6653b94568",
+      "matchesOriginalIndex": true,
+      "bytes": 549
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-bounded-typecheck-exact.log.gz",
+      "sha256": "4e3f95cb5e5063ca0c114006e7b2b1e406ce07632d1cb4e67ba14d3aeafc8b50",
+      "matchesOriginalIndex": true,
+      "bytes": 716
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-bounded-typecheck.log.gz",
+      "sha256": "911bb8e6237dbc901378934f0703a265a961509ffd2bde5289a73e1f0f0daad6",
+      "matchesOriginalIndex": true,
+      "bytes": 2314
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-independent-review.log.gz",
+      "sha256": "b2b1d8d1042e859a14466367d5da14a15adfe725f4cce22d35b512a4bd19ab82",
+      "matchesOriginalIndex": true,
+      "bytes": 1703
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-macos-crosscheck.log.gz",
+      "sha256": "5d06bc08e59195cfbb1a15cc86caa82fcebcf23c9d72bc56752f56e532457a55",
+      "matchesOriginalIndex": true,
+      "bytes": 2472
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-source-binding.json.gz",
+      "sha256": "e2cee490fc889fbf46f1692f57b7c628de81648a0f6c808ed24d4865e22f5641",
+      "matchesOriginalIndex": true,
+      "bytes": 851
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-validation.json.gz",
+      "sha256": "d3a325e0b227d468639c7838ac0bca45bd69dfe2c6adc6a22e68f7d5dde9d1ac",
+      "matchesOriginalIndex": true,
+      "bytes": 2715
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-workflow-negative-controls.log.gz",
+      "sha256": "ff1a05d1f261902aeed2a960e29b89b4a5e762cb03ba0307cbbbbb550516acc1",
+      "matchesOriginalIndex": true,
+      "bytes": 241
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-capture-workflow-negative-controls.py",
+      "sha256": "a5a5b5645d2f7475bab1a83d07aac29bfff85b758faad082b0165f407fb6c1fa",
+      "matchesOriginalIndex": true,
+      "bytes": 2605
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-first-control-label-action-disabled.png",
+      "sha256": "9804d40e9eb8b5ac0405f983d8822b6e698135abdd9d966a13a8e50367517453",
+      "matchesOriginalIndex": true,
+      "bytes": 3499
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-first-control-label-action-enabled.png",
+      "sha256": "9804d40e9eb8b5ac0405f983d8822b6e698135abdd9d966a13a8e50367517453",
+      "matchesOriginalIndex": true,
+      "bytes": 3499
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-second-accesskit_macos.log.gz",
+      "sha256": "5f9993c7decca76b98e0e127a122a511680a05e0b7b8092d77f16468a5bb4167",
+      "matchesOriginalIndex": true,
+      "bytes": 2322
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-second-artifact.json",
+      "sha256": "0e288c7021e6e280137b24b2360b1b8c1122bf3b05e6a45ce803818ab7b3ced9",
+      "matchesOriginalIndex": true,
+      "bytes": 1027
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-second-job.log.gz",
+      "sha256": "85d17760b4d0cee75a3d245da3883aee099c648c1428a3bf9aa37da3579bbf5d",
+      "matchesOriginalIndex": true,
+      "bytes": 82705
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-second-message-fixtures.log.gz",
+      "sha256": "8c611822a0f0a3ed7c774a125ff588d643aa665eeba8e7d54c79e554bb781abc",
+      "matchesOriginalIndex": true,
+      "bytes": 195
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-second-session-fixtures.log.gz",
+      "sha256": "53de5703144beb9ac7df629b25083f4d293525ca8b16c4afcb058e9bf981a7a8",
+      "matchesOriginalIndex": true,
+      "bytes": 294
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/adapter-second-suite-exits.tsv",
+      "sha256": "696bba5d5d740b6156d6a89e7a8b0b43651d90bac5082868201b46f2e69b4d64",
+      "matchesOriginalIndex": true,
+      "bytes": 152
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author-handoff.json.gz",
+      "sha256": "ae083352399ef25950b1fbab5d6f190306fdc46c79366a9f84fff72fc95b99c4",
+      "matchesOriginalIndex": true,
+      "bytes": 5254
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-repair-format.log.gz",
+      "sha256": "710c63d8d40d5688a62c3b08053dd1971c4e4ee87b2297f3f20c2540d22cd94e",
+      "matchesOriginalIndex": true,
+      "bytes": 82
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-repair-types-final.log.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "matchesOriginalIndex": true,
+      "bytes": 20
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-repair-types.log.gz",
+      "sha256": "bdb8027d72085cb8fc21c301f016d15dbe4b43946079c54197b47a1f404653ee",
+      "matchesOriginalIndex": true,
+      "bytes": 237
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-consumer-16.log.gz",
+      "sha256": "edc8c1b2035e042fcbbe66ec0e968cae94edb75bd43e0495a948a9f1322764af",
+      "matchesOriginalIndex": true,
+      "bytes": 10909
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-consumer-accepted.log.gz",
+      "sha256": "5aeb3f255fcf7429db3b79a1e520c6d65ff2e77616df710eb204efec11890141",
+      "matchesOriginalIndex": true,
+      "bytes": 11266
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-consumer-after.log.gz",
+      "sha256": "580f18b214c551936f6c5f89deb5f892b804ef41a7982235839e85a3b5429c07",
+      "matchesOriginalIndex": true,
+      "bytes": 11565
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-consumer-before.log.gz",
+      "sha256": "4d6fa3a229bf81821af7a6462a0bbeadea639dc0639a2833ab03af7515debefb",
+      "matchesOriginalIndex": true,
+      "bytes": 11302
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-consumer-final.log.gz",
+      "sha256": "1d8abb86d784d862d56c9b24a613bb2ff6dd4440e5f07a7cc17a6242b0bb2205",
+      "matchesOriginalIndex": true,
+      "bytes": 11549
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-resource-kill.log.gz",
+      "sha256": "d2879c262eb03f4bee59fd5934edb9968e555bfdad36df22b6594c60154045af",
+      "matchesOriginalIndex": true,
+      "bytes": 10986
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-retirement-final.log.gz",
+      "sha256": "e2457667b55bfbbfbbbe3facb352394fcfaac88bdf77e5575fa2f8803eb08e1d",
+      "matchesOriginalIndex": true,
+      "bytes": 11665
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/browser-target-retirement.log.gz",
+      "sha256": "0b0e386a8b2ae18ff081bab7b315b4892e7894dd1223eed86b759da81253e191",
+      "matchesOriginalIndex": true,
+      "bytes": 11923
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/vue-source-15.log.gz",
+      "sha256": "33092f0aa34209ea31757ee5a7d0e90f33a361e6cb2f84c4bfb98705e2e15a47",
+      "matchesOriginalIndex": true,
+      "bytes": 8918
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-author/vue-void-slot-before.log.gz",
+      "sha256": "600b812ae2434d00df680895dd42a53a156ef7f6c1678130f491e1e0213b41d6",
+      "matchesOriginalIndex": true,
+      "bytes": 9066
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final-driver.py",
+      "sha256": "3a51d08a0653d2dfafac8a75b48f5e7f06803d21769b94f56d761376c1153ba3",
+      "matchesOriginalIndex": true,
+      "bytes": 4504
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/browser-client.test.log.gz",
+      "sha256": "a8a080e4a76dc396f3861ea27f525a94b900ae128f3fb7ac86c7d47a6d0fe58b",
+      "matchesOriginalIndex": true,
+      "bytes": 769
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/browser-revision-session.test.log.gz",
+      "sha256": "642c49df146f27526672397506064545b5a82fc5ca544df089107f7e4d39b3e5",
+      "matchesOriginalIndex": true,
+      "bytes": 685
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/browser-target-consumer.test.log.gz",
+      "sha256": "aae8dbf3d45fea53aaed9be34ce4f8de2d4dd6a1bd9215d5f97faace940cbb17",
+      "matchesOriginalIndex": true,
+      "bytes": 11129
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/browser-wasm.test.log.gz",
+      "sha256": "0e3c834e88f2e0f10795c6be6d618796112815670f3b54bd6a9dbfc45e1d43d2",
+      "matchesOriginalIndex": true,
+      "bytes": 11240
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/native-support-plan.recheck.json.gz",
+      "sha256": "52e88f7dc55f0ab8af521ad32191bb5bf4cddc09e3255c529a940a91d2be5fde",
+      "matchesOriginalIndex": true,
+      "bytes": 579
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/native-support-plan.recheck.log.gz",
+      "sha256": "5275d6dead828ba07fb2be15060f70cf33f435239d4506b88984ddea02bfa31d",
+      "matchesOriginalIndex": true,
+      "bytes": 10047
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/native-support-plan.test.log.gz",
+      "sha256": "7c403562d9d86eb867fec6ac1fe7d8be0d6d428b1de8b8c5e92a76c347b07101",
+      "matchesOriginalIndex": true,
+      "bytes": 9801
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/source-files-after-test-format.json.gz",
+      "sha256": "8b7ad881c576dd02e75e82126f1a13eafe782534baab92655dd82b0b466fd74e",
+      "matchesOriginalIndex": true,
+      "bytes": 578631
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/source-files.json.gz",
+      "sha256": "f6150a64b6c33f0deb38ac8e6ea396750adf7e51bfa81a0a54a7dabc99882623",
+      "matchesOriginalIndex": true,
+      "bytes": 578633
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/test-before-format.ts.gz",
+      "sha256": "a7396839c37e4f488e87f1f44b067f8c2beb600c3c11765803819e66858e6a66",
+      "matchesOriginalIndex": true,
+      "bytes": 7190
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/test-format-equivalence.json.gz",
+      "sha256": "77103d61b03c59b8016e0f53befe406f8d8166b2026941fff0ee8e6ba63e6781",
+      "matchesOriginalIndex": true,
+      "bytes": 653
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/validation.json.gz",
+      "sha256": "4f481c26c9d8e9abd471db5c4a44a00a78531138b32ac459575d74198df3448e",
+      "matchesOriginalIndex": true,
+      "bytes": 1084
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/vue-source.after-format.json.gz",
+      "sha256": "5af56305c94abd75cf4f9043c9796e4b04ff24677ee5098519fb7916d1bdfb63",
+      "matchesOriginalIndex": true,
+      "bytes": 533
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/vue-source.after-format.log.gz",
+      "sha256": "fc52069cc2af7b81b26b0e4e9ca993753f09b1f01cf968fc979ad49a705c413b",
+      "matchesOriginalIndex": true,
+      "bytes": 9341
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-final/vue-source.test.log.gz",
+      "sha256": "c11ba1fb60f48bdeaa0910ae90fd5ce53b883ebf73c4ec2b8346aebb299b0c3e",
+      "matchesOriginalIndex": true,
+      "bytes": 9082
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-repair-independent-esm.log.gz",
+      "sha256": "69be65517d16c16e8d251ecdd3561f4f7d3b860ce3b60d3dc8aef253ad33303d",
+      "matchesOriginalIndex": true,
+      "bytes": 2367
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-repair-independent-esm.mjs.gz",
+      "sha256": "545e0d553a2e4cdd0f1435a858070222a16a34aac44f5da031cc57c1fc620f28",
+      "matchesOriginalIndex": true,
+      "bytes": 2150
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-repair-independent-review-files.json.gz",
+      "sha256": "fa9fce69389ac3c41e491bb243feeaacd3ed29a523ac9219936b6f8e18688bf7",
+      "matchesOriginalIndex": true,
+      "bytes": 443
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-repair-independent-review.md.gz",
+      "sha256": "7aed23a90ae69093230e42ee8a1c6daec4a4aad4c49012e66abe93e33ea85d3f",
+      "matchesOriginalIndex": true,
+      "bytes": 4734
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/browser-second-receipt-summary.json.gz",
+      "sha256": "3bf8917563e59f47e6f0e71ea3e11127adf93f10ba8be54cf9130523d9b2f0e0",
+      "matchesOriginalIndex": true,
+      "bytes": 32846
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/format-final.log.gz",
+      "sha256": "d9867c27f73b3313ca8671e63303f13aad9e30aefa02b9e6ec0fd1a0a7777f02",
+      "matchesOriginalIndex": true,
+      "bytes": 554
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/format-initial.log.gz",
+      "sha256": "201aef7836d53f2cd90e2faf503f590e0e20044cb20d7001bd3accce613fce88",
+      "matchesOriginalIndex": true,
+      "bytes": 586
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-capture-author.zip",
+      "sha256": "69e18923c1870cfbc9528f8a997a3099a660105595268fd5c3a6dada7d4649cb",
+      "matchesOriginalIndex": true,
+      "bytes": 147288
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-second-jobs.json",
+      "sha256": "4c041a8ff54f1831d9650bec908db5d2032dcc8f0b503b84b55f3063d1284447",
+      "matchesOriginalIndex": true,
+      "bytes": 10919
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-evidence-map.json",
+      "sha256": "45bc71792902e880911843dd70f1dd2738625975ba7ef4186fccfe553470012c",
+      "matchesOriginalIndex": true,
+      "bytes": 7739
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-final-review.json.gz",
+      "sha256": "371196b95827be755ed511d91820807dd06c5a624211bd5fd2ec01ebdec53bb7",
+      "matchesOriginalIndex": true,
+      "bytes": 2133
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/diagnostic.py.gz",
+      "sha256": "ce68b8a359ce48a2c565e84cdd6802e980a60530b030f10796f2669e742b2aeb",
+      "matchesOriginalIndex": true,
+      "bytes": 2421
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/files.json.gz",
+      "sha256": "0d58d032f3cd455121fa689eaa6f1de26a23e400766d5141cff6627cc07c52f8",
+      "matchesOriginalIndex": true,
+      "bytes": 529
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/memory-samples.jsonl.gz",
+      "sha256": "a9ed3d754ee13bc855f1b1302e4146b2a69ee9d6642eaab9079138a18e09a2c3",
+      "matchesOriginalIndex": true,
+      "bytes": 5936
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/observe-child-exits.cjs.gz",
+      "sha256": "d7f47be12f4fa502a98a9cc35fc06780c25fb7ceaaadb13461994bcdf3075b32",
+      "matchesOriginalIndex": true,
+      "bytes": 661
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/process-events.jsonl.gz",
+      "sha256": "4f505b18dc6121a363b63210294caaac22194b2064b9b41d4755ad494c8f0251",
+      "matchesOriginalIndex": true,
+      "bytes": 541
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/result.json.gz",
+      "sha256": "8ce0913b189eefc5db73b082471049d0c6c56951889f5633c745b487a2dde180",
+      "matchesOriginalIndex": true,
+      "bytes": 1232
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/review-diagnosis.md.gz",
+      "sha256": "5a473bd54437fef6aec65fb2067fb783823f54f9b96644fb95e1a836ec794684",
+      "matchesOriginalIndex": true,
+      "bytes": 3315
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-diagnostic/test.log.gz",
+      "sha256": "2c05a959ab40a75543dce662cb3025e5a2ff2056c6ede0431334f55849be9243",
+      "matchesOriginalIndex": true,
+      "bytes": 9701
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/case-results.json.gz",
+      "sha256": "5549c8f5607cf9e80734488b1fe068e53df8d9324c97110dfd081cabc4e32da0",
+      "matchesOriginalIndex": true,
+      "bytes": 808
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/diagnostic.py.gz",
+      "sha256": "8fdadd1c4087688704651cad80d3c4481f87f3625682997d1178411a03a39231",
+      "matchesOriginalIndex": true,
+      "bytes": 2424
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/memory-samples.jsonl.gz",
+      "sha256": "d54edcbbd4481ee2865dfd6e66a328cf75351a572167d7638b90473e630d8a5e",
+      "matchesOriginalIndex": true,
+      "bytes": 8502
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/observe-child-exits.cjs.gz",
+      "sha256": "bbc0279a7f0d0cb2a680dce94f6928597cfcfa292d476075a0246164f384ea91",
+      "matchesOriginalIndex": true,
+      "bytes": 660
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/process-events.jsonl.gz",
+      "sha256": "84867e54347046c559cf1f89ccd8be0d30190dc4ae6576711e57fe4152c8753c",
+      "matchesOriginalIndex": true,
+      "bytes": 512
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/result.json.gz",
+      "sha256": "6f0688c73a840b116fc54b87000e84eb210eae507a65c5ada383b3343ba0bc6b",
+      "matchesOriginalIndex": true,
+      "bytes": 1292
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/review-outcome.md.gz",
+      "sha256": "b62cdb1c6c6faec02824c0a1bd128e5ad16442eadc7494e986cfe86d0fd31270",
+      "matchesOriginalIndex": true,
+      "bytes": 2540
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/native-support-plan-low-heap/test.log.gz",
+      "sha256": "a5c4f7951e0b8805219a45b87f360ed5b1a915def2c5febda113b2f3cd5c9d4e",
+      "matchesOriginalIndex": true,
+      "bytes": 10816
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/public-head-checks.json",
+      "sha256": "d7012a57fd95ab5a8715beb51629ec986c167137996acab6dd578c81f8c51f91",
+      "matchesOriginalIndex": true,
+      "bytes": 7248
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/public-pr-readback.json",
+      "sha256": "56da5193e1c6e37023e514df5f4dc49d9ffa05a605e9eea2ae812ffa9ba94e84",
+      "matchesOriginalIndex": true,
+      "bytes": 8649
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/publisher-no-write.json",
+      "sha256": "69b751d53095dc935ad4a7f179966fa53dc52c6c2f7ee267160724e1353aae87",
+      "matchesOriginalIndex": true,
+      "bytes": 1013
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/retained-evidence.json",
+      "sha256": "4a734a22871f4f3b7ab933cce57d42b7a6d99293e5a76cec04beed0a95567aa9",
+      "matchesOriginalIndex": true,
+      "bytes": 1618
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/runtime-peer-tests.log.gz",
+      "sha256": "af91dc5761a88620f66894493aaee07fc5d05ba9c03ae3f67b4ed6a916f1223c",
+      "matchesOriginalIndex": true,
+      "bytes": 51750
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint5-integration/wasm-tests-before-preview-fix.log.gz",
+      "sha256": "9ef3a69d0f07d2b2ba331fbd7546fb3d376f28fe74abfbf8f9edcfaef5ccd1b5",
+      "matchesOriginalIndex": true,
+      "bytes": 20908
+    },
+    {
+      "path": "native/gpui/crates/proto-ui-gpui/tests/accesskit_macos.rs",
+      "sha256": "bd7e4625ab5fe359b676bc8e2fdaf68491f30216cbbdfbb05a1c5538de40db70",
+      "matchesOriginalIndex": true,
+      "bytes": 52491
+    },
+    {
+      "path": "native/gpui/crates/proto-ui-gpui/tests/capture_pixels.rs",
+      "sha256": "96ec4952d203f59bcc2bcf88e892a7d9a7d856f71933dc11b26f3a215a9e30a1",
+      "matchesOriginalIndex": true,
+      "bytes": 5017
+    },
+    {
+      "path": "native/gpui/crates/proto-ui-gpui/tests/support/capture_pixels.rs",
+      "sha256": "e47ac94e0ee1de858529bf6b4dc6000ed1f0ce971074a4ffafd17c93416346c9",
+      "matchesOriginalIndex": true,
+      "bytes": 6285
+    },
+    {
+      "path": "native/gpui/crates/proto-ui-gpui/tests/support/native_capture.rs",
+      "sha256": "fbc3e7cfbc3e7a7fd0f1365b3698c1ab4c3ce21ae972b19fc3c0ce602295f95d",
+      "matchesOriginalIndex": true,
+      "bytes": 19037
+    },
+    {
+      "path": "packages/compiler/src/vue-source.ts",
+      "sha256": "46e3432bd3685341235a4c3dda57c42de9523c3cc0c634f228bea1fecf23b5e8",
+      "matchesOriginalIndex": true,
+      "bytes": 98455
+    },
+    {
+      "path": "packages/compiler/test/browser-target-consumer.test.ts",
+      "sha256": "7e3729c83abce3fe1f35203ae052746212d3b28ab15d175a3fd414790e8907e9",
+      "matchesOriginalIndex": true,
+      "bytes": 12958
+    },
+    {
+      "path": "packages/compiler/test/vue-source.test.ts",
+      "sha256": "5fb96888ee8315d168755bb327eca0fe8c321a5367b6c1f5d7100b036981cb79",
+      "matchesOriginalIndex": true,
+      "bytes": 34190
+    },
+    {
+      "path": "scripts/compiler/browser-assets.ts",
+      "sha256": "a1aa43fd0ca090224c659084a72f269a1f95df35a7fb0fc15904254963aea747",
+      "matchesOriginalIndex": true,
+      "bytes": 9122
+    },
+    {
+      "path": "scripts/compiler/browser-targets/react-client.mjs",
+      "sha256": "55f966b1e364fe6309e290ce33d321d9cdb628c343a6f317d3d51e96e9b4ddc5",
+      "matchesOriginalIndex": true,
+      "bytes": 149
+    },
+    {
+      "path": "scripts/compiler/browser-targets/react-dom.mjs",
+      "sha256": "a680aede060f48fdd1eb1cb6119eb1792db2d2aa92a0d5d65be0a5a2be43cc1f",
+      "matchesOriginalIndex": true,
+      "bytes": 312
+    },
+    {
+      "path": "scripts/compiler/browser-targets/react-runtime.mjs",
+      "sha256": "b8d45597c56bc301b17dee9f74da4b076e864e7705251dde752fd9b26ff03299",
+      "matchesOriginalIndex": true,
+      "bytes": 296
+    },
+    {
+      "path": "scripts/compiler/browser-targets/react.mjs",
+      "sha256": "784209e308697371a9cd2dc35b0d3e4fedad0bb2a0410554ba2dd6d12fbd75d8",
+      "matchesOriginalIndex": true,
+      "bytes": 702
+    }
+  ],
+  "validation": {
+    "browserCompilerCasesPassed": 74,
+    "sources": [
+      "sprint5-final-gates/validation.json.gz",
+      "sprint5-final-local-deps/validation.json.gz"
+    ],
+    "originalEnvironmentFailures": [
+      "16 browser target cases and 5 WASM cases did not execute because symlinked dependency sources escaped repository source closure."
+    ],
+    "remedy": "Install the original frozen lockfile offline into the isolated worktree; 586 reused packages, zero downloads. Only the two affected files reran.",
+    "rawSecondDriverResult": "exit 1, sourceStable false; actual case commands both exit 0; the only changed tracked file was .github/workflows/ci-production-suites.yml. All 12335 remaining tracked source bytes, including all compiler/test/browser inputs, match the before-run manifest. The original result is preserved.",
+    "currentChangedFilesFromSecondManifest": [".github/workflows/ci-production-suites.yml"],
+    "nativeClassifierPassed": 7,
+    "nativeCaptureStatePassed": 3,
+    "nativeReceiptControlsPassed": 15,
+    "existingCiAndBrowserReceiptTestsPassed": 56,
+    "wholeWorkspaceTypecheck": "not run in this continuation",
+    "realBrowser": "local normal-sandbox launch still fails at socket EPERM; no new real browser accepted",
+    "macosPixels": "not run after corrected capture source"
+  },
+  "publication": "pending exact content-bound connector commit; not a local git commit or completed CLI publication",
+  "authors": "Frozen implementation and new workflow authored by Codex under current user direction; previous commits and authorship are preserved."
+}

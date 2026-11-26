@@ -1,0 +1,101 @@
+name: Draft projection family evidence
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Evidence inventory (the existing complete family lane remains the default)
+        type: choice
+        default: all
+        options:
+          - all
+          - sprint2
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: draft-family-evidence-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  browser-evidence:
+    if: ${{ inputs.scope != 'sprint2' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Configure the official Astro evidence surface
+        run: |
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences list
+      - name: Verify component capabilities with native Chromium input
+        timeout-minutes: 12
+        env:
+          PUI_CHROME_EXECUTABLE: ${{ env.CHROME_PATH }}
+          PUI_EVIDENCE_DIR: ${{ runner.temp }}/projection-family-evidence/component-capabilities
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
+          node --import tsx scripts/analysis/component-capabilities-browser.mjs \
+            2>&1 | tee "$RUNNER_TEMP/component-capabilities.log"
+      - name: Check source tokens and real four-runtime fixture
+        env:
+          PROTO_UI_FAMILY_EVIDENCE_DIR: ${{ runner.temp }}/projection-family-evidence
+        run: |
+          corepack pnpm@10.32.1 check:styles:preset
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/prototypes/bootstrap-2-3-2/test/button.test.ts \
+            packages/prototypes/liquid-glass/test/button.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
+      - name: Retain SHA-bound public fixture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: projection-families-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/projection-family-evidence
+          if-no-files-found: warn
+          retention-days: 30
+  sprint2-consumers:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'sprint2' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Run one sequential Sprint 2 acceptance queue
+        env:
+          PUI_SPRINT2_EVIDENCE_DIR: ${{ runner.temp }}/sprint2-consumers
+        run: node scripts/analysis/run-sprint2-consumers.mjs
+      - name: Retain every passed, failed and not-run receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprint2-consumers-${{ github.sha }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/sprint2-consumers
+            !${{ runner.temp }}/sprint2-consumers/**/cache/**
+          if-no-files-found: warn
+          retention-days: 30

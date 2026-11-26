@@ -1,0 +1,24 @@
+{
+  "command": "corepack pnpm@10.32.1 exec vitest run /tmp/contents-transaction-baseline-7642/packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts --config /tmp/contents-transaction-baseline-7642/vitest.config.mts --maxWorkers=1 --minWorkers=1",
+  "exitCode": 1,
+  "node": "v24.22.3",
+  "pnpm": "10.32.1",
+  "vitest": "2.1.9",
+  "happyDom": "15.11.7",
+  "floatingUiDom": "1.8.0",
+  "floatingUiCore": "1.8.0",
+  "rootConfigSha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+  "floatingUiDomMjsSha256": "a1c916ed18ed8bb2c586079f7946d35797b45bc79eafae1d99ec6f812672ef54",
+  "floatingUiCoreMjsSha256": "c6c359d91fbc6636f6143aae9ff47105eeacea869b14afe7d54e120444ab8f37",
+  "counts": {
+    "numTotalTests": 8,
+    "numPassedTests": 4,
+    "numFailedTests": 4,
+    "numPendingTests": 0,
+    "success": false
+  },
+  "testSourceSha256": "7c53e83f9cfd01ffdaeec2f7e915c27ccc09db4b94a05422160cf81f1c1366b2",
+  "productPositioningSource": "7642f1376b08ee3d4930f596da6a77ca74db9dda",
+  "workspaceHead": "9b6a7e54a82cf0758cb0eb94a9befa69a0516a5e",
+  "scope": "18 immutable positioning src files, with installed dependencies and shared workspace aliases; no live production source replacement and no native-browser assertion."
+}

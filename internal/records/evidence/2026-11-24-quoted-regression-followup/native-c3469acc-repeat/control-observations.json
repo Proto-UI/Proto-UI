@@ -1,0 +1,46 @@
+[
+  {
+    "file": "runtime/contents-wheel-controls/cancellation-false.json",
+    "cancel": false,
+    "beforeTop": 0,
+    "afterTop": 400,
+    "documentUnchanged": true,
+    "sameDialogAndSurface": true,
+    "trustedMatchingWheel": [
+      {
+        "trusted": true,
+        "deltaY": 400,
+        "clientX": 190,
+        "clientY": 160,
+        "surfaceInPath": true,
+        "contentInPath": true,
+        "defaultPrevented": false
+      }
+    ],
+    "replacementIdentityRejected": true,
+    "completionErrors": [],
+    "browser": "157.0.8103.78"
+  },
+  {
+    "file": "runtime/contents-wheel-controls/cancellation-true.json",
+    "cancel": true,
+    "beforeTop": 0,
+    "afterTop": 0,
+    "documentUnchanged": true,
+    "sameDialogAndSurface": true,
+    "trustedMatchingWheel": [
+      {
+        "trusted": true,
+        "deltaY": 400,
+        "clientX": 190,
+        "clientY": 160,
+        "surfaceInPath": true,
+        "contentInPath": true,
+        "defaultPrevented": true
+      }
+    ],
+    "replacementIdentityRejected": true,
+    "completionErrors": [],
+    "browser": "157.0.8103.78"
+  }
+]

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Same-source Button pointer and props evidence</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/pointer-props.css" />
+  </head>
+  <body>
+    <div id="pointer-root"></div>
+    <script type="module" src="/pointer-props.ts"></script>
+  </body>
+</html>

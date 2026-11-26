@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "single-bounded-same-source-native-repeat",
+  "source": "c3469acc8cc00aff5c49baef2629486d41314aff",
+  "previousRun": 45422958374,
+  "run": 45425876105,
+  "job": 138557613678,
+  "attempt": 1,
+  "reason": "The prior known terminal failure occurred at the first runtime-transition1000ms poll during recorded long tasks;zero public wheel cases executed. Repeat once to resolve repeatability and obtain missing wheel coverage,without changing source,selection,deadlines or assertions. The prior failure remains retained; a green repeat does not repair or erase that failure.",
+  "boundaries": [
+    "Different GitHub runner, not the same machine; record actual environment and generated outputs.",
+    "No source mutation or new push precedes this repeat.",
+    "The first preparation failed during its authenticated read before request.json or any POST existed. A directory readback proves only the failed preflight file. The final preparation made one successful dispatch request, HTTP204, matched to the new run."
+  ],
+  "failedPreflight": {
+    "content": [
+      {
+        "type": "text",
+        "text": "exit_code: 1\nstdout:\n\nstderr:\n[stdin]:9\nif(pre.status!==0||pre.stdout!=='200')throw Error('Pre-dispatch authenticated read failed');\n                                      ^\n\nError: Pre-dispatch authenticated read failed\n    at [stdin]:9:45\n    at runScriptInThisContext (node:internal/vm:209:10)\n    at node:internal/process/execution:446:12\n    at [stdin]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:444:60)\n    at evalFunction (node:internal/process/execution:279:30)\n    at evalTypeScript (node:internal/process/execution:291:3)\n    at node:internal/main/eval_stdin:53:5\n    at Socket.<anonymous> (node:internal/process/execution:201:5)\n    at Socket.emit (node:events:531:35)\n\nNode.js v22.23.2\n"
+      }
+    ],
+    "structuredContent": {
+      "error_code": "INVALID_ARGUMENT"
+    },
+    "isError": true
+  },
+  "preflightReconciliation": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "f 72 curl-final-preflight.json"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"exit\": null,\n  \"signal\": \"SIGTERM\",\n  \"http\": \"\",\n  \"stderr\": \"\"\n}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ],
+  "dispatch": {
+    "content": [
+      {
+        "type": "text",
+        "text": "exit_code: 0\nstdout:\n{\"transport\":\"curl with existing gh credentials in child stdin only\",\"exit\":0,\"signal\":null,\"http\":\"204\",\"stderr\":\"\",\"completedAt\":\"2026-11-24T15:28:16.914Z\"}\n\nstderr:\n"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "originalRecord": {
+    "path": "dispatch-c3469acc-repeat-original.json.gz",
+    "rawBytes": 64886,
+    "rawSha256": "2faadf55b9372fa2da272def32c20bfb93bc461f17f9e7a70b226628146b5264",
+    "archiveBytes": 4944,
+    "archiveSha256": "e1470c9816a088527acea0281c04ac1d5ea12b5c117c7b75a4767016370863cb"
+  }
+}

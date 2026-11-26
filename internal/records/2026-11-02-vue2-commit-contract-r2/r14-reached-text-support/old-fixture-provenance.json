@@ -1,0 +1,21 @@
+{
+  "fixturePath": "packages/compiler/test/fixtures/native-support-migration-v1.json",
+  "fixtureSHA256": "753ba919d86f780d03b1145c451b03782c5f59aa3d8528286db4485e8fb7bf24",
+  "source": {
+    "sourceCaptureSHA256": "af00bb718781a7648a3dc3c4127fe658e4cb83bedd51a72c61d9ffe05d1f1358",
+    "publicGeneratorParent": "91c63aa7d4344a2d9130b3fabb737f4670f0aa68",
+    "emitterPath": "packages/compiler/src/vue2-source.ts",
+    "cliPath": "packages/compiler/src/cli.ts",
+    "cliSHA256": "f3c2edd529b992ebfa6a220eb3254a3d5db9d327c30e42641bc0f5eceb17faae",
+    "capturedAt": "2026-11-03T07:47:45Z",
+    "metadataNormalization": [
+      "CLI JSON result.directory and result.files absolute temporary prefixes replaced with case-relative paths; code, diagnostics, input, component, map, provenance and all artifact hashes are unchanged.",
+      "This JSON includes retained project artifacts and this capture provenance; it is not byte-identical to the raw capture.json. Unchanged helper bodies are omitted and must be reconstructed only at their exact captured hashes."
+    ]
+  },
+  "legacyHashes": {
+    ".proto-ui/interaction/native-v1.ts": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+    ".proto-ui/interaction/adapter-modules-v1.ts": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a"
+  },
+  "boundary": "Four actual old CLI outputs. Twelve retained component/map/provenance file byte sequences are exact; support reconstruction is permitted only by exact captured SHA. CLI output directory metadata is normalized and is not raw-byte-identical capture metadata."
+}

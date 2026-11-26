@@ -1,0 +1,1650 @@
+{
+  "schemaVersion": 1,
+  "scope": "Happy DOM compiler scroll-reveal consumer fixture ordering; no production change",
+  "source": {
+    "repository": "https://github.com/Proto-UI/Proto-UI",
+    "base": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "testFile": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+    "baseTestSha256": "1c07823b5dd5ca964358bb3050aaa70622a4ccb2b69807ea222f20805fe03ff7",
+    "candidateTestSha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e",
+    "candidatePatchSha256": "062f517a4d43aea7fb62c4c2b682ac5433d48e2df963112a3cb0e466f6155450",
+    "observedUpstreamMain": "a4583a0873b0b7742171f5b66279204b13f7332e",
+    "branchRationale": "Remain directly on the consumer pin; upstream main has additional production changes outside this repair."
+  },
+  "environment": {
+    "node": "24.22.1",
+    "pnpm": "10.32.1",
+    "vitest": "2.1.9",
+    "happyDom": "15.11.7",
+    "browser": "not used",
+    "geometry": "explicitly injected clientHeight=100, scrollHeight=400, initial scrollTop=50"
+  },
+  "upstreamAuthority": [
+    "spec/contracts/C-SCROLL-TARGET-REVEAL-0001.yaml (draft)",
+    "spec/tests/T-SCROLL-TARGET-REVEAL-0001.yaml (draft)",
+    "spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml (draft)",
+    "packages/compiler/test/native-scroll-reveal.test.ts: preserves an older pending end request after an invalid reveal",
+    "internal/records/2026-11-17-compiler-scroll-recovery.zh-CN.md"
+  ],
+  "externalFailure": {
+    "shenkoHead": "cb1d06329fbea59ee3b1c80c4e91ebe396b4cde4",
+    "jobUrl": "https://github.com/cyjin-yl/shenko/actions/runs/44932176472/job/136930992702",
+    "artifactUrl": "https://github.com/cyjin-yl/shenko/actions/runs/44932176472/artifacts/14718537069",
+    "artifactSha256": "f189d5cd6529f95eb571f6d946a3baa4d0bfc3d6f8597fee4401cabc6b4ff350",
+    "suiteCounts": {
+      "passed": 182,
+      "failed": 1,
+      "skipped": 2
+    },
+    "testCounts": {
+      "passed": 2912,
+      "failed": 1,
+      "skipped": 9
+    },
+    "observed": "React foreign/self/sibling/family rejection case expected scrollTop 50, received 300"
+  },
+  "interpretation": {
+    "measured": [
+      "The four invalid requests synchronously return rejected/unavailable at offset 50, without writing scrollTop.",
+      "The controlled late mount frame reproduces the exact original 50/300 assertion failure: 27 passed, 1 failed, 0 skipped.",
+      "The only 50-to-300 write is inside the previously scheduled frame calling the actual emitted applyScroll to-end path.",
+      "Draining that mounting frame before geometry produces a real 0-to-0 write, then all original assertions pass including valid reveal 50-to-70."
+    ],
+    "limits": [
+      "Original CI did not collect write stacks. Its exact failing assertion is reproduced by a legal controlled ordering, not a replay of its original scheduler trace.",
+      "The observer adds synchronous file I/O and the controlled variants inject RAF order. Natural baseline runs and controlled experiments are distinct.",
+      "Full compiler, native-browser geometry, upstream CI/DCO and independent published review were not executed for this local candidate.",
+      "The compiler and host source, original pin and lockfile, and original Nightly suite selection were not changed."
+    ]
+  },
+  "assertionConservation": {
+    "baseExpectCalls": 29,
+    "candidateExpectCalls": 29,
+    "expectExpressionsUnchanged": true,
+    "baseMatcherCalls": 29,
+    "candidateMatcherCalls": 29,
+    "matcherCallsAndExpectedValuesUnchanged": true,
+    "baseTestDefinitions": 7,
+    "candidateTestDefinitions": 7,
+    "testTitlesUnchanged": true
+  },
+  "runs": [
+    {
+      "label": "baseline-1",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/baseline-1.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:18:30.218764+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "1c07823b5dd5ca964358bb3050aaa70622a4ccb2b69807ea222f20805fe03ff7",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": "",
+      "timeout_seconds": 180,
+      "exit_code": 0,
+      "duration_seconds": 15.511,
+      "finished_at": "2026-11-21T18:18:45.891599+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "1c07823b5dd5ca964358bb3050aaa70622a4ccb2b69807ea222f20805fe03ff7",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": "",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failed_assertions": [],
+      "inputs_unchanged_during_run": true
+    },
+    {
+      "label": "baseline-2",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/baseline-2.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:19:12.555491+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "1c07823b5dd5ca964358bb3050aaa70622a4ccb2b69807ea222f20805fe03ff7",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": "",
+      "timeout_seconds": 180,
+      "exit_code": 0,
+      "duration_seconds": 16.429,
+      "finished_at": "2026-11-21T18:19:29.022302+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "1c07823b5dd5ca964358bb3050aaa70622a4ccb2b69807ea222f20805fe03ff7",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": "",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failed_assertions": [],
+      "inputs_unchanged_during_run": true
+    },
+    {
+      "label": "trace-native",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "timing_mode": "native",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/trace-native.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:22:58.272497+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "a6ad50aae24571b891fb09614c9303f8bc76224582246961e491e0024d0a2391",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "timeout_seconds": 180,
+      "exit_code": 0,
+      "duration_seconds": 16.594,
+      "finished_at": "2026-11-21T18:23:14.928549+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "a6ad50aae24571b891fb09614c9303f8bc76224582246961e491e0024d0a2391",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failed_assertions": [],
+      "inputs_unchanged_during_run": true
+    },
+    {
+      "label": "trace-release-after-rejections",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "timing_mode": "release-after-rejections",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/trace-release-after-rejections.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:23:19.970855+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "a6ad50aae24571b891fb09614c9303f8bc76224582246961e491e0024d0a2391",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "timeout_seconds": 180,
+      "exit_code": 1,
+      "duration_seconds": 17.061,
+      "finished_at": "2026-11-21T18:23:37.076897+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "a6ad50aae24571b891fb09614c9303f8bc76224582246961e491e0024d0a2391",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 27,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "failed_assertions": [
+        {
+          "ancestorTitles": ["C-SCROLL-TARGET-REVEAL-0001 ordinary react-dom-source-v1"],
+          "fullName": "C-SCROLL-TARGET-REVEAL-0001 ordinary react-dom-source-v1 rejects an item owned by another surface, a sibling, self and another family before physical movement",
+          "status": "failed",
+          "title": "rejects an item owned by another surface, a sibling, self and another family before physical movement",
+          "duration": 331.0144479999999,
+          "failureMessages": [
+            "AssertionError: expected 300 to be 50 // Object.is equality\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:221:33\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ],
+          "meta": {}
+        }
+      ],
+      "inputs_unchanged_during_run": true
+    },
+    {
+      "label": "trace-drain-before-geometry",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "timing_mode": "drain-before-geometry",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/trace-drain-before-geometry.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:24:00.769212+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "a6ad50aae24571b891fb09614c9303f8bc76224582246961e491e0024d0a2391",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "timeout_seconds": 180,
+      "exit_code": 0,
+      "duration_seconds": 14.303,
+      "finished_at": "2026-11-21T18:24:15.113707+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "a6ad50aae24571b891fb09614c9303f8bc76224582246961e491e0024d0a2391",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failed_assertions": [],
+      "inputs_unchanged_during_run": true
+    },
+    {
+      "label": "proposed-fixture",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "timing_mode": "native",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/proposed-fixture.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:25:54.514390+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "4745ef68df941d3b7c4995b0a0af5202d0c6b5c2ce1858cad50f345c1ee0185d",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "timeout_seconds": 180,
+      "exit_code": 0,
+      "duration_seconds": 15.08,
+      "finished_at": "2026-11-21T18:26:09.640163+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "4745ef68df941d3b7c4995b0a0af5202d0c6b5c2ce1858cad50f345c1ee0185d",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failed_assertions": [],
+      "inputs_unchanged_during_run": true
+    },
+    {
+      "label": "proposed-fixture-formatted",
+      "source": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+      "cwd": "/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro",
+      "timing_mode": "native",
+      "command": [
+        "/home/agent/.npm/_npx/ef8b185be06dfeb4/node_modules/node/bin/node",
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-evidence/proposed-fixture-formatted.vitest.json"
+      ],
+      "node": "v24.22.1",
+      "started_at": "2026-11-21T18:27:16.578912+00:00",
+      "inputs_before": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_before": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "timeout_seconds": 180,
+      "exit_code": 0,
+      "duration_seconds": 14.504,
+      "finished_at": "2026-11-21T18:27:31.118944+00:00",
+      "inputs_after": {
+        "packages/compiler/test/scroll-reveal-consumers.test.ts": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e",
+        "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/native-scroll-reveal.ts": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+        "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da"
+      },
+      "worktree_after": " M packages/compiler/test/scroll-reveal-consumers.test.ts\n",
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failed_assertions": [],
+      "inputs_unchanged_during_run": true
+    }
+  ],
+  "reactTraces": {
+    "trace-native": [
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 1,
+        "time": 7122.37496,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1],
+        "id": 1,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 2,
+        "time": 7123.219555,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1, 2],
+        "id": 2,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 3,
+        "time": 7123.692919,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1, 2, 3],
+        "id": 3,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 4,
+        "time": 7124.293782,
+        "kind": "raf-fire",
+        "phase": "raf:1 during mount",
+        "pending": [2, 3],
+        "id": 1
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 5,
+        "time": 7124.536053,
+        "kind": "raf-return",
+        "phase": "raf:1 during mount",
+        "pending": [2, 3],
+        "id": 1
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 6,
+        "time": 7124.605045,
+        "kind": "raf-fire",
+        "phase": "raf:2 during mount",
+        "pending": [3],
+        "id": 2
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 7,
+        "time": 7124.653678,
+        "kind": "raf-return",
+        "phase": "raf:2 during mount",
+        "pending": [3],
+        "id": 2
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 8,
+        "time": 7124.683552,
+        "kind": "raf-fire",
+        "phase": "raf:3 during mount",
+        "pending": [],
+        "id": 3
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 9,
+        "time": 7124.78296,
+        "kind": "raf-return",
+        "phase": "raf:3 during mount",
+        "pending": [],
+        "id": 3
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 10,
+        "time": 7124.986793,
+        "kind": "observe-offset",
+        "phase": "mount",
+        "offset": 0,
+        "pending": [],
+        "descriptor": "accessor"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 11,
+        "time": 7125.047163,
+        "kind": "phase",
+        "phase": "geometry",
+        "offset": 0,
+        "pending": []
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 12,
+        "time": 7125.575248,
+        "kind": "scrollTop-write",
+        "phase": "geometry",
+        "offset": 50,
+        "pending": [],
+        "before": 0,
+        "requested": 50,
+        "after": 50,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at geometry (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:23:11)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:207:7\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 13,
+        "time": 7125.904077,
+        "kind": "request-before",
+        "phase": "foreign-surface:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "foreign-surface"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 14,
+        "time": 7126.570007,
+        "kind": "request-return",
+        "phase": "foreign-surface:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "foreign-surface",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 15,
+        "time": 7126.820809,
+        "kind": "act-return",
+        "phase": "foreign-surface:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "foreign-surface"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 16,
+        "time": 7126.876452,
+        "kind": "request-before",
+        "phase": "sibling:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "sibling"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 17,
+        "time": 7127.223969,
+        "kind": "request-return",
+        "phase": "sibling:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "sibling",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 18,
+        "time": 7127.334894,
+        "kind": "act-return",
+        "phase": "sibling:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "sibling"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 19,
+        "time": 7127.387141,
+        "kind": "request-before",
+        "phase": "self:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "self"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 20,
+        "time": 7127.593528,
+        "kind": "request-return",
+        "phase": "self:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "self",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 21,
+        "time": 7127.705054,
+        "kind": "act-return",
+        "phase": "self:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "self"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 22,
+        "time": 7127.786545,
+        "kind": "request-before",
+        "phase": "other-family:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "other-family"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 23,
+        "time": 7127.939573,
+        "kind": "request-return",
+        "phase": "other-family:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "other-family",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 24,
+        "time": 7128.021354,
+        "kind": "act-return",
+        "phase": "other-family:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "other-family"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 25,
+        "time": 7128.035595,
+        "kind": "phase",
+        "phase": "assert-rejections",
+        "offset": 50,
+        "pending": []
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 26,
+        "time": 7128.084568,
+        "kind": "request-before",
+        "phase": "valid:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "valid"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 27,
+        "time": 7129.576426,
+        "kind": "scrollTop-write",
+        "phase": "valid:synchronous",
+        "offset": 70,
+        "pending": [],
+        "before": 50,
+        "requested": 70,
+        "after": 70,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at revealNativeScrollTarget (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:561:17)\n    at revealScroll (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:936:14)\n    at applyScroll (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:959:63)\n    at Object.request (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1178:62)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/surface.proto.ts:12:13\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/Surface.tsx:690:28\n    at invoke (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/Surface.tsx:179:14)\n    at Object.reveal (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-J2Jo50/output/Surface.tsx:686:18)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:222:73"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 28,
+        "time": 7129.958364,
+        "kind": "request-return",
+        "phase": "valid:synchronous",
+        "offset": 70,
+        "pending": [],
+        "name": "valid",
+        "result": {
+          "kind": "dispatched"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "native",
+        "sequence": 29,
+        "time": 7130.11021,
+        "kind": "act-return",
+        "phase": "valid:after-act",
+        "offset": 70,
+        "pending": [],
+        "name": "valid"
+      }
+    ],
+    "trace-release-after-rejections": [
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 1,
+        "time": 7663.850738,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1],
+        "id": 1,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 2,
+        "time": 7664.334968,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1, 2],
+        "id": 2,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 3,
+        "time": 7665.985121,
+        "kind": "observe-offset",
+        "phase": "mount",
+        "offset": 0,
+        "pending": [1, 2],
+        "descriptor": "accessor"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 4,
+        "time": 7666.056186,
+        "kind": "phase",
+        "phase": "geometry",
+        "offset": 0,
+        "pending": [1, 2]
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 5,
+        "time": 7666.600225,
+        "kind": "scrollTop-write",
+        "phase": "geometry",
+        "offset": 50,
+        "pending": [1, 2],
+        "before": 0,
+        "requested": 50,
+        "after": 50,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at geometry (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:23:11)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:207:7\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 6,
+        "time": 7666.849245,
+        "kind": "request-before",
+        "phase": "foreign-surface:synchronous",
+        "offset": 50,
+        "pending": [1, 2],
+        "name": "foreign-surface"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 7,
+        "time": 7667.789122,
+        "kind": "request-return",
+        "phase": "foreign-surface:synchronous",
+        "offset": 50,
+        "pending": [1, 2],
+        "name": "foreign-surface",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 8,
+        "time": 7668.157079,
+        "kind": "raf-schedule",
+        "phase": "foreign-surface:act-await",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "id": 3,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 9,
+        "time": 7668.377127,
+        "kind": "act-return",
+        "phase": "foreign-surface:after-act",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "foreign-surface"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 10,
+        "time": 7668.463295,
+        "kind": "request-before",
+        "phase": "sibling:synchronous",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "sibling"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 11,
+        "time": 7668.655811,
+        "kind": "request-return",
+        "phase": "sibling:synchronous",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "sibling",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 12,
+        "time": 7668.806725,
+        "kind": "act-return",
+        "phase": "sibling:after-act",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "sibling"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 13,
+        "time": 7668.861837,
+        "kind": "request-before",
+        "phase": "self:synchronous",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "self"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 14,
+        "time": 7669.128273,
+        "kind": "request-return",
+        "phase": "self:synchronous",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "self",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 15,
+        "time": 7669.224827,
+        "kind": "act-return",
+        "phase": "self:after-act",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "self"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 16,
+        "time": 7669.266308,
+        "kind": "request-before",
+        "phase": "other-family:synchronous",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "other-family"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 17,
+        "time": 7669.397934,
+        "kind": "request-return",
+        "phase": "other-family:synchronous",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "other-family",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 18,
+        "time": 7669.501608,
+        "kind": "act-return",
+        "phase": "other-family:after-act",
+        "offset": 50,
+        "pending": [1, 2, 3],
+        "name": "other-family"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 19,
+        "time": 7669.566775,
+        "kind": "controlled-flush-start",
+        "phase": "after-rejections",
+        "offset": 50,
+        "pending": [1, 2, 3]
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 20,
+        "time": 7669.675777,
+        "kind": "raf-fire",
+        "phase": "raf:1 during after-rejections",
+        "offset": 50,
+        "pending": [2, 3],
+        "id": 1
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 21,
+        "time": 7669.780212,
+        "kind": "raf-return",
+        "phase": "raf:1 during after-rejections",
+        "offset": 50,
+        "pending": [2, 3],
+        "id": 1
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 22,
+        "time": 7669.803747,
+        "kind": "raf-fire",
+        "phase": "raf:2 during after-rejections",
+        "offset": 50,
+        "pending": [3],
+        "id": 2
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 23,
+        "time": 7670.468366,
+        "kind": "scrollTop-write",
+        "phase": "raf:2 during after-rejections",
+        "offset": 300,
+        "pending": [3],
+        "before": 50,
+        "requested": 300,
+        "after": 300,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at applyScroll (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:994:21)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1032:34\n    at Object.invoke (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/Surface.tsx:179:14)\n    at Object.callback (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-vWU7MY/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1032:21)\n    at fire (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:71:16)\n    at Object.flush (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:127:45)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:218:37\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumer.ts:341:19\n    at Proxy.process.env.NODE_ENV.exports.act (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/react@19.2.6/node_modules/react/cjs/react.development.js:814:22)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 24,
+        "time": 7670.602235,
+        "kind": "raf-return",
+        "phase": "raf:2 during after-rejections",
+        "offset": 300,
+        "pending": [3],
+        "id": 2
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 25,
+        "time": 7670.623636,
+        "kind": "raf-fire",
+        "phase": "raf:3 during after-rejections",
+        "offset": 300,
+        "pending": [],
+        "id": 3
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 26,
+        "time": 7670.658949,
+        "kind": "raf-return",
+        "phase": "raf:3 during after-rejections",
+        "offset": 300,
+        "pending": [],
+        "id": 3
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 27,
+        "time": 7670.6667,
+        "kind": "controlled-flush-end",
+        "phase": "after-rejections",
+        "offset": 300,
+        "pending": []
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "release-after-rejections",
+        "sequence": 28,
+        "time": 7670.69339,
+        "kind": "phase",
+        "phase": "assert-rejections",
+        "offset": 300,
+        "pending": []
+      }
+    ],
+    "trace-drain-before-geometry": [
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 1,
+        "time": 6642.885711,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1],
+        "id": 1,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 2,
+        "time": 6643.431383,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1, 2],
+        "id": 2,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 3,
+        "time": 6644.937222,
+        "kind": "raf-schedule",
+        "phase": "mount",
+        "pending": [1, 2, 3],
+        "id": 3,
+        "stack": "Error: \n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:80:40\n    at mockCall (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+spy@2.1.9/node_modules/@vitest/spy/dist/index.js:61:17)\n    at bound bound requestAnimationFrame (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/tinyspy@3.0.2/node_modules/tinyspy/dist/index.js:45:80)\n    at endFollowContentChanged (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1022:27)\n    at MutationObserver.<anonymous> (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1274:21)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/mutation-observer/MutationObserverListener.ts:69:19\n    at Timeout.callback (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1293:38)\n    at Timeout._onTimeout (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom/src/window/BrowserWindow.ts:1284:16)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 4,
+        "time": 6645.59507,
+        "kind": "observe-offset",
+        "phase": "mount",
+        "offset": 0,
+        "pending": [1, 2, 3],
+        "descriptor": "accessor"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 5,
+        "time": 6645.703432,
+        "kind": "controlled-flush-start",
+        "phase": "before-geometry",
+        "offset": 0,
+        "pending": [1, 2, 3]
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 6,
+        "time": 6645.839143,
+        "kind": "raf-fire",
+        "phase": "raf:1 during before-geometry",
+        "offset": 0,
+        "pending": [2, 3],
+        "id": 1
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 7,
+        "time": 6646.15988,
+        "kind": "raf-return",
+        "phase": "raf:1 during before-geometry",
+        "offset": 0,
+        "pending": [2, 3],
+        "id": 1
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 8,
+        "time": 6646.194302,
+        "kind": "raf-fire",
+        "phase": "raf:2 during before-geometry",
+        "offset": 0,
+        "pending": [3],
+        "id": 2
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 9,
+        "time": 6647.607453,
+        "kind": "scrollTop-write",
+        "phase": "raf:2 during before-geometry",
+        "offset": 0,
+        "pending": [3],
+        "before": 0,
+        "requested": 0,
+        "after": 0,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at applyScroll (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:994:21)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1032:34\n    at Object.invoke (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/Surface.tsx:179:14)\n    at Object.callback (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1032:21)\n    at fire (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:71:16)\n    at Object.flush (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:127:45)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:204:37\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumer.ts:341:19\n    at Proxy.process.env.NODE_ENV.exports.act (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/react@19.2.6/node_modules/react/cjs/react.development.js:814:22)"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 10,
+        "time": 6647.797606,
+        "kind": "raf-return",
+        "phase": "raf:2 during before-geometry",
+        "offset": 0,
+        "pending": [3],
+        "id": 2
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 11,
+        "time": 6647.862222,
+        "kind": "raf-fire",
+        "phase": "raf:3 during before-geometry",
+        "offset": 0,
+        "pending": [],
+        "id": 3
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 12,
+        "time": 6647.913849,
+        "kind": "raf-return",
+        "phase": "raf:3 during before-geometry",
+        "offset": 0,
+        "pending": [],
+        "id": 3
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 13,
+        "time": 6647.925046,
+        "kind": "controlled-flush-end",
+        "phase": "before-geometry",
+        "offset": 0,
+        "pending": []
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 14,
+        "time": 6647.979657,
+        "kind": "phase",
+        "phase": "geometry",
+        "offset": 0,
+        "pending": []
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 15,
+        "time": 6648.51302,
+        "kind": "scrollTop-write",
+        "phase": "geometry",
+        "offset": 50,
+        "pending": [],
+        "before": 0,
+        "requested": 50,
+        "after": 50,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at geometry (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:23:11)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:207:7\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 16,
+        "time": 6648.733568,
+        "kind": "request-before",
+        "phase": "foreign-surface:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "foreign-surface"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 17,
+        "time": 6649.502061,
+        "kind": "request-return",
+        "phase": "foreign-surface:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "foreign-surface",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 18,
+        "time": 6649.71623,
+        "kind": "act-return",
+        "phase": "foreign-surface:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "foreign-surface"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 19,
+        "time": 6649.764702,
+        "kind": "request-before",
+        "phase": "sibling:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "sibling"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 20,
+        "time": 6649.916948,
+        "kind": "request-return",
+        "phase": "sibling:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "sibling",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 21,
+        "time": 6650.077667,
+        "kind": "act-return",
+        "phase": "sibling:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "sibling"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 22,
+        "time": 6650.132048,
+        "kind": "request-before",
+        "phase": "self:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "self"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 23,
+        "time": 6650.312076,
+        "kind": "request-return",
+        "phase": "self:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "self",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 24,
+        "time": 6650.427207,
+        "kind": "act-return",
+        "phase": "self:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "self"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 25,
+        "time": 6650.471433,
+        "kind": "request-before",
+        "phase": "other-family:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "other-family"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 26,
+        "time": 6650.63727,
+        "kind": "request-return",
+        "phase": "other-family:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "other-family",
+        "result": {
+          "kind": "rejected",
+          "reason": "unavailable"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 27,
+        "time": 6650.745801,
+        "kind": "act-return",
+        "phase": "other-family:after-act",
+        "offset": 50,
+        "pending": [],
+        "name": "other-family"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 28,
+        "time": 6650.764849,
+        "kind": "phase",
+        "phase": "assert-rejections",
+        "offset": 50,
+        "pending": []
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 29,
+        "time": 6650.815745,
+        "kind": "request-before",
+        "phase": "valid:synchronous",
+        "offset": 50,
+        "pending": [],
+        "name": "valid"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 30,
+        "time": 6652.10349,
+        "kind": "scrollTop-write",
+        "phase": "valid:synchronous",
+        "offset": 70,
+        "pending": [],
+        "before": 50,
+        "requested": 70,
+        "after": 70,
+        "stack": "Error: \n    at HTMLDivElement.set [as scrollTop] (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:110:20)\n    at revealNativeScrollTarget (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:561:17)\n    at revealScroll (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:936:14)\n    at applyScroll (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:959:63)\n    at Object.request (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/.proto-ui/interaction/modules-2d89a78d93dfffe7-v2.ts:1178:62)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/surface.proto.ts:12:13\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/Surface.tsx:690:28\n    at invoke (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/Surface.tsx:179:14)\n    at Object.reveal (/workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/generated-modules/scroll-family-CYB1xE/output/Surface.tsx:686:18)\n    at /workspace/scratch/0e9f736f5ffa/proto-ui-scroll-repro/packages/compiler/test/scroll-reveal-consumers.test.ts:222:73"
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 31,
+        "time": 6652.393051,
+        "kind": "request-return",
+        "phase": "valid:synchronous",
+        "offset": 70,
+        "pending": [],
+        "name": "valid",
+        "result": {
+          "kind": "dispatched"
+        }
+      },
+      {
+        "profile": "react-dom-source-v1",
+        "mode": "drain-before-geometry",
+        "sequence": 32,
+        "time": 6652.577125,
+        "kind": "act-return",
+        "phase": "valid:after-act",
+        "offset": 70,
+        "pending": [],
+        "name": "valid"
+      }
+    ]
+  },
+  "diagnosticPatch": "diff --git a/packages/compiler/test/scroll-reveal-consumers.test.ts b/packages/compiler/test/scroll-reveal-consumers.test.ts\nindex a56a05b..bef5b2a 100644\n--- a/packages/compiler/test/scroll-reveal-consumers.test.ts\n+++ b/packages/compiler/test/scroll-reveal-consumers.test.ts\n@@ -1,4 +1,5 @@\n // @vitest-environment happy-dom\n+import { appendFileSync } from 'node:fs';\n import { afterEach, describe, expect, it, vi } from 'vitest';\n import { nativeOwnerProfiles } from './native-owner-consumer';\n import { cleanupScrollConsumers, mountScrollFamily } from './scroll-reveal-consumer';\n@@ -46,6 +47,89 @@ function geometry(surface: HTMLElement, target: HTMLElement) {\n }\n const unavailable = { kind: 'rejected', reason: 'unavailable' };\n \n+/** Temporary, source-bound diagnostic: preserves all original assertions. */\n+function observeScrollTiming(profile: string) {\n+  const mode = process.env.PUI_SCROLL_RAF_MODE ?? 'native';\n+  const output = process.env.PUI_SCROLL_TRACE_FILE!;\n+  const controlled = mode !== 'native';\n+  const originalRequest = window.requestAnimationFrame.bind(window);\n+  const originalCancel = window.cancelAnimationFrame.bind(window);\n+  const pending = new Map<number, { callback: FrameRequestCallback; native?: number }>();\n+  let next = 0, sequence = 0, phase = 'mount', surface: HTMLElement | undefined;\n+  function event(kind: string, detail: Record<string, unknown> = {}) {\n+    appendFileSync(output, JSON.stringify({ profile, mode, sequence: ++sequence,\n+      time: performance.now(), kind, phase, offset: surface?.scrollTop,\n+      pending: [...pending.keys()], ...detail }) + '\\n');\n+  }\n+  function fire(id: number, time: number) {\n+    const work = pending.get(id);\n+    if (!work) return;\n+    pending.delete(id);\n+    const previous = phase;\n+    phase = `raf:${id} during ${previous}`;\n+    event('raf-fire', { id });\n+    try { work.callback(time); } finally {\n+      event('raf-return', { id });\n+      phase = previous;\n+    }\n+  }\n+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {\n+    const id = ++next;\n+    const work: { callback: FrameRequestCallback; native?: number } = { callback };\n+    pending.set(id, work);\n+    event('raf-schedule', { id, stack: new Error().stack });\n+    if (!controlled) work.native = originalRequest(time => fire(id, time));\n+    return id;\n+  });\n+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(id => {\n+    const work = pending.get(id);\n+    event('raf-cancel', { id });\n+    pending.delete(id);\n+    if (work?.native !== undefined) originalCancel(work.native);\n+  });\n+  return {\n+    mode,\n+    attach(current: HTMLElement) {\n+      surface = current;\n+      let target: object | null = current;\n+      let descriptor: PropertyDescriptor | undefined;\n+      while (target && !descriptor) {\n+        descriptor = Object.getOwnPropertyDescriptor(target, 'scrollTop');\n+        target = Object.getPrototypeOf(target);\n+      }\n+      let saved = current.scrollTop;\n+      event('observe-offset', { descriptor: descriptor?.get ? 'accessor' : 'data' });\n+      Object.defineProperty(current, 'scrollTop', {\n+        configurable: true,\n+        enumerable: true,\n+        get() { return descriptor?.get ? descriptor.get.call(current) : saved; },\n+        set(value: number) {\n+          const before = current.scrollTop;\n+          if (descriptor?.set) descriptor.set.call(current, value); else saved = value;\n+          event('scrollTop-write', { before, requested: value, after: current.scrollTop,\n+            stack: new Error().stack });\n+        },\n+      });\n+    },\n+    phase(value: string) { phase = value; event('phase'); },\n+    request<T>(name: string, callback: () => T): T {\n+      phase = `${name}:synchronous`;\n+      event('request-before', { name });\n+      const result = callback();\n+      event('request-return', { name, result });\n+      phase = `${name}:act-await`;\n+      return result;\n+    },\n+    after(name: string) { phase = `${name}:after-act`; event('act-return', { name }); },\n+    flush(where: string) {\n+      phase = where;\n+      event('controlled-flush-start');\n+      for (const id of [...pending.keys()]) fire(id, performance.now());\n+      event('controlled-flush-end');\n+    },\n+  };\n+}\n+\n for (const profile of nativeOwnerProfiles)\n   describe(`C-SCROLL-TARGET-REVEAL-0001 ordinary ${profile}`, () => {\n     it('reveals a real current part with minimal vertical movement and preserves unrelated host state', async () => {\n@@ -112,16 +196,31 @@ for (const profile of nativeOwnerProfiles)\n     });\n \n     it('rejects an item owned by another surface, a sibling, self and another family before physical movement', async () => {\n+      const trace = observeScrollTiming(profile);\n       const owner = await mountScrollFamily(profile);\n       const surface = owner.physical('surface');\n+      trace.attach(surface);\n+      if (trace.mode === 'drain-before-geometry') {\n+        await owner.act(() => trace.flush('before-geometry'));\n+      }\n+      trace.phase('geometry');\n       geometry(surface, owner.physical('direct'));\n       const exposed = owner.handles.surface.getExposes();\n-      expect(await owner.act(() => exposed.reveal(1))).toEqual(unavailable);\n-      expect(await owner.act(() => exposed.reveal(2))).toEqual(unavailable);\n-      expect(await owner.act(() => exposed.revealSelf())).toEqual(unavailable);\n-      expect(await owner.act(() => exposed.revealOther(0))).toEqual(unavailable);\n+      expect(await owner.act(() => trace.request('foreign-surface', () => exposed.reveal(1)))).toEqual(unavailable);\n+      trace.after('foreign-surface');\n+      expect(await owner.act(() => trace.request('sibling', () => exposed.reveal(2)))).toEqual(unavailable);\n+      trace.after('sibling');\n+      expect(await owner.act(() => trace.request('self', () => exposed.revealSelf()))).toEqual(unavailable);\n+      trace.after('self');\n+      expect(await owner.act(() => trace.request('other-family', () => exposed.revealOther(0)))).toEqual(unavailable);\n+      trace.after('other-family');\n+      if (trace.mode === 'release-after-rejections') {\n+        await owner.act(() => trace.flush('after-rejections'));\n+      }\n+      trace.phase('assert-rejections');\n       expect(surface.scrollTop).toBe(50);\n-      expect(await owner.act(() => exposed.reveal(0))).toEqual({ kind: 'dispatched' });\n+      expect(await owner.act(() => trace.request('valid', () => exposed.reveal(0)))).toEqual({ kind: 'dispatched' });\n+      trace.after('valid');\n       expect(surface.scrollTop).toBe(70);\n     });\n \n",
+  "rawArtifactHashes": {
+    "baseline-1.receipt.json": {
+      "sha256": "0589659de92d2609ad1e1cc1021f6e8d2c73c8868d3b9ff80988ae2f41eb091c",
+      "bytes": 2703
+    },
+    "baseline-1.vitest.json": {
+      "sha256": "e3e490eaacde86af5fd7ea32e3d79e067fb09fe93e2656c85c81d74be93362cf",
+      "bytes": 11907
+    },
+    "baseline-1.log": {
+      "sha256": "bca9a8c2df316db9d79c531a87f6591414b3d83bae928e51d18f0421599c54b3",
+      "bytes": 264703
+    },
+    "baseline-1.patch": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "baseline-2.receipt.json": {
+      "sha256": "8c29803951bc9c0793ef4c496d24122439245fe4bfd66d1be84d19b8d51218b9",
+      "bytes": 2703
+    },
+    "baseline-2.vitest.json": {
+      "sha256": "e237d2594da1f94ff586e562b249ccd1d1d8e7c333335793abfa6b33f0b3ba14",
+      "bytes": 11916
+    },
+    "baseline-2.log": {
+      "sha256": "8cb1662f12466fb2b7f123b4d916a7a89ea41d53a8946ff0842e29f46ef0db78",
+      "bytes": 267440
+    },
+    "baseline-2.patch": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "trace-native.receipt.json": {
+      "sha256": "d8165b51f34824e681a5b59406e77c778556309a59dea830a40861e7e6d306dd",
+      "bytes": 2852
+    },
+    "trace-native.vitest.json": {
+      "sha256": "f48b3c304ea658e95c6dac535400fe9009952d0f6fbe0e0648133314f9d83bb7",
+      "bytes": 11922
+    },
+    "trace-native.log": {
+      "sha256": "8531816708401c8aa80749a8e16731334487b132d7493e7b4abbcfcb7faee6c3",
+      "bytes": 266031
+    },
+    "trace-native.patch": {
+      "sha256": "3363ddcc147e011dea0fe2711de47b41ab8510edd4106072e574a4a7197b00c9",
+      "bytes": 6557
+    },
+    "trace-native.trace.jsonl": {
+      "sha256": "42c4630bde53ce07ff61c4db6fb1759fbe8bb166ff9b32561a77475aa86f9edc",
+      "bytes": 34400
+    },
+    "trace-release-after-rejections.receipt.json": {
+      "sha256": "7bc34613eca486edf9b46903da0abf27b56467d61698c7009a5ef259bf790a0c",
+      "bytes": 5319
+    },
+    "trace-release-after-rejections.vitest.json": {
+      "sha256": "181be658f852faf9920e2de5e2ccf68b2c5375d3a6529b3e9c6c9c705b6cf4a2",
+      "bytes": 13794
+    },
+    "trace-release-after-rejections.log": {
+      "sha256": "a9c000ec8a37b89187c1ab04ae3a2730027680d731b7cd9a09c3cad0eb3ad47d",
+      "bytes": 266168
+    },
+    "trace-release-after-rejections.patch": {
+      "sha256": "3363ddcc147e011dea0fe2711de47b41ab8510edd4106072e574a4a7197b00c9",
+      "bytes": 6557
+    },
+    "trace-release-after-rejections.trace.jsonl": {
+      "sha256": "28968f4c88468b4bf9b2277e4dd407b1fda5cf5934d34ba70321bca4634f58b8",
+      "bytes": 37020
+    },
+    "trace-drain-before-geometry.receipt.json": {
+      "sha256": "66d0ff5ffdf398a6b1980aa4f3015c7dba66453cf7c6f27840f288bc1b57662f",
+      "bytes": 2897
+    },
+    "trace-drain-before-geometry.vitest.json": {
+      "sha256": "c567878555300abc225c6205c14cbb07308db424c6758db54b2494e94b07343f",
+      "bytes": 11918
+    },
+    "trace-drain-before-geometry.log": {
+      "sha256": "2b5740e52c5a2842b57eacd675f5803cdb0dd0405d6e4e3f877ae68d343ddb57",
+      "bytes": 265141
+    },
+    "trace-drain-before-geometry.patch": {
+      "sha256": "3363ddcc147e011dea0fe2711de47b41ab8510edd4106072e574a4a7197b00c9",
+      "bytes": 6557
+    },
+    "trace-drain-before-geometry.trace.jsonl": {
+      "sha256": "645d50cc129925f39d0db2c51a13ae7078a81be406b35dadd708bafd5562b717",
+      "bytes": 39154
+    },
+    "proposed-fixture.receipt.json": {
+      "sha256": "c83478ec1b09b93c4c90e3a442fec0095c62726904f655f17a48229b9810930f",
+      "bytes": 2859
+    },
+    "proposed-fixture.vitest.json": {
+      "sha256": "54915a8050f0bf17cb372d27a7ac76cf8cffea892adfdb609c477826618799cf",
+      "bytes": 11918
+    },
+    "proposed-fixture.log": {
+      "sha256": "eed43dfaabadf17a95b8da4a0fb2512876ae38b9cff70136ef367dc59c7b367d",
+      "bytes": 265315
+    },
+    "proposed-fixture.patch": {
+      "sha256": "31972874f01a4fd5d47ba48a30b31c25d83b25b724c94c9e163e5a96fb241649",
+      "bytes": 2838
+    },
+    "proposed-fixture-formatted.receipt.json": {
+      "sha256": "a83389bc63cdb3bb54080e5baeb2d3a349a0fe9360efead1f6d42222c1eaf558",
+      "bytes": 2880
+    },
+    "proposed-fixture-formatted.vitest.json": {
+      "sha256": "ab18bddd4aabcc0b09260011edcd8cee9e7ee18ccd84dc82ab3c389adf549b0f",
+      "bytes": 11925
+    },
+    "proposed-fixture-formatted.log": {
+      "sha256": "efdaa0f8b1f317993caeca9e990e7ec239c4e1ca6f2a5ad153a3ee5fd63e32e8",
+      "bytes": 265616
+    },
+    "proposed-fixture-formatted.patch": {
+      "sha256": "0298838e03b5195c70a255072a3faf4e247ce0b35ed57bb4f34d14498a1d0c7d",
+      "bytes": 2842
+    }
+  },
+  "rawArtifactAvailability": "Full local run receipts, JSON reporters, logs and traces remain with the preparing agent. This file embeds the original receipts and complete React trace excerpts plus the reproducible diagnostic patch; no external asset upload has been claimed.",
+  "provenance": {
+    "agent": "Codex",
+    "gitIdentity": "Codex <codex@openai.com>",
+    "aiUse": "OpenAI ChatGPT coding agent materially authored the diagnostic, fixture repair and record.",
+    "sourceMaterial": "Only this public MIT-licensed Proto-UI source and its existing controlled-frame fixture pattern; no proprietary source copied.",
+    "review": "Coordinating agent read the proposed helper and unchanged assertions. No human review or GitHub approval is claimed."
+  }
+}

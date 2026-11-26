@@ -1,0 +1,42 @@
+{
+  "exitCode": 1,
+  "timedOut": false,
+  "name": "source82",
+  "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "startedAt": "2026-11-24T03:11:14.862700+00:00",
+  "durationMs": 3474,
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/adapters/react/test/overlay-catalog.integration.test.ts",
+    "packages/adapters/react/test/overlay-focus.integration.test.ts",
+    "packages/adapters/react/test/overlay-portal-ownership.test.ts",
+    "packages/adapters/react/test/portal-destination-fake-array.test.ts",
+    "packages/adapters/react/test/portal-destination-lifetimes.integration.test.ts",
+    "packages/adapters/react/test/portal-destination-material-reentry.integration.test.ts",
+    "packages/adapters/react/test/portal-destination.integration.test.ts",
+    "packages/adapters/react/test/portal-direction.integration.test.ts",
+    "packages/adapters/react/test/portal-document-destination.integration.test.ts",
+    "packages/adapters/react/test/portal-first-content-identity.integration.test.ts",
+    "packages/adapters/react/test/tooltip-description-presence.integration.test.ts",
+    "packages/adapters/base/test/sprint1-async-disposal-precedence.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/var/tmp/proto-ui-native-evidence-456f/source82.json"
+  ],
+  "outerTimeoutSeconds": 180,
+  "headAfter": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "trackedStatusAfter": "",
+  "report": {
+    "success": true,
+    "numTotalTests": 0,
+    "numPassedTests": 0,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  }
+}

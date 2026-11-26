@@ -1,0 +1,10 @@
+{
+  "source": "6be3babcac8bc11fd43679b446a486c93642fb74",
+  "requestCount": 1,
+  "httpStatus": 422,
+  "workflowRunCreated": false,
+  "observedRuns": 0,
+  "result": "rejected by actual GitHub workflow expression parser before execution",
+  "error": "runner context is unavailable in jobs.contents-wheel.env; rejected lines 100 and 101",
+  "scope": "No native case or platform workflow executed; local YAML/script checks had not covered this expression context"
+}

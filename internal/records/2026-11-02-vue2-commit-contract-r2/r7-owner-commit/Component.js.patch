@@ -1,0 +1,35 @@
+--- a/Component.js
++++ b/Component.js
+@@ -40,6 +40,8 @@
+ /** @template T @typedef {{ type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }} __puiStateEvent */
+ /** @template T @typedef {{ get: () => T, setDefault: (value: T) => void, set: (value: T, reason?: unknown) => void, external: __puiExternalState<T>, dispose: () => void }} __puiOwnedState */
+ /** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: __puiDataType } | { kind: 'union', members: readonly __puiDataType[] } | { kind: 'record', fields: readonly { name: string, type: __puiDataType, optional?: boolean }[] }} __puiDataType */
++/** @typedef {{ epoch: number, revision: number, kind: 'update' }} __puiPendingCommit */
++/** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} __puiRenderedCommit */
+ /** @param {unknown} value @param {PropertyKey} key */
+ const __puiOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+ /** @param {__puiDataType} type @param {unknown} value @returns {boolean} */
+@@ -90,12 +92,15 @@
+   let revision = 0;
+   let commitVersion = 0;
+   let queued = false;
++  /** @type {__puiPendingCommit | null} */
+   let pending = null;
++  /** @type {__puiRenderedCommit | null} */
+   let renderedCommit = null;
+   
+   
+   let template = null;
+   let renderFunction;
++  /** @type {(() => void) | undefined} */
+   let unwatch;
+   let raw = Object.freeze({});
+   let resolved = Object.freeze({});
+@@ -491,6 +496,7 @@
+     },
+     hostMounted() {  nativeMounted = true; afterCommit(); },
+     afterCommit,
++    /** @param {import('vue').CreateElement} h */
+     render(h) {
+       
+       if (terminal || !present || !hostActive) {

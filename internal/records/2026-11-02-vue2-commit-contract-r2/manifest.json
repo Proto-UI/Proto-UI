@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "record": "Vue2 committed-authored/live-slot r2 failing strict reproduction",
+  "status": "11behaviorPASS_1generatedStrictFAIL_sourceStrictPASS_notCompilerAcceptance",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "executedCandidateTree": "0a2e97762970aef4416e92edbd973280aa261219",
+  "originalCandidateTree": "5ea14274ad1520ec323802b541388c332cb78373",
+  "publicationBaseProposed": "d850c28a40bfbc31f10d244b075d6f27038f46fa",
+  "publicationBaseEvidence": "Static compare only: eight commits after783touchfourwwwtests. Compiler/spec/config/lock bytes unchanged; whole d850head was not executed.",
+  "test": {
+    "path": "packages/compiler/test/vue2-native-template-commit-contract.test.ts",
+    "sha256": "aa27faa0b485b5416a6f9bf83e6c115b9fcd5516cdd22de4db51b0bc32bb08e1",
+    "cases": 12,
+    "expectCallSites": 43,
+    "skipped": 0
+  },
+  "toolchain": {
+    "node": "24.22.1",
+    "typescript": "5.9.3",
+    "vue": "2.6.14",
+    "vitest": "2.1.9",
+    "happy-dom": "15.11.7",
+    "pnpmLockSHA256": "3ac437fda5666f744c02587d9c90b47a927a6e2521973f6a18b47cc3c7cbe422"
+  },
+  "results": {
+    "collectExit": 0,
+    "behaviorPassed": 11,
+    "behaviorFailed": 0,
+    "generatedStrictFailed": 1,
+    "generatedDiagnostics": 167,
+    "sourceStrictExit": 0,
+    "sourceStrictDiagnostics": 0,
+    "unitExit": 1,
+    "codes": {
+      "7006": 106,
+      "7019": 1,
+      "7005": 13,
+      "7034": 9,
+      "7022": 1,
+      "7023": 3,
+      "7024": 1,
+      "2339": 19,
+      "7053": 9,
+      "2345": 5
+    }
+  },
+  "preservation": {
+    "originalCollection": "exit1/runner125 reporter interception failure retained locally; exact list-only disableConsoleIntercept recovery.",
+    "originalSourceStrict": "TS7006 andTS2554 in own test retained;4line r2 repaired only those.",
+    "all12GraphsByteIdenticalAcrossR2": true,
+    "all167DiagnosticsEqualAcrossR2ExceptTemporaryDirectory": true,
+    "allSourceAndDependencyPrePostChecksPassed": true
+  },
+  "placeholders": {
+    "<generated>": "Temporary directory allocated by test under compiler/test/generated-modules; actual basename intentionally omitted.",
+    "<repo>": "Repository checkout root.",
+    "<vue2-declaration-root>": "Real Vue2.6.14 package root resolved through packages/adapters/vue2/package.json.",
+    "<locked-dependencies>": "Pinned dependency root; retain hashed package identifier and relative file for provenance, not a local filesystem path."
+  },
+  "artifacts": [
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682",
+      "kind": "original-unchanged-bytes",
+      "originalArtifact": "authored.proto.ts"
+    },
+    {
+      "path": "graph/Component.js.txt",
+      "bytes": 29639,
+      "sha256": "1bb4aa8072a46a259d9e70c20aeae4851f33c9ced06c904851b1ea978a7291bb",
+      "kind": "original-unchanged-bytes",
+      "originalArtifact": "strict/files/Component.js"
+    },
+    {
+      "path": "graph/Consumer.ts.txt",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+      "kind": "original-unchanged-bytes",
+      "originalArtifact": "strict/files/Consumer.ts"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts.txt",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+      "kind": "original-unchanged-bytes",
+      "originalArtifact": "strict/files/.proto-ui/context/scope-v1.ts"
+    },
+    {
+      "path": "diagnostics.portable.json",
+      "bytes": 50653,
+      "sha256": "a968c2ac6616cd400649fa7e0f8addb2413f3d036d9976d86a4328d5604cd167",
+      "kind": "derived-location-only-redaction",
+      "originalArtifact": "strict/diagnostics.json",
+      "originalSHA256": "bdd78bdeffe71dcc202a7a106063c381afc83a01e459398215f03b419af6de94",
+      "transformation": "Only sandbox absolute path prefixes replaced by declared placeholders; no fields, diagnostics, ordering or options removed."
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5",
+      "kind": "derived-location-only-redaction",
+      "originalArtifact": "strict/request.json",
+      "originalSHA256": "85192a07d38045bd9aa3b88db11decc8694f9587910eca9010495d7e0b1e718d",
+      "transformation": "Only sandbox absolute path prefixes replaced by declared placeholders; no fields, diagnostics, ordering or options removed."
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "e9c2bbbc30008112c30b64f54beb615dfd8696112ed185049e83efba8b9d0950",
+      "kind": "derived-location-only-redaction",
+      "originalArtifact": "strict/program.json",
+      "originalSHA256": "b872e32a739b154628a66898fa2d58eea79b6c95a28d07a23083a48e5f2ffc32",
+      "transformation": "Only sandbox absolute path prefixes replaced by declared placeholders; no fields, diagnostics, ordering or options removed."
+    },
+    {
+      "path": "module-metadata.json",
+      "bytes": 729,
+      "sha256": "d28019941a93a2441b6e946457fab63fe8b06ac63cf649672c55ca9c6a87180b",
+      "kind": "metadata-projection-with-original-source-bytes-separate"
+    }
+  ],
+  "remaining": "Native lowering, generated strict, browser/build/SSR/bundle/init/full matrix and independent review remain open. This evidence does not close1055or1120.",
+  "publicSource": "https://github.com/Proto-UI/Proto-UI/issues/1055#issuecomment-6569582240"
+}

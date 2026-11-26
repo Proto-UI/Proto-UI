@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "kind": "engineering-evidence-index",
+  "normative": false,
+  "scope": "ControlLabel generic Web lowering, Runtime interoperability, bounded compatibility repairs and alpha.2 preparation",
+  "observationTimezone": "UTC",
+  "productCommit": "b41273fdb264ffc5a4f29ecfa398aa5b6a319e26",
+  "productTree": "ce45013835fb00faf568848c4d5c8dee33eca93c",
+  "sourceManifestSha256": "6c26261d3b9b0dbefcf96101c033d53ca6269430b2c0f69e7111932b3bfbe9b9",
+  "environments": {
+    "localNode": "24.22.1",
+    "remoteNode": "24.21.0",
+    "pnpm": "10.32.1",
+    "typescript": "5.9.3",
+    "chromium": "157.0.8103.38",
+    "chromiumSandbox": true
+  },
+  "compiler": {
+    "files": 76,
+    "tests": 1692,
+    "passed": 1691,
+    "skipped": 1,
+    "batches": 10,
+    "seconds": 199.91217255592346,
+    "missing": [],
+    "duplicates": [],
+    "skippedAssertions": [
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "name": "exact old CLI corpus capture captures actual Trigger Text Boundary and Modal output directories with complete provenance",
+        "status": "skipped"
+      }
+    ],
+    "manifestSha256": "8607f9d3991ff386d04ba655d85ac3963fc1fbf096780ae3b1678d92e887458a",
+    "summarySha256": "576d8117ed07b1cabaffd23eba7d5cd1065bad285bc3fc2d0bf4e3a80d142c13",
+    "results": [
+      {
+        "id": "batch-01",
+        "files": 8,
+        "tests": 140,
+        "passed": 140,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-02",
+        "files": 8,
+        "tests": 100,
+        "passed": 100,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-03",
+        "files": 8,
+        "tests": 172,
+        "passed": 172,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-04",
+        "files": 8,
+        "tests": 222,
+        "passed": 222,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-05",
+        "files": 8,
+        "tests": 144,
+        "passed": 144,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-06",
+        "files": 8,
+        "tests": 194,
+        "passed": 193,
+        "pending": 1,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-07",
+        "files": 8,
+        "tests": 246,
+        "passed": 246,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-08",
+        "files": 8,
+        "tests": 243,
+        "passed": 243,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-09",
+        "files": 8,
+        "tests": 130,
+        "passed": 130,
+        "pending": 0,
+        "exitCode": 0
+      },
+      {
+        "id": "batch-10",
+        "files": 4,
+        "tests": 101,
+        "passed": 101,
+        "pending": 0,
+        "exitCode": 0
+      }
+    ]
+  },
+  "owningLayer": {
+    "files": 18,
+    "tests": 280,
+    "passed": 280,
+    "skipped": 0,
+    "reportSha256": "70d49f083070bd2c86a2871b5dabbc6488a463ac3fea1ce60b90248d6087a475",
+    "filesExecuted": [
+      "packages/core/test/control-label.test.ts",
+      "packages/modules/a11y/test/control-label-source.test.ts",
+      "packages/modules/a11y/test/part-relationships.test.ts",
+      "packages/modules/a11y/test/web-range.test.ts",
+      "packages/modules/a11y/test/web-reference.test.ts",
+      "packages/modules/a11y/test/web.test.ts",
+      "packages/modules/control-label/test/activation-projection.test.ts",
+      "packages/modules/control-label/test/anatomy-pair.test.ts",
+      "packages/modules/control-label/test/failure-recovery.test.ts",
+      "packages/modules/control-label/test/registry.test.ts",
+      "packages/modules/control-label/test/web-lifecycle.test.ts",
+      "packages/modules/control-label/test/web.test.ts",
+      "packages/adapters/react/test/control-label.integration.test.ts",
+      "packages/adapters/vue/test/control-label.integration.test.ts",
+      "packages/adapters/vue2/test/control-label.integration.test.ts",
+      "packages/adapters/vue2/test/instance-associations.test.ts",
+      "packages/adapters/web-component/test/control-label.integration.test.ts",
+      "packages/runtime/test/contract/control-label.cleanup.contract.test.ts"
+    ]
+  },
+  "native": {
+    "candidate": {
+      "head": "b41273fdb264ffc5a4f29ecfa398aa5b6a319e26",
+      "headTree": "ce45013835fb00faf568848c4d5c8dee33eca93c",
+      "dirty": false,
+      "statusEntries": [],
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "buildSha256": "90ff4ded9710702cb5ee9db77750829d98bdc2b85e2acafda65613dc67736787",
+    "bundleSha256": "13549f78685eb737ac4becc46fe497f8e5bf245c103740a0d8b9ae3987e2b05b",
+    "browser": "157.0.8103.38",
+    "cases": 24,
+    "pass": 24,
+    "fail": 0,
+    "pageErrors": 0,
+    "blockedRequests": 0,
+    "captureErrors": 0
+  },
+  "types": {
+    "command": ["corepack", "pnpm@10.32.1", "check:types"],
+    "exitCode": 0,
+    "seconds": 206.4431290626526,
+    "headAtStart": "ce56274971f51590c8bccb33c1a2763637a88fc5",
+    "sourceManifestSha256": "6c26261d3b9b0dbefcf96101c033d53ca6269430b2c0f69e7111932b3bfbe9b9",
+    "docs": {
+      "files": 1226,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 30
+    },
+    "bindingNote": "Command began on the frozen working candidate before its signed commit; all 180 source file hashes were verified before and after, and match productCommit."
+  },
+  "packages": {
+    "command": ["corepack", "pnpm@10.32.1", "build:packages"],
+    "exitCode": 0,
+    "seconds": 79.15279603004456,
+    "headAtStart": "b41273fdb264ffc5a4f29ecfa398aa5b6a319e26",
+    "sourceManifestSha256": "6c26261d3b9b0dbefcf96101c033d53ca6269430b2c0f69e7111932b3bfbe9b9",
+    "publicPackages": 47
+  },
+  "releaseTests": {
+    "fullRunBeforeFinalRepairs": {
+      "files": 23,
+      "tests": 214,
+      "passed": 211,
+      "failed": 3,
+      "skipped": 0,
+      "seconds": 291.04
+    },
+    "affectedFilesAfterRepair": {
+      "files": 2,
+      "executedTests": 26,
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 33.6,
+      "filteredUnchangedCase": "authoring preserves identities across deletion, replacement, and file moves",
+      "filteredCasePriorResult": "passed, 219.99 seconds; no timeout or assertion change"
+    },
+    "fixes": [
+      "Current scoped lifecycle fixture derives a nonempty bounded subset from the independently read authored plan.",
+      "Bounded npm 429 retries continue after a failed normally exited child, retaining original success, resume and hard-failure boundaries."
+    ],
+    "registryWrites": false
+  },
+  "governance": {
+    "releaseVersion": "passed",
+    "releaseAssets": {
+      "status": "passed",
+      "packages": 47
+    },
+    "packageManifests": {
+      "status": "passed",
+      "packages": 47
+    },
+    "spec": {
+      "entities": 1271,
+      "schemaRelationEvidenceIssues": 0,
+      "activeTestMappingIssues": 0,
+      "authoringChangedInputs": 10
+    },
+    "runtimeRunner": {
+      "browserSuites": 99,
+      "nodeTests": 137,
+      "passed": 137,
+      "skipped": 0
+    },
+    "sourceTreeUnchanged": true
+  },
+  "historicalFailuresRetained": [
+    "Initial full compiler candidate: 16 failed assertions and 109 unexecuted/skipped tests, including beforeAll-blocked cases and the one capture-old-only case; repaired rather than removed.",
+    "Local official types exited 137; remote controlled run exposed two fixture-only Vue2 injection type boundaries, subsequently corrected.",
+    "One full compiler run was interrupted 130 for a reproduced ID reentry fix; another was system-killed. Final verification preserves the complete Vitest-discovered 76-file set in independent bounded processes.",
+    "An initial non-root runuser browser launcher failed before executing tests; all counted native runs use the normal user and enabled Chromium sandbox.",
+    "tsx CLI Unix IPC EPERM; same authoring script passed through node --import tsx.",
+    "One GC child timed out under load; unchanged isolated and full 137-case reruns passed without changing the timeout."
+  ],
+  "evidenceAvailability": {
+    "maintainedRecord": "2026-11-15-control-label-compiler-alpha.2-repair.zh-CN.md",
+    "rawLogs": "Retained in the task workspaces; not falsely represented as uploaded GitHub artifacts.",
+    "publicScreenshotUploads": "pending",
+    "inspectedFinalCapture": {
+      "scenario": "vue2 / Runtime Label / compiled Toggle / activated",
+      "viewport": {
+        "width": 960,
+        "height": 640
+      },
+      "theme": "plain light behavior fixture",
+      "sha256": "7efe6925eadd4cc5cf735abf73ac03f033b124a19550d5aeb71b5c60061a34e8"
+    },
+    "independentGitHubApproval": false,
+    "npmPublication": false
+  }
+}

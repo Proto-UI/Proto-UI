@@ -1,0 +1,55 @@
+{
+  "source": "92d3331636ff6337c87fc557f4b0334d426398dd",
+  "run": 45392795625,
+  "job": 138440634742,
+  "result": "failure",
+  "controls": "2 passed, 0 skipped",
+  "publicMatrix": "1 failed; 9 other tests intentionally filtered; first Shadcn/WC/click failed before remaining matrix combinations",
+  "entries": [
+    {
+      "path": "afterTest.json",
+      "bytes": 3559,
+      "sha256": "b6640f7e1fce0673adccdeb72b419b95295bbc277905f58170006050b403d88b"
+    },
+    {
+      "path": "beforeTest.json",
+      "bytes": 3604,
+      "sha256": "76d6235696c0d54e1c713bf7c36b617605803be104929efb01a60422a34d6fbd"
+    },
+    {
+      "path": "evidence-bundle.tar.gz",
+      "bytes": 363345,
+      "sha256": "714facf9ed52259dc86e70f41071ece4755d0a2848b0c7135df55fa98dba6ad0"
+    },
+    {
+      "path": "independent-native-observation-92d.json",
+      "bytes": 13953,
+      "sha256": "3541c64e32a21ce43b023f235d24fc718a99ddc70da27d567dfd280dee9d0d84"
+    },
+    {
+      "path": "independent-native-observation-92d.md",
+      "bytes": 6506,
+      "sha256": "f62164a7a9fc88a5edca7ba3b318e8042bc828caeea89a0f098b8cb34031e3f7"
+    },
+    {
+      "path": "result-report.md",
+      "bytes": 3439,
+      "sha256": "87ede250ba40d5b34df4682283d08497ea0634743b4c05b082f7152a00fb74f8"
+    },
+    {
+      "path": "result-summary.json",
+      "bytes": 7951,
+      "sha256": "ba48a2087b45b51184780cbc17c6de9bb971335e25dac0d6b01f31c606187fbe"
+    },
+    {
+      "path": "shadcn-wc-click-wheel-failure.png",
+      "bytes": 57151,
+      "sha256": "a827d395163db0c31897c4aa791bd0f32af1a9489f95fcc76186f782a7adfa2b"
+    },
+    {
+      "path": "shadcn-wc-click-wheel.json",
+      "bytes": 52832,
+      "sha256": "044a428257490b5fcdc769fd47a6858a066fff961a4fe1df41e8091f61df1b7e"
+    }
+  ]
+}

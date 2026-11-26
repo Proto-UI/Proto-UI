@@ -1,0 +1,84 @@
+{
+  "sourceBase": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+  "patchSha256": "81b93c1600b75dea8218f9214aa74ef9dc42b6e6ebdcc48976ec8786bcd7a8a7",
+  "files": [
+    {
+      "path": "packages/compiler/src/parser.ts",
+      "sha256": "6d3cc2ea2601c68fd8b1eaef548cf63fa5ee8ba3fd57bce5e166a5922d24eb4a"
+    },
+    {
+      "path": "packages/adapters/base/test/shader-unused-capability.test.ts",
+      "sha256": "35741a6435cf3e3d9bd1d042ef1e26f401c5e05f800ecebe165e33e1fa59e0a0"
+    },
+    {
+      "path": "packages/prototypes/base/package.json",
+      "sha256": "f506961e79805a73e24e79a5ad205a41f19c68845482935b62e966b91aebb7c9"
+    },
+    {
+      "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "sha256": "232c977a85e10786f289457d874f8a67ee195b99ef2a3b2a81813761af8abe1d"
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "sha256": "47e2b395e769b328d58e48779815ecd6d7557a9f0656439fde4b920fb7c4eeaa"
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "sha256": "dc6869effa49c502d89518cecb0d5298ce344ffdf9ec603b0a6412fbd5f196b9"
+    }
+  ],
+  "independentSourceReview": {
+    "reviewer": "/root/sprint12",
+    "result": "no blocking finding",
+    "reviewedPatchSha256": "81b93c1600b75dea8218f9214aa74ef9dc42b6e6ebdcc48976ec8786bcd7a8a7",
+    "githubApprove": false
+  },
+  "tests": {
+    "parserAndShader": {
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0
+    },
+    "publicManifests": {
+      "checked": 47,
+      "result": "passed"
+    },
+    "presetGenerationChecks": {
+      "result": "passed",
+      "motionPaletteTests": 13
+    }
+  },
+  "scope": "Bounded integration source and generated projections; final integrated type-check, package budgets, packed smoke and browsers remain required.",
+  "raw": [
+    {
+      "path": "root-ci-focused-vitest.json.gz",
+      "rawSha256": "4eededf913eab4dc510ec853690be693babb9f241adebf076cf59070b8e92b5d",
+      "gzipSha256": "e84ad6aba65e2aaae3326eb9c451a6b4d81fa72cc7594bf949bf7f34fc2c01c6"
+    },
+    {
+      "path": "root-ci-focused-vitest.log.gz",
+      "rawSha256": "24a39eab724b052df55a878b1ec5552ad60d21a36099a132fbe9c43b0d32a925",
+      "gzipSha256": "c4a7f1818f2cb41a74f13ce262fffc37a489c02b647d03e45f13e15e3a3b8057"
+    },
+    {
+      "path": "root-ci-preset-check.log.gz",
+      "rawSha256": "958caa2548989774c73c76a0f2fedd5027144b6cfeff3d0acfc52edebc44929b",
+      "gzipSha256": "c97c43e59e6565c0c57e4b59ea91dabdea5dfef954be9810ff2552c60e19cd27"
+    },
+    {
+      "path": "job-137596731053.log.gz",
+      "rawSha256": "967e078a3b22a836f86d153ecdb652d16e7d2685e454d3577d7e45c0580b4b5f",
+      "gzipSha256": "98a2c8fa9dd15775b92d80459a663a5be24320bfc6d8e5ad59565f04b8adc527"
+    },
+    {
+      "path": "job-137596879189.log.gz",
+      "rawSha256": "eefd73645475f26c555229b9b912279b3ca53f8de6cc17b617d119cab3a31402",
+      "gzipSha256": "791703b492cc968a0a58a3d360392408c31a032ab0f8eebd5107dea7640c3587"
+    },
+    {
+      "path": "job-137597104358.log.gz",
+      "rawSha256": "ea7b03d50e075bc2ba38a5dc3bf67cb4d2cd16a107e7321251d0c14963153350",
+      "gzipSha256": "6edd740d0672821c8254b7120572fcab56c10d1d1a14122e772efd066350016b"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+// Reached Text Control native host operations and shared ownership.
+import { owners, targets, hostIds, activeScopes, logicalRoot, descends, rootOwners, logicalOwners, type Owner, type Claim, type NativeFocusRequest } from './ownership-v1';
+export type NativeConfig = Readonly<Record<string, unknown>>;
+export type NativeTextEvent = Readonly<{type: string; value: string; composing: boolean; data: string | null; inputType: string | null}>;
+export interface NativeTextControl<Run = unknown> { on(type: string, callback: (run: Run, event: NativeTextEvent) => void): () => void; sync(patch: NativeConfig): void; snapshot(): { value: string; composing: boolean } | null }
+
+export type NativeInteraction<Run> = {
+  asTextControl(): NativeTextControl<Run>;
+  rootTag(): string | null;
+  rootProperties(): Readonly<Record<string, string | number | boolean | null>>;
+  projectAttributes(): Readonly<Record<string, string | null>>;
+  refresh(): void; mount(): void; unmount(): void; dispose(): void;
+};
+export interface NativeTextOptions<Run> {
+  ensureSetup(operation: string): void; ensureRuntime(operation: string): void;
+  isAlive(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T;
+  getRun(): Run; getRoot(): HTMLElement | null; getHost?(): HTMLElement | null;
+  identity: object; getLogicalParent(): object | null;
+  getExposes?(): Readonly<Record<string, unknown>>;
+  requestHostUpdate?(): void;
+}
+export function createNativeInteraction<Run>(options: NativeTextOptions<Run>): NativeInteraction<Run> {
+  let disposed = false, root: HTMLElement | null = null, host: HTMLElement | null = null, generation = 0;
+  let hostProperties: Readonly<Record<string, string | number | boolean | null>> | null = null, hostPortal: HTMLElement | null = null;
+  const cleanups: (() => void)[] = [];
+  const hooks = new Set<string>(), claims = new Map<object, Claim>();
+  const focusConfig: Record<string, unknown> = { disabled: false, navParticipation: 'auto' };
+  const scopeConfig: Record<string, unknown> = {}, rovingConfig: Record<string, unknown> = {};
+  let pendingFocus: NativeFocusRequest | null = null;
+  const owner: Owner = {
+    identity: options.identity, parent: options.getLogicalParent, target: () => root,
+    host: () => root ? options.getHost?.() ?? root : null,
+    alive: () => !disposed && options.isAlive(), hooks, claims,
+    exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig,
+    selected: false, active: false, scopeDeclared: false, rovingDeclared: false,
+    focusDeclared: false, entryDeclared: false, scopeActive: false,
+    focus: request => requestFocus(request), changed: () => refresh(),
+  };
+  if (owners.has(options.identity)) throw new Error('[Modules] duplicate live owner identity.');
+  function alive() { if (disposed || !options.isAlive()) throw new Error('[Modules] owner is terminally disposed.'); }
+  function setup(operation: string) { alive(); options.ensureSetup(operation); }
+  function runtime(operation: string) { alive(); options.ensureRuntime(operation); }
+  function ready() { return !disposed && options.isAlive() && !!root && root === options.getRoot() && root.isConnected; }
+  function declare(name: string) { setup('hook.' + name); hooks.add(name); }
+  function announceTopology(rootOwner = logicalRoot(owner)) {
+    for (const participant of [...owners.values()])
+      if (participant.alive() && logicalRoot(participant) === rootOwner) participant.changed();
+  }
+  function requestFocus(request?: NativeFocusRequest) {
+    alive();
+    for (let index = activeScopes.length - 1; index >= 0; index--) {
+      const scope = activeScopes[index];
+      if (!scope.alive()) { activeScopes.splice(index, 1); continue; }
+      if (scope.target()?.isConnected) { if (!descends(owner, scope)) return; break; }
+    }
+    if (!ready() || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { pendingFocus = request ?? {}; return; }
+    options.invoke(() => { runtime('focus.focusSelf'); root!.focus({ preventScroll: request?.preventScroll }); });
+  }
+  function requestPresentation() {
+    if (disposed || !options.isAlive() || !(options.isReady?.() ?? true)) return;
+    const next = rootProperties(), portal = null;
+    const changed = !hostProperties || portal !== hostPortal || Object.keys(next).length !== Object.keys(hostProperties).length || Object.keys(next).some(key => next[key] !== hostProperties![key]);
+    hostProperties = next; hostPortal = portal;
+    if (changed) options.requestHostUpdate?.();
+  }
+  function listen(target: EventTarget, type: string, callback: (event: Event) => void, listenerOptions?: AddEventListenerOptions) {
+    const epoch = generation;
+    const guarded = (event: Event) => { if (epoch === generation && ready() && (options.isReady?.() ?? true)) callback(event); };
+    target.addEventListener(type, guarded, listenerOptions); cleanups.push(() => target.removeEventListener(type, guarded, listenerOptions));
+  }
+  const textListeners = new Map<string, Set<(run: Run, event: NativeTextEvent) => void>>();
+  let textDeclared = false, textInitialized = false, textValue = '', textComposing = false, textMode = 'uncontrolled';
+  let textPatch: NativeConfig = {};
+  const canonicalText = (value: string) => { const normalized = value.replace(/\r\n?/g, '\n'); return normalized; };
+  function restoreTextValue(target: HTMLInputElement | HTMLTextAreaElement) {
+    if (target.value === textValue || textComposing) return;
+    const start = target.selectionStart, end = target.selectionEnd, direction = target.selectionDirection;
+    const top = target.scrollTop, left = target.scrollLeft;
+    target.value = textValue;
+    if (start !== null && end !== null) target.setSelectionRange(Math.min(start, textValue.length), Math.min(end, textValue.length), direction ?? 'none');
+    target.scrollTop = top; target.scrollLeft = left;
+  }
+  function applyText() {
+    if (!ready() || !textDeclared) return;
+    if (root!.localName !== 'input' && root!.localName !== 'textarea') throw new Error('[TextControl] renderer did not bind the required physical Root.');
+    const target = root as HTMLInputElement | HTMLTextAreaElement;
+    if (target.localName === 'input' && !['text','search','tel','password'].includes((target as HTMLInputElement).type)) throw new Error('[TextControl] incompatible input sanitization.');
+    for (const [key, value] of Object.entries(textPatch)) {
+      if (['value','valueMode','defaultValue'].includes(key)) continue;
+      if (['disabled','readOnly','required'].includes(key)) { Reflect.set(target, key, value); continue; }
+      if (key === 'rows' && target.localName === 'textarea') { Reflect.set(target, key, Math.max(1, Math.trunc(Number(value)))); continue; }
+      if (key === 'minLength' || key === 'maxLength') { if (Number(value) < 0) target.removeAttribute(key.toLowerCase()); else Reflect.set(target, key, Math.trunc(Number(value))); continue; }
+      if (['placeholder','name','autoComplete','inputMode','enterKeyHint','wrap'].includes(key)) { if (value === '') target.removeAttribute(key.toLowerCase()); else target.setAttribute(key.toLowerCase(), String(value)); }
+    }
+    if (typeof textPatch.defaultValue === 'string') target.defaultValue = canonicalText(textPatch.defaultValue);
+    restoreTextValue(target);
+  }
+  const textControl: NativeTextControl<Run> = {
+    on(type, callback) {
+      setup('textControl.on');
+      if (!['input','change','compositionstart','compositionupdate','compositionend'].includes(type)) throw new Error('[TextControl] invalid event type.');
+      let listeners = textListeners.get(type); if (!listeners) { listeners = new Set(); textListeners.set(type, listeners); }
+      listeners.add(callback); return () => { setup('textControl.off'); listeners!.delete(callback); };
+    },
+    sync(patch) {
+      runtime('textControl.sync');
+      if (!textInitialized) { textMode = String(patch.valueMode ?? 'uncontrolled'); if (!['controlled','uncontrolled'].includes(textMode)) throw new Error('[TextControl] invalid value mode.'); textValue = canonicalText(String(textMode === 'controlled' ? patch.value ?? '' : patch.defaultValue ?? '')); textInitialized = true; }
+      textPatch = { ...textPatch, ...patch, valueMode: textMode,
+        ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
+        ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
+      if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
+      applyText(); requestPresentation();
+    },
+    snapshot() { alive(); return textDeclared ? Object.freeze({ value: textValue, composing: textComposing }) : null; },
+  };
+  function attachText() {
+    if (!textDeclared) return;
+    applyText();
+    const target = root as HTMLInputElement | HTMLTextAreaElement, epoch = generation;
+    for (const type of ['input','change','compositionstart','compositionupdate','compositionend']) listen(target, type, native => {
+      const editing = native as InputEvent;
+      if (type === 'compositionstart' || type === 'input' && editing.isComposing) textComposing = true;
+      if (type === 'compositionend') textComposing = false;
+      const value = canonicalText(target.value);
+      if (textMode === 'uncontrolled' && type === 'input') textValue = value;
+      const event = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null });
+      for (const callback of [...textListeners.get(type) ?? []]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; options.invoke(() => callback(options.getRun(), event)); }
+      if (textMode === 'controlled' && (type === 'compositionend' || type === 'input' && !textComposing)) queueMicrotask(() => { if (epoch === generation && ready()) applyText(); });
+    });
+  }
+
+  function rootTag(): string | null {
+    alive(); return 'textarea';
+  }
+  function rootProperties(): Readonly<Record<string, string | number | boolean | null>> {
+    alive();
+    const result: Record<string, string | number | boolean | null> = Object.create(null);
+    {
+      result.value = textValue;
+      for (const [key, value] of Object.entries(textPatch)) if (!['value','valueMode','defaultValue'].includes(key) && (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
+        if (key === 'minLength' || key === 'maxLength') result[key] = typeof value === 'number' && value >= 0 ? Math.trunc(value) : null;
+        else if (key === 'rows') result[key] = Math.max(1, Math.trunc(Number(value)));
+        else result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
+  function projectAttributes(): Readonly<Record<string, string | null>> {
+    alive();
+    const result: Record<string, string | null> = Object.create(null);
+    if (hostIds.has(options.identity)) {
+      const existing = owners.get(options.identity)?.target()?.id;
+      if (existing) hostIds.set(options.identity, existing);
+      result.id = hostIds.get(options.identity)!;
+    }
+    return result;
+  }
+  function refresh() {
+    if (disposed || !options.isAlive()) return;
+    if (!ready()) { requestPresentation(); return; }
+    const next = projectAttributes();
+    for (const [name, ownership] of attributes) if (!Object.hasOwn(next, name)) {
+      if (root!.getAttribute(name) === ownership.projected) {
+        if (ownership.baseline === null) root!.removeAttribute(name);
+        else root!.setAttribute(name, ownership.baseline);
+      }
+      attributes.delete(name);
+    }
+    for (const [name, value] of Object.entries(next)) {
+      const current = root!.getAttribute(name);
+      let ownership = attributes.get(name);
+      if (!ownership) { ownership = { baseline: current, projected: current }; attributes.set(name, ownership); }
+      else if (current !== ownership.projected) ownership.baseline = current;
+      if (current !== value) { if (value === null) root!.removeAttribute(name); else root!.setAttribute(name, value); }
+      ownership.projected = value;
+    }
+    applyText();
+    if (pendingFocus) { const request = pendingFocus; pendingFocus = null; requestFocus(request); }
+    requestPresentation();
+  }
+  function unmount() {
+    const previous = root, previousHost = host;
+    ++generation; root = host = null;
+    if (previous && targets.get(previous) === owner) targets.delete(previous);
+    const failures: unknown[] = [];
+    for (const off of cleanups.splice(0)) try { off(); } catch (error) { failures.push(error); }
+    textComposing = false;
+    if (previous) {
+      try { announceTopology(); } catch (error) { failures.push(error); }
+      for (const [name, ownership] of attributes) if (previous.getAttribute(name) === ownership.projected) {
+        if (ownership.baseline === null) previous.removeAttribute(name);
+        else previous.setAttribute(name, ownership.baseline);
+      }
+    }
+    attributes.clear();
+    if (previous && rootOwners.get(previous)?.identity === options.identity) rootOwners.delete(previous);
+    if (previousHost && rootOwners.get(previousHost)?.identity === options.identity) rootOwners.delete(previousHost);
+    logicalOwners.delete(options.identity);
+    if (failures.length) throw new AggregateError(failures, '[Modules] view cleanup failed.');
+  }
+  function mount() {
+    alive(); const candidate = options.getRoot();
+    if (root === candidate && ready()) { refresh(); return; }
+    unmount(); alive(); root = candidate;
+    if (!root) return;
+    host = options.getHost?.() ?? root;
+    const routeOwner = { identity: options.identity, parent: options.getLogicalParent, trigger: () => false, target: root };
+    rootOwners.set(root, routeOwner); rootOwners.set(host, routeOwner); logicalOwners.set(options.identity, routeOwner);
+    targets.set(root, owner);
+    if (root.id) hostIds.set(options.identity, root.id);
+    try { attachText(); refresh(); announceTopology(); }
+    catch (error) {
+      try { unmount(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Modules] mount and cleanup failed.'); }
+      throw error;
+    }
+  }
+  owners.set(options.identity, owner);
+  return {
+    asTextControl() { declare('asTextControl'); textDeclared = true; return textControl; },
+
+    rootTag, rootProperties, projectAttributes, refresh, mount, unmount,
+    dispose() {
+      if (disposed) return;
+      const rootOwner = logicalRoot(owner), failures: unknown[] = [];
+      disposed = true;
+      try { unmount(); } catch (error) { failures.push(error); }
+      owners.delete(options.identity); claims.clear(); hooks.clear(); textListeners.clear();
+      try { announceTopology(rootOwner); } catch (error) { failures.push(error); }
+      if (failures.length) throw new AggregateError(failures, '[Modules] terminal cleanup failed.');
+    },
+  };
+}

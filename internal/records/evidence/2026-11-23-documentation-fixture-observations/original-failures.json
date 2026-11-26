@@ -1,0 +1,494 @@
+[
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > shadcn/wc/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 6.966661000000045,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > brutalist/wc/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 1.3830600000000004,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > shadcn/react/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 1.0768239999999878,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > brutalist/react/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 0.9802509999999529,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > shadcn/vue/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 1.0001290000000154,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > brutalist/vue/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 0.9295280000000048,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > shadcn/vue2/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 1.250611000000049,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts",
+    "name": "apps/www/src/components/Homepage/homepage-focus-owner.test.ts > Homepage native focus paint ownership > brutalist/vue2/announcement carries resolved appearance without moving native semantics",
+    "durationMs": 0.8979709999999841,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }",
+        "stack": "AssertionError: expected { href: '/docs/?q=1#part', \u2026(5) } to match object { href: '/docs/?q=1#part', \u2026(5) }\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/Homepage/homepage-focus-owner.test.ts:68:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/documentation-image-trigger-readiness.test.ts",
+    "name": "apps/www/src/components/documentation-image-trigger-readiness.test.ts > accepts actual shadcn private trigger identity and rejects obsolete, incomplete or wrong-family controls",
+    "durationMs": 8.859159999999974,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected false to be true // Object.is equality",
+        "stack": "AssertionError: expected false to be true // Object.is equality\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/documentation-image-trigger-readiness.test.ts:38:27\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/documentation-image-trigger-readiness.test.ts",
+    "name": "apps/www/src/components/documentation-image-trigger-readiness.test.ts > accepts actual brutalist private trigger identity and rejects obsolete, incomplete or wrong-family controls",
+    "durationMs": 1.5577260000000024,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected false to be true // Object.is equality",
+        "stack": "AssertionError: expected false to be true // Object.is equality\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/documentation-image-trigger-readiness.test.ts:38:27\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/accordion-demo-teardown.test.ts",
+    "name": "apps/www/src/content/docs/accordion-demo-teardown.test.ts > Nested Accordion terminal lifetime across real runtime hosts > react closes and reopens nested owners without transient duplicate parts",
+    "durationMs": 1311.792909,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "single-overview-content: expected 'p-3 pui-owner-demo-2' to be 'p-3' // Object.is equality",
+        "stack": "AssertionError: single-overview-content: expected 'p-3 pui-owner-demo-2' to be 'p-3' // Object.is equality\n    at assertOpen (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/accordion-demo-teardown.test.ts:70:41)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/accordion-demo-teardown.test.ts:87:32\n    at Timeout.checkCallback (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:3598:24)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/accordion-demo-teardown.test.ts",
+    "name": "apps/www/src/content/docs/accordion-demo-teardown.test.ts > Nested Accordion terminal lifetime across real runtime hosts > vue closes and reopens nested owners without transient duplicate parts",
+    "durationMs": 1266.162781,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "single-overview-content: expected 'p-3 pui-owner-demo-3' to be 'p-3' // Object.is equality",
+        "stack": "AssertionError: single-overview-content: expected 'p-3 pui-owner-demo-3' to be 'p-3' // Object.is equality\n    at assertOpen (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/accordion-demo-teardown.test.ts:70:41)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/accordion-demo-teardown.test.ts:87:32\n    at Timeout.checkCallback (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:3598:24)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/accordion-demo-teardown.test.ts",
+    "name": "apps/www/src/content/docs/accordion-demo-teardown.test.ts > Nested Accordion terminal lifetime across real runtime hosts > vue2 closes and reopens nested owners without transient duplicate parts",
+    "durationMs": 1211.4720860000002,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "single-overview-content: expected 'p-3 pui-owner-demo-4' to be 'p-3' // Object.is equality",
+        "stack": "AssertionError: single-overview-content: expected 'p-3 pui-owner-demo-4' to be 'p-3' // Object.is equality\n    at assertOpen (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/accordion-demo-teardown.test.ts:70:41)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/accordion-demo-teardown.test.ts:87:32\n    at Timeout.checkCallback (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:3598:24)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field shadcn demo cancellation consumer (synthetic WC) > retires a pending reply after delivered pointer activation and permits a fresh request",
+    "durationMs": 231.5398409999998,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field shadcn demo cancellation consumer (synthetic WC) > accepts an explicit newer change after cancellation while the canceled request stays retired",
+    "durationMs": 189.15856200000007,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field shadcn demo cancellation consumer (synthetic WC) > does not claim cancellation when only pointerdown arrives without a committed command",
+    "durationMs": 185.53055199999994,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field shadcn demo cancellation consumer (synthetic WC) > shows cancellation after an already completed invalid check without clearing established validity",
+    "durationMs": 197.09891100000004,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field shadcn demo cancellation consumer (synthetic WC) > keeps the actual command before mounted error feedback and preserves editor associations",
+    "durationMs": 162.88319599999977,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field bootstrap-2-3-2 demo cancellation consumer (synthetic WC) > retires a pending reply after delivered pointer activation and permits a fresh request",
+    "durationMs": 136.10306900000023,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field bootstrap-2-3-2 demo cancellation consumer (synthetic WC) > accepts an explicit newer change after cancellation while the canceled request stays retired",
+    "durationMs": 126.21661799999993,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field bootstrap-2-3-2 demo cancellation consumer (synthetic WC) > does not claim cancellation when only pointerdown arrives without a committed command",
+    "durationMs": 129.38622000000032,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field bootstrap-2-3-2 demo cancellation consumer (synthetic WC) > shows cancellation after an already completed invalid check without clearing established validity",
+    "durationMs": 126.67472799999996,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field bootstrap-2-3-2 demo cancellation consumer (synthetic WC) > keeps the actual command before mounted error feedback and preserves editor associations",
+    "durationMs": 145.58061799999996,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at mount (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/field-demo-cancellation.test.ts:49:22)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field liquid-glass demo cancellation consumer (synthetic WC) > retires a pending reply after delivered pointer activation and permits a fresh request",
+    "durationMs": 288.7210190000005,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field liquid-glass demo cancellation consumer (synthetic WC) > accepts an explicit newer change after cancellation while the canceled request stays retired",
+    "durationMs": 159.6259460000001,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field liquid-glass demo cancellation consumer (synthetic WC) > does not claim cancellation when only pointerdown arrives without a committed command",
+    "durationMs": 155.44870300000002,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field liquid-glass demo cancellation consumer (synthetic WC) > shows cancellation after an already completed invalid check without clearing established validity",
+    "durationMs": 135.83128100000067,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+    "name": "apps/www/src/content/docs/field-demo-cancellation.test.ts > Field liquid-glass demo cancellation consumer (synthetic WC) > keeps the actual command before mounted error feedback and preserves editor associations",
+    "durationMs": 148.9879009999995,
+    "errors": [
+      {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'modules')",
+        "stack": "TypeError: Cannot read properties of undefined (reading 'modules')\n    at Module.getModuleDeclaration (/home/runner/work/Proto-UI/Proto-UI/packages/core/src/prototype.ts:291:16)\n    at Module.AdaptToWebComponent (/home/runner/work/Proto-UI/Proto-UI/packages/adapters/web-component/src/adapt.ts:187:23)\n    at Module.ensurePreviewWcRegistered (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/wc-registry.ts:15:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:317:18)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:337:29)\n    at renderDemoNodeWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:312:31)\n    at renderDemoWc (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:506:3)\n    at Module.renderDemo (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/PrototypePreviewer/demo-renderer.ts:1992:22)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > binds both rendered controls once when the document is interactive",
+    "durationMs": 61.326010999999994,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:172:9\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > binds both rendered controls once when the document is complete",
+    "durationMs": 14.320902000000046,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:172:9\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > waits for DOMContentLoaded when loading and binds each control only once",
+    "durationMs": 14.657515999999987,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:188:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > does not duplicate valueChange handlers on repeated Astro page loads",
+    "durationMs": 8.755015000000071,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:206:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > binds a newly inserted root on page load without rebinding retained roots",
+    "durationMs": 10.056208999999967,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:228:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > maps en to the declared zh-cn path and persists the new preference",
+    "durationMs": 7.840582999999924,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:248:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:629:21\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > maps zh-cn to the declared en path and persists the new preference",
+    "durationMs": 7.7913500000000795,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:248:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:629:21\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > does not navigate or persist for the current locale or an unmapped locale",
+    "durationMs": 10.659040000000005,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:265:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > uses the exposed value when event detail is absent, while explicit detail wins",
+    "durationMs": 7.365538000000015,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:278:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > synchronizes a stored preference to the cookie only once across both controls",
+    "durationMs": 10.896991999999955,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:290:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > leaves an already synchronized cookie and stored preference untouched",
+    "durationMs": 18.927062999999976,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:304:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > still binds and writes the cookie when localStorage is unavailable",
+    "durationMs": 8.650970999999913,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:319:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/test/language-select-lifecycle.test.ts",
+    "name": "apps/www/test/language-select-lifecycle.test.ts > processed language selector script lifecycle > preserves malformed-JSON rejection without blocking valid siblings, and retries after repair",
+    "durationMs": 7.184646000000043,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Unexpected client import: ../site-locale-navigation",
+        "stack": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:96\n          if (id !== \"../site-shadcn-controls\") throw new Error(`Unexpected client import: ${id}`);\n                                                ^\n\nError: Unexpected client import: ../site-locale-navigation\n    at require (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:114:55)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/override/LanguageSelect.astro:4:34\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Proxy.runInNewContext (node:vm:310:38)\n    at Object.start (/home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:105:5)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/test/language-select-lifecycle.test.ts:332:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)"
+      }
+    ]
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "result": {
+    "ok": false,
+    "diagnostics": [
+      {
+        "code": "PUI5001",
+        "category": "output-conflict",
+        "message": "Native support migration rejected: Unknown or modified native support ABI; migration refuses to guess",
+        "span": {
+          "file": "<project-temp-1>/plan.json",
+          "start": 0,
+          "end": 0,
+          "line": 1,
+          "column": 1,
+          "endLine": 1,
+          "endColumn": 1
+        }
+      }
+    ]
+  },
+  "cli": {
+    "code": 1,
+    "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Unknown or modified native support ABI; migration refuses to guess\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+    "stderr": ""
+  },
+  "opens": 0,
+  "inputs": [
+    {
+      "id": "old-trigger",
+      "directory": "old-trigger",
+      "provenanceSHA256": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664"
+    },
+    {
+      "id": "new-image",
+      "directory": "new-image",
+      "provenanceSHA256": "c84e64994755abb68e4fd58d254a11abb551a296ddc6ad65a2d08e746c2486b1"
+    }
+  ]
+}

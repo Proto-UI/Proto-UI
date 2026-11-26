@@ -1,0 +1,64 @@
+{
+  "candidateSha": "282cbca2c375b371470eb75853750ba023f420b3",
+  "candidateBinding": "CANDIDATE_SHA is checked by the unchanged source harness, which collects read-only Git candidate provenance.",
+  "selectedFile": "packages/compiler/test/shader-presentation.browser.test.ts",
+  "expectedCases": 28,
+  "sourceBefore": {
+    "packages/compiler/test/shader-presentation.browser.test.ts": "25bae8a84b3a9a4589c45bbea71862379d75ccb74b1c93db747e471130073632",
+    "packages/compiler/test/shader-browser-fixture.ts": "5658fd5422be72ad65012aa481b5cef9bbf63186a03e0a144a4dab0d7bc5869f",
+    "packages/compiler/test/shader-browser-consumer.ts": "5d91874143de2da04e5595d9ab20292a65a99f2afa6ae40deb1a09f51b8b0102",
+    "packages/compiler/test/shader-oracle.ts": "27a69741bb5e88b7ac0d6e498d59444786d48c9ac58e0c614fb5bf801f4ed037",
+    "packages/compiler/test/fixtures/shader-static-data-owner.proto.ts": "90aed2a06ab6ec0de0498d4c418d9395019cdbf1d768bc9ec7f9886b094dd570",
+    "packages/compiler/test/fixtures/shader-presentation-owner.proto.ts": "1d8d4b84db5acba7749f7807da81f2239d8b3e0b915d1924067fec0d4be9f9de",
+    "packages/compiler/src/shader-static-data.ts": "bd162457e703081e2ffa29d874b290165fde494cc197ff6b404233e874cfc795",
+    "packages/compiler/src/shader-plan.ts": "36e70a9ea1b204261a2638bff0799c511319a4073487c4d21e2f898d1da95a28",
+    "packages/adapters/base/src/material/shader-webgl2-host.ts": "558ed225533fe488dcdf177655e33cd8b485142045bf2e005ad0ca92dc0df248",
+    "pnpm-lock.yaml": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8"
+  },
+  "sourceAfter": {
+    "packages/compiler/test/shader-presentation.browser.test.ts": "25bae8a84b3a9a4589c45bbea71862379d75ccb74b1c93db747e471130073632",
+    "packages/compiler/test/shader-browser-fixture.ts": "5658fd5422be72ad65012aa481b5cef9bbf63186a03e0a144a4dab0d7bc5869f",
+    "packages/compiler/test/shader-browser-consumer.ts": "5d91874143de2da04e5595d9ab20292a65a99f2afa6ae40deb1a09f51b8b0102",
+    "packages/compiler/test/shader-oracle.ts": "27a69741bb5e88b7ac0d6e498d59444786d48c9ac58e0c614fb5bf801f4ed037",
+    "packages/compiler/test/fixtures/shader-static-data-owner.proto.ts": "90aed2a06ab6ec0de0498d4c418d9395019cdbf1d768bc9ec7f9886b094dd570",
+    "packages/compiler/test/fixtures/shader-presentation-owner.proto.ts": "1d8d4b84db5acba7749f7807da81f2239d8b3e0b915d1924067fec0d4be9f9de",
+    "packages/compiler/src/shader-static-data.ts": "bd162457e703081e2ffa29d874b290165fde494cc197ff6b404233e874cfc795",
+    "packages/compiler/src/shader-plan.ts": "36e70a9ea1b204261a2638bff0799c511319a4073487c4d21e2f898d1da95a28",
+    "packages/adapters/base/src/material/shader-webgl2-host.ts": "558ed225533fe488dcdf177655e33cd8b485142045bf2e005ad0ca92dc0df248",
+    "pnpm-lock.yaml": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8"
+  },
+  "selectedSourcesUnchanged": true,
+  "chromiumSandbox": true,
+  "chromePath": "/tank/shared/projects/proto-ui-agent/sprint4-completion-20261124-1494/browsers/chromium-1208/chrome-linux64/chrome",
+  "chromeVersion": "Google Chrome for Testing 145.0.7632.6",
+  "reportExists": true,
+  "status": "failed-or-timed-out",
+  "reportedAtUtc": "2026-11-23T19:42:41.781161+00:00",
+  "fixtureBuilds": [
+    {
+      "path": "/tank/shared/projects/proto-ui-agent/sprint4-completion-20261124-1494/browser28-evidence/shader-presentation-inline-m2ftwV/build.json",
+      "sha256": "80e9407f35b7e363cbc11c625244e00ab594db2d9a97a025907f5d95e00e400d",
+      "candidate": {
+        "head": "282cbca2c375b371470eb75853750ba023f420b3",
+        "headTree": "91949a055947ce353e535570bc1430d0da368680",
+        "dirty": false,
+        "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceGeneratorSha256": "1e7506e4cb1bf33d6c236e4a5c9a00ffd3576dfa121f777a83450ed575606582",
+      "compilations": 4,
+      "bundleSha256": "aa826207429c975a75981b2000179c6cda3f4e8ad2f493e5b2268b9fc47762fb"
+    }
+  ],
+  "vitest": {
+    "numTotalTests": 28,
+    "numPassedTests": 0,
+    "numFailedTests": 0,
+    "numPendingTests": 28,
+    "numTodoTests": 0,
+    "success": false,
+    "numTotalTestSuites": 1,
+    "numFailedTestSuites": 1
+  },
+  "reportSha256": "fc29eb1fad7e558ff1342371fc04ad398441a1c2ec29884d2dfdf60cc4af2a86"
+}

@@ -1,0 +1,264 @@
+{
+  "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=true)",
+  "checkedIR": {
+    "schemaVersion": 5,
+    "name": "native-shapes",
+    "source": {
+      "file": "native-shapes.proto.ts",
+      "exportName": "default",
+      "sha256": "370fafa9dfed6759bcbf5c03d67ba32806ab002e4b0bb7e37f3ade75cdad2c4c"
+    },
+    "sourceFiles": [
+      {
+        "file": "native-shapes.proto.ts",
+        "content": "import {definePrototype} from '@proto.ui/core';\n\nexport default definePrototype({name:'native-shapes',setup(def){def.event.on('host:sample',()=>{});return r=>r.el('b','ssr-root');}});",
+        "sha256": "0269505262209cb830986a3b0f1c613c0a81968417cf41eb3ad61e07ad095b31"
+      }
+    ],
+    "setup": {
+      "parameters": [
+        {
+          "name": "def",
+          "type": "def"
+        }
+      ],
+      "body": [
+        {
+          "kind": "effect",
+          "expression": {
+            "kind": "operation",
+            "operation": "event.on",
+            "receiver": {
+              "kind": "reference",
+              "name": "def",
+              "type": "def",
+              "span": {
+                "file": "native-shapes.proto.ts",
+                "start": 113,
+                "end": 116,
+                "line": 3,
+                "column": 65,
+                "endLine": 3,
+                "endColumn": 68
+              }
+            },
+            "arguments": [
+              {
+                "kind": "literal",
+                "value": "host:sample",
+                "type": "string",
+                "span": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 126,
+                  "end": 139,
+                  "line": 3,
+                  "column": 78,
+                  "endLine": 3,
+                  "endColumn": 91
+                }
+              },
+              {
+                "kind": "function",
+                "type": "function",
+                "function": {
+                  "parameters": [],
+                  "body": [],
+                  "phase": "callback",
+                  "context": "event",
+                  "returnType": "void",
+                  "span": {
+                    "file": "native-shapes.proto.ts",
+                    "start": 140,
+                    "end": 146,
+                    "line": 3,
+                    "column": 92,
+                    "endLine": 3,
+                    "endColumn": 98
+                  }
+                },
+                "span": {
+                  "file": "native-shapes.proto.ts",
+                  "start": 140,
+                  "end": 146,
+                  "line": 3,
+                  "column": 92,
+                  "endLine": 3,
+                  "endColumn": 98
+                }
+              }
+            ],
+            "type": "unknown",
+            "span": {
+              "file": "native-shapes.proto.ts",
+              "start": 113,
+              "end": 147,
+              "line": 3,
+              "column": 65,
+              "endLine": 3,
+              "endColumn": 99
+            }
+          },
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 113,
+            "end": 148,
+            "line": 3,
+            "column": 65,
+            "endLine": 3,
+            "endColumn": 100
+          }
+        },
+        {
+          "kind": "return",
+          "value": {
+            "kind": "function",
+            "type": "function",
+            "function": {
+              "parameters": [
+                {
+                  "name": "r",
+                  "type": "render"
+                }
+              ],
+              "body": [
+                {
+                  "kind": "return",
+                  "value": {
+                    "kind": "operation",
+                    "operation": "render.el",
+                    "receiver": {
+                      "kind": "reference",
+                      "name": "r",
+                      "type": "render",
+                      "span": {
+                        "file": "native-shapes.proto.ts",
+                        "start": 158,
+                        "end": 159,
+                        "line": 3,
+                        "column": 110,
+                        "endLine": 3,
+                        "endColumn": 111
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "kind": "literal",
+                        "value": "b",
+                        "type": "string",
+                        "span": {
+                          "file": "native-shapes.proto.ts",
+                          "start": 163,
+                          "end": 166,
+                          "line": 3,
+                          "column": 115,
+                          "endLine": 3,
+                          "endColumn": 118
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "value": "ssr-root",
+                        "type": "string",
+                        "span": {
+                          "file": "native-shapes.proto.ts",
+                          "start": 167,
+                          "end": 177,
+                          "line": 3,
+                          "column": 119,
+                          "endLine": 3,
+                          "endColumn": 129
+                        }
+                      }
+                    ],
+                    "type": "template",
+                    "span": {
+                      "file": "native-shapes.proto.ts",
+                      "start": 158,
+                      "end": 178,
+                      "line": 3,
+                      "column": 110,
+                      "endLine": 3,
+                      "endColumn": 130
+                    }
+                  },
+                  "span": {
+                    "file": "native-shapes.proto.ts",
+                    "start": 158,
+                    "end": 178,
+                    "line": 3,
+                    "column": 110,
+                    "endLine": 3,
+                    "endColumn": 130
+                  }
+                }
+              ],
+              "phase": "render",
+              "context": "render",
+              "returnType": "template",
+              "span": {
+                "file": "native-shapes.proto.ts",
+                "start": 155,
+                "end": 178,
+                "line": 3,
+                "column": 107,
+                "endLine": 3,
+                "endColumn": 130
+              }
+            },
+            "span": {
+              "file": "native-shapes.proto.ts",
+              "start": 155,
+              "end": 178,
+              "line": 3,
+              "column": 107,
+              "endLine": 3,
+              "endColumn": 130
+            }
+          },
+          "span": {
+            "file": "native-shapes.proto.ts",
+            "start": 148,
+            "end": 179,
+            "line": 3,
+            "column": 100,
+            "endLine": 3,
+            "endColumn": 131
+          }
+        }
+      ],
+      "phase": "setup",
+      "context": "setup",
+      "returnType": "function",
+      "span": {
+        "file": "native-shapes.proto.ts",
+        "start": 102,
+        "end": 180,
+        "line": 3,
+        "column": 54,
+        "endLine": 3,
+        "endColumn": 132
+      }
+    },
+    "hooks": [],
+    "contextKeys": [],
+    "staticDeclarations": [],
+    "moduleDeclarations": [],
+    "props": [],
+    "exposes": [],
+    "requirements": [
+      "event",
+      "render"
+    ]
+  },
+  "emitterOptions": {
+    "ssr": true
+  },
+  "authoredGraph": [
+    {
+      "file": "native-shapes.proto.ts",
+      "content": "import {definePrototype} from '@proto.ui/core';\n\nexport default definePrototype({name:'native-shapes',setup(def){def.event.on('host:sample',()=>{});return r=>r.el('b','ssr-root');}});",
+      "sha256": "0269505262209cb830986a3b0f1c613c0a81968417cf41eb3ad61e07ad095b31"
+    }
+  ],
+  "note": "Actual checked-IR emitter input; runtime transpilation is not strict validation."
+}

@@ -1,0 +1,626 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "selectedAcceptance": "62 actual CLI/filesystem migration tests; not whole-compiler acceptance.",
+    "threeDistinctGroups": [
+      "Untouched independently emitted legacy directories, observed with their actual failures.",
+      "Explicit test-only shared legacy-support assembly with original component/map bytes and static facades; not untouched old directories.",
+      "New directories produced by the actual migrate-native-support CLI."
+    ],
+    "additionalControls": [
+      "Unmigrated old-Trigger/new-Text routing counterexample.",
+      "Deliberately duplicated full helper with shared ownership; only the recorded facade and two helper copies differ."
+    ],
+    "limits": [
+      "No full compiler, browser, hydration, all-backend or performance acceptance is inferred.",
+      "Existing unrelated generated strict and Text failures are not claimed fixed by these 62 tests."
+    ]
+  },
+  "sourceTest": {
+    "projectPath": "packages/compiler/test/native-support-migration.test.ts",
+    "sha256": "b70ac0d5444c80eba712b5b42156373811e4c66dbc987860f2e3e8d9d5a6a707",
+    "included": false
+  },
+  "historicalFixture": {
+    "projectPath": "packages/compiler/test/fixtures/native-support-migration-v1.json",
+    "sha256": "753ba919d86f780d03b1145c451b03782c5f59aa3d8528286db4485e8fb7bf24",
+    "included": false
+  },
+  "actualTestReportSourceSHA256": "c3098368c672454f3873e12074958eb0099655e13c5d3f85e64711e4472f9432",
+  "selectedResults": {
+    "tests": 62,
+    "passed": 62,
+    "failed": 0,
+    "cases": [
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "preserves every component and source map byte and records exact original manifests",
+        "fullName": "actual CLI native-support directory migration preserves every component and source map byte and records exact original manifests",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "retains a filesystem baseline with one byte-identical legacy support instance",
+        "fullName": "actual CLI native-support directory migration retains a filesystem baseline with one byte-identical legacy support instance",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "retains the real unmigrated old-Trigger/new-Text routing counterexample",
+        "fullName": "actual CLI native-support directory migration retains the real unmigrated old-Trigger/new-Text routing counterexample",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "measures unchanged independently emitted old Trigger and Text directories",
+        "fullName": "actual CLI native-support directory migration measures unchanged independently emitted old Trigger and Text directories",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "isolates actual filesystem Text input for old-trigger and new-text",
+        "fullName": "actual CLI native-support directory migration isolates actual filesystem Text input for old-trigger and new-text",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "isolates actual filesystem Text input for new-trigger and old-text",
+        "fullName": "actual CLI native-support directory migration isolates actual filesystem Text input for new-trigger and old-text",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "isolates actual filesystem Text input for old-trigger and old-text",
+        "fullName": "actual CLI native-support directory migration isolates actual filesystem Text input for old-trigger and old-text",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "isolates actual filesystem Text input for new-trigger and new-text",
+        "fullName": "actual CLI native-support directory migration isolates actual filesystem Text input for new-trigger and new-text",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares boundary state in both opening orders with old/new",
+        "fullName": "actual CLI native-support directory migration shares boundary state in both opening orders with old/new",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares boundary state in both opening orders with new/old",
+        "fullName": "actual CLI native-support directory migration shares boundary state in both opening orders with new/old",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares boundary state in both opening orders with old/old",
+        "fullName": "actual CLI native-support directory migration shares boundary state in both opening orders with old/old",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares boundary state in both opening orders with new/new",
+        "fullName": "actual CLI native-support directory migration shares boundary state in both opening orders with new/new",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "detects a second full boundary helper instance even while ownership stays shared",
+        "fullName": "actual CLI native-support directory migration detects a second full boundary helper instance even while ownership stays shared",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "measures unchanged independent old boundary directories in both opening orders",
+        "fullName": "actual CLI native-support directory migration measures unchanged independent old boundary directories in both opening orders",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares modal state in both opening orders with old/new",
+        "fullName": "actual CLI native-support directory migration shares modal state in both opening orders with old/new",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares modal state in both opening orders with new/old",
+        "fullName": "actual CLI native-support directory migration shares modal state in both opening orders with new/old",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares modal state in both opening orders with old/old",
+        "fullName": "actual CLI native-support directory migration shares modal state in both opening orders with old/old",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "shares modal state in both opening orders with new/new",
+        "fullName": "actual CLI native-support directory migration shares modal state in both opening orders with new/new",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "detects a second full modal helper instance even while ownership stays shared",
+        "fullName": "actual CLI native-support directory migration detects a second full modal helper instance even while ownership stays shared",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "measures unchanged independent old modal directories in both opening orders",
+        "fullName": "actual CLI native-support directory migration measures unchanged independent old modal directories in both opening orders",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "resolves normal imports after creating a nested output and relocating the whole directory",
+        "fullName": "actual CLI native-support directory migration resolves normal imports after creating a nested output and relocating the whole directory",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "resolves input directories relative to the plan rather than the calling cwd",
+        "fullName": "actual CLI native-support directory migration resolves input directories relative to the plan rather than the calling cwd",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "requires the exact trusted provenance SHA before any output open",
+        "fullName": "actual CLI native-support directory migration requires the exact trusted provenance SHA before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the invalid-json plan before any output open",
+        "fullName": "actual CLI native-support directory migration rejects the invalid-json plan before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the array plan before any output open",
+        "fullName": "actual CLI native-support directory migration rejects the array plan before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the version plan before any output open",
+        "fullName": "actual CLI native-support directory migration rejects the version plan before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the empty-inputs plan before any output open",
+        "fullName": "actual CLI native-support directory migration rejects the empty-inputs plan before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the unknown-key plan before any output open",
+        "fullName": "actual CLI native-support directory migration rejects the unknown-key plan before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the missing-anchor plan before any output open",
+        "fullName": "actual CLI native-support directory migration rejects the missing-anchor plan before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects invalid migration CLI usage 'missing-output'",
+        "fullName": "actual CLI native-support directory migration rejects invalid migration CLI usage 'missing-output'",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects invalid migration CLI usage 'missing-plan'",
+        "fullName": "actual CLI native-support directory migration rejects invalid migration CLI usage 'missing-plan'",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects invalid migration CLI usage 'irrelevant-profile'",
+        "fullName": "actual CLI native-support directory migration rejects invalid migration CLI usage 'irrelevant-profile'",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects changed bytes in Component.js before any output open",
+        "fullName": "actual CLI native-support directory migration rejects changed bytes in Component.js before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects changed bytes in Component.js.map before any output open",
+        "fullName": "actual CLI native-support directory migration rejects changed bytes in Component.js.map before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects changed bytes in .proto-ui/interaction/native-v1.ts before any output open",
+        "fullName": "actual CLI native-support directory migration rejects changed bytes in .proto-ui/interaction/native-v1.ts before any output open",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects missing recorded files",
+        "fullName": "actual CLI native-support directory migration rejects missing recorded files",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects unlisted extra files rather than silently dropping them",
+        "fullName": "actual CLI native-support directory migration rejects unlisted extra files rather than silently dropping them",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects extra empty input directories rather than silently dropping them",
+        "fullName": "actual CLI native-support directory migration rejects extra empty input directories rather than silently dropping them",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a modified helper even when its manifest and trusted SHA have been resealed",
+        "fullName": "actual CLI native-support directory migration rejects a modified helper even when its manifest and trusted SHA have been resealed",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects an unknown helper with otherwise complete matching ownership",
+        "fullName": "actual CLI native-support directory migration rejects an unknown helper with otherwise complete matching ownership",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a resealed change to the known context scope helper",
+        "fullName": "actual CLI native-support directory migration rejects a resealed change to the known context scope helper",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects an unknown context helper with otherwise matching ownership",
+        "fullName": "actual CLI native-support directory migration rejects an unknown context helper with otherwise matching ownership",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a conflicting target dependency version rather than relabeling the consumer",
+        "fullName": "actual CLI native-support directory migration rejects a conflicting target dependency version rather than relabeling the consumer",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects duplicate artifact records before writing",
+        "fullName": "actual CLI native-support directory migration rejects duplicate artifact records before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects case-collision artifact records before writing",
+        "fullName": "actual CLI native-support directory migration rejects case-collision artifact records before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects file-directory-collision artifact records before writing",
+        "fullName": "actual CLI native-support directory migration rejects file-directory-collision artifact records before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects traversal artifact records before writing",
+        "fullName": "actual CLI native-support directory migration rejects traversal artifact records before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects duplicate-id plan paths before writing",
+        "fullName": "actual CLI native-support directory migration rejects duplicate-id plan paths before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects case-id plan paths before writing",
+        "fullName": "actual CLI native-support directory migration rejects case-id plan paths before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects traversal-id plan paths before writing",
+        "fullName": "actual CLI native-support directory migration rejects traversal-id plan paths before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects reserved-id plan paths before writing",
+        "fullName": "actual CLI native-support directory migration rejects reserved-id plan paths before writing",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects the same input directory under a second id",
+        "fullName": "actual CLI native-support directory migration rejects the same input directory under a second id",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a symbolic-link plan file",
+        "fullName": "actual CLI native-support directory migration rejects a symbolic-link plan file",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a symlink at the input directory boundary",
+        "fullName": "actual CLI native-support directory migration rejects a symlink at the input directory boundary",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a symlink at the input parent boundary",
+        "fullName": "actual CLI native-support directory migration rejects a symlink at the input parent boundary",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a symlink at the input artifact boundary",
+        "fullName": "actual CLI native-support directory migration rejects a symlink at the input artifact boundary",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rejects a symlink at the input manifest boundary",
+        "fullName": "actual CLI native-support directory migration rejects a symlink at the input manifest boundary",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "refuses an existing output directory, including an original input directory",
+        "fullName": "actual CLI native-support directory migration refuses an existing output directory, including an original input directory",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "does not follow a pre-existing output symlink",
+        "fullName": "actual CLI native-support directory migration does not follow a pre-existing output symlink",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "allows one of two concurrent create-only deliveries to win",
+        "fullName": "actual CLI native-support directory migration allows one of two concurrent create-only deliveries to win",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "rolls back completed and partial files and permits a clean retry",
+        "fullName": "actual CLI native-support directory migration rolls back completed and partial files and permits a clean retry",
+        "status": "passed"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "actual CLI native-support directory migration"
+        ],
+        "title": "preserves a foreign replacement during ownership-aware rollback",
+        "fullName": "actual CLI native-support directory migration preserves a foreign replacement during ownership-aware rollback",
+        "status": "passed"
+      }
+    ]
+  },
+  "separateCapturePhase": {
+    "cases": [
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "ancestorTitles": [
+          "exact old CLI corpus capture"
+        ],
+        "title": "captures actual Trigger Text Boundary and Modal output directories with complete provenance",
+        "fullName": "exact old CLI corpus capture captures actual Trigger Text Boundary and Modal output directories with complete provenance",
+        "status": "skipped"
+      }
+    ],
+    "note": "The historical capture phase is not rerun in this verification selection; it is not one of the selected62 migration cases."
+  },
+  "evidenceInventory": {
+    "topLevelJSONRecords": 97,
+    "consumerObservations": 24,
+    "consumerTraceAndBundleRecords": 48,
+    "rejectionUsageRollbackAndSymlinkRecords": 38,
+    "cliReconstructionAssemblyRelocationAndCounterfactualRecords": 11
+  },
+  "normalization": {
+    "status": "Normalized derivative, not original evidence bytes.",
+    "rules": [
+      "Every distinct temporary fixture root receives one stable distinct <fixture-NNN> token across all documents. Relative esbuild paths to that root receive the same token.",
+      "Dependency installation roots become <locked-dependencies>; repository roots become <repo>. Module-relative paths, package IDs and all other project data remain unchanged.",
+      "Normalization applies to object keys and string values, including nested CLI JSON stdout strings. Original record SHA256 and byte length are retained. Internal occurrence-aware reversal reconstructs each original JSON file byte-for-byte."
+    ],
+    "fixtureRootCount": 68,
+    "omitted": "No bundle code, broad legacy helper bodies, execution receipts/logs, process data or supervision records are included."
+  }
+}

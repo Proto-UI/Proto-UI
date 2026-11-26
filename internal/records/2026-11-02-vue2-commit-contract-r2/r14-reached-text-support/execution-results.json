@@ -1,0 +1,1193 @@
+{
+  "publicParent": "91c63aa7d4344a2d9130b3fabb737f4670f0aa68",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "executedTree": "9f68a24dbe9ce444c78a1b52dfac3bd39ab91e32",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/artifact-output.ts",
+      "sha256": "593ec6b6c9e4210170766ab34c5ffba013c1c645f418cc34de2a7647969889ed",
+      "bytes": 22073
+    },
+    {
+      "path": "packages/compiler/src/cli.ts",
+      "sha256": "ffc60b8449ac9a4ff598fc28e01ac7ce76c714c33aa19d257a7b147482c0b5c7",
+      "bytes": 26306
+    },
+    {
+      "path": "packages/compiler/src/index.ts",
+      "sha256": "d44270de2799c5db59bc1675ed05e4061273c4f18a27808944a114920e2458a9",
+      "bytes": 3249
+    },
+    {
+      "path": "packages/compiler/src/native-adapter-modules.ts",
+      "sha256": "408d0e2a063ced8839edf9ad88d48f915f042d18a771b5de60bff4b26bd8c791",
+      "bytes": 146573
+    },
+    {
+      "path": "packages/compiler/src/native-interaction.ts",
+      "sha256": "85957264740ee61a571eca4aa585feb2cd0eee3657629689a525f0fc2e13e10e",
+      "bytes": 50805
+    },
+    {
+      "path": "packages/compiler/src/native-support-migration.ts",
+      "sha256": "e4647865305357a7946c1c1d8c9c1c5154b0b4d8a01a57ca570a5635e4dddfd3",
+      "bytes": 21058
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "sha256": "38e03b7f9151abc6424f680905d49cfb6b359519178ce9b6a683a4a153edeaa9",
+      "bytes": 72228
+    },
+    {
+      "path": "packages/compiler/test/fixtures/native-support-migration-v1.json",
+      "sha256": "753ba919d86f780d03b1145c451b03782c5f59aa3d8528286db4485e8fb7bf24",
+      "bytes": 189351
+    },
+    {
+      "path": "packages/compiler/test/native-support-migration.test.ts",
+      "sha256": "b70ac0d5444c80eba712b5b42156373811e4c66dbc987860f2e3e8d9d5a6a707",
+      "bytes": 60539
+    },
+    {
+      "path": "packages/compiler/test/native-support-capabilities.test.ts",
+      "sha256": "67e5e938a99da20992d39ace69ffb57afc8409e4488f96d88885a61aa7c07a8e",
+      "bytes": 16623
+    }
+  ],
+  "phases": [
+    {
+      "phase": "source-strict",
+      "exitCode": 0,
+      "commands": [
+        {
+          "phase": "source-strict",
+          "command": [
+            "TypeScript 5.9.3 createProgram",
+            "five source/test roots and transitive imports; strict/noEmit/skipLibCheck=false"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "tests": [],
+      "counts": null
+    },
+    {
+      "phase": "migration-unit",
+      "exitCode": 0,
+      "commands": [
+        {
+          "phase": "collect",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "list",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/native-support-migration.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--json=<results>/collected-cases.json",
+            "--disableConsoleIntercept",
+            "--testNamePattern",
+            "actual CLI native-support directory migration"
+          ],
+          "exitCode": 0
+        },
+        {
+          "phase": "unit",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/native-support-migration.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--reporter=default",
+            "--reporter=json",
+            "--outputFile.json=<results>/vitest.json",
+            "--testNamePattern",
+            "actual CLI native-support directory migration"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "tests": [
+        {
+          "test": "exact old CLI corpus capture captures actual Trigger Text Boundary and Modal output directories with complete provenance",
+          "status": "skipped"
+        },
+        {
+          "test": "actual CLI native-support directory migration preserves every component and source map byte and records exact original manifests",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration retains a filesystem baseline with one byte-identical legacy support instance",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration retains the real unmigrated old-Trigger/new-Text routing counterexample",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration measures unchanged independently emitted old Trigger and Text directories",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration isolates actual filesystem Text input for old-trigger and new-text",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration isolates actual filesystem Text input for new-trigger and old-text",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration isolates actual filesystem Text input for old-trigger and old-text",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration isolates actual filesystem Text input for new-trigger and new-text",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares boundary state in both opening orders with old/new",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares boundary state in both opening orders with new/old",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares boundary state in both opening orders with old/old",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares boundary state in both opening orders with new/new",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration detects a second full boundary helper instance even while ownership stays shared",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration measures unchanged independent old boundary directories in both opening orders",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares modal state in both opening orders with old/new",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares modal state in both opening orders with new/old",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares modal state in both opening orders with old/old",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration shares modal state in both opening orders with new/new",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration detects a second full modal helper instance even while ownership stays shared",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration measures unchanged independent old modal directories in both opening orders",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration resolves normal imports after creating a nested output and relocating the whole directory",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration resolves input directories relative to the plan rather than the calling cwd",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration requires the exact trusted provenance SHA before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the invalid-json plan before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the array plan before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the version plan before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the empty-inputs plan before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the unknown-key plan before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the missing-anchor plan before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects invalid migration CLI usage 'missing-output'",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects invalid migration CLI usage 'missing-plan'",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects invalid migration CLI usage 'irrelevant-profile'",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects changed bytes in Component.js before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects changed bytes in Component.js.map before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects changed bytes in .proto-ui/interaction/native-v1.ts before any output open",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects missing recorded files",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects unlisted extra files rather than silently dropping them",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects extra empty input directories rather than silently dropping them",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a modified helper even when its manifest and trusted SHA have been resealed",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects an unknown helper with otherwise complete matching ownership",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a resealed change to the known context scope helper",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects an unknown context helper with otherwise matching ownership",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a conflicting target dependency version rather than relabeling the consumer",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects duplicate artifact records before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects case-collision artifact records before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects file-directory-collision artifact records before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects traversal artifact records before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects duplicate-id plan paths before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects case-id plan paths before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects traversal-id plan paths before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects reserved-id plan paths before writing",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects the same input directory under a second id",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a symbolic-link plan file",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a symlink at the input directory boundary",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a symlink at the input parent boundary",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a symlink at the input artifact boundary",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rejects a symlink at the input manifest boundary",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration refuses an existing output directory, including an original input directory",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration does not follow a pre-existing output symlink",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration allows one of two concurrent create-only deliveries to win",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration rolls back completed and partial files and permits a clean retry",
+          "status": "passed"
+        },
+        {
+          "test": "actual CLI native-support directory migration preserves a foreign replacement during ownership-aware rollback",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "numTotalTests": 63,
+        "numPassedTests": 62,
+        "numFailedTests": 0,
+        "numPendingTests": 1
+      }
+    },
+    {
+      "phase": "unit",
+      "exitCode": 1,
+      "commands": [
+        {
+          "phase": "collect",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "list",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/native-support-capabilities.test.ts",
+            "packages/compiler/test/vue2-native-template-commit-contract.test.ts",
+            "packages/compiler/test/vue2-native-template.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--json=<results>/collected-cases.json",
+            "--disableConsoleIntercept"
+          ],
+          "exitCode": 0
+        },
+        {
+          "phase": "unit",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/native-support-capabilities.test.ts",
+            "packages/compiler/test/vue2-native-template-commit-contract.test.ts",
+            "packages/compiler/test/vue2-native-template.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--reporter=default",
+            "--reporter=json",
+            "--outputFile.json=<results>/vitest.json"
+          ],
+          "exitCode": 1
+        }
+      ],
+      "tests": [
+        {
+          "test": "reached native support compilation omits unrelated factories for actual Text and an unreachable Overlay",
+          "status": "passed"
+        },
+        {
+          "test": "reached native support compilation retains reached Overlay and Focus while sharing the same owner artifact",
+          "status": "passed"
+        },
+        {
+          "test": "mixed generated native owner lifetime isolates Text pointer and keyboard input from an outer Trigger",
+          "status": "passed"
+        },
+        {
+          "test": "mixed generated native owner lifetime detects removal of only the Text physical-owner registration",
+          "status": "passed"
+        },
+        {
+          "test": "mixed generated native owner lifetime keeps module ownership through detach and removes both registries on dispose",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary preserves A/S1 then B/S1 without identity dispatch: commit-contract",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary preserves A/S1 then B/S1 without identity dispatch: Button",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary preserves A/S1 then B/S1 without identity dispatch: RenamedNativeOwner",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary rejects the independent rerender-authored semantic negative",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary rejects the independent freeze-vnode semantic negative",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary evaluates a helper alias twice left-to-right, not its unselected branch or live slot refresh",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary rejects source-level reuse of one helper result for two distinct calls",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary compatibility: a second read failure retains the entire preceding publication",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary rejects premature clearing of the real generated publication before a throwing read",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary rebinds the current slot after authored ViewIntent detachment without reviving the old root",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 actual generated committed-authored / live-native-slot boundary retains instance state across native KeepAlive epochs and invalidates saved methods on destruction",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 generated graph strict boundary (separate from behavior/transpilation) checks every actual emitted source with real Vue2 declarations and no diagnostic filtering",
+          "status": "failed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction preserves lifecycle registration order and run binding across native view epochs",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction keeps lifecycle throw order while finishing terminal state cleanup and invalidation",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction preserves resolved watcher hydration, coalesced snapshots, registration order and run binding",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction keeps a setup-returned props watcher disposer inactive through repeated native invocation and cleanup",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction preserves queued native update commits without treating live-slot paint as an authored commit",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retires the old queued commit when an updated callback detaches and a later prop reopens",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction preserves owned state family validation, defaults and committed native publication",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction keeps owned state subscriber snapshots, reentry and queued work after a thrown callback",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction preserves structurally admitted extra state fields instead of assuming closed schemas",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction continues other owned state cleanup after a disconnect throw and retires old handles",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction uses native paint closures, nested finite arrays and live native slots",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction matches native Vue2 numeric normalization through nested children and live slots",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction does not resolve an authored String binding when normalizing captured numeric children",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains native custom-tag identity despite a registered component with the same name",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains native custom-tag style attributes with the exact pre flag",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction preserves the real native renderer props/context reads and live slot capability",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains default-slot behavior when setup returns no renderer",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction adapts only the private setup-result boundary: const alias=draw;return alias;",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction adapts only the private setup-result boundary: const factory=()=>draw;return factory();",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains declaration captures across a caller parameter with the same name",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction does not turn a render-context checked-IR scalar helper into a renderer ABI",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction uses actual checked-IR template formal contexts without a legacy node guess",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains an identity-observed callable with invoked=false",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains an identity-observed callable with invoked=true",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains an uncalled identity-observed callable with a legacy template formal",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'props.watch' through 'direct'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'props.watch' through 'alias'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'props.watch' through 'factory'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'context.subscribe' through 'direct'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'context.subscribe' through 'alias'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'context.subscribe' through 'factory'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'context.trySubscribe' through 'direct'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'context.trySubscribe' through 'alias'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains admitted native disposer 'context.trySubscribe' through 'factory'",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains the existing Vue2 target rejection for props.watchAll",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains the existing Vue2 target rejection for props.watchRaw",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compiler-native child construction retains the existing Vue2 target rejection for props.watchRawAll",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof requires complete identity uses, preserves checked types, and honors an independent invocation veto",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: direct",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: alias",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: after-return",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: nested-unused-body",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: dead-branch",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not discard calls in a checked inline callback",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains returned/factory callable bodies: return alias;",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains returned/factory callable bodies: const factory=()=>draw;return factory();",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof resolves a captured alias separately from a caller parameter with the same name",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof closes a direct alias chain using each declaration environment",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof does not collapse multiple valid creations sharing one FunctionIR and the same captures",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains upstream rejection of callable reflection: name",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains upstream rejection of callable reflection: length",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains upstream rejection of callable reflection: toString",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains upstream rejection of callable container escape: array",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains upstream rejection of callable container escape: record",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof retains upstream rejection of recursive aliases",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof preserves separate function identities and original arity with no runtime projector",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 closed identity-only body proof keeps the full body when an identity-observed alias is actually invoked",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compile-time root-data demand constructs fresh native root data directly when no root-property producer is reached",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compile-time root-data demand retains root-property lowering for a reached native interaction",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compile-time root-data demand preserves legal physical root attributes and style: image",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compile-time root-data demand preserves legal physical root attributes and style: text",
+          "status": "failed"
+        },
+        {
+          "test": "Vue2 compile-time root-data demand retains the full SSR transport root-data path (interaction=false)",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 compile-time root-data demand retains the full SSR transport root-data path (interaction=true)",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "numTotalTests": 80,
+        "numPassedTests": 78,
+        "numFailedTests": 2,
+        "numPendingTests": 0
+      }
+    },
+    {
+      "phase": "regression-unit",
+      "exitCode": 0,
+      "commands": [
+        {
+          "phase": "collect",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "list",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/vue2-native-this-boundary.test.ts",
+            "packages/compiler/test/vue2-state-reachability.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--json=<results>/collected-cases.json",
+            "--disableConsoleIntercept"
+          ],
+          "exitCode": 0
+        },
+        {
+          "phase": "unit",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/vue2-native-this-boundary.test.ts",
+            "packages/compiler/test/vue2-state-reachability.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--reporter=default",
+            "--reporter=json",
+            "--outputFile.json=<results>/vitest.json"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "tests": [
+        {
+          "test": "Vue2 native instance checker stability (not full strict-consumer acceptance) returns real diagnostics without crashing for empty",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 native instance checker stability (not full strict-consumer acceptance) returns real diagnostics without crashing for focus",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 native instance checker stability (not full strict-consumer acceptance) returns real diagnostics without crashing for state-and-slots",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 native instance checker stability (not full strict-consumer acceptance) returns real diagnostics without crashing for renamed-prefix",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 native instance checker stability (not full strict-consumer acceptance) rejects a nonexistent native-owner property rather than turning the instance into any",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support omits state support for empty without identity dispatch",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support omits state support for Button without identity dispatch",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support omits state support for RenamedComponent without identity dispatch",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support does not retain a dormant declaration or its unused alias",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support omits an authored hook after an unconditional setup return",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains existing rejection of authored hooks in callback-phase helpers",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains existing rejection of shadowing or TDZ-like unbound input: const x=()=>{}; if(true){const x=x;}",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains existing rejection of shadowing or TDZ-like unbound input: const x=()=>{}; if(true){const x=7;const alias=x;}",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains existing rejection of shadowing or TDZ-like unbound input: const x=x;",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains existing rejection of shadowing or TDZ-like unbound input: const alias=x;const x=7;",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support does not emit statements after an unconditional return",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains the bool declaration and disposal dependency",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains the string declaration and disposal dependency",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains the enum declaration and disposal dependency",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains the numberDiscrete declaration and disposal dependency",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains the numberRange declaration and disposal dependency",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support follows a called helper, value alias or nested closure: const create=()=>{def.state.bool('value',false);}; create();",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support follows a called helper, value alias or nested closure: const create=()=>{def.state.bool('value',false);}; const alias=create; alias();",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support follows a called helper, value alias or nested closure: const outer=()=>{const inner=()=>{def.state.bool('value',false);}; inner();}; outer();",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains state captured by a passed callback and returned renderer",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support keeps the existing inline-callback admission boundary explicit",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support follows state declarations across authored hook files",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains interaction-owned state even without an authored state declaration",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains the mixed interaction and authored-state closure",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support retains Context data consumption without inventing a local state owner",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support preserves direct SSR-option state demand: false",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached native state support preserves direct SSR-option state demand: true",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves does not infer Portal from the component name empty",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves does not infer Portal from the component name Overlay",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves does not infer Portal from the component name Button",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves omits Portal for state-only output and its SSR option",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves omits Portal for a context subscriber without interaction",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves keeps focus interaction while omitting unreachable Portal host moves",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves omits an Overlay operation after the unconditional setup return",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves retains reached imported Overlay aliases and captured runtime handle reads",
+          "status": "passed"
+        },
+        {
+          "test": "Vue2 reached Portal host moves retains Overlay reached through authored hook composition",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "numTotalTests": 41,
+        "numPassedTests": 41,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      }
+    },
+    {
+      "phase": "cli-unit",
+      "exitCode": 0,
+      "commands": [
+        {
+          "phase": "collect",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "list",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/cli.test.ts",
+            "packages/compiler/test/output.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--json=<results>/collected-cases.json",
+            "--disableConsoleIntercept"
+          ],
+          "exitCode": 0
+        },
+        {
+          "phase": "unit",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--config",
+            "vitest.config.ts",
+            "packages/compiler/test/cli.test.ts",
+            "packages/compiler/test/output.test.ts",
+            "--pool=threads",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--reporter=default",
+            "--reporter=json",
+            "--outputFile.json=<results>/vitest.json"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "tests": [
+        {
+          "test": "private compiler CLI compiles a real source to a fresh consumer-owned destination and refuses a second delivery",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI checks, inspects and explains the real entry without reserving any output",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI reports located compiler rejection in JSON and does not deliver a partial output",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI reports source read errors as checked failures rather than succeeding or writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI uses explicit configuration paths relative to the config, with CLI entry/export/output overrides relative to cwd",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"check\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"check\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"check\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"check\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"check\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"compile\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"watch\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"diff\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"watch\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects ambiguous or unsupported invocation \"diff\" before writing",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects malformed explicit configuration {",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects malformed explicit configuration []",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects malformed explicit configuration {\"entry\":\"entry.proto.ts\",\"unknown\":true}",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects malformed explicit configuration {\"entry\":\"entry.proto.ts\",\"json\":\"yes\"}",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI rejects malformed explicit configuration {\"entry\":null}",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI does not silently select a fallback for an unsupported target profile",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI delivers the explicitly selected source profile instead of the default runtime-backed output",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI keeps text diagnostics on stderr and structured inspect data on stdout",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI diffs consumer-modified owned artifacts without replacing them or writing proposed output",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI refuses to diff an unowned destination and preserves its files",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI retains immutable output across entry deletion, recovers, and settles on cancellation",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI propagates config rename/parse failures and reloads the selected entry before a new success",
+          "status": "passed"
+        },
+        {
+          "test": "private compiler CLI terminates watch on publication conflict without replacing consumer-owned paths",
+          "status": "passed"
+        },
+        {
+          "test": "transactional create-only compiler delivery rolls back owned partial Component.tsx bytes and permits a clean retry",
+          "status": "passed"
+        },
+        {
+          "test": "transactional create-only compiler delivery rolls back owned partial provenance.json bytes and permits a clean retry",
+          "status": "passed"
+        },
+        {
+          "test": "transactional create-only compiler delivery never overwrites or removes a pre-existing destination",
+          "status": "passed"
+        },
+        {
+          "test": "transactional create-only compiler delivery does not unlink a file whose exclusive creation failed after directory reservation",
+          "status": "passed"
+        },
+        {
+          "test": "transactional create-only compiler delivery rejects unsupported source before a caller has any artifact to deliver",
+          "status": "passed"
+        },
+        {
+          "test": "transactional create-only compiler delivery does not require a runtime source for a type-only re-export",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "numTotalTests": 34,
+        "numPassedTests": 34,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      }
+    }
+  ],
+  "fullCurrentFailures": [
+    {
+      "test": "Vue2 generated graph strict boundary (separate from behavior/transpilation) checks every actual emitted source with real Vue2 declarations and no diagnostic filtering",
+      "messages": [
+        "AssertionError: [\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 5595,\n    \"length\": 2,\n    \"messageText\": \"Parameter 'vm' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'vm' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 5599,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'setup' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'setup' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 5606,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'types' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'types' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 5613,\n    \"length\": 7,\n    \"messageText\": \"Parameter 'rootTag' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'rootTag' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 5622,\n    \"length\": 10,\n    \"messageText\": \"Parameter 'autoUpdate' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'autoUpdate' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7034,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 6070,\n    \"length\": 8,\n    \"messageText\": \"Variable 'template' implicitly has type 'any' in some locations where its type cannot be determined.\",\n    \"message\": \"Variable 'template' implicitly has type 'any' in some locations where its type cannot be determined.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7034,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 6093,\n    \"length\": 14,\n    \"messageText\": \"Variable 'renderFunction' implicitly has type 'any' in some locations where its type cannot be determined.\",\n    \"message\": \"Variable 'renderFunction' implicitly has type 'any' in some locations where its type cannot be determined.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7034,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 6386,\n    \"length\": 8,\n    \"messageText\": \"Variable 'defaults' implicitly has type 'any[]' in some locations where its type cannot be determined.\",\n    \"message\": \"Variable 'defaults' implicitly has type 'any[]' in some locations where its type cannot be determined.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 8600,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 8605,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 10177,\n    \"length\": 9,\n    \"messageText\": \"Parameter 'candidate' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'candidate' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 10188,\n    \"length\": 11,\n    \"messageText\": \"Parameter 'fromDefault' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'fromDefault' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7005,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 10575,\n    \"length\": 8,\n    \"messageText\": \"Variable 'defaults' implicitly has an 'any[]' type.\",\n    \"message\": \"Variable 'defaults' implicitly has an 'any[]' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 11165,\n    \"length\": 2,\n    \"messageText\": \"Parameter 'fn' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'fn' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 11387,\n    \"length\": 7,\n    \"messageText\": \"Parameter 'request' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'request' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7005,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 13646,\n    \"length\": 14,\n    \"messageText\": \"Variable 'renderFunction' implicitly has an 'any' type.\",\n    \"message\": \"Variable 'renderFunction' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 14118,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'next' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'next' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15456,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15519,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15635,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15640,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15712,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15717,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 15965,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 16073,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 16078,\n    \"length\": 7,\n    \"messageText\": \"Parameter 'payload' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'payload' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 16087,\n    \"length\": 7,\n    \"messageText\": \"Parameter 'options' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'options' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 17093,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 18895,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'kind' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'kind' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 18901,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 18906,\n    \"length\": 7,\n    \"messageText\": \"Parameter 'initial' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'initial' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19036,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19353,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19369,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19393,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19545,\n    \"length\": 5,\n    \"messageText\": \"Property 'clamp' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'clamp' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19574,\n    \"length\": 3,\n    \"messageText\": \"Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19593,\n    \"length\": 3,\n    \"messageText\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19654,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19670,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19695,\n    \"length\": 3,\n    \"messageText\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19729,\n    \"length\": 3,\n    \"messageText\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19741,\n    \"length\": 3,\n    \"messageText\": \"Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19775,\n    \"length\": 3,\n    \"messageText\": \"Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'max' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19895,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19911,\n    \"length\": 7,\n    \"messageText\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'options' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19935,\n    \"length\": 4,\n    \"messageText\": \"Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19980,\n    \"length\": 3,\n    \"messageText\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'min' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 2339,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 19998,\n    \"length\": 4,\n    \"messageText\": \"Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.\",\n    \"message\": \"Property 'step' does not exist on type 'Readonly<{ kind: any; }>'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 20178,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'input' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'input' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 20777,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7053,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 21259,\n    \"length\": 16,\n    \"messageText\": \"Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'.\",\n    \"message\": \"Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7053,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 21278,\n    \"length\": 31,\n    \"messageText\": \"Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'.\",\n    \"message\": \"Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ accept: number; fallback: number; error: number; }'.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 21433,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 22760,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 22765,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 22839,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 22844,\n    \"length\": 2,\n    \"messageText\": \"Parameter 'fn' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'fn' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 22986,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 22991,\n    \"length\": 2,\n    \"messageText\": \"Parameter 'fn' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'fn' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 23190,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'layer' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'layer' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24273,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24278,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24336,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24341,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24348,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'spec' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'spec' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24411,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24416,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24423,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'spec' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'spec' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24494,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24499,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24506,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'spec' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'spec' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24585,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24590,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24597,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'spec' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'spec' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24688,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24693,\n    \"length\": 5,\n    \"messageText\": \"Parameter 'value' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'value' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24836,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24841,\n    \"length\": 6,\n    \"messageText\": \"Parameter 'handle' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'handle' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24917,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24922,\n    \"length\": 2,\n    \"messageText\": \"Parameter 'fn' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'fn' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7019,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 24960,\n    \"length\": 7,\n    \"messageText\": \"Rest parameter 'args' implicitly has an 'any[]' type.\",\n    \"message\": \"Rest parameter 'args' implicitly has an 'any[]' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 25043,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'key' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'key' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 25048,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'spec' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'spec' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 27186,\n    \"length\": 8,\n    \"messageText\": \"Parameter 'renderer' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'renderer' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7005,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 28034,\n    \"length\": 8,\n    \"messageText\": \"Variable 'template' implicitly has an 'any' type.\",\n    \"message\": \"Variable 'template' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 28659,\n    \"length\": 2,\n    \"messageText\": \"Parameter 'fn' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'fn' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 30167,\n    \"length\": 10,\n    \"messageText\": \"Parameter '__puiOwner' implicitly has an 'any' type.\",\n    \"message\": \"Parameter '__puiOwner' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 30433,\n    \"length\": 3,\n    \"messageText\": \"Parameter 'run' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'run' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 30438,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'next' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'next' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 30894,\n    \"length\": 4,\n    \"messageText\": \"Parameter 'next' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'next' implicitly has an 'any' type.\"\n  },\n  {\n    \"category\": 1,\n    \"code\": 7006,\n    \"file\": \"<repo>/packages/compiler/test/generated-modules/vue2-commit-strict-WuawEh/Component.js\",\n    \"start\": 31207,\n    \"length\": 1,\n    \"messageText\": \"Parameter 'r' implicitly has an 'any' type.\",\n    \"message\": \"Parameter 'r' implicitly has an 'any' type.\"\n  }\n]: expected [ …(92) ] to deeply equal []\n    at <repo>/packages/compiler/test/vue2-native-template-commit-contract.test.ts:390:63\n    at file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:533:5\n    at runTest (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1056:11)\n    at runSuite (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runSuite (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runFiles (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1262:5)\n    at startTests (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1271:3)\n    at file://<locked-dependencies>/382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file://<locked-dependencies>/382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file://<locked-dependencies>/382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      ]
+    },
+    {
+      "test": "Vue2 compile-time root-data demand preserves legal physical root attributes and style: text",
+      "messages": [
+        "AssertionError: expected '' to be 'seed' // Object.is equality\n    at <repo>/packages/compiler/test/vue2-native-template.test.ts:1648:44\n    at file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:533:5\n    at runTest (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1056:11)\n    at runSuite (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runSuite (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runFiles (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1262:5)\n    at startTests (file://<locked-dependencies>/a3bb0f4a2f544e80/dist/index.js:1271:3)\n    at file://<locked-dependencies>/382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file://<locked-dependencies>/382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file://<locked-dependencies>/382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      ]
+    }
+  ],
+  "officialFormat": {
+    "export": 0,
+    "recheck": 0,
+    "files": 9,
+    "formattedSourcesExecutedAfterward": true,
+    "originalCapabilityTest": "Already formatted and unchanged, separately executed in final80."
+  },
+  "priorFailures": {
+    "newMigrationFirstRun": "60/62. Two correct product rejection assertions were followed by an evidence label validation exception. Only the label was lowercased; all inputs/assertions remain unchanged. Final62 pass.",
+    "collectionNameMismatch": "Three quoted parameter display names did not match a hand-written collection list. Collection62 succeeded, unit did not run. Only expected names were corrected to actual names before continuing.",
+    "canonicalOperationSpelling": "The initial R14 source-strict failure TS2367 used update rather than canonical run.update; exact canonical spelling and positive operation cases fixed it.",
+    "unmigratedCompatibility": "The original old Trigger/new Text combination activates the outer Trigger incorrectly. Untouched old independent directories also have separate support instances. Explicit migration addresses a new output cohort, not those original directories."
+  },
+  "captureOnlyTest": "Normal verify execution selects62 acceptance tests; one archival capture-old test is intentionally unselected. Normal tests need no corpus environment variable and do not skip migration acceptance.",
+  "scope": "Selected project records, not complete original execution logs. No current-main/full-public-ancestry execution, native browser, hydration, all-backend or bundle/initialization acceptance.",
+  "separateProcessEntry": {
+    "successExit": 0,
+    "wrongAnchorExit": 1,
+    "missingOutputExit": 2,
+    "complete69OutputFilesMatchHandler": true,
+    "inputAndComponentMapBytesUnchanged": true,
+    "wrongAnchorNoOutput": true,
+    "evidence": "migration/process-entry.json"
+  }
+}

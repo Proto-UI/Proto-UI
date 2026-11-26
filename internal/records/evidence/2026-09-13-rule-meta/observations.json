@@ -1,0 +1,2277 @@
+{
+  "browser": "152.0.7977.83",
+  "buttons": [
+    {
+      "runtime": "wc",
+      "initialLight": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "darkBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "darkAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "lightBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "lightAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "initialLight": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "darkBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "darkAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "lightBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "lightAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "initialLight": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "darkBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "darkAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "lightBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "lightAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "initialLight": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "darkBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "darkAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(2.75381 0 0)",
+          "border": "lab(100 0 0 / 0.1)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(63.7053 60.745 31.3109)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(7.78201 -0.0000149012 0)"
+        }
+      ],
+      "lightBeforeInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.2)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ],
+      "lightAfterInteraction": [
+        {
+          "text": "Default",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Default2",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        },
+        {
+          "text": "Outline",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-border bg-background text-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(100 0 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Destructive",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/10 text-destructive h-8 gap-1.5 px-2.5",
+          "background": "oklab(0.57701 0.217634 0.112472 / 0.1)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(48.4493 77.4328 61.5452)"
+        },
+        {
+          "text": "+",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-transparent text-foreground size-8",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(2.75381 0 0)"
+        },
+        {
+          "text": "Disabled",
+          "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-2.5",
+          "background": "lab(7.78201 -0.0000149012 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "color": "lab(98.26 0 0)"
+        }
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "control": "checkbox",
+      "runtime": "wc",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "checkbox",
+      "runtime": "react",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "checkbox",
+      "runtime": "vue",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "checkbox",
+      "runtime": "vue2",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Unchecked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Checked",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Mixed",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Disabled",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "lab(7.78201 -0.0000149012 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Focus ring",
+              "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "switch",
+      "runtime": "wc",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "switch",
+      "runtime": "react",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "switch",
+      "runtime": "vue",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "switch",
+      "runtime": "vue2",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(90.952 0 -0.0000119209)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(7.78201 -0.0000149012 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Email alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.8)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "Release alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            },
+            {
+              "text": "Archived alerts",
+              "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary",
+              "background": "lab(7.78201 -0.0000149012 0)",
+              "border": "rgba(0, 0, 0, 0)",
+              "color": "lab(98.26 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "textarea",
+      "runtime": "wc",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "textarea",
+      "runtime": "react",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "textarea",
+      "runtime": "vue",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "control": "textarea",
+      "runtime": "vue2",
+      "states": [
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "dark",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+              "border": "lab(100 0 0 / 0.15)",
+              "color": "oklch(0.922 0 0)"
+            }
+          ]
+        },
+        {
+          "colorScheme": "light",
+          "paint": [
+            {
+              "text": "Edit this note to exercise uncontrolled ownership.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is disabled.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            },
+            {
+              "text": "This editor is read only, and still focusable.",
+              "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "lab(90.952 0 -0.0000119209)",
+              "color": "oklch(0.269 0 0)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "runtime": "wc",
+      "reducedMotion": "no-preference",
+      "samples": [
+        {
+          "control": "leaveBtn",
+          "states": [
+            {
+              "state": "leaving",
+              "elapsedMs": 31.69999998807907
+            },
+            {
+              "state": "closed",
+              "elapsedMs": 233.60000002384186
+            }
+          ]
+        },
+        {
+          "control": "enterBtn",
+          "states": [
+            {
+              "state": "entering",
+              "elapsedMs": 41.30000001192093
+            },
+            {
+              "state": "entered",
+              "elapsedMs": 343.10000002384186
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runtime": "wc",
+      "reducedMotion": "reduce",
+      "samples": [
+        {
+          "control": "leaveBtn",
+          "states": [
+            {
+              "state": "leaving",
+              "elapsedMs": 33.5
+            },
+            {
+              "state": "closed",
+              "elapsedMs": 43
+            }
+          ]
+        },
+        {
+          "control": "enterBtn",
+          "states": [
+            {
+              "state": "entering",
+              "elapsedMs": 37.09999996423721
+            },
+            {
+              "state": "entered",
+              "elapsedMs": 47.39999997615814
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "reducedMotion": "no-preference",
+      "samples": [
+        {
+          "control": "leaveBtn",
+          "states": [
+            {
+              "state": "leaving",
+              "elapsedMs": 15.299999952316284
+            },
+            {
+              "state": "closed",
+              "elapsedMs": 216.79999995231628
+            }
+          ]
+        },
+        {
+          "control": "enterBtn",
+          "states": [
+            {
+              "state": "entering",
+              "elapsedMs": 34.40000003576279
+            },
+            {
+              "state": "entered",
+              "elapsedMs": 336.80000001192093
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "reducedMotion": "reduce",
+      "samples": [
+        {
+          "control": "leaveBtn",
+          "states": [
+            {
+              "state": "leaving",
+              "elapsedMs": 31.5
+            },
+            {
+              "state": "closed",
+              "elapsedMs": 36.09999996423721
+            }
+          ]
+        },
+        {
+          "control": "enterBtn",
+          "states": [
+            {
+              "state": "entering",
+              "elapsedMs": 39.5
+            },
+            {
+              "state": "entered",
+              "elapsedMs": 48.19999998807907
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "reducedMotion": "no-preference",
+      "samples": [
+        {
+          "control": "leaveBtn",
+          "states": [
+            {
+              "state": "leaving",
+              "elapsedMs": 39.80000001192093
+            },
+            {
+              "state": "leaving",
+              "elapsedMs": 40.10000002384186
+            },
+            {
+              "state": "closed",
+              "elapsedMs": 243.39999997615814
+            }
+          ]
+        },
+        {
+          "control": "enterBtn",
+          "states": [
+            {
+              "state": "entering",
+              "elapsedMs": 31.80000001192093
+            },
+            {
+              "state": "entered",
+              "elapsedMs": 333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "reducedMotion": "reduce",
+      "samples": [
+        {
+          "control": "leaveBtn",
+          "states": [
+            {
+              "state": "leaving",
+              "elapsedMs": 29.5
+            },
+            {
+              "state": "leaving",
+              "elapsedMs": 29.80000001192093
+            },
+            {
+              "state": "closed",
+              "elapsedMs": 35.69999998807907
+            }
+          ]
+        },
+        {
+          "control": "enterBtn",
+          "states": [
+            {
+              "state": "entering",
+              "elapsedMs": 37.80000001192093
+            },
+            {
+              "state": "entered",
+              "elapsedMs": 45.09999996423721
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

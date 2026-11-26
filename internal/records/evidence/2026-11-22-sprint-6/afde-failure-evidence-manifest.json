@@ -1,0 +1,56 @@
+[
+  {
+    "file": "afde-frame-comparison.json.gz",
+    "compressedSha256": "1dd7589d647876d7bc2b4b7c57e8ffce545b28c756b64168f67a78e6dce737a1",
+    "compressedBytes": 30162,
+    "uncompressedSha256": "e852130d2f7577be02a5d9ecbc95a0ddb7628dafe4b45b823ac536231d4ff035",
+    "uncompressedBytes": 314518,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "runId": 45018131381
+  },
+  {
+    "file": "afde-program-clear-original.json.gz",
+    "compressedSha256": "a7f183a4902bd17f84eb2c6e8fb6334131e6d076b5f85637dab10a005d98a2a6",
+    "compressedBytes": 9331,
+    "uncompressedSha256": "201c583f8e0c794381d88cdf4e40e0b014b4b842b422c30275bef178d9370fb3",
+    "uncompressedBytes": 42797,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "runId": 45018131381
+  },
+  {
+    "file": "afde-material-vitest.json.gz",
+    "compressedSha256": "1513abbcc7c284540f08133509fbb376a7ed4d49a983c4e30ec752a0a844ec73",
+    "compressedBytes": 37210,
+    "uncompressedSha256": "eba694c84508b91a45c021eea526cd138770541db64e5cbc4e7f7fc8184066a8",
+    "uncompressedBytes": 379271,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "runId": 45018126008
+  },
+  {
+    "file": "afde-portal-boundary-original.json.gz",
+    "compressedSha256": "813bbaabe24427d226565dbbb21953258f4aac99517baff05c1c763da4827f0b",
+    "compressedBytes": 17849,
+    "uncompressedSha256": "b27561827dc8d71051b8f478e33c742047b9987d62fb00de84bcd8b7faa81e16",
+    "uncompressedBytes": 407753,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "runId": 45018126008
+  },
+  {
+    "file": "afde-state-controls-vitest.json.gz",
+    "compressedSha256": "fd47c3608e18bb13bec6670e4e54208cb531e14969594388459d0e9cd9a32c0e",
+    "compressedBytes": 3794,
+    "uncompressedSha256": "884c3469806fd0e5798d7c9d5716419c3e5f2db4b5b0d3961fe648a555e61437",
+    "uncompressedBytes": 55933,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "runId": 45018126008
+  },
+  {
+    "file": "afde-state-controls-manifest.json.gz",
+    "compressedSha256": "aad317448ff53f729c862f4247f2379a8caee546dd8e33719dfac05e5682d701",
+    "compressedBytes": 7747,
+    "uncompressedSha256": "f4041ac38b346ea75622eb5c1e7406ba323eaf59444f521034516c82e40a9dd6",
+    "uncompressedBytes": 289530,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "runId": 45018126008
+  }
+]

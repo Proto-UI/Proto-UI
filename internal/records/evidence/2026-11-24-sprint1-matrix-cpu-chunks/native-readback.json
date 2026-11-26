@@ -1,0 +1,170 @@
+{
+  "artifactId": 14853721378,
+  "runId": 45244534426,
+  "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45244534426",
+  "sha256": "9433da819f8d7f87ace3df9ea2d4609ee2aa7ab630280c45ca1c8b39ce0dff90",
+  "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+  "sourceTree": "3b75082114ecd7026b6d3f5288d0a397a3aef559",
+  "browserEnvironment": "Google Chrome 157.0.8103.78",
+  "status": {
+    "startedAt": "2026-11-23T19:03:58.617Z",
+    "requestedProfileWindowMs": 180000,
+    "profileTiming": {
+      "startAcknowledgedAt": "2026-11-23T19:03:58.702Z",
+      "stopRequestedAt": "2026-11-23T19:05:10.949Z",
+      "stopAcknowledgedAt": null,
+      "sampledDurationMs": null,
+      "stopReason": "owner-finish",
+      "ownerStoppedCapture": false,
+      "phaseCoverage": "requires-timestamp-reconciliation"
+    },
+    "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+    "caseName": "Website Demo Matrix browser smoke > mounts every demo in every official Web adapter",
+    "diagnosticOnly": true,
+    "samplingIsNotPerformanceAcceptance": true,
+    "phase": "case-finally",
+    "at": "2026-11-23T19:05:12.949Z",
+    "elapsedMs": 74332,
+    "finished": true,
+    "profileState": "unavailable",
+    "profileError": "Error: Profiler stop unavailable within 2000ms",
+    "network": {
+      "requested": 1342,
+      "responses": 1332,
+      "finished": 1332,
+      "failed": 0,
+      "ignoredOtherOrigins": 0,
+      "statuses": {
+        "200": 1332
+      },
+      "pending": [
+        {
+          "path": "/src/content/docs/image-demo.shared.ts",
+          "type": "script",
+          "elapsedMs": 59058
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/prototypes/shadcn/src/drawer/command-paint.ts",
+          "type": "script",
+          "elapsedMs": 59434
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/prototypes/shadcn/src/drawer/recipes.ts",
+          "type": "script",
+          "elapsedMs": 59434
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/adapters/base/src/material/sink.ts",
+          "type": "script",
+          "elapsedMs": 59441
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/adapters/base/src/material/contact-profile.ts",
+          "type": "script",
+          "elapsedMs": 59442
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/adapters/base/src/material/source.ts",
+          "type": "script",
+          "elapsedMs": 59442
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/adapters/base/src/material/preferences.ts",
+          "type": "script",
+          "elapsedMs": 59442
+        },
+        {
+          "path": "/@fs/home/runner/work/Proto-UI/Proto-UI/packages/adapters/base/src/material/style.ts",
+          "type": "script",
+          "elapsedMs": 59442
+        },
+        {
+          "path": "/src/content/docs/zh-cn/demo-shadcn-message-scroller.demo.ts",
+          "type": "script",
+          "elapsedMs": 59456
+        },
+        {
+          "path": "/src/content/docs/zh-cn/demo-shadcn-label.demo.ts",
+          "type": "script",
+          "elapsedMs": 59457
+        }
+      ],
+      "failures": [],
+      "truncated": false
+    }
+  },
+  "phases": [
+    {
+      "sequence": 1,
+      "phase": "route-open",
+      "outcome": "started",
+      "at": "2026-11-23T19:03:58.702Z",
+      "snapshotStatus": "captured",
+      "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+      "inventory": {
+        "demos": 0,
+        "runtimeCount": 4,
+        "previewers": 0,
+        "initialized": 0
+      },
+      "pageErrors": []
+    },
+    {
+      "sequence": 2,
+      "phase": "route-open",
+      "outcome": "passed",
+      "at": "2026-11-23T19:04:07.290Z",
+      "snapshotStatus": "unavailable",
+      "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+      "inventory": {},
+      "pageErrors": []
+    },
+    {
+      "sequence": 3,
+      "phase": "inited-count",
+      "outcome": "started",
+      "at": "2026-11-23T19:04:08.293Z",
+      "snapshotStatus": "captured",
+      "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+      "inventory": {
+        "demos": 341,
+        "runtimeCount": 4,
+        "previewers": 1364,
+        "initialized": 0
+      },
+      "pageErrors": []
+    },
+    {
+      "sequence": 4,
+      "phase": "inited-count",
+      "outcome": "failed",
+      "at": "2026-11-23T19:05:08.941Z",
+      "snapshotStatus": "unavailable",
+      "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+      "inventory": {},
+      "pageErrors": []
+    },
+    {
+      "sequence": 5,
+      "phase": "case-finally",
+      "outcome": "observed",
+      "at": "2026-11-23T19:05:09.944Z",
+      "snapshotStatus": "unavailable",
+      "sourceSha": "81c103bd462b73910f7279122fab5f282d172d56",
+      "inventory": {},
+      "pageErrors": []
+    }
+  ],
+  "counts": {
+    "numPassedTests": 0,
+    "numFailedTests": 1,
+    "numPendingTests": 3
+  },
+  "interpretation": [
+    "Real page reached; original 60000ms activation/initialization failure retained.",
+    "Initial1364/0 is an entry snapshot, not terminal progress.",
+    "Profiler start acknowledged, final stop unresponsive within unchanged2000ms; no CPU profile exists.",
+    "1342 requests,1332 completed200,zero failures;10 pending started about59s after profile setup, so source imports progressed into catalog.",
+    "Three unselected diagnostic cases are not passes; full original cases retained in ordinary runtime CI."
+  ]
+}
