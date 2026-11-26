@@ -323,23 +323,46 @@ async function expectCopyControls(
     // Ordinary controls use the public Rhea icon size-8 and 18px glyphs.
     // CodeExample explicitly opts into Proto icon-compact: the Blocks
     // toolbar size-7 consumer geometry, not upstream icon-sm.
-    const inCodeExample = await control.evaluate((node) =>
-      Boolean(node.closest('[data-code-example]'))
-    );
+    const slot = await control.evaluate((node) => {
+      const copyHost = node.closest('[data-site-copy]');
+      const inCodeExample = Boolean(node.closest('[data-code-example]'));
+      const inHeaderOrToolbar = Boolean(
+        node.closest(
+          '[data-code-file-header], [data-code-toolbar], [data-code-collapsible="false"]'
+        )
+      );
+      const isFloatingOverlay =
+        !inCodeExample &&
+        !node.closest('[data-code-file-browser], [data-code-presentation="docs"]') &&
+        !inHeaderOrToolbar &&
+        Boolean(
+          copyHost?.classList.contains('site-code-copy-overlay') ||
+          copyHost?.classList.contains('site-ec-copy')
+        );
+      return { inCodeExample, isFloatingOverlay };
+    });
     expect([facts.width, facts.height, ...facts.glyph]).toEqual(
-      inCodeExample ? ['28px', '28px', '16px', '16px'] : ['32px', '32px', '18px', '18px']
+      slot.inCodeExample ? ['28px', '28px', '16px', '16px'] : ['32px', '32px', '18px', '18px']
     );
     expect(facts.radius).toBe(facts.expectedRadius);
     expect(facts.opacity).toBe('1');
-    await expect
-      .poll(() => control.evaluate((element) => getComputedStyle(element).borderTopColor), {
-        timeout: 2_000,
-      })
-      .toBe('rgba(0, 0, 0, 0)');
+    if (slot.isFloatingOverlay) {
+      await expect
+        .poll(() => control.evaluate((element) => getComputedStyle(element).borderTopColor), {
+          timeout: 2_000,
+        })
+        .not.toBe('rgba(0, 0, 0, 0)');
+    } else {
+      await expect
+        .poll(() => control.evaluate((element) => getComputedStyle(element).borderTopColor), {
+          timeout: 2_000,
+        })
+        .toBe('rgba(0, 0, 0, 0)');
+    }
     expect(facts.tokens).toContain(
-      inCodeExample ? 'rounded-md' : 'rounded-[var(--pui-radius-2xl)]'
+      slot.inCodeExample ? 'rounded-md' : 'rounded-[var(--pui-radius-2xl)]'
     );
-    expect(facts.tokens).toContain(inCodeExample ? 'size-7' : 'size-8');
+    expect(facts.tokens).toContain(slot.inCodeExample ? 'size-7' : 'size-8');
     expect(Math.max(...facts.center)).toBeLessThanOrEqual(1);
     await page.keyboard.press('Tab');
     await control.focus();
@@ -354,15 +377,37 @@ async function expectCopyControls(
     expect(focused.focused).toBe(true);
     expect(focused.shadow).not.toBe(facts.shadow);
   }
-  // Every Shadcn Copy uses the public ghost recipe. A separately rounded
-  // opaque Surface must not leave a white rim or corners behind the Button.
+  // Floating overlay Copy buttons own an opaque single-owner outline surface so
+  // code text never bleeds behind the icon; dedicated header/toolbar/docs slots
+  // keep the transparent ghost recipe. Neither uses a separate backplate node.
   for (const control of [ec, preview]) {
-    expect(await control.getAttribute('data-pui-style')).toContain('bg-transparent');
-    await expect
-      .poll(() => control.evaluate((element) => getComputedStyle(element).backgroundColor), {
-        timeout: 2_000,
-      })
-      .toBe('rgba(0, 0, 0, 0)');
+    const isFloatingOverlay = await control.evaluate((element) => {
+      const copyHost = element.closest('[data-site-copy]');
+      return (
+        !element.closest(
+          '[data-code-example], [data-code-file-browser], [data-code-presentation="docs"], [data-code-file-header], [data-code-toolbar], [data-code-collapsible="false"]'
+        ) &&
+        Boolean(
+          copyHost?.classList.contains('site-code-copy-overlay') ||
+          copyHost?.classList.contains('site-ec-copy')
+        )
+      );
+    });
+    if (isFloatingOverlay) {
+      expect(await control.getAttribute('data-pui-style')).toContain('border-border');
+      await expect
+        .poll(() => control.evaluate((element) => getComputedStyle(element).backgroundColor), {
+          timeout: 2_000,
+        })
+        .not.toBe('rgba(0, 0, 0, 0)');
+    } else {
+      expect(await control.getAttribute('data-pui-style')).toContain('bg-transparent');
+      await expect
+        .poll(() => control.evaluate((element) => getComputedStyle(element).backgroundColor), {
+          timeout: 2_000,
+        })
+        .toBe('rgba(0, 0, 0, 0)');
+    }
     expect(
       await control.evaluate(
         (element) =>
@@ -785,19 +830,47 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
             expect(boxGeometry.declaredWidth).toBe('256px');
           }
           const pre = page.locator('.proto-previewer__code').first();
+          const shell = page.locator('.proto-previewer [data-code-shell]').first();
           const collapsed = await pre.evaluate((element) => {
-            const content = element.closest('[data-code-content]')!;
+            const codeShell = element.closest<HTMLElement>('[data-code-shell]')!;
+            const content = element.closest<HTMLElement>('[data-code-content]')!;
             const scroll =
-              element.closest('[data-code-scroll-ready] [data-code-scroll-viewport]') ?? element;
+              element.closest<HTMLElement>(
+                '[data-code-scroll-ready] [data-code-scroll-viewport]'
+              ) ?? element;
+            const guard = codeShell.querySelector<HTMLElement>('[data-code-expand-guard]');
             return {
-              expanded: element.closest<HTMLElement>('[data-code-shell]')!.dataset.codeExpanded,
+              expanded: codeShell.dataset.codeExpanded,
+              inert: Boolean(
+                (element.closest<HTMLElement>('[data-code-scroll-root]') ?? content).inert
+              ),
+              guardVisible: Boolean(guard && !guard.hidden),
+              overflow: getComputedStyle(scroll).overflowX,
+            };
+          });
+          expect(collapsed).toEqual({
+            expanded: 'false',
+            inert: true,
+            guardVisible: true,
+            overflow: 'hidden',
+          });
+          await retainEvidence(page, `${width}-${theme}-collapsed`, { facts, collapsed });
+          // Clicking anywhere on the collapsed safe-zone expands the code block.
+          await shell.locator('[data-code-expand-guard]').click({ position: { x: 16, y: 16 } });
+          await expect.poll(() => shell.getAttribute('data-code-expanded')).toBe('true');
+          const expandedScroll = await pre.evaluate((element) => {
+            const content = element.closest<HTMLElement>('[data-code-content]')!;
+            const scroll =
+              element.closest<HTMLElement>(
+                '[data-code-scroll-ready] [data-code-scroll-viewport]'
+              ) ?? element;
+            return {
               selectable: getComputedStyle(content).userSelect !== 'none',
               overflow: getComputedStyle(scroll).overflowX,
               scrollable: scroll.scrollWidth > scroll.clientWidth,
             };
           });
-          expect(collapsed).toEqual({
-            expanded: 'false',
+          expect(expandedScroll).toEqual({
             selectable: true,
             overflow: 'auto',
             scrollable: true,
@@ -922,9 +995,14 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
                 .scrollLeft > before
             );
           }, beforeArrow);
-          await retainEvidence(page, `${width}-${theme}-collapsed`, { facts, collapsed });
           await expectCopyControls(page);
           await retainEvidence(page, `${width}-${theme}-expanded`, await surfaceFacts(page));
+          const collapse = shell.locator('[data-code-collapse]');
+          await collapse.waitFor({ state: 'visible' });
+          await collapse.click();
+          await expect.poll(() => shell.getAttribute('data-code-expanded')).toBe('false');
+          await shell.locator('[data-code-toggle]').click();
+          await expect.poll(() => shell.getAttribute('data-code-expanded')).toBe('true');
           await paletteProbe(page);
         } finally {
           await context.close();

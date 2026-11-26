@@ -357,7 +357,7 @@ export function createCalendarDemo(
       kind: 'box',
       className:
         family === 'liquid-glass'
-          ? 'inline-flex max-w-full items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6'
+          ? 'inline-flex max-w-full items-center justify-center'
           : 'inline-flex max-w-full flex-col items-start gap-3',
       children: [calendarNode],
     },

@@ -55,6 +55,18 @@ cases:
       - P-BRUTALIST-TABS-LIST-APPEARANCE
       - P-BRUTALIST-TABS-TRIGGER-APPEARANCE
     expectation: Default to underline and back preserves Base selection/hover/press/focus-visible/disabled facts and exactly restores previous List/Trigger current-state paint. Inactive text, selected underline, focus visibility, disabled request suppression and post-destroy callbacks receive negative controls.
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-LINE-VARIANT
+    title: Four-family dogfood line variant for RuntimeBox Tabs
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-VARIANT
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VARIANT
+      - P-LIQUID-GLASS-TABS-LIST-VARIANT
+      - P-LIQUID-GLASS-TABS-TRIGGER-VARIANT
+      - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
+      - P-BRUTALIST-TABS-LIST-VARIANT
+      - P-BRUTALIST-TABS-TRIGGER-VARIANT
+    expectation: Setting variant=line on each family Tabs List propagates through private family context to Triggers without prop drilling, preserves Base selection/focus/keyboard/disabled semantics, adapts visually to each family, and powers RuntimeBox Runtime Tabs directly instead of legacy appearance=underline.
   - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-GENERATION-FOCUS
     title: Consumer activation with exact-generation focus
     covers:
@@ -95,6 +107,7 @@ implementations:
     path: apps/www/src/components/PrototypePreviewer/runtime-tabs.test.ts
     consumesCases:
       - T-RUNTIME-TABS-APPEARANCE-0001-CASE-BASE-INHERITANCE
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-LINE-VARIANT
     exercises: &a1
       - P-BOOTSTRAP-2-3-2-TABS
       - P-BOOTSTRAP-2-3-2-TABS-LIST
@@ -124,6 +137,7 @@ implementations:
     consumesCases:
       - T-RUNTIME-TABS-APPEARANCE-0001-CASE-DEFAULT-SURFACE
       - T-RUNTIME-TABS-APPEARANCE-0001-CASE-STATE-ROUNDTRIP
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-LINE-VARIANT
     exercises: *a1
   - id: source-css
     kind: module-test
@@ -171,12 +185,14 @@ verifies:
         - P-BOOTSTRAP-2-3-2-TABS-LIST-DIRECT-ENTRY
         - P-BOOTSTRAP-2-3-2-TABS-LIST-VISUAL-DEFAULT
         - P-BOOTSTRAP-2-3-2-TABS-LIST-APPEARANCE
+        - P-BOOTSTRAP-2-3-2-TABS-LIST-VARIANT
     - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER
       anchors:
         - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-BASE-INHERITANCE
         - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-DIRECT-ENTRY
         - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VISUAL-DEFAULT
         - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
+        - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VARIANT
     - id: P-BOOTSTRAP-2-3-2-TABS-CONTENT
       anchors:
         - P-BOOTSTRAP-2-3-2-TABS-CONTENT-BASE-INHERITANCE
@@ -193,12 +209,14 @@ verifies:
         - P-LIQUID-GLASS-TABS-LIST-DIRECT-ENTRY
         - P-LIQUID-GLASS-TABS-LIST-VISUAL-DEFAULT
         - P-LIQUID-GLASS-TABS-LIST-APPEARANCE
+        - P-LIQUID-GLASS-TABS-LIST-VARIANT
     - id: P-LIQUID-GLASS-TABS-TRIGGER
       anchors:
         - P-LIQUID-GLASS-TABS-TRIGGER-BASE-INHERITANCE
         - P-LIQUID-GLASS-TABS-TRIGGER-DIRECT-ENTRY
         - P-LIQUID-GLASS-TABS-TRIGGER-VISUAL-DEFAULT
         - P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
+        - P-LIQUID-GLASS-TABS-TRIGGER-VARIANT
     - id: P-LIQUID-GLASS-TABS-CONTENT
       anchors:
         - P-LIQUID-GLASS-TABS-CONTENT-BASE-INHERITANCE
@@ -207,15 +225,19 @@ verifies:
     - id: P-SHADCN-TABS-LIST
       anchors:
         - P-SHADCN-TABS-LIST-APPEARANCE
+        - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
     - id: P-SHADCN-TABS-TRIGGER
       anchors:
         - P-SHADCN-TABS-TRIGGER-APPEARANCE
+        - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
     - id: P-BRUTALIST-TABS-LIST
       anchors:
         - P-BRUTALIST-TABS-LIST-APPEARANCE
+        - P-BRUTALIST-TABS-LIST-VARIANT
     - id: P-BRUTALIST-TABS-TRIGGER
       anchors:
         - P-BRUTALIST-TABS-TRIGGER-APPEARANCE
+        - P-BRUTALIST-TABS-TRIGGER-VARIANT
 exercises:
   prototypes: *a1
 openQuestions:
@@ -231,6 +253,9 @@ sources:
   - path: internal/records/2026-10-10-runtime-box-tabs.md
     label: Non-normative fixed-reference, discrepancy and evidence ledger
 revisions:
+  - version: 0.3.0
+    change: refined
+    summary: Add four-family dogfood variant=line coverage for RuntimeBox Tabs while keeping appearance=underline roundtrip compatibility.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Add bounded four-family appearance/Runtime evidence without promoting unrun native or resource gates.

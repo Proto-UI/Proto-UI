@@ -11,7 +11,7 @@ statement:
 criteria:
   - id: P-SHADCN-CARD-VISUAL
     text:
-      en: Root shares New York/Rhea scope as a declared family boundary. No explicit style means inherit nearest outer scope; explicit selection applies only to this subtree, including other family consumers. New York preserves gap/py/px 24px, rounded-xl, explicit border and shadow-sm. Rhea uses theme-capped min(radius4xl,24px), no border, foreground ring/5 (dark /10), shadow-sm, text-sm, overflow-hidden and default20/sm16 gap and vertical padding. The light and dark ring contributions are mutually exclusive.
+      en: Root shares New York/Rhea/Luma scope as a declared family boundary. No explicit style means inherit nearest outer scope; explicit selection applies only to this subtree, including other family consumers. New York preserves gap/py/px 24px, rounded-xl, explicit border and shadow-sm. Rhea uses theme-capped min(radius4xl,24px), no border, foreground ring/5 (dark /10), shadow-sm, text-sm, overflow-hidden and default20/sm16 gap and vertical padding. Luma uses radius4xl, no border, foreground ring/5 (dark /10), shadow-md, text-sm, overflow-hidden and default24/sm16 gap and vertical padding. The light and dark ring contributions are mutually exclusive.
   - id: P-SHADCN-CARD-PASSIVE
     text:
       en: All four parts are roleless, non-focusable slots, with no interaction props, event handlers, semantic state, commands or exposed methods. Native anchors and independently semantic children keep their ownership.
@@ -23,7 +23,7 @@ criteria:
       en: Consumers retain native headings/paragraphs and may compose Text for title/body with tone inherit to preserve Card foreground. Muted captions/descriptions intentionally request muted tone. Card does not invent heading levels or accessibility roles.
   - id: P-SHADCN-CARD-SHARED-SCOPE
     text:
-      en: Root reuses the public style-scope resolver and must not default to a concrete style that masks the outer scope. Parts use shared selection; density has a separate private visual context. Explicit Card scope affects all descendant family consumers, not just the four parts. Nested Card roots isolate density and may inherit or explicitly override style. Style/density changes preserve native content nodes, edited value, selection, focus, links and action ownership. Only new-york-v4/new-york and rhea are supported; New York supports default density only.
+      en: Root reuses the public style-scope resolver and must not default to a concrete style that masks the outer scope. Parts use shared selection; density has a separate private visual context. Explicit Card scope affects all descendant family consumers, not just the four parts. Nested Card roots isolate density and may inherit or explicitly override style. Style/density changes preserve native content nodes, edited value, selection, focus, links and action ownership. Only new-york-v4/new-york, rhea, and luma are supported; New York supports default density only.
   - id: P-SHADCN-CARD-COMPATIBILITY-LIMITS
     text:
       en: This remains the existing four-part passive subset, not a complete upstream Card API. No automatic image-edge detection or descendant image radius, CardAction columns/placement, container queries, arbitrary data-slot/className/native prop forwarding, CardTitle or CardDescription prototype is added. Consumers compose native heading/paragraph semantics and public Text/Button presentation. Rhea title uses base/medium text; description uses small muted text. No full source parity, stable admission or native raster acceptance follows from token tests.
@@ -41,6 +41,9 @@ sources:
   - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
   - path: packages/prototypes/shadcn/test/card.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Add bounded Luma style profile (rounded-4xl, shadow-md, ring-1, default24/sm16 spacing) alongside New York and Rhea.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Project existing passive parts through bounded New York/Rhea shared scope and density; preserve native content ownership and explicit unsupported source features.

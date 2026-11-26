@@ -1,6 +1,6 @@
 import type { DemoChild, DemoNode } from '../PrototypePreviewer/demo-types';
 import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-families';
-import { homepageGalleryIcon, type GalleryCardOptions } from './homepage-gallery-icons';
+import type { GalleryCardOptions } from './homepage-gallery-icons';
 import type { HomepageButtonIntent } from './homepage-button-variants';
 
 type Builders = {
@@ -8,7 +8,9 @@ type Builders = {
     id: string,
     children?: DemoChild[],
     props?: Record<string, unknown>,
-    ref?: string
+    ref?: string,
+    associationKey?: string,
+    surfaceStyle?: Record<string, string>
   ) => DemoNode;
   box: (
     className: string,
@@ -21,10 +23,17 @@ type Builders = {
     caption: string,
     children: DemoChild[],
     id: string,
-    options?: GalleryCardOptions
+    options?: GalleryCardOptions,
+    media?: DemoChild[]
   ) => DemoNode;
   /** The variant is a website intent; each family maps it to its own name. */
-  button: (label: string, ref?: string, variant?: HomepageButtonIntent) => DemoNode;
+  button: (
+    label: string,
+    ref?: string,
+    variant?: HomepageButtonIntent,
+    disabled?: boolean,
+    options?: { fullWidth?: boolean; children?: DemoChild[] }
+  ) => DemoNode;
   status: (value: string, ref: string) => DemoNode;
 };
 
@@ -59,6 +68,8 @@ export function createHomepageCompositionParts(
       progress: 90,
     },
   ];
+  const stageSteps = [25, 40, 60, 90, 100] as const;
+
   // Command's upstream slot intentionally does not select the ordinary shell focus ring.
   // This passive shell has no disabled opacity of its own; the editor retains those facts.
   const commandInput = () =>
@@ -111,12 +122,16 @@ export function createHomepageCompositionParts(
       ),
     ],
     'workspace-command',
-    { emphasis: 'accent', icon: homepageGalleryIcon('workspace-command') }
+    { emphasis: 'standard' }
   );
   const progress = card(
-    zh ? '下一站，完成你的想法' : 'Make room for an idea',
-    zh ? '拖动或用方向键调整计划进度。' : 'Drag or use arrow keys to adjust your plan.',
+    zh ? '计划阈值与进度' : 'Plan threshold',
+    zh ? '拖动或用方向键调整本页计划进度。' : 'Drag or use arrow keys to adjust your plan.',
     [
+      box('home-gallery__metric-row', [
+        box('home-gallery__eyebrow', [zh ? '当前完成度' : 'Current progress']),
+        box('home-gallery__metric', [`${initialProgress}%`], 'composition-progress-readout'),
+      ]),
       p(
         `${family}-progress-root`,
         [
@@ -127,92 +142,108 @@ export function createHomepageCompositionParts(
         { value: initialProgress, min: 0, max: 100 },
         'composition-progress'
       ),
-      p(
-        `${family}-slider-root`,
-        [
-          p(`${family}-slider-track`, [
-            p(`${family}-slider-indicator`),
-            p(`${family}-slider-thumb`, [], {}, 'composition-slider-thumb'),
-          ]),
-        ],
-        {
-          value: initialProgress,
-          min: 0,
-          max: 100,
-          step: 5,
-          ariaLabel: zh ? '调整示例计划进度' : 'Adjust example plan progress',
-        },
-        'composition-slider'
-      ),
-      box('home-gallery__row', [
-        button(zh ? '重新开始' : 'Start again', 'composition-reset', 'secondary'),
+      box('home-gallery__slider-group', [
+        p(
+          `${family}-slider-root`,
+          [
+            p(`${family}-slider-track`, [
+              p(`${family}-slider-indicator`),
+              p(`${family}-slider-thumb`, [], {}, 'composition-slider-thumb'),
+            ]),
+          ],
+          {
+            value: initialProgress,
+            min: 0,
+            max: 100,
+            step: 5,
+            ariaLabel: zh ? '调整示例计划进度' : 'Adjust example plan progress',
+          },
+          'composition-slider'
+        ),
+        box('home-gallery__range-bounds', [
+          box('home-gallery__eyebrow', ['0% (MIN)']),
+          box('home-gallery__eyebrow', ['100% (MAX)']),
+        ]),
+      ]),
+      box('home-gallery__stacked-actions', [
+        button(zh ? '推进到下一阶段' : 'Advance stage', 'composition-advance', 'primary', false, {
+          fullWidth: true,
+        }),
+        button(zh ? '重新开始' : 'Start again', 'composition-reset', 'secondary', false, {
+          fullWidth: true,
+        }),
       ]),
       status(zh ? '计划进度 40%' : 'Plan progress: 40%', 'composition-progress-status'),
     ],
     'workspace-progress',
-    { icon: homepageGalleryIcon('workspace-progress') }
+    { emphasis: 'accent' }
   );
   const analytics = card(
     zh ? '你的创作节奏' : 'Plan rhythm',
     zh ? '六个阶段，一步一步让想法成形。' : 'Six stages. One idea taking shape.',
     [
-      box('home-gallery__stack', [
-        box('home-gallery__metric-row', [
-          box('home-gallery__metric', ['40%'], 'gallery-rhythm-value'),
-          box('home-gallery__eyebrow', [zh ? '计划完成度' : 'Plan complete']),
+      p(`${family}-separator-root`),
+      box('home-gallery__stats', [
+        box('home-gallery__stat', [
+          box('home-gallery__eyebrow', [zh ? '下一步' : 'Up next']),
+          box(
+            'home-gallery__stat-value',
+            [zh ? '制作原型' : 'Build a prototype'],
+            'gallery-rhythm-next'
+          ),
         ]),
-        box(
-          'home-gallery__chart',
-          [
-            box('home-gallery__chart-bars', [], 'gallery-rhythm-bars', {
-              'aria-hidden': 'true',
-            }),
-          ],
-          undefined,
-          zh
-            ? {
-                role: 'img',
-                'aria-label': '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
-              }
-            : {
-                role: 'img',
-                'aria-label':
-                  'Six sample bars scaled by the current plan progress. The actual value is shown by the example plan progress bar on this page.',
-              }
-        ),
-        box(
-          'home-gallery__chart-labels',
-          (zh
-            ? ['想法', '提纲', '原型', '细节', '复查', '完成']
-            : ['Idea', 'Plan', 'Build', 'Refine', 'Review', 'Done']
-          ).map((label) => box('home-gallery__chart-label', [label]))
-        ),
-        p(`${family}-separator-root`),
-        box('home-gallery__stats', [
-          box('home-gallery__stat', [
-            box('home-gallery__eyebrow', [zh ? '下一步' : 'Up next']),
-            box(
-              'home-gallery__stat-value',
-              [zh ? '制作原型' : 'Build a prototype'],
-              'gallery-rhythm-next'
-            ),
-          ]),
-          box('home-gallery__stat', [
-            box('home-gallery__eyebrow', [zh ? '尚待探索' : 'Still to explore']),
-            box('home-gallery__stat-value', ['60%'], 'gallery-rhythm-remaining'),
-          ]),
-        ]),
-        box('home-gallery__eyebrow', [
-          zh ? '示例数据 · 随本页计划进度变化' : 'Sample data · linked to this page’s plan',
+        box('home-gallery__stat', [
+          box('home-gallery__eyebrow', [zh ? '完成进度' : 'Plan complete']),
+          box('home-gallery__stat-value', ['40%'], 'gallery-rhythm-value'),
         ]),
       ]),
+      box('home-gallery__meta-row', [
+        box('home-gallery__eyebrow', [zh ? '尚待探索' : 'Still to explore']),
+        box('home-gallery__eyebrow', ['60%'], 'gallery-rhythm-remaining'),
+      ]),
+      button(
+        zh ? '查看下一阶段' : 'Advance rhythm',
+        'gallery-analytics-advance',
+        'primary',
+        false,
+        {
+          fullWidth: true,
+        }
+      ),
     ],
     'workspace-analytics',
     {
       density: 'compact',
       body: 'edge-media',
-      icon: homepageGalleryIcon('analytics'),
-    }
+    },
+    [
+      box(
+        'home-gallery__chart',
+        [
+          box('home-gallery__chart-bars', [], 'gallery-rhythm-bars', {
+            'aria-hidden': 'true',
+          }),
+        ],
+        undefined,
+        zh
+          ? {
+              role: 'img',
+              'aria-label': '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
+            }
+          : {
+              role: 'img',
+              'aria-label':
+                'Six sample bars scaled by the current plan progress. The actual value is shown by the example plan progress bar on this page.',
+            }
+      ),
+      box(
+        'home-gallery__chart-labels',
+        (zh
+          ? ['想法', '提纲', '原型', '细节', '复查', '完成']
+          : ['Idea', 'Plan', 'Build', 'Refine', 'Review', 'Done']
+        ).map((label) => box('home-gallery__chart-label', [label]))
+      ),
+    ]
   );
   const helpItems = [
     {
@@ -262,7 +293,7 @@ export function createHomepageCompositionParts(
       ),
     ],
     'workspace-help',
-    { density: 'compact', icon: homepageGalleryIcon('workspace-help') }
+    { density: 'compact', emphasis: 'quiet' }
   );
 
   return {
@@ -271,15 +302,22 @@ export function createHomepageCompositionParts(
     help,
     analytics,
     setup({ bind, write, feedback }: Bindings) {
+      let currentValue = initialProgress;
       const update = (value: number) => {
         // This validates outward data; range stepping and keyboard semantics belong to Slider.
         if (!Number.isFinite(value) || value < 0 || value > 100) return;
+        currentValue = value;
         write('composition-slider', { value });
         write('composition-progress', { value });
+        feedback('composition-progress-readout', `${value}%`);
         feedback(
           'composition-progress-status',
           zh ? `计划进度 ${value}%` : `Plan progress: ${value}%`
         );
+      };
+      const advance = () => {
+        const next = stageSteps.find((step) => step > currentValue) ?? stageSteps[0];
+        update(next);
       };
       bind('composition-slider', 'valueChange', ({ value }) => {
         if (typeof value === 'number') update(value);
@@ -293,6 +331,8 @@ export function createHomepageCompositionParts(
           zh ? `已选择：${selected.text}` : `Selected: ${selected.text}`
         );
       });
+      bind('composition-advance', 'click', advance);
+      bind('gallery-analytics-advance', 'click', advance);
       bind('composition-reset', 'click', () => {
         update(initialProgress);
         feedback(

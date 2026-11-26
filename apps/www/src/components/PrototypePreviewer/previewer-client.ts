@@ -309,6 +309,7 @@ export function initPreviewer(options: PreviewerOptions) {
     pre.style.overflow = 'auto';
     container.appendChild(pre);
     host.appendChild(container);
+    host.style.removeProperty('min-height');
     finishStartup();
     console.error(err);
     dispatch('error', { error: err });
@@ -351,8 +352,11 @@ export function initPreviewer(options: PreviewerOptions) {
       activeSurface = null;
       const previous = currentDemo;
       currentDemo = null;
-      if (previous) await previous.destroy();
-      else host.replaceChildren();
+      if (previous) {
+        const previousHeight = host.getBoundingClientRect().height;
+        if (previousHeight > 0) host.style.minHeight = `${Math.ceil(previousHeight)}px`;
+        await previous.destroy();
+      } else host.replaceChildren();
       if (destroyed || myVersion !== version) return;
       runtimeTabs?.select(runtime);
 
@@ -438,6 +442,7 @@ export function initPreviewer(options: PreviewerOptions) {
         return;
       }
       finishStartup();
+      host.style.removeProperty('min-height');
       currentDemo = { id, destroy: result.destroy };
       activeSurface = surface;
       // A live input may have changed while setAppearance was pending. Its
@@ -455,7 +460,12 @@ export function initPreviewer(options: PreviewerOptions) {
       for (let scope: HTMLElement | null = root; scope; scope = scope.parentElement) {
         familyObserver.observe(scope, {
           attributes: true,
-          attributeFilter: ['data-site-library-family', 'data-projection-family', 'class'],
+          attributeFilter: [
+            'data-site-library-family',
+            'data-projection-family',
+            'data-preview-control-family',
+            'class',
+          ],
         });
       }
       stopFamilyObserver = () => familyObserver.disconnect();
@@ -575,6 +585,7 @@ export function initPreviewer(options: PreviewerOptions) {
         try {
           await previous?.destroy();
         } finally {
+          host.style.removeProperty('min-height');
           host.replaceChildren();
           finishStartup();
           runtimeTabs?.dispose();

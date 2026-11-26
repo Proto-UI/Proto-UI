@@ -1,31 +1,47 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asScrollAreaThumb,
-  type ScrollAreaThumbProps,
+  type ScrollAreaThumbProps as BaseScrollAreaThumbProps,
   type ScrollAreaThumbExposes,
 } from '@proto.ui/prototypes-base/scroll-area';
+
+export type ScrollAreaThumbProps = BaseScrollAreaThumbProps & {
+  material?: 'auto' | 'opaque';
+};
 
 export default definePrototype<ScrollAreaThumbProps, ScrollAreaThumbExposes>({
   name: 'liquid-glass-scroll-area-thumb',
   modules: asScrollAreaThumb.modules,
   setup(def) {
+    def.props.define({
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ material: 'auto' });
     const inherited = asScrollAreaThumb();
     // Fill the cross-axis cleanly (host owns scrolling-axis extent and flex-grow: 0).
-    // Fail-closed opaque pill upgrades to a translucent overlay indicator only when
-    // reduced-transparency and forced-colors are inactive.
+    // Fail-closed opaque pill upgrades via shared optical material when preferences permit.
     def.feedback.style.use(
       tw(
-        'relative h-full w-full rounded-full border border-transparent bg-muted-foreground transition-colors'
+        'relative h-full w-full rounded-full border border-transparent bg-muted-foreground text-background transition-shadow'
       )
     );
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    def.rule({
+      when: (w) => w.prop('material').eq('auto'),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
+    });
     def.rule({
       when: (w) =>
         w.all(
           w.meta('preference.reducedTransparency').eq('no-preference'),
           w.meta('preference.forcedColors').eq('none')
         ),
-      intent: (i) =>
-        i.feedback.style.use(tw('bg-muted-foreground/60 ring-1 ring-inset ring-foreground/10')),
+      intent: (i) => i.feedback.style.use(tw('ring-1 ring-inset ring-foreground/10')),
     });
     def.rule({
       when: (w) => w.meta('preference.contrast').eq('more'),

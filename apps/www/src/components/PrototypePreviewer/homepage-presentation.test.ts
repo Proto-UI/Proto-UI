@@ -60,7 +60,7 @@ describe('Homepage presentation source boundaries', () => {
     expect(preview).toContain(
       'grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));'
     );
-    expect(preview).toContain('width: min(100%, 104rem);');
+    expect(preview).toContain('width: min(100%, 116rem);');
     expect(preview).not.toContain('margin-inline: -1.25rem;');
     expect(preview).toContain('padding-inline: 1.25rem;');
     expect(preview).toContain('box-sizing: border-box;');

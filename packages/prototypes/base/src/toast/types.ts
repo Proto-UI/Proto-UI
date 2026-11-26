@@ -39,6 +39,7 @@ export type ToastViewportExposes = {
   position: ExposeState<ToastPosition>;
   expanded: ExposeState<boolean>;
   paused: ExposeState<boolean>;
+  hasOpen: ExposeState<boolean>;
 };
 
 export type ToastViewportAsHookContract = {
@@ -46,6 +47,7 @@ export type ToastViewportAsHookContract = {
     position: State<ToastPosition>;
     expanded: State<boolean>;
     paused: State<boolean>;
+    hasOpen: State<boolean>;
   };
 };
 

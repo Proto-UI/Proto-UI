@@ -109,33 +109,43 @@ describe('Drawer Handle behavior and optional family presentation', () => {
   );
 
   for (const family of [base, brutalist, bootstrap, glass])
-    it(`${family.drawerHandle.name} preserves its own bottom recipe and non-bottom edge placement`, async () => {
+    it(`${family.drawerHandle.name} preserves its bottom recipe across side changes`, async () => {
       const { content, handle } = await fixture(family);
       const bottom = tokensOf(handle);
-      const inFlow = family === brutalist || family === glass;
-      expect(bottom).toEqual(
-        expect.arrayContaining(
-          inFlow
-            ? [
-                'relative',
-                'mx-[auto]',
-                'mt-1',
-                'shrink-0',
-                'rounded-full',
-                family === brutalist ? 'h-2' : 'h-1.5',
-                family === brutalist ? 'w-[100px]' : 'w-12',
-              ]
-            : ['absolute', 'z-10', 'top-1', 'left-1/2', '-translate-x-1/2', 'h-2', 'w-12']
-        )
-      );
-      if (inFlow) {
+      if (family === brutalist) {
+        expect(bottom).toEqual(
+          expect.arrayContaining([
+            'relative',
+            'mx-[auto]',
+            'mt-1',
+            'shrink-0',
+            'rounded-full',
+            'h-2',
+            'w-[100px]',
+          ])
+        );
         expect(bottom).not.toContain('absolute');
         expect(bottom).not.toContain('-translate-x-1/2');
+      } else {
+        expect(bottom).toEqual(
+          expect.arrayContaining([
+            'absolute',
+            'z-10',
+            'top-1',
+            'left-1/2',
+            '-translate-x-1/2',
+            'h-2',
+            'w-12',
+          ])
+        );
       }
+      if (family !== brutalist) expect(bottom).not.toContain('w-[100px]');
       expect(bottom).not.toContain('mt-4');
+
       setElementProps(content, { side: 'top' });
       await flush();
-      expect(tokensOf(handle)).toEqual(
+      const top = tokensOf(handle);
+      expect(top).toEqual(
         expect.arrayContaining([
           'absolute',
           'z-10',
@@ -146,8 +156,8 @@ describe('Drawer Handle behavior and optional family presentation', () => {
           'w-12',
         ])
       );
-      for (const token of ['relative', 'mx-[auto]', 'mt-1', 'w-[100px]'])
-        expect(tokensOf(handle)).not.toContain(token);
+      for (const token of ['relative', 'mx-[auto]', 'mt-1', 'top-1', 'w-[100px]'])
+        expect(top).not.toContain(token);
       setElementProps(content, { side: 'bottom' });
       await flush();
       expect(tokensOf(handle)).toEqual(bottom);

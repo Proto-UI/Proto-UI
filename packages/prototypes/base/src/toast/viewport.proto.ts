@@ -60,6 +60,7 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
   });
   const expanded = def.state.bool('expanded', false);
   const paused = def.state.bool('paused', false);
+  const hasOpen = def.state.bool('hasOpen', false);
 
   const overlay = asOverlay<ToastViewportProps>();
   overlay.configure({
@@ -105,6 +106,9 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
   const publish = (run: RunHandle<ToastViewportProps> | null) => {
     if (!run) return;
     const p = run.props.get();
+    const currentOpenIds = run.context.read(TOAST_VIEWPORT_CONTEXT).openIds;
+    const nextHasOpen = currentOpenIds.length > 0;
+    if (!nextHasOpen && hovered) hovered = false;
     const nextPosition = resolvePosition(p.position);
     const nextExpanded = !!p.expand || hovered;
     const nextPaused = manualPause || hovered;
@@ -112,6 +116,7 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
     position.set(nextPosition, 'reason: toast viewport position');
     expanded.set(nextExpanded, 'reason: toast viewport expand');
     paused.set(nextPaused, 'reason: toast viewport pause');
+    hasOpen.set(nextHasOpen, 'reason: toast viewport open stack presence');
     run.context.update(TOAST_VIEWPORT_CONTEXT, (prev) => ({
       position: nextPosition,
       expanded: nextExpanded,
@@ -125,9 +130,22 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
     }));
   };
 
+  def.context.subscribe(TOAST_VIEWPORT_CONTEXT, (run, next) => {
+    currentRun = run;
+    const nextHasOpen = next.openIds.length > 0;
+    if (hasOpen.get() !== nextHasOpen) {
+      hasOpen.set(nextHasOpen, 'reason: toast viewport open stack presence');
+    }
+    if (!nextHasOpen && hovered) {
+      hovered = false;
+      publish(run);
+    }
+  });
+
   def.expose.state('position', position);
   def.expose.state('expanded', expanded);
   def.expose.state('paused', paused);
+  def.expose.state('hasOpen', hasOpen);
   def.expose.method('focusFirst', () => focus.focusFirst());
   def.expose.method('pauseAll', () => {
     manualPause = true;
@@ -163,6 +181,7 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
 
   def.event.on('pointer.enter', (run) => {
     currentRun = run;
+    if (run.context.read(TOAST_VIEWPORT_CONTEXT).openIds.length === 0) return;
     hovered = true;
     publish(run);
   });

@@ -47,7 +47,7 @@ export function createFormValidationDemo(family: string): DemoSpec {
     kind: 'box',
     className:
       family === 'liquid-glass'
-        ? 'grid w-full max-w-md min-w-0 gap-4 rounded-2xl border border-border bg-background/85 p-5'
+        ? 'grid w-full max-w-md min-w-0 gap-4'
         : 'grid w-full max-w-md min-w-0 gap-4 p-4',
     children: [
       atom('form', 'root', 'form', { ariaLabel: 'Account validation form' }, [
@@ -175,8 +175,7 @@ export function createFormValidationDemo(family: string): DemoSpec {
       family === 'liquid-glass'
         ? {
             kind: 'box',
-            className:
-              'flex w-full justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+            className: 'flex w-full justify-center',
             children: [inner],
           }
         : inner,

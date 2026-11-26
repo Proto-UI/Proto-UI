@@ -382,7 +382,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/runtime/src/instance/session.ts': Object.freeze({
-    sourceSha256: '82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a',
+    sourceSha256: 'c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb',
     specifiers: Object.freeze([
       '../kernel',
       '../kernel/event',

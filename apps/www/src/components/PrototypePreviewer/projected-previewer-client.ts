@@ -354,6 +354,9 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       const skeleton = mount.querySelector<HTMLElement>('.proto-previewer__skeleton');
       const skeletonParent = skeleton?.parentNode ?? null;
       const skeletonNextSibling = skeleton?.nextSibling ?? null;
+      const startupTabs = mount.querySelector<HTMLElement>('[data-previewer-startup-tabs]');
+      const startupTabsParent = startupTabs?.parentNode ?? null;
+      const startupTabsNextSibling = startupTabs?.nextSibling ?? null;
       let preparedStopThemeWatcher: (() => void) | null = null;
       let watcherPublished = false;
 
@@ -406,6 +409,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
           root.dataset.projectionComponent = componentId;
           root.dataset.projectionRuntime = committedRuntimeId;
           setState('ready');
+          startupTabs?.remove();
           skeleton?.remove();
           initialErrorSurface?.remove();
           initialErrorSurface = null;
@@ -459,6 +463,13 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
             const insertionPoint =
               skeletonNextSibling?.parentNode === skeletonParent ? skeletonNextSibling : null;
             skeletonParent.insertBefore(skeleton, insertionPoint);
+          }
+          if (startupTabs && startupTabsParent && !startupTabs.isConnected) {
+            const insertionPoint =
+              startupTabsNextSibling?.parentNode === startupTabsParent
+                ? startupTabsNextSibling
+                : null;
+            startupTabsParent.insertBefore(startupTabs, insertionPoint);
           }
         },
       };

@@ -90,10 +90,10 @@ describe('finite homepage Hero recipes', () => {
       expect(siteTextRecipe('slogan', 'shadcn', false, 'site', bucket, 'zh')).toEqual({
         size: bucket === 'wide' ? '5xl' : '3xl',
         tone: 'default',
-        weight: 'medium',
+        weight: 'semibold',
         font: 'body',
         leading: 'tight',
-        tracking: 'normal',
+        tracking: 'tight',
         emphasis: 'normal',
         decoration: 'none',
       });
@@ -114,9 +114,9 @@ describe('finite homepage Hero recipes', () => {
       /:global\(\[data-site-library-family='shadcn'\]\)\s+\.homepage-hero\s+h1:lang\(zh\):not\(\[data-typography-owner\]\)\s*\{([^}]*)\}/
     );
     expect(rule).not.toBeNull();
-    expect(rule![1]).toContain('font-weight: 500;');
+    expect(rule![1]).toContain('font-weight: 600;');
     expect(rule![1]).toContain('line-height: 1.25;');
-    expect(rule![1]).toContain('letter-spacing: 0;');
+    expect(rule![1]).toContain('letter-spacing: -0.025em;');
     expect(rule![1]).not.toMatch(/font-family|font-size/);
     expect(hero.indexOf(rule![0])).toBeGreaterThan(hero.indexOf('@media (min-width: 1280px)'));
   });

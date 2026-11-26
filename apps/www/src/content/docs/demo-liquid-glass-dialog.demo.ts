@@ -4,8 +4,7 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex min-w-0 items-start',
+    className: 'flex min-w-0 items-start',
     children: [
       {
         kind: 'proto',
@@ -55,7 +54,8 @@ const demo: DemoSpec = {
                 children: [
                   {
                     kind: 'box',
-                    className: 'rounded-xl border border-border bg-background/60 px-3.5 py-2.5 grid gap-0.5',
+                    className:
+                      'rounded-xl border border-border bg-background/60 px-3.5 py-2.5 grid gap-0.5',
                     children: [
                       {
                         kind: 'box',
@@ -63,12 +63,18 @@ const demo: DemoSpec = {
                         className: 'text-xs font-medium text-muted-foreground',
                         children: ['Name'],
                       },
-                      { kind: 'box', tag: 'span', className: 'text-sm font-medium', children: ['Pedro Duarte'] },
+                      {
+                        kind: 'box',
+                        tag: 'span',
+                        className: 'text-sm font-medium',
+                        children: ['Pedro Duarte'],
+                      },
                     ],
                   },
                   {
                     kind: 'box',
-                    className: 'rounded-xl border border-border bg-background/60 px-3.5 py-2.5 grid gap-0.5',
+                    className:
+                      'rounded-xl border border-border bg-background/60 px-3.5 py-2.5 grid gap-0.5',
                     children: [
                       {
                         kind: 'box',
@@ -76,7 +82,12 @@ const demo: DemoSpec = {
                         className: 'text-xs font-medium text-muted-foreground',
                         children: ['Username'],
                       },
-                      { kind: 'box', tag: 'span', className: 'text-sm font-medium', children: ['@peduarte'] },
+                      {
+                        kind: 'box',
+                        tag: 'span',
+                        className: 'text-sm font-medium',
+                        children: ['@peduarte'],
+                      },
                     ],
                   },
                 ],

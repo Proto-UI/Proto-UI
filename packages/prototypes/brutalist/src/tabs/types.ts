@@ -20,6 +20,7 @@ export type BrutalistTabsRootAsHookContract = TabsRootAsHookContract;
 
 export interface BrutalistTabsListProps extends TabsListProps {
   appearance?: 'default' | 'underline';
+  variant?: 'default' | 'line';
 }
 export type BrutalistTabsListExposes = TabsListExposes;
 export type BrutalistTabsListAsHookContract = TabsListAsHookContract;

@@ -1,9 +1,12 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
-const inputClass =
-  'col-span-2 h-8 w-full rounded-md border border-input bg-transparent flex items-center px-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring';
-const labelClass = 'text-sm font-medium text-foreground';
+const DEFAULTS = [
+  { ref: 'width', key: 'shadcn-popover-width', label: 'Width', value: '100%' },
+  { ref: 'maxWidth', key: 'shadcn-popover-max-width', label: 'Max. width', value: '300px' },
+  { ref: 'height', key: 'shadcn-popover-height', label: 'Height', value: '25px' },
+  { ref: 'maxHeight', key: 'shadcn-popover-max-height', label: 'Max. height', value: 'none' },
+] as const;
 
 export default withShadcnRheaDemo({
   type: 'demo',
@@ -48,84 +51,34 @@ export default withShadcnRheaDemo({
               {
                 kind: 'box',
                 className: 'grid gap-2',
-                children: [
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Width'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'width',
-                        className: inputClass,
-                        attrs: { id: 'shadcn-popover-width', type: 'text', value: '100%' },
-                      },
-                    ],
-                  },
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Max. width'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'maxWidth',
-                        className: inputClass,
-                        attrs: { id: 'shadcn-popover-max-width', type: 'text', value: '300px' },
-                      },
-                    ],
-                  },
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Height'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'height',
-                        className: inputClass,
-                        attrs: { id: 'shadcn-popover-height', type: 'text', value: '25px' },
-                      },
-                    ],
-                  },
-                  {
-                    kind: 'box',
-                    className: 'grid grid-cols-3 items-center gap-3',
-                    children: [
-                      {
-                        kind: 'box',
-                        tag: 'span',
-                        className: labelClass,
-                        children: ['Max. height'],
-                      },
-                      {
-                        kind: 'box',
-                        tag: 'div',
-                        ref: 'maxHeight',
-                        className: inputClass,
-                        attrs: { id: 'shadcn-popover-max-height', type: 'text', value: 'none' },
-                      },
-                    ],
-                  },
-                ],
+                children: DEFAULTS.map((field) => ({
+                  kind: 'box' as const,
+                  className: 'grid grid-cols-3 items-center gap-3',
+                  children: [
+                    {
+                      kind: 'proto' as const,
+                      prototypeId: 'shadcn-label-root',
+                      associations: { controlLabel: field.key },
+                      children: [field.label],
+                    },
+                    {
+                      kind: 'box' as const,
+                      className: 'col-span-2 min-w-0',
+                      children: [
+                        {
+                          kind: 'proto' as const,
+                          prototypeId: 'shadcn-input-root',
+                          ref: field.ref,
+                          className: 'w-full min-w-0',
+                          associations: { controlLabel: field.key },
+                          props: {
+                            defaultValue: field.value,
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                })),
               },
               {
                 kind: 'box',
@@ -151,22 +104,15 @@ export default withShadcnRheaDemo({
       },
     ],
   },
-  setup({ refs }) {
-    const defaults: Record<string, string> = {
-      width: '100%',
-      maxWidth: '300px',
-      height: '25px',
-      maxHeight: 'none',
-    };
-    const onReset = () => {
-      for (const [key, value] of Object.entries(defaults)) {
-        const node = refs[key];
-        if (node instanceof HTMLInputElement) node.value = value;
-      }
-    };
-    refs.reset?.addEventListener('click', onReset);
-    return () => {
-      refs.reset?.removeEventListener('click', onReset);
-    };
+  setup({ api }) {
+    api.setProps('reset', {
+      variant: 'ghost',
+      size: 'sm',
+      onClick: () => {
+        for (const field of DEFAULTS) {
+          api.call(field.ref, 'resetValue', field.value);
+        }
+      },
+    });
   },
 } satisfies DemoSpec);

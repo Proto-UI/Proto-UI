@@ -58,8 +58,13 @@ test('authored Toast styles are declarations rather than selector-only markers',
     'pointer-events-auto',
     'shadow-[0_4px_12px_rgb(0_0_0/10%)]',
     'z-0',
-    'z-20',
-    'z-30',
+    'pointer-events-none',
+    'order-[var(--pui-stack-index)]',
+    'z-[calc(1000_-_var(--pui-stack-index))]',
+    'w-[max(50%,calc(100%_-_var(--pui-stack-index)*18px))]',
+    'top-[calc(var(--pui-stack-index)*14px)]',
+    'bottom-[calc(var(--pui-stack-index)*14px)]',
+    'transition-[width,top,bottom,opacity]',
   ]) {
     assert.ok(fixture.tokens[token], `${token} must retain its compiled declarations`);
     assert.ok(fixture.order.includes(token), `${token} must retain cascade order`);

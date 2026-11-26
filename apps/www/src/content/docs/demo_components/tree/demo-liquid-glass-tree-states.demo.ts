@@ -4,8 +4,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'grid w-full max-w-2xl gap-4 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 sm:grid-cols-2',
+    className: 'grid w-full max-w-2xl gap-4 sm:grid-cols-2',
     children: [
       {
         kind: 'box',

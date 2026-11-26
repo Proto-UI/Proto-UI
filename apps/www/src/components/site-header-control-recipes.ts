@@ -5,7 +5,7 @@ import type { SiteLibraryFamily } from './site-library-family';
  * owns available width and the common accessible target size. */
 export function headerButtonProps(family: SiteLibraryFamily, size = 'icon') {
   return family === 'shadcn'
-    ? { styleProfile: 'rhea' as const, variant: 'secondary' as const, size }
+    ? { styleProfile: 'luma' as const, variant: 'secondary' as const, size }
     : family === 'brutalist'
       ? { variant: 'surface' as const, size }
       : {
@@ -20,7 +20,7 @@ export function headerButtonProps(family: SiteLibraryFamily, size = 'icon') {
 export function headerSelectControlProps(family: SiteLibraryFamily) {
   return {
     // Popup width follows each family's own recipe; no per-consumer size policy.
-    shadcnStyleProfile: 'rhea' as const,
+    shadcnStyleProfile: 'luma' as const,
     triggerAppearance: 'default' as const,
     compactTriggerAppearance: 'default' as const,
     brutalistTriggerAppearance: 'elevated' as const,

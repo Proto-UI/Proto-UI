@@ -294,7 +294,7 @@ for (const locale of ['en', 'zh-cn']) {
 
     const lanes = ['theory-kernel', 'prototype-libraries', 'translation-layer'];
     for (const [index, lane] of lanes.entries()) {
-      const group = svg.match(new RegExp(`<g data-node="${lane}">([\\s\\S]*?)<\\/g>`))?.[1];
+      const group = svg.match(new RegExp(`<g data-node="${lane}"[^>]*>([\\s\\S]*?)<\\/g>`))?.[1];
       assert.ok(group, lane);
       const [x, width] = [
         [32, 140],
@@ -319,7 +319,7 @@ for (const locale of ['en', 'zh-cn']) {
       'theory',
     ].entries()) {
       const group = svg.match(
-        new RegExp(`<g data-diagnosis="${diagnosis}">([\\s\\S]*?)<\\/g>`)
+        new RegExp(`<g data-diagnosis="${diagnosis}"[^>]*>([\\s\\S]*?)<\\/g>`)
       )?.[1];
       assert.ok(group?.includes(`<rect x="44" y="${488 + 100 * index}" width="428" height="92"`));
       assert.doesNotMatch(group, /<path\b/);

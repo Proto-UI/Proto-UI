@@ -440,7 +440,12 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         !candidate.host.inert;
       const composition = createSiteSearchComposition({
         family,
-        shadcnStyle: root.dataset.searchStyle === 'new-york-v4' ? 'new-york-v4' : 'rhea',
+        shadcnStyle:
+          root.dataset.searchStyle === 'new-york-v4'
+            ? 'new-york-v4'
+            : root.dataset.searchStyle === 'rhea'
+              ? 'rhea'
+              : 'luma',
         session: search.session,
         copy: search.copy,
         isCurrent: current,
@@ -671,9 +676,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       async materialize(request) {
         const preparation = preferencePreparation;
         const release =
-          preparation?.runtime === request.selection.runtimeId
-            ? preparation[kind]
-            : undefined;
+          preparation?.runtime === request.selection.runtimeId ? preparation[kind] : undefined;
         if (!release) return options.materialize(request);
         try {
           const candidate = await options.materialize(request);

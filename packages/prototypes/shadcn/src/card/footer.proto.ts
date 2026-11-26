@@ -14,6 +14,10 @@ export const ShadcnCardFooter = definePrototype<ShadcnCardFooterProps, ShadcnCar
       when: (w) => w.state(style).eq('rhea'),
       intent: (i) => i.feedback.style.use(tw('rounded-b-[min(var(--pui-radius-4xl),24px)]')),
     });
+    def.rule({
+      when: (w) => w.state(style).eq('luma'),
+      intent: (i) => i.feedback.style.use(tw('rounded-b-[var(--pui-radius-4xl)]')),
+    });
 
     def.rule({
       when: (w) => w.prop('divider').eq(true),
@@ -31,6 +35,16 @@ export const ShadcnCardFooter = definePrototype<ShadcnCardFooterProps, ShadcnCar
     def.rule({
       when: (w) =>
         w.all(w.prop('divider').eq(true), w.state(style).eq('rhea'), w.state(size).eq('sm')),
+      intent: (i) => i.feedback.style.use(tw('pt-4')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.prop('divider').eq(true), w.state(style).eq('luma'), w.state(size).eq('default')),
+      intent: (i) => i.feedback.style.use(tw('pt-6')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.prop('divider').eq(true), w.state(style).eq('luma'), w.state(size).eq('sm')),
       intent: (i) => i.feedback.style.use(tw('pt-4')),
     });
     return (r) => [r.r.slot()];

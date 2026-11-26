@@ -31,7 +31,7 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
           w.prop('fade').eq(false),
           w.meta('preference.reducedMotion').eq('no-preference')
         ),
-      intent: (i) => i.feedback.style.use(tw('transition-colors')),
+      intent: (i) => i.feedback.style.use(tw('transition-shadow')),
     });
     def.rule({
       when: (w) =>

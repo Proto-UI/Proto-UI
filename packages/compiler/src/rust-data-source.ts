@@ -874,7 +874,7 @@ export function emitRustDataSource(
           `/// Calls selected pure source function ${rustString(method.name)}; component setup is not executed.\npub fn ${method.rustName}(${method.parameters.map((parameter) => `${parameter.rustName}: ${parameter.optional ? `Option<${parameter.rustType}>` : parameter.rustType}`).join(', ')}) -> Result<${method.rustReturnType}, DataError> {\n    ${method.parameters.map((parameter) => (parameter.optional ? `if let Some(value) = &${parameter.rustName} { ${validate('(*value).clone()', parameter.type)} }` : validate(parameter.rustName, parameter.type))).join('\n    ')}\n    let result = ${functions.get(eligible.get(method.name)!)}(${method.parameters.map((parameter) => parameter.rustName).join(', ')})?;\n    ${validate('result', method.returnType)}\n    Ok(result)\n}`
       )
       .join('\n\n');
-    const code = `// Generated checked typed data functions. No setup, renderer, owner, dynamic object map or IR interpreter.\n#![allow(dead_code, unused_variables, unused_mut, unused_imports, unreachable_code)]\n${rustDataSupport(features)}\n${declarations.join('\n\n')}\n\n${authored}\n\n${entries}\n`;
+    const code = `// Generated checked typed data functions. No setup, renderer, owner, dynamic object map or IR interpreter.\n#![allow(dead_code, unused_parens, unused_variables, unused_mut, unused_imports, unreachable_code)]\n${rustDataSupport(features)}\n${declarations.join('\n\n')}\n\n${authored}\n\n${entries}\n`;
     const dependencies: RustDataModule['dependencies'] = features.has('number-text')
       ? [{ name: 'serde_json', version: '1.0', role: 'language-support' }]
       : [];

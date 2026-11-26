@@ -3,9 +3,15 @@ import { codeFileIcon, type CodeFileIcon } from '../code-file-icon';
 import StaticLucideIcon from '../StaticLucideIcon.astro';
 import CodeScrollArea from './CodeScrollArea.astro';
 import SiteCopyBootstrap from '../SiteCopyBootstrap.astro';
-import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
+import {
+  previewButtonTag,
+  resolvePreviewControlFamily,
+  resolveSiteLibraryFamily,
+  siteControlTags,
+  type PreviewControlFamily,
+} from '../site-library-family';
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
-const { Button } = siteControlTags(siteFamily);
+const defaultSiteControls = siteControlTags(siteFamily);
 const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
 import { highlightCode, type CodeLang } from './code-highlight';
 
@@ -23,6 +29,8 @@ interface Props {
   collapsible?: boolean;
   copyLabel?: string;
   expandLabel?: string;
+  collapseLabel?: string;
+  controlFamily?: PreviewControlFamily;
   title?: string;
   scrollableTitle?: boolean;
   titleIcon?: 'terminal' | 'folder-tree' | CodeFileIcon;
@@ -43,6 +51,8 @@ const {
   collapsible = true,
   copyLabel = isChinese ? '复制代码' : 'Copy code',
   expandLabel = isChinese ? '展开代码' : 'View code',
+  collapseLabel = isChinese ? '收起代码' : 'Collapse code',
+  controlFamily,
   title,
   scrollableTitle = false,
   titleIcon,
@@ -51,6 +61,11 @@ const {
   scrollLimit,
   panelRole = 'tabpanel',
 } = Astro.props;
+const effectiveControlFamily = resolvePreviewControlFamily(Astro.url.pathname, controlFamily);
+const Button =
+  effectiveControlFamily === siteFamily
+    ? defaultSiteControls.Button
+    : previewButtonTag(effectiveControlFamily);
 const highlighted = await highlightCode(code, lang);
 ---
 
@@ -123,9 +138,15 @@ const highlighted = await highlightCode(code, lang);
 
     {
       collapsible && (
+        <div class="code-panel__collapsed-guard" data-code-expand-guard hidden aria-hidden="true" />
+      )
+    }
+
+    {
+      collapsible && (
         <Button
           data-site-button
-          data-site-control-family={siteFamily}
+          data-site-control-family={effectiveControlFamily}
           data-variant="outline"
           data-size="sm"
           class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10"
@@ -139,6 +160,23 @@ const highlighted = await highlightCode(code, lang);
       )
     }
   </div>
+  {
+    collapsible && (
+      <div class="code-panel__collapse-bar" data-code-collapse-bar hidden>
+        <Button
+          data-site-button
+          data-site-control-family={effectiveControlFamily}
+          data-variant="outline"
+          data-size="sm"
+          data-code-collapse
+          aria-expanded="true"
+          aria-label={collapseLabel}
+        >
+          {collapseLabel}
+        </Button>
+      </div>
+    )
+  }
 </figure>
 
 <script>
@@ -183,6 +221,37 @@ const highlighted = await highlightCode(code, lang);
     [data-code-scroll-ready][data-code-scroll-limit='preview']
     [data-code-scroll-viewport] {
     max-height: 4.5rem;
+    overflow: hidden;
+  }
+  [data-code-expanded='false'] [data-code-scroll-ready] [data-code-scroll-viewport] {
+    overflow: hidden;
+  }
+  [data-code-expanded='false'] [data-code-scroll-track] {
+    display: none;
+  }
+  .code-panel__collapsed-guard {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--docs-code-radius, 0.5rem);
+    background: transparent;
+    transition: background-color 150ms ease;
+  }
+  .code-panel__collapsed-guard:hover {
+    background: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+  }
+  .code-panel__collapsed-guard[hidden] {
+    display: none;
+  }
+  .code-panel__collapse-bar {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0.75rem 0.25rem;
+  }
+  .code-panel__collapse-bar[hidden] {
+    display: none;
   }
   @container code-panel (max-width: 14rem) {
     [data-code-expanded='true']

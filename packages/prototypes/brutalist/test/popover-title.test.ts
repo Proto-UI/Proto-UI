@@ -169,7 +169,5 @@ describe('Neo Popover Title bounded presentation', () => {
       );
       expect(css).toContain('line-height: 1;');
     }
-    // The unchanged complete-family scan takes about 11s on the serial local
-    // control; keep that full coverage under the established family-scan bound.
-  }, 120_000);
+  }, 30_000);
 });

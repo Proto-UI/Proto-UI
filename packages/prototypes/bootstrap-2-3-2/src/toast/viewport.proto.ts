@@ -34,6 +34,14 @@ export default definePrototype<ToastViewportProps, ToastViewportExposes>({
       });
     }
     def.rule({
+      when: (w) => w.state(state.hasOpen).eq(false),
+      intent: (i) => i.feedback.style.use(tw('pointer-events-none')),
+    });
+    def.rule({
+      when: (w) => w.state(state.hasOpen).eq(true),
+      intent: (i) => i.feedback.style.use(tw('pointer-events-auto')),
+    });
+    def.rule({
       when: (w) => w.state(state.expanded).eq(false),
       intent: (i) => i.feedback.style.use(tw('gap-2')),
     });

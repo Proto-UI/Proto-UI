@@ -472,11 +472,22 @@ describe('liquid-glass tooltip projection', () => {
       expect(second.exposes.open.get()).toBe(true);
       expect(secondContent.exposes.open.get()).toBe(true);
 
-      // Tooltip Content is an ordinary opaque surface: real style, no slot.
+      // Tooltip Content declares open-gated regular Liquid Glass with opaque fallback and opt-out.
       expect(secondContent.frame().material).toEqual({
-        slot: null,
-        candidates: [],
+        slot: {
+          version: 2,
+          shape: { kind: 'rounded-rect', geometry: 'style' },
+          source: { kind: 'in-app-backdrop' },
+          fallback: { fill: 'style', foreground: 'style' },
+        },
+        candidates: [{ intent: 'liquid-glass', variant: 'regular' }],
       });
+      secondContent.set({ material: 'opaque' });
+      expect(secondContent.frame().material.candidates).toEqual([]);
+      secondContent.set({});
+      expect(secondContent.frame().material.candidates).toEqual([
+        { intent: 'liquid-glass', variant: 'regular' },
+      ]);
       expect(secondContent.frame().style.tokens).toEqual(
         expect.arrayContaining(['bg-secondary', 'text-secondary-foreground', 'text-xs'])
       );

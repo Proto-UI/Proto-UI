@@ -4,6 +4,7 @@ import {
   applySiteLibraryFamily,
   requireSiteLibraryFamily,
   resolveSiteLibraryFamily,
+  runtimePreviewFamily,
   siteControlTags,
 } from './site-library-family';
 
@@ -116,6 +117,19 @@ describe('website library family scope', () => {
     expect(css).not.toContain('.expressive-code .copy button');
     expect(css).toContain('[data-site-button]');
     expect(css).not.toContain('wc-shadcn-button[hidden]');
+  });
+
+  it('prefers data-preview-control-family over an enclosing site library family scope', () => {
+    const main = document.querySelector<HTMLElement>('main')!;
+    const previewer = document.createElement('div');
+    previewer.dataset.previewControlFamily = 'liquid-glass';
+    const child = document.createElement('div');
+    previewer.append(child);
+    main.append(previewer);
+    expect(runtimePreviewFamily(child)).toBe('liquid-glass');
+
+    previewer.dataset.projectionFamily = 'brutalist';
+    expect(runtimePreviewFamily(child)).toBe('brutalist');
   });
 
   it('does not overwrite the canonical projection theme with application family tokens', () => {

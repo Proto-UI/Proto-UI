@@ -7,10 +7,8 @@ import type {
 
 export type LabelExampleFamily = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
-const LIQUID_GLASS_STAGE_CLASS =
-  'w-full max-w-md rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6';
-const LIQUID_GLASS_OVERVIEW_STAGE_CLASS =
-  'w-full max-w-xl rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6';
+const LIQUID_GLASS_STAGE_CLASS = 'w-full max-w-md';
+const LIQUID_GLASS_OVERVIEW_STAGE_CLASS = 'w-full max-w-xl';
 
 function wrapFamilyStage(
   family: LabelExampleFamily,

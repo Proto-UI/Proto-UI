@@ -15,33 +15,31 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'relative w-full max-w-96 rounded-2xl bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/25 p-5',
+    className: 'relative grid w-full max-w-96 gap-3',
     children: [
+      {
+        kind: 'box',
+        className: 'flex items-center justify-between gap-2',
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-button',
+            props: { variant: 'regular', material: 'auto' },
+            children: ['Library'],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-button',
+            props: { variant: 'prominent', material: 'auto' },
+            children: ['Play All'],
+          },
+        ],
+      },
       {
         kind: 'box',
         className:
           'relative overflow-hidden rounded-xl border border-border/60 bg-background/90 shadow-sm',
         children: [
-          {
-            kind: 'box',
-            className:
-              'flex items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-3 py-2.5 backdrop-blur-xs',
-            children: [
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-button',
-                props: { variant: 'regular', material: 'auto' },
-                children: ['Library'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-button',
-                props: { variant: 'prominent', material: 'auto' },
-                children: ['Play All'],
-              },
-            ],
-          },
           {
             kind: 'proto',
             prototypeId: 'liquid-glass-scroll-area-root',

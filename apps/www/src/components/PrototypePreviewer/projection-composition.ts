@@ -65,7 +65,7 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   triggerAppearance?: 'default' | 'ghost';
   compactTriggerAppearance?: 'default' | 'ghost';
   /** Explicit family projection; never overrides another family's recipe. */
-  shadcnStyleProfile?: 'new-york-v4' | 'rhea';
+  shadcnStyleProfile?: 'new-york-v4' | 'rhea' | 'luma';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -953,7 +953,7 @@ export function createProjectionComposition(
         children: [
           createProjectedProto(tabsParts.list, coordinateAttrs, rendererThemeSurfaceStyle, {
             props: {
-              appearance: 'underline',
+              variant: 'line',
               a11yLabel: options.controls.runtime.label,
               loop: true,
             },
@@ -963,7 +963,6 @@ export function createProjectionComposition(
                 props: {
                   value: option.value,
                   disabled: option.disabled === true,
-                  appearance: 'underline',
                 },
                 children: [option.label],
               })
@@ -1532,6 +1531,9 @@ export function createProjectionComposition(
                 value: options.runtimeId,
                 orientation: 'horizontal',
                 activationMode: 'manual',
+                ...(options.projectionFamilyId === 'shadcn'
+                  ? { styleProfile: options.controls.runtime.shadcnStyleProfile ?? 'rhea' }
+                  : {}),
               },
               surfaceStyle: { width: '100%', minWidth: '0', gap: '1rem' },
               children: [

@@ -4,8 +4,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className:
-      'flex min-w-0 flex-wrap items-center justify-center gap-6 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    className: 'flex min-w-0 flex-wrap items-center justify-center gap-6',
     children: [
       {
         kind: 'proto',
@@ -20,7 +19,13 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'liquid-glass-hover-card-content',
-            props: { side: 'bottom', align: 'center', sideOffset: 8, variant: 'regular', material: 'auto' },
+            props: {
+              side: 'bottom',
+              align: 'center',
+              sideOffset: 8,
+              variant: 'regular',
+              material: 'auto',
+            },
             children: [
               {
                 kind: 'box',
@@ -51,7 +56,13 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'liquid-glass-hover-card-content',
-            props: { side: 'bottom', align: 'center', sideOffset: 8, variant: 'prominent', material: 'auto' },
+            props: {
+              side: 'bottom',
+              align: 'center',
+              sideOffset: 8,
+              variant: 'prominent',
+              material: 'auto',
+            },
             children: [
               {
                 kind: 'box',
@@ -82,7 +93,13 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'liquid-glass-hover-card-content',
-            props: { side: 'bottom', align: 'center', sideOffset: 8, variant: 'regular', material: 'opaque' },
+            props: {
+              side: 'bottom',
+              align: 'center',
+              sideOffset: 8,
+              variant: 'regular',
+              material: 'opaque',
+            },
             children: [
               {
                 kind: 'box',

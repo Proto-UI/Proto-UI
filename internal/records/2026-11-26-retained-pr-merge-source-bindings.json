@@ -1,0 +1,162 @@
+{
+  "kind": "source-only-merge-review",
+  "date": "2026-11-26",
+  "main": "acdf0df77ecb8803263023a30bc1240f6bdf2413",
+  "carrierPr": 1908,
+  "carrierHead": "28958b402bfb116c135377fe01e23a94ea7b2a7b",
+  "agentAssistance": "ChatGPT subagent under explicit current-user direction; external publication remains with coordinating root.",
+  "rows": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
+      "owners": "`www.demo.home-demo-select`",
+      "recorded": "319fced79764134792d39ac09d13675d3e58915e03bdcf40c12c004ca5cf043d",
+      "actual": "291cdd524d60f57f65fca7ada36d23772a131edcef647adce619e58236b727ec",
+      "blob": "00aeb7f15fa9eef6946548d34e612866c3b6d3b9",
+      "matchesParent": [],
+      "review": "Retain the source-merged responsive preview. Ghost cards apply only before the first committed generation; an existing gallery remains available during a runtime switch and keeps regional cancel/retry UI.",
+      "mainBlob": "76bacf6a184b0151b68b83f5a9b8cdb4ccb31c05",
+      "carrierBlob": "908658cc0953a5da3a9d2ad8e5a0dabce4a8ad4d"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+      "owners": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
+      "recorded": "4fd03809c049a6a70e774dd6a5402edad258b08e16fdd43648cc6e4159f73460",
+      "actual": "9f9b75906e72f8fb16d0f0d33eb02c4c397f227f53747fb4c212f72951bf5c3f",
+      "blob": "1ceeefcb7e29e72645fab28d8d4a66d5416c141f",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "1ceeefcb7e29e72645fab28d8d4a66d5416c141f",
+      "carrierBlob": "fe28a0f1f45a3c7fe0161352ecbc659e246c20e3"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "owners": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
+      "recorded": "f7ff3708827d6c832882a3db9579a8bd5d1709018b25e6b8bf1111f4950dcebc",
+      "actual": "f5215da7e1f0f07407a0c6510fedf0aec66e40536635461441222e69ef8dab37",
+      "blob": "2ac81d77fb8d8d56c63b81f880032000ab994a9e",
+      "matchesParent": [],
+      "review": "Subscribe to the existing live theme input before asynchronous shell preparation, preserving the synchronously emitted first complete map and the newest map arriving before publication. Version/destroy guards and both failure and supersession cleanup remain. The existing family observer replaces its watch after publication.",
+      "mainBlob": "7af326c443c3f7f951efb650b8cea69ecf5079f1",
+      "carrierBlob": "a5927df14c425a7a59523af738ad5a5245cf214f"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
+      "owners": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
+      "recorded": "b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b",
+      "actual": "3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a",
+      "blob": "8674302d259c1f61d70ce628e4c7faee77e2e11c",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "8674302d259c1f61d70ce628e4c7faee77e2e11c",
+      "carrierBlob": "ab5cf966ccaf1fcc14b89cae7ff71a43d0df8bd1"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "owners": "`www.demo.home-demo-select`, `www.demo.runtime-select`",
+      "recorded": "fd27997ad813469f2d2d7d75d235d70e339548c3016865d2a326fa07b628f730",
+      "actual": "857a983c9101da3677e6fdd3946caa099b557db79f1f58620970e2ab216ba4cb",
+      "blob": "ad88fa84f151ca5eaea93055c39678839c7ef3da",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "ad88fa84f151ca5eaea93055c39678839c7ef3da",
+      "carrierBlob": "dffe3e0efcbb6d1eab1bde6d98531c4a793e5ad1"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-materializer.ts",
+      "owners": "`www.demo.prototype-previewer`",
+      "recorded": "da804d7ae21ba4f2000f6e8eabc936d5f1273245c27194d82fac94f30daf6ffd",
+      "actual": "7b44a01b23f7910150ca875cdf5e9f0320e3be7ac28b1372f167be78c9029e10",
+      "blob": "85cc282186275c969c9ce607003718e026d4c1ec",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "85cc282186275c969c9ce607003718e026d4c1ec",
+      "carrierBlob": "9c48653a831aba635d875b5c1c278cfa1b4f634f"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "owners": "`www.demo.brutalist-theme-style`, `www.demo.demo-matrix`",
+      "recorded": "8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d",
+      "actual": "3c6a0b9111f3ec8cc6942a7469fe0d387ed64222c34c36c0c49f9f71b279e6f2",
+      "blob": "2fac854e530836be8a98e6d25a0fa82af0a85cfd",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "2fac854e530836be8a98e6d25a0fa82af0a85cfd",
+      "carrierBlob": "a173b48fae447eb3771eb25fe50856b494e744ce"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/runtime-tabs.ts",
+      "owners": "`www.demo.runtime-select`",
+      "recorded": "f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178",
+      "actual": "474e5be107742102059b663053f8c6d30c9482731d8d82bde40c514f4083e54b",
+      "blob": "44a61baf1bd92f903125bd9ccfae1cc60c5418c5",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "44a61baf1bd92f903125bd9ccfae1cc60c5418c5",
+      "carrierBlob": "02a1e17beebe66e7ebf843d974e1bdde342db975"
+    },
+    {
+      "path": "apps/www/src/components/site-link-recipes.ts",
+      "owners": "`www.shell.native-link-presentation`",
+      "recorded": "34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc",
+      "actual": "16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479",
+      "blob": "c9df07a8453696bbdd4ac48edcf125a1918233ce",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "c9df07a8453696bbdd4ac48edcf125a1918233ce",
+      "carrierBlob": "bf1baf9cbd9db922775dac6426f2250766b3b6f6"
+    },
+    {
+      "path": "apps/www/src/components/site-search-commands.ts",
+      "owners": "`www.search.dialog`, `www.search.input-results`, `www.search.launcher`",
+      "recorded": "7d255f171bcf8d2ac8f5de89f559bfa1bdb6e36509e938a56ad1f6720b257c17",
+      "actual": "a182b2c521319bd7f1df00bb76db7b8013dd80671b542bb68b71eb33188118b1",
+      "blob": "b203f271b5332fb4b2d3effe34fe740903ce15fe",
+      "matchesParent": [],
+      "review": "Retain 1908 critical Header-preparation leases around the existing independent opener/Dialog projection controllers, keyed by runtime and generation. Publish, dispose, failure, supersession and destroy release existing reservations; no new activation or focus owner is introduced. Original Search budget failures remain unresolved acceptance debt.",
+      "mainBlob": "8c3288214702d0055d19207193b065f9680a62ab",
+      "carrierBlob": "88f310b4cc406ae04c5924d186dbc430ba364bb0"
+    },
+    {
+      "path": "apps/www/src/components/site-search-composition.ts",
+      "owners": "`www.search.dialog`, `www.search.input-results`, `www.search.loading-failure`",
+      "recorded": "50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3",
+      "actual": "37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7",
+      "blob": "64dbcb05a225f0a18f0888ba553b1494d17498b6",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "64dbcb05a225f0a18f0888ba553b1494d17498b6",
+      "carrierBlob": "7f243c0f42dba64f89c797af276a96ca2b4fea19"
+    },
+    {
+      "path": "apps/www/src/components/site-shadcn-controls.ts",
+      "owners": "`www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle`",
+      "recorded": "53ec9878f07024aef14dae9d519035a05e4c22032206374899b6aa940d5a2f2a",
+      "actual": "13adc1a8fbbc2ef61dc40c4c11d7c96c8c3e276373596b53f8bdc95e9baa2b00",
+      "blob": "870600d4c2e803b5855bbd010d414eef0d2a6bc4",
+      "matchesParent": [],
+      "review": "Find the same portalled Select Content through its existing aria-controls IDREF and update compact documentation placement through the public position prop. Preserve explicit authored placement, ordinary family defaults and consumer-owned wrapping; this does not add Item CSS or selection ownership.",
+      "mainBlob": "dd357bf1d91d40a0ba1ee876759f1e934b79aff6",
+      "carrierBlob": "03d35e1dc6595458cf5e494f2773556a9a5c54cf"
+    },
+    {
+      "path": "apps/www/src/components/site-text-recipes.ts",
+      "owners": "`www.content.typography-presentation`",
+      "recorded": "e035ff8d22dcff7af4e7df6b21ef4938f23884e98a6d362c0167180bf9dcce8d",
+      "actual": "d87897eae6f2ad94c5524c9f8a323ef1ff63b2b84b065a97556a1c596f989014",
+      "blob": "ae7d0b5015824e0806b4224b3823867f78214fb7",
+      "matchesParent": ["review-main"],
+      "review": "Restore the exact current main source bytes and corresponding main fingerprint; source owner group and consumer disposition are unchanged.",
+      "mainBlob": "ae7d0b5015824e0806b4224b3823867f78214fb7",
+      "carrierBlob": "d67fb64e367e4b2e1f748487a33713405b2df457"
+    }
+  ],
+  "notEstablished": [
+    "No consumer row promotion",
+    "No browser or optical acceptance",
+    "No replacement of retained failing Search, Matrix or CLI receipts"
+  ],
+  "bindingUpdate": {
+    "beforeSha256": "6f060467b8cd556404a6c47811b08fe1994cd68071ad2c7faa071047746c09f2",
+    "afterSha256": "f0b41ec5134286b4b3575114d1a50464872373ed1c80340cbe74517cffa39186"
+  }
+}
