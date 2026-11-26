@@ -54,4 +54,70 @@ describe('adapter-base: view visibility', () => {
     root.removeAttribute(PUI_VIEW_DETACHED_ATTR);
     expect(getComputedStyle(root).display).not.toBe('none');
   });
+
+  it('reveals retained Proto children at their current style without suppressing authored keyframes', () => {
+    const parent = document.createElement('div');
+    parent.setAttribute(PUI_VIEW_REVEALING_ATTR, 'presence');
+    parent.style.animation = 'enter 200ms ease';
+    const child = document.createElement('button');
+    child.setAttribute('data-pui-root', '');
+    child.style.transition = 'background-color 150ms linear';
+    child.style.animation = 'pulse 2s linear';
+    const authoredChild = document.createElement('span');
+    authoredChild.style.transition = 'opacity 100ms ease';
+    const separatePortal = child.cloneNode() as HTMLElement;
+    parent.append(child, authoredChild);
+    document.body.append(parent, separatePortal);
+    const originalStyle = child.getAttribute('style');
+
+    installViewVisibilityRule(document);
+
+    expect(getComputedStyle(parent).animation).toBe('enter 200ms ease');
+    expect(getComputedStyle(child).transition).toBe('none');
+    expect(getComputedStyle(child).animation).toBe('pulse 2s linear');
+    expect(getComputedStyle(authoredChild).transition).toBe('opacity 100ms ease');
+    expect(getComputedStyle(separatePortal).transition).toBe('background-color 150ms linear');
+    expect(child.getAttribute('style')).toBe(originalStyle);
+
+    parent.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+    expect(parent.firstElementChild).toBe(child);
+    expect(getComputedStyle(child).transition).toBe('background-color 150ms linear');
+    expect(getComputedStyle(child).animation).toBe('pulse 2s linear');
+    parent.style.backgroundColor = 'red';
+    expect(getComputedStyle(child).transition).toBe('background-color 150ms linear');
+  });
+
+  it('retains the inner reveal barrier after an outer presence reveal finishes', () => {
+    const outer = document.createElement('div');
+    const inner = document.createElement('div');
+    const child = document.createElement('button');
+    child.setAttribute('data-pui-root', '');
+    child.style.transition = 'background-color 150ms linear';
+    outer.setAttribute(PUI_VIEW_REVEALING_ATTR, 'presence');
+    inner.setAttribute(PUI_VIEW_REVEALING_ATTR, 'presence');
+    inner.append(child);
+    outer.append(inner);
+    document.body.append(outer);
+    installViewVisibilityRule(document);
+
+    expect(getComputedStyle(child).transition).toBe('none');
+    outer.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+    expect(getComputedStyle(child).transition).toBe('none');
+    inner.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+    expect(getComputedStyle(child).transition).toBe('background-color 150ms linear');
+  });
+
+  it.each(['', 'portal'])('keeps the existing non-presence child policy for %j reveal', (kind) => {
+    const parent = document.createElement('div');
+    const child = document.createElement('button');
+    parent.setAttribute(PUI_VIEW_REVEALING_ATTR, kind);
+    child.setAttribute('data-pui-root', '');
+    child.style.transition = 'background-color 150ms linear';
+    parent.append(child);
+    document.body.append(parent);
+    installViewVisibilityRule(document);
+
+    expect(getComputedStyle(parent).transition).toBe('none');
+    expect(getComputedStyle(child).transition).toBe('background-color 150ms linear');
+  });
 });
