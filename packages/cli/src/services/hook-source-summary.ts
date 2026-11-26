@@ -1491,7 +1491,18 @@ function createHookSourceSummaryContextInternal(
       ? { call, path }
       : null;
   };
-  const knownReturnedStateDefinitionCall = (path: readonly string[]): boolean => {
+  const nativeEventRegistration = (call: ts.CallExpression, path: readonly string[]): boolean =>
+    path.length === 2 &&
+    path[0] === 'event' &&
+    (path[1] === 'on' || path[1] === 'onGlobal') &&
+    !call.questionDotToken &&
+    call.arguments.length === 2 &&
+    !call.arguments.some(ts.isSpreadElement) &&
+    isStringValue(unwrap(call.arguments[0]!));
+  const knownReturnedStateDefinitionCall = (
+    path: readonly string[],
+    call: ts.CallExpression
+  ): boolean => {
     const operation = path.join('.');
     // This bounded slice knows these native operations. An unfamiliar facade
     // call may execute authored code with its receiver, so it remains opaque.
@@ -1499,6 +1510,9 @@ function createHookSourceSummaryContextInternal(
       operation === 'rule' ||
       operation === 'feedback.style.use' ||
       operation === 'expose.state' ||
+      // The native Def wrapper stores argument 1 for later Event dispatch.
+      // This slice admits no dynamic event name or third options argument.
+      nativeEventRegistration(call, path) ||
       operation === 'context.provide' ||
       operation === 'context.trySubscribe' ||
       operation === 'context.trySubscribeAncestor' ||
@@ -1554,7 +1568,7 @@ function createHookSourceSummaryContextInternal(
         // provenance. Bare members, writes, method aliases and unfamiliar
         // operations remain opaque; only the State constructors are read below.
         const operation = staticMemberCall(node);
-        if (operation && knownReturnedStateDefinitionCall(operation.path)) return;
+        if (operation && knownReturnedStateDefinitionCall(operation.path, operation.call)) return;
         if (
           ts.isCallExpression(parent) &&
           !parent.questionDotToken &&
@@ -1865,6 +1879,24 @@ function createHookSourceSummaryContextInternal(
       definitions: ReadonlySet<ts.Node>
     ): boolean => {
       if (!synchronousBody(fn) || opaqueFunctionSyntax(fn)) return false;
+      // A named function expression has a second, private self binding. The
+      // const/inline reference check below cannot close uses of that binding.
+      // Compare lexical identity so a parameter or local shadow stays distinct.
+      if (ts.isFunctionExpression(fn) && fn.name) {
+        const self = fn.name;
+        let used = false;
+        const visit = (node: ts.Node): void => {
+          if (used || ts.isTypeNode(node)) return;
+          if (isValueIdentifier(node) && bindingDeclaration(node, module) === self) {
+            used = true;
+            return;
+          }
+          ts.forEachChild(node, visit);
+        };
+        for (const parameter of fn.parameters) visit(parameter);
+        visit(fn.body!);
+        if (used) return false;
+      }
       const admitted = (reference: ts.Node): boolean => {
         const value = outerValue(reference);
         const call = value.parent;
@@ -1885,7 +1917,16 @@ function createHookSourceSummaryContextInternal(
         }
         return (
           nativeReference(receiver, module, definitions) &&
-          (path.join('.') === 'context.trySubscribe' ||
+          ((nativeEventRegistration(call, path) &&
+            call.arguments[1] === value &&
+            fn.parameters.length <= 2 &&
+            fn.parameters.every(
+              (parameter) =>
+                ts.isIdentifier(parameter.name) &&
+                !parameter.initializer &&
+                !parameter.dotDotDotToken
+            )) ||
+            path.join('.') === 'context.trySubscribe' ||
             path.join('.') === 'context.trySubscribeAncestor' ||
             path.join('.') === 'props.watchRaw' ||
             (path.length === 2 &&
