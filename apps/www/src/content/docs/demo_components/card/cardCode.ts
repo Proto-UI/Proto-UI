@@ -178,7 +178,7 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
   <wc-brutalist-card-content>
     <p class="text-sm">12 automated checks passed across all edge regions with zero regressions.</p>
   </wc-brutalist-card-content>
-  <wc-brutalist-card-footer>
+  <wc-brutalist-card-footer class="flex-wrap">
     <span class="text-xs text-muted-foreground">Updated 2m ago</span>
     <wc-brutalist-button size="sm">Publish release</wc-brutalist-button>
   </wc-brutalist-card-footer>
@@ -615,7 +615,7 @@ export function BrutalistCardDemo() {
           12 automated checks passed across all edge regions with zero regressions.
         </p>
       </BrutalistCardContent>
-      <BrutalistCardFooter>
+      <BrutalistCardFooter className="flex-wrap">
         <span className="text-xs text-muted-foreground">Updated 2m ago</span>
         <BrutalistButton size="sm">Publish release</BrutalistButton>
       </BrutalistCardFooter>
@@ -1060,7 +1060,7 @@ import {
     <BrutalistCardContent>
       <p class="text-sm">12 automated checks passed across all edge regions with zero regressions.</p>
     </BrutalistCardContent>
-    <BrutalistCardFooter>
+    <BrutalistCardFooter class="flex-wrap">
       <span class="text-xs text-muted-foreground">Updated 2m ago</span>
       <BrutalistButton size="sm">Publish release</BrutalistButton>
     </BrutalistCardFooter>
@@ -1528,7 +1528,7 @@ export default {
     <BrutalistCardContent>
       <p class="text-sm">12 automated checks passed across all edge regions with zero regressions.</p>
     </BrutalistCardContent>
-    <BrutalistCardFooter>
+    <BrutalistCardFooter class="flex-wrap">
       <span class="text-xs text-muted-foreground">Updated 2m ago</span>
       <BrutalistButton size="sm">Publish release</BrutalistButton>
     </BrutalistCardFooter>

@@ -32,6 +32,50 @@ const STYLE_CSS_LANES: ReadonlyArray<{
   },
 ];
 
+describe('zero-specificity theme cascade', () => {
+  for (const { target, render } of STYLE_CSS_LANES) {
+    it(`${target} places dark-only paint after defaults and before state recipes`, () => {
+      const tokens = [
+        'shadow-[4px_4px_0_0_#000]',
+        'dark:shadow-[4px_4px_0_0_var(--pui-foreground)]',
+        'data-[open]:shadow-none',
+        'dark:data-[open]:shadow-md',
+      ];
+      for (const ordered of [tokens, [...tokens].reverse(), [...tokens].sort()]) {
+        const css = render(ordered);
+        const plain = css.indexOf('--pui-shadow: 4px 4px 0 0 #000;');
+        const dark = css.indexOf('--pui-shadow: 4px 4px 0 0 var(--pui-foreground);');
+        const state = css.indexOf('--pui-shadow: 0 0 #0000;');
+        const combined = css.indexOf('--pui-shadow: 0 4px 6px -1px');
+        expect(plain).toBeGreaterThanOrEqual(0);
+        expect(dark).toBeGreaterThan(plain);
+        expect(state).toBeGreaterThan(dark);
+        expect(combined).toBeGreaterThan(dark);
+        // The state recipes retain their existing relative ordering; dark
+        // does not gain selector specificity or a new priority over State.
+        expect(state < combined).toBe(
+          ordered.indexOf('data-[open]:shadow-none') < ordered.indexOf('dark:data-[open]:shadow-md')
+        );
+      }
+    });
+
+    it(`${target} keeps explicit longhands within their own theme condition`, () => {
+      const tokens = ['dark:leading-[2.5rem]', 'leading-6', 'dark:text-sm', 'text-xs'];
+      for (const ordered of [tokens, [...tokens].reverse()]) {
+        const css = render(ordered);
+        const baseFont = css.indexOf('font-size: 0.75rem;');
+        const baseLeading = css.indexOf('line-height: 1.5rem;');
+        const darkFont = css.indexOf('font-size: 0.875rem;');
+        const darkLeading = css.indexOf('line-height: 2.5rem;');
+        expect(baseFont).toBeGreaterThanOrEqual(0);
+        expect(baseLeading).toBeGreaterThan(baseFont);
+        expect(darkFont).toBeGreaterThan(baseLeading);
+        expect(darkLeading).toBeGreaterThan(darkFont);
+      }
+    });
+  }
+});
+
 it('ships every Toast viewport anchor in each family preset', () => {
   const placements = [
     ['top-left', 'top-6', 'left-6'],
@@ -102,7 +146,7 @@ describe('Toast stack style delivery', () => {
       expect(css).toContain('transition-duration: 300ms;');
       expect(css).toContain('transition-timing-function: cubic-bezier(0, 0, 0.2, 1);');
       expect(css).toContain('line-height: 1.4;');
-      expect(css).toContain('--pui-shadow: 0 4px 12px rgb(0 0 0 / 10%);');
+      expect(css).toContain('--pui-shadow: 0 4px 12px rgb(0 0 0 / 0.1);');
       expect(css).not.toContain('Unsupported Proto UI style tokens');
     });
   }
@@ -640,6 +684,7 @@ describe('proto style css renderer', () => {
     ['w-72', 'width: 18rem;'],
     ['text-[1.3125rem]', 'font-size: 1.3125rem;'],
     ['border-[#e5e5e5]', 'border-color: #e5e5e5;'],
+    ['border-inherit', 'border-color: inherit;'],
     ['outline-border', 'outline-color: var(--pui-border);'],
   ])(
     'renders the existing physical vocabulary %s in document and Shadow output',
@@ -1217,28 +1262,34 @@ describe('proto style css renderer', () => {
     expect(css).toContain('transition-property: none;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
-  it('emits explicit duration and ease overrides after transition utilities so they win the cascade', () => {
-    const css = renderProtoStyleTokenCss([
-      'duration-200',
-      'ease-in-out',
-      'transition-all',
-      'transition-colors',
-    ]);
+  it.each([
+    ['duration-200', 'ease-in-out', '200ms'],
+    ['duration-300', 'ease-out', '300ms'],
+  ])(
+    'emits %s and %s after transition utilities so they win the cascade',
+    (durationToken, easeToken, durationValue) => {
+      const css = renderProtoStyleTokenCss([
+        durationToken,
+        easeToken,
+        'transition-all',
+        'transition-colors',
+      ]);
 
-    const transitionAll = css.indexOf('[data-pui-style~="transition-all"]');
-    const transitionColors = css.indexOf('[data-pui-style~="transition-colors"]');
-    const duration = css.indexOf('[data-pui-style~="duration-200"]');
-    const ease = css.indexOf('[data-pui-style~="ease-in-out"]');
+      const transitionAll = css.indexOf('[data-pui-style~="transition-all"]');
+      const transitionColors = css.indexOf('[data-pui-style~="transition-colors"]');
+      const duration = css.indexOf(`[data-pui-style~="${durationToken}"]`);
+      const ease = css.indexOf(`[data-pui-style~="${easeToken}"]`);
 
-    expect(transitionAll).toBeGreaterThan(-1);
-    expect(duration).toBeGreaterThan(transitionAll);
-    expect(duration).toBeGreaterThan(transitionColors);
-    expect(ease).toBeGreaterThan(transitionAll);
-    expect(ease).toBeGreaterThan(transitionColors);
-    expect(css).toContain('transition-duration: 150ms;');
-    expect(css).toContain('transition-duration: 200ms;');
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
-  });
+      expect(transitionAll).toBeGreaterThan(-1);
+      expect(duration).toBeGreaterThan(transitionAll);
+      expect(duration).toBeGreaterThan(transitionColors);
+      expect(ease).toBeGreaterThan(transitionAll);
+      expect(ease).toBeGreaterThan(transitionColors);
+      expect(css).toContain('transition-duration: 150ms;');
+      expect(css).toContain(`transition-duration: ${durationValue};`);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    }
+  );
   it('emits explicit leading overrides after text-size utilities', () => {
     const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
 

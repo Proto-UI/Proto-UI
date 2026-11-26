@@ -50,11 +50,13 @@ vi.mock('./projection-theme', async (original) => {
   const current = await original<typeof import('./projection-theme')>();
   return {
     ...current,
-    resolveProjectionThemeSurfaceStyle: (
-      ...args: Parameters<typeof current.resolveProjectionThemeSurfaceStyle>
+    // The publication batch reads the latest family through the watcher's
+    // synchronous initial emission, so inject the post-render fault there.
+    watchProjectionThemeSurfaceStyle: (
+      ...args: Parameters<typeof current.watchProjectionThemeSurfaceStyle>
     ) => {
       if (control.failTheme && args[0] === 'brutalist') throw new Error('post-render theme failed');
-      return current.resolveProjectionThemeSurfaceStyle(...args);
+      return current.watchProjectionThemeSurfaceStyle(...args);
     },
   };
 });

@@ -201,13 +201,13 @@ it('forwards each of the three keyboard handlers own event into its original gat
   ]) {
     const block = between(
       source,
-      `    listen(${target}, '${type}', (e: KeyboardEvent) => {`,
-      '\n    })'
+      `      listen(${target}, '${type}', (e: KeyboardEvent) => {`,
+      '\n      })'
     );
     let callback;
     const calls = [];
     const event = { type };
-    vm.runInNewContext(javascript(block + '\n    });'), {
+    vm.runInNewContext(javascript(block + '\n      });'), {
       [target]: {},
       listen(_target, _type, cb) {
         callback = cb;
@@ -270,7 +270,7 @@ it('preserves the real eventGate method results, arguments and receiver under ob
   const source = between(
     react(),
     "        for (const method of ['enable'",
-    '\n\n        const router ='
+    '\n\n        const eventPort ='
   );
   const make = () => {
     const context = { exports: {} };

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "745e28513e4b247e81b596516ba542e43b869725",
-  "scope": "Direct source inventory for the same sampled website routes after the partial typed source producer and React/GPUI consumers. All 32 reviewed owners remain; only pnpm-lock.yaml renews its digest for the reviewed compiler importer. The prior 3ed63ef source reference is archived byte-for-byte. No retired compiler owner is restored. Source identity does not certify browser execution, complete served/transitive closure or lifecycle acceptance.",
+  "revision": "3355fb3a99f5d9db03c71d6818ec39f24a4d7109",
+  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1922 integration source commit 3355fb3a99f5d9db03c71d6818ec39f24a4d7109. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-9d5c3f6.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -27,7 +27,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "60b55efb6c15b2deccc95a736f8a3aaf8ea1fdc0e2b851db19fe4a1192f1970c"
+      "sha256": "d34e9445536da8c56aaca4be078449ecdc05108f93f11e5bd5828f94d5d06629"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -35,7 +35,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "b73271d7c754a27567d3b0fc1f50bb95d48b08d51337dc443aa447a0f36ab825"
+      "sha256": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
@@ -83,7 +83,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "75e6a226b6038f4d6936ac876596bee90ee9b97e78e783feb5664d9452e5fe07"
+      "sha256": "07dae9498553279b22e69683d42ab8e3e47a1be4161792cebb8ef86dfb9544c6"
     },
     {
       "path": "apps/www/package.json",
@@ -91,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "212e98529f0e2e76831ae8fee37b281f069e61bb737f8462f7b5cfbcc14ce53a"
+      "sha256": "833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
@@ -115,7 +115,7 @@
     },
     {
       "path": "apps/www/src/components/docs-header-preparation.ts",
-      "sha256": "545b76fa19b9633d52915c20c8e5ddb7e340dc9a73e43b88b6c790d0a42aa244"
+      "sha256": "a9ec13d22f86a8979b3f9964cb6b8b65ab6022df922e4b21c59a728b473c8c58"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/button/button-usage.ts",

@@ -163,7 +163,7 @@ it('retains a validated metadata snapshot and explicit shared Header appearance'
   const all = nodes(demo.root);
   expect(
     all.find((node) => node.kind === 'proto' && node.ref === 'home-locale-root')
-  ).toMatchObject({ props: { styleProfile: 'rhea' } });
+  ).toMatchObject({ props: { styleProfile: 'luma' } });
   expect(
     all.find((node) => node.kind === 'proto' && node.ref === 'home-locale-trigger')
   ).toMatchObject({ props: { appearance: 'default' } });

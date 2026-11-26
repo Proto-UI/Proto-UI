@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-gate-followup-repair",
+  "preparedFrom": "8861f38292667894693c394d7cd1203c316e1a65",
+  "precedingCandidate": "56221ad7221ae454ddda36cb9724001dcbf5525e",
+  "observedPrecedingFailures": {
+    "originalCLI": {
+      "total": 823,
+      "passed": 821,
+      "failed": 2,
+      "skipped": 0,
+      "todo": 0,
+      "unresolvedInventory": 3266,
+      "regression": "accepts an intent reading a container that also holds a handle"
+    },
+    "originalWC": {
+      "total": 74,
+      "passed": 72,
+      "failed": 2,
+      "skipped": 0,
+      "todo": 0
+    },
+    "strictPackage": {
+      "passed": 8,
+      "total": 9,
+      "wcGzip": 218283,
+      "wcLimit": 218100
+    }
+  },
+  "cli": {
+    "repair": "Transport a separately proven State sibling as a non-token leaf; requested token paths must still end in an own literal string.",
+    "files": [
+      {
+        "path": "packages/cli/src/services/lowered-hook-coverage.ts",
+        "beforeSha256": "d1b6551cca5be9a672c45323d6cbfb0c81ef96df80f16acddd840b68ed66795d",
+        "afterSha256": "8601c35595a748399acc89b62cc5fef181cb40e8402b708900c8d38dd1905e46",
+        "bytes": 217531
+      },
+      {
+        "path": "packages/cli/test/lowered-token-selected-leaf.test.ts",
+        "beforeSha256": null,
+        "afterSha256": "e3904e5f1699ac4c5dbf006693e0eda5ca8b1faf11cf2dcff9f329c32370a2f0",
+        "bytes": 2849
+      }
+    ],
+    "retainedGuards": [
+      "private local const, no exported/imported mutable owner",
+      "literal own keys, no missing/inherited/unknown key",
+      "no getters, spreads or prototype setter initializer",
+      "whole-source no owner/nested-container escape, alias, write or dynamic eval",
+      "State marker cannot be returned as string token",
+      "Reflect iterator negative controls unchanged"
+    ],
+    "localBoundedControls": 62,
+    "localScope": "Isolated copy of supplied runtime-omission-only. Exact service hash and test hashes verified; no claim that this is a clean full H562 Git checkout.",
+    "fullInventoryRepaired": false
+  },
+  "wc": {
+    "repair": [
+      "Reuse the same composed ancestor chain without changing its membership.",
+      "Merge existing per-node dormant observation options before registering once.",
+      "Retain current-identity guarded method/setter restoration using ordered closures.",
+      "Bridge the single Happy DOM CSSOM display input at getComputedStyle without changing original assertions."
+    ],
+    "files": [
+      {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "preimageSha256": "739d1c3750af97524ee76097a87d575f15e64c2d458ce92cb1ce7d2670e738b0",
+        "postimageSha256": "35dec6e04717b342a2a784de5c0bc9fd898745c2fd4629e4ce3a39b93142e278"
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts",
+        "preimageSha256": "8451937e7820b0cd6633dcfc1c591617f5da82d240a2d03b0df02cc613868aec",
+        "postimageSha256": "4cd34d288139d73cf19fcbea2c5e4f6f7d9aeee9945b18035ec132607471dcfe"
+      }
+    ],
+    "platformProbe": {
+      "kind": "independent-platform-behavior-probe",
+      "sourcePurpose": "Explain exact H562 original inert fixture failures without changing any product expectation",
+      "node": "v24.22.3",
+      "happyDom": "15.11.7",
+      "chromium": "156.0.8078.108",
+      "happyResult": {
+        "before": "block",
+        "currentDeclaration": "none",
+        "afterCssom": "block",
+        "afterStyleNode": "none",
+        "records": []
+      },
+      "chromiumResult": {
+        "before": "block",
+        "currentDeclaration": "none",
+        "afterCssom": "none",
+        "afterStyleNode": "none",
+        "records": [
+          {
+            "type": "childList",
+            "removedTarget": true
+          }
+        ]
+      },
+      "originalH": "56221ad7221ae454ddda36cb9724001dcbf5525e",
+      "productBundleRun": false,
+      "browserContractPassed": true
+    },
+    "platformProbeSha256": "e8dfb56ba7df4ea93e26e3eea828f8a67d57fe86dee75ef56e03cfa9aa40fb5c",
+    "originalAssertionExpectationsChanged": false,
+    "local74Scope": "Exact H module/test preimages; local execution uses 710a archive with exact H modules/focus-scope/portal files, not an exact H checkout. Parent owns exact H execution and actual strict9 package budget.",
+    "local74Result": {
+      "total": 74,
+      "passed": 74,
+      "failed": 0
+    },
+    "ownershipNegativeControl": {
+      "report": "foreign-owner-negative.report.json",
+      "total": 74,
+      "passed": 72,
+      "failed": 2,
+      "skippedTodo": 0,
+      "failureIdentities": [
+        "never clobbers a third-party stylesheet patch installed after ours",
+        "never clobbers a third-party cssText setter installed after ours"
+      ],
+      "meaning": "Removing only the two retained current-identity guards fails existing foreign-owner controls",
+      "sourceRestored": true
+    }
+  },
+  "acceptance": {
+    "status": "Pending original checks on the combined committed source; this record does not claim a new strict-budget or full-CLI pass.",
+    "noRaisedBudgets": true,
+    "noChangedOriginalCLIOracle": true,
+    "noDeferredIssueClosure": true
+  },
+  "websiteBindingsRecord": "internal/records/2026-11-25-header-toast-source-bindings.json"
+}

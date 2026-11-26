@@ -122,20 +122,20 @@ export function linkSurfaceProps(
     };
   if (family === 'shadcn' && appearance === 'nav')
     return shadcnActionAppearance({
-      styleProfile: 'rhea',
+      styleProfile: 'luma',
       emphasis: 'minimal',
       ...facts,
       // Ordinary navigation retains its native text-selection and stationary
-      // press policy; the shared Rhea recipe still owns hover/current/focus.
+      // press policy; the shared Luma recipe still owns hover/current/focus.
       pressed: false,
       hovered: facts.hovered || facts.current,
     }).surface;
   if (appearance === 'action') return linkActionAppearance(family, emphasis, facts).surface;
-  // Community icons share the selected Rhea paint, not Button semantics.
+  // Community icons share the selected Luma paint, not Button semantics.
   // Their existing 44px native-link target remains in linkSurfaceLayout.
   if (family === 'shadcn' && appearance === 'icon')
     return shadcnActionAppearance({
-      styleProfile: 'rhea',
+      styleProfile: 'luma',
       emphasis: emphasis === 'link' ? 'minimal' : emphasis,
       ...facts,
     }).surface;
@@ -203,12 +203,12 @@ export function linkTextProps(
     };
   if (family === 'shadcn' && appearance === 'nav')
     return {
-      ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).text,
+      ...shadcnActionAppearance({ styleProfile: 'luma', emphasis: 'minimal', ...facts }).text,
       weight: facts.current ? 'semibold' : 'medium',
     };
   if (appearance === 'action') return linkActionAppearance(family, 'primary', facts).text;
   if (family === 'shadcn' && appearance === 'icon')
-    return shadcnActionAppearance({ styleProfile: 'rhea', ...facts }).text;
+    return shadcnActionAppearance({ styleProfile: 'luma', ...facts }).text;
   const quietNavigation = family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc');
   return {
     size:
@@ -277,7 +277,7 @@ export function linkSurfaceLayout(
       userSelect: _userSelect,
       WebkitUserSelect: _WebkitUserSelect,
       ...layout
-    } = shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout;
+    } = shadcnActionAppearance({ styleProfile: 'luma', emphasis: 'minimal', ...facts }).layout;
     return {
       ...layout,
       minHeight: 'var(--site-control-height, 2.75rem)',

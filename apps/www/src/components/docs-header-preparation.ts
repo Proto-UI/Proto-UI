@@ -1,26 +1,30 @@
-const pendingPreparations = new WeakMap<Document, { waiters: Set<() => void>; release(): void }>();
+const pendingPreparations = new WeakMap<
+  Document,
+  { waiters: Set<() => void>; leases: Set<symbol> }
+>();
 
 export function hasPendingDocsHeaderPreparation(document: Document): boolean {
   return pendingPreparations.has(document);
 }
 
 export function reserveDocsHeaderPreparation(document: Document): () => void {
-  const previous = pendingPreparations.get(document);
-  const preparation = {
+  const preparation = pendingPreparations.get(document) ?? {
     waiters: new Set<() => void>(),
-    release() {
-      if (pendingPreparations.get(document) === preparation) pendingPreparations.delete(document);
-      for (const resume of preparation.waiters) queueMicrotask(resume);
-      preparation.waiters.clear();
-    },
+    leases: new Set<symbol>(),
   };
+  const lease = Symbol();
+  preparation.leases.add(lease);
   pendingPreparations.set(document, preparation);
-  previous?.release();
-  return preparation.release;
+  return () => {
+    if (!preparation.leases.delete(lease) || preparation.leases.size) return;
+    if (pendingPreparations.get(document) === preparation) pendingPreparations.delete(document);
+    for (const resume of preparation.waiters) queueMicrotask(resume);
+    preparation.waiters.clear();
+  };
 }
 
-/** Coalesce only work waiting on Docs Header. Other projection starts retain
- * their original timing. Recheck the barrier after a superseding attempt. */
+/** Coalesce work waiting on Docs Header and Search. Recheck the barrier when
+ * resuming because another critical request can reserve it first. */
 export function deferUntilDocsHeaderPrepared(
   root: HTMLElement,
   run: () => void | Promise<unknown>

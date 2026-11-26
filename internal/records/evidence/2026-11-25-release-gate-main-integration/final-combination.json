@@ -1,0 +1,14 @@
+{
+  "readyParent": "c443efa7a7226a9b62517f7af21faa379d128aa9",
+  "reviewedMainMerge": "fe7bdfe00666c4dda8aa5a7b41fcef736c8476db",
+  "main": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+  "remainingConflict": "scripts/docs/test/brutalist-provenance.test.mjs",
+  "resolution": "Retain bounded AST proof that every section border is under divider=true and defaults false; retain main bilingual divider API and prose contracts; retain black Root frame and rejection of obsolete ink-frame prose.",
+  "verification": {
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0
+  },
+  "fullCi": "pending"
+}

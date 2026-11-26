@@ -1,0 +1,35 @@
+{
+  "scope": "Planner/sequencing controls; native twenty-case original suite still required",
+  "sourceHashes": {
+    "apps/www/scripts/contrast-tooltip-handoff.mjs": "7424ec4844f8c8e5851a0a88700da06264628d61554a5304890eaf6edfa2cb8b",
+    "apps/www/scripts/contrast-tooltip-handoff.test.mjs": "85aa51d75811a7d71d039b5565377735a40a6478af663c37929e1a6c81ea49e2"
+  },
+  "authority": ["P-BASE-TOOLTIP-GROUP-DELAYS", "P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF"],
+  "currentRecipe": {
+    "openDelay": 500,
+    "closeDelay": 100,
+    "skipDelay": 300,
+    "triggers": ["Account", "Notifications"]
+  },
+  "before": {
+    "total": 9,
+    "passed": 7,
+    "failed": 2
+  },
+  "after": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "exit": 0
+  },
+  "unchanged": [
+    "300ms native warm deadline",
+    "native pointer enter",
+    "same physical Group/Root/Trigger/Content leases",
+    "one painted Content",
+    "cold timing",
+    "rejection controls"
+  ],
+  "nativeStatus": "pending"
+}

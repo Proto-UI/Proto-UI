@@ -15,7 +15,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Tooltip displays concise contextual descriptions on hover or keyboard focus using anchored portal positioning, `Escape` dismissal, and automatic `aria-describedby` / `role="tooltip"` wiring. Brutalist styles `Content` as a 5px rounded neutral surface with a theme-adaptive 2px foreground border across Light and Dark modes.
+Tooltip displays concise contextual descriptions on hover or keyboard focus using anchored portal positioning, `Escape` dismissal, and automatic `aria-describedby` / `role="tooltip"` wiring. Brutalist styles `Content` as a 5px rounded neutral surface with a fixed 2px black border; its fill and text follow Light and Dark themes.
 
 ## Preview
 
@@ -29,7 +29,7 @@ Tooltip displays concise contextual descriptions on hover or keyboard focus usin
 
 ## Installation
 
-Use `@proto.ui/prototypes-brutalist/tooltip` and your host adapter from the same workspace revision. The React example adapts the exported prototypes directly with `@proto.ui/adapter-react`.
+Install `@proto.ui/cli`, `@proto.ui/prototypes-brutalist`, and your host adapter (`@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue`, or `@proto.ui/adapter-vue2`; Vue 2 requires Vue `>=2.6.0 <2.7`) from the same source revision. For a local source checkout, use the repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs). The React example imports `@proto.ui/prototypes-brutalist/tooltip` and adapts its exported prototypes directly with `@proto.ui/adapter-react`.
 
 Initialize the Brutalist style sheet with the matching local CLI and import the generated `proto-ui-style.css` in the application entry.
 
@@ -72,7 +72,7 @@ TooltipGroup (optional)
 - `Group`: Shares delay defaults, warm-window skip timing, and active-tooltip coordination across sibling tooltips.
 - `Root`: Manages controlled or uncontrolled open state and per-tooltip delay overrides.
 - `Trigger`: Transparent trigger host that routes hover/focus events and manages `aria-describedby`.
-- `Content`: Renders the 5px rounded neutral surface in a portal with theme-adaptive foreground border, anchored positioning, and `Escape` dismissal.
+- `Content`: Renders the 5px rounded neutral surface in a portal with a fixed black border, theme-aware fill and text, anchored positioning, and `Escape` dismissal.
 
 ## Examples
 

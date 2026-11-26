@@ -5,7 +5,7 @@ status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
   en: Owning-layer and synthetic Web harness coverage only; native browser visual and first-frame evidence remain pending, with no stable or complete Finf credit.
-summary: Four-part exports, passive composition, finite New York/Rhea scope and density projection, and gallery inheritance.
+summary: Four-part exports, passive composition, finite New York/Rhea/Luma scope and density projection, and gallery inheritance.
 cases:
   - id: T-SHADCN-CARD-0001-CASE-1
     title: Four public parts and facade aliases
@@ -137,6 +137,9 @@ verifies:
     - P-SHADCN-CARD-CONTENT
     - P-SHADCN-CARD-FOOTER
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Extend finite Card style-projection tests to cover the bounded Luma profile alongside New York and Rhea.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Bound Card draft criteria to explicit owning-layer and SSR checks.

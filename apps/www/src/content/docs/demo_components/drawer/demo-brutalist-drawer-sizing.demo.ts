@@ -23,6 +23,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-drawer-content',
+            ref: 'sizing-content',
             previewTheme: 'portal',
             props: {
               side: 'right',

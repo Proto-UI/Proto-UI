@@ -12,6 +12,8 @@ export const SHADCN_STYLE_SCOPE = createContextKey<ShadcnStyleContext>('shadcn-s
 export function normalizeShadcnStyle(value: unknown): ShadcnStyleId | null {
   if (value === undefined || value === null || value === 'inherit') return null;
   if (value === 'new-york') return 'new-york-v4';
-  if (SHADCN_STYLE_IDS.includes(value as ShadcnStyleId)) return value as ShadcnStyleId;
+  // Keep the shared Rule iteration domain out of the method receiver's lifetime.
+  // Membership inspects a private value copy; the exported array keeps its identity.
+  if ([...SHADCN_STYLE_IDS].includes(value as ShadcnStyleId)) return value as ShadcnStyleId;
   throw new Error(`[shadcn-style-scope] Unknown style: ${String(value)}`);
 }

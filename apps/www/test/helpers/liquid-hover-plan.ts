@@ -65,8 +65,11 @@ export function liquidHoverStages(journey: LiquidHoverJourney, part: string): st
     return [
       'collapse-blocked',
       'collapse-blocked-hover',
+      'collapse-blocked-down',
       'collapse-blocked-click',
       'collapse-blocked-focus',
+      'collapse-blocked-focus-hover',
+      'collapse-blocked-blur',
     ];
   if ([...LIQUID_HOVER_NEGATIVES, 'accordion-tight'].includes(part))
     return ['negative-idle', 'negative-hover', 'negative-press', 'negative-release'];

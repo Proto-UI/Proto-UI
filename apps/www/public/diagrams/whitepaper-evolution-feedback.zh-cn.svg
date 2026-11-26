@@ -12,6 +12,7 @@
   .line { fill:none; stroke:var(--muted); stroke-width:2; stroke-linejoin:round; }
 </style><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker></defs>
 <desc id="description">理论与内核、原型库和翻译层并行推进。实现、符合性测试与真实使用提供归因证据：实现偏差需要修正实现；Host 能力缺口需要补足翻译能力；必要语义遗漏或定义对某类 Host 过拟合需要修正 Prototype；基础关系出现反例需要重新检查理论。这些是不同的归因方向，不是依次完成的阶段。明确修正对应层并重新检验；实现结果不会静默成为新标准。</desc>
+<g class="evo-root">
 <defs>
   <style>
     .evo-root {
@@ -81,106 +82,71 @@
     <path d="M1.5 2 L8.5 5 L1.5 8 Z" fill="var(--evo-line)"/>
   </marker>
 </defs>
-<g class="evo-root">
-<rect x="0" y="0" width="960" height="928" rx="16" fill="var(--evo-bg)" stroke="none"/>
-<text x="56" y="48" font-size="12" class="evo-mono evo-kicker">EVOLUTION LOOP · 演进闭环</text>
-<text x="56" y="84" font-size="28" class="evo-title">实践、证据与明确修正</text>
-<text x="56" y="112" font-size="16" class="evo-sub">三条主线并行推进，实践证据驱动显式归因与定向修正</text>
-<path data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M 104 706 H 58 Q 44 706 44 692 V 164 Q 44 150 58 150 H 782 Q 796 150 796 164 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>
-<path data-relation="revision-return" data-from="diagnoses" data-to="theory-kernel" d="M 228 150 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>
-<path data-relation="revision-return" data-from="diagnoses" data-to="prototype-libraries" d="M 512 150 V 184" class="evo-wire-dash" marker-end="url(#evo-arrow)"/>
-<g transform="translate(44 432) rotate(-90)">
-      <rect x="-64" y="-12" width="128" height="24" rx="12" class="evo-pill"/>
-      <text x="0" y="4" font-size="11" text-anchor="middle" class="evo-mono evo-kicker">显式修正回路</text>
-    </g>
-<g data-node="theory-kernel" filter="url(#evo-shadow)">
-      <rect x="112" y="192" width="232" height="114" rx="12" class="evo-card"/>
-      <rect x="112" y="192" width="232" height="4" rx="2" fill="var(--evo-blue)" stroke="none"/>
-      <rect x="130" y="210" width="32" height="20" rx="6" fill="var(--evo-blue-soft)" stroke="none"/>
-      <text x="146" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="var(--evo-blue)" font-weight="600">01</text>
-      <text x="130" y="260" font-size="20" class="evo-title">理论与内核</text>
-      <text x="130" y="286" font-size="13" class="evo-sub">模型 · 契约 · 生命周期</text>
-    </g>
-<g data-node="prototype-libraries" filter="url(#evo-shadow)">
-      <rect x="396" y="192" width="232" height="114" rx="12" class="evo-card"/>
-      <rect x="396" y="192" width="232" height="4" rx="2" fill="var(--evo-green)" stroke="none"/>
-      <rect x="414" y="210" width="32" height="20" rx="6" fill="var(--evo-green-soft)" stroke="none"/>
-      <text x="430" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="var(--evo-green)" font-weight="600">02</text>
-      <text x="414" y="260" font-size="20" class="evo-title">原型库</text>
-      <text x="414" y="286" font-size="13" class="evo-sub">语义协议 · 交互与组合</text>
-    </g>
-<g data-node="translation-layer" filter="url(#evo-shadow)">
-      <rect x="680" y="192" width="232" height="114" rx="12" class="evo-card"/>
-      <rect x="680" y="192" width="232" height="4" rx="2" fill="var(--evo-amber)" stroke="none"/>
-      <rect x="698" y="210" width="32" height="20" rx="6" fill="var(--evo-amber-soft)" stroke="none"/>
-      <text x="714" y="224" font-size="11" text-anchor="middle" class="evo-mono" fill="var(--evo-amber)" font-weight="600">03</text>
-      <text x="698" y="260" font-size="20" class="evo-title">翻译层</text>
-      <text x="698" y="286" font-size="13" class="evo-sub">Adapter · 宿主能力映射</text>
-    </g>
-<path data-relation="work-exchange" data-from="theory-kernel" data-to="prototype-libraries" d="M 346 240 H 390" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
-<path data-relation="work-exchange" data-from="prototype-libraries" data-to="theory-kernel" d="M 394 256 H 350" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
-<path data-relation="work-exchange" data-from="prototype-libraries" data-to="translation-layer" d="M 630 240 H 674" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
-<path data-relation="work-exchange" data-from="translation-layer" data-to="prototype-libraries" d="M 678 256 H 634" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
-<path data-relation="practice-input" data-from="theory-kernel" data-to="practice-evidence" d="M 228 306 V 326 Q 228 338 240 338 H 512" class="evo-wire"/>
-<path data-relation="practice-input" data-from="translation-layer" data-to="practice-evidence" d="M 796 306 V 326 Q 796 338 784 338 H 512" class="evo-wire"/>
-<path data-relation="evidence-entry" data-from="prototype-libraries" data-to="practice-evidence" d="M 512 306 V 364" class="evo-wire" marker-end="url(#evo-arrow)"/>
-<g data-node="practice-evidence" filter="url(#evo-shadow)">
-    <rect x="112" y="372" width="800" height="106" rx="12" class="evo-card"/>
-    <text x="136" y="400" font-size="11" class="evo-mono evo-kicker">STAGE 01 · 实践证据</text>
-    <text x="136" y="428" font-size="20" class="evo-title">实践提供证据</text>
-    <text x="136" y="454" font-size="14" class="evo-sub">真实实现、符合性测试与跨宿主使用暴露当前近似的边界</text>
-  </g>
-<g>
-      <rect x="612" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
-      <text x="656" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">行为结果</text>
-    </g>
-<g>
-      <rect x="708" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
-      <text x="752" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">失败案例</text>
-    </g>
-<g>
-      <rect x="804" y="408" width="88" height="32" rx="8" fill="var(--evo-surface-subtle)" stroke="var(--evo-border)" stroke-width="1"/>
-      <text x="848" y="428" font-size="12" text-anchor="middle" fill="var(--evo-ink)" font-weight="500">反例样本</text>
-    </g>
-<path data-relation="diagnose" data-from="practice-evidence" data-to="diagnoses" d="M 512 478 V 512" class="evo-wire" marker-end="url(#evo-arrow)"/>
-<g data-alternatives="diagnoses">
-    <rect x="104" y="520" width="816" height="324" rx="16" class="evo-zone"/>
-    <text x="130" y="550" font-size="11" class="evo-mono evo-kicker">STAGE 02 · 归因分流（并行方向，非先后阶段）</text>
-    <text x="130" y="578" font-size="20" class="evo-title">归因：哪一层需要修正？</text>
-  
-<g data-diagnosis="implementation" filter="url(#evo-shadow)">
-      <rect x="128" y="602" width="374" height="102" rx="12" class="evo-card"/>
-      <rect x="128" y="618" width="4" height="70" rx="2" fill="var(--evo-slate)" stroke="none"/>
-      <text x="148" y="636" font-size="16" class="evo-title">实现偏差</text>
-      <text x="148" y="658" font-size="13" class="evo-sub">行为偏离已有规范与契约</text>
-      <rect x="148" y="670" width="116" height="24" rx="6" fill="var(--evo-slate-soft)" stroke="none"/>
-      <text x="158" y="686" font-size="12" fill="var(--evo-slate)" font-weight="600">→ 修正实现</text>
-    </g>
-<g data-diagnosis="host-capability" filter="url(#evo-shadow)">
-      <rect x="522" y="602" width="374" height="102" rx="12" class="evo-card"/>
-      <rect x="522" y="618" width="4" height="70" rx="2" fill="var(--evo-amber)" stroke="none"/>
-      <text x="542" y="636" font-size="16" class="evo-title">Host 能力缺口</text>
-      <text x="542" y="658" font-size="13" class="evo-sub">目标宿主缺少所需承载能力</text>
-      <rect x="542" y="670" width="116" height="24" rx="6" fill="var(--evo-amber-soft)" stroke="none"/>
-      <text x="552" y="686" font-size="12" fill="var(--evo-amber)" font-weight="600">→ 补足翻译能力</text>
-    </g>
-<g data-diagnosis="prototype" filter="url(#evo-shadow)">
-      <rect x="128" y="722" width="374" height="102" rx="12" class="evo-card"/>
-      <rect x="128" y="738" width="4" height="70" rx="2" fill="var(--evo-green)" stroke="none"/>
-      <text x="148" y="756" font-size="16" class="evo-title">义务遗漏或过拟合</text>
-      <text x="148" y="778" font-size="13" class="evo-sub">定义遗漏必要语义或绑定特定 Host</text>
-      <rect x="148" y="790" width="116" height="24" rx="6" fill="var(--evo-green-soft)" stroke="none"/>
-      <text x="158" y="806" font-size="12" fill="var(--evo-green)" font-weight="600">→ 修正 Prototype</text>
-    </g>
-<g data-diagnosis="theory" filter="url(#evo-shadow)">
-      <rect x="522" y="722" width="374" height="102" rx="12" class="evo-card"/>
-      <rect x="522" y="738" width="4" height="70" rx="2" fill="var(--evo-blue)" stroke="none"/>
-      <text x="542" y="756" font-size="16" class="evo-title">基础关系出现反例</text>
-      <text x="542" y="778" font-size="13" class="evo-sub">现有模型无法一致解释基础关系</text>
-      <rect x="542" y="790" width="116" height="24" rx="6" fill="var(--evo-blue-soft)" stroke="none"/>
-      <text x="552" y="806" font-size="12" fill="var(--evo-blue)" font-weight="600">→ 重审理论</text>
-    </g>
+<rect width="960" height="928" rx="16" fill="var(--evo-bg)" stroke="none"/>
+<text x="48" y="64" font-size="40" text-anchor="start" class="evo-title"><tspan x="48" dy="0">实践、证据与明确修正</tspan></text>
+<text x="48" y="118" font-size="36" text-anchor="start" class="evo-sub"><tspan x="48" dy="0">三条主线并行推进</tspan></text>
+<g data-node="theory-kernel">
+<rect x="96" y="166" width="248" height="126" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="96" y="166" width="248" height="4" rx="2" fill="var(--evo-blue)" stroke="none"/>
+<text x="220" y="216.4" font-size="36" text-anchor="middle" class="evo-title"><tspan x="220" dy="0">理论与</tspan><tspan x="220" dy="50.4">内核</tspan></text>
 </g>
-<text x="104" y="888" font-size="15" class="evo-sub">明确修正对应层，再次检验。实现结果不会静默成为新标准。</text>
+<g data-node="prototype-libraries">
+<rect x="384" y="166" width="248" height="126" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="384" y="166" width="248" height="4" rx="2" fill="var(--evo-green)" stroke="none"/>
+<text x="508" y="241.6" font-size="36" text-anchor="middle" class="evo-title"><tspan x="508" dy="0">原型库</tspan></text>
+</g>
+<g data-node="translation-layer">
+<rect x="672" y="166" width="248" height="126" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="672" y="166" width="248" height="4" rx="2" fill="var(--evo-amber)" stroke="none"/>
+<text x="796" y="241.6" font-size="36" text-anchor="middle" class="evo-title"><tspan x="796" dy="0">翻译层</tspan></text>
+</g>
+<path data-relation="work-exchange" data-from="theory-kernel" data-to="prototype-libraries" d="M348 210 H380" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="work-exchange" data-from="prototype-libraries" data-to="theory-kernel" d="M380 252 H348" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="work-exchange" data-from="prototype-libraries" data-to="translation-layer" d="M636 210 H668" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="work-exchange" data-from="translation-layer" data-to="prototype-libraries" d="M668 252 H636" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="practice-input" data-from="theory-kernel" data-to="practice-evidence" d="M220 292 V316 Q220 328 508 328" class="evo-wire"/>
+<path data-relation="practice-input" data-from="prototype-libraries" data-to="practice-evidence" d="M508 292 V316 Q508 328 508 328" class="evo-wire"/>
+<path data-relation="practice-input" data-from="translation-layer" data-to="practice-evidence" d="M796 292 V316 Q796 328 508 328" class="evo-wire"/>
+<path data-relation="evidence-entry" data-from="work" data-to="practice-evidence" d="M508 328 V348" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<g data-node="practice-evidence">
+<rect x="96" y="352" width="824" height="124" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="96" y="352" width="824" height="4" rx="2" fill="var(--evo-slate)" stroke="none"/>
+<text x="508" y="400" font-size="36" text-anchor="middle" class="evo-title"><tspan x="508" dy="0">实践提供证据</tspan></text>
+<text x="508" y="454" font-size="36" text-anchor="middle" class="evo-sub"><tspan x="508" dy="0">行为结果、失败与反例</tspan></text>
+</g>
+<path data-relation="diagnose" data-from="practice-evidence" data-to="diagnoses" d="M508 476 V492" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<g data-alternatives="diagnoses">
+<rect x="80" y="496" width="856" height="376" rx="16" class="evo-zone"/>
+<text x="96" y="548" font-size="36" text-anchor="start" class="evo-title"><tspan x="96" dy="0">归因：哪一层需要修正？</tspan></text>
+<g data-diagnosis="implementation">
+<rect x="96" y="578" width="400" height="128" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="96" y="578" width="400" height="4" rx="2" fill="var(--evo-slate)" stroke="none"/>
+<text x="296" y="626" font-size="36" text-anchor="middle" class="evo-title"><tspan x="296" dy="0">实现偏差</tspan></text>
+<text x="296" y="680" font-size="36" text-anchor="middle" class="evo-sub"><tspan x="296" dy="0">修正实现</tspan></text>
+</g>
+<g data-diagnosis="host-capability">
+<rect x="520" y="578" width="400" height="128" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="520" y="578" width="400" height="4" rx="2" fill="var(--evo-amber)" stroke="none"/>
+<text x="720" y="626" font-size="36" text-anchor="middle" class="evo-title"><tspan x="720" dy="0">Host 能力缺口</tspan></text>
+<text x="720" y="680" font-size="36" text-anchor="middle" class="evo-sub"><tspan x="720" dy="0">补足翻译能力</tspan></text>
+</g>
+<g data-diagnosis="prototype">
+<rect x="96" y="730" width="400" height="128" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="96" y="730" width="400" height="4" rx="2" fill="var(--evo-green)" stroke="none"/>
+<text x="296" y="778" font-size="36" text-anchor="middle" class="evo-title"><tspan x="296" dy="0">义务遗漏或过拟合</tspan></text>
+<text x="296" y="832" font-size="36" text-anchor="middle" class="evo-sub"><tspan x="296" dy="0">修正 Prototype</tspan></text>
+</g>
+<g data-diagnosis="theory">
+<rect x="520" y="730" width="400" height="128" rx="12" class="evo-card" filter="url(#evo-shadow)"/>
+<rect x="520" y="730" width="400" height="4" rx="2" fill="var(--evo-blue)" stroke="none"/>
+<text x="720" y="778" font-size="36" text-anchor="middle" class="evo-title"><tspan x="720" dy="0">基础关系出现反例</tspan></text>
+<text x="720" y="832" font-size="36" text-anchor="middle" class="evo-sub"><tspan x="720" dy="0">重审理论</tspan></text>
+</g>
+</g>
+<path data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M80 684 H58 Q44 684 44 670 V146 Q44 136 58 136 H796" class="evo-wire"/>
+<path data-relation="revision-return" data-from="diagnoses" data-to="theory-kernel" d="M220 136 V162" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="revision-return" data-from="diagnoses" data-to="prototype-libraries" d="M508 136 V162" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<path data-relation="revision-return" data-from="diagnoses" data-to="translation-layer" d="M796 136 V162" class="evo-wire" marker-end="url(#evo-arrow-sm)"/>
+<text x="48" y="908" font-size="36" text-anchor="start" class="evo-sub"><tspan x="48" dy="0">明确修正，再次检验。</tspan></text>
 </g>
 </svg>

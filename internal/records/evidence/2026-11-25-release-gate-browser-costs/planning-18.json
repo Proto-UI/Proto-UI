@@ -1,0 +1,612 @@
+{
+  "kind": "existing-policy-projection-not-native-execution",
+  "shardCount": 18,
+  "selectedSuites": 114,
+  "maxEstimatedSeconds": 720,
+  "setupReserveSeconds": 180,
+  "watchdogSeconds": 900,
+  "totalEstimatedSeconds": 12095,
+  "shards": [
+    {
+      "shard": "1/18",
+      "estimatedSeconds": 694,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts",
+          "estimatedSeconds": 694
+        }
+      ]
+    },
+    {
+      "shard": "2/18",
+      "estimatedSeconds": 673,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts",
+          "estimatedSeconds": 2
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+          "estimatedSeconds": 10
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+          "estimatedSeconds": 641
+        },
+        {
+          "suite": "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts",
+          "estimatedSeconds": 2
+        },
+        {
+          "suite": "packages/compiler/test/focus-scope-native.browser.test.ts",
+          "estimatedSeconds": 18
+        }
+      ]
+    },
+    {
+      "shard": "3/18",
+      "estimatedSeconds": 672,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts",
+          "estimatedSeconds": 10
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "estimatedSeconds": 41
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "estimatedSeconds": 600
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts",
+          "estimatedSeconds": 1
+        },
+        {
+          "suite": "packages/compiler/test/owner-hydration-retirement.browser.test.ts",
+          "estimatedSeconds": 3
+        },
+        {
+          "suite": "packages/compiler/test/sprint1-ownership.browser.test.ts",
+          "estimatedSeconds": 17
+        }
+      ]
+    },
+    {
+      "shard": "4/18",
+      "estimatedSeconds": 672,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+          "estimatedSeconds": 435
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts",
+          "estimatedSeconds": 95
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts",
+          "estimatedSeconds": 59
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts",
+          "estimatedSeconds": 46
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts",
+          "estimatedSeconds": 32
+        },
+        {
+          "suite": "apps/www/test/virtual-list-resize.browser.test.ts",
+          "estimatedSeconds": 1
+        },
+        {
+          "suite": "packages/compiler/test/vue2-native-editor.browser.test.ts",
+          "estimatedSeconds": 4
+        }
+      ]
+    },
+    {
+      "shard": "5/18",
+      "estimatedSeconds": 671,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts",
+          "estimatedSeconds": 40
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts",
+          "estimatedSeconds": 10
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "estimatedSeconds": 420
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+          "estimatedSeconds": 99
+        },
+        {
+          "suite": "apps/www/test/button-view-lifetime.browser.test.ts",
+          "estimatedSeconds": 18
+        },
+        {
+          "suite": "apps/www/test/shadow-percentage-translation.browser.test.ts",
+          "estimatedSeconds": 81
+        },
+        {
+          "suite": "packages/prototypes/base/test/async-region.browser.test.ts",
+          "estimatedSeconds": 3
+        }
+      ]
+    },
+    {
+      "shard": "6/18",
+      "estimatedSeconds": 671,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts",
+          "estimatedSeconds": 41
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts",
+          "estimatedSeconds": 100
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+          "estimatedSeconds": 78
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+          "estimatedSeconds": 419
+        },
+        {
+          "suite": "packages/compiler/test/sprint2-native.browser.test.ts",
+          "estimatedSeconds": 19
+        },
+        {
+          "suite": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+          "estimatedSeconds": 14
+        }
+      ]
+    },
+    {
+      "shard": "7/18",
+      "estimatedSeconds": 672,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+          "estimatedSeconds": 120
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/contrast-tooltip-warm-handoff.browser.test.ts",
+          "estimatedSeconds": 94
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts",
+          "estimatedSeconds": 46
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts",
+          "estimatedSeconds": 39
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+          "estimatedSeconds": 373
+        }
+      ]
+    },
+    {
+      "shard": "8/18",
+      "estimatedSeconds": 671,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/workspace/test/lifecycle.browser.test.ts",
+          "estimatedSeconds": 95
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+          "estimatedSeconds": 300
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts",
+          "estimatedSeconds": 132
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts",
+          "estimatedSeconds": 68
+        },
+        {
+          "suite": "apps/www/test/color-scheme.browser.test.ts",
+          "estimatedSeconds": 25
+        },
+        {
+          "suite": "apps/www/test/message-composition.browser.test.ts",
+          "estimatedSeconds": 9
+        },
+        {
+          "suite": "packages/compiler/test/shader-presentation.browser.test.ts",
+          "estimatedSeconds": 42
+        }
+      ]
+    },
+    {
+      "shard": "9/18",
+      "estimatedSeconds": 671,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts",
+          "estimatedSeconds": 24
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+          "estimatedSeconds": 300
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts",
+          "estimatedSeconds": 66
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts",
+          "estimatedSeconds": 43
+        },
+        {
+          "suite": "apps/www/test/radio-group-entry.browser.test.ts",
+          "estimatedSeconds": 10
+        },
+        {
+          "suite": "packages/adapters/web-component/test/native-text-width.browser.test.ts",
+          "estimatedSeconds": 99
+        },
+        {
+          "suite": "packages/compiler/test/transition-native.browser.test.ts",
+          "estimatedSeconds": 129
+        }
+      ]
+    },
+    {
+      "shard": "10/18",
+      "estimatedSeconds": 672,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts",
+          "estimatedSeconds": 273
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts",
+          "estimatedSeconds": 36
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+          "estimatedSeconds": 132
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "estimatedSeconds": 70
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts",
+          "estimatedSeconds": 45
+        },
+        {
+          "suite": "apps/www/test/template-style.browser.test.ts",
+          "estimatedSeconds": 2
+        },
+        {
+          "suite": "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+          "estimatedSeconds": 114
+        }
+      ]
+    },
+    {
+      "shard": "11/18",
+      "estimatedSeconds": 670,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts",
+          "estimatedSeconds": 26
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+          "estimatedSeconds": 84
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts",
+          "estimatedSeconds": 8
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts",
+          "estimatedSeconds": 120
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts",
+          "estimatedSeconds": 137
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts",
+          "estimatedSeconds": 55
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts",
+          "estimatedSeconds": 240
+        }
+      ]
+    },
+    {
+      "shard": "12/18",
+      "estimatedSeconds": 669,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts",
+          "estimatedSeconds": 236
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+          "estimatedSeconds": 52
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts",
+          "estimatedSeconds": 120
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts",
+          "estimatedSeconds": 139
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts",
+          "estimatedSeconds": 90
+        },
+        {
+          "suite": "apps/www/test/component-consumer-repairs.browser.test.ts",
+          "estimatedSeconds": 22
+        },
+        {
+          "suite": "apps/www/test/preferences.browser.test.ts",
+          "estimatedSeconds": 10
+        }
+      ]
+    },
+    {
+      "shard": "13/18",
+      "estimatedSeconds": 670,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/anchored-positioning-cold-size.browser.test.ts",
+          "estimatedSeconds": 3
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts",
+          "estimatedSeconds": 44
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+          "estimatedSeconds": 33
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+          "estimatedSeconds": 81
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts",
+          "estimatedSeconds": 156
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts",
+          "estimatedSeconds": 233
+        },
+        {
+          "suite": "packages/adapters/react/test/focus-entry-readiness.browser.test.ts",
+          "estimatedSeconds": 120
+        }
+      ]
+    },
+    {
+      "shard": "14/18",
+      "estimatedSeconds": 670,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/components/documentation-image-preview.browser.test.ts",
+          "estimatedSeconds": 161
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts",
+          "estimatedSeconds": 83
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts",
+          "estimatedSeconds": 49
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+          "estimatedSeconds": 222
+        },
+        {
+          "suite": "apps/www/test/evidence/brutalist-fonts.browser.test.ts",
+          "estimatedSeconds": 32
+        },
+        {
+          "suite": "apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts",
+          "estimatedSeconds": 3
+        },
+        {
+          "suite": "apps/www/test/tree-navigation.browser.test.ts",
+          "estimatedSeconds": 120
+        }
+      ]
+    },
+    {
+      "shard": "15/18",
+      "estimatedSeconds": 670,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts",
+          "estimatedSeconds": 83
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts",
+          "estimatedSeconds": 20
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+          "estimatedSeconds": 212
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+          "estimatedSeconds": 120
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+          "estimatedSeconds": 170
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts",
+          "estimatedSeconds": 13
+        },
+        {
+          "suite": "packages/compiler/test/presence-presentation.browser.test.ts",
+          "estimatedSeconds": 52
+        }
+      ]
+    },
+    {
+      "shard": "16/18",
+      "estimatedSeconds": 668,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+          "estimatedSeconds": 53
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts",
+          "estimatedSeconds": 26
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts",
+          "estimatedSeconds": 120
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts",
+          "estimatedSeconds": 203
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts",
+          "estimatedSeconds": 6
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts",
+          "estimatedSeconds": 173
+        },
+        {
+          "suite": "apps/www/test/release-docs-reading.browser.test.ts",
+          "estimatedSeconds": 87
+        }
+      ]
+    },
+    {
+      "shard": "17/18",
+      "estimatedSeconds": 670,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts",
+          "estimatedSeconds": 120
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts",
+          "estimatedSeconds": 31
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+          "estimatedSeconds": 200
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts",
+          "estimatedSeconds": 174
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts",
+          "estimatedSeconds": 49
+        },
+        {
+          "suite": "packages/adapters/base/test/focus-intent-retries.browser.test.ts",
+          "estimatedSeconds": 92
+        },
+        {
+          "suite": "packages/adapters/vue/test/focus-request-readiness.browser.test.ts",
+          "estimatedSeconds": 4
+        }
+      ]
+    },
+    {
+      "shard": "18/18",
+      "estimatedSeconds": 669,
+      "setupReserveSeconds": 180,
+      "executionBudgetSeconds": 900,
+      "suites": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "estimatedSeconds": 50
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+          "estimatedSeconds": 177
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts",
+          "estimatedSeconds": 92
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts",
+          "estimatedSeconds": 191
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "estimatedSeconds": 125
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts",
+          "estimatedSeconds": 4
+        },
+        {
+          "suite": "packages/compiler/test/control-label-native.browser.test.ts",
+          "estimatedSeconds": 30
+        }
+      ]
+    }
+  ],
+  "interpretation": "This applies the unchanged authored/observed/reserve maximum and unknown-only 120-second fallback. It is capacity planning; it does not prove that candidate browser jobs or the 16 suites without terminal summaries pass."
+}

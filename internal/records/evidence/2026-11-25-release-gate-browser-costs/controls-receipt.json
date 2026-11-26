@@ -1,0 +1,65 @@
+{
+  "kind": "local-runner-control-validation",
+  "baseCommit": "124e329cfc3cd710c1f1d267d640f1b97ef2f4c9",
+  "scope": "The restored owned four-source/one-fixture candidate; source digests captured at archival. The shared checkout also contains other pending repairs; this is not clean-head full-CI proof.",
+  "command": [
+    "node",
+    "--test",
+    "scripts/test/run-runtime-tests.test.mjs",
+    "scripts/test/runtime-process-owner.test.mjs",
+    "scripts/test/regression-baseline.test.mjs",
+    "scripts/test/wc-native-isolation.test.mjs",
+    "scripts/test/happy-dom-mutation-keepalive.test.mjs",
+    "scripts/analysis/shadow-s4-paint-cleanup.test.mjs",
+    "scripts/test/sprint1-evidence.test.mjs"
+  ],
+  "exitCode": 0,
+  "tests": 206,
+  "suites": 9,
+  "passed": 206,
+  "failed": 0,
+  "cancelled": 0,
+  "skipped": 0,
+  "todo": 0,
+  "durationMs": 36931.015925,
+  "rawLog": {
+    "path": "runtime-controls.log.gz",
+    "sha256": "cb391eb0bb6289045d4d80636f8f584afc261c19fa6c73fde9ba26e76e72dab9",
+    "bytes": 19658,
+    "gzipSha256": "c9c5467fbfe05002197ddc357aedd00194ef9ddbd00a3966873d5f61dc1f8631"
+  },
+  "sourceSnapshot": [
+    {
+      "path": "scripts/test/runtime-test-plan.mjs",
+      "sha256": "ec9cb81f132fda07c87aecdfbbdd6273b83e98efc27106247a5178008ef06e22"
+    },
+    {
+      "path": "scripts/test/regression-baseline.test.mjs",
+      "sha256": "b5659c3409674e703eb2c0ed8fc35b4a3db14fd944173f7645761f61bef7b86e"
+    },
+    {
+      "path": "scripts/test/run-runtime-tests.test.mjs",
+      "sha256": "f41265c07e70d5892e89b887c583f562b97dfbc437b72d708d084b5366929415"
+    },
+    {
+      "path": "scripts/test/sprint1-evidence.test.mjs",
+      "sha256": "598c9a39a2c15cc1e8321c970328022538ecddfe44f2ddd79491a522c2046bf5"
+    },
+    {
+      "path": "scripts/test/fixtures/browser-suite-costs-45537881490.json",
+      "sha256": "79e599e15d3b51ce1b935df9729ffbf13485f496d167c03a52b3fcff77a141e8"
+    },
+    {
+      "path": "scripts/test/wc-native-isolation.test.mjs",
+      "sha256": "c8ccf63b2ff6bb8f80cd928ba0c61e552f681aaab1cd1ca7783e8de1fd100f9b"
+    },
+    {
+      "path": "scripts/test/happy-dom-mutation-keepalive.test.mjs",
+      "sha256": "5edf7e72f073a2f0d11ce6566e13f5092590f859c2d353395405a71dd19188b4"
+    },
+    {
+      "path": "scripts/analysis/shadow-s4-paint-cleanup.test.mjs",
+      "sha256": "4c5f816c7b285b29daed0499147dec6580b57b34e5c657eae4b316982f64f345"
+    }
+  ]
+}

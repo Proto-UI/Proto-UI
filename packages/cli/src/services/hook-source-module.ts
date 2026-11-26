@@ -9,6 +9,9 @@ export type HookSourceModule = { file: string; source: ts.SourceFile };
 export type HookSourceSymbol = { module: HookSourceModule; declaration: ts.Node };
 
 export type HookSourceModuleContext = {
+  /** Share successful path observations only inside one synchronous summary query.
+   * Reentrant public module queries still own an independent observation. */
+  withSynchronousIdentityQuery<T>(query: () => T): T;
   /** Register an immutable parsed source; changed text requires a new SourceFile. */
   registerSource(source: ts.SourceFile): void;
   /** Return the module identity corresponding to a registered source. */
@@ -1207,12 +1210,27 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   // duplicate path resolution only inside that lookup, never across calls.
   // Source/AST and parsed-module caches retain their existing separate rules.
   let canonicalQueryCache: Map<string, string> | undefined;
+  let publicQueryDepth = 0;
+  let summaryQuery: { paths: Map<string, string>; depth: number } | undefined;
+  const withSynchronousIdentityQuery = <T>(query: () => T): T => {
+    const previous = summaryQuery;
+    summaryQuery = { paths: new Map(), depth: publicQueryDepth };
+    try {
+      return query();
+    } finally {
+      // This ends before any returned promise settles: no observation crosses
+      // an await, a later summary call, or a separately entered public query.
+      summaryQuery = previous;
+    }
+  };
   const inCanonicalQuery = <T>(lookup: () => T): T => {
     const previous = canonicalQueryCache;
-    canonicalQueryCache = new Map();
+    canonicalQueryCache = summaryQuery?.depth === publicQueryDepth ? summaryQuery.paths : new Map();
+    publicQueryDepth++;
     try {
       return lookup();
     } finally {
+      publicQueryDepth--;
       canonicalQueryCache = previous;
     }
   };
@@ -2095,6 +2113,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     isDefineReference(node, module, new Set(), 'defineHook');
 
   return {
+    withSynchronousIdentityQuery,
     registerSource: (source) => inCanonicalQuery(() => registerSource(source)),
     moduleForSource: (source) => inCanonicalQuery(() => moduleForSource(source)),
     resolveModule: (from, specifier) => inCanonicalQuery(() => resolveModule(from, specifier)),

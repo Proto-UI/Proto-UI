@@ -1,0 +1,794 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-25",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "scope": "Exact source/import binding renewal for retained 0.3 governance on the inspected merge candidate; no product source changes.",
+  "candidate": {
+    "head": "d2075f1f371bc88fc568b5ebee64a9fbe6cb78b1",
+    "mergeHead": "ad2399554b6fff1546d4a9068f7f8fe6c27a14d0",
+    "state": "working tree during merge; source hashes below are the authority, not a claimed final committed tree",
+    "readFromWorktree": "/tank/shared/projects/proto-ui-merge-cb096/repo"
+  },
+  "originalFailure": {
+    "run": 45571675472,
+    "job": 139059745096,
+    "source": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+    "issues": 25,
+    "breakdown": "23 import occurrences from Feedback/create, one application-role import and one Header source fingerprint; all original literal edges already had exact admissions."
+  },
+  "rootCause": "Source guards intentionally reject changed importer bytes before consulting their literal specifier lists. Reviewed sources changed while exact hash registries and matrix fingerprints retained earlier bytes. PR1884 adds additional finite source deltas and one local Library seed helper, requiring their own review.",
+  "recovery": "All 13 previously bound full source bodies were recovered and their SHA-256 matched the old binding before reviewing complete deltas. Current bodies were read from the actual merged worktree and byte-verified against Device omp_hash. Full checker and guard-test copies also matched their actual device hashes.",
+  "reviewedSources": [
+    {
+      "path": "packages/modules/feedback/src/create.ts",
+      "owner": "www.build.style-generation",
+      "review": "The complete recovered delta reports material-presence-host-unavailable for a shared-slot + declared-Presence combination and lets Presence retain the style fallback when only the shared slot is present. The distinct material projection still rejects combined Presence. All 18 literal import strings remain unchanged; no extra capabilities or physical host are admitted.",
+      "currentSHA256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0",
+      "currentBytes": 42936,
+      "deviceHashMatches": true,
+      "previous": {
+        "sourceRevision": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+        "gitBlob": "b55d1e557f6afbaf52ce7bbff9cc7219b5216bc9",
+        "sha256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "packages/core/src/spec/feedback/application-role.ts",
+      "owner": "www.demo.raw-adapter-runtimes (browser compiler source/type graph only)",
+      "review": "The complete recovered delta adds five exact rem/RTL translation endpoints and two exact percentage expressions plus their comments. Classification remains finite set membership; the only ./placeholder import and compiler companion owner remain exact. This binding does not admit a general CSS expression parser or promote the draft physical feature.",
+      "currentSHA256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+      "currentBytes": 7756,
+      "deviceHashMatches": true,
+      "previous": {
+        "sourceRevision": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+        "gitBlob": "ba16c1bf3ef6b5963cd8c2b97c3907901a3faa78",
+        "sha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/site-header-surface.ts",
+      "owner": "www.shell.mobile-menu-panel; www.shell.mobile-menu-toggle",
+      "review": "The delta is exactly merged #1874: the passive zero-control wrapper no longer locks slotted application controls, and publication/rollback may restore captured focus only when focus stayed in the content or fell to body/documentElement. An intentional external focus move is not overridden. Same imports, content owner, generation/disposal boundaries; browser/focus/visual acceptance remains separately pending.",
+      "currentSHA256": "b11e5dbb0a5f4d4a9a1fbce5e2575fd6c45b0d7c461dee44291e991234879abb",
+      "currentBytes": 16542,
+      "deviceHashMatches": true,
+      "previous": {
+        "sourceRevision": "8ca216038ddb1f0c17a5dbfc6dee62283e3f3a2e",
+        "gitBlob": "64a51874da870a72319cd38b44071c044391be1c",
+        "sha256": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "packages/compiler/src/core-value-types.ts",
+      "owner": "www.demo.raw-adapter-runtimes (browser compiler source/type graph only)",
+      "review": "Adds only the existing top member to the PresentationReceipt channel value union, keeping receipt vocabulary separate from target admission. The only ../../core/src/control-label import is unchanged.",
+      "currentSHA256": "94d2e70c10ab0b4f10536682ea2c42e971419a597ba0ea5034e90011382b65e4",
+      "currentBytes": 17381,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "7b540846e38b20a358363c308c3fbc7963becc7b",
+        "sha256": "f94e6acaea151b7046c57ec4a537202ef903f79264df1e437d749cb502ab8b8d",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "packages/compiler/src/native-async.ts",
+      "owner": "www.demo.raw-adapter-runtimes (browser compiler source/type graph only)",
+      "review": "Adds only top to the emitted NativePresentationReceipt channels type. No lifecycle branch or source import changes; the same Core shader-presentation edge remains admitted.",
+      "currentSHA256": "3aacca4fef0ba3c6e3eff973c2fe29e46e704014f1d81bf674302719343a11bf",
+      "currentBytes": 34018,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "fc6cb64c07eb1fbe474f7b22489cec6a2899ff99",
+        "sha256": "0b9c33c233a6fc648befeaad36ab7b7fdfe56804cd3261055ef3b0da1997c211",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "packages/compiler/src/rule-declarations.ts",
+      "owner": "www.demo.raw-adapter-runtimes (browser compiler source/type graph only)",
+      "review": "Adds a parser-supplied checked-Set predicate for declaration-time pure captured .has calls, with no optional call/member, type arguments, spread or callback-local captures. A method spelling alone remains insufficient. All three existing raw Core declaration/style/token imports and the companion are unchanged. This source-edge review supplies no broader IR10 admission.",
+      "currentSHA256": "aab4b30c7f13f53d06d01a7d6b9c3d0ac0dfbf74d3d67a1d975fb944f0499a25",
+      "currentBytes": 37752,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "4ed1393d3f4876f731ad899934c7bc7ea1ba9331",
+        "sha256": "e6841f7531d59aff8ff4082907f98f49e82c533750254188c27eda9b97a574ab",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/LibraryCardPart.astro",
+      "owner": "www.gallery.ui-library-cards",
+      "review": "Adds one data-library-style-seed attribute containing the same server-owned tokens already serialized as the initial data-pui-style. No import, handler or semantic owner changes.",
+      "currentSHA256": "6199ea488b345c01f110795b2f3629781277f9eefdf3fd8919ab99b95d29c891",
+      "currentBytes": 2422,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "9e9420ef06032a1a74b0ff2ac12e7aca40aa4832",
+        "sha256": "9f06c431bc331ab4d67b916ddca3b9fb52cbc1ce5eb658d5e53679bd6cad0d40",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
+      "owner": "www.demo.home-demo-select",
+      "review": "Only the existing skeleton/loading-mask CSS selectors change: ghosts cover cold acquisition and disappear after a committed generation, so an existing gallery remains visible through switching. Regional cancel/retry owners and imports are unchanged.",
+      "currentSHA256": "319fced79764134792d39ac09d13675d3e58915e03bdcf40c12c004ca5cf043d",
+      "currentBytes": 18910,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "988c2a39badc99d85bfb18d3166c66281640f359",
+        "sha256": "78ecc05f4319dd16ed7be2ffe06586c06c81420a8922d1568ebc979f40f40fb1",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/library-card-client.ts",
+      "owner": "www.gallery.ui-library-cards",
+      "review": "Wraps the same WC Adapter constructor in the reviewed local withLibraryStyleSeed helper. Public prototype registrations, getProps, native content lease and native link facts remain. Adds only a local Website helper edge; the sole raw WC Adapter import remains unchanged.",
+      "currentSHA256": "a76ff8694ef17cc01d0da51c1e9e8efc5fa7192dec59d916a601c3088f8d3ff3",
+      "currentBytes": 2190,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "6ba2962f66e49a4b6a3bbc0375484670cb5226ed",
+        "sha256": "7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/library-liquid-card-client.ts",
+      "owner": "www.gallery.ui-library-cards",
+      "review": "Applies the same local seed wrapper to the existing private Liquid Card candidate constructor. It preserves the explicit private candidate tag, material sink, getProps and content lease. The sole raw WC Adapter import is unchanged, and no ordinary Gallery optical consumer is introduced.",
+      "currentSHA256": "a706b27a7331bef6fb27828a4b6964dc5d0cc3e9eff1b07312d70a850f11261f",
+      "currentBytes": 1498,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "d747ee00bbdcc8e7fcacedad42154db8a5148683",
+        "sha256": "a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/site-shadcn-controls.ts",
+      "owner": "Existing seven source-binding row owners retained",
+      "review": "Follows the existing aria-controls IDREF to a portalled Select Content marked as the site-owned content, and selects existing popper positioning for the compact Shadcn Docs runtime field while retaining explicit placement and other families' defaults. The exact seven raw Adapter/Button/Select specifiers stay unchanged. This does not supply native focus, layout or cross-host acceptance.",
+      "currentSHA256": "53ec9878f07024aef14dae9d519035a05e4c22032206374899b6aa940d5a2f2a",
+      "currentBytes": 19872,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "cda3c34ac42a59a5b7d98d6b083cce2d12994704",
+        "sha256": "fc2006315ebca2293380cc1402eafac4b9064f48e5951ad263162a8d2a5e67f4",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+      "owner": "www.demo.authored-controllers",
+      "review": "Only adds min-w-0 and max-w-full to the existing demo wrapper classes. The authored Select recipe, callbacks and imports remain unchanged; Bootstrap remains WIP / Experimental.",
+      "currentSHA256": "ef65da1fd0a602fb75f4488c64c9683caf19e4a24ba76d3583fe76aa96790429",
+      "currentBytes": 3686,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "7b7098df6e3cff73f91061a5179e7daa01d62f84",
+        "sha256": "ee0ca51c4c9b248a1b75439f684212bb698830f7929f310d9f2785b54c79a198",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "owner": "www.demo.authored-controllers; www.demo.demo-matrix",
+      "review": "Keeps the existing accordion-tight negative destination exactly one actual CSS pixel below the real subject using a local ResizeObserver; guards invalid geometry and disconnects all observers before destroying records. This diagnostic adjusts only application fixture geometry, retaining the real material admission/paint owner and all eight literal imports. No native or optical acceptance is inferred.",
+      "currentSHA256": "6fa82bac96becd0d64124ba97a280f8a9e8d52630b802696e3175501ef8fbe55",
+      "currentBytes": 12530,
+      "deviceHashMatches": true,
+      "previous": {
+        "recovery": "Reverse the complete PR1884 delta from hash-verified merged bytes; recovered full body matches existing reviewed binding",
+        "gitBlob": "62d4206a7b72360e2d7a23e374ec9d05e13ed733",
+        "sha256": "4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c",
+        "recoveredHashMatches": true
+      }
+    },
+    {
+      "path": "apps/www/src/components/library-style-seed.ts",
+      "owner": "www.gallery.ui-library-cards",
+      "review": "Complete new helper reviewed. It accepts only an explicit serialized array of nonempty whitespace-free tokens, withdraws that declared seed once before the same Adapter connectedCallback, preserves unrelated tokens, and on failure restores only its withdrawn contribution while the marker still matches. It introduces no input/focus/dismissal owner. Its only two raw imports are type-only Prototype from Core and WebComponentAdapterConstructor from the WC Adapter. Admit only this exact file, full bytes and these two literal strings.",
+      "currentSHA256": "ff2a962e7dd010d55d05e512ef103287c435a96c545ca146c887622abc5270c2",
+      "currentBytes": 2594,
+      "deviceHashMatches": true,
+      "previous": null
+    }
+  ],
+  "existingFingerprintUpdates": [
+    {
+      "file": "scripts/coverage-matrices/startup-prerender-imports.mjs",
+      "source": "packages/modules/feedback/src/create.ts",
+      "oldSha256": "7faa1043eebc7e6874623de07ff2fc0c761b7eb2b15de9c57fcbc18b6b2f72b9",
+      "newSha256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0"
+    },
+    {
+      "file": "scripts/coverage-matrices/browser-compiler-imports.mjs",
+      "source": "packages/core/src/spec/feedback/application-role.ts",
+      "oldSha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+      "newSha256": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2"
+    },
+    {
+      "file": "scripts/coverage-matrices/browser-compiler-imports.mjs",
+      "source": "packages/compiler/src/core-value-types.ts",
+      "oldSha256": "f94e6acaea151b7046c57ec4a537202ef903f79264df1e437d749cb502ab8b8d",
+      "newSha256": "94d2e70c10ab0b4f10536682ea2c42e971419a597ba0ea5034e90011382b65e4"
+    },
+    {
+      "file": "scripts/coverage-matrices/browser-compiler-imports.mjs",
+      "source": "packages/compiler/src/native-async.ts",
+      "oldSha256": "0b9c33c233a6fc648befeaad36ab7b7fdfe56804cd3261055ef3b0da1997c211",
+      "newSha256": "3aacca4fef0ba3c6e3eff973c2fe29e46e704014f1d81bf674302719343a11bf"
+    },
+    {
+      "file": "scripts/coverage-matrices/browser-compiler-imports.mjs",
+      "source": "packages/compiler/src/rule-declarations.ts",
+      "oldSha256": "e6841f7531d59aff8ff4082907f98f49e82c533750254188c27eda9b97a574ab",
+      "newSha256": "aab4b30c7f13f53d06d01a7d6b9c3d0ac0dfbf74d3d67a1d975fb944f0499a25"
+    },
+    {
+      "file": "scripts/coverage-matrices/library-card-imports.mjs",
+      "source": "apps/www/src/components/library-card-client.ts",
+      "oldSha256": "7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8",
+      "newSha256": "a76ff8694ef17cc01d0da51c1e9e8efc5fa7192dec59d916a601c3088f8d3ff3"
+    },
+    {
+      "file": "scripts/coverage-matrices/library-card-imports.mjs",
+      "source": "apps/www/src/components/library-liquid-card-client.ts",
+      "oldSha256": "a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0",
+      "newSha256": "a706b27a7331bef6fb27828a4b6964dc5d0cc3e9eff1b07312d70a850f11261f"
+    },
+    {
+      "file": "scripts/coverage-matrices/diagnostic-imports.mjs",
+      "source": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "oldSha256": "4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c",
+      "newSha256": "6fa82bac96becd0d64124ba97a280f8a9e8d52630b802696e3175501ef8fbe55"
+    },
+    {
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "source": "apps/www/src/components/site-shadcn-controls.ts",
+      "oldSha256": "fc2006315ebca2293380cc1402eafac4b9064f48e5951ad263162a8d2a5e67f4",
+      "newSha256": "53ec9878f07024aef14dae9d519035a05e4c22032206374899b6aa940d5a2f2a"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/components/site-header-surface.ts",
+      "oldSha256": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+      "newSha256": "b11e5dbb0a5f4d4a9a1fbce5e2575fd6c45b0d7c461dee44291e991234879abb"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/components/LibraryCardPart.astro",
+      "oldSha256": "9f06c431bc331ab4d67b916ddca3b9fb52cbc1ce5eb658d5e53679bd6cad0d40",
+      "newSha256": "6199ea488b345c01f110795b2f3629781277f9eefdf3fd8919ab99b95d29c891"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
+      "oldSha256": "78ecc05f4319dd16ed7be2ffe06586c06c81420a8922d1568ebc979f40f40fb1",
+      "newSha256": "319fced79764134792d39ac09d13675d3e58915e03bdcf40c12c004ca5cf043d"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/components/library-card-client.ts",
+      "oldSha256": "7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8",
+      "newSha256": "a76ff8694ef17cc01d0da51c1e9e8efc5fa7192dec59d916a601c3088f8d3ff3"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/components/library-liquid-card-client.ts",
+      "oldSha256": "a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0",
+      "newSha256": "a706b27a7331bef6fb27828a4b6964dc5d0cc3e9eff1b07312d70a850f11261f"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/components/site-shadcn-controls.ts",
+      "oldSha256": "fc2006315ebca2293380cc1402eafac4b9064f48e5951ad263162a8d2a5e67f4",
+      "newSha256": "53ec9878f07024aef14dae9d519035a05e4c22032206374899b6aa940d5a2f2a"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+      "oldSha256": "ee0ca51c4c9b248a1b75439f684212bb698830f7929f310d9f2785b54c79a198",
+      "newSha256": "ef65da1fd0a602fb75f4488c64c9683caf19e4a24ba76d3583fe76aa96790429"
+    },
+    {
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "source": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "oldSha256": "4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c",
+      "newSha256": "6fa82bac96becd0d64124ba97a280f8a9e8d52630b802696e3175501ef8fbe55"
+    }
+  ],
+  "newAdmission": {
+    "path": "apps/www/src/components/library-style-seed.ts",
+    "sourceSHA256": "ff2a962e7dd010d55d05e512ef103287c435a96c545ca146c887622abc5270c2",
+    "specifiers": [
+      "@proto.ui/core",
+      "@proto.ui/adapter-web-component"
+    ],
+    "importsAreTypeOnly": true,
+    "owner": "www.gallery.ui-library-cards",
+    "state": "blocked"
+  },
+  "preservedBoundaries": [
+    "Every existing import specifier list, exact importer path, companion owner, source-check algorithm and rejection diagnostic remains unchanged.",
+    "The only new raw admission is the complete reviewed library-style-seed.ts with its two type-only literals; no category, prefix, directory or neighboring module is admitted.",
+    "Every existing matrix owner set, row ID, lifecycle and blocked/research/experimental disposition remains; the new local helper is attached only to the existing blocked Card row.",
+    "Source renewal is not browser, optical, keyboard, accessibility, native-host or release acceptance.",
+    "All 20 deferred Compiler/IR10 0.4 items remain deferred; existing CLI source provenance is a separate retained 0.3 CI gate."
+  ],
+  "negativeControls": [
+    "startup Feedback closure remains source-bound: exact source succeeds; changed bytes, adjacent Adapter import and foreign copied file reject.",
+    "integrated source import boundary: compiler closure: exact source with exact companion succeeds; changed-source, foreign-owner, changed-companion and missing-companion reject. Include application-role.ts in the existing table.",
+    "library card import boundary remains exact and content-bound: exact bytes succeed; copied owner, source mutation and extra React Adapter reject. Extend to the Liquid Card client and both type-only seed-helper imports.",
+    "main source imports remain exact: site-shadcn-controls.ts retains all seven literal imports, foreign copy, changed bytes and extra Runtime negatives.",
+    "diagnostic import review rejects owner, body and edge drift: liquid-glass-hover.astro retains exact path/bytes and its eight-import boundary.",
+    "literal bracketed website source binding and rejects interaction drift inside an already mapped Website source retain matrix hash and owner guards."
+  ],
+  "validation": {
+    "gitApplyCheck": {
+      "status": "passed",
+      "scope": "exact byte-verified merged-source snapshot in scratch",
+      "exitCode": 0
+    },
+    "structuralImportAndOwnershipCheck": {
+      "status": "passed",
+      "registries": [
+        {
+          "file": "startup-prerender-imports.mjs",
+          "existingEntries": 75,
+          "changedHashEntries": [
+            "packages/modules/feedback/src/create.ts"
+          ],
+          "addedExactSources": [],
+          "allExistingEdgesAndCompanionsUnchanged": true
+        },
+        {
+          "file": "browser-compiler-imports.mjs",
+          "existingEntries": 32,
+          "changedHashEntries": [
+            "packages/compiler/src/core-value-types.ts",
+            "packages/compiler/src/native-async.ts",
+            "packages/compiler/src/rule-declarations.ts",
+            "packages/core/src/spec/feedback/application-role.ts"
+          ],
+          "addedExactSources": [],
+          "allExistingEdgesAndCompanionsUnchanged": true
+        },
+        {
+          "file": "library-card-imports.mjs",
+          "existingEntries": 16,
+          "changedHashEntries": [
+            "apps/www/src/components/library-liquid-card-client.ts",
+            "apps/www/src/components/library-card-client.ts"
+          ],
+          "addedExactSources": [
+            "apps/www/src/components/library-style-seed.ts"
+          ],
+          "allExistingEdgesAndCompanionsUnchanged": true
+        },
+        {
+          "file": "diagnostic-imports.mjs",
+          "existingEntries": 9,
+          "changedHashEntries": [
+            "apps/www/src/pages/en/test/liquid-glass-hover.astro"
+          ],
+          "addedExactSources": [],
+          "allExistingEdgesAndCompanionsUnchanged": true
+        }
+      ],
+      "checks": {
+        "passed": true,
+        "guardImplementationUnchanged": true,
+        "existingMatrixStatesAndOwnersPreserved": true,
+        "existingTestsAndAssertionsPreserved": true,
+        "newTestTableRows": 4,
+        "newCases": 8
+      }
+    },
+    "originalCoverageGate": {
+      "status": "pending parent execution on the final common candidate",
+      "command": "corepack pnpm@10.32.1 -s check:coverage-matrices"
+    },
+    "focusedBoundaryControls": {
+      "status": "pending parent execution; no passing test receipt claimed",
+      "existingAssertionsPreserved": true,
+      "addedCases": 8
+    },
+    "limit": "Static source review and patch applicability do not establish an executed coverage gate, browser acceptance, native-host acceptance or a final committed-candidate receipt."
+  },
+  "provenance": {
+    "sourceReview": "Independent technical agent readback and exact-delta review; no human approval or GitHub review claimed",
+    "externalWrites": "none by this repair agent"
+  },
+  "bindingFollowup17": {
+    "status": "Source review and incremental patch prepared; actual candidate coverage and negative-control execution pending.",
+    "candidate": {
+      "head": "ad76f763ae3473773ac84172c1b8f86bb501c855",
+      "branch": "fix/ready-integration-followups-cb096",
+      "readFromWorktree": "/tank/shared/projects/proto-ui-merge-cb096/final-repo",
+      "state": "First coverage patch applied and original package ceilings restored in a dirty worktree; each bound source is separately byte-verified. Not a clean final execution claim."
+    },
+    "priorCandidateFailure": {
+      "log": "/tank/shared/projects/proto-ui-merge-cb096/evidence/coverage-candidate-check.log",
+      "issues": 17,
+      "breakdown": {
+        "existingSiteNativeControlsRawImportOccurrences": 7,
+        "newBrutalistDialogTypeImportOccurrence": 1,
+        "existingMatrixSourceFingerprints": 9
+      },
+      "retained": true
+    },
+    "recovery": "Seven existing source bodies match main710a old bindings; the two Toast source bodies were instead recovered at PR1895 head58d55 and exactly match the ledger old hashes. Main/1884 Toast bytes are not substituted for those original reviewed files. The new Dialog importer is reviewed in full against its main710a recipe.",
+    "dependencyReview": [
+      {
+        "path": "apps/www/src/content/docs/demo_components/toast/toast-copy.ts",
+        "sha256": "ab35333fc1ae71b8d22a5acae09839a93e53156d64d6bc53cb059b2d6db572c8",
+        "bytes": 433,
+        "review": "The local helper imports only the local DemoRuntimeApi type, asks the renderer to replace two text-only keyed child regions, and returns true only when both report committed. No raw Proto UI import or independent control owner."
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/button/types.ts",
+        "review": "The existing public BrutalistButtonProps declares surface in its finite variant union and wrap?:boolean; button/index.ts exports that type. The authored Dialog does not invent a private prop or load runtime code through the new edge."
+      }
+    ],
+    "preservedBoundaries": [
+      "Every pre-existing allowlist entry retains its exact path, specifiers, prefixes, categories and companion rules. Only the site-native-controls source hash changes.",
+      "Only the full reviewed Dialog source and its one literal Button type import gain an exact admission; neighboring files, imports and value-import mutations remain rejected.",
+      "Only nine existing matrix SHA-256 cells change; every owner set, row ID, target class, lifecycle, state, evidence claim and re-review boundary is unchanged.",
+      "The complete source-check and import-resolution implementation, rejection diagnostics and all existing tests remain byte-identical.",
+      "This source binding does not claim Header/Search/Matrix/native-browser acceptance, promote prototypes, change checkboxes or close Issues.",
+      "The separately identified in-flight Matrix warmup retirement race and original desktop60s failure remain unresolved by source binding alone."
+    ],
+    "negativeControls": [
+      "Existing main source imports remain exact: site-native-controls.ts exercises the exact seven literals, copied importer, changed body and foreign Runtime edge.",
+      "New Brutalist Dialog type import test checks exact source admission, copied owner rejection, changed-body rejection, type-to-value import rejection, adjacent Prototype edge rejection and adjacent React Adapter rejection.",
+      "Existing literal bracketed website source binding and mapped-source interaction-drift tests retain source fingerprint and ownership rejection controls."
+    ],
+    "validation": {
+      "structuralChecks": {
+        "status": "passed",
+        "scope": "local byte-verified source review and incremental edit structure; no repository gate executed",
+        "sourceBodiesVerified": 10,
+        "existingReviewedBaselinesRecovered": 9,
+        "existingMatrixFingerprintsChanged": 9,
+        "existingRawImportSourceFingerprintsChanged": 1,
+        "newExactTypeOnlyImporterAdmissions": 1,
+        "unchangedExistingNativeLiteralSpecifiers": 7,
+        "guardImplementationAndAllOtherEntriesBytePreserved": true,
+        "matrixRestoresExactlyByRevertingNineHashCells": true,
+        "allExistingTestsBytePreserved": true,
+        "newTestBlocks": 1,
+        "newNegativeMutations": 5,
+        "originalRecordFieldsPreserved": true
+      },
+      "repositoryCoverage": {
+        "status": "not run by this agent; root must rerun the original unfiltered gate"
+      },
+      "negativeControlRuntime": {
+        "status": "not run by this agent; root must execute existing and new controls"
+      },
+      "commandsForRoot": [
+        "corepack pnpm@10.32.1 -s check:coverage-matrices",
+        "node --test --test-name-pattern='main source imports remain exact: site-native-controls.ts|Brutalist Dialog type import remains exact, content-bound and owner-bound|literal bracketed website source binding|rejects interaction drift inside an already mapped Website source' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+      ]
+    },
+    "provenance": {
+      "remoteShell": false,
+      "remoteWrites": false,
+      "githubWrites": false,
+      "sourceReviewOnly": true
+    },
+    "reviewedSources": [
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/DemoMatrix.astro",
+        "candidateSha256": "28e2afbcee6a6a538157cc7714e8ffaea08394df89bdae390ea10ab55e209479",
+        "candidateBytes": 6725,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.demo-matrix"
+        ],
+        "review": "The current Matrix element gains data-demo-matrix and the global __protoUiDemoMatrix publication script is removed. Delivery now belongs to the existing Previewer bootstrap's current Matrix element. Demo discovery, all four runtime columns, lazy preview recipes, Shadow fixtures and layout remain. The original desktop acceptance stays unpassed until executed; element-owned source delivery is not a claim of completed initialization."
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+        "candidateSha256": "b73271d7c754a27567d3b0fc1f50bb95d48b08d51337dc443aa447a0f36ab825",
+        "candidateBytes": 9211,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.lazy-mount-observer",
+          "www.demo.prototype-previewer",
+          "www.demo.runtime-select"
+        ],
+        "review": "The same page-owned bootstrap shares one IntersectionObserver, records each root's observation timestamp, rejects old observer/old target records and unobserves each admitted root. Existing abort, connected-root, visible-panel and duplicate-mount checks remain. The current Matrix element receives a local warmDemoModules callback and clear/dispose removes it; its client import uses the already reviewed local Previewer client. No raw package edge or test readiness mutation is added. The separately identified in-flight warmup retirement race remains a source/runtime follow-up, not waived by rebinding."
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+        "candidateSha256": "57a53bf9fcaf82a54c5e65312074aaf617c96161c4e6809b095447e56ca5a04a",
+        "candidateBytes": 23350,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.prototype-previewer",
+          "www.demo.runtime-select"
+        ],
+        "review": "The only delta re-exports demoModuleCount and warmDemoModules from the same local demo-modules module already imported for loadDemo. Existing preview generation, preference broadcast, startup shell, fallback, owner and teardown logic are byte-identical. This supplies the bootstrap's element-owned delivery without a new raw package dependency."
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
+        "candidateSha256": "547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89",
+        "candidateBytes": 1275,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.prototype-previewer"
+        ],
+        "review": "The shared body childList observer now skips deliveries that contain no removedNodes. For every actual removal the unchanged registration loop still checks all active owners, isolates one failing cleanup, and disconnects/deletes its per-body observer only after the final registration is released. No import or owner expansion occurs."
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+        "candidateSha256": "8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d",
+        "candidateBytes": 11481,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.brutalist-theme-style",
+          "www.demo.demo-matrix"
+        ],
+        "review": "The existing prefers-color-scheme listener is shared per Document through a WeakMap and a set of subscriber schedule functions. Each consumer retains its own MutationObserver, closed theme resolution, microtask scheduling and fingerprint suppression. Registration is revoked on initial emit failure and cleanup; the last subscriber removes the media listener. All literal family theme/typography imports and allowed token vocabulary remain unchanged; no arbitrary CSS or new family input is admitted."
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+        "candidateSha256": "04fd2cf261f0ec807fd28ef166b782766b81fa6822b4f07bf8076e65f6cce016",
+        "candidateBytes": 18906,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "3af95119b8f190cfe06b757d744c0f258db8a0f6f482d51e52ce87776c393cc2",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [
+          "../site-library-family"
+        ],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.preview-surface"
+        ],
+        "review": "The only semantic addition is a local re-export of runtimePreviewFamily from the already governed site-library-family module. The Liquid canvas return expression is reformatted without changing its props, transparent variant or conditional border suppression. Default radius, real canvas/provider condition, owned portal surface styles, author precedence, public material declarations and content/shell ownership remain unchanged. No new raw Proto UI package edge is introduced."
+      },
+      {
+        "path": "apps/www/src/components/site-native-controls.ts",
+        "candidateSha256": "b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451",
+        "candidateBytes": 21332,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [],
+        "importsRemoved": [],
+        "owners": [
+          "www.shell.native-link-presentation",
+          "www.shell.table-of-contents"
+        ],
+        "review": "The sole executable delta gives the existing progressive requestIdleCallback a finite { timeout: 50 } option, so a quiet page cannot indefinitely leave the same native-link presentation queue pending. All seven literal raw imports, native anchor/summary semantics, Surface/Text roles, native-content leases, family/theme reads, one-batch claims, cancellation and release remain unchanged. This renews the existing exact importer bytes; it grants no new control or native-navigation owner."
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts",
+        "candidateSha256": "2576709ceb69f3f98dcbd4bd8d7a140cb009dd98bd89bd48b47b753135ff1048",
+        "candidateBytes": 3474,
+        "comparedOriginalCommit": "58d55c299695dec564d820b2989c37de1c111f42",
+        "comparedOriginalSha256": "3a02c346ab3568b493357ffb95420b56add589db89f80a1818df05ce4aac96b6",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [
+          "./toast-copy"
+        ],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.authored-controllers"
+        ],
+        "review": "The ledger's exact prior file was recovered from PR1895, not current main. Against those reviewed bytes, the existing portal theme opt-in and Toast roles remain. Native DOM click/text mutation is replaced by public Button onClick props, renderer-owned text-only dynamic child regions, and api.call to the existing Toast/Viewport exposures. The local setToastCopy helper requires both text regions to report committed. Request revision and cleanup/dismiss-all invalidation prevent late opens; positioning changes only after the current copy commits. The only new dependency is that local helper; no raw Proto UI import is added."
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts",
+        "candidateSha256": "4fbee37fba745ffa10acb2a3476b3ae662c346695200c40f90efd961645e72cb",
+        "candidateBytes": 3336,
+        "comparedOriginalCommit": "58d55c299695dec564d820b2989c37de1c111f42",
+        "comparedOriginalSha256": "6a06783576383eb83343191351b1bc02cd0473348bbdac20c77ff97894838f2c",
+        "originalMatchesPriorBinding": true,
+        "importsAdded": [
+          "./toast-copy"
+        ],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.authored-controllers"
+        ],
+        "review": "The exact prior PR1895 bytes retain the same portal theme opt-in, five rich-color variants and Toast roles. Current source replaces native click/text writes with public Button props, renderer-owned text-only dynamic child regions and the existing Toast open exposure. Both copy commits must succeed and the request must still be current before type/richColors/open publication; cleanup advances the request revision. The only new dependency is the reviewed local setToastCopy helper; no raw package edge or semantic owner is added."
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts",
+        "candidateSha256": "457cfc4e34819d47a852590307b443fa28c062e0d8c91ddb296fc6b9562668b4",
+        "candidateBytes": 3709,
+        "comparedOriginalCommit": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+        "comparedOriginalSha256": "df55db0df310b76795995aea9d903d4ca4112c063c6897ac861292f9508526b9",
+        "originalMatchesPriorBinding": false,
+        "importsAdded": [
+          "@proto.ui/prototypes-brutalist/button"
+        ],
+        "importsRemoved": [],
+        "owners": [
+          "www.demo.authored-controllers"
+        ],
+        "review": "The complete authored recipe adds one type-only BrutalistButtonProps import and checks two prop objects against the existing public Button contract. Cancel changes the obsolete neutral variant to the declared surface variant; Cancel and Save both opt into wrap:true. Public Dialog Root/Trigger/Mask/Content/Header/Title/Description/Footer/Close/CloseIcon and Button nodes remain the owners of interaction; the native-looking profile fields remain static fixture content. Other changes are formatting. No runtime package import, DOM event listener, focus/dismissal implementation or generalized demo exemption is introduced.",
+        "newExactTypeOnlyAdmission": true,
+        "ownerNote": "The existing authored-controller owner remains blocked. This declarative recipe has no authored event or lifecycle controller requiring a new matrix interaction binding; its Dialog and Button nodes retain public prototype semantics. The exact type import admission is a source-bound raw-import exception, not a new owner row."
+      }
+    ],
+    "existingFingerprintUpdates": [
+      {
+        "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+        "sourcePath": "apps/www/src/components/site-native-controls.ts",
+        "kind": "existing-source-fingerprint-only",
+        "old": "c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9",
+        "new": "b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451",
+        "existingLiteralSpecifiersPreserved": 7
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/PrototypePreviewer/DemoMatrix.astro",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e` |",
+        "new": "| `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `28e2afbcee6a6a538157cc7714e8ffaea08394df89bdae390ea10ab55e209479` |",
+        "oldSha256": "aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e",
+        "newSha256": "28e2afbcee6a6a538157cc7714e8ffaea08394df89bdae390ea10ab55e209479",
+        "owners": [
+          "www.demo.demo-matrix"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25` |",
+        "new": "| `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `b73271d7c754a27567d3b0fc1f50bb95d48b08d51337dc443aa447a0f36ab825` |",
+        "oldSha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25",
+        "newSha256": "b73271d7c754a27567d3b0fc1f50bb95d48b08d51337dc443aa447a0f36ab825",
+        "owners": [
+          "www.demo.lazy-mount-observer",
+          "www.demo.prototype-previewer",
+          "www.demo.runtime-select"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c` |",
+        "new": "| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `57a53bf9fcaf82a54c5e65312074aaf617c96161c4e6809b095447e56ca5a04a` |",
+        "oldSha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c",
+        "newSha256": "57a53bf9fcaf82a54c5e65312074aaf617c96161c4e6809b095447e56ca5a04a",
+        "owners": [
+          "www.demo.prototype-previewer",
+          "www.demo.runtime-select"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19` |",
+        "new": "| `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89` |",
+        "oldSha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19",
+        "newSha256": "547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89",
+        "owners": [
+          "www.demo.prototype-previewer"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6` |",
+        "new": "| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d` |",
+        "oldSha256": "9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6",
+        "newSha256": "8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d",
+        "owners": [
+          "www.demo.brutalist-theme-style",
+          "www.demo.demo-matrix"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `3af95119b8f190cfe06b757d744c0f258db8a0f6f482d51e52ce87776c393cc2` |",
+        "new": "| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `04fd2cf261f0ec807fd28ef166b782766b81fa6822b4f07bf8076e65f6cce016` |",
+        "oldSha256": "3af95119b8f190cfe06b757d744c0f258db8a0f6f482d51e52ce87776c393cc2",
+        "newSha256": "04fd2cf261f0ec807fd28ef166b782766b81fa6822b4f07bf8076e65f6cce016",
+        "owners": [
+          "www.demo.preview-surface"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/components/site-native-controls.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9` |",
+        "new": "| `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |",
+        "oldSha256": "c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9",
+        "newSha256": "b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451",
+        "owners": [
+          "www.shell.native-link-presentation",
+          "www.shell.table-of-contents"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `3a02c346ab3568b493357ffb95420b56add589db89f80a1818df05ce4aac96b6` |",
+        "new": "| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-position.demo.ts` | `www.demo.authored-controllers` | `2576709ceb69f3f98dcbd4bd8d7a140cb009dd98bd89bd48b47b753135ff1048` |",
+        "oldSha256": "3a02c346ab3568b493357ffb95420b56add589db89f80a1818df05ce4aac96b6",
+        "newSha256": "2576709ceb69f3f98dcbd4bd8d7a140cb009dd98bd89bd48b47b753135ff1048",
+        "owners": [
+          "www.demo.authored-controllers"
+        ]
+      },
+      {
+        "file": "internal/website/self-hosting-coverage-matrix.md",
+        "sourcePath": "apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts",
+        "kind": "existing-matrix-fingerprint-only",
+        "old": "| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts` | `www.demo.authored-controllers` | `6a06783576383eb83343191351b1bc02cd0473348bbdac20c77ff97894838f2c` |",
+        "new": "| `apps/www/src/content/docs/demo_components/toast/demo-shadcn-toast-rich-colors.demo.ts` | `www.demo.authored-controllers` | `4fbee37fba745ffa10acb2a3476b3ae662c346695200c40f90efd961645e72cb` |",
+        "oldSha256": "6a06783576383eb83343191351b1bc02cd0473348bbdac20c77ff97894838f2c",
+        "newSha256": "4fbee37fba745ffa10acb2a3476b3ae662c346695200c40f90efd961645e72cb",
+        "owners": [
+          "www.demo.authored-controllers"
+        ]
+      }
+    ],
+    "newAdmission": {
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "kind": "single-exact-type-import-admission",
+      "sourcePath": "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts",
+      "old": null,
+      "new": "  // Exact authored Dialog recipe: the single public Button edge is type-only.\n  // Full importer bytes remain required; no controller acceptance is promoted.\n  'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts': Object.freeze({\n    sourceSha256: '457cfc4e34819d47a852590307b443fa28c062e0d8c91ddb296fc6b9562668b4',\n    specifiers: Object.freeze(['@proto.ui/prototypes-brutalist/button']),\n  }),\n",
+      "sourceSha256": "457cfc4e34819d47a852590307b443fa28c062e0d8c91ddb296fc6b9562668b4",
+      "specifiers": [
+        "@proto.ui/prototypes-brutalist/button"
+      ],
+      "prefixesAdded": [],
+      "categoriesAdded": [],
+      "companionRulesChanged": false
+    }
+  }
+}

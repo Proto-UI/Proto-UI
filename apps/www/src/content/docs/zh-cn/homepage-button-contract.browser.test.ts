@@ -609,6 +609,12 @@ describe.sequential('Base Button selection and family-owned homepage geometry', 
           };
           await observeMotion(16);
           await page.setViewportSize({ width: 390, height: 1000 });
+          // The native Hero Demo Enter activation above keeps this fragment's
+          // gallery interactive when the viewport becomes narrow.
+          expect(new URL(page.url()).hash).toBe('#home-demo-previewer');
+          await expect
+            .poll(() => reset.evaluate((node) => Boolean(node.closest('[inert]'))))
+            .toBe(false);
           await page.evaluate(() => {
             document.documentElement.style.fontSize = '200%';
           });

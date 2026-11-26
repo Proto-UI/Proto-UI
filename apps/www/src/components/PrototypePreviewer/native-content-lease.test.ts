@@ -308,6 +308,47 @@ describe('shadow callback blur and descendant focus', () => {
 });
 
 describe('synchronous owner-to-owner Selection freshness', () => {
+  it('does not read endpoints when the current Selection has no range', () => {
+    const { link, source, oldSurface, move } = fixture(true);
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    const endpoints = (['anchorNode', 'anchorOffset', 'focusNode', 'focusOffset'] as const).map(
+      (property) => vi.spyOn(selection, property, 'get')
+    );
+    withNativeContentLease(link, move);
+    for (const endpoint of endpoints) expect(endpoint).not.toHaveBeenCalled();
+    expect(oldSurface.isConnected).toBe(false);
+    expect(source.isConnected).toBe(true);
+    expect(link.textContent).toBe('Original native source');
+  });
+
+  it('retains the focus lease for an empty document Selection', () => {
+    const source = document.createElement('div');
+    const destination = document.createElement('div');
+    const input = document.createElement('input');
+    input.value = 'Focused native control';
+    source.append(input);
+    document.body.append(source, destination);
+    input.focus();
+    input.setSelectionRange(1, 4, 'backward');
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    const anchor = vi.spyOn(selection, 'anchorNode', 'get');
+    withNativeContentLease(source, () => {
+      source.remove();
+      input.blur();
+      destination.append(source);
+    });
+    expect(document.activeElement).toBe(input);
+    expect(input.value).toBe('Focused native control');
+    expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
+      1,
+      4,
+      'backward',
+    ]);
+    expect(anchor).not.toHaveBeenCalled();
+  });
+
   it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
     const first = fixture(true);
     const second = fixture(true);

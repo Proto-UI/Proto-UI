@@ -104,7 +104,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
         throw new Error('Contents Popover family is unavailable');
       const lease: NativeTreeLease = { close: () => closePublicView() };
       const slotId = `${owner}-${namespace}-${request.generation}`;
-      const style = family === 'shadcn' ? { styleProfile: 'rhea' } : {};
+      const style = family === 'shadcn' ? { styleProfile: 'luma' } : {};
       const navigationStyle = family === 'shadcn' ? { styleProfile: 'new-york-v4' } : {};
       const origin = document.activeElement;
       rememberedFocus.clear();

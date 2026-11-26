@@ -48,7 +48,7 @@ const whitepaperLabel =
     width: 100%;
     max-width: 56rem;
     margin-inline: auto;
-    padding: 1.5rem 0 0;
+    padding: 1.5rem 0 0.75rem;
     text-align: center;
   }
   .homepage-hero :global(.homepage-hero__eyebrow) {
@@ -60,11 +60,10 @@ const whitepaperLabel =
   .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a) {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
     min-width: 0;
     max-width: 100%;
     min-height: 1.5rem;
-    padding: 0.125rem 0.5rem 0.125rem 0.625rem;
+    padding: 0.125rem 0.625rem;
     border-radius: 9999px;
     background-color: var(--color-muted);
     color: var(--color-secondary-foreground);
@@ -85,6 +84,46 @@ const whitepaperLabel =
   .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-link:hover),
   .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a:hover) {
     background-color: color-mix(in srgb, var(--color-muted) 80%, var(--color-foreground) 8%);
+  }
+  :global([data-site-library-family='brutalist'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-runtime-link),
+  :global([data-site-library-family='brutalist'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-actions-fallback a) {
+    border-radius: 0;
+    border: 2px solid var(--pui-border, #000);
+    background-color: var(--pui-secondary, #fff);
+    color: var(--pui-foreground, #000);
+    box-shadow: 2px 2px 0 0 var(--pui-border, #000);
+  }
+  :global([data-site-library-family='brutalist'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-runtime-link:hover),
+  :global([data-site-library-family='brutalist'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-actions-fallback a:hover) {
+    background-color: var(--pui-accent, #facc15);
+    color: var(--pui-accent-foreground, #000);
+  }
+  :global([data-site-library-family='bootstrap-2-3-2'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-runtime-link),
+  :global([data-site-library-family='bootstrap-2-3-2'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-actions-fallback a) {
+    border-radius: 3px;
+    border: 1px solid var(--pui-border, #cccccc);
+    background-color: var(--pui-secondary, #f5f5f5);
+    color: var(--pui-foreground, #333333);
+  }
+  :global([data-site-library-family='bootstrap-2-3-2'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-runtime-link:hover),
+  :global([data-site-library-family='bootstrap-2-3-2'])
+    .homepage-hero
+    :global(.homepage-hero__eyebrow .home-actions-fallback a:hover) {
+    background-color: var(--pui-accent, #e6e6e6);
   }
   .homepage-hero :global(.homepage-hero__eyebrow a:focus-visible) {
     outline: 2px solid var(--color-ring);
@@ -157,6 +196,10 @@ const whitepaperLabel =
     }
   }
   @media (min-width: 1280px) {
+    .homepage-hero {
+      padding-top: 2.25rem;
+      padding-bottom: 1.75rem;
+    }
     .homepage-hero :global(.homepage-hero__eyebrow) {
       margin-bottom: 1rem;
     }
@@ -177,13 +220,14 @@ const whitepaperLabel =
   :global([data-site-library-family='shadcn'])
     .homepage-hero
     h1:lang(zh):not([data-typography-owner]) {
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.25;
-    letter-spacing: 0;
+    letter-spacing: -0.025em;
   }
   @media (max-width: 767px) {
     .homepage-hero {
       padding-top: 0;
+      padding-bottom: 0;
     }
     .homepage-hero h1 {
       text-wrap: pretty;

@@ -37,9 +37,7 @@ export default definePrototype<LiquidGlassDialogCloseProps, DialogCloseExposes>(
     def.rule({
       when: (w) => w.prop('prominence').eq('prominent'),
       intent: (i) =>
-        i.feedback.style.use(
-          tw('border-transparent bg-primary text-primary-foreground shadow-sm')
-        ),
+        i.feedback.style.use(tw('border-transparent bg-primary text-primary-foreground shadow-sm')),
     });
     def.rule({
       when: (w) => w.prop('prominence').eq('destructive'),
@@ -51,11 +49,13 @@ export default definePrototype<LiquidGlassDialogCloseProps, DialogCloseExposes>(
 
     const state = behavior.getState!;
     def.rule({
-      when: (w) => w.all(w.state(state('hovered')!).eq(true), w.state(state('disabled')!).eq(false)),
+      when: (w) =>
+        w.all(w.state(state('hovered')!).eq(true), w.state(state('disabled')!).eq(false)),
       intent: (i) => i.feedback.style.use(tw(COMMAND_HOVER)),
     });
     def.rule({
-      when: (w) => w.all(w.state(state('pressed')!).eq(true), w.state(state('disabled')!).eq(false)),
+      when: (w) =>
+        w.all(w.state(state('pressed')!).eq(true), w.state(state('disabled')!).eq(false)),
       intent: (i) => i.feedback.style.use(tw(COMMAND_PRESS)),
     });
     def.rule({

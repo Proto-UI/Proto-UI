@@ -90,11 +90,12 @@ function normalizeTokens(tokens: readonly string[]) {
 }
 
 function setStyleAttribute(el: HTMLElement, tokens: readonly string[]) {
-  if (tokens.length > 0) {
-    el.setAttribute(PUI_STYLE_ATTR, tokens.join(' '));
-  } else {
-    el.removeAttribute(PUI_STYLE_ATTR);
-  }
+  const next = tokens.length > 0 ? tokens.join(' ') : null;
+  // Ownership and hooks still reconcile on every apply. Avoid only an equal
+  // live DOM write, which would otherwise invalidate style and notify observers.
+  if (el.getAttribute(PUI_STYLE_ATTR) === next) return;
+  if (next === null) el.removeAttribute(PUI_STYLE_ATTR);
+  else el.setAttribute(PUI_STYLE_ATTR, next);
 }
 
 function applyOwnedStyleTokens(el: HTMLElement, source: unknown, tokens: readonly string[]) {

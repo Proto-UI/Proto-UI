@@ -1,0 +1,931 @@
+{
+  "schemaVersion": 1,
+  "title": "0.3 browser tail repairs: public Radio entry, actual paint and native layout",
+  "date": "2026-11-25",
+  "status": "69 selected native browser cases and 363 public demo policy tests passed; final integrated clean CI remains separate",
+  "classification": {
+    "officialActions": false,
+    "cleanTree": false,
+    "fullBrowserMatrix": false,
+    "changedBehaviorOnly": true,
+    "independentReview": "No platform approval is represented by this record"
+  },
+  "candidate": {
+    "localHeadAtPostRunAudit": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+    "remoteBaseHead": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+    "remoteCheckout": "/home/ezra/proto-ui-browser-tail-cb5d",
+    "remoteControl": "/home/ezra/proto-ui-browser-tail-cb5d-control",
+    "server": "http://127.0.0.1:4351",
+    "initialSourceOverlay": {
+      "archive": "/home/ezra/proto-ui-browser-tail-cb5d-control/source-overlay.tar.gz",
+      "sha256": "ff5ca86371db1beaa811f4e992df390b4944eb0d8e7db96a273e99b6e4da7285",
+      "bytes": 129249,
+      "manifest": "internal/records/evidence/2026-11-25-release-gate-browser-tail/source-overlay-files.json.gz"
+    },
+    "additionalOwnedInputs": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+        "sha256": "a3faa2608ecc738d23d4996611030f65ba8e599e916c6b2f3059dc2636af7517"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+        "sha256": "d66ce7b621ac8806b8731d3d261c5f5bb7242e6d4514ee621428d77ab3d6140e"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+        "sha256": "02a0e508cd7a60b513c67bc065989af95b4792269561b8d610bb4fdb7d00576e"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+        "sha256": "fb90d754fb8ce7afa3c418df13f3500b046cf9fe65a8831c1c1eb1f28535cb32"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+        "sha256": "1e2b4122e223d466f56e25f0a4694d114c51671b6f83eab53373bb4a19cb87c5"
+      },
+      {
+        "path": "apps/www/test/release-docs-reading.browser.test.ts",
+        "sha256": "b7765ad7a6ad71543441a23a0284de3d62648b58291f26f0ad423d37e411a020"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-empty.demo.ts",
+        "sha256": "ea3216a9fd81502f993256c1539f18059c4758ac01e17b7d2a5b370e72e26904"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+        "sha256": "accd3d22a217c27a1e3b742d3f1c967d06aebca6288e5150d9f6116a0c402e03"
+      },
+      {
+        "path": "packages/cli/test/collapsible-profile-style-closure.test.ts",
+        "sha256": "d66bf8f8b832baf97e14b948e7c4e48fd50dccd2598bfa371a621dad83f95f56"
+      },
+      {
+        "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/radio-group.mdx",
+        "sha256": "1218663acaa5db08a2c8ebfc13da3c9ece58ec73f9e163c2aec02a0229ef5441"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx",
+        "sha256": "64ab2f8412cff3189ca77c938df2f96241f51b1dc010d3129982d2c20c76c5d0"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+        "sha256": "fcb348004ff7770ff31126e0248173b646ec5741b78b5b0e40f204ddc3cf4041"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-card.demo.ts",
+        "sha256": "53b3520aba59eb2f8545aa75505e580e025f3571f4f7c1f9704e1b8d64abb50a"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/card/cardCode.ts",
+        "sha256": "40cf8f44d7e072db4dc54f04bf33f12e2aebda8588116738b69c16b2d6520e59"
+      },
+      {
+        "path": "apps/www/test/shadcn-rhea-demo-policy.test.ts",
+        "sha256": "80821bddda558429121f378bc686ce3fc21a07def3f7a9742b4c07bbc9c346d8"
+      },
+      {
+        "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+        "sha256": "af7f9f49e61431866899969cf2ea2a5e60ef255aee20239fcfca9f2b301e2bdc"
+      }
+    ],
+    "postRunComparison": "14 remote browser/source inputs equal their local SHA-256. The CLI closure test and later Rhea inventory test ran locally; neither is represented as a remote input. Initial overlay manifest alone does not include the subsequent Radio, Card, or p-3.5 changes.",
+    "sourceBinding": "internal/records/evidence/2026-11-25-release-gate-browser-tail/source-binding.json.gz"
+  },
+  "environment": {
+    "node": "24.22.3",
+    "pnpm": "10.32.1",
+    "chromium": "156.0.8078.79",
+    "executable": "/usr/bin/chromium",
+    "sandbox": true,
+    "githubActionsGuardBypassed": false,
+    "commands": {
+      "browser": "PROTO_UI_BROWSER_BASE_URL=http://127.0.0.1:4351 PROTO_UI_BROWSER_TEST=1 PROTO_UI_RUNTIME_EVIDENCE_DIR=<phase-evidence> pnpm exec vitest run <file> --maxWorkers=1 --minWorkers=1 --no-file-parallelism -t <selected-case-pattern> --reporter=json --outputFile=<receipt>",
+      "exactPhaseScripts": [
+        "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase1.sh.gz",
+        "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2.sh.gz",
+        "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3.sh.gz",
+        "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4.sh.gz"
+      ],
+      "policy": "corepack pnpm@10.32.1 exec vitest run apps/www/test/shadcn-rhea-demo-policy.test.ts --minWorkers=1 --maxWorkers=2 --no-file-parallelism --reporter=json --outputFile=/tmp/cb5d-radio-rhea-policy-after.json",
+      "types": "corepack pnpm@10.32.1 exec tsc --noEmit -p /tmp/cb5d-browser-tail-tsconfig.json"
+    }
+  },
+  "repairs": [
+    {
+      "area": "Radio public empty selection example",
+      "type": "Bounded public consumer and source-aligned native tests",
+      "change": "Add an ordinary Rhea group without value/defaultValue, document it in both locales, and select exact public hero/disabled/empty examples for the existing 12 cases. Add the example to the explicit Rhea inventory and unchanged per-example policy assertions.",
+      "preserved": "No owner/API or default behavior change. Native Tab and Enter leave the empty group empty; native Space and ArrowDown select it. Label activation, single-selection, passive glyph, current 150 ms Item shadow / zero-duration Indicator, disabled groups, pointer and keyboard checks remain."
+    },
+    {
+      "area": "Shadcn controls",
+      "type": "Source-aligned test repair",
+      "change": "Use the current local Runtime toolbar, one Textarea hero, and four Checkbox hero controls plus the existing controlled indeterminate example.",
+      "preserved": "Actual keyboard focus ring, source transition timing/properties, label/Space/disabled behavior, glyph count, theme cycles and single ARIA control ownership."
+    },
+    {
+      "area": "Shadcn Collapsible CSS closure",
+      "type": "Production repair committed separately in 3e507be1c",
+      "change": "Replace the same eight static profile table entries with a readonly tuple array and direct for-of. Preserve order, conditions, props and paint. Regenerated manifest adds p-3.5.",
+      "proof": "CLI entry/preset/document/shadow closure test plus 14 existing layout tests passed. Browser observations show 28 px padding at root font size 32 px for all four runtimes; full Collapsible 36/36 passed.",
+      "preserved": "No Compiler support expansion. Bootstrap tests wait for actual 350 ms exit completion and assert the inner body owns 15 px padding and its 1 px divider while the animated host owns zero padding."
+    },
+    {
+      "area": "Tabs profile and docs code focus",
+      "type": "Source-aligned test repair",
+      "change": "Select actual local profile demo Runtime controls and current Active preset/Rhea presentation. Assert code expansion hands keyboard focus to the ready native scroll viewport, with no PRE tabindex.",
+      "preserved": "Tab/Panel/editor node identity, selected Password, disabled Billing, shortcuts, actual profile transitions, both language routes, and navigation/history checks."
+    },
+    {
+      "area": "Fresh scroll-policy control pair",
+      "type": "Execution budget repair",
+      "change": "Increase only the two-cold-context policy-pair case budget from 24 s to 60 s; the old run completed the negative control then timed out before the second context terminal assertions.",
+      "preserved": "All source hashes, independent contexts, initial geometry, actual native wheel input, displacement thresholds, positive/negative policy distinction and 750 ms quiet boundary are unchanged."
+    },
+    {
+      "area": "Switch press geometry",
+      "type": "Source-aligned test repair",
+      "change": "Use current public sizes/hero/disabled examples and obtain the small checked case through an actual pointer click.",
+      "preserved": "Both sizes and checked states, disabled-off/on, source-pinned geometry, at least 240 ms native held press and RAF root/thumb scale=1; Brutalist Thumb isolation case remains unchanged."
+    },
+    {
+      "area": "Brutalist Card documentation footer",
+      "type": "Real public example overflow repair",
+      "change": "Add flex-wrap only to the documentation Card Footer and mirror it in all four displayed framework sources.",
+      "before": "At 390 px width and 24 px root font, Publish release extended to 397.578125 px and caused 8 px document overflow.",
+      "proof": "Original docs-columns test and its 1 px maximum overflow oracle are unchanged. Both themes pass all thirteen width/text-scale scenarios.",
+      "preserved": "Card prototype and Button owner contracts remain unchanged."
+    }
+  ],
+  "verification": {
+    "browserPassed": 69,
+    "browserFailed": 0,
+    "browserReports": [
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-full-candidate.json.gz",
+        "scope": "Radio: original twelve scenarios across four runtimes",
+        "passed": 12,
+        "failed": 0,
+        "unselected": 0,
+        "totalDeclared": 12
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-candidate.json.gz",
+        "scope": "Shadcn Checkbox/Textarea current public examples",
+        "passed": 6,
+        "failed": 0,
+        "unselected": 0,
+        "totalDeclared": 6
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-full-candidate.json.gz",
+        "scope": "All Collapsible projection cases, including four runtimes and Chinese samples",
+        "passed": 36,
+        "failed": 0,
+        "unselected": 0,
+        "totalDeclared": 36
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-profile-candidate.json.gz",
+        "scope": "Tabs profile transitions, four runtimes by two locales",
+        "passed": 8,
+        "failed": 0,
+        "unselected": 34,
+        "totalDeclared": 42
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-candidate.json.gz",
+        "scope": "Keyboard code expansion/focus, both locales",
+        "passed": 2,
+        "failed": 0,
+        "unselected": 22,
+        "totalDeclared": 24
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-candidate.json.gz",
+        "scope": "Fresh independent positive/negative scroll-policy contexts",
+        "passed": 1,
+        "failed": 0,
+        "unselected": 5,
+        "totalDeclared": 6
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/columns-brutalist-candidate.json.gz",
+        "scope": "Brutalist docs columns, light/dark with thirteen width/text-scale cases each",
+        "passed": 2,
+        "failed": 0,
+        "unselected": 8,
+        "totalDeclared": 10
+      },
+      {
+        "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/composed-full-candidate.json.gz",
+        "scope": "Whole composed style isolation file, Switch press geometry and Brutalist Thumb focus",
+        "passed": 2,
+        "failed": 0,
+        "unselected": 0,
+        "totalDeclared": 2
+      }
+    ],
+    "rheaPolicy": {
+      "passed": 363,
+      "failed": 0,
+      "skipped": 0,
+      "explicitDemoCount": 341,
+      "exactLocaleSetComparisonRetained": true,
+      "receipt": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-rhea-policy-after.json.gz"
+    },
+    "scopedTypecheck": {
+      "exitCode": 0,
+      "includesNewRheaInventory": true,
+      "config": "internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-tsconfig.json.gz",
+      "log": "internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-types.log.gz"
+    },
+    "gitDiffCheck": {
+      "exitCode": 0,
+      "scope": [
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+        "apps/www/test/release-docs-reading.browser.test.ts",
+        "apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-empty.demo.ts",
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/radio-group.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx",
+        "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-card.demo.ts",
+        "apps/www/src/content/docs/demo_components/card/cardCode.ts",
+        "apps/www/test/shadcn-rhea-demo-policy.test.ts"
+      ]
+    }
+  },
+  "remainingGateBoundaries": [
+    "Shadow S1/S3 cases await the separately owned Badge/Thumb role closure; this record does not mark those cases passed.",
+    "The final merged candidate must pass the complete clean CI matrix. Dirty diagnostics and unselected cases above are not substitutes for that gate.",
+    "The earlier 643/643 prototype proof retains its original source binding and is not rewritten by these documentation/test changes."
+  ],
+  "readySourcePaths": [
+    "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+    "apps/www/test/release-docs-reading.browser.test.ts",
+    "apps/www/src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-empty.demo.ts",
+    "apps/www/src/content/docs/en/ui-libraries/shadcn/radio-group.mdx",
+    "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx",
+    "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-brutalist-card.demo.ts",
+    "apps/www/src/content/docs/demo_components/card/cardCode.ts",
+    "apps/www/test/shadcn-rhea-demo-policy.test.ts"
+  ],
+  "evidence": [
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/card-overflow-enlarged-before.json.gz",
+      "rawBytes": 15548,
+      "rawSha256": "0e64cc6cb20286f1dc1126d90ad3261d84bae64044ce463627ff8e1d617e6639",
+      "gzipBytes": 1404,
+      "gzipSha256": "6332505ff85abd208bf8b64d4903e6a079e7b8a878e3eb275c15060099ee72a7",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/card-overflow-enlarged-before.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-baseline.json.gz",
+      "rawBytes": 2668,
+      "rawSha256": "3db1e3227a82ac8178376b00796046659e06baad79b21d8b2bb6c1f469ac6f1b",
+      "gzipBytes": 915,
+      "gzipSha256": "29f20d015346aa5064c11e0362efb5d5c16134242829df4c64d575bc53de84fd"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/code-scroll-fresh-candidate.json.gz",
+      "rawBytes": 2243,
+      "rawSha256": "ddac2b058c126c5ab267244398782ad14558d7fc16fb7db4c452aee084ee8c8d",
+      "gzipBytes": 698,
+      "gzipSha256": "eba5487dc247354259baa5467c411a1ff02f789977d9f6470808bed9bbb48bc0",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/code-scroll-fresh-candidate.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-full-candidate.json.gz",
+      "rawBytes": 13629,
+      "rawSha256": "b767f61194226edc77e5db4e9957bd11f745fb351f78fcdf46f89d46ced53815",
+      "gzipBytes": 1221,
+      "gzipSha256": "f95762b163cfc795e183f41720df8871ca915264ebeb5772cef225889227a3ee",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/collapsible-full-candidate.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-paint-diagnostic.json.gz",
+      "rawBytes": 24405,
+      "rawSha256": "236b66efdcf6736355c5e6e40f0a105a34c356cf249055dee69eaa258fb4727c",
+      "gzipBytes": 2374,
+      "gzipSha256": "2410b4ed0609978e43f0d3fb3eeaf5ae4d59d5fefe226de87fd6d9301cfa67ba"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-profile-css-merged-after.json.gz",
+      "rawBytes": 6861,
+      "rawSha256": "47356b4933191c179cc1df8155416c1ced04ee6b5d591f81752b877f3b02ef62",
+      "gzipBytes": 1459,
+      "gzipSha256": "c718f3639ae0477fdffa966a12e317b52df0161bd2e3679c708d0a63e1a1d52c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/collapsible-wc-baseline.json.gz",
+      "rawBytes": 18056,
+      "rawSha256": "a1e80895c7ea410943654ffb2b8d771dad9ed38d84204b39d4d55efdfb75490e",
+      "gzipBytes": 1334,
+      "gzipSha256": "e749a07d54dac5ea9529a28b3818cb444507ba9070fba664c848f0d08d5cefee"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/columns-brutalist-candidate.json.gz",
+      "rawBytes": 3264,
+      "rawSha256": "1bf267c8da0c7c1b3f37e4f3827252c3d6b5a5d11e38a3c9c4291de4d72166a0",
+      "gzipBytes": 754,
+      "gzipSha256": "cb67de1fa89a6cb6a88a6e8b6249a97f945a57d829798c1f2cc3bacd0950b56e",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/columns-brutalist-candidate.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/composed-full-candidate.json.gz",
+      "rawBytes": 1415,
+      "rawSha256": "6b909c70efc0c19a1914303884f65c8a45ebf9d567d28b8b24b3440d8fe7ec74",
+      "gzipBytes": 550,
+      "gzipSha256": "afdfde4cd33ea0dd491fa610832ece1f70f74b7ddd234ab082e51b1d464ca523",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/composed-full-candidate.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-baseline.json.gz",
+      "rawBytes": 4413,
+      "rawSha256": "e8db81adeb822a5a6984170202f4ddff503aecbd1500a365126497acde1ef611",
+      "gzipBytes": 1047,
+      "gzipSha256": "cd2524060f02a03a38552c970f54651846cd227a11c56e6eed843e2c1077e332"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/controls-candidate.json.gz",
+      "rawBytes": 2889,
+      "rawSha256": "05dfd211362c6d0050bfd99be9267af9236fb99b1903fae7fa957c90e4419c0e",
+      "gzipBytes": 786,
+      "gzipSha256": "38cf660afe12166ceb957c8bba03945e542bf81bd86281afcdddbcb99ee6efc6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-baseline.json.gz",
+      "rawBytes": 9880,
+      "rawSha256": "f86434b486380c1662bbc85a9d974ef77a072ff3326bb6668f19a3cc126dee3b",
+      "gzipBytes": 1033,
+      "gzipSha256": "f3d5e5796faed9982d317f88e9290666dad693c10eb07dc0c8e3bcc87ad16461"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/docs-reading-nav-candidate.json.gz",
+      "rawBytes": 6285,
+      "rawSha256": "fcb444c3516410e5e6dd44092f99def970ca9d6233671d2d8b667d8dc93284ca",
+      "gzipBytes": 695,
+      "gzipSha256": "83b8e68e6870a4262b83ec82fe36ab93691fc2b9c78dbdbec672af53a33af15a",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/docs-reading-nav-candidate.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase1.sh.gz",
+      "rawBytes": 1663,
+      "rawSha256": "c1ffdce90f55732362bf3277ae56a3d38d05a603d03245f456bee57d0aac005e",
+      "gzipBytes": 745,
+      "gzipSha256": "fd80f141075158be5639f5627239fa74237ee4bf152ae33d398158ce02c5796f",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase1.sh"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2-evidence--code-scroll-chain--observations.json.gz",
+      "rawBytes": 265817,
+      "rawSha256": "20ae2c2b92bb9dfa6ca59d580eb4e97c453879181495955a9344955d6a989322",
+      "gzipBytes": 9351,
+      "gzipSha256": "4eb5b7dd6842da5abb4da8d5b5a73beb426c20229ea7cb2031471c19bf6a196b",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase2-evidence/code-scroll-chain/observations.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase2.sh.gz",
+      "rawBytes": 1625,
+      "rawSha256": "5eba438de78a2ddde543437f09133be130e603ef0951252551820a97a4c99eb1",
+      "gzipBytes": 631,
+      "gzipSha256": "cc9e44481e2169e603a5f75f566275db4818bd21f3ef6c58eaf2d3437446522b",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase2.sh"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-react-open.json.gz",
+      "rawBytes": 26266,
+      "rawSha256": "2cf3c6319737313e829326b4c7552c74a419b67b306992a6f3dd101fe0c672f0",
+      "gzipBytes": 2282,
+      "gzipSha256": "3f6860379f4e75301df808942074c8f51532b4ad3e8f69dc3c98368d910fecc2",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/bootstrap-2-3-2-react-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-vue-open.json.gz",
+      "rawBytes": 26114,
+      "rawSha256": "1d8188e3724af605a12f1851afe211cae6aa694f7d940077969b6b6e0fc58cf5",
+      "gzipBytes": 2279,
+      "gzipSha256": "7043ee438d213edf48d208823412bd5a2e9a49f7db3c6b9bb1ab22185b78ff68",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/bootstrap-2-3-2-vue-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-vue2-open.json.gz",
+      "rawBytes": 26266,
+      "rawSha256": "df069415f699d39001b9d3522d18e8a6149d694562330a2f65fb02bb51839fa0",
+      "gzipBytes": 2281,
+      "gzipSha256": "9e640594d3973856c4eb3510b3d5651f4d79bbd11fb0ab89ad7033bdce356b22",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/bootstrap-2-3-2-vue2-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--bootstrap-2-3-2-wc-open.json.gz",
+      "rawBytes": 27362,
+      "rawSha256": "26f197bc6975db8647a97addb3383971d6049baa22f482ee9d00e5c52f321bfb",
+      "gzipBytes": 2368,
+      "gzipSha256": "424fe99940fe83add72de533b88832e926e855c5f219c6484dbaf36ee797d9eb",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/bootstrap-2-3-2-wc-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-react-320-text200-dark-open.json.gz",
+      "rawBytes": 31908,
+      "rawSha256": "40e1edd84d86ab7a07e24659785192e55f1aa0ff12a3f197e7673232c5344fca",
+      "gzipBytes": 2490,
+      "gzipSha256": "46f4a274488371841b7cea073688392659bf458af6f45a263c08924bcd358e4e",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-react-320-text200-dark-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-react-320-text200-light-open.json.gz",
+      "rawBytes": 31822,
+      "rawSha256": "545d151ce0ee895c353e2db3ca14a1f9cb47d1e47980b55e89c866f6dff02811",
+      "gzipBytes": 2491,
+      "gzipSha256": "05ccf33f078c4e91408bd5ac37e014bb3c1a82e18cb6a14063e784fc02186195",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-react-320-text200-light-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue-320-text200-dark-open.json.gz",
+      "rawBytes": 31866,
+      "rawSha256": "ae8c5752e3eb355c2d587d0554fbaca16207157cd40510ca81670e9c521ffaf1",
+      "gzipBytes": 2484,
+      "gzipSha256": "7fbfede011afebb255c6b46d5bc6b54a9cb245dfa0a45547abe3394a3caad235",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-vue-320-text200-dark-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue-320-text200-light-open.json.gz",
+      "rawBytes": 31780,
+      "rawSha256": "9c79c90550d0162cbb1e52717c64c8d07f9926214feb86bbc7a6bdc2c4ceb70b",
+      "gzipBytes": 2484,
+      "gzipSha256": "3b34cd68a93d3bad45d8a4a6068bccdb4573ce3754756e4d83f33df9bd7712e5",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-vue-320-text200-light-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue2-320-text200-dark-open.json.gz",
+      "rawBytes": 31886,
+      "rawSha256": "c9c972a6b4aaf484f3d4bd6b695d890d8329eb84ccd26f5fa17802804e7e8416",
+      "gzipBytes": 2478,
+      "gzipSha256": "c7c183229f919929655ff9940b470efa83b1f895b7c2d4b46595482a2beee649",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-vue2-320-text200-dark-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-vue2-320-text200-light-open.json.gz",
+      "rawBytes": 31800,
+      "rawSha256": "31e7f4b327d3b2a22449dc42510bf9b13cfb7b8277e59c4f12b8bf3b14c864c4",
+      "gzipBytes": 2479,
+      "gzipSha256": "e0a19bd8f69d65752022c804b9c1dc844b7b8761fca0051e82e0e0bb5ab939d6",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-vue2-320-text200-light-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-wc-320-text200-dark-open.json.gz",
+      "rawBytes": 33177,
+      "rawSha256": "c730c2c084f1ad59146e86998a2e90943cfc199acd37f3963f98ec89b2d65116",
+      "gzipBytes": 2579,
+      "gzipSha256": "d7b10b469fa3ea21bcd3dbe6a66d5533f9f24bc09869a841798a96e3f8dbf326",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-wc-320-text200-dark-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-collapsible-evidence--shadcn-wc-320-text200-light-open.json.gz",
+      "rawBytes": 33093,
+      "rawSha256": "f48b25e722176c96388c4cf5e417b6c362edd70e6e61076420a0106c7e66dab0",
+      "gzipBytes": 2580,
+      "gzipSha256": "d00b5bcf66dab0dde352f7ca27d03ef4fe9063e6455cd99834dc7a1947c426a0",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-collapsible-evidence/shadcn-wc-320-text200-light-open.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--code-scroll-chain--observations.json.gz",
+      "rawBytes": 464754,
+      "rawSha256": "d7db7009cc69a00e572c5be7f9e08b3ffec3487a102bb466fd1655f6bc7fe0e9",
+      "gzipBytes": 13468,
+      "gzipSha256": "0c607dfb61ae3dc51787002534878abb0c557b0a026eaf18f7048eee53313bfc",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-evidence/code-scroll-chain/observations.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--release-docs-reading--results.json.gz",
+      "rawBytes": 8246,
+      "rawSha256": "e5220f0bf0df65189f08630b7471cfa11a61bfab18ebb30ccc0eeff2356611ae",
+      "gzipBytes": 1372,
+      "gzipSha256": "270069cf04770b258279cf11c8a680712faf85d960573961fcffd2fc0593814c",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-evidence/release-docs-reading/results.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3-evidence--release-docs-reading--source.json.gz",
+      "rawBytes": 2105,
+      "rawSha256": "1ace87708430ecb1c55b6fd153aa4df85ec577bdfacb255f91b041421d131afc",
+      "gzipBytes": 987,
+      "gzipSha256": "651ce58cce510b4f1eec1cce999ab7178b08ef1ba3c70e5c4a2ff0414bb75006",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3-evidence/release-docs-reading/source.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase3.sh.gz",
+      "rawBytes": 2211,
+      "rawSha256": "eb4e34146dba930b93144bbb1bc3cfaf8fe930c33c9d848abb61b62c21c1daa1",
+      "gzipBytes": 803,
+      "gzipSha256": "8466e1216b5b2e180ec3684c15feada8d1a6243fc4c61bc82d0999c78ef49dad",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase3.sh"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1188-root16.json.gz",
+      "rawBytes": 4417,
+      "rawSha256": "f0ee01719abae7c61cfc79530dd466db058d1cc5c709b3e8fec46aaabd43e255",
+      "gzipBytes": 1550,
+      "gzipSha256": "e1e4a4e025b86aa56241906c358000598541b42385f85833afc605413577a1de",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1188-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1279-root16.json.gz",
+      "rawBytes": 4448,
+      "rawSha256": "ed7091eb04e27ec38e1cfe5bb48a0eb6f75c7be520dbba2f1cf4f2b58aa9c7d0",
+      "gzipBytes": 1558,
+      "gzipSha256": "4e09eae7c9a651812d9d8a73cb053c7d04944fd2dc9de43d0833d70a0ce4e0ee",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1279-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1280-root16.json.gz",
+      "rawBytes": 4497,
+      "rawSha256": "b3eb17520d83e7d8de68c3c1a5098d0235b97f06c19101e3d7fb7d3ea221bed3",
+      "gzipBytes": 1568,
+      "gzipSha256": "531f5496f7c8d6e4a14df53b4bb9175137faf0e7e825a7592cc50c466ba53b29",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1280-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root16.json.gz",
+      "rawBytes": 4464,
+      "rawSha256": "682bc0f8c8fd67ffc717cb50f83c2fc3367100b5595293a5465e164c758438f9",
+      "gzipBytes": 1556,
+      "gzipSha256": "38cf697ec26204fdfbc7b37509e5cad7c9ead65b7d26ace647e2f4f84c9250b9",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1440-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root20.json.gz",
+      "rawBytes": 4475,
+      "rawSha256": "b99c10599735d693f48d42e6e212271b17ccebbc1644ff3a5a58abcb4b85b2f3",
+      "gzipBytes": 1562,
+      "gzipSha256": "aff22a2ffb10b98c8ae7d593d3e5a06ad49f2c9b80d2a22673ea9d543827b158",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1440-root20.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root24.json.gz",
+      "rawBytes": 4448,
+      "rawSha256": "bb1fff57b932d380e9e3c9641aa4355ff46aca92a0c13be50dee9cd601fab5ba",
+      "gzipBytes": 1564,
+      "gzipSha256": "add2102ea16824b13f8e4de2fc634f5eab2b94d5d260514a26e0d9437a575099",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1440-root24.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1440-root32.json.gz",
+      "rawBytes": 4381,
+      "rawSha256": "177e80650aa910b387456dbe5afe6421899d8220ad657b6e8aaa6f780adb91d1",
+      "gzipBytes": 1537,
+      "gzipSha256": "bc72972f0ced17dc39fc0f30849f25916d438da27d129885059cb7182425e27d",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1440-root32.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1920-root16.json.gz",
+      "rawBytes": 4435,
+      "rawSha256": "f353c4b68b8b74d0dd2ae1777d0de374f4c11c2db401ec91b5ff1ea319cc1755",
+      "gzipBytes": 1544,
+      "gzipSha256": "06bf4aeb74864568cc330e22302bb933a1c98d01032c037aa847fddb806ec91a",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1920-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-1920-root24.json.gz",
+      "rawBytes": 4514,
+      "rawSha256": "fbe4b2f2e67cbce7ed16201a8f218b5fa3e996ba29543767c348f9f8e83cc2f7",
+      "gzipBytes": 1570,
+      "gzipSha256": "bb5f952322377b47b329cd9d9a56134c906474c89bf4379506df91ad68d0b4d8",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-1920-root24.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-320-root16.json.gz",
+      "rawBytes": 4370,
+      "rawSha256": "ad02496cb5c2196e6a669c5bf5e26e47a344c709690aa7685e2c829bdd098800",
+      "gzipBytes": 1516,
+      "gzipSha256": "5721c769c7df96cb3379bf8f3d7aab593703db5de59cf0cb1aba23b9d3337540",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-320-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-dark-390-root24.json.gz",
+      "rawBytes": 4370,
+      "rawSha256": "2a6ae9d2e5ff6f2d8a2dfdc63e04df9980fbc959e6ff2913b3e3695d093b31c3",
+      "gzipBytes": 1516,
+      "gzipSha256": "b6be1cf5402242f3b6237b07e9cab030b7f4861434ac19e4b77e03f24e778737",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-dark-390-root24.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1188-root16.json.gz",
+      "rawBytes": 4417,
+      "rawSha256": "f0ee01719abae7c61cfc79530dd466db058d1cc5c709b3e8fec46aaabd43e255",
+      "gzipBytes": 1550,
+      "gzipSha256": "e1e4a4e025b86aa56241906c358000598541b42385f85833afc605413577a1de",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1188-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1279-root16.json.gz",
+      "rawBytes": 4448,
+      "rawSha256": "ed7091eb04e27ec38e1cfe5bb48a0eb6f75c7be520dbba2f1cf4f2b58aa9c7d0",
+      "gzipBytes": 1558,
+      "gzipSha256": "4e09eae7c9a651812d9d8a73cb053c7d04944fd2dc9de43d0833d70a0ce4e0ee",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1279-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1280-root16.json.gz",
+      "rawBytes": 4497,
+      "rawSha256": "b3eb17520d83e7d8de68c3c1a5098d0235b97f06c19101e3d7fb7d3ea221bed3",
+      "gzipBytes": 1568,
+      "gzipSha256": "531f5496f7c8d6e4a14df53b4bb9175137faf0e7e825a7592cc50c466ba53b29",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1280-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root16.json.gz",
+      "rawBytes": 4464,
+      "rawSha256": "682bc0f8c8fd67ffc717cb50f83c2fc3367100b5595293a5465e164c758438f9",
+      "gzipBytes": 1556,
+      "gzipSha256": "38cf697ec26204fdfbc7b37509e5cad7c9ead65b7d26ace647e2f4f84c9250b9",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1440-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root20.json.gz",
+      "rawBytes": 4491,
+      "rawSha256": "f2135f25a00b18a880ea904861a68f979b63a3b1a15f16f7520b03ac1b128ed2",
+      "gzipBytes": 1561,
+      "gzipSha256": "6e2c10dda68623777fe8af4b665d6e8d30c6c561468f66ca5d111053b8148b2f",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1440-root20.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root24.json.gz",
+      "rawBytes": 4448,
+      "rawSha256": "bb1fff57b932d380e9e3c9641aa4355ff46aca92a0c13be50dee9cd601fab5ba",
+      "gzipBytes": 1564,
+      "gzipSha256": "add2102ea16824b13f8e4de2fc634f5eab2b94d5d260514a26e0d9437a575099",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1440-root24.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1440-root32.json.gz",
+      "rawBytes": 4381,
+      "rawSha256": "177e80650aa910b387456dbe5afe6421899d8220ad657b6e8aaa6f780adb91d1",
+      "gzipBytes": 1537,
+      "gzipSha256": "bc72972f0ced17dc39fc0f30849f25916d438da27d129885059cb7182425e27d",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1440-root32.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1920-root16.json.gz",
+      "rawBytes": 4435,
+      "rawSha256": "f353c4b68b8b74d0dd2ae1777d0de374f4c11c2db401ec91b5ff1ea319cc1755",
+      "gzipBytes": 1544,
+      "gzipSha256": "06bf4aeb74864568cc330e22302bb933a1c98d01032c037aa847fddb806ec91a",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1920-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-1920-root24.json.gz",
+      "rawBytes": 4518,
+      "rawSha256": "6236841f75046897686913383d5a5b20ef00488bb887fc6b722ef370c9aa7991",
+      "gzipBytes": 1572,
+      "gzipSha256": "9c89c033adde2133ce151cacb1fa5e438fe45cf53a1e7a6e08fb9fa1c0bf0582",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-1920-root24.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-320-root16.json.gz",
+      "rawBytes": 4370,
+      "rawSha256": "ad02496cb5c2196e6a669c5bf5e26e47a344c709690aa7685e2c829bdd098800",
+      "gzipBytes": 1516,
+      "gzipSha256": "5721c769c7df96cb3379bf8f3d7aab593703db5de59cf0cb1aba23b9d3337540",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-320-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--en-brutalist-light-390-root24.json.gz",
+      "rawBytes": 4370,
+      "rawSha256": "2a6ae9d2e5ff6f2d8a2dfdc63e04df9980fbc959e6ff2913b3e3695d093b31c3",
+      "gzipBytes": 1516,
+      "gzipSha256": "b6be1cf5402242f3b6237b07e9cab030b7f4861434ac19e4b77e03f24e778737",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/en-brutalist-light-390-root24.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-dark-1440-root16.json.gz",
+      "rawBytes": 4469,
+      "rawSha256": "abf005789fc529edd6eec3013ee728aa19220893a1421deecd3d3b9d621e1165",
+      "gzipBytes": 1558,
+      "gzipSha256": "9a686a90342523a9ce529c1582e6750e8c103f54af236a9c2658f84b4b4d8bf9",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/zh-cn-brutalist-dark-1440-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-dark-1440-root20.json.gz",
+      "rawBytes": 4495,
+      "rawSha256": "b9ca0d3e20d700541b2ec8e7fcfd8babd9a50cd1ce374541464bdfdb45345fa0",
+      "gzipBytes": 1564,
+      "gzipSha256": "14755dc6a9ed1cc312f25bffc5a09097b181bb3e9d16bd2622f5ed2c9c119aac",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/zh-cn-brutalist-dark-1440-root20.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-light-1440-root16.json.gz",
+      "rawBytes": 4469,
+      "rawSha256": "abf005789fc529edd6eec3013ee728aa19220893a1421deecd3d3b9d621e1165",
+      "gzipBytes": 1558,
+      "gzipSha256": "9a686a90342523a9ce529c1582e6750e8c103f54af236a9c2658f84b4b4d8bf9",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/zh-cn-brutalist-light-1440-root16.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--docs-columns--zh-cn-brutalist-light-1440-root20.json.gz",
+      "rawBytes": 4487,
+      "rawSha256": "990e6b58d0c3114353214252b528652c1838bf7f921c625c326b82951b067b8e",
+      "gzipBytes": 1566,
+      "gzipSha256": "75746e37fc7bbd75c99293cc40ddbf12269013beec67678527aa1b640324be6c",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/docs-columns/zh-cn-brutalist-light-1440-root20.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4-evidence--switch-press-source-oracle--run.json.gz",
+      "rawBytes": 49865,
+      "rawSha256": "541ae433fea9520e5abe4455503d15f9417014ad613487f41b21bc14f227cf65",
+      "gzipBytes": 2010,
+      "gzipSha256": "8a2438fa9be81a17b43ba19c8a135f6ccb0f8c109a57729176268fd7ed029311",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4-evidence/switch-press-source-oracle/run.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/phase4.sh.gz",
+      "rawBytes": 1064,
+      "rawSha256": "70919a0252a78c9501304bc94a11ad1d9446b0814c50e4b74b790c6fdbc50a61",
+      "gzipBytes": 501,
+      "gzipSha256": "faab6ef36f051e3330f8c4f852b8b16707ae3aa87c336f1d7b45b8827753515e",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/phase4.sh"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-baseline.json.gz",
+      "rawBytes": 7043,
+      "rawSha256": "98484175fbfcb11fe16110176ed6cdaf8150de54931d7b6946f0b6f102617873",
+      "gzipBytes": 946,
+      "gzipSha256": "1f10bad1acccbed68b5d0344b2d748e38821a72413da6fbcb77620cb9af0abcc"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-full-candidate.json.gz",
+      "rawBytes": 5596,
+      "rawSha256": "4eda0d2bf084c536bb63adec12956d2ae60c331a707e67f76018681a2359a0b2",
+      "gzipBytes": 777,
+      "gzipSha256": "387c47d465b6bccbe068f040ace9d74e9fb36c17f05362a0dbd4657461612056"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-initial-entry.json.gz",
+      "rawBytes": 3372,
+      "rawSha256": "d599276d09e55d7cb71c4aa3a8910b6a66ab180d547f5e702385241544bb722e",
+      "gzipBytes": 654,
+      "gzipSha256": "c4de1ea55cc492e16594d84947fa14745e75b0ae6a47a9ccf01fa0076a12c640",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/react-initial-entry.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-interaction.json.gz",
+      "rawBytes": 9164,
+      "rawSha256": "85ddfa67932424cc59a77e79680e3116f48bb4285ab3fd7cdaf4a1e074a8b285",
+      "gzipBytes": 919,
+      "gzipSha256": "72e212ece89bc429a3eabbf96cbf02903d825a509140c5667b14be9080a0397a",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/react-interaction.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--react-labels.json.gz",
+      "rawBytes": 2737,
+      "rawSha256": "e323df31f1d3ab4a21a7faaf930d57faa2470563e33921d342f807851189762e",
+      "gzipBytes": 607,
+      "gzipSha256": "9bddd17d0e52f697d5537f08232d2b8915b6202a16ec28eaac8cd3bc6b8d2949",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/react-labels.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-initial-entry.json.gz",
+      "rawBytes": 3317,
+      "rawSha256": "c18c87322c30e78f5ec35ef8e0dab8ec5357054e12e34eaab16b032e47e5d427",
+      "gzipBytes": 636,
+      "gzipSha256": "e3214156d567761d2dcb58f5e713bb7f54cc0a517ab59a76e548672bccb8d43d",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/vue-initial-entry.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-interaction.json.gz",
+      "rawBytes": 9162,
+      "rawSha256": "ad25d30507305dfb55bf2a48a1b686c3a07f8e914284779657d783d6ba3c5b61",
+      "gzipBytes": 919,
+      "gzipSha256": "730105198bd92ca5c8f77d50b05877250788f7f84349c01ec1ebf888eba20cd3",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/vue-interaction.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue-labels.json.gz",
+      "rawBytes": 2735,
+      "rawSha256": "1f228a86ce2d64f93caedffa37263d692c11207eca238a1a40d9e2ab1ee00693",
+      "gzipBytes": 607,
+      "gzipSha256": "181be9a8f2d5ace16fd903c9743cd58b7953b19135320bbae0ae634888252c01",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/vue-labels.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-initial-entry.json.gz",
+      "rawBytes": 3318,
+      "rawSha256": "41594b4e8a6e458181d2cc8d9224a1b84136454c0576a130c57bfc6f213e1a10",
+      "gzipBytes": 637,
+      "gzipSha256": "c18efbe8514a3257ff20c2b4a2cc56439b25d0c56f0fff33ae9cb1c29ce68a35",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/vue2-initial-entry.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-interaction.json.gz",
+      "rawBytes": 9163,
+      "rawSha256": "e30a933ad5a25f4deb4f4acd0161b2881a9fffe60aff067d47a4e4571d24d922",
+      "gzipBytes": 920,
+      "gzipSha256": "99a5c837ce40df3eddcae03d833d2d824262b4974fa085beafec258ea934edb7",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/vue2-interaction.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--vue2-labels.json.gz",
+      "rawBytes": 2735,
+      "rawSha256": "490ab6e82fa34d439bded1d0c35455454ea979b07e20182c26836a778837b3d3",
+      "gzipBytes": 608,
+      "gzipSha256": "937d13744e7d824c0f3003a4dd29cc5ee97436eaaa80373e28d3dc36d2b8dc51",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/vue2-labels.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-initial-entry.json.gz",
+      "rawBytes": 3316,
+      "rawSha256": "44f9627bc209a582261b502c60e28672fe58fd44f7ce73366fef9168211a41b3",
+      "gzipBytes": 635,
+      "gzipSha256": "872bdd8d9622d3bb0feab286a464860e1112063c5d66d9b45328f80eb32bcb45",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/wc-initial-entry.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-interaction.json.gz",
+      "rawBytes": 9214,
+      "rawSha256": "e40fce27c1ce70a7ed057694036a2631e44e53e898f7cdf9c6f8f9ed5f91cb7e",
+      "gzipBytes": 941,
+      "gzipSha256": "6a8ad0928db9e17896a33326f4701edc337d43933c07d7f5157783fab6e0f3e1",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/wc-interaction.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-observations--wc-labels.json.gz",
+      "rawBytes": 2712,
+      "rawSha256": "ae0f5be942644de769061af2f9b6dd20b2bbe48b7fed1116aad8c5641f98df44",
+      "gzipBytes": 596,
+      "gzipSha256": "13ca93be36fb2b521b144c43e965febd65c83c5d82865ba1689f26026d8dfdc1",
+      "remoteSource": "/tmp/proto-shadcn-radio-group-fL8sGs/wc-labels.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-rhea-policy-after.json.gz",
+      "rawBytes": 143876,
+      "rawSha256": "4715b1fb82055fa1104cb9f9ac659909fa36cf0c79086867b24f6dae0c3dfcbd",
+      "gzipBytes": 8313,
+      "gzipSha256": "a8d01c05a50df6955aba3c3694ec1ff189901b6c107fcc32c8a69e9ac9f1c02c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-wc-candidate.json.gz",
+      "rawBytes": 7095,
+      "rawSha256": "6ab18524514e1a459f3776cc93ef7174b7dff15c5dc2e7c56d661c982ae8e834",
+      "gzipBytes": 988,
+      "gzipSha256": "8b6de00a39474b586e4690790f671215a3d78337a0f21c970b39299c543fd520"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/radio-wc-interaction-candidate.json.gz",
+      "rawBytes": 5287,
+      "rawSha256": "1ad6727c7698421ca488e64ac959f04f3251e40fe4eb152fe898873ee6c351f7",
+      "gzipBytes": 650,
+      "gzipSha256": "9b6c7f236f2316ad793d1461536822c0e4bbebab2068524c2357fe5528b6faf2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-tsconfig.json.gz",
+      "rawBytes": 5267,
+      "rawSha256": "772030f9fb7658cd029ad70d167590f784c5e2c2c1f11e3ac9e7723a4f3bb670",
+      "gzipBytes": 918,
+      "gzipSha256": "7d763f2c01eef3a1b8708f033064fa96118669fcbbdc4395092e9613edab72fb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/scoped-types.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/source-binding.json.gz",
+      "rawBytes": 8773,
+      "rawSha256": "0532a446f5236433721f0cce8991c9cc09de93c6d33f294eff94441aa85703d0",
+      "gzipBytes": 1345,
+      "gzipSha256": "7b6e10b7a783ab025eab44ab0f62aae1f56cbb58046f73f3685f661bc83fe302"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/source-overlay-files.json.gz",
+      "rawBytes": 6758,
+      "rawSha256": "d1cefcca496ff41cf87f7db68184098e4542624c866b2bf7b10c2567010c47b2",
+      "gzipBytes": 2300,
+      "gzipSha256": "c9b473fe14c7f37807323780ea914925a640f759456546a09d699cb3f11ea4d7",
+      "remoteSource": "/home/ezra/proto-ui-browser-tail-cb5d-control/source-overlay-files.json"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-baseline-ready.json.gz",
+      "rawBytes": 13828,
+      "rawSha256": "afc2b224bb1e67f3669803fadfa8cf0d33b5911648773e476f8c39ea3b00a306",
+      "gzipBytes": 1467,
+      "gzipSha256": "9507f591e4ca81c29fa9f92b8177faf4e94bdd7af7fd7fc7e5eacd214e801bac"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-tail/sprint-profile-candidate.json.gz",
+      "rawBytes": 11652,
+      "rawSha256": "e9db95366120c488d71e477b8d6ffabf4122d70abddd53f8bfa0b7754510ae9e",
+      "gzipBytes": 1098,
+      "gzipSha256": "2d2ed1f57105ec53a24ae54aeaa5b47b594216bb867c4421f67dbc77ed30d388"
+    }
+  ]
+}

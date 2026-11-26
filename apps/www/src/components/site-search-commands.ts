@@ -8,11 +8,13 @@ import arrowRightIcon from '../../../../packages/prototypes/lucide/src/icons/arr
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
 import { registerPrototype } from './PrototypePreviewer/registry';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
+import { reserveDocsHeaderPreparation } from './docs-header-preparation';
 import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import {
   createProjectionScopeController,
   type ProjectionScopeCommit,
   type ProjectionScopeController,
+  type ProjectionScopeControllerOptions,
   type ProjectionScopeMaterializeRequest,
 } from './PrototypePreviewer/projection-scope';
 import {
@@ -438,7 +440,12 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         !candidate.host.inert;
       const composition = createSiteSearchComposition({
         family,
-        shadcnStyle: root.dataset.searchStyle === 'new-york-v4' ? 'new-york-v4' : 'rhea',
+        shadcnStyle:
+          root.dataset.searchStyle === 'new-york-v4'
+            ? 'new-york-v4'
+            : root.dataset.searchStyle === 'rhea'
+              ? 'rhea'
+              : 'luma',
         session: search.session,
         copy: search.copy,
         isCurrent: current,
@@ -648,6 +655,61 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   // prototype loading and rendering so the open command can activate within
   // the initial-ready budget instead of waiting for the full dialog tree.
   let dialogController: ProjectionScopeController | null = null;
+  type PreferencePreparation = {
+    runtime: RuntimeId;
+    opener(): void;
+    dialog?: () => void;
+  };
+  let preferencePreparation: PreferencePreparation | undefined;
+  const releasePreparation = (preparation: PreferencePreparation | undefined) => {
+    if (preferencePreparation === preparation) preferencePreparation = undefined;
+    preparation?.opener();
+    preparation?.dialog?.();
+  };
+  const createCriticalScope = (
+    kind: 'opener' | 'dialog',
+    options: ProjectionScopeControllerOptions
+  ) => {
+    const releases = new Map<number, () => void>();
+    return createProjectionScopeController({
+      ...options,
+      async materialize(request) {
+        const preparation = preferencePreparation;
+        const release =
+          preparation?.runtime === request.selection.runtimeId ? preparation[kind] : undefined;
+        if (!release) return options.materialize(request);
+        try {
+          const candidate = await options.materialize(request);
+          releases.set(request.generation, release);
+          return {
+            ...candidate,
+            dispose() {
+              releases.delete(request.generation);
+              release();
+              return candidate.dispose();
+            },
+          };
+        } catch (error) {
+          release();
+          throw error;
+        }
+      },
+      prepareCommit(commit) {
+        const publication = options.prepareCommit?.(commit);
+        const release = releases.get(commit.generation);
+        releases.delete(commit.generation);
+        return {
+          publish() {
+            publication?.publish();
+            release?.();
+          },
+          rollback() {
+            publication?.rollback();
+          },
+        };
+      },
+    });
+  };
   const retire = (previous: ProjectionScopeController) => {
     const cleanup = previous.destroy();
     retired.add(cleanup);
@@ -680,7 +742,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   let pendingDialogFocus: SiteSearchFocusRestore | null = null;
   const createDialog = () => {
     const namespace = `docs-dialog-${++attempt}`;
-    return createProjectionScopeController({
+    return createCriticalScope('dialog', {
       initialSelection: { runtimeId: runtime, projectionFamilyId: family },
       async materialize(request) {
         return participant.materializeDialog(request, namespace, {
@@ -705,13 +767,15 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       if (snapshot.generation !== 0 || snapshot.phase !== 'idle') return;
       retire(dialogController);
     }
-    dialogController = createDialog();
-    observe(dialogController.start(), dialogController);
+    const release = preferencePreparation?.dialog;
+    const owner = createDialog();
+    dialogController = owner;
+    observe(owner.start(), owner, release);
   };
   const offDialogOpen = participant.onOpen?.(() => ensureDialog());
   const create = () => {
     const namespace = `docs-${++attempt}`;
-    return createProjectionScopeController({
+    return createCriticalScope('opener', {
       initialSelection: { runtimeId: runtime, projectionFamilyId: family },
       async materialize(request) {
         const candidates = await participant.materialize(request, namespace, themeSource);
@@ -735,9 +799,10 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     });
   };
   let controller = create();
-  const observe = (pending: Promise<unknown>, owner = controller) =>
+  const observe = (pending: Promise<unknown>, owner = controller, release?: () => void) =>
     pending.then(
       (snapshot) => {
+        release?.();
         if (
           alive &&
           owner === dialogController &&
@@ -748,6 +813,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
         return snapshot;
       },
       (error) => {
+        release?.();
         if (!alive) return;
         const dialogFailure = owner === dialogController;
         if (!dialogFailure && owner !== controller) return;
@@ -761,17 +827,29 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     );
   const refresh = () => {
     if (!alive) return;
+    const release = preferencePreparation?.opener;
     if (controller.getSnapshot().generation === 0 && controller.getSnapshot().phase === 'idle') {
       const previous = controller;
       controller = create();
       retire(previous);
-      return observe(controller.start());
+      return observe(controller.start(), controller, release);
     }
-    return observe(controller.request({ runtimeId: runtime, projectionFamilyId: family }));
+    return observe(
+      controller.request({ runtimeId: runtime, projectionFamilyId: family }),
+      controller,
+      release
+    );
   };
   const onPreference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
-    if (isRuntimeId(next)) {
+    if (alive && root.isConnected && root.ownerDocument === document && isRuntimeId(next)) {
+      const preparation: PreferencePreparation = {
+        runtime: next,
+        opener: reserveDocsHeaderPreparation(document),
+        dialog: dialogController ? reserveDocsHeaderPreparation(document) : undefined,
+      };
+      releasePreparation(preferencePreparation);
+      preferencePreparation = preparation;
       runtime = next;
       void refresh();
       if (dialogController) {
@@ -810,12 +888,14 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
         }
         observe(
           dialogController.request({ runtimeId: runtime, projectionFamilyId: family }),
-          dialogController
+          dialogController,
+          preparation?.dialog
         );
       }
     }
   };
-  document.addEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
+  // Reserve before retained documentation decorations handle the event.
+  document.addEventListener(PREFERRED_ADAPTER_EVENT, onPreference, true);
   return {
     ready: observe(controller.start()),
     refresh,
@@ -823,9 +903,10 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       if (destroyPromise) return destroyPromise;
       if (!alive) return Promise.resolve();
       alive = false;
+      releasePreparation(preferencePreparation);
       offDialogOpen?.();
       document.removeEventListener('focusin', onDialogFocus, true);
-      document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
+      document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference, true);
       // These controllers own independent leases. A failed opener must not
       // prevent Dialog retirement; keep the existing first-failure policy.
       destroyPromise = Promise.allSettled([controller.destroy(), dialogController?.destroy()]).then(

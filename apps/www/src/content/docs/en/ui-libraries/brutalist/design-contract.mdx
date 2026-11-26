@@ -38,7 +38,8 @@ Brutalist assigns shadow depth and press behavior by component category rather t
 | --- | --- | --- |
 | Elevated action control — Button, raised Surface, Dialog / Dropdown / Select / Collapsible Trigger, Accordion Item | 4px 4px hard black shadow | Translates `+4px, +4px` along the shadow axis and removes the outer shadow on press; no extra hover lift |
 | Raised panel — Card, Dialog / Alert Dialog / Command Dialog / Drawer Content, Calendar | 4px 4px hard black shadow | Static surface with no press displacement |
-| Anchored content panel — Dropdown / Context / Menubar / Navigation Menu Content, Autocomplete / Combobox / Select / Hover Card Content, Popover | 3px 3px hard foreground shadow | No hover or press motion; positioned by the overlay |
+| Anchored content panel — Dropdown / Context / Menubar / Navigation Menu Content, Autocomplete / Combobox / Select Content, Popover | 3px 3px hard foreground shadow | No hover or press motion; positioned by the overlay |
+| Anchored content exception — Hover Card Content | No hard shadow | Keeps its 200ms enter/leave transition and overlay positioning |
 | Flat selection control — Toggle, Tabs Trigger | No shadow, no offset | Toggle keeps `border-black` on hover/press and preserves its 2px inset active frame while pressed; unselected Tabs Trigger gains hover fill and border while selected triggers keep their color pair |
 | Binary capsule control — Switch | No shadow on Root or Thumb | No hover shift; press keeps fill and geometry while the Thumb slides 20px with a 150ms transition |
 | Editable surface — Input, Textarea, Number Field, Input OTP | Input / Textarea: no shadow; Number Field / Input OTP controls: 2px 2px border-colored shadow | No lift or press sink; displays focus ring and state styling |

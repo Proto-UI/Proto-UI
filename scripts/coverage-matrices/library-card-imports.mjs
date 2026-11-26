@@ -105,11 +105,11 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/library-liquid-card-client.ts': Object.freeze({
-    sourceSha256: 'a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0',
+    sourceSha256: 'a706b27a7331bef6fb27828a4b6964dc5d0cc3e9eff1b07312d70a850f11261f',
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: 'a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb',
+    sourceSha256: 'b93920864a23913c3f752b748c30a32c5f4bafda35b83d0065d26ce8861a4a19',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',
@@ -120,8 +120,14 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '2e9bb4ca8c903ec0863f4d5a6b18c7486c609a4ef4e806ba6eaf459cd49003cc',
     specifiers: Object.freeze(['./contact-profile', './liquidgl-kernel.generated', './style']),
   }),
+  // Exact consumer-owned withdrawal of the serialized Library SSR style seed.
+  // Both imports are type-only; this grants no general Adapter hydration boundary.
+  'apps/www/src/components/library-style-seed.ts': Object.freeze({
+    sourceSha256: 'bfb98a5e1e38273abffeb5f656b612d432cf43180bd8b8af015cbba813ee3330',
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/adapter-web-component']),
+  }),
   'apps/www/src/components/library-card-client.ts': Object.freeze({
-    sourceSha256: '7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8',
+    sourceSha256: 'a76ff8694ef17cc01d0da51c1e9e8efc5fa7192dec59d916a601c3088f8d3ff3',
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/library-card-prototypes.ts': Object.freeze({

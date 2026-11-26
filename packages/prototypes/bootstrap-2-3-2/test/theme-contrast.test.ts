@@ -1,6 +1,34 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { accordionRoot, accordionItem, accordionTrigger } from '../src/accordion';
+import { collapsibleRoot, collapsibleTrigger } from '../src/collapsible';
+import { hoverCardRoot, hoverCardTrigger } from '../src/hover-card';
 import { THEME, renderThemeCss } from '../src/theme';
 import { readFileSync } from 'node:fs';
+
+const commands = [
+  { root: accordionRoot, item: accordionItem, trigger: accordionTrigger, darkInk: 'ring' },
+  { root: collapsibleRoot, trigger: collapsibleTrigger, darkInk: 'foreground' },
+  { root: hoverCardRoot, trigger: hoverCardTrigger, darkInk: 'foreground' },
+] as const;
+for (const prototype of [
+  accordionRoot,
+  accordionItem,
+  accordionTrigger,
+  collapsibleRoot,
+  collapsibleTrigger,
+  hoverCardRoot,
+  hoverCardTrigger,
+])
+  AdaptToWebComponent(prototype, { registerAs: `contrast-${prototype.name}` });
+const flush = async () => {
+  for (let index = 0; index < 30; index++) await Promise.resolve();
+};
+afterEach(async () => {
+  document.body.replaceChildren();
+  document.documentElement.classList.remove('dark');
+  await flush();
+});
 
 function luminance(hex: string) {
   const rgb = hex
@@ -52,7 +80,7 @@ describe('Bootstrap readable page adaptation', () => {
       'packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts',
       'utf8'
     );
-    expect(days).toContain("tw('bg-muted border-border')");
+    expect(days).toContain("tw('bg-muted border-border font-bold')");
     expect(days).toContain("tw('bg-secondary')");
     expect(days).not.toContain('bg-[#eee]');
     const row = readFileSync(
@@ -61,22 +89,52 @@ describe('Bootstrap readable page adaptation', () => {
     );
     expect(row).toContain('bg-accent text-accent-foreground');
   });
-  it('keeps supporting copy and link interaction ink readable in dark mode', () => {
+  it('keeps supporting copy and link interaction ink readable in dark mode', async () => {
     const description = readFileSync(
       'packages/prototypes/bootstrap-2-3-2/src/fieldset/description.proto.ts',
       'utf8'
     );
     expect(description).toContain('text-muted-foreground');
     expect(description).not.toContain('text-[#555]');
-    for (const path of [
-      'accordion/trigger.proto.ts',
-      'collapsible/trigger.proto.ts',
-      'hover-card/trigger.proto.ts',
-    ]) {
-      const source = readFileSync(`packages/prototypes/bootstrap-2-3-2/src/${path}`, 'utf8');
-      expect(source).toContain("tw('text-foreground underline')");
-      expect(source).not.toContain("tw('text-[#005580] underline')");
+    // Real host color-scheme and borrowed hover facts select the current
+    // per-command semantic ink; historical light-mode blue remains valid.
+    document.documentElement.classList.add('dark');
+    for (const command of commands) {
+      const root = document.createElement(`contrast-${command.root.name}`);
+      const trigger = document.createElement(`contrast-${command.trigger.name}`) as HTMLElement & {
+        getExposes(): { hovered: { get(): boolean } };
+      };
+      if ('item' in command) {
+        const item = document.createElement(`contrast-${command.item.name}`);
+        setElementProps(item, { value: 'details' });
+        item.append(trigger);
+        root.append(item);
+      } else root.append(trigger);
+      document.body.append(root);
+      await flush();
+      trigger.dispatchEvent(new PointerEvent('pointerenter'));
+      await flush();
+      expect(trigger.getExposes().hovered.get()).toBe(true);
+      const tokens = (trigger.getAttribute('data-pui-style') ?? '').split(/\s+/);
+      if ('item' in command) {
+        // This simple rule lowers to a guarded CSS selector; the Adapter
+        // keeps its prefix rather than replacing it with an unconditional ink.
+        expect(tokens).toContain('dark:text-ring');
+        expect(tokens).toContain(
+          'dark:data-[hovered]:not-[data-collapse-blocked]:not-[data-disabled]:underline'
+        );
+      } else {
+        expect(tokens).toContain(`text-${command.darkInk}`);
+        expect(tokens).toContain('underline');
+      }
+      expect(tokens).not.toContain('text-[#005580]');
+      for (const background of [THEME.dark.background, THEME.dark.secondary, THEME.dark.muted])
+        expect(contrast(THEME.dark[command.darkInk], background)).toBeGreaterThanOrEqual(4.5);
+      root.remove();
+      await flush();
     }
+    // Old literal hover ink is still a discriminating dark-page negative control.
+    expect(contrast('#005580', THEME.dark.background)).toBeLessThan(4.5);
     expect(contrast(THEME.dark['muted-foreground'], THEME.dark.background)).toBeGreaterThanOrEqual(
       4.5
     );

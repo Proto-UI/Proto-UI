@@ -406,8 +406,11 @@ describe.sequential('Runtime-only vertical layout parity', () => {
           expect(facts.font).toBe(previous.font);
           expect(facts.padding).toEqual(previous.padding);
           expect(facts.typography.length).toBeGreaterThan(0);
-          expect(facts.typography.map((text) => text.identity)).toEqual(
-            previous.typography.map((text) => text.identity)
+          expect(facts.examples.map((example) => example.id)).toEqual(
+            previous.examples.map((example) => example.id)
+          );
+          expect(facts.typography.map((text) => [text.identity, text.flowAnchor])).toEqual(
+            previous.typography.map((text) => [text.identity, text.flowAnchor])
           );
           facts.typography.forEach((text, index) => {
             const expected = previous.typography[index]!;
@@ -456,10 +459,19 @@ async function docsGeometry(root: Locator) {
         const rect = owner.getBoundingClientRect();
         const surface = owner.querySelector<HTMLElement>('[data-typography-prototype]')!;
         const css = getComputedStyle(surface);
+        // Host-specific source snippets can have different line counts. Bind
+        // prose spacing to the same preceding authored example, so its source
+        // height cannot masquerade as a RuntimeBox or typography difference.
+        const preceding = [...main.querySelectorAll<HTMLElement>('[data-previewer-id]')]
+          .filter((previewer) =>
+            Boolean(previewer.compareDocumentPosition(owner) & Node.DOCUMENT_POSITION_FOLLOWING)
+          )
+          .at(-1);
         return {
           identity: `${owner.localName}/${owner.textContent}`,
+          flowAnchor: preceding ? `after:${preceding.dataset.demoId}` : 'main',
           x: rect.x - origin.x,
-          y: rect.y - origin.y,
+          y: rect.y - (preceding?.getBoundingClientRect().bottom ?? origin.y),
           width: rect.width,
           height: rect.height,
           surfaceDisplay: css.display,
@@ -468,7 +480,31 @@ async function docsGeometry(root: Locator) {
           leading: css.lineHeight,
         };
       });
+    const examples = [...main.querySelectorAll<HTMLElement>('[data-previewer-id]')].map(
+      (previewer) => {
+        const read = (element: Element | null) => {
+          if (!element) return null;
+          const bounds = element.getBoundingClientRect();
+          return {
+            y: bounds.y - origin.y,
+            height: bounds.height,
+            display: getComputedStyle(element).display,
+          };
+        };
+        return {
+          id: previewer.dataset.demoId,
+          runtime: previewer.dataset.runtime,
+          projectionRuntime: previewer.dataset.projectionRuntime,
+          state: previewer.dataset.projectionState,
+          preview: read(previewer),
+          surface: read(previewer.querySelector('.pui-runtime-preview-surface')),
+          code: read(previewer.querySelector('[data-code-shell]')),
+          codeViewport: read(previewer.querySelector('[data-code-scroll-viewport]')),
+        };
+      }
+    );
     return {
+      examples,
       width: rect.width,
       height: rect.height,
       contentHeight: content.height,

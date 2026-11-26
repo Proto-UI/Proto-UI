@@ -1,0 +1,85 @@
+{
+  "scope": "Current public recipe identity and strict selected Escape baseline; no audit gate relaxed",
+  "base": "5c79265311db7d8f3b7ff5b32c5442c99876b207",
+  "files": [
+    {
+      "path": "apps/www/scripts/audit-brutalist-contrast.mts",
+      "sha256": "c1653c4c61b81e6df5dc221be9aae166b18b7adafc3d9e3b24f4313dc213a327"
+    },
+    {
+      "path": "apps/www/scripts/contrast-audit-plan.mjs",
+      "sha256": "4286e39f8ddd15be47f029855b4eba7d61becaf512cfe75a8d471ead4f45a84b"
+    },
+    {
+      "path": "apps/www/scripts/contrast-audit-plan.test.mjs",
+      "sha256": "55c0f7be34f6e8dc070e9df67e569bbcf11253dcab5aa80aacaa3ca51bba40b6"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts",
+      "sha256": "2b6f7cb68a31238e8296c11c51c9cb59cbfc4c581ef03e31d647047c3d63c5c0"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-dropdown-menu.demo.ts",
+      "sha256": "c0ad02040eb6d3cfa563a54367109af7d56f0c62c71a14b5232416c2edda2624"
+    },
+    {
+      "path": "apps/www/test/contrast-popup-escape.test.ts",
+      "sha256": "4bde3bfbaba2d681e1465c68508743bb3e87b8e8e27c2da6f15ee5db69a4e4b6"
+    },
+    {
+      "path": "apps/www/test/contrast-projection-identity.test.ts",
+      "sha256": "2f312331bd246a271851123d832477e6b25cb07c499a43b81a5502a6ca039372"
+    }
+  ],
+  "sourceTests": {
+    "numTotalTests": 737,
+    "numPassedTests": 737,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "nativeCalibration": {
+    "selected": 2,
+    "passed": 2,
+    "failed": 0,
+    "filtered": 54,
+    "remoteReport": "/home/ezra/proto-ui-color-gate-cb5d-control/contrast-root.json",
+    "limitation": "Instrument-only exact-lease probes use actual Chromium; this is not native product or complete audit acceptance."
+  },
+  "pending": [
+    "Run the complete selected Select contrast audit from a clean committed candidate to verify trusted option selection, reopen and Escape under all four runtimes and two themes."
+  ],
+  "notes": [
+    "Current Checkbox refs are updatesCheckbox/channelsCheckbox/cardCheckbox; anonymous Textarea stays anonymous in the instrument DOM.",
+    "Select placeholder must be committed through real Apple option input before observing selected-value preservation across Escape. Source fixture retains all changed-owner, stale-generation, selected-Root and swallowed-Escape negative controls.",
+    "The initial preparation inside the pure Escape observer was rejected by the existing no-click/no-focus guard (736/737). Trusted selection is now a distinct preparation phase before the unchanged Escape observer; the complete 737-case suite and 77 plan tests pass.",
+    "The first full source rerun terminated early with a Vitest running-tests warning (296 completed, no failed assertion); its incomplete report is retained and is not a passing receipt. A complete subsequent rerun passed 737/737."
+  ],
+  "sourcePlanTests": {
+    "total": 77,
+    "passed": 77,
+    "failed": 0,
+    "receipt": "cb5d-contrast-plan-integrated.tap.gz"
+  },
+  "archivedReceipts": [
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-sources-integrated.json.gz",
+      "sha256": "8352dd060e2f4c7f2bf3c4857e4f9256f1bc6de54699471fd4aa030c6f942d21"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-escape-separation-guard.json.gz",
+      "sha256": "d94e036751ae6a8f38b2b6480eed55ea452a013953611ba154e90968f492d54a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-identity-preparation-separated.json.gz",
+      "sha256": "b119d200eb0dada9ffa97dcf03b346821b029581fa106006a584130e74698136"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/cb5d-contrast-plan-integrated.tap.gz",
+      "sha256": "82fd7bbb254e2b684bd3ec10f5d37d00ae6262d307e95bd35ffc7b4576bca5db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-contrast/contrast-root.json.gz",
+      "sha256": "d385ca64c9b76c216659595aed1f060a0d4c8655094c63a6fc33fdcbd0fc31c6"
+    }
+  ]
+}

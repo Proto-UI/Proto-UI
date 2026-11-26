@@ -1,0 +1,81 @@
+{
+  "subject": "Restore the governed Brutalist Hover Card Content no-shadow exception",
+  "currentUserRequest": "检查 0.3 发版门禁，让 CI 错误都修完",
+  "delegatedScope": "Parent authorized bounded reconciliation after original maintainer ruling and historical source/spec packet; no new design or lifecycle promotion.",
+  "baseline": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+  "ruling": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/398#issuecomment-5378973550",
+    "id": 5378973550,
+    "author": "guangliang2019",
+    "body": "## Maintainer design ruling: adopt a typed depth and motion grammar\n\nChoose the **typed grammar** direction. The Brutalist family must not normalize every component to one universal `3px` rest shadow and one unconditional lift/sink transition.\n\nCurrent component-specific P entities are evidence that depth and motion depend on semantic and visual role. The family grammar should define a finite set of named categories with explicit defaults and permitted exceptions, for example passive label, panel, loading placeholder, editable control, binary control, selected trigger, and scroll chrome. These names are working inventory labels, not pre-approved final entity names; the implementation must derive and validate the final category set against the current P entities and visual evidence.\n\nRequired governance boundary:\n\n- exactly one applicable spec/knowledge or decision slice owns the family-level category grammar;\n- component P entities reference or refine that owner and remain authoritative for their exact component criteria;\n- every exception is finite, named, justified, and executable rather than an ad hoc source comment;\n- the EN/ZH Design Contract becomes a traceable projection and must stop presenting an unqualified universal table;\n- implementation normalization occurs only where several components are classified under the same invariant and currently drift from it;\n- visual evidence covers every admitted category and exception in Light and Dark;\n- generated tokens, presets, and CLI closure remain consistent when any token changes.\n\nDo not create a second prose source of truth or infer that every current implementation difference deserves permanent exception status. First classify the existing Badge, Card, Skeleton, Textarea, Scroll Area, Toggle, Switch, and Tabs behavior; then either map each value to an approved category/exception or normalize it to that category default.\n\nDesign decision status: **typed grammar approved; category inventory, normative owner, projections, and executable evidence remain implementation work**."
+  },
+  "grammarAdmission": {
+    "commit": "ec81ad9912f3498700e2e9a5b157ba034e48f87c",
+    "date": "2026-11-06",
+    "facts": [
+      "D category included Hover Card Content in 3px anchored panels",
+      "D revision explicitly preserved every current P-entity-governed behavior",
+      "The same commit retained P Content no-hard-shadow criterion and shadow-free source",
+      "Only eight other P entities were backlinked; Hover Card was omitted"
+    ]
+  },
+  "regression": {
+    "commit": "c049606db4a93fa15e7e9a97708d2ea6364a0557",
+    "pr": "https://github.com/Proto-UI/Proto-UI/pull/1818",
+    "facts": [
+      "Adds z-50, text-start and hard foreground shadow in Content source",
+      "Comment cites public design contract",
+      "No change to D grammar, Hover Card P, or Hover Card unit test",
+      "PR discussion contains no Hover Card semantic supersession decision"
+    ],
+    "discussion": [
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1818#issuecomment-7143857013",
+        "id": 7143857013,
+        "author": "vercel[bot]",
+        "body": "[vc]: #xOmQXHneT5AlhijkhaINDiyjZ1EBDMDRpuoLMpN6QxM=:eyJpc01vbm9yZXBvIjp0cnVlLCJ0eXBlIjoiZ2l0aHViIiwicHJvamVjdHMiOlt7Im5hbWUiOiJwcm90by11aSIsInByb2plY3RJZCI6InByal91QjZSMEtBWXZINHhla0VwNExoakhmWTQzdjVxIiwidjAiOmZhbHNlLCJpbnNwZWN0b3JVcmwiOiJodHRwczovL3ZlcmNlbC5jb20vMjYwNjI5ODI0NnFxY29tcy1wcm9qZWN0cy9wcm90by11aS81amo2Vm9OMzRHQmpDTGJ4N3hlMm9NSFdYTEV5IiwicHJldmlld1VybCI6InByb3RvLXVpLWdpdC1mZWF0LXVpLWxpYnJhcmllcy04NGI3MmMtMjYwNjI5ODI0NnFxY29tcy1wcm9qZWN0cy52ZXJjZWwuYXBwIiwibmV4dENvbW1pdFN0YXR1cyI6IkRFUExPWUVEIiwibGl2ZUZlZWRiYWNrIjp7InJlc29sdmVkIjowLCJ1bnJlc29sdmVkIjowLCJ0b3RhbCI6MCwibGluayI6InByb3RvLXVpLWdpdC1mZWF0LXVpLWxpYnJhcmllcy04NGI3MmMtMjYwNjI5ODI0NnFxY29tcy1wcm9qZWN0cy52ZXJjZWwuYXBwIn0sInJvb3REaXJlY3RvcnkiOm51bGx9XX0=\nThe latest updates on your projects. Learn more about [Vercel for GitHub](https://vercel.link/github-learn-more).\n\n| Project | Deployment | Actions | Updated |\n| :--- | :----- | :------ | :------ |\n| <a href=\"https://vercel.com/2606298246qqcoms-projects/proto-ui\"><sup><img src=\"https://vercel.com/api/www/avatar?projectId=prj_uB6R0KAYvH4xekEp4LhjHfY43v5q&teamId=team_cKDCJlR84jaH8KJwbDwL57Tt&s=32\" width=\"16\" height=\"16\" align=\"middle\" alt=\"\" /></sup></a> [proto-ui](https://vercel.com/2606298246qqcoms-projects/proto-ui) | ![Ready](https://vercel.com/static/status/ready.svg) [Ready](https://vercel.com/2606298246qqcoms-projects/proto-ui/5jj6VoN34GBjCLbx7xe2oMHWXLEy) | [Preview](https://proto-ui-git-feat-ui-libraries-84b72c-2606298246qqcoms-projects.vercel.app) | <relative-time datetime=\"2026-11-24T20:55:16.129Z\">Nov 24, 2026 8:55pm UTC</relative-time> |\n\n"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1818#issuecomment-7143859081",
+        "id": 7143859081,
+        "author": "chatgpt-codex-connector[bot]",
+        "body": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"1d033ee095f702af020b8f3ce48127c0d399a2bd\",\"has_any_findings\":true,\"has_unresolved_findings\":true,\"status\":\"failed\"},\"security_review\":{\"commit_sha\":null,\"has_any_findings\":null,\"has_unresolved_findings\":null,\"status\":null}} -->\n\n<details>\n<summary><strong>Codex Review Summary</strong>: ❌ Failed</summary>\n\nThis comment shows the latest Codex review activity on this pull request.\n\n| Review | Status | Commit | Review trigger |\n| --- | --- | --- | --- |\n| 📝 **Code Review** | ❌ **Failed** <relative-time datetime=\"2026-11-24T20:38:26.861234Z\">2026-11-24T20:38:26.861234Z</relative-time><br/>We couldn’t complete this review. Comment `@codex review` to try again. | `1d033ee` | PR opened |\n\n\n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\" or \"@codex security review\".\n\nCodex reacts with 👀 while any review is running, comments if it has suggestions, and reacts with 👍 once all reviews finish with no findings.\n\n</details>\n\n</details>"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1818#issuecomment-7143859919",
+        "id": 7143859919,
+        "author": "chatgpt-codex-connector[bot]",
+        "body": "You have reached your Codex usage limits for code reviews. You can see your limits in the [Codex usage dashboard](https://chatgpt.com/codex/cloud/settings/usage)."
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1818#issuecomment-7144047242",
+        "id": 7144047242,
+        "author": "cyjin-yl",
+        "body": "Release intake at `1d033ee095f702af020b8f3ce48127c0d399a2bd`. This change spans 565 files and introduces new public Brutalist Drawer parts, new examples and experimental-family documentation. The repository is in the repair-only period defined in the [0.3 release plan](https://github.com/Proto-UI/Proto-UI/blob/9831f4209392588c5a7a02dfda3da105460b1581/internal/governance/release-0.3-plan.md#red-light-and-recovery-rules). The current regression baseline still has unresolved failures.\n\nThis feature wave remains open outside the repair integration queue. A separately identified fix for an existing 0.3 regression can proceed with its failing case and bounded scope. Bootstrap 2.3.2 and Liquid Glass remain experimental. The two-successive-cycle recovery condition and the November 27 feature freeze still apply.\n\n<!-- release03-repair-intake-1818-1d033ee095f702af020b8f3ce48127c0d399a2bd -->"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/1818#issuecomment-7144289879",
+        "id": 7144289879,
+        "author": "vercel[bot]",
+        "body": "Deployment failed for project [proto-ui](https://vercel.com/2606298246qqcoms-projects/proto-ui) with the following error:\n~~~\nResource is limited - try again in 24 hours (more than 100, code: \"api-deployments-free-per-day\").\n~~~\nLearn More: https://vercel.com/2606298246qqcoms-projects?upgradeToPro=build-rate-limit"
+      }
+    ]
+  },
+  "governingCriteria": [
+    "P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR",
+    "P-BRUTALIST-HOVER-CARD-CONTENT-TRANSITION",
+    "D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-EXCEPTIONS"
+  ],
+  "boundary": [
+    "Retain source z-50 and text-start",
+    "Remove only ungoverned hard shadow from source",
+    "Name omitted existing no-shadow exception and typed P backlink",
+    "Keep every original native no-shadow, fill, typography, radius, transition, hit and four-runtime/light-dark assertion",
+    "No status/since/activeSince changes",
+    "Regenerate projections through normal generators"
+  ],
+  "evidence": {
+    "browser": "/home/ezra/proto-ui-browser-gate-cb5d-control/brutalist-remaining-current.json",
+    "negativeUnit": "/tmp/cb5d-browser-control/hovercard-negative-unit.log"
+  }
+}

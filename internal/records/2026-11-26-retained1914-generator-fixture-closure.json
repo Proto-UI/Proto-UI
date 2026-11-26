@@ -1,0 +1,28 @@
+{
+  "head": "64e10e2be3b152b3a82218daa50cc9c404446263",
+  "path": "packages/cli/test/brutalist-preset-generator.test.ts",
+  "beforeSha256": "caa52959927445a2e8e0393a5e837af174a8055d84297e72b8d02e42ffefd07a",
+  "afterSha256": "bdb01fd99a3934e876566ad64e5a213a40ca57ae1222fadd348fd0d5779443b7",
+  "patchSha256": "6497b62886734e38a7d21e3bf921811d76f4f39c95cefdce04ff971348f95cef",
+  "scope": "Copy the actual three newly imported collector dependencies into the existing escaped-path fixture. No product, source domain, fixture cleanup, assertion, child timeout180000ms or case timeout420000ms changed.",
+  "before": {
+    "tests": 1,
+    "passed": 0,
+    "failed": 1,
+    "failure": "ERR_MODULE_NOT_FOUND closed-when-state-presence.js from actual escaped fixture",
+    "reportSha256": "489805cc5440f4c2b6c1ec9d2ea78e456ffe623890bc3eb052eae8d8acd84052"
+  },
+  "after": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 41911.561584,
+    "actualFullGenerateAndCheck": true,
+    "reportSha256": "9c73d1d266843e1f404421cc8aa081b0eb8f0510e16b110983f2a68ce0b61392"
+  },
+  "independentReview": {
+    "reviewer": "/root/review_website_prs",
+    "reportSha256": "016d3b0ea48c35a8a599b91d84fbfe2ffa5ef73917f8b871605f590adb412181",
+    "verdict": "PASS for exact3line fixture closure repair"
+  }
+}

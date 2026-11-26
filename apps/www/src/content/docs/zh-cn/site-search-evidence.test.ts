@@ -19,10 +19,14 @@ import {
   stopSearchRuntimeTrace,
 } from './site-search-evidence';
 
-const source = readFileSync(
-  'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
-  'utf8'
-);
+const source = [
+  'site-search-browser.ts',
+  'site-search-activation.browser.test.ts',
+  'site-search-layout.browser.test.ts',
+  'site-search-menu.browser.test.ts',
+]
+  .map((name) => readFileSync(`apps/www/src/content/docs/zh-cn/${name}`, 'utf8'))
+  .join('\n');
 
 describe('independent Pagefind browser callback transport', () => {
   it('runs the actual Vitest-transformed callback without SSR import globals', async () => {

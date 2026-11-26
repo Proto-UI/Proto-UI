@@ -15,6 +15,7 @@ import {
   choosePreviewRuntime,
   launchBrowser,
   openRoute,
+  selectRuntime,
   startServer,
   stopServer,
 } from './browser-harness';
@@ -236,17 +237,17 @@ async function selectTriggerGeometrySnapshot(page: Page, phase: string) {
             items.push(describe(current));
           return { items, truncated: !!current };
         };
-        // openRoute uses this same first Previewer; no additional selector wait.
-        const previewer = document.querySelector('[data-previewer-id]');
+        const authoredRtl = document.querySelector(
+          '[data-demo-id="demo-bootstrap-2-3-2-select-rtl"]'
+        );
+        const previewer = authoredRtl ?? document.querySelector('[data-previewer-id]');
         const trigger = previewer?.querySelector<HTMLElement>(
-          '[data-projection-content] [data-demo-ref="rtlTrigger"]'
+          authoredRtl
+            ? '.host [role="combobox"]'
+            : '[data-projection-content] [data-demo-ref="rtlTrigger"]'
         );
         const valueNodes = trigger
-          ? [
-              ...trigger.querySelectorAll<HTMLElement>(
-                '[data-projection-prototype$="-select-value"]'
-              ),
-            ]
+          ? [...trigger.querySelectorAll<HTMLElement>('[data-display-value]')]
           : [];
         const values = valueNodes.slice(0, 4).map((value) => {
           const chain = ancestors(value);
@@ -336,16 +337,23 @@ async function selectTriggerPlatformFonts(page: Page) {
       if (expired) return expiredResult;
       const { root } = await session.send('DOM.getDocument', { depth: 1 });
       if (expired) return expiredResult;
-      const previewer = await session.send('DOM.querySelector', {
+      const authoredRtl = await session.send('DOM.querySelector', {
         nodeId: root.nodeId,
-        selector: '[data-previewer-id]',
+        selector: '[data-demo-id="demo-bootstrap-2-3-2-select-rtl"]',
       });
+      const previewer = authoredRtl.nodeId
+        ? authoredRtl
+        : await session.send('DOM.querySelector', {
+            nodeId: root.nodeId,
+            selector: '[data-previewer-id]',
+          });
       if (expired) return expiredResult;
       if (!previewer.nodeId) return { unavailable: 'The original Previewer is absent.' };
       const value = await session.send('DOM.querySelector', {
         nodeId: previewer.nodeId,
-        selector:
-          '[data-projection-content] [data-demo-ref="rtlTrigger"] [data-projection-prototype$="-select-value"]',
+        selector: authoredRtl.nodeId
+          ? '.host [role="combobox"] [data-display-value]'
+          : '[data-projection-content] [data-demo-ref="rtlTrigger"] [data-projection-prototype$="-select-value"]',
       });
       if (expired) return expiredResult;
       if (!value.nodeId) return { unavailable: 'The original Select Value is absent.' };
@@ -384,13 +392,15 @@ async function waitReady(page: Page, family: string, runtime: string) {
         '[data-previewer-id] [data-projection-scope]'
       );
       const trigger = scope?.querySelector<HTMLElement>(
-        '[data-projection-content] [data-demo-ref="uncontrolledTrigger"]'
+        family === 'bootstrap-2-3-2'
+          ? '[data-projection-content] [aria-label="Produce selector"]'
+          : '[data-projection-content] [data-demo-ref="uncontrolledTrigger"]'
       );
       return (
         scope?.dataset.projectionState === 'ready' &&
         scope.dataset.projectionRuntime === runtime &&
         trigger?.dataset.projectionPrototype === `${family}-select-trigger` &&
-        trigger.textContent?.trim() === 'Alpha'
+        trigger.textContent?.trim() === (family === 'bootstrap-2-3-2' ? 'Apple' : 'Alpha')
       );
     },
     { family, runtime }
@@ -431,7 +441,21 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             await choosePreviewRuntime(page, previewer, runtime);
             await waitReady(page, family, runtime);
             const demo = previewer.locator('[data-projection-content]');
-            const trigger = demo.locator('[data-demo-ref="uncontrolledTrigger"]');
+            const bootstrap = family === 'bootstrap-2-3-2';
+            const disabledPreview = bootstrap
+              ? page.locator('[data-demo-id="demo-bootstrap-2-3-2-select-disabled"]')
+              : previewer;
+            if (bootstrap)
+              await selectRuntime(page, disabledPreview, runtime, '[role="combobox"]', 2);
+            const trigger = bootstrap
+              ? disabledPreview.getByRole('combobox', {
+                  name: 'Fruit selector with disabled item',
+                  exact: true,
+                })
+              : demo.locator('[data-demo-ref="uncontrolledTrigger"]');
+            const initialValue = bootstrap ? 'Disabled item inside' : 'Alpha';
+            const firstChoice = bootstrap ? 'Apple' : 'Alpha';
+            const nextChoice = bootstrap ? 'Pineapple' : 'Beta';
             async function stageSnapshot(phase: string) {
               if (family !== 'liquid-glass') return;
               const snapshot = await demo.evaluate((root) => ({
@@ -470,7 +494,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             }
             await stageSnapshot('mounted');
             expect(await trigger.getAttribute('aria-expanded')).toBe('false');
-            expect((await trigger.textContent())?.trim()).toBe('Alpha');
+            expect((await trigger.textContent())?.trim()).toBe(initialValue);
             // Runtime chrome is the active family's real Tabs recipe, separate
             // from the demonstrated Select and its popup below.
             const runtimeRoot = previewer.locator(
@@ -578,38 +602,49 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 });
             }
             await page.waitForFunction(
-              () =>
+              (firstChoice) =>
                 document.activeElement?.getAttribute('role') === 'option' &&
-                document.activeElement.textContent?.trim() === 'Alpha'
+                document.activeElement.textContent?.trim() === firstChoice,
+              firstChoice
             );
+            if (bootstrap)
+              expect(
+                await firstContent
+                  .getByRole('option', { name: 'Grapes (Sold out)', exact: true })
+                  .getAttribute('aria-disabled')
+              ).toBe('true');
             await page.keyboard.press('ArrowDown');
             await page.waitForFunction(
-              () => document.activeElement?.textContent?.trim() === 'Beta'
+              (nextChoice) => document.activeElement?.textContent?.trim() === nextChoice,
+              nextChoice
             );
-            expect((await trigger.textContent())?.trim()).toBe('Alpha');
+            expect((await trigger.textContent())?.trim()).toBe(initialValue);
             await page.keyboard.press('Enter');
-            await page.waitForFunction(
-              () =>
-                document
-                  .querySelector('[data-demo-ref="uncontrolledTrigger"]')
-                  ?.textContent?.trim() === 'Beta'
-            );
+            await trigger.getByText(nextChoice, { exact: true }).waitFor({ state: 'visible' });
             expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
             await trigger.click();
             await popup(page, trigger);
             await page.keyboard.press('End');
             await page.keyboard.press('Home');
-            await page.keyboard.press('b');
+            await page.keyboard.press(nextChoice[0]!.toLowerCase());
             await page.waitForFunction(
-              () => document.activeElement?.textContent?.trim() === 'Beta'
+              (nextChoice) => document.activeElement?.textContent?.trim() === nextChoice,
+              nextChoice
             );
             await page.keyboard.press('Escape');
-            expect((await trigger.textContent())?.trim()).toBe('Beta');
+            expect((await trigger.textContent())?.trim()).toBe(nextChoice);
             expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
-            const disabled = demo.locator('[data-demo-ref="disabledTrigger"]');
+            const disabled = bootstrap
+              ? disabledPreview.getByRole('combobox', {
+                  name: 'Disabled fruit selector',
+                  exact: true,
+                })
+              : demo.locator('[data-demo-ref="disabledTrigger"]');
             expect(await disabled.getAttribute('aria-disabled')).toBe('true');
             expect(await disabled.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
-            const controlled = demo.locator('[data-demo-ref="controlledTrigger"]');
+            const controlled = bootstrap
+              ? demo.getByRole('combobox', { name: 'Produce selector', exact: true })
+              : demo.locator('[data-demo-ref="controlledTrigger"]');
             await controlled.click();
             const controlledContent = await popup(page, controlled);
             if (family === 'liquid-glass') {
@@ -620,15 +655,36 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
               ).toBe('controlledStage');
               await stageSnapshot('controlled-open');
             }
-            await controlledContent.getByRole('option', { name: 'Beta', exact: true }).click();
-            expect((await controlled.textContent())?.trim()).toBe('Alpha');
-            await demo.getByRole('button', { name: 'Accept selection', exact: true }).click();
-            await page.waitForFunction(
-              () =>
-                document
-                  .querySelector('[data-demo-ref="controlledTrigger"]')
-                  ?.textContent?.trim() === 'Beta'
-            );
+            if (bootstrap) {
+              // The current authored consumer accepts requests and exposes Reset.
+              // Controlled refusal stays in the Base contract and API-input tests.
+              await controlledContent.getByRole('option', { name: 'Banana', exact: true }).click();
+              await controlled.getByText('Banana', { exact: true }).waitFor({ state: 'visible' });
+              await demo.getByRole('button', { name: 'Reset', exact: true }).click();
+              await controlled.getByText('Apple', { exact: true }).waitFor({ state: 'visible' });
+              expect(await controlled.getAttribute('aria-expanded')).toBe('false');
+              await controlled.click();
+              const reopened = await popup(page, controlled);
+              expect(await reopened.getByRole('option').allTextContents()).toEqual([
+                'Apple',
+                'Banana',
+                'Blueberry',
+                'Carrot',
+                'Broccoli',
+                'Spinach',
+              ]);
+              await page.waitForFunction(
+                () =>
+                  document.activeElement?.getAttribute('role') === 'option' &&
+                  document.activeElement.textContent?.trim() === 'Apple'
+              );
+              await page.keyboard.press('Escape');
+            } else {
+              await controlledContent.getByRole('option', { name: 'Beta', exact: true }).click();
+              expect((await controlled.textContent())?.trim()).toBe('Alpha');
+              await demo.getByRole('button', { name: 'Accept selection', exact: true }).click();
+              await controlled.getByText('Beta', { exact: true }).waitFor({ state: 'visible' });
+            }
             await trigger.click();
             await popup(page, trigger);
             await page.keyboard.press('Tab');
@@ -640,11 +696,23 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             if (captureDir)
               await previewer.screenshot({ path: path.join(captureDir, `${prefix}-desktop.png`) });
 
+            const rtlPreview = bootstrap
+              ? page.locator('[data-demo-id="demo-bootstrap-2-3-2-select-rtl"]')
+              : previewer;
+            const scrollablePreview = bootstrap
+              ? page.locator('[data-demo-id="demo-bootstrap-2-3-2-select-scrollable"]')
+              : previewer;
+            if (bootstrap) {
+              for (const example of [rtlPreview, scrollablePreview])
+                await selectRuntime(page, example, runtime, '[role="combobox"]', 1);
+            }
             await page.setViewportSize({ width: 320, height: 900 });
             await page.evaluate(() => {
               document.documentElement.style.fontSize = '32px';
             });
-            const rtl = demo.locator('[data-demo-ref="rtlTrigger"]');
+            const rtl = bootstrap
+              ? rtlPreview.getByRole('combobox', { name: 'اختر فاكهة', exact: true })
+              : demo.locator('[data-demo-ref="rtlTrigger"]');
             await rtl.scrollIntoViewIfNeeded();
             if (captureDir)
               triggerGeometryEvidence.push(
@@ -652,9 +720,13 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
               );
             await rtl.click();
             const rtlContent = await popup(page, rtl);
-            const geometry = await rtlContent.evaluate((node) => {
-              const surface = node.querySelector<HTMLElement>('[data-demo-ref$="Surface"]');
-              const painted = surface ?? node;
+            const geometry = await rtlContent.evaluate((node, bootstrap) => {
+              const surface = node.querySelector<HTMLElement>(
+                '[data-projection-prototype$="-select-surface"]'
+              );
+              // Bootstrap's historical dropdown-menu chrome belongs to Content;
+              // Liquid's optical paint belongs to its explicit Surface.
+              const painted = bootstrap ? node : (surface ?? node);
               const style = getComputedStyle(node);
               const paint = getComputedStyle(painted);
               const rect = node.getBoundingClientRect();
@@ -679,7 +751,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 backgroundImage: paint.backgroundImage,
                 radius: paint.borderRadius,
               };
-            });
+            }, bootstrap);
             if (captureDir)
               triggerGeometryEvidence.push(
                 await selectTriggerGeometrySnapshot(page, 'rtl-320-text200-open')
@@ -693,10 +765,11 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 expect(geometry.height).toBeGreaterThan(30);
                 expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
                 expect(geometry.indicatorRight).toBeLessThanOrEqual(geometry.labelLeft + 1);
-                expect(geometry.selectedText).toContain('VeryLongUnbrokenOptionLabels');
-                // Surface owns paint. Optical success is a backdrop image with a
-                // transparent color; opaque fallback is a solid fill. The portal
-                // frame itself stays transparent.
+                expect(geometry.selectedText).toContain(
+                  bootstrap ? 'تفاح' : 'VeryLongUnbrokenOptionLabels'
+                );
+                // Read the family's paint owner. Optical success is a backdrop
+                // image with a transparent color; opaque fallback is a solid fill.
                 expect(
                   geometry.background !== 'rgba(0, 0, 0, 0)' || geometry.backgroundImage !== 'none'
                 ).toBe(true);
@@ -745,6 +818,58 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                   2
                 )
               );
+            }
+            if (bootstrap) {
+              await page.keyboard.press('Escape');
+              const timezone = scrollablePreview.getByRole('combobox', {
+                name: 'Timezone selector',
+                exact: true,
+              });
+              await timezone.scrollIntoViewIfNeeded();
+              await timezone.click();
+              const timezones = await popup(page, timezone);
+              const longLabel = 'Australian Eastern Standard Time (AEST)';
+              await timezones.getByRole('option', { name: longLabel, exact: true }).click();
+              await timezone.getByText(longLabel, { exact: true }).waitFor({ state: 'visible' });
+              await timezone.click();
+              const longContent = await popup(page, timezone);
+              const longGeometry = await longContent.evaluate((node) => {
+                const rect = node.getBoundingClientRect();
+                const selected = node.querySelector<HTMLElement>(
+                  '[role="option"][aria-selected="true"]'
+                )!;
+                return {
+                  left: rect.left,
+                  right: rect.right,
+                  width: rect.width,
+                  height: rect.height,
+                  scrollWidth: node.scrollWidth,
+                  clientWidth: node.clientWidth,
+                  labelScrollWidth: selected.scrollWidth,
+                  labelClientWidth: selected.clientWidth,
+                  selectedText: selected.textContent,
+                  pageOverflow: document.documentElement.scrollWidth - innerWidth,
+                };
+              });
+              expect(longGeometry.selectedText).toBe(longLabel);
+              expect(longGeometry.left).toBeGreaterThanOrEqual(0);
+              expect(longGeometry.right).toBeLessThanOrEqual(321);
+              expect(longGeometry.width).toBeGreaterThan(40);
+              expect(longGeometry.height).toBeGreaterThan(30);
+              expect(longGeometry.scrollWidth).toBeLessThanOrEqual(longGeometry.clientWidth + 1);
+              expect(longGeometry.labelScrollWidth).toBeLessThanOrEqual(
+                longGeometry.labelClientWidth + 1
+              );
+              expect(longGeometry.pageOverflow).toBeLessThanOrEqual(1);
+              if (captureDir) {
+                await page.screenshot({
+                  path: path.join(captureDir, `${prefix}-320-text200-long-open.png`),
+                });
+                await writeFile(
+                  path.join(captureDir, `${prefix}-long-label.json`),
+                  JSON.stringify({ source, family, runtime, theme, longGeometry }, null, 2)
+                );
+              }
             }
             expect(errors).toEqual([]);
           } catch (error) {
@@ -808,32 +933,36 @@ describe.sequential('actual family Text selection and typography', () => {
   for (const family of families)
     for (const runtime of RUNTIMES) {
       it(`${family}/${runtime}: document Text stays selectable beside nonselectable Select content`, async () => {
-        const { context, page, previewer } = await openRoute(
-          browser,
-          baseUrl,
-          route(family, 'text'),
-          { width: 1280, height: 900 }
-        );
+        const {
+          context,
+          page,
+          previewer: hero,
+        } = await openRoute(browser, baseUrl, route(family, 'text'), { width: 1280, height: 900 });
+        // Keep the original 3xl rem-scaling criterion bound to the authored
+        // scale example; the current hero now demonstrates the 2xl exception.
+        const previewer =
+          family === 'bootstrap-2-3-2'
+            ? page.locator('[data-demo-id="demo-bootstrap-2-3-2-text-scale"]')
+            : hero;
         try {
-          await choosePreviewRuntime(page, previewer, runtime);
-          await page.waitForFunction(
-            ({ family, runtime }) => {
-              const scope = document.querySelector<HTMLElement>(
-                '[data-previewer-id] [data-projection-scope]'
-              );
-              return (
-                scope?.dataset.projectionRuntime === runtime &&
-                scope.dataset.projectionState === 'ready' &&
-                scope.querySelectorAll(
-                  `[data-projection-content] [data-projection-prototype="${family}-text-root"]`
-                ).length === 4
-              );
-            },
-            { family, runtime }
+          await selectRuntime(
+            page,
+            previewer,
+            runtime,
+            family === 'bootstrap-2-3-2'
+              ? '[data-pui-root]'
+              : `[data-projection-prototype="${family}-text-root"]`,
+            family === 'bootstrap-2-3-2' ? 7 : 4
           );
-          const text = previewer
-            .locator(`[data-projection-content] [data-projection-prototype="${family}-text-root"]`)
-            .first();
+          const textNodes = previewer.locator(
+            family === 'bootstrap-2-3-2'
+              ? '.host .pui-runtime-preview-surface [data-pui-root]'
+              : `.host [data-projection-prototype="${family}-text-root"]`
+          );
+          const text =
+            family === 'bootstrap-2-3-2'
+              ? textNodes.filter({ hasText: '3xl · Page Title' })
+              : textNodes.first();
           await text.scrollIntoViewIfNeeded();
           const box = await text.boundingBox();
           if (!box) throw new Error('Actual Text has no painted bounds.');
@@ -841,7 +970,7 @@ describe.sequential('actual family Text selection and typography', () => {
             clickCount: 3,
           });
           expect(await page.evaluate(() => getSelection()?.toString())).toContain(
-            'A reusable Text atom'
+            family === 'bootstrap-2-3-2' ? '3xl · Page Title' : 'A reusable Text atom'
           );
           const readTypography = () =>
             text.evaluate((node) => {

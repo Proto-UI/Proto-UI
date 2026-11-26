@@ -45,6 +45,12 @@ export type HookSourceValue =
     }
   | { kind: 'unknown'; reason: string };
 
+/** A scalar State created by this invocation's native Def, without AsHook provenance. */
+export type HookSourceReturnedLocalState = Readonly<{
+  declaration: HookSourceRef;
+  declaredName: string;
+}>;
+
 export type HookSourceResolution = {
   /** True when the expression was an imported/local authored producer or its member. */
   matched: boolean;
@@ -100,6 +106,20 @@ export type HookSourceSummaryContext = {
   ): HookSourceResolution;
   /** Resolve an authored producer call and its captured result. */
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
+  /** Keep native Def ownership separate from ordinary source values. */
+  isNativeSetupDefinition(parameter: ts.ParameterDeclaration): boolean;
+  /**
+   * Follow a closed synchronous helper return without granting AsHook provenance.
+   * The optional argument resolver carries this caller's source State identity
+   * only; it never certifies the borrowed object's methods or State values.
+   */
+  resolveReturnedLocalState(
+    node: ts.CallExpression,
+    source: ts.SourceFile,
+    nativeDefinitions: ReadonlySet<ts.Node>,
+    ownerInvocation?: ts.CallExpression,
+    resolveStateArgument?: (argument: ts.Expression) => HookSourceState | null
+  ): HookSourceReturnedLocalState | null;
   /** Resolve a stable synchronous authored function without executing it. */
   resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
   /**
@@ -121,6 +141,16 @@ export type HookSourceSummaryContext = {
     specifier: string,
     helper: ts.FunctionLikeDeclaration
   ): boolean;
+  /**
+   * Observe a source's opaque imports for the supplied helpers in one bounded
+   * synchronous identity query. A null result keeps a caller's scalar override
+   * authoritative; the caller must use the existing scalar methods instead.
+   * Targets and physical identity are never retained across these queries.
+   */
+  resolveFunctionImportReferences?(
+    source: ts.SourceFile,
+    helpers: readonly ts.FunctionLikeDeclaration[]
+  ): ReadonlyMap<ts.FunctionLikeDeclaration, readonly ts.Node[]> | null;
   resolveStableSourceBinding(
     node: ts.Identifier
   ): ts.VariableDeclaration | ts.ParameterDeclaration | null;
@@ -142,9 +172,10 @@ export type HookSourceSummaryContext = {
    */
   isAuthoredSetup(node: ts.Node, source: ts.SourceFile): boolean;
   /**
-   * Classify a local function value whose every reference is a canonical Core
-   * setup registration. This closes the reference, not the setup's Rule reads
-   * or its runtime capabilities; ordinary calls and escaped values still fail.
+   * Classify a local setup whose references are canonical registrations or
+   * bounded first calls with a canonical setup's unchanged Def parameter.
+   * This closes references only; borrowed calls, escapes and unproved Rule
+   * reads remain unresolved, and no fresh Runtime capability is granted.
    */
   isClosedAuthoredSetupReference(node: ts.Node, source: ts.SourceFile): boolean;
   isCanonicalPrototypeSetupProperty(property: ts.ObjectLiteralElementLike): boolean;
@@ -724,6 +755,20 @@ function createHookSourceSummaryContextInternal(
   const producerCache = new Map<string, Producer | null>();
   const summaryCache = new Map<string, HookSourceValue>();
   const summaryStack = new Set<string>();
+  let returnedStateDefinitionFacts = new WeakMap<ts.Node, boolean>();
+  const withSynchronousSummaryQuery = <T>(query: () => T): T => {
+    // A native Def closure can depend on imported helpers. An unchanged entry
+    // AST does not pin their physical identity across public summary queries.
+    // Keep recursive proof reuse inside this query and restore an outer query
+    // after reentry, just as the module resolver does for path observations.
+    const previous = returnedStateDefinitionFacts;
+    returnedStateDefinitionFacts = new WeakMap();
+    try {
+      return moduleContext.withSynchronousIdentityQuery(query);
+    } finally {
+      returnedStateDefinitionFacts = previous;
+    }
+  };
   const providerStateCache = new Map<string, ReadonlyMap<string, ProviderStateProof> | null>();
   const canonicalFocusableCache = new Map<string, SymbolRef | null>();
   const dynamicImports = new WeakMap<ts.SourceFile, string[]>();
@@ -731,6 +776,7 @@ function createHookSourceSummaryContextInternal(
   const moduleForSource = (source: ts.SourceFile): Module => {
     const module = moduleContext.moduleForSource(source);
     const previous = registeredSources.get(module.file);
+    if (previous !== source) returnedStateDefinitionFacts = new WeakMap();
     if (previous && previous !== source) {
       producerCache.clear();
       summaryCache.clear();
@@ -1012,11 +1058,14 @@ function createHookSourceSummaryContextInternal(
    * A named body can be both a configured Core setup and an ordinary callable.
    * The configuration alone cannot grant Core's parameter capability to those
    * other calls. Without a call-specific capability frame, retain proof only
-   * when every local reference is a canonical setup configuration.
+   * when every local reference is a canonical setup configuration. Inventory
+   * reference closure may additionally admit a bounded first native call;
+   * capability callers retain the strict default below.
    */
   const hasOnlyAuthoredSetupReferences = (
     setup: ts.FunctionLikeDeclaration,
-    source: ts.SourceFile
+    source: ts.SourceFile,
+    allowFirstNativeSetupCall = false
   ): boolean => {
     const module = moduleForSource(source);
     const allowed = new Set<ts.Node>();
@@ -1091,6 +1140,72 @@ function createHookSourceSummaryContextInternal(
     };
     const names = new Set(bindings.map(({ name }) => name.text));
     const declarations = new Set(bindings.map(({ name }) => name));
+    const isFirstNativeSetupCall = (node: ts.Identifier): boolean => {
+      if (
+        !allowFirstNativeSetupCall ||
+        !ts.isFunctionDeclaration(setup) ||
+        !ts.isSourceFile(setup.parent) ||
+        setup.parameters.length !== 1 ||
+        setup.parameters.some(
+          (parameter) =>
+            !ts.isIdentifier(parameter.name) || parameter.initializer || parameter.dotDotDotToken
+        ) ||
+        hasDynamicRuleSource(source)
+      )
+        return false;
+      let reference: ts.Node = node;
+      while (reference.parent && unwrap(reference.parent) === node) reference = reference.parent;
+      const call = reference.parent;
+      if (
+        !ts.isCallExpression(call) ||
+        call.expression !== reference ||
+        call.questionDotToken ||
+        call.arguments.length !== 1
+      )
+        return false;
+      const argument = unwrap(call.arguments[0]);
+      if (!ts.isIdentifier(argument)) return false;
+      const owner = ts.findAncestor(call, isFunctionLike);
+      if (
+        !owner ||
+        owner === setup ||
+        !isFunctionLike(owner) ||
+        !owner.body ||
+        !ts.isBlock(owner.body) ||
+        owner.asteriskToken ||
+        owner.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+        owner.parameters.length !== 1 ||
+        !isAuthoredSetup(owner, source) ||
+        !hasOnlyAuthoredSetupReferences(owner, source)
+      )
+        return false;
+      // Before this first statement, no authored prefix has received or
+      // modified the owner's Def. Later or nested calls need their own proof.
+      const statement = owner.body.statements[0];
+      if (
+        !statement ||
+        !ts.isExpressionStatement(statement) ||
+        unwrap(statement.expression) !== call
+      )
+        return false;
+      const parameter = owner.parameters[0];
+      if (
+        !ts.isIdentifier(parameter.name) ||
+        parameter.initializer ||
+        parameter.dotDotDotToken ||
+        hasBindingWrite(parameter.name, module)
+      )
+        return false;
+      const expected = moduleContext.resolveReference(parameter.name, module);
+      const actual = moduleContext.resolveReference(argument, module);
+      return (
+        !!expected &&
+        !!actual &&
+        expected.module.source === source &&
+        actual.module.source === source &&
+        expected.declaration === actual.declaration
+      );
+    };
     let exclusive = true;
     const visit = (node: ts.Node): void => {
       if (!exclusive || ts.isTypeNode(node)) return;
@@ -1113,7 +1228,8 @@ function createHookSourceSummaryContextInternal(
         if (
           (parent.name !== node || ts.isShorthandPropertyAssignment(parent)) &&
           referencesSetupBinding(node) &&
-          !allowed.has(node)
+          !allowed.has(node) &&
+          !isFirstNativeSetupCall(node)
         ) {
           exclusive = false;
           return;
@@ -1333,6 +1449,1088 @@ function createHookSourceSummaryContextInternal(
     const returned = directReturnExpression(fn, module);
     if (!returned || !ts.isCallExpression(returned.expression)) return null;
     return { call: returned.expression, module: returned.module };
+  };
+
+  // This is an invocation proof for a prototype-owned State, not an AsHook
+  // capture. Keep the native Def capability separate from HookSourceValue so
+  // an ordinary helper never acquires a producer name or exported variant.
+  const bindingDeclaration = (node: ts.Node, module: Module): ts.Node | undefined => {
+    const declaration = moduleContext.resolveReference(unwrap(node), module)?.declaration;
+    return declaration && ts.isIdentifier(declaration) && ts.isParameter(declaration.parent)
+      ? declaration.parent
+      : declaration;
+  };
+  const outerValue = (node: ts.Node): ts.Node => {
+    let value = node;
+    while (value.parent && unwrap(value.parent) === node) value = value.parent;
+    return value;
+  };
+  const synchronousBody = (fn: ts.FunctionLikeDeclaration): boolean =>
+    !!fn.body &&
+    !fn.asteriskToken &&
+    !fn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+  const opaqueFunctionSyntax = (fn: ts.FunctionLikeDeclaration): boolean => {
+    let opaque = false;
+    const visit = (node: ts.Node): void => {
+      if (opaque || ts.isTypeNode(node)) return;
+      if (
+        node.kind === ts.SyntaxKind.ThisKeyword ||
+        node.kind === ts.SyntaxKind.SuperKeyword ||
+        ts.isWithStatement(node) ||
+        (ts.isIdentifier(node) && (node.text === 'arguments' || node.text === 'eval'))
+      ) {
+        opaque = true;
+        return;
+      }
+      ts.forEachChild(node, visit);
+    };
+    for (const parameter of fn.parameters) visit(parameter);
+    if (fn.body) visit(fn.body);
+    return opaque;
+  };
+  const staticMemberCall = (
+    reference: ts.Node
+  ): { call: ts.CallExpression; path: string[] } | null => {
+    let value = outerValue(reference);
+    const path: string[] = [];
+    while (
+      value.parent &&
+      (ts.isPropertyAccessExpression(value.parent) || ts.isElementAccessExpression(value.parent)) &&
+      value.parent.expression === value
+    ) {
+      const member = value.parent;
+      const name = memberName(member);
+      if (
+        member.questionDotToken ||
+        name === null ||
+        ['call', 'apply', 'bind', 'constructor', 'prototype', '__proto__'].includes(name)
+      )
+        return null;
+      path.push(name);
+      value = outerValue(member);
+    }
+    const call = value.parent;
+    return path.length > 0 &&
+      call &&
+      ts.isCallExpression(call) &&
+      call.expression === value &&
+      !call.questionDotToken &&
+      !call.arguments.some(ts.isSpreadElement)
+      ? { call, path }
+      : null;
+  };
+  const nativeEventRegistration = (call: ts.CallExpression, path: readonly string[]): boolean =>
+    path.length === 2 &&
+    path[0] === 'event' &&
+    (path[1] === 'on' || path[1] === 'onGlobal') &&
+    !call.questionDotToken &&
+    call.arguments.length === 2 &&
+    !call.arguments.some(ts.isSpreadElement) &&
+    isStringValue(unwrap(call.arguments[0]!));
+
+  // Only literal data can enter the Core family constructor in this slice.
+  // Getters, spreads, computed keys and borrowed objects could execute authored
+  // code while the constructor copies the declaration, so remain opaque.
+  const nativeObservationLiteral = (node: ts.Node, depth = 0): boolean => {
+    if (depth >= 16) return false;
+    const value = unwrap(node);
+    if (
+      isStringValue(value) ||
+      ts.isNumericLiteral(value) ||
+      value.kind === ts.SyntaxKind.TrueKeyword ||
+      value.kind === ts.SyntaxKind.FalseKeyword ||
+      value.kind === ts.SyntaxKind.NullKeyword
+    )
+      return true;
+    if (ts.isPrefixUnaryExpression(value))
+      return (
+        (value.operator === ts.SyntaxKind.PlusToken ||
+          value.operator === ts.SyntaxKind.MinusToken) &&
+        ts.isNumericLiteral(value.operand)
+      );
+    if (ts.isArrayLiteralExpression(value))
+      return value.elements.every((element) => nativeObservationLiteral(element, depth + 1));
+    if (!ts.isObjectLiteralExpression(value)) return false;
+    const names = new Set<string>();
+    return value.properties.every((property) => {
+      if (!ts.isPropertyAssignment(property) || ts.isComputedPropertyName(property.name))
+        return false;
+      const name = propertyName(property.name);
+      if (name === null || name === '__proto__' || names.has(name)) return false;
+      names.add(name);
+      return nativeObservationLiteral(property.initializer, depth + 1);
+    });
+  };
+  const nativeObservationIdentity = (
+    node: ts.Node,
+    factoryName: 'createContextKey' | 'createAnatomyFamily',
+    module: Module
+  ): boolean => {
+    const value = unwrap(node);
+    if (!ts.isIdentifier(value)) return false;
+    const binding = moduleContext.resolveReference(value, module);
+    const declaration = binding?.declaration;
+    if (
+      !binding ||
+      !declaration ||
+      !ts.isVariableDeclaration(declaration) ||
+      !ts.isIdentifier(declaration.name) ||
+      !stableVariable(declaration, binding.module) ||
+      !declaration.initializer
+    )
+      return false;
+    const initializer = unwrap(declaration.initializer);
+    if (
+      !ts.isCallExpression(initializer) ||
+      initializer.questionDotToken ||
+      initializer.arguments.some(ts.isSpreadElement) ||
+      initializer.arguments.length !== (factoryName === 'createContextKey' ? 1 : 2) ||
+      !isStringValue(unwrap(initializer.arguments[0]!))
+    )
+      return false;
+    const factory = unwrap(initializer.expression);
+    if (!ts.isIdentifier(factory) || hasBindingWrite(factory, binding.module)) return false;
+    const imported = moduleContext.resolveReference(factory, binding.module)?.declaration;
+    if (!imported || !ts.isImportSpecifier(imported) || imported.isTypeOnly) return false;
+    const clause = imported.parent.parent;
+    const statement = clause.parent;
+    if (
+      !ts.isImportClause(clause) ||
+      clause.isTypeOnly ||
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== '@proto.ui/core' ||
+      (imported.propertyName ?? imported.name).text !== factoryName
+    )
+      return false;
+    // These actual Core constructors freeze the identity they return. A const
+    // alias, object member, foreign factory or unknown metadata proves none of
+    // this; module resolution must reach the original lexical declaration.
+    return (
+      factoryName === 'createContextKey' ||
+      (ts.isObjectLiteralExpression(unwrap(initializer.arguments[1]!)) &&
+        nativeObservationLiteral(initializer.arguments[1]!))
+    );
+  };
+  const nativeObservationRegistration = (
+    call: ts.CallExpression,
+    path: readonly string[],
+    module: Module
+  ): { callbackIndex: number; maxParameters: number } | null => {
+    if (path.length !== 2 || call.questionDotToken || call.arguments.some(ts.isSpreadElement))
+      return null;
+    if (path[0] === 'props' && path[1] === 'watch' && call.arguments.length === 2) {
+      const keys = unwrap(call.arguments[0]!);
+      return ts.isArrayLiteralExpression(keys) &&
+        keys.elements.every((key) => isStringValue(unwrap(key)))
+        ? { callbackIndex: 1, maxParameters: 4 }
+        : null;
+    }
+    if (
+      path[0] === 'context' &&
+      path[1] === 'subscribe' &&
+      call.arguments.length === 2 &&
+      nativeObservationIdentity(call.arguments[0]!, 'createContextKey', module)
+    )
+      return { callbackIndex: 1, maxParameters: 3 };
+    if (
+      path[0] === 'anatomy' &&
+      path[1] === 'subscribeParts' &&
+      call.arguments.length === 3 &&
+      nativeObservationIdentity(call.arguments[0]!, 'createAnatomyFamily', module) &&
+      isStringValue(unwrap(call.arguments[1]!))
+    )
+      return { callbackIndex: 2, maxParameters: 2 };
+    return null;
+  };
+  const knownReturnedStateDefinitionCall = (
+    path: readonly string[],
+    call: ts.CallExpression,
+    module: Module
+  ): boolean => {
+    const operation = path.join('.');
+    // This bounded slice knows these native operations. An unfamiliar facade
+    // call may execute authored code with its receiver, so it remains opaque.
+    return (
+      operation === 'rule' ||
+      operation === 'feedback.style.use' ||
+      operation === 'expose.state' ||
+      // The native Def wrapper stores argument 1 for later Event dispatch.
+      // This slice admits no dynamic event name or third options argument.
+      nativeEventRegistration(call, path) ||
+      nativeObservationRegistration(call, path, module) !== null ||
+      operation === 'context.provide' ||
+      operation === 'context.trySubscribe' ||
+      operation === 'context.trySubscribeAncestor' ||
+      (path.length === 2 &&
+        ((path[0] === 'state' &&
+          ['bool', 'enum', 'string', 'numberRange', 'numberList', 'numberDiscrete'].includes(
+            path[1]!
+          )) ||
+          (path[0] === 'props' && ['define', 'setDefaults', 'watchRaw'].includes(path[1]!)) ||
+          (path[0] === 'lifecycle' &&
+            ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onBeforeDispose'].includes(
+              path[1]!
+            ))))
+    );
+  };
+  const closedReturnedStateDefinition = (
+    declaration: ts.Node,
+    module: Module,
+    active = new Set<ts.Node>()
+  ): boolean => {
+    const cached = returnedStateDefinitionFacts.get(declaration);
+    if (cached !== undefined) return cached;
+    if (
+      active.has(declaration) ||
+      active.size >= 32 ||
+      (!ts.isParameter(declaration) && !ts.isVariableDeclaration(declaration)) ||
+      !ts.isIdentifier(declaration.name) ||
+      (ts.isParameter(declaration) && (declaration.initializer || declaration.dotDotDotToken)) ||
+      (ts.isVariableDeclaration(declaration) && !stableVariable(declaration, module)) ||
+      hasBindingWrite(declaration.name, module)
+    )
+      return false;
+    const owner = ts.findAncestor(declaration, isFunctionLike);
+    if (!owner || !synchronousBody(owner) || opaqueFunctionSyntax(owner)) return false;
+    const next = new Set(active).add(declaration);
+    let closed = true;
+    const visit = (node: ts.Node): void => {
+      if (!closed || ts.isTypeNode(node)) return;
+      if (isValueIdentifier(node) && bindingDeclaration(node, module) === declaration) {
+        if (ts.findAncestor(node, isFunctionLike) !== owner) {
+          closed = false;
+          return;
+        }
+        const value = outerValue(node);
+        const parent = value.parent;
+        if (
+          ts.isVariableDeclaration(parent) &&
+          parent.initializer === value &&
+          closedReturnedStateDefinition(parent, module, next)
+        )
+          return;
+        // A known native operation does not give its result Def/State
+        // provenance. Bare members, writes, method aliases and unfamiliar
+        // operations remain opaque; only the State constructors are read below.
+        const operation = staticMemberCall(node);
+        if (operation && knownReturnedStateDefinitionCall(operation.path, operation.call, module))
+          return;
+        if (
+          ts.isCallExpression(parent) &&
+          !parent.questionDotToken &&
+          ts.isIdentifier(unwrap(parent.expression)) &&
+          !parent.arguments.some(ts.isSpreadElement)
+        ) {
+          const index = parent.arguments.findIndex((argument) => argument === value);
+          const helper = functionFor(parent.expression, module);
+          const parameter = index >= 0 ? helper?.fn.parameters[index] : undefined;
+          if (
+            helper &&
+            parameter &&
+            (ts.isFunctionDeclaration(helper.fn) ||
+              ts.isFunctionExpression(helper.fn) ||
+              ts.isArrowFunction(helper.fn)) &&
+            !ts.findAncestor(helper.fn.parent, isFunctionLike) &&
+            closedReturnedStateDefinition(parameter, helper.module, next)
+          )
+            return;
+        }
+        closed = false;
+        return;
+      }
+      ts.forEachChild(node, visit);
+    };
+    // Parameter defaults run before the body and can read an earlier Def
+    // parameter (or alias it through arguments). They belong to the same
+    // capability boundary even when the queried return is in the body.
+    for (const parameter of owner.parameters) visit(parameter);
+    visit(owner.body!);
+    returnedStateDefinitionFacts.set(declaration, closed);
+    return closed;
+  };
+  const isNativeSetupDefinition = (parameter: ts.ParameterDeclaration): boolean => {
+    const source = parameter.getSourceFile();
+    const owner = parameter.parent;
+    return (
+      isFunctionLike(owner) &&
+      owner.parameters[0] === parameter &&
+      isAuthoredSetup(owner, source) &&
+      hasOnlyAuthoredSetupReferences(owner, source) &&
+      closedReturnedStateDefinition(parameter, moduleForSource(source))
+    );
+  };
+  const resolveReturnedLocalState = (
+    call: ts.CallExpression,
+    source: ts.SourceFile,
+    nativeDefinitions: ReadonlySet<ts.Node>,
+    ownerInvocation?: ts.CallExpression,
+    resolveStateArgument?: (argument: ts.Expression) => HookSourceState | null
+  ): HookSourceReturnedLocalState | null => {
+    if (!nativeDefinitions.size) return null;
+    const module = moduleForSource(source);
+    // invoke rejects these same call shapes before resolving any helper. Keep
+    // source registration, but avoid proving the caller's entire reference set
+    // for a call that cannot reach the returned-State constructor path.
+    if (
+      call.questionDotToken ||
+      call.arguments.some(ts.isSpreadElement) ||
+      !ts.isIdentifier(unwrap(call.expression))
+    )
+      return null;
+    const nativeReference = (
+      expression: ts.Node,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>,
+      active = new Set<ts.Node>()
+    ): boolean => {
+      const value = unwrap(expression);
+      if (!ts.isIdentifier(value)) return false;
+      const declaration = bindingDeclaration(value, module);
+      if (!declaration || active.has(declaration) || active.size >= 32) return false;
+      if (definitions.has(declaration)) return closedReturnedStateDefinition(declaration, module);
+      return (
+        ts.isVariableDeclaration(declaration) &&
+        !!declaration.initializer &&
+        stableVariable(declaration, module) &&
+        closedReturnedStateDefinition(declaration, module) &&
+        nativeReference(
+          declaration.initializer,
+          module,
+          definitions,
+          new Set(active).add(declaration)
+        )
+      );
+    };
+    const closedWhenBuilders = new WeakMap<ts.FunctionLikeDeclaration, boolean>();
+    const closedWhenBuilder = (fn: ts.FunctionLikeDeclaration, module: Module): boolean => {
+      const cached = closedWhenBuilders.get(fn);
+      if (cached !== undefined) return cached;
+      const parameter = fn.parameters[0];
+      if (
+        !synchronousBody(fn) ||
+        opaqueFunctionSyntax(fn) ||
+        fn.parameters.length !== 1 ||
+        !parameter ||
+        !ts.isIdentifier(parameter.name) ||
+        parameter.initializer ||
+        parameter.dotDotDotToken ||
+        hasBindingWrite(parameter.name, module)
+      )
+        return false;
+      let closed = true;
+      const visit = (node: ts.Node): void => {
+        if (!closed || ts.isTypeNode(node)) return;
+        if (isValueIdentifier(node) && bindingDeclaration(node, module) === parameter) {
+          const operation = staticMemberCall(node);
+          closed =
+            ts.findAncestor(node, isFunctionLike) === fn &&
+            !!operation &&
+            operation.path.length === 1 &&
+            ['state', 'prop', 'meta', 'all', 'any', 'not'].includes(operation.path[0]!);
+          if (!closed) return;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(fn.body!);
+      closedWhenBuilders.set(fn, closed);
+      return closed;
+    };
+    const nativeWhenStateRead = (
+      reference: ts.Node,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>
+    ): boolean => {
+      const value = outerValue(reference);
+      const call = value.parent;
+      if (
+        !ts.isCallExpression(call) ||
+        call.questionDotToken ||
+        call.arguments.length !== 1 ||
+        call.arguments[0] !== value ||
+        memberName(call.expression) !== 'state'
+      )
+        return false;
+      const builder = memberOwner(call.expression);
+      const parameter = builder && bindingDeclaration(builder, module);
+      if (!parameter || !ts.isParameter(parameter)) return false;
+      const fn = parameter.parent;
+      if (
+        (!ts.isArrowFunction(fn) && !ts.isFunctionExpression(fn)) ||
+        (ts.isFunctionExpression(fn) && fn.name) ||
+        !closedWhenBuilder(fn, module)
+      )
+        return false;
+      const callback = outerValue(fn);
+      const property = callback.parent;
+      if (
+        !ts.isPropertyAssignment(property) ||
+        property.initializer !== callback ||
+        propertyName(property.name) !== 'when' ||
+        !ts.isObjectLiteralExpression(property.parent) ||
+        configProperty(property.parent, 'when') !== property
+      )
+        return false;
+      const spec = outerValue(property.parent);
+      const rule = spec.parent;
+      if (
+        !ts.isCallExpression(rule) ||
+        rule.questionDotToken ||
+        rule.arguments.length !== 1 ||
+        rule.arguments[0] !== spec ||
+        memberName(rule.expression) !== 'rule'
+      )
+        return false;
+      const receiver = memberOwner(rule.expression);
+      return !!receiver && nativeReference(receiver, module, definitions);
+    };
+    const nativeRendererStateRead = (
+      reference: ts.Node,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>
+    ): boolean => {
+      const operation = staticMemberCall(reference);
+      const renderer = ts.findAncestor(reference, isFunctionLike);
+      if (
+        !operation ||
+        operation.path.length !== 1 ||
+        operation.path[0] !== 'get' ||
+        operation.call.arguments.length !== 0 ||
+        !renderer ||
+        (!ts.isArrowFunction(renderer) && !ts.isFunctionExpression(renderer)) ||
+        (ts.isFunctionExpression(renderer) && !!renderer.name) ||
+        !synchronousBody(renderer) ||
+        opaqueFunctionSyntax(renderer) ||
+        renderer.parameters.length !== 1 ||
+        !ts.isIdentifier(renderer.parameters[0]!.name) ||
+        renderer.parameters[0]!.initializer ||
+        renderer.parameters[0]!.dotDotDotToken ||
+        !owner.body ||
+        !ts.isBlock(owner.body) ||
+        !isAuthoredSetup(owner, owner.getSourceFile()) ||
+        !hasOnlyAuthoredSetupReferences(owner, owner.getSourceFile())
+      )
+        return false;
+      const parameter = owner.parameters[0];
+      const returned = directReturnExpression(owner, module);
+      const last = owner.body.statements.at(-1);
+      // Only Core's directly returned renderer may retain this private handle.
+      // A callback given to an unknown operation still fails the complete use
+      // proof, as do aliases, method writes and all nonzero-argument calls.
+      return (
+        !!parameter &&
+        nativeReference(parameter.name, module, definitions) &&
+        !!returned &&
+        returned.expression === renderer &&
+        !!last &&
+        ts.isReturnStatement(last) &&
+        !!last.expression &&
+        unwrap(last.expression) === renderer
+      );
+    };
+    const discardedOwnerStateReturn = (
+      reference: ts.Node,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module
+    ): boolean => {
+      if (
+        !ownerInvocation ||
+        ownerInvocation.questionDotToken ||
+        ownerInvocation.arguments.some(ts.isSpreadElement) ||
+        !ts.isIdentifier(unwrap(ownerInvocation.expression)) ||
+        !owner.body ||
+        !ts.isBlock(owner.body)
+      )
+        return false;
+      const result = outerValue(ownerInvocation);
+      if (!ts.isExpressionStatement(result.parent) || result.parent.expression !== result)
+        return false;
+      const callee = functionFor(
+        ownerInvocation.expression,
+        moduleForSource(ownerInvocation.getSourceFile())
+      );
+      if (callee?.fn !== owner) return false;
+      const returned = directReturnExpression(owner, module);
+      const last = owner.body.statements.at(-1);
+      const value = outerValue(reference);
+      // The evidence is this exact replay call, never another caller of the
+      // same exported helper. Captured, forwarded or chained results stay
+      // unresolved even if another activation discards its own fresh State.
+      return (
+        !!returned &&
+        returned.expression === unwrap(value) &&
+        !!last &&
+        ts.isReturnStatement(last) &&
+        last.expression === value &&
+        ts.findAncestor(value, isFunctionLike) === owner
+      );
+    };
+    const closedCallerState = (
+      declaration: ts.VariableDeclaration,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>,
+      active = new Set<ts.Node>()
+    ): boolean => {
+      if (
+        !ts.isIdentifier(declaration.name) ||
+        !stableVariable(declaration, module) ||
+        active.has(declaration) ||
+        active.size >= 32
+      )
+        return false;
+      const owner = ts.findAncestor(declaration, isFunctionLike);
+      if (!owner?.body || !synchronousBody(owner) || opaqueFunctionSyntax(owner)) return false;
+      const next = new Set(active).add(declaration);
+      const nativeCallbackRelay = (
+        reference: ts.Identifier,
+        callback: ts.FunctionLikeDeclaration
+      ): boolean => {
+        const value = outerValue(reference);
+        const relay = value.parent;
+        const wrapper = ts.findAncestor(reference, isFunctionLike);
+        if (
+          !ts.isCallExpression(relay) ||
+          relay.expression !== value ||
+          relay.questionDotToken ||
+          relay.arguments.length !== callback.parameters.length ||
+          !ts.isExpressionStatement(outerValue(relay).parent) ||
+          !wrapper ||
+          wrapper === callback ||
+          ts.findAncestor(wrapper.parent, isFunctionLike) !== owner ||
+          !relay.arguments.every((argument, index) => {
+            const supplied = unwrap(argument);
+            return (
+              ts.isIdentifier(supplied) &&
+              bindingDeclaration(supplied, module) === wrapper.parameters[index] &&
+              !hasBindingWrite(supplied, module)
+            );
+          })
+        )
+          return false;
+        // Admit one private, discarded call that forwards the wrapper's own
+        // native callback parameters. Both functions still need complete use
+        // proofs; this wrapper cannot itself rely on another relay. This closes
+        // State identity, not callback timing, purity or a current State value.
+        return registeredCallback(wrapper, owner, module, definitions, true);
+      };
+      let closed = true;
+      let read = false;
+      const visit = (node: ts.Node): void => {
+        if (!closed || ts.isTypeNode(node)) return;
+        if (isValueIdentifier(node) && bindingDeclaration(node, module) === declaration) {
+          const value = outerValue(node);
+          if (
+            ts.isVariableDeclaration(value.parent) &&
+            value.parent.initializer === value &&
+            ts.findAncestor(value.parent, isFunctionLike) === owner &&
+            closedCallerState(value.parent, module, definitions, next)
+          ) {
+            read = true;
+            return;
+          }
+          if (nativeWhenStateRead(node, module, definitions)) {
+            read = true;
+            return;
+          }
+          if (
+            nativeRendererStateRead(node, owner, module, definitions) ||
+            discardedOwnerStateReturn(node, owner, module) ||
+            capturedOwnerStateReturn(node, owner, module)
+          ) {
+            read = true;
+            return;
+          }
+          const operation = staticMemberCall(node);
+          const callback = ts.findAncestor(node, isFunctionLike);
+          if (
+            operation &&
+            operation.path.length === 1 &&
+            ((operation.path[0] === 'get' && operation.call.arguments.length === 0) ||
+              (operation.path[0] === 'set' &&
+                operation.call.arguments.length >= 1 &&
+                operation.call.arguments.length <= 2) ||
+              (operation.path[0] === 'setDefault' && operation.call.arguments.length === 1)) &&
+            callback &&
+            callback !== owner &&
+            ts.findAncestor(callback.parent, isFunctionLike) === owner &&
+            registeredCallback(callback, owner, module, definitions, true, nativeCallbackRelay)
+          ) {
+            // The complete private handle use set stays inside this owner and
+            // exact native registrations. This proves identity only, not the
+            // current State value, callback phase validity or selector names.
+            read = true;
+            return;
+          }
+          // In particular, a helper may expose the handle without a lexical
+          // expose call here. No argument, return, container or callback escape
+          // can certify this result as an internal State.
+          closed = false;
+          return;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(owner.body);
+      return closed && read;
+    };
+
+    const capturedOwnerStateReturn = (
+      reference: ts.Node,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module
+    ): boolean => {
+      if (
+        !ownerInvocation ||
+        ownerInvocation.questionDotToken ||
+        ownerInvocation.arguments.some(ts.isSpreadElement) ||
+        !ts.isIdentifier(unwrap(ownerInvocation.expression)) ||
+        !owner.body ||
+        !ts.isBlock(owner.body)
+      )
+        return false;
+      const result = outerValue(ownerInvocation);
+      const capture = result.parent;
+      if (!ts.isVariableDeclaration(capture) || capture.initializer !== result) return false;
+      const caller = ts.findAncestor(capture, isFunctionLike);
+      const native = caller?.parameters[0];
+      if (!caller || !native || !isNativeSetupDefinition(native)) return false;
+      const callerModule = moduleForSource(ownerInvocation.getSourceFile());
+      if (functionFor(ownerInvocation.expression, callerModule)?.fn !== owner) return false;
+      const returned = directReturnExpression(owner, module);
+      const last = owner.body.statements.at(-1);
+      const value = outerValue(reference);
+      // This exact replay may return its private handle to one canonical
+      // setup's stable const. Close every use of that captured identity there;
+      // another caller, a forwarded result or an exposure supplies no proof.
+      return (
+        !!returned &&
+        returned.expression === unwrap(value) &&
+        !!last &&
+        ts.isReturnStatement(last) &&
+        last.expression === value &&
+        ts.findAncestor(value, isFunctionLike) === owner &&
+        closedCallerState(capture, callerModule, new Set([native]))
+      );
+    };
+
+    const closedCallbackSyntax = (fn: ts.FunctionLikeDeclaration, module: Module): boolean => {
+      if (!synchronousBody(fn) || opaqueFunctionSyntax(fn)) return false;
+      // A named function expression has a second, private self binding. The
+      // const/inline reference check below cannot close uses of that binding.
+      // Compare lexical identity so a parameter or local shadow stays distinct.
+      if (ts.isFunctionExpression(fn) && fn.name) {
+        const self = fn.name;
+        let used = false;
+        const visit = (node: ts.Node): void => {
+          if (used || ts.isTypeNode(node)) return;
+          if (isValueIdentifier(node) && bindingDeclaration(node, module) === self) {
+            used = true;
+            return;
+          }
+          ts.forEachChild(node, visit);
+        };
+        for (const parameter of fn.parameters) visit(parameter);
+        visit(fn.body!);
+        if (used) return false;
+      }
+      return true;
+    };
+    const registeredCallback = (
+      fn: ts.FunctionLikeDeclaration,
+      owner: ts.FunctionLikeDeclaration,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>,
+      requireExactSlot = false,
+      relayCall?: (reference: ts.Identifier, callback: ts.FunctionLikeDeclaration) => boolean
+    ): boolean => {
+      if (!closedCallbackSyntax(fn, module)) return false;
+      const admitted = (reference: ts.Node): boolean => {
+        const value = outerValue(reference);
+        const call = value.parent;
+        if (
+          !ts.isCallExpression(call) ||
+          call.questionDotToken ||
+          call.arguments.some(ts.isSpreadElement) ||
+          !call.arguments.some((argument) => argument === value)
+        )
+          return false;
+        let receiver: ts.Node = unwrap(call.expression);
+        const path: string[] = [];
+        while (ts.isPropertyAccessExpression(receiver) || ts.isElementAccessExpression(receiver)) {
+          const name = memberName(receiver);
+          if (receiver.questionDotToken || name === null) return false;
+          path.unshift(name);
+          receiver = unwrap(receiver.expression);
+        }
+        let registration = nativeEventRegistration(call, path)
+          ? { callbackIndex: 1, maxParameters: 2 }
+          : nativeObservationRegistration(call, path, module);
+        // The new caller-use proof also needs exact slots for already supported
+        // registrations. Preserve the older helper proof's admitted surface.
+        if (!registration && requireExactSlot) {
+          if (
+            path.length === 2 &&
+            path[0] === 'context' &&
+            ['trySubscribe', 'trySubscribeAncestor'].includes(path[1]!) &&
+            call.arguments.length === 2 &&
+            nativeObservationIdentity(call.arguments[0]!, 'createContextKey', module)
+          )
+            registration = { callbackIndex: 1, maxParameters: 3 };
+          if (path.join('.') === 'props.watchRaw' && call.arguments.length === 2) {
+            const keys = unwrap(call.arguments[0]!);
+            if (
+              ts.isArrayLiteralExpression(keys) &&
+              keys.elements.every((key) => isStringValue(unwrap(key)))
+            )
+              registration = { callbackIndex: 1, maxParameters: 4 };
+          }
+          if (
+            path.length === 2 &&
+            path[0] === 'lifecycle' &&
+            ['onCreated', 'onMounted', 'onUpdated', 'onUnmounted', 'onBeforeDispose'].includes(
+              path[1]!
+            ) &&
+            call.arguments.length === 1
+          )
+            registration = { callbackIndex: 0, maxParameters: 1 };
+        }
+        return (
+          nativeReference(receiver, module, definitions) &&
+          ((registration &&
+            call.arguments[registration.callbackIndex] === value &&
+            fn.parameters.length <= registration.maxParameters &&
+            fn.parameters.every(
+              (parameter) =>
+                ts.isIdentifier(parameter.name) &&
+                !parameter.initializer &&
+                !parameter.dotDotDotToken
+            )) ||
+            (!requireExactSlot &&
+              (path.join('.') === 'context.trySubscribe' ||
+                path.join('.') === 'context.trySubscribeAncestor' ||
+                path.join('.') === 'props.watchRaw' ||
+                (path.length === 2 &&
+                  path[0] === 'lifecycle' &&
+                  [
+                    'onCreated',
+                    'onMounted',
+                    'onUpdated',
+                    'onUnmounted',
+                    'onBeforeDispose',
+                  ].includes(path[1]!)))))
+        );
+      };
+      const value = outerValue(fn);
+      if (!ts.isVariableDeclaration(value.parent)) return admitted(fn);
+      const declaration = value.parent;
+      if (
+        declaration.initializer !== value ||
+        !ts.isIdentifier(declaration.name) ||
+        !stableVariable(declaration, module)
+      )
+        return false;
+      let closed = true;
+      let used = false;
+      const visit = (node: ts.Node): void => {
+        if (!closed || ts.isTypeNode(node)) return;
+        if (isValueIdentifier(node) && bindingDeclaration(node, module) === declaration) {
+          const registration = ts.findAncestor(node, isFunctionLike) === owner && admitted(node);
+          used ||= registration;
+          closed = registration || !!relayCall?.(node, fn);
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(owner.body!);
+      return closed && used;
+    };
+    const invoke = (
+      invocation: ts.CallExpression,
+      module: Module,
+      definitions: ReadonlySet<ts.Node>,
+      active: ReadonlySet<ts.FunctionLikeDeclaration>
+    ): HookSourceReturnedLocalState | null => {
+      if (
+        invocation.questionDotToken ||
+        invocation.arguments.some(ts.isSpreadElement) ||
+        !ts.isIdentifier(unwrap(invocation.expression)) ||
+        active.size >= 32
+      )
+        return null;
+      const helper = functionFor(invocation.expression, module);
+      if (
+        !helper ||
+        (!ts.isFunctionDeclaration(helper.fn) &&
+          !ts.isFunctionExpression(helper.fn) &&
+          !ts.isArrowFunction(helper.fn)) ||
+        !synchronousBody(helper.fn) ||
+        active.has(helper.fn) ||
+        ts.findAncestor(helper.fn.parent, isFunctionLike) ||
+        opaqueFunctionSyntax(helper.fn)
+      )
+        return null;
+      const localDefinitions = new Set<ts.Node>();
+      for (const [index, parameter] of helper.fn.parameters.entries()) {
+        const argument = invocation.arguments[index];
+        if (argument && nativeReference(argument, module, definitions)) {
+          if (!closedReturnedStateDefinition(parameter, helper.module)) return null;
+          localDefinitions.add(parameter);
+        }
+      }
+      if (!localDefinitions.size) return null;
+      const body = helper.fn.body!;
+      const returned = directReturnExpression(helper.fn, helper.module);
+      if (!returned) return null;
+      if (ts.isBlock(body)) {
+        const last = body.statements.at(-1);
+        if (
+          !last ||
+          !ts.isReturnStatement(last) ||
+          !last.expression ||
+          unwrap(last.expression) !== returned.expression
+        )
+          return null;
+      }
+      const next = new Set(active).add(helper.fn);
+      const simpleArgument = (node: ts.Node): boolean => {
+        const value = unwrap(node);
+        return (
+          ts.isIdentifier(value) ||
+          isStringValue(value) ||
+          ts.isNumericLiteral(value) ||
+          [
+            ts.SyntaxKind.TrueKeyword,
+            ts.SyntaxKind.FalseKeyword,
+            ts.SyntaxKind.NullKeyword,
+          ].includes(value.kind) ||
+          ((ts.isPropertyAccessExpression(value) || ts.isElementAccessExpression(value)) &&
+            !value.questionDotToken &&
+            memberName(value) !== null &&
+            simpleArgument(value.expression))
+        );
+      };
+      const simpleWatchCallback = (expression: ts.Node): ts.FunctionLikeDeclaration | null => {
+        const fn = unwrap(expression);
+        return (ts.isArrowFunction(fn) || ts.isFunctionExpression(fn)) &&
+          ts.findAncestor(fn.parent, isFunctionLike) === helper.fn &&
+          closedCallbackSyntax(fn, helper.module) &&
+          fn.parameters.length <= 2 &&
+          fn.parameters.every(
+            (parameter) =>
+              ts.isIdentifier(parameter.name) && !parameter.initializer && !parameter.dotDotDotToken
+          )
+          ? fn
+          : null;
+      };
+      const receiverFacts = new Map<ts.ParameterDeclaration, boolean>();
+      const closedBorrowedReceiver = (parameter: ts.ParameterDeclaration): boolean => {
+        const cached = receiverFacts.get(parameter);
+        if (cached !== undefined) return cached;
+        const index = helper.fn.parameters.indexOf(parameter);
+        const argument = invocation.arguments[index];
+        // The caller supplies source identity for this exact replay only. A
+        // State declaration does not prove that its writable watch method is
+        // native, or say anything about callback timing or current values.
+        if (
+          invocation !== call ||
+          !resolveStateArgument ||
+          !argument ||
+          helper.fn.parameters.length !== invocation.arguments.length ||
+          !invocation.arguments.every(simpleArgument) ||
+          !ts.isIdentifier(parameter.name) ||
+          parameter.initializer ||
+          parameter.dotDotDotToken ||
+          hasBindingWrite(parameter.name, helper.module) ||
+          !resolveStateArgument(argument)
+        )
+          return false;
+        let closed = true;
+        const visit = (node: ts.Node): void => {
+          if (!closed || ts.isTypeNode(node)) return;
+          if (isValueIdentifier(node) && bindingDeclaration(node, helper.module) === parameter) {
+            const value = outerValue(node);
+            const parent = value.parent;
+            if (
+              ts.isBinaryExpression(parent) &&
+              ts.findAncestor(parent, isFunctionLike) === helper.fn &&
+              ((parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken &&
+                parent.left === value) ||
+                (parent.operatorToken.kind === ts.SyntaxKind.InKeyword &&
+                  parent.right === value &&
+                  isStringValue(unwrap(parent.left)) &&
+                  (unwrap(parent.left) as ts.StringLiteralLike).text === 'watch'))
+            )
+              return;
+            if (
+              (ts.isPropertyAccessExpression(parent) || ts.isElementAccessExpression(parent)) &&
+              parent.expression === value
+            ) {
+              const operation = outerValue(parent).parent;
+              if (
+                ts.isCallExpression(operation) &&
+                operation.expression === outerValue(parent) &&
+                !operation.questionDotToken
+              ) {
+                if (memberName(parent) === 'get' && operation.arguments.length === 0) return;
+                if (
+                  memberName(parent) === 'watch' &&
+                  !parent.questionDotToken &&
+                  operation.arguments.length === 1 &&
+                  ts.findAncestor(operation, isFunctionLike) === helper.fn &&
+                  simpleWatchCallback(operation.arguments[0]!)
+                )
+                  return;
+              }
+            }
+            closed = false;
+            return;
+          }
+          ts.forEachChild(node, visit);
+        };
+        visit(body);
+        receiverFacts.set(parameter, closed);
+        return closed;
+      };
+      const borrowedWatchRelay = (
+        reference: ts.Identifier,
+        callback: ts.FunctionLikeDeclaration
+      ): boolean => {
+        const value = outerValue(reference);
+        const relay = value.parent;
+        const wrapper = ts.findAncestor(reference, isFunctionLike);
+        if (
+          callback.parameters.length !== 0 ||
+          !ts.isCallExpression(relay) ||
+          relay.expression !== value ||
+          relay.questionDotToken ||
+          relay.arguments.length !== 0 ||
+          !ts.isExpressionStatement(outerValue(relay).parent) ||
+          !wrapper ||
+          simpleWatchCallback(wrapper) !== wrapper
+        )
+          return false;
+        const supplied = outerValue(wrapper);
+        const registration = supplied.parent;
+        if (
+          !ts.isCallExpression(registration) ||
+          registration.questionDotToken ||
+          registration.arguments.length !== 1 ||
+          registration.arguments[0] !== supplied ||
+          memberName(registration.expression) !== 'watch'
+        )
+          return false;
+        const receiver = memberOwner(registration.expression);
+        const parameter = receiver && bindingDeclaration(receiver, helper.module);
+        // Only a direct, discarded zero-argument call crosses this boundary.
+        // The private callback still has a native registration and every one
+        // of its other references is closed. Neither function nor State
+        // identity can be returned, stored, aliased or handed to the receiver.
+        return !!parameter && ts.isParameter(parameter) && closedBorrowedReceiver(parameter);
+      };
+      const closedState = (declaration: ts.VariableDeclaration, seen: Set<ts.Node>): boolean => {
+        if (
+          !ts.isIdentifier(declaration.name) ||
+          !stableVariable(declaration, helper.module) ||
+          seen.has(declaration) ||
+          seen.size >= 32
+        )
+          return false;
+        const aliases = new Set(seen).add(declaration);
+        let closed = true;
+        const visit = (node: ts.Node): void => {
+          if (!closed || ts.isTypeNode(node)) return;
+          if (isValueIdentifier(node) && bindingDeclaration(node, helper.module) === declaration) {
+            const value = outerValue(node);
+            if (unwrap(value) === returned.expression) return;
+            if (nativeWhenStateRead(node, helper.module, localDefinitions)) return;
+            if (
+              ts.isVariableDeclaration(value.parent) &&
+              value.parent.initializer === value &&
+              closedState(value.parent, aliases)
+            )
+              return;
+            const member = staticMemberCall(node);
+            const callback = ts.findAncestor(node, isFunctionLike);
+            if (
+              member &&
+              member.path.length === 1 &&
+              ['get', 'set', 'setDefault'].includes(member.path[0]!) &&
+              (callback === helper.fn ||
+                (callback &&
+                  (registeredCallback(callback, helper.fn, helper.module, localDefinitions) ||
+                    registeredCallback(
+                      callback,
+                      helper.fn,
+                      helper.module,
+                      localDefinitions,
+                      true,
+                      borrowedWatchRelay
+                    ))))
+            )
+              return;
+            closed = false;
+            return;
+          }
+          ts.forEachChild(node, visit);
+        };
+        visit(body);
+        return closed;
+      };
+      const valueOf = (
+        node: ts.Node,
+        seen = new Set<ts.Node>()
+      ): HookSourceReturnedLocalState | null => {
+        const value = unwrap(node);
+        if (ts.isIdentifier(value)) {
+          const declaration = bindingDeclaration(value, helper.module);
+          return declaration &&
+            ts.isVariableDeclaration(declaration) &&
+            declaration.initializer &&
+            !seen.has(declaration) &&
+            ts.findAncestor(declaration, isFunctionLike) === helper.fn &&
+            closedState(declaration, new Set())
+            ? valueOf(declaration.initializer, new Set(seen).add(declaration))
+            : null;
+        }
+        if (
+          !ts.isCallExpression(value) ||
+          value.questionDotToken ||
+          value.arguments.some(ts.isSpreadElement)
+        )
+          return null;
+        const stateFacade = memberOwner(value.expression);
+        const receiver = stateFacade && memberOwner(stateFacade);
+        const method = memberName(value.expression);
+        if (
+          stateFacade &&
+          memberName(stateFacade) === 'state' &&
+          receiver &&
+          nativeReference(receiver, helper.module, localDefinitions) &&
+          method &&
+          ['bool', 'enum', 'string', 'numberRange', 'numberList', 'numberDiscrete'].includes(method)
+        ) {
+          const declaredName = literalString(value.arguments[0], helper.module, new Map());
+          return declaredName === null ? null : { declaration: sourceRef(value), declaredName };
+        }
+        return invoke(value, helper.module, localDefinitions, next);
+      };
+      return valueOf(returned.expression);
+    };
+    const captured = outerValue(call).parent;
+    // The production collector does not yet recover a helper-created State's
+    // declared attribute name. Admit only an unexposed const whose complete
+    // use set is closed: native WhenBuilder reads, Core's directly returned
+    // renderer's value get(), exact native registration callbacks, or the exact
+    // replay's discarded helper result.
+    // Exposed/escaped returns stay pending instead of certifying the
+    // collector's fallback expose-key CSS.
+    if (
+      !ts.isVariableDeclaration(captured) ||
+      !captured.initializer ||
+      unwrap(captured.initializer) !== call ||
+      !closedCallerState(captured, module, nativeDefinitions)
+    )
+      return null;
+    return invoke(call, module, nativeDefinitions, new Set());
   };
 
   const thisMember = (node: ts.Node): string | null => {
@@ -6395,8 +7593,27 @@ function createHookSourceSummaryContextInternal(
   return {
     registerSource,
     resolveRegisteredSourceImport,
-    resolve: evaluate,
-    resolveCall,
+    resolve: (node, source, environment) =>
+      withSynchronousSummaryQuery(() => evaluate(node, source, environment)),
+    resolveCall: (node, source) => withSynchronousSummaryQuery(() => resolveCall(node, source)),
+    isNativeSetupDefinition: (parameter) =>
+      withSynchronousSummaryQuery(() => isNativeSetupDefinition(parameter)),
+    resolveReturnedLocalState: (
+      node,
+      source,
+      nativeDefinitions,
+      ownerInvocation,
+      resolveStateArgument
+    ) =>
+      withSynchronousSummaryQuery(() =>
+        resolveReturnedLocalState(
+          node,
+          source,
+          nativeDefinitions,
+          ownerInvocation,
+          resolveStateArgument
+        )
+      ),
     resolveSourceFunction: (node, source) => {
       const resolved = functionFor(node, moduleForSource(source));
       if (
@@ -6414,6 +7631,45 @@ function createHookSourceSummaryContextInternal(
     proveSourceProducerLifetimes: (source) => createProducerLifetimeGuard(source).proveSource(),
     hasDynamicImportOfFunction,
     isSourceFunctionExportedBy,
+    resolveFunctionImportReferences(source, helpers) {
+      // Supplied contexts may replace either public scalar method. Preserve
+      // that behavior instead of bypassing the caller's implementation.
+      if (
+        this.hasDynamicImportOfFunction !== hasDynamicImportOfFunction ||
+        this.isSourceFunctionExportedBy !== isSourceFunctionExportedBy
+      )
+        return null;
+      return withSynchronousSummaryQuery(() => {
+        const references = new Map<ts.FunctionLikeDeclaration, readonly ts.Node[]>();
+        if (!helpers.length) return references;
+        const dynamicTargets = dynamicImportTargets(source);
+        const namespaces: Array<{ statement: ts.ImportDeclaration; target: Module }> = [];
+        for (const statement of source.statements) {
+          if (
+            !ts.isImportDeclaration(statement) ||
+            statement.importClause?.isTypeOnly ||
+            !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+            !statement.importClause?.namedBindings ||
+            !ts.isNamespaceImport(statement.importClause.namedBindings)
+          )
+            continue;
+          const target = moduleContext.resolveModule(
+            source.fileName,
+            statement.moduleSpecifier.text
+          );
+          if (target) namespaces.push({ statement, target });
+        }
+        for (const helper of helpers) {
+          const nodes: ts.Node[] = [];
+          if (dynamicTargets.some((target) => moduleExportsFunction(target, helper)))
+            nodes.push(source);
+          for (const { statement, target } of namespaces)
+            if (moduleExportsFunction(target, helper)) nodes.push(statement);
+          references.set(helper, nodes);
+        }
+        return references;
+      });
+    },
     dynamicImportVariableInitializers,
     resolveStableSourceBinding: (node) => {
       const binding = moduleContext.resolveReference(node, moduleForSource(node.getSourceFile()));
@@ -6448,7 +7704,7 @@ function createHookSourceSummaryContextInternal(
         !!setup &&
         setup.module.source === source &&
         isAuthoredSetup(setup.fn, source) &&
-        hasOnlyAuthoredSetupReferences(setup.fn, source)
+        hasOnlyAuthoredSetupReferences(setup.fn, source, true)
       );
     },
     isCanonicalPrototypeSetupProperty: (property) =>

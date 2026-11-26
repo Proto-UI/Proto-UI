@@ -25,14 +25,11 @@ export function setupSelectTriggerVisual(
     source: { kind: 'in-app-backdrop' },
     fallback: { fill: 'style', foreground: 'style' },
   });
+  // The Host suppresses motion for restrictive or unknown preferences without
+  // replacing this complete candidate or losing the neutral contact carrier.
   for (const isPressed of [false, true]) {
     def.rule({
-      when: (w) =>
-        w.all(
-          w.state(pressed).eq(isPressed),
-          w.state(disabled).eq(false),
-          w.not(w.meta('preference.reducedMotion').eq('reduce'))
-        ),
+      when: (w) => w.all(w.state(pressed).eq(isPressed), w.state(disabled).eq(false)),
       intent: (i) =>
         i.feedback.material.use({
           intent: 'liquid-glass',
@@ -44,11 +41,6 @@ export function setupSelectTriggerVisual(
         }),
     });
   }
-  def.rule({
-    when: (w) =>
-      w.all(w.state(disabled).eq(false), w.meta('preference.reducedMotion').eq('reduce')),
-    intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
-  });
 
   def.feedback.style.use(
     tw(

@@ -1,0 +1,56 @@
+{
+  "kind": "source-only-merge-review",
+  "date": "2026-11-26",
+  "carrierPr": 1913,
+  "carrierHead": "8a14a0d3dfddbc475c9781a52a7954bf5b8deed2",
+  "integrationBase": "7c585d67e2c7337d0f35aba740e6f3dbbe9b6cba",
+  "agentAssistance": "ChatGPT subagent under explicit current-user direction; external publication remains with coordinating root.",
+  "rows": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "owners": "`www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select`",
+      "recorded": "d665ac5a6043619031f43b241da54bfc131cce5cf3f036214d679e42258f8a6b",
+      "actual": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51",
+      "blob": "d83d118ffb529b8ba9721dde86b8eb5a1b7dfd0a",
+      "original1913Blob": "a8a98a342c66307bf9f046b6ecb256946590cf3c",
+      "review": "Keep the original bootstrap and lazy-root lifecycle. Retain the bounded shadow-root tracking repair and revalidate Matrix callback identity, current Matrix and connection before/after the dynamic import and after awaited module warmup. A cleared and rearmed same DOM element cannot revive an older callback receipt. The shared module delivery itself remains unchanged."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "owners": "`www.demo.home-demo-select`, `www.demo.runtime-select`",
+      "recorded": "857a983c9101da3677e6fdd3946caa099b557db79f1f58620970e2ab216ba4cb",
+      "actual": "9cf1bc8e3e61275b7efb6517b2361b4d98d9cab97bfee284bd29fab2642ef3e8",
+      "blob": "d4c1d78d6765e8f5ea46c3942d65b473f0c5fcc7",
+      "original1913Blob": "f1720ddb3d42831f4a435cc82b74ddcf92123b9f",
+      "review": "Compose current main with the original opt-in wrapValue repair. For a family with no public ItemText, wrap the complete consumer-owned label in a normal wrapping span; preserve the raw string default, ItemText family path, full label value, Item owner, popup geometry policy and public input behavior."
+    }
+  ],
+  "matrixOwnerValidation": {
+    "negativeControl": {
+      "failedAsExpected": 5,
+      "positiveControlPassed": 1,
+      "source": "original post-await receipt publication"
+    },
+    "repairedBootstrap": {
+      "passed": 29,
+      "failed": 0,
+      "includesExistingLifecycleCases": 23
+    },
+    "review": "Coordinating root reviewed the bounded Matrix repair in the current session. No public review or native check status is asserted."
+  },
+  "additionalFocusedValidation": {
+    "retainedSourceHostCases": 83,
+    "consumerWrapCases": 5,
+    "homepageDocumentationCaptureContractCases": 29
+  },
+  "bindingUpdate": {
+    "beforeSha256": "33ea349145dbd2991311bfd2c28802aa0b841e22d1ecf94bdf5872e72a05bdf2",
+    "afterSha256": "01f179971adea2f36d475b54f4180ac09b01f613addb5b83c54db888cc7df6fa"
+  },
+  "notEstablished": [
+    "No consumer row promotion or extra import allowance",
+    "No Matrix sixty-second startup acceptance",
+    "No Search one-thousand-millisecond acceptance",
+    "No physical popup/Drawer geometry or optical acceptance"
+  ]
+}

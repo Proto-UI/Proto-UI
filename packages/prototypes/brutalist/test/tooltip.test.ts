@@ -127,6 +127,13 @@ describe('prototypes/brutalist: tooltip', () => {
     expect(content.getAttribute('role')).toBe('tooltip');
     expect(styleContains(content, 'rounded-base')).toBe(true);
     expect(styleContains(content, 'border-2')).toBe(true);
+    expect(styleContains(content, 'border-black')).toBe(true);
+    expect(styleContains(content, 'border-foreground')).toBe(false);
+    // duration-150 belongs to the keyframe animation; it must not interpolate
+    // theme colors, radius or the anchored position through CSS transitions.
+    expect(styleContains(content, 'transition-none')).toBe(true);
+    expect(content.getAttribute('data-pui-style')).toContain('data-[open]:animate-in');
+    expect(content.getAttribute('data-pui-style')).toContain('data-[open]:duration-150');
     expect(styleContains(content, 'bg-secondary-background')).toBe(true);
     expect(styleContains(content, 'font-sans')).toBe(true);
     expect(styleContains(content, 'shadow-[4px_4px_0_0_var(--pui-foreground)]')).toBe(false);

@@ -168,16 +168,42 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     await flush();
     const svg = (el: any) => el.shadowRoot?.querySelector('svg') ?? el.querySelector('svg');
     const glyph = (el: any) => svg(el)?.querySelector('path')?.getAttribute('d') ?? null;
-    expect(glyph(a)).toBe(family === 'bootstrap-2-3-2' ? 'M5 12L10 17L19 7' : 'm20 6-11 11-5-5');
+    const glyphPaint = (el: any) => {
+      // An unchecked indicator keeps its painted box while it has no SVG glyph.
+      const boxes = (el.shadowRoot ?? el).querySelectorAll(
+        'span[data-pui-style~="pointer-events-none"][data-pui-style~="size-5"]'
+      );
+      expect(boxes).toHaveLength(1);
+      return (boxes[0].getAttribute('data-pui-style') ?? '').split(/\s+/);
+    };
+    if (family === 'liquid-glass') {
+      expect(glyphPaint(a)).toEqual(
+        expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
+      );
+      expect(glyphPaint(all)).toEqual(
+        expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
+      );
+      expect(glyphPaint(b)).toEqual(expect.arrayContaining(['bg-background', 'text-foreground']));
+    }
+    const checkedPath =
+      family === 'bootstrap-2-3-2'
+        ? 'M5 12L10 17L19 7'
+        : family === 'liquid-glass'
+          ? 'M4.5 8 7 11 11.5 5'
+          : 'm20 6-11 11-5-5';
+    expect(glyph(a)).toBe(checkedPath);
     expect(glyph(b)).toBe(null);
-    expect(glyph(all)).toBe(family === 'bootstrap-2-3-2' ? 'M5 12H19' : 'M5 12h14');
+    const mixedPath =
+      family === 'bootstrap-2-3-2' ? 'M5 12H19' : family === 'liquid-glass' ? 'M6 8h4' : 'M5 12h14';
+    expect(glyph(all)).toBe(mixedPath);
     expect(svg(a).getAttribute('aria-hidden')).toBe('true');
     expect(svg(a).getAttribute('tabindex')).toBe(null);
     expect(svg(a).getAttribute('role')).toBe(null);
-    expect(svg(a).getAttribute('width')).toBe(family === 'liquid-glass' ? '14' : '16');
-    expect(svg(a).getAttribute('stroke-width')).toBe(
-      family === 'brutalist' ? '3' : family === 'liquid-glass' ? '2.25' : '2'
-    );
+    // Liquid's public HIG glyph now uses its 16-unit viewport and 2px stroke.
+    if (family === 'liquid-glass') expect(svg(a).getAttribute('viewBox')).toBe('0 0 16 16');
+    expect(svg(a).getAttribute('width')).toBe('16');
+    expect(svg(a).getAttribute('height')).toBe('16');
+    expect(svg(a).getAttribute('stroke-width')).toBe(family === 'brutalist' ? '3' : '2');
     let proposals = 0;
     root.addEventListener('valueChange', () => proposals++);
     b.click();
@@ -186,18 +212,35 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(proposals).toBe(1);
     expect(glyph(b)).toBe(null);
     expect(root.getExposes().getValue()).toEqual(['a']);
+    if (family === 'liquid-glass') expect(glyphPaint(b)).toContain('bg-background');
     setElementProps(root, { value: ['a', 'b'] });
     await flush();
     await new Promise((resolve) => setTimeout(resolve, 5));
     await flush();
     expect(glyph(all)).toBe(glyph(a));
     expect(all.getAttribute('aria-checked')).toBe('true');
+    if (family === 'liquid-glass') {
+      for (const control of [a, b, all]) {
+        expect(glyphPaint(control)).toEqual(
+          expect.arrayContaining(['bg-primary', 'text-primary-foreground'])
+        );
+        expect(glyphPaint(control)).not.toContain('bg-background');
+      }
+    }
     setElementProps(root, { value: [], disabled: true });
     await flush();
     await new Promise((resolve) => setTimeout(resolve, 5));
     await flush();
     expect(glyph(a)).toBe(null);
     expect(glyph(all)).toBe(null);
+    if (family === 'liquid-glass') {
+      for (const control of [a, b, all]) {
+        expect(glyphPaint(control)).toEqual(
+          expect.arrayContaining(['bg-muted', 'text-muted-foreground', 'shadow-none'])
+        );
+        expect(glyphPaint(control)).not.toContain('bg-primary');
+      }
+    }
     a.click();
     expect(proposals).toBe(1);
     const tokens = (await collectProtoStyleTokens(
@@ -209,9 +252,9 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     // lowers everywhere except shadcn, whose glyph-paint focus rules are gated
     // on the parameter state and emit unprefixed runtime tokens instead
     // (forced-colors-focus-outline proven below). Checked and mixed paint is
-    // renderer-driven through the watched-state glyph update in all four
-    // families (proven by the DOM evidence above), emitting unprefixed
-    // indicator tokens instead of data-[checked]/indeterminate variants.
+    // renderer-driven through watched-state glyph updates in every family;
+    // the collector emits unprefixed indicator tokens rather than checked/mixed
+    // variants. Controlled acceptance, refusal and disabled DOM paint are checked above.
     expect(
       tokens.some((x) => x.includes('data-[disabled]:')),
       tokens.join('\n')
@@ -225,7 +268,14 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
       ).toBe(true);
     }
     if (family === 'liquid-glass') {
-      expect(tokens).toContain('bg-primary');
-      expect(tokens).toContain('border-primary');
+      expect(tokens).toEqual(
+        expect.arrayContaining([
+          'border-primary',
+          'bg-primary',
+          'text-primary-foreground',
+          'bg-muted',
+          'text-muted-foreground',
+        ])
+      );
     }
   });

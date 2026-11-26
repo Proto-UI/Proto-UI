@@ -1,6 +1,5 @@
 import { composeHomepageText, setHomepageText } from './homepage-text';
 import { createHomepageGalleryParts } from './homepage-gallery-parts';
-import { homepageGalleryIcon } from './homepage-gallery-icons';
 import { homepageButtonVariant } from './homepage-button-variants';
 import {
   collectPrototypeIds,
@@ -12,8 +11,8 @@ import type { ProjectionContentRecipe } from '../PrototypePreviewer/projection-c
 import {
   resolveProjectionPart,
   resolveProjectionSelectParts,
-  type ProjectionFamilyId,
 } from '../PrototypePreviewer/projection-families';
+import type { SiteLibraryFamily } from '../site-library-family';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 
 export const HOMEPAGE_SHOWCASE_ID = 'website-component-gallery';
@@ -68,7 +67,7 @@ const COPY = {
 
 /** Website-owned task composition. All interactive behavior stays in existing public Prototypes. */
 export function createHomepageShowcase(
-  family: ProjectionFamilyId,
+  family: SiteLibraryFamily,
   runtime: RuntimeId,
   locale: string,
   isActive: () => boolean,
@@ -267,6 +266,7 @@ export function createHomepageShowcase(
                     prototypeId: parts.button,
                     ref: 'settings-save',
                     props: { disabled: true, wrap: true },
+                    surfaceStyle: { width: '100%' },
                     children: [copy.save],
                   },
                   {
@@ -278,6 +278,7 @@ export function createHomepageShowcase(
                       wrap: true,
                       variant: homepageButtonVariant(family, 'secondary'),
                     },
+                    surfaceStyle: { width: '100%' },
                     children: [copy.reset],
                   },
                 ],
@@ -473,7 +474,7 @@ export function createHomepageShowcase(
       },
     ],
     'preferences',
-    { emphasis: 'accent', icon: homepageGalleryIcon('preferences') }
+    { emphasis: 'accent' }
   );
   const attribution =
     locale === 'en'

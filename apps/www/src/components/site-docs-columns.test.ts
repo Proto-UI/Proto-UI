@@ -4,12 +4,34 @@ const frame = readFileSync('apps/www/src/components/override/PageFrame.astro', '
 const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
 
 function expectRightRailOrHidden(source: string) {
-  // One emitted style block prevents Astro5 reversing equal-specificity rules.
+  // One emitted rail style block prevents Astro5 reversing equal-specificity rules.
   // This source guard preserves structure; native geometry is the acceptance
   // oracle for the estimated canvas budget, not a duplicated numeric constant.
-  const styles = [...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)];
-  expect(styles).toHaveLength(1);
-  const css = styles[0]![1]!.replace(/\/\*[\s\S]*?\*\//g, '');
+  const styles = [...source.matchAll(/<style\b([^>]*)>([\s\S]*?)<\/style>/g)];
+  const railStyles = styles.filter((style) => !/\bis:global\b/.test(style[1]!));
+  expect(railStyles).toHaveLength(1);
+  for (const style of styles.filter((style) => /\bis:global\b/.test(style[1]!))) {
+    // Document-owned preview portals have a separate global block. Exclude it
+    // only while every rule targets the opted-in portal, never the rail itself.
+    const globalCss = style[2]!.replace(/\/\*[\s\S]*?\*\//g, '');
+    const rules = [...globalCss.matchAll(/([^{}]+)\{[^{}]*\}/g)];
+    expect(rules.length).toBeGreaterThan(0);
+    expect(
+      rules
+        .map((rule) => rule[0])
+        .join('')
+        .replace(/\s/g, '')
+    ).toBe(globalCss.replace(/\s/g, ''));
+    for (const rule of rules) {
+      for (const selector of rule[1]!.split(',')) {
+        expect(selector).not.toMatch(/[@;]/);
+        expect(selector.trim()).toMatch(
+          /(?:^|\s)\.pui-runtime-preview-owned-surface(?:\[[^\]]+\])*$/
+        );
+      }
+    }
+  }
+  const css = railStyles[0]![2]!.replace(/\/\*[\s\S]*?\*\//g, '');
   const wideMedia = [...css.matchAll(/@media\s*\(min-width:\s*80rem\)/g)];
   expect(wideMedia).toHaveLength(2);
   const grid = [
@@ -32,8 +54,10 @@ function expectRightRailOrHidden(source: string) {
 }
 
 function reverseWideMediaBlocks(source: string) {
-  const style = /<style\b[^>]*>([\s\S]*?)<\/style>/.exec(source)!;
-  const css = style[1]!;
+  const style = [...source.matchAll(/<style\b([^>]*)>([\s\S]*?)<\/style>/g)].find(
+    (style) => !/\bis:global\b/.test(style[1]!)
+  )!;
+  const css = style[2]!;
   const media = [...css.matchAll(/@media\s*\(min-width:\s*80rem\)/g)];
   const first = media[0]!.index!;
   const second = media[1]!.index!;
@@ -45,11 +69,28 @@ describe('documentation shell composition contract', () => {
     expectRightRailOrHidden(columns);
   });
 
+  it.each(['before', 'after'] as const)(
+    'allows an independent portal style %s the rail cascade',
+    (position) => {
+      const portal = '<style is:global>.pui-runtime-preview-owned-surface { z-index: 31; }</style>';
+      expectRightRailOrHidden(position === 'before' ? portal + columns : columns + portal);
+    }
+  );
+
   it.each([
     [
       'separate style tags',
       (source: string) =>
         source.replace(/(?=@media\s*\(min-width:\s*80rem\)\s*\{\s*@container)/, '</style><style>'),
+    ],
+    [
+      'rail override in an additional global style',
+      (source: string) =>
+        source + '<style is:global>.right-sidebar-container { display: flex; }</style>',
+    ],
+    [
+      'inner rail override in an additional global style',
+      (source: string) => source + '<style is:global>.right-sidebar { position: fixed; }</style>',
     ],
     ['reversed media blocks', reverseWideMediaBlocks],
     [
@@ -76,14 +117,23 @@ describe('documentation shell composition contract', () => {
           'grid-template-columns: minmax(0, 1fr)'
         ),
     ],
+    [
+      'global block overrides the rail',
+      (source: string) =>
+        `${source}<style is:global>.docs-reading-columns[data-layout='docs'] { display: flex; order: 0; }</style>`,
+    ],
+    [
+      'global import precedes a portal rule',
+      (source: string) =>
+        `${source}<style is:global>@import url('./rail-override.css'); .pui-runtime-preview-owned-surface[data-position] { top: 0; }</style>`,
+    ],
   ] as const)('rejects a broken rail visibility cascade: %s', (_name, mutate) => {
     // These are current-candidate mutation checks, not independent baseline
     // conformance evidence. A baseline that fails the positive precondition
     // never executes its mutation; keep that failure distinct in reports.
-    const singleStyleFixture = columns.replace(/<\/style>\s*<style>/g, '\n');
-    expectRightRailOrHidden(singleStyleFixture);
-    const broken = mutate(singleStyleFixture);
-    expect(broken).not.toBe(singleStyleFixture);
+    expectRightRailOrHidden(columns);
+    const broken = mutate(columns);
+    expect(broken).not.toBe(columns);
     expect(() => expectRightRailOrHidden(broken)).toThrow();
   });
 

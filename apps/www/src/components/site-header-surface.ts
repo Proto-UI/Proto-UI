@@ -319,6 +319,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
       started: false,
       release: reserveDocsHeaderPreparation(document),
     };
+    if (preferencePreparation) releasePreparation(preferencePreparation);
     preferencePreparation = preparation;
     // Another listener may stop the dispatch before our normal handler.
     queueMicrotask(() => {

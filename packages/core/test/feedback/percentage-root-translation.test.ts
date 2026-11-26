@@ -67,6 +67,15 @@ describe('draft finite percentage Root translation provenance', () => {
     '-translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
     'translate-x-[calc(100%_-_6px)]',
     'translate-x-[var(--pui-percentage)]',
+    'translate-x-[-0.125rem]',
+    'translate-y-[-0.0625rem]',
+    'translate-x-[calc(-0.0625rem)]',
+    'translate-x-[calc(3px_-_100%)]',
+    'translate-x-[calc(-100%_-_3px)]',
+    'translate-x-[calc(0.125rem_+_(100%_+_2px_-_0.125rem)*var(--pui-percentage)/100)]',
+    'translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--percentage)/100)]',
+    'translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/10)]',
+    'translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)_*_var(--pui-percentage)/100)]',
   ])('keeps the non-admitted near miss %s unresolved', (token) => {
     expect(classifyTwTokenApplicationRoleV0(token)).toEqual({
       token,

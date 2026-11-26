@@ -19,6 +19,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-popover-content',
+            ref: 'basic-content',
             previewTheme: 'portal',
             props: { align: 'start' },
             children: [

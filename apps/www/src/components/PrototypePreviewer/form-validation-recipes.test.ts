@@ -236,7 +236,7 @@ for (const [family, demo] of Object.entries({
       expect(assertOldResults(1).summary).toBe('Stale responses: discarded');
       expect(exposes('form').pending.get()).toBe(true);
       await click('acceptResult');
-      expect(ref('submissionStatus').textContent).toContain('Submitted (#1)');
+      expect(ref('submissionStatus').textContent).toContain('Submitted (#1):');
       expect(ref('submissionStatus').textContent).toContain('"account":"lin"');
       expect(validity()).toMatchObject({ invalid: false, pending: false });
       expect(editor().getAttribute('aria-errormessage')).toBeNull();

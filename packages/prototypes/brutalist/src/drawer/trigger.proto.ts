@@ -4,40 +4,26 @@ import {
   type DrawerTriggerProps,
   type DrawerTriggerExposes,
 } from '@proto.ui/prototypes-base/drawer';
-import {
-  BRUTALIST_DISABLED_TOKENS,
-  BRUTALIST_FOCUS_TOKENS,
-  BRUTALIST_MOTION_HIT_TOKENS,
-  BRUTALIST_PRESS_TOKENS,
-  BRUTALIST_STRUCTURE_TOKENS,
-} from '../style';
 
 export default definePrototype<DrawerTriggerProps, DrawerTriggerExposes>({
   name: 'brutalist-drawer-trigger',
   setup(def) {
     const behavior = asDrawerTrigger();
-    const state = behavior.getState!;
-    const pressed = state('pressed')!;
-    const focusVisible = state('focusVisible')!;
-    const disabled = state('disabled')!;
-
+    // The admitted density-only slice keeps these commands flat; generic
+    // Button elevation and expanded hit regions are outside this boundary.
     def.feedback.style.use(
       tw(
-        `${BRUTALIST_STRUCTURE_TOKENS} inline-flex items-center justify-center bg-primary text-primary-foreground min-h-10 px-4 py-2 text-sm min-w-0 max-w-full whitespace-normal wrap-anywhere text-center select-none cursor-pointer outline-none`
+        'inline-flex items-center justify-center rounded-base border-2 border-foreground bg-background min-h-10 px-4 py-2 text-sm font-medium min-w-0 max-w-full whitespace-normal wrap-anywhere text-center outline-none'
       )
     );
+    const state = behavior.getState!;
     def.rule({
-      when: (w) => w.all(w.state(pressed).eq(true), w.state(disabled).eq(false)),
-      intent: (i) =>
-        i.feedback.style.use(tw(`${BRUTALIST_PRESS_TOKENS} ${BRUTALIST_MOTION_HIT_TOKENS}`)),
+      when: (w) => w.state(state('focusVisible')!).eq(true),
+      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
     });
     def.rule({
-      when: (w) => w.state(focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
-    });
-    def.rule({
-      when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw(`${BRUTALIST_DISABLED_TOKENS} cursor-not-allowed`)),
+      when: (w) => w.state(state('disabled')!).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
     });
     return behavior.render;
   },

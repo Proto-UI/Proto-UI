@@ -23,6 +23,17 @@ import {
 } from './shadow-split-test-utils';
 
 const staticToken = 'translate-x-[calc(100%_-_4px)]';
+const rtlStatic = [
+  'translate-x-[-0.0625rem]',
+  'translate-x-[calc(2px_-_100%)]',
+  'translate-x-[calc(8px_-_100%)]',
+  'translate-x-[calc(-100%_-_2px)]',
+  'translate-x-[calc(4px_-_100%)]',
+];
+const remDynamic = [
+  'translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]',
+];
 const dynamic = [
   'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
   'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
@@ -32,6 +43,7 @@ const dynamic = [
   'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
   'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
   'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+  ...remDynamic,
 ];
 const marker = '--pui-split-percentage-translation-recipe: v1;';
 const effect = (tokens: string[]) =>
@@ -128,6 +140,7 @@ function fixture(
     'block',
     'bg-black',
     staticToken,
+    ...rtlStatic,
     ...dynamic,
   ]);
   const artifact = {
@@ -198,17 +211,80 @@ describe('draft finite percentage translation recipe and current owner proof', (
     expect(f.surface.getAttribute('data-pui-style')).toBe('consumer');
   });
 
-  it('keeps W-4px static without a percentage source or Web binding', () => {
-    const f = fixture({ bind: false });
-    try {
-      delete f.record.percentage;
-      for (const value of ['', '0', '50', '100', 'invalid']) {
-        f.host.style.setProperty('--pui-percentage', value);
-        f.effects.queueStyle(effect(['block', staticToken]));
-        f.effects.flushNow!();
-        expect(f.host.getAttribute('data-pui-split-root-style')).toBe(`block ${staticToken}`);
-        expect(f.surface.getAttribute('data-pui-style')).toBe('consumer block');
+  it.each([staticToken, ...rtlStatic])(
+    'keeps %s static without a percentage source or Web binding',
+    (token) => {
+      const f = fixture({ bind: false });
+      try {
+        delete f.record.percentage;
+        for (const value of ['', '0', '50', '100', 'invalid']) {
+          f.host.style.setProperty('--pui-percentage', value);
+          f.effects.queueStyle(effect(['block', token]));
+          f.effects.flushNow!();
+          expect(f.host.getAttribute('data-pui-split-root-style')).toBe(`block ${token}`);
+          expect(f.surface.getAttribute('data-pui-style')).toBe('consumer block');
+        }
+      } finally {
+        f.dispose();
       }
+    }
+  );
+
+  it.each([...rtlStatic, ...remDynamic])(
+    'rejects a re-receipted wrong operand for the exact RTL/rem token %s',
+    (token) => {
+      const selector = `:host([data-pui-split-root-style~="${token}"])`;
+      const f = fixture({
+        css: (css) =>
+          rewriteSplitRuleDeclarations(css, selector, (declarations) =>
+            declarations.replace(/--pui-translate-x:[^;]+;/, '--pui-translate-x: 999px;')
+          ),
+      });
+      try {
+        const before = f.snapshot();
+        expect(() => f.effects.queueStyle(effect([token]))).toThrow(/missing token/);
+        f.effects.flushNow!();
+        expect(f.snapshot()).toEqual(before);
+      } finally {
+        f.dispose();
+      }
+    }
+  );
+
+  it.each(
+    remDynamic.flatMap((token) =>
+      [
+        'absent',
+        'wrong-range',
+        'revoked',
+        'retired-owner',
+        'replaced-handle',
+        'foreign-priority',
+      ].map((fault) => ({ token, fault }))
+    )
+  )('keeps the current-owner proof for $token after $fault', ({ token, fault }) => {
+    const f = fixture({
+      source:
+        fault === 'wrong-range' ? source(1, { kind: 'number.range', min: 0, max: 1 }) : undefined,
+    });
+    try {
+      const before = f.snapshot();
+      if (fault === 'absent') delete f.record.percentage;
+      if (fault === 'absent' || fault === 'wrong-range') {
+        expect(() => f.effects.queueStyle(effect([token]))).toThrow(/percentage owner source/);
+      } else {
+        f.effects.queueStyle(effect([token]));
+        if (fault === 'revoked') f.caps.resetAttached();
+        if (fault === 'retired-owner') f.retireOwner();
+        if (fault === 'replaced-handle') f.record.percentage = source().handle;
+        if (fault === 'foreign-priority')
+          f.host.style.setProperty('--pui-percentage', '25', 'important');
+        const beforeFlush = f.snapshot();
+        expect(() => f.effects.flushNow!()).toThrow(/percentage source not current/);
+        expect(f.snapshot()).toEqual(beforeFlush);
+        return;
+      }
+      expect(f.snapshot()).toEqual(before);
     } finally {
       f.dispose();
     }

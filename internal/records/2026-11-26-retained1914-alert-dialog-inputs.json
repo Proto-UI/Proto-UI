@@ -1,0 +1,101 @@
+{
+  "kind": "retained1914-alert-dialog-source-input-deduplication",
+  "date": "2026-11-26",
+  "sourceParent": "bedf782241e6c0b3f69bedc5f1054f35592b463c",
+  "patchSha256": "82c60ba92091df0dba3a4a44e1ae2d141c97626a86299269ded92f29d3ed2df3",
+  "secondReviewSha256": "c97bafb36f18c4b916885b7475bf43982159fe6e85ba92a1d02c55041e25dbf7",
+  "decision": "The live AlertDialog action helper is already included by directory enumeration. Remove only its duplicate explicit source entry and preserve the complete unique source domain and all test assertions.",
+  "sourceInputs": {
+    "sourceParent": "bedf782241e6c0b3f69bedc5f1054f35592b463c",
+    "beforeListedInputs": 16,
+    "afterListedInputs": 15,
+    "uniqueInputs": 15,
+    "sameCompleteUniqueSourceSet": true,
+    "assertionsBytePreserved": true,
+    "inputs": [
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/action-paint.ts",
+        "sha256": "a8269d504dfbfb46a6b0d474ceaa7388b86d363cda6fd283c5590eb4419fd178"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/action.proto.ts",
+        "sha256": "0705ecc8c7f7b09f66309c25bb81c589dbb35ffad45dff08fbd1a287f54c3be6"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/cancel.proto.ts",
+        "sha256": "26b1d5794937534f31f368cd883205fe02a61384244bbbc6032fc4ca0563468d"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/content.proto.ts",
+        "sha256": "39e89def0133060986f5218cadf0427cbfe72a102ad0438dfc83d50dfe325fc2"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/description.proto.ts",
+        "sha256": "0279057fe63a20a41a88521bf8ac565c66c568a127d066fa60daab9c8fb07c72"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/footer.proto.ts",
+        "sha256": "89e0e7c02697a461a6c7d5b421ec3b4d2390876e443aec8a8fab096430277b22"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/header.proto.ts",
+        "sha256": "c48b783913c984b7c9733258d5701465ee2e8a2488cf3a4b230b7520c2257a91"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/index.ts",
+        "sha256": "19682eead1722007db8098d050139140bd638db11f593f2281ae8d26d4203754"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/mask.proto.ts",
+        "sha256": "fc1611f8d0fa2da8b16b2d0d8731d6f1007d77075fdd2b6f24ade56a52369ec6"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/recipes.ts",
+        "sha256": "0da2dff1d9d8568f12cc689deaeec1c1929c9f4fe0499f8228460f32115f5a2b"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/root.proto.ts",
+        "sha256": "0793abe5b7d35d6fd031befbb53958edeff10d0cd97f9dee6bfe0dbdcb2a53b8"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/title.proto.ts",
+        "sha256": "fe8dbbb8246b41e3b26df48afe134e9649fda1f9abf84c5a6308dba72854321d"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/trigger.proto.ts",
+        "sha256": "ae639106ce58580808b99be82fe1d111d1f7f3d97eef0f787870fab1de81cb75"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/alert-dialog/types.ts",
+        "sha256": "a61d7d67a47569f7bcfe0e23860286e92381d29cf2eb9d49e702fb7af399258c"
+      },
+      {
+        "file": "packages/prototypes/shadcn/src/dialog/style.ts",
+        "sha256": "40ad12ca61713479c9eeec40fe7c0562e629b866f37c2eed7f985d9ed54afd15"
+      }
+    ]
+  },
+  "actualSemanticEquality": {
+    "tokens": 180,
+    "documentCssSha256": "fe3576b191bb51f3efce93dc1b85829720e37bc726f8b89df836e6ac1c5fb3e9",
+    "shadowCssSha256": "38d042db5a5dddebb8697029f35e223e0d50359328bef96cba7ad88fb0a2e622",
+    "sameCompleteTokensAndCss": true
+  },
+  "defaultGate": {
+    "timeoutMs": 5000,
+    "before": "failed: timeout",
+    "after": "failed: timeout",
+    "timeoutChanged": false,
+    "performancePassClaimed": false
+  },
+  "evidence": {
+    "1914-alert-dialog-dedupe-semantic.json": "b599f4ffefbffa2e647c74c502db13af9d7e0fba04832ec3429a967fb2083a45",
+    "1914-alert-dialog-dedupe-default.report.json": "f0fca9ec32f6d04c51178f0531e75733b544d653fa0efb0ddb22e1f1d5d80c6e",
+    "1914-legacy-default-gate.report.json": "1a99dd9855a8197764634420564256e0a46a32392663f9eb64990b9201863022"
+  },
+  "limits": [
+    "Before/after semantic calls run sequentially within one process; their durations are not an independent performance comparison. Both actual default-five-second Vitest runs failed.",
+    "This input cleanup does not discharge the complete rule-source gate, browser acceptance or the existing default timeout failure."
+  ],
+  "authorship": "Agent-assisted current-user integration with independent subagent source review."
+}

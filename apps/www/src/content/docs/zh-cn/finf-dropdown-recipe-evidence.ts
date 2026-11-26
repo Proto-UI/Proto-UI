@@ -1,5 +1,9 @@
 import type { Locator } from 'playwright-core';
-import type { DemoRenderResult, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
+import type {
+  DemoRenderResult,
+  DemoRuntimeApi,
+  DemoSpec,
+} from '../../../components/PrototypePreviewer/demo-types';
 import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/ids';
 
 export const DROPDOWN_DEMOS = {
@@ -60,9 +64,20 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   host.dataset.dropdownEvidenceFixture = recipe;
   document.body.append(host);
   let view: DemoRenderResult | undefined;
+  let runtimeApi: DemoRuntimeApi | undefined;
   try {
     await loadPrototypes([...ids]);
-    view = await renderDemo({ host, demo: surface.demo, runtime });
+    view = await renderDemo({
+      host,
+      demo: {
+        ...surface.demo,
+        setup(context) {
+          runtimeApi = context.api;
+          return surface.demo.setup?.(context);
+        },
+      },
+      runtime,
+    });
     await surface.ready;
   } catch (error) {
     try {
@@ -77,7 +92,14 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   return {
     publicProfile: 'rhea',
     fixtureProfile: 'new-york-v4',
+    setDeleteDisabled(disabled: boolean) {
+      if (recipe !== 'destructive' || !runtimeApi)
+        throw new Error('The live destructive fixture must own its Delete prop update.');
+      // Exercise the same authored Item through the normal renderer input API.
+      runtimeApi.setProps('delete', { disabled });
+    },
     async destroy() {
+      runtimeApi = undefined;
       try {
         await mountedView.destroy();
       } finally {
