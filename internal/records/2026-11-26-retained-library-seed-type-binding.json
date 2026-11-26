@@ -1,0 +1,17 @@
+{
+  "kind": "retained-library-seed-type-source-binding",
+  "date": "2026-11-26",
+  "sourceCommit": "03a79f0a13727a105596b9711ecf11919a1e059e",
+  "sourcePath": "apps/www/src/components/library-style-seed.ts",
+  "owner": "www.gallery.ui-library-cards",
+  "beforeSha256": "ff2a962e7dd010d55d05e512ef103287c435a96c545ca146c887622abc5270c2",
+  "afterSha256": "74b2ff6fd9a002b7ce64f576c24a6638dea1aaa9cddae7bb9388f2cc6c18e50b",
+  "sourcePatchSha256": "0f9f2429d702b6b7f88a49df30271a3439026254f8a757afea24edaac6fe304b",
+  "sourceReviewSha256": "c02ff0f8a29a2802e0e6da75e08741d387b19a47116b889a81d872a390c554cc",
+  "reason": "Preserve the exact constructor type and inherited static/instance contracts after actual hosted type errors; implementation is unchanged and emitted JavaScript is byte-identical.",
+  "runtimeSha256": "9c176d5b71c5dd26138a626ef7f1a7023efed287c606873c3bc797c855a1731b",
+  "typeNegativeControls": 13,
+  "retainedDependencyDiagnostics": 81,
+  "boundary": "Only renew the existing reviewed source fingerprint. No owner, admission path, draft status, accepted coverage or permission changes; full hosted type validation remains separate.",
+  "authorship": "Agent-assisted current-user integration with independent source review."
+}
