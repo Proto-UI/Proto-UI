@@ -215,7 +215,7 @@ describe.sequential('composed style isolation browser regressions', () => {
     });
     try {
       await page.goto(`${baseUrl}${SHADCN_SWITCH_ROUTE}`, { waitUntil: 'networkidle' });
-      const previewer = page.locator('[data-previewer-id]').first();
+      const previewer = page.locator('[data-demo-id="demo-shadcn-switch-sizes"]');
       await previewer.waitFor({ state: 'visible' });
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
@@ -268,9 +268,7 @@ describe.sequential('composed style isolation browser regressions', () => {
           );
         }
         // Exercise both sizes in both checked states without changing disabled examples.
-        for (const variant of SHADCN_SWITCH_DEMO_CASES.filter(
-          (entry) => !entry.disabled && !entry.checked
-        )) {
+        for (const variant of SHADCN_SWITCH_DEMO_CASES.filter((entry) => !entry.disabled)) {
           phase = `pressed:${runtime}/${variant.size}/${variant.name}`;
           const root = previewer.getByRole('switch', { name: variant.name, exact: true });
           for (const checked of [false, true]) {
