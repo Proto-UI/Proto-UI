@@ -1,1 +1,0 @@
-{"name": "agent-doc", "pid": 1695008, "startedAt": "2026-11-24T06:14:06.987617+00:00", "command": ["corepack", "pnpm@10.32.1", "check:agent-doc"], "outerTimeoutSeconds": 180}

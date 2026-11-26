@@ -703,65 +703,73 @@ async function numberField(runtime, family, prefix) {
   };
 }
 
-async function calendarRangePaint(family) {
+async function calendarRangePaint(family, component = 'calendar') {
   await settlePaint();
-  const paint = await page.evaluate((family) => {
-    const sample = (day) => {
-      const element = document.querySelector(`.cap-date-2026-10-${day}`);
-      if (!element) throw new Error(`Missing visible calendar day ${day}`);
-      const style = getComputedStyle(element);
-      const box = element.getBoundingClientRect();
-      return {
-        background: style.backgroundColor,
-        image: style.backgroundImage,
-        color: style.color,
-        radius: style.borderTopLeftRadius,
-        opacity: style.opacity,
-        width: box.width,
-        height: box.height,
+  const paint = await page.evaluate(
+    ({ family, component }) => {
+      const sample = (day) => {
+        const element = document.querySelector(`.cap-date-2026-10-${day}`);
+        if (!element) throw new Error(`Missing visible calendar day ${day}`);
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        return {
+          background: style.backgroundColor,
+          image: style.backgroundImage,
+          color: style.color,
+          radius: style.borderTopLeftRadius,
+          opacity: style.opacity,
+          width: box.width,
+          height: box.height,
+        };
       };
-    };
-    // Resolve semantic colors in the same inherited scope as the real day.
-    // This probe neither styles the component nor injects expected state.
-    const day = document.querySelector('.cap-date-2026-10-12');
-    const probe = document.createElement('span');
-    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none';
-    day.parentElement.append(probe);
-    const resolve = (color) => {
-      probe.style.backgroundColor = '';
-      probe.style.backgroundColor = color;
-      if (!probe.style.backgroundColor) throw new Error(`Invalid theme expression: ${color}`);
-      return getComputedStyle(probe).backgroundColor;
-    };
-    const middleToken = family === 'shadcn' ? 'accent' : 'secondary';
-    const middleInk =
-      family === 'shadcn'
-        ? 'accent-foreground'
-        : family === 'liquid-glass'
-          ? 'secondary-foreground'
-          : 'foreground';
-    const expected = {
-      endpoint: resolve(`var(--pui-${family === 'brutalist' ? 'main' : 'primary'})`),
-      endpointInk: resolve(
-        `var(--pui-${family === 'brutalist' ? 'main-foreground' : 'primary-foreground'})`
-      ),
-      middle: resolve(
+      // Resolve semantic colors in the same inherited scope as the real day.
+      // This probe neither styles the component nor injects expected state.
+      const day = document.querySelector('.cap-date-2026-10-12');
+      const probe = document.createElement('span');
+      probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none';
+      day.parentElement.append(probe);
+      const resolve = (color) => {
+        probe.style.backgroundColor = '';
+        probe.style.backgroundColor = color;
+        if (!probe.style.backgroundColor) throw new Error(`Invalid theme expression: ${color}`);
+        return getComputedStyle(probe).backgroundColor;
+      };
+      const middleExpr =
         family === 'brutalist'
-          ? 'color-mix(in oklab, var(--pui-main) 20%, transparent)'
-          : `var(--pui-${middleToken})`
-      ),
-      middleInk: resolve(`var(--pui-${middleInk})`),
-      transparent: resolve('transparent'),
-    };
-    probe.remove();
-    return {
-      expected,
-      start: sample('10'),
-      middle: sample('12'),
-      end: sample('14'),
-      unselected: sample('09'),
-    };
-  }, family);
+          ? component === 'calendar'
+            ? 'color-mix(in oklab, var(--pui-main) 25%, transparent)'
+            : 'color-mix(in oklab, var(--pui-main) 20%, transparent)'
+          : family === 'liquid-glass'
+            ? component === 'calendar'
+              ? 'color-mix(in oklab, var(--pui-primary) 15%, transparent)'
+              : 'var(--pui-muted)'
+            : 'var(--pui-accent)';
+      const middleInk =
+        family === 'shadcn' || family === 'bootstrap-2-3-2'
+          ? 'accent-foreground'
+          : family === 'liquid-glass' && component === 'calendar'
+            ? 'primary'
+            : 'foreground';
+      const expected = {
+        endpoint: resolve(`var(--pui-${family === 'brutalist' ? 'main' : 'primary'})`),
+        endpointInk: resolve(
+          `var(--pui-${family === 'brutalist' ? 'main-foreground' : 'primary-foreground'})`
+        ),
+        middle: resolve(middleExpr),
+        middleInk: resolve(`var(--pui-${middleInk})`),
+        transparent: resolve('transparent'),
+      };
+      probe.remove();
+      return {
+        expected,
+        start: sample('10'),
+        middle: sample('12'),
+        end: sample('14'),
+        unselected: sample('09'),
+      };
+    },
+    { family, component }
+  );
   for (const [name, value] of Object.entries(paint).filter(([name]) => name !== 'expected')) {
     assert.ok(value.width > 0 && value.height > 0, `${name} day has a real painted box`);
     assert.equal(value.opacity, '1', `${name} day is opaque after finite transitions`);
@@ -825,7 +833,7 @@ async function calendar(runtime, family, prefix) {
   assert.equal(await read('date-2026-10-12', 'rangeMiddle'), true);
   assert.equal(await read('date-2026-10-14', 'rangeEnd'), true);
   assert.equal(await page.locator('.cap-date-2026-10-12').getAttribute('aria-selected'), 'true');
-  const rangePaint = await calendarRangePaint(family);
+  const rangePaint = await calendarRangePaint(family, 'calendar');
   const pictures = [await capture(`${prefix}-range`)];
   await mount(runtime, family, 'calendar', { mode: 'multiple' });
   for (const day of ['03', '08', '12']) await page.locator(`.cap-date-2026-10-${day}`).click();
@@ -891,7 +899,7 @@ async function datePicker(runtime, family, prefix) {
   // in the Date Picker's own styled day projections.
   await page.locator('.cap-trigger').click();
   await until('content', 'transitionState', 'entered');
-  const rangePaint = await calendarRangePaint(family);
+  const rangePaint = await calendarRangePaint(family, 'date-picker');
   pictures.push(await capture(`${prefix}-reopened-range`));
   await mount(runtime, family, 'date-picker', { mode: 'range', range: { from: '2026-10-10' } });
   await page.locator('.cap-trigger').click();

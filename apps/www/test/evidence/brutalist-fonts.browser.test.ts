@@ -112,7 +112,7 @@ describe.sequential('actual Brutalist font faces and fallback', () => {
         const dialogPreview = page.locator('[data-previewer-id]').first();
         await selectRuntime(page, dialogPreview, runtime, '[aria-haspopup="dialog"]', 1);
         await dialogPreview.locator('[aria-haspopup="dialog"]').click();
-        const title = page.getByText('Neo-Brutalist modal', { exact: true }).last();
+        const title = page.getByText('Edit profile', { exact: true }).last();
         await title.waitFor({ state: 'visible' });
         const heading = await title.evaluate((el) => {
           const css = getComputedStyle(el);

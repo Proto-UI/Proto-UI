@@ -7,6 +7,7 @@ afterAll(() => observerKeeper.restore());
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { siteTypographyParticipant } from './site-typography';
 import { initDocumentationTypography } from './site-typography-client';
+import { prepareDemoRuntime } from './PrototypePreviewer/demo-renderer';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
@@ -82,6 +83,9 @@ vi.mock('./PrototypePreviewer/projection-theme', async (original) => {
 
 const handles: Array<{ destroy(): Promise<void> }> = [];
 const candidates: MaterializedProjectionCandidate[] = [];
+// Module acquisition precedes the measured owner lifecycle, as it does on a runtime switch.
+for (const runtime of ['react', 'vue', 'vue2'] as const)
+  beforeAll(() => prepareDemoRuntime(runtime));
 afterEach(async () => {
   for (const h of handles.splice(0)) await h.destroy();
   for (const c of candidates.splice(0)) await c.dispose();
@@ -167,7 +171,7 @@ describe('independent typography owner review', () => {
           .getAttribute('data-pui-style')!
           .split(/\s+/);
       expect(tokens()).toEqual(
-        expect.arrayContaining(['font-medium', 'tracking-normal', 'leading-tight'])
+        expect.arrayContaining(['font-semibold', 'tracking-tight', 'leading-tight'])
       );
       expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(text);
       expect(participant.needsRefresh()).toBe(false);

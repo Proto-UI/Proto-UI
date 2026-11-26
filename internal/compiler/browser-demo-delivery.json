@@ -4,7 +4,7 @@
   "meaning": "Execution overlay; the complete prior source inventory and all its rejected rows remain unchanged. No parent completion is inferred.",
   "inventory": {
     "path": "internal/compiler/website-demo-migrations.json",
-    "sha256": "5277ff526d1e0afa6049f19a3812da24b485fb8c3e62fc6505eef98440029b88",
+    "sha256": "9f18ecc0fd0c0443cbea36e8e97aab02da76659082174d802989d9074c91aa80",
     "sourceProvenance": {
       "revision": {
         "head": "09f98199449b5eb233372aeaf77fffb8d02b78bb",

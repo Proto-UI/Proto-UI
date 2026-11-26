@@ -246,15 +246,15 @@ Therefore:
 - "outside press" and "focus outside" are overlay consumer behaviors, not foundational overlay-owned primitives
 - component protocols with controlled state or exception policy may subscribe to the same Boundary signal instead of enabling automatic Overlay close
 
-Escape is not a Boundary classification. When enabled, Overlay consumes the neutral `key.down` event stream directly. Focus-outside observation remains deferred until a reliable cross-host focus sample contract is defined.
+Escape is not a Boundary classification. When enabled, Overlay consumes the neutral `key.down` event stream directly. For `closeOnFocusOutside`, Overlay consumes host-proven `focus.move` observation when opted in, without moving focus; adapters without a host focus sampler fail closed.
 
 ---
 
 ## 8. Focus Policy
 
-`entry` and `restore` are retained configuration fields; the current generic Overlay does not execute these policies. Dialog, Dropdown and other consumers retain their own Focus and Root request protocols. `closeOnAnchorPress` and `closeOnTriggerPress` are likewise not automatic generic dismissal implementations.
+`entry` and `restore` are retained configuration fields; the current generic Overlay does not execute these policies. Dialog, Dropdown, and other consumers retain their own Focus and Root request protocols. `closeOnAnchorPress` and `closeOnTriggerPress` are likewise not automatic generic dismissal implementations.
 
-Focus-outside remains deferred until a reliable neutral sample contract is admitted. These boundaries are cataloged in `M-OVERLAY-0001-D`; configuration shape alone is not evidence of behavior.
+Opt-in `closeOnFocusOutside` relies on the host-proven `focus.move` boundary (see §0.1 and `M-OVERLAY-0001-D`); hosts without a focus sampler remain unsupported and fail closed.
 
 ---
 

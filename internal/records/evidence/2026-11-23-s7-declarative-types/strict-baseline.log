@@ -1,6 +1,0 @@
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
-
-> proto-ui-declarative-catalog-study@0.0.0 check:types
-> node check-types.mjs
-
-Strict consumer type check passed (3 entry files; shared mapping checked).

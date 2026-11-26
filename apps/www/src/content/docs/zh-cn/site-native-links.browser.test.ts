@@ -1868,7 +1868,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           .first();
         await selected.waitFor({ state: 'visible' });
         expect((await linkPaint(selected)).tokens).toContain(
-          family === 'brutalist' ? 'bg-main' : 'bg-accent'
+          family === 'brutalist' ? 'bg-canary' : 'bg-accent'
         );
         const sidebar = page
           .locator('.sidebar-pane a[data-site-link-enhanced]:not([aria-current="page"]):visible')
@@ -1908,7 +1908,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         if (family === 'brutalist') {
           const paint = await linkPaint(brand);
           expect(paint.tokens).toEqual(
-            expect.arrayContaining(['border-2', 'border-black', 'shadow-[4px_4px_0_0_#000]'])
+            expect.arrayContaining(['border-2', 'border-border', 'shadow-[4px_4px_0_0_#000]'])
           );
         }
         expect(await brand.locator('[data-pui-style~="font-semibold"]').count()).toBe(1);

@@ -72,26 +72,32 @@ export default withShadcnRheaDemo({
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'shadcn-dropdown-label',
-                children: ['Switch workspace'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'shadcn-dropdown-item',
-                props: { value: 'personal', textValue: 'Personal' },
-                children: ['Personal'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'shadcn-dropdown-item',
-                props: { value: 'studio', textValue: 'Design Studio' },
-                children: ['Design Studio'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'shadcn-dropdown-item',
-                props: { value: 'acme', textValue: 'Acme Inc.' },
-                children: ['Acme Inc.'],
+                prototypeId: 'shadcn-dropdown-group',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-dropdown-label',
+                    children: ['Switch workspace'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-dropdown-item',
+                    props: { value: 'personal', textValue: 'Personal' },
+                    children: ['Personal'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-dropdown-item',
+                    props: { value: 'studio', textValue: 'Design Studio' },
+                    children: ['Design Studio'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-dropdown-item',
+                    props: { value: 'acme', textValue: 'Acme Inc.' },
+                    children: ['Acme Inc.'],
+                  },
+                ],
               },
             ],
           },
