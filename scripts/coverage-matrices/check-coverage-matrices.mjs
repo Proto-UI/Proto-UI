@@ -9990,7 +9990,9 @@ const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   ],
   [
     'apps/www/scripts/accordion-activation-probe.mjs',
-    '9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b',
+    // #1928 only re-indents the three web-event-router keydown/keyup splice
+    // anchors to match the current router source; probe behavior is unchanged.
+    '1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642',
   ],
 ];
 export function promotionBarePackageTargets(root, specifier, metadata) {
