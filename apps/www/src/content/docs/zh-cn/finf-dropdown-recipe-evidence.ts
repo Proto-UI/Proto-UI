@@ -1,8 +1,14 @@
 import type { Locator } from 'playwright-core';
-import type { DemoRenderResult, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
+import type {
+  DemoChild,
+  DemoRenderResult,
+  DemoRuntimeApi,
+  DemoSpec,
+} from '../../../components/PrototypePreviewer/demo-types';
 import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/ids';
 
 export const DROPDOWN_DEMOS = {
+  basic: 'demo-shadcn-dropdown-menu-basic',
   destructive: 'demo-shadcn-dropdown-destructive',
   inset: 'demo-shadcn-dropdown-inset',
 } as const;
@@ -11,6 +17,7 @@ export const dropdownPreviewSelector = (recipe: DropdownRecipe) =>
   `[data-previewer-id][data-demo-id="${DROPDOWN_DEMOS[recipe]}"]`;
 
 export const dropdownEvidenceRecipes = [
+  { recipe: 'basic', profile: 'new-york-v4' },
   { recipe: 'destructive', profile: 'new-york-v4' },
   { recipe: 'inset', profile: 'new-york-v4' },
   { recipe: 'inset', profile: 'rhea' },
@@ -48,8 +55,28 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   if (!previewer || runtimePreviewFamily(previewer) !== 'shadcn')
     throw new Error('Public Shadcn Dropdown preview missing.');
   const original = await loadDemo(DROPDOWN_DEMOS[recipe]);
+  const demo = newYorkDropdownDemo(original);
+  const itemRefs: string[] = [];
+  const selections: unknown[] = [];
+  let api: DemoRuntimeApi;
+  if (recipe === 'basic' || recipe === 'destructive') {
+    // Basic has no authored refs. Attach observation handles only to the clone.
+    const collectItems = (node: DemoChild) => {
+      if (typeof node === 'string' || node.kind === 'text') return;
+      if (node.kind === 'proto' && node.prototypeId === 'shadcn-dropdown-item') {
+        node.ref ??= `observed-item-${itemRefs.length}`;
+        itemRefs.push(node.ref);
+      }
+      node.children?.forEach(collectItems);
+    };
+    collectItems(demo.root);
+    demo.setup = (context) => {
+      api = context.api;
+      return original.setup?.(context);
+    };
+  }
   const surface = createRuntimePreviewSurface(
-    newYorkDropdownDemo(original),
+    demo,
     'shadcn',
     resolveProjectionThemeSurfaceStyle('shadcn', previewer),
     runtime
@@ -77,6 +104,13 @@ export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtim
   return {
     publicProfile: 'rhea',
     fixtureProfile: 'new-york-v4',
+    observeSelects() {
+      for (const ref of itemRefs) {
+        if (!api.getExposes(ref)) throw new Error(`Missing open Dropdown item: ${ref}`);
+        api.setProps(ref, { onSelect: (payload: unknown) => selections.push(payload) });
+      }
+    },
+    selections,
     async destroy() {
       try {
         await mountedView.destroy();
