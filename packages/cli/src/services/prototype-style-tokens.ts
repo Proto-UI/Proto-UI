@@ -5252,7 +5252,7 @@ function collectRuleVariantTokens(node, scope, tokens, exposures) {
 /** Only prove ineligibility of a direct, actually returned WhenBuilder expression.
  * Unknown aliases/helper returns retain the existing collector boundary; this is
  * not a second evaluator or a claim that all return/control-flow shapes resolve. */
-function hasProvenRuntimeOnlyReturnedCondition(node, scope) {
+function hasProvenRuntimeOnlyReturnedCondition(node, scope, selectedConditions = new Map()) {
   const callback = unwrapTransparent(node);
   if (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) return false;
   const parameter = callback.parameters[0];
@@ -5334,7 +5334,8 @@ function hasProvenRuntimeOnlyReturnedCondition(node, scope) {
   const runtimeOnly = (value) => {
     const expression = unwrapTransparent(value);
     if (ts.isConditionalExpression(expression)) {
-      const outcome = capturedWhenConditionOutcome(expression, node, scope);
+      const outcome =
+        selectedConditions.get(expression) ?? capturedWhenConditionOutcome(expression, node, scope);
       return outcome === null
         ? false
         : runtimeOnly(outcome ? expression.whenTrue : expression.whenFalse);
@@ -5373,16 +5374,49 @@ function hasProvenRuntimeOnlyReturnedCondition(node, scope) {
   return runtimeOnly(returned);
 }
 
-function analyzeWhenVariants(node, scope) {
-  if (hasProvenRuntimeOnlyReturnedCondition(node, scope)) return [];
+function analyzeWhenVariants(node, scope, selectedConditions = new Map()) {
+  if (hasProvenRuntimeOnlyReturnedCondition(node, scope, selectedConditions)) return [];
   const groups = [];
-  let unresolvedConditional = false;
+  let unresolvedConditional = null;
+  let incompleteAlternative = false;
 
   visit(node);
-  // Only one complete branch is returned at runtime. An unproved choice must
-  // not concatenate both branches' leaves into a selector neither returns.
-  // The ordinary intent-token walk still records its authored base tokens.
-  if (unresolvedConditional) return [];
+  // An alternative is a complete returned When expression. A private State or
+  // unsupported meta leaf cannot disappear while its public siblings become
+  // a partial selector. This constraint belongs to the inventory expansion;
+  // it does not widen the ordinary Rule's proof boundary.
+  if (incompleteAlternative) return [];
+  if (unresolvedConditional) {
+    const conditional = unresolvedConditional;
+    const condition = unwrapTransparent(conditional.condition);
+    const sources = captureStatePresenceSources(condition, scope);
+    const knownCapture =
+      sources?.length > 0 &&
+      sources.every((value) => value.kind === 'object' || value.kind === 'state');
+    // This inventory does not select a branch or certify State presence. Only
+    // an existing captured object/State and the closed When DSL can contribute
+    // the union of whole returned alternatives. Opaque predicates, receivers
+    // and member reads retain the existing boundary. Keep enumeration bounded.
+    if (
+      selectedConditions.size >= 4 ||
+      !ts.isIdentifier(condition) ||
+      (!knownCapture && resolveStateHandleSemantics(condition, scope).length === 0) ||
+      !canPruneClosedWhenCondition(
+        conditional,
+        node,
+        scope.sourceSummary,
+        (value) => resolveStateHandleSemantics(value, scope).length > 0,
+        true
+      )
+    )
+      return [];
+    // Each traversal retains its own prop/any/not/meta eligibility checks.
+    // Concatenating leaves from both branches would invent a selector which
+    // the Runtime never returns; the ordinary Rule proof remains unchanged.
+    return [true, false].flatMap((outcome) =>
+      analyzeWhenVariants(node, scope, new Map([...selectedConditions, [conditional, outcome]]))
+    );
+  }
   let chains = [[]];
   for (const group of groups) {
     chains = chains.flatMap((chain) => group.map((variant) => [...chain, variant]));
@@ -5393,12 +5427,13 @@ function analyzeWhenVariants(node, scope) {
 
   function visit(current) {
     if (ts.isConditionalExpression(current)) {
-      const outcome = capturedWhenConditionOutcome(current, node, scope);
+      const outcome =
+        selectedConditions.get(current) ?? capturedWhenConditionOutcome(current, node, scope);
       if (outcome !== null) {
         visit(outcome ? current.whenTrue : current.whenFalse);
         return;
       }
-      unresolvedConditional = true;
+      unresolvedConditional ??= current;
       return;
     }
     if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
@@ -5431,10 +5466,25 @@ function analyzeWhenVariants(node, scope) {
             const firstArg = subject.arguments[0];
             const expected = current.arguments[0];
             if (firstArg) {
-              const variants = resolveStateHandleSemantics(firstArg, scope)
-                .map((semantic) => resolveStateEqVariant(semantic, expected, scope))
-                .filter(Boolean);
+              const variants = resolveStateHandleSemantics(firstArg, scope).flatMap((semantic) => {
+                const proved = resolveStateEqVariant(semantic, expected, scope);
+                if (proved) return [proved];
+                const comparison = expected && unwrapTransparent(expected);
+                if (!comparison || !ts.isIdentifier(comparison)) return [];
+                const inventory = resolveExpression(comparison, scope);
+                if (!inventory.compoundRowInventory) return [];
+                // A compound row can retain literal CSS requirements without
+                // proving its mutable leaves. Preserve each known comparison
+                // beside that row's known intents; never change `single`, the
+                // State capability, or the ordinary finite-row proof.
+                return (inventory.strings ?? [])
+                  .map((text) =>
+                    resolveStateEqVariant(semantic, ts.factory.createStringLiteral(text), scope)
+                  )
+                  .filter(Boolean);
+              });
               if (variants.length > 0) groups.push([...new Set(variants)]);
+              else if (selectedConditions.size > 0) incompleteAlternative = true;
             }
             return;
           }
@@ -5451,7 +5501,7 @@ function analyzeWhenVariants(node, scope) {
               value.text === 'dark'
             ) {
               groups.push(['dark']);
-            }
+            } else if (selectedConditions.size > 0) incompleteAlternative = true;
           }
         }
       }
@@ -6444,7 +6494,10 @@ function bindTokenLoopPattern(name, graph, scope, readExpression = null, invento
     scope.bindings.set(
       name.text,
       withTokenGraph(
-        { ...emptyValue(), ...(inventoryOnly ? { unknownAlternative: true } : {}) },
+        {
+          ...emptyValue(),
+          ...(inventoryOnly ? { unknownAlternative: true, compoundRowInventory: true } : {}),
+        },
         graph ?? { kind: 'unknown' }
       )
     );
