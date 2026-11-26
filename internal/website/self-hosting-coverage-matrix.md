@@ -366,7 +366,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/content/docs/zh-cn/site-search-ime-evidence.ts` | `www.search.input-results` | `c84f1c2e125dcebd7d6096b1f5fa7441dcaf40c8110d83015324b7d85350d3ba` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
-| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `04ab0568d223ab7cc0fea4caf3056f9a3488c76f2a5ef082b724ab10fae8a2bd` |
+| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `8950741f89aac7159d06a9184a1114b2a90c3e5cd6c65472e66970fe4a82f518` |
 | `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `724948f5c3aa0b3eb9eec21d1d8e22254dcd3e0b90a9166ce2bdce8a18a113c7` |
 | `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `bebbe40586af030a01536b1e63c010fff697aed294b7a30437e2575ed1aa08f3` |
 | `apps/www/src/components/InstallCommandCard.astro` | `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs` | `05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7` |
@@ -406,7 +406,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `fd27997ad813469f2d2d7d75d235d70e339548c3016865d2a326fa07b628f730` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `da804d7ae21ba4f2000f6e8eabc936d5f1273245c27194d82fac94f30daf6ffd` |
-| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `8f944d960b3f435b5af9a48ca38ca1856003536755f8ef1d2357de93f538fe0d` |
+| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `eef363417f1fd7e01e3c4460be4a71fc8563a174d8eb5192182d0c154bd77f8e` |
 | `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `16845ab5f031db1b75a5a5c7dce214d2fded101807fcb4e899ed29f97ffcb275` |
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `04fd2cf261f0ec807fd28ef166b782766b81fa6822b4f07bf8076e65f6cce016` |
@@ -455,7 +455,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `0c82ae36d1fa9d81efbceaad25c2e153a52333d3da0087abae9f3aac16315b6b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `e035ff8d22dcff7af4e7df6b21ef4938f23884e98a6d362c0167180bf9dcce8d` |
 | `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `ecfad806298ef695834f4b046e39bc5f5c179978441ca369a43a61653eacc111` |
-| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `9da41374b7379af51514477115d210076eb54fea9555c300be33bd1b61ba4b74` |
+| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `efa045ac360cb01c468b2153315f36d9ecfa4af550f706cb3fb06c64a31c559b` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |
 | `apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts` | `www.demo.authored-controllers` | `55f59f12bdab2528f0aa65422010b168d5e6cb5aa3a1e60a614df4ab02e1c7bf` |
 | `apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts` | `www.demo.authored-controllers` | `03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4` |

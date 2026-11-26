@@ -17702,7 +17702,12 @@ for (const extension of ['html', 'astro', 'md', 'mdx', 'vue', 'svelte', 'tsx']) 
     });
 }
 
-for (const helper of ['browser-harness', 'site-search-evidence']) {
+for (const helper of [
+  'browser-harness',
+  'site-search-evidence',
+  'site-search-browser',
+  'site-search-close-focus-evidence',
+]) {
   test(`main test helper boundary: ${helper} is excluded only while unreachable`, () => {
     const root = createRoot();
     writeValidMatrices(root);

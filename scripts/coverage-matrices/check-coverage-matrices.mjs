@@ -9863,6 +9863,8 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir
 const WEBSITE_TEST_HELPER_PATHS = [
   '/apps/www/src/content/docs/zh-cn/browser-harness.ts',
   '/apps/www/src/content/docs/zh-cn/site-search-evidence.ts',
+  '/apps/www/src/content/docs/zh-cn/site-search-browser.ts',
+  '/apps/www/src/content/docs/zh-cn/site-search-close-focus-evidence.ts',
 ];
 function isTestNamedSource(absolutePath) {
   if (
