@@ -175,7 +175,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./application-role', './semantic-merge', './style', './tokens']),
   }),
   'packages/core/src/spec/feedback/semantic-merge.ts': Object.freeze({
-    sourceSha256: '85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58',
+    sourceSha256: '591004dd057dd4b8dcf3d6a6b10879c933b0de746f894d74ad4a9bdb2559f94d',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./placeholder']),
   }),
