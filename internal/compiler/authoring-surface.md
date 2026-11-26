@@ -2,9 +2,19 @@
 
 The [authoring contract](../../spec/contracts/C-COMPILER-AUTHORING-0001.yaml) chooses the API spellings below for the already accepted [foundation semantics](../../spec/contracts/C-COMPILER-FOUNDATION-0001.yaml). Its [independent cases](../../spec/tests/T-COMPILER-AUTHORING-0001.yaml) define observable expectations. This page explains those choices and the complete example sources; it does not add a language rule.
 
-**Implementation status:** `@proto.ui/core/authoring` is a planned 0.4 export, not an available package subpath. The examples are complete design inputs. They do not currently execute through an Adapter or compile to a target. The initial executable frontend provides a partial binding/type and value-diagnostic pass, not complete phase, ownership, task or native-output support. Use its explicit analysis result rather than treating no displayed error as admission. No declaration-only shim or mock runtime accompanies these examples.
+## Scope & Limits
+
+**Implementation status:**
+
+- `@proto.ui/core/authoring` is a planned 0.4 export, not an available package subpath. The complete design inputs currently have no Adapter or compiled-target execution.
+- The initial executable frontend supplies a partial binding/type and value-diagnostic pass. Complete phase, ownership, task and native-output support remain missing; use its explicit analysis result to determine admission.
+- The examples have no declaration-only shim or mock runtime.
 
 The inputs are stored as `.proto.ts.txt` text fixtures: their contents are complete TypeScript source for future compiler/Adapter harnesses. This keeps a planned import from becoming a current workspace compilation unit. Syntax validation uses the TypeScript parser on those exact bytes; it does not supply a fake authoring declaration or suppress type errors to claim an executable example.
+
+The Tabs example covers selection and loading. The full anatomy, keyboard, activation, focus, controlled-selection, accessibility and indicator protocol remains separate work. Its explicit loader is a scenario dependency, not a new platform-extern blocker for ordinary official prototypes.
+
+The design examples alone do not establish a registered Shenko migration, Adapter conformance or completion of the language. Those claims require source manifests, verified transformation and their independent execution routes.
 
 ## Author-facing operations
 
@@ -34,7 +44,9 @@ The entry remains `definePrototype({ name, setup(def) })`. Existing `@proto.ui/c
 
 Every legal `await` commits and resumes in a fresh scheduled segment, even for an already-ready value. `task.await` is the examples' explicit operation form; it is not a new ban on other valid owned await expressions. The task capability follows the current segment internally; it never exposes a writable transaction reference that can be held across suspension.
 
-`Presence<T>` in the prop schema is `omitted` or `present(value)`. It is separate from a business `Option<T>`. `Result<T, E>` in the async example is the typed `ok(value)` / `err(error)` result, represented by discriminated records with `kind`, `value` or `error`. An `err` handled by the task is data. Explicit cancellation, latest supersession and owner termination are distinct scheduler outcomes, not fabricated business failures or successes.
+- `Presence<T>` is `omitted` or `present(value)`, separate from a business `Option<T>`.
+- `Result<T, E>` is the typed `ok(value)` / `err(error)` result. Discriminated records carry `kind` and either `value` or `error`; a handled error is data.
+- Explicit cancellation, latest supersession and owner termination are distinct scheduler outcomes, not fabricated business failures or successes.
 
 The table is not a complete implementation inventory. The foundation also requires checked integers, Unicode scalar operations, typed conversion failure, all effect classes, real view-commit acknowledgements and the remaining independent traces. A frontend can report those missing capabilities without inventing source restrictions. Neither `as` nor `==` is rejected just for its spelling; actual types, origins and defined operations govern admission.
 
@@ -49,13 +61,16 @@ The table is not a complete implementation inventory. The foundation also requir
 | Choose appearance from tone | Pure `badgeStyle` helper and derived style handle | Known tone adds its token; unknown tone retains the common token |
 | Keep transport logic in the caller | No transport task, timer or network access | Pure recomputation produces no effects |
 
-Start with `Offline`/`offline`, then publish `Connected`/`online`. The displayed label and the online token must both change. Renaming or extracting the helper does not change meaning, and the extracted helper becomes part of the same Adapter/compiler source closure. Actual migration of the registered Shenko source still requires its source-bound manifest, safe transformation and both execution routes; this design file is not that receipt.
+Start with `Offline`/`offline`, then publish `Connected`/`online`: both the displayed label and online token change. Renaming or extracting the helper preserves meaning, and an extracted helper joins the common Adapter/compiler source closure. Registered Shenko migration still requires its manifest, safe transformation and both execution routes.
 
 ## Complete input 2: controlled Toggle
 
 [controlled-toggle.proto.ts.txt](examples/controlled-toggle.proto.ts.txt) contains an active-value owner, typed change requests, a disabled guard, a public action and a view. It is a complete controlled-value scenario, not the full Base Toggle definition: focus, accessible semantics, transient pointer/press state, labels and the full semantic-event host path remain governed work.
 
-The `active` prop explicitly declares `optional: true, controlMode: 'fixed-instance'`. Its initial presence selects the schema's controlled or uncontrolled mode. A later value in controlled mode is valid; changing presence within the same logical instance is rejected by that input schema. A new instance/key may select a different mode. Other defined transition policies remain possible; this example does not introduce a language-wide ban on mode transitions.
+The `active` prop declares `optional: true, controlMode: 'fixed-instance'`.
+
+- Initial presence selects controlled or uncontrolled mode. Controlled values may change; changing presence within one logical instance is rejected by that input schema.
+- A new instance/key may select a different mode. Other defined transition policies remain possible; fixed-instance mode is this example’s schema, not a language-wide ban.
 
 | Input and action | Actual projection | Request |
 | --- | --- | --- |
@@ -73,8 +88,6 @@ These dependencies belong in M1 with the controlled example. Calling the example
 ## Complete input 3: Context and owned async Tabs
 
 [context-owned-async-tabs.proto.ts.txt](examples/context-owned-async-tabs.proto.ts.txt) contains a nominal Context key, a typed atomic loader declaration, a pure label helper, an async panel and its owner prototype. The owner exposes `value` and `select`; the panel exposes its discriminated `panel` state, its readonly `label`, and `reload`/`cancel` actions.
-
-This is a selection/loading scenario for authoring design. It does not replace the full Tabs protocol for anatomy, keyboard navigation, activation policy, focus, controlled selection, accessibility or indicator geometry. The example's external loader is an explicit scenario dependency, not evidence that ordinary official prototypes face a new platform-extern blocker.
 
 The created panel explicitly starts loading through `def.lifecycle.onCreated(reload)`. An ordinary Context change only invalidates its pure readers; this example does **not** automatically start another load. A consuming application can invoke the declared `reload` action when it wants that behavior. No renderer or derivation starts a task as a side effect of recomputation.
 
@@ -99,4 +112,6 @@ Implement the authoring exports and their Adapter path together with the shared 
 
 Upstream owns delivering and verifying necessary official and registered-consumer migrations. Where a general autofix is not yet safe, upstream must finish the concrete migration and establish verified tooling/preconditions instead of transferring a permanent source fork to consumers. The safety boundary prohibits a guessed edit or an unsupported claim of semantic preservation; it does not waive the migration obligation.
 
-The [source/lint projection](source-compatibility-and-lint.md) defines how to report undetermined source, missing implementation, safe migration and the full inventory. The [implementation sequence](atomic-lowering-completion.md) maps all 28 foundation criteria into M1–M3 and the remaining three targets. A syntax check of these three files is useful authoring hygiene; it does not establish language admission, native compilation, Adapter compatibility or full component conformance. Those routes remain explicitly missing in the catalog.
+The [source/lint projection](source-compatibility-and-lint.md) defines reporting for undetermined source, missing implementation, safe migration and the full inventory.
+
+The [implementation sequence](atomic-lowering-completion.md) maps all 28 foundation criteria into M1–M3 and the remaining three targets. Syntax checks provide authoring hygiene; native compilation, Adapter compatibility and full component conformance remain missing catalog routes.

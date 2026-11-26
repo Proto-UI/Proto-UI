@@ -90,6 +90,10 @@ When an update is triggered (e.g. via `run.update()`):
 
 No lifecycle callback may be reordered across these steps.
 
+### View Reconciliation Retry (`C-LIFECYCLE-0008`)
+
+Generated Web Components retry desired-view reconciliation after native connection when a preconfigured logical owner has no mounted view yet. The retry runs after the current native slot commit while keeping the owner, State, and setup result intact. Already mounted views retain their rendered nodes, and terminal disposal cancels queued materialization.
+
 ---
 
 ## Unmount & Disposal Semantics
@@ -125,13 +129,11 @@ Lifecycle violations (ordering, availability, or domain misuse) are considered *
 
 Implementations MUST fail fast and MUST NOT silently recover.
 
-The draft `C-LIFECYCLE-0002-J` defines one bounded failed-creation path. After Runtime acquires an instance, a synchronous `created` failure completes all reachable acquired-resource terminal cleanup before rethrowing the **identical initiating value**. Queued Delay work is cancelled and instance-scoped handles become invalid even when a cleanup callback, diagnostic, or release also throws; those secondary errors do not replace the initiating value.
+### Draft Error-Path Clarifications
 
-Props synchronization or watcher dispatch failures while entering that failed-creation cleanup cannot skip registered `beforeDispose` releases. Ordinary callback entry and normal disposal retain their existing preparation-error behavior.
-
-The explicitly selected draft `C-LIFECYCLE-0002-K` governs ordinary terminal disposal: the authored `beforeDispose` sequence stops at the first thrown value, including a falsy value. Later authored callbacks do not run, but Runtime still attempts private terminal cleanup of its acquired resources. Disposal rejects after cleanup rather than silently succeeding; when the authored failure is the only error, the identical value is retained. Other cleanup-error aggregation stays unchanged. The exhaustive failed-created cleanup in J is a separate path, not weakened by ordinary authored fail-fast behavior.
-
-This does not promise recovery of resources never returned by a failing factory. Other lifecycle callback propagation and recovery remain open in `C-LIFECYCLE-0002-Q-CALLBACK-ERRORS`; these draft rules are not stable lifecycle admission.
+- **Failed creation (`C-LIFECYCLE-0002-J`, draft)**: After Runtime acquires an instance, a synchronous `created` failure completes all reachable acquired-resource terminal cleanup before rethrowing the **identical initiating value**. Queued Delay work is cancelled and instance-scoped handles become invalid even if cleanup also throws; secondary errors never replace the initiating value, and props-sync or watcher dispatch failures do not skip registered `beforeDispose` releases.
+- **Ordinary terminal disposal (`C-LIFECYCLE-0002-K`, draft)**: The authored `beforeDispose` sequence stops at the first thrown value (including falsy values). Later authored callbacks do not run, while Runtime still attempts private terminal cleanup and rejects afterward with the identical authored error when it is the only error.
+- **Open scope**: Recovery of resources never returned by a failing factory is not promised; other callback error propagation remains tracked in `C-LIFECYCLE-0002-Q-CALLBACK-ERRORS` (draft).
 
 ---
 

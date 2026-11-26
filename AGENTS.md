@@ -124,7 +124,7 @@ corepack pnpm@10.32.1 test
 
 Choose verification proportional to the change:
 
-- Agent/documentation-only changes: run `check:public-docs` (including repository links and supported package-script references), `check:agent-operations`, and `check:agent-doc`; generate the local Agent project understanding when its snapshot needs inspection. Run `test:public-docs` when changing documentation checks.
+- Agent/documentation-only changes: run `check:internal-docs`, `check:public-docs` (including repository links and supported package-script references), `check:agent-operations`, and `check:agent-doc`; generate the local Agent project understanding when its snapshot needs inspection. Run `test:public-docs` when changing documentation checks.
 - Spec changes: run the relevant spec/schema/graph tests, `check:prototype-catalog` when prototypes are involved, regenerate projections, then run type checks.
 - Runtime, module, adapter, or prototype behavior changes: run focused tests first, then the relevant workspace-wide checks.
 - Release-governance changes: run the release checks documented under `internal/governance/**`.
@@ -133,6 +133,7 @@ Generated files must be changed through their generator. `internal/agent/PROJECT
 
 ## Change discipline
 
+- Follow [the internal engineering writing guide](internal/governance/engineering-writing-guide.md) when authoring or updating `internal/**` docs: put conclusions first, state epistemic/authority limits **once** in frontmatter or a single `## Scope & Limits` section instead of repeating disclaimers in every paragraph, keep living docs concise by editing in place (split receipts/inventories into `.json`/`.yaml`), and never commit binary evidence (`.png`, `.log`, `.tar.gz`, raw test dumps) to `main`. Verify with `corepack pnpm@10.32.1 check:internal-docs`.
 - Apply the Agent-only [Issue/PR visual evidence soft gate](internal/agent-operations/visual-evidence.md): Agents own reproduction, uploaded subject-appropriate visuals, sanitized request paraphrases, and explicit evidence debt. Humans may submit plain descriptions without images or Agent checklists. See the [gh upload guide](internal/agent-operations/github-evidence-upload.md).
 - A checkbox update is a deliverable with the same rank as the code change, not optional bookkeeping. Separate development completion from release acceptance: a reviewed, validated, integrated bounded change completes its own development checkbox with its PR, merge SHA and evidence, even while an unrelated family or umbrella criterion stays open. When one checkbox mixes conditions, retain the original wording, expose independently addressable children, and check each satisfied child promptly with evidence. Never repeatedly write "cannot count as complete" as a substitute for performing reachable work and its tracking write; never mark missing evidence as passed. See [the 0.3 dev-vs-acceptance rule](internal/governance/release-0.3-plan.md#development-completion-versus-release-acceptance).
 - Keep unrelated user changes intact.

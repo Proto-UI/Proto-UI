@@ -65,10 +65,10 @@ Vercel 为实际 `FAILURE`，URL 指向 `upgradeToPro=build-rate-limit`，不是
 
 ## 可重复核对与留下的非成功
 
-- [筛选数据](evidence/2026-11-24-sprint7-idle-batch/screening.json)：保留实际观察窗、算法、全部十项、原 checkbox 行、事件及排除原因。
-- [原生精简快照](evidence/2026-11-24-sprint7-idle-batch/native-compact.json)：不是抽样。保留全部 220 事件和 39 评论的身份/时间/正文哈希，完整原 JSON 的逐文件 SHA；包含 PR checks 与来源请求实际命令/退出码。
+- [筛选数据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint7-idle-batch/screening.json)：保留实际观察窗、算法、全部十项、原 checkbox 行、事件及排除原因。
+- [原生精简快照](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint7-idle-batch/native-compact.json)：不是抽样。保留全部 220 事件和 39 评论的身份/时间/正文哈希，完整原 JSON 的逐文件 SHA；包含 PR checks 与来源请求实际命令/退出码。
 - `evidence/2026-11-24-sprint7-idle-batch/connector/`：十份原 Issue 的完整正文/评论及七份 PR 快照，不改写历史正文。
-- [本地证据检查](evidence/2026-11-24-sprint7-idle-batch/local-evidence-inspection.json)：六份实际读取的报告/独立包字节哈希，不声称重跑其原任务。
+- [本地证据检查](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint7-idle-batch/local-evidence-inspection.json)：六份实际读取的报告/独立包字节哈希，不声称重跑其原任务。
 - 首次原生采集使用设备旧版 gh 不支持的 `--slurp` 和 `baseRefOid`，相应命令真实失败；后继移除不支持选项，30 个 Issue/评论/timeline 请求及 PR 读取成功。完整原始失败与成功 JSON 保留在用户设备 `/tank/shared/projects/proto-ui-agent/s7-idle-audit-0d7d`，没有拿失败命令的空输出当作无评论/无检查。
 - 第一次整包返回排队超时，第二次返回明确截断，均未用于判断或冒充完整归档。后续传回完整精简 JSON，压缩 SHA `374046759f25ea89c019ffdac0bbcd0828ac8064f29e0dd396b349225f4b67a9`、解压 SHA `1a9eae70c10e69a68014cef5cfef645bc82da6d66c5b9e969135f2d40026319e` 均校验一致。
 

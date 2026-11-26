@@ -18,7 +18,7 @@ The 22 named checks, original 2.5-second state timeout, both specified positive 
 
 ## Actual results
 
-The final run started at `2026-11-23T09:22:15Z` and ended at `2026-11-23T09:22:41Z`. [Machine-readable receipts](evidence/2026-11-23-s7-tabs-calibration/reports.json) retain command arguments, return codes, source hashes, the rejected setup attempts and both complete browser attempts.
+The final run started at `2026-11-23T09:22:15Z` and ended at `2026-11-23T09:22:41Z`. [Machine-readable receipts](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-s7-tabs-calibration/reports.json) retain command arguments, return codes, source hashes, the rejected setup attempts and both complete browser attempts.
 
 | Cell | Viewport / scheme | Exit | Result |
 | --- | --- | --- | --- |

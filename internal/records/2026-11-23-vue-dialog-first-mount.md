@@ -1,7 +1,0 @@
-# Await the actual Vue Dialog view before exercising it
-
-The original Vue Dialog suite produced five failures: initial transition state was still closed, the layer/passthrough projections were absent, and an outside pointer event dispatched before the view's event ingress could not close it. A diagnostic replay recorded the real DOM and phase after each existing flush. The first observation already had the Teleport destination and a retained closed root; the next observation had the mounted entering view, `data-is-present`, layer style and available-space probe. This was distinct first-view scheduling, not a permanently closed product.
-
-Each initially open fixture now resolves a promise from the Prototype's real `onMounted` callback, then performs its existing Vue commit flush before inspection or input. The initially closed Mask still does not mount and retains its original detached assertion. All original seven tests, entry/exit states, z-index lower bound, outside event, passthrough and rematerialization outcomes remain unchanged. No guessed sleep, polling budget, Transition duration, Adapter policy or test deadline was added or enlarged.
-
-The same seven-test file now passes **7/7**. The [receipt](evidence/2026-11-23-vue-dialog-first-mount/receipt.json) retains the 5-failure baseline, actual diagnostic sequence and full passing output. The diagnostic loop was removed from the committed test. This is framework lifecycle evidence in Happy DOM; it is not native Portal paint or release acceptance.

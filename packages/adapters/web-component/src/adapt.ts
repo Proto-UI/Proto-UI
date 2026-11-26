@@ -700,9 +700,17 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       type PortalAcquisition = { epoch: number; release: () => void };
       let portalAcquisition: PortalAcquisition | null = null;
       let completedMountAcquisition: PortalAcquisition | null = null;
+      let currentMountPhase: Extract<RuntimeLifecycleEvent, { type: 'mount.phase' }> | undefined;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
+
+      const releaseAcquisition = (acquisition: PortalAcquisition | null) => {
+        if (!acquisition) return;
+        if (completedMountAcquisition === acquisition) completedMountAcquisition = null;
+        if (portalAcquisition === acquisition) portalAcquisition = null;
+        acquisition.release();
+      };
 
       const clearSlotProjector = () => {
         const projector = this._slotProjector;
@@ -790,17 +798,20 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           schedule: (task) => {
             const acquisition = completedMountAcquisition;
             completedMountAcquisition = null;
-            schedule(() => {
-              try {
-                task();
-              } finally {
-                // The original mounted callback and its synchronous callback
-                // flush may acquire the first portal projection. Do not delay
-                // or reorder that task; retire only its own acquisition token.
-                acquisition?.release();
-                if (portalAcquisition === acquisition) portalAcquisition = null;
-              }
-            });
+            try {
+              schedule(() => {
+                try {
+                  task();
+                } finally {
+                  // Include the mounted callback's synchronous projection flush.
+                  releaseAcquisition(acquisition);
+                }
+              });
+            } catch (error) {
+              // Submission may throw before the callback runs, even after reentry.
+              releaseAcquisition(acquisition);
+              throw error;
+            }
           },
           rawPropsSource,
           getInstanceAssociations: () => getElementAssociations(thisEl),
@@ -833,36 +844,41 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 ? portalAcquisition
                 : null;
             if (event.type === 'mount.phase') {
+              currentMountPhase = event;
+              if (event.phase !== 'mounted') focusIngressReady = false;
               if (event.phase === 'mounting') {
-                portalAcquisition?.release();
+                releaseAcquisition(portalAcquisition);
                 portalAcquisition = {
                   epoch: event.epoch,
                   release: beginWebComponentPortalViewAcquisition(thisEl),
                 };
               } else if (event.phase !== 'mounted' && portalAcquisition?.epoch === event.epoch) {
-                portalAcquisition.release();
-                portalAcquisition = null;
+                releaseAcquisition(portalAcquisition);
               }
             }
             try {
               if (event.type === 'mount.phase' && event.phase === 'mounted')
                 admitViewProjection?.();
               opt.diagnostics?.onLifecycleEvent?.(event);
-              if (event.type === 'mount.phase') {
-                focusIngressReady = event.phase === 'mounted';
-                if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
-              }
-            } finally {
-              // Runtime schedules this epoch after the complete notification
-              // returns. Publish its captured acquisition after any diagnostic
-              // or readiness reentry has finished scheduling a nested epoch.
+              // Projection and diagnostics can synchronously advance the phase or retire the owner.
               if (
-                event.type === 'mount.phase' &&
+                event === currentMountPhase &&
                 event.phase === 'mounted' &&
-                portalAcquisition === finishingAcquisition
-              )
-                completedMountAcquisition = finishingAcquisition;
+                !ownerResourcesReleased &&
+                !this._terminalDisposing &&
+                this._instanceToken === instanceToken
+              ) {
+                focusIngressReady = true;
+                if (thisEl.isConnected) this[NOTIFY_FOCUS_TARGET_READY]();
+              }
+            } catch (error) {
+              if (event === currentMountPhase) focusIngressReady = false;
+              releaseAcquisition(finishingAcquisition);
+              throw error;
             }
+            // Runtime schedules this epoch only after notification returns normally.
+            if (finishingAcquisition && portalAcquisition === finishingAcquisition)
+              completedMountAcquisition = finishingAcquisition;
           },
           getSlotProjector: () => this._slotProjector,
           ensureSlotProjector: () => {

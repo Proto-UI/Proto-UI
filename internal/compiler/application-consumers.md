@@ -9,7 +9,11 @@ correctness or compatibility oracles for the new compiler.
 | Consumer | Useful independent scenarios | Target |
 | --- | --- | --- |
 | [Shenko](https://github.com/cyjin-yl/shenko) | Status props update rendered text and appearance; controlled selections remain requests until their owner accepts; conversation children retain identity; nested Context follows logical ancestry; owned tasks cannot update retired views. | React |
-| [Verdant](https://github.com/OpenGreendam/verdant) | Typed pressed/selected state drives host appearance without another interaction owner; continuous gesture previews and final commits preserve their declared action boundaries; text, selection and scroll remain native host operations; cleanup ends stale input and async work. | GPUI |
+| [Verdant](https://github.com/OpenGreendam/verdant) | Typed state, continuous gesture previews, final commits and native text/selection/scroll; cleanup ends stale input and tasks. | GPUI |
+
+Verdant’s typed pressed/selected state drives appearance without another interaction owner. Continuous gesture previews and final commits preserve their declared action boundaries. Text, selection and scroll remain native host operations; cleanup ends stale input and async work.
+
+## Migration and retained targets
 
 Start from the behavior the application needs and independent component
 definitions. Migrate its relevant `.proto.ts` declarations and callbacks into

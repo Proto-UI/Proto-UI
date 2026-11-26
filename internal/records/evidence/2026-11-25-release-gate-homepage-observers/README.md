@@ -1,11 +1,23 @@
+---
+kind: audit
+status: archived
+date: 2026-11-25
+archived: 2026-11-27
+source:
+  revision: 1c4a23455175ec65d3b41a630cfa9797d74a721d
+  path: internal/records/evidence/2026-11-25-release-gate-homepage-observers/README.md
+  sha256: d69e713455a634f339ee822d7f9345d9cb62f0c968b6f5d60edd9abce06480f6
+---
+
 # Homepage observation repairs
 
-The completed full run `45537881490` exposed three observation mismatches in the mobile and density scripts:
+Archived on 2026-11-27 (Asia/Shanghai). The [complete historical record](https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-homepage-observers/README.md) preserves the original observations and their evidence boundaries.
 
-- A named nested Canvas helper acquired tsx's `__name` annotation and failed after Playwright serialized it. The same two alpha measurements now use an anonymous array callback; no browser-global helper is installed.
-- The enlarged source window was checked against an obsolete fixed 417px cap. Its existing authored limit is `min(36rem, 65svh)`. The observer now computes that upper bound independently from the measured root font and viewport, retaining overflow, positive size, short-source natural height, Copy, and keyboard scrolling assertions.
-- Current homepage content flows in `data-home-gallery-stage`. The density observer reads that actual owner and uses the existing native hero link to expand the inert mobile overview before reading interactive content. The immutable historical baseline still uses its original `.home-gallery` owner. Membership and physical spacing checks are unchanged.
+## Evidence
 
-The native navigation bridge initializes links in bounded batches. Readiness now waits for every visible navigation row's actual Text and Surface owners, instead of beginning the full observation after only one row has mounted. The observation still rejects missing leaves and unreadable or undersized native destinations, using the same existing wait deadline.
+- [Original receipts and supporting files](https://github.com/Proto-UI/Proto-UI/tree/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-homepage-observers).
+- [Archive source index](../../2026-11-26-retained-record-archive-index.json).
 
-`homepage-evidence-contract.test.ts` passed **23/23**, including serialization, negative geometry, pinned baseline, and bounded workflow controls. The complete mobile and density native workflows are pending on the committed candidate; these source tests are not replacement screenshot evidence.
+## Scope & Limits
+
+This page is a navigation pointer. The archived record retains its original results and pending checks at the cited revision; it is not a current-source acceptance report.

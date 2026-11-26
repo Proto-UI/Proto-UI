@@ -1,9 +1,0 @@
-# Restore explicit inputs at three existing test boundaries
-
-Three general-CI regressions came from fixture inputs or diagnostics that no longer reached their intended boundary. This commit changes tests only.
-
-- Drawer intrinsic drag reads its untransformed used CSS height. Happy DOM kept the authored `height: auto` string even though the existing fixture already supplied a 200 px layout rectangle. The fixture now supplies that same 200 px used height through its computed-style stub; authored inline `auto`, original drag distances, outcomes and cancellation checks remain. Native `CSSStyleDeclaration` methods retain their original receiver. An intermediate unbound-proxy attempt produced explicit receiver errors and is retained in the evidence rather than counted as a pass.
-- Ancestor Context remains unavailable to the compiler profiles under test. The existing typed-member parser now rejects `def.context` and `run.context` with registered `PUI1006` before syntax lowering can report `PUI1004`. Each original negative case still requires failure and now checks the exact diagnostic message, line and source span. This does not implement or admit compiler Context.
-- The composed Dialog Mask test used an old partial handwritten stylesheet. It failed on new public tokens before reaching its intended missing-I1-receipt control. It now runs the actual CLI token extractor on the public shadcn and Base Dialog directories and generates the complete companion. The negative artifacts still remove only the I1 marker and must reject with no early readiness; the valid deferred control and cleanup checks remain.
-
-The final three-file run passed **34 tests with zero failures or skips**. The [receipt](evidence/2026-11-23-boundary-fixtures/receipt.json) retains exact source hashes, the command, complete logs and failed intermediate observations. This is controlled-host and compiler-diagnostic evidence, not native layout or release acceptance.

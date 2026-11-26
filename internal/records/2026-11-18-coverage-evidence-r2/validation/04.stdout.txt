@@ -1,1 +1,0 @@
-[coverage-governance] OK (7 Issues; observation-only timestamp changes ignored)

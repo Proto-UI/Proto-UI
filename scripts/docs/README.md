@@ -70,6 +70,23 @@ Finalization compares current captures, Vitest reports, logs and source receipts
 
 For a local reproduction on a sandbox-capable Linux browser host, install the declared dependencies, set `CHROME_PATH`, bind `CANDIDATE_SHA` to the clean checkout and set `SPRINT3_EVIDENCE_DIR` to a fresh directory outside the repository. Run `node scripts/test/sprint3-consumer-evidence.mjs init`, then `run`, and finally `finalize` even when `run` fails. Each attempt needs a new directory; an old failed receipt is never overwritten. A green bounded dispatch still does not establish installed Shenko/OpenGreendam/Verdant application acceptance, historical Camoufox results, physical-device/OS assistive-technology acceptance, non-Web completion, or the full release cycle.
 
+## Internal documentation hygiene and readability checks
+
+Run the deterministic, offline internal-docs gate from the repository root:
+
+```sh
+corepack pnpm@10.32.1 check:internal-docs
+node scripts/docs/check-internal-docs.mjs --warnings --files <path>
+node --test scripts/docs/test/check-internal-docs.test.mjs
+```
+
+`scripts/docs/check-internal-docs.mjs` enforces the [internal engineering writing guide](../../internal/governance/engineering-writing-guide.md) across `internal/**`:
+
+- **Hygiene & size**: bans binary screenshots/media/archives/raw logs under `internal/**`, enforces JSON/Markdown size budgets, and checks single-H1 discipline.
+- **Prose readability (AST)**: parses Markdown via `mdast` to detect wall-of-text paragraphs, inline-code path stuffing, repeated per-paragraph defensive disclaimers, stacked negative clauses, long unbroken prose runs, and oversized table cells.
+- **Legacy debt ratchet**: grandfathers existing violations in `internal/baselines/internal-docs-debt.json` (regenerated via `corepack pnpm@10.32.1 check:internal-docs:baseline` after cleanup) so new or modified internal docs cannot add debt.
+- **Advisory English prose linting (Vale)**: executes `.vale/styles/ProtoUI/*.yml` rules locally in Node (warnings only) and natively via `errata-ai/vale-action@v2` in CI (`internal-docs-lint`).
+
 ## Repository documentation references
 
 `check:public-docs` also runs the repository reference check. To inspect it independently:

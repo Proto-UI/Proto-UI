@@ -1,9 +1,23 @@
+---
+kind: audit
+status: archived
+date: 2026-11-25
+archived: 2026-11-27
+source:
+  revision: 1c4a23455175ec65d3b41a630cfa9797d74a721d
+  path: internal/records/evidence/2026-11-25-release-gate-package-budgets/README.md
+  sha256: f7c3a0be57f9d42035fd7d005e9c562e832cf3b22b471bbdc72fc43e036c3be6
+---
+
 # Accepted 0.3 package cost transaction
 
-This candidate changes only the React, Vue and Web Component whole-entry ceilings to 181900, 180800 and 218400 bytes. Their measured costs are 181862, 180720 and 218353. Each ceiling uses the preceding positioning transaction's next 100-byte boundary, leaving 38/80/47 bytes. The other 6 limits and every measurement/strict failure control remain unchanged.
+Archived on 2026-11-27 (Asia/Shanghai). The [complete historical record](https://github.com/Proto-UI/Proto-UI/blob/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets/README.md) preserves the original observations and their evidence boundaries.
 
-Three original canonical reports are retained byte-for-byte under gzip. The prior 47ae cost is the exact input to the already recorded positioning transaction. Its original report failed the earlier ceilings; it is not relabelled green. The 4d report failed WC by 209 bytes. The 798 report failed React/Vue/WC by 62/120/253 bytes after a successful frozen install, complete build and 28 controls.
+## Evidence
 
-The source comparisons retain every closure input and its old/new hash and retained bytes. All 3 Adapter roots and Runtime have identical input membership in both comparisons. Gzip changes are actual whole-entry measurements, not sums of module deltas. Current 8b inputs match the 798 report for all 9 entries. This source equality is not a final-head CI pass.
+- [Original receipts and supporting files](https://github.com/Proto-UI/Proto-UI/tree/1c4a23455175ec65d3b41a630cfa9797d74a721d/internal/records/evidence/2026-11-25-release-gate-package-budgets).
+- [Archive source index](../../2026-11-26-retained-record-archive-index.json).
 
-The authored transaction records accepted behavior, investigated/rejected implementation refactors, environment, hashes, margin and rollback. Independent review and the final committed head's canonical strict measurement remain pending.
+## Scope & Limits
+
+This page is a navigation pointer. The archived record retains its original results and pending checks at the cited revision; it is not a current-source acceptance report.

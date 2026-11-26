@@ -1,0 +1,21 @@
+# Select connected-reaction fixture and discriminating stale-callback control
+
+Date: 2026-11-23. Non-normative fixture correction on `71d5221eba36ae482f49c7a4827a3f67acdd65f3`.
+
+## Governed behavior and the old failure
+
+`A-WEB-COMPONENT-0001-G/I/J/L` retain the instance and its state across synchronous DOM transport, reconcile the current view intent, and do not turn state updates into an implicit structural render. `P-SHADCN-SELECT-STYLE-LIMITS` additionally requires certified caller transport and unchanged-blueprint reuse to preserve the complete caller options. These are the existing authorities; this correction changes no specification or production code.
+
+The original general-run archive at `evidence/2026-11-23-conceal-fixtures/s67-general-baseline-remaining.json.gz` records the two normal/pending-reaction cases stopping in `preparing` instead of the required `entering`. The Happy DOM fixture supplied bounding boxes but omitted the used-layout offsets, viewport dimensions and size-write acknowledgement read by the current Select alignment lease. Missing computed margin/border values also produced non-finite measurements. The updated fixture supplies those platform facts, including dimensions derived from the lease's actual width/height writes. It still observes the real controller's phase and diagnostics; it does not write either result.
+
+The old fault injection waited for Item template removals during a portal move and expected four low-level `commitChildren` calls. Current retained-owner portal transport reuses those templates, so that premise no longer delivers the four pending text reactions. The corrected injection queues the actual text `connectedCallback` functions during the real content append, delivers each once in an explicitly injected synchronous detach window, and reinserts the same node. The test checks all four injected nodes were actually disconnected with no parent. This models the allowed late connected-reaction boundary; it is controlled Happy DOM evidence, not a claim that this particular browser sequence occurred naturally.
+
+The obsolete four-commit expectation is replaced with zero structural commits for this unchanged caller tree. The independent original assertions remain: no alignment structure invalidations, `entering`, no diagnostic, the same text owner identities, successful close/reopen, and the malformed ItemText diagnostic with the controlled Root still open. The original synchronous runaway bounds of 80 structure notifications and 100 commit/connection callbacks remain unchanged. No timer, retry, budget, production style or native acceptance threshold is relaxed.
+
+## Executed evidence
+
+The formatted candidate passes all three cases, with zero failed or pending tests. [The receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-select-connected-reactions/receipt.json) binds the exact test and production source hashes, command, base commit and timestamps; its adjacent compressed JSON and complete console log retain the result.
+
+A temporary negative control removed only the existing `if (!this.isConnected) return;` in the production adapter's queued-connect guard. The pending-reaction case then failed at the unchanged `probe.structures === 0` assertion with **8 actual structure invalidations**. The other two cases were unselected, not counted as passed. The production file was restored byte-for-byte in a `finally` block and its original SHA-256 was verified. The [negative-control receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-select-connected-reactions/s67-site-select-guard-control-receipt.json) and compressed raw JSON/log record the exact mutation and failure. That control used the same candidate before Prettier's whitespace-only rewrite; the subsequent three-case pass used the formatted source recorded in the main receipt.
+
+This closes the stale unit fixture and proves it detects the guarded topology regression. It does not establish a fix for the separate native Search case at 320 px / 200% text size, browser geometry fidelity, paint, accessibility, or assistive-technology acceptance.

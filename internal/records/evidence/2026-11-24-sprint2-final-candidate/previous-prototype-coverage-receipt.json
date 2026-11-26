@@ -1,9 +1,0 @@
-{
-  "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
-  "sourceHead": "8d19dc59cd5bbb84ff0a7c69d886685e0557b3a8",
-  "bytes": 3636215,
-  "sha256": "2c825825f0db9ba9ba2c859b2a87f9f802ffdae223e28e9998e7c6b7bd4406af",
-  "archive": "internal/records/evidence/2026-11-24-sprint2-final-candidate/previous-prototype-coverage.json.gz",
-  "archiveSha256": "21d0365171a77b70c5500e2fbfa58f14db8f7fba98ea253d167562b2a14a51b5",
-  "boundary": "Preserved prior candidate inventory unchanged; this archive is not new acceptance."
-}
