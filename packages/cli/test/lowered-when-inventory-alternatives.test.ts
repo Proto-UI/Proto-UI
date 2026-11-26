@@ -2,8 +2,84 @@ import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import {
+  HOST_ELEMENT_CAP,
+  tw,
+  type DefHandle,
+  type OwnedStateHandle,
+  type StyleHandle,
+} from '@proto.ui/core';
+import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import { EXPOSE_STATE_WEB_MAP_CAP } from '@proto.ui/module-expose-state-web';
+import { createRuntimeSession } from '@proto.ui/runtime';
 import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
 import { collectProtoStyleTokensFromFiles } from '../src/services/prototype-style-tokens';
+
+type RuntimeFlags = {
+  ready: OwnedStateHandle<boolean>;
+  focused: OwnedStateHandle<boolean>;
+};
+
+async function runtimeTokens(install: (def: DefHandle<{}>, state: RuntimeFlags) => void) {
+  const styles: StyleHandle[] = [];
+  const host = document.createElement('div');
+  const session = createRuntimeSession(
+    {
+      name: 'when-inventory-runtime',
+      setup(def) {
+        const state = {
+          ready: def.state.bool('ready', false),
+          focused: def.state.bool('focused', true),
+        };
+        def.expose.state('ready', state.ready);
+        def.expose.state('focused', state.focused);
+        install(def, state);
+        return (renderer) => renderer.el('span', 'native Rule');
+      },
+    },
+    {
+      prototypeName: 'when-inventory-runtime',
+      getRawProps: () => ({}),
+      schedule: (callback) => callback(),
+      commit: (_children, completion) => completion?.done(),
+      onRuntimeReady(runtime) {
+        runtime.attach('feedback', [
+          [
+            EFFECTS_CAP,
+            { queueStyle: (style: StyleHandle) => styles.push(style), requestFlush() {} },
+          ],
+        ]);
+        runtime.attach('expose-state-web', [
+          [HOST_ELEMENT_CAP, host],
+          [
+            EXPOSE_STATE_WEB_MAP_CAP,
+            (key: string) => ({ dataAttr: `data-${key}`, cssVar: `--pui-${key}` }),
+          ],
+        ]);
+      },
+    }
+  );
+  try {
+    await session.mount();
+    return styles.at(-1)?.tokens ?? [];
+  } finally {
+    await session.dispose();
+  }
+}
+
+function installOptionalRule(
+  def: DefHandle<{}>,
+  state: RuntimeFlags,
+  optional: OwnedStateHandle<boolean> | null = null
+) {
+  def.rule({
+    when: (when) =>
+      optional
+        ? when.all(when.state(state.focused).eq(true), when.state(optional).eq(false))
+        : when.state(state.focused).eq(true),
+    intent: (intent) => intent.feedback.style.use(tw('bg-primary')),
+  });
+}
 
 async function observe(when: string, extra = '') {
   const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'pui-when-css-')));
@@ -43,6 +119,69 @@ async function observe(when: string, extra = '') {
 }
 
 describe('CSS inventory enumerates complete closed When alternatives', () => {
+  it.each([false, true])(
+    'executes a defaulted State parameter with supplied=%s',
+    async (supplied) => {
+      const tokens = await runtimeTokens((def, state) => {
+        if (supplied) installOptionalRule(def, state, state.ready);
+        else installOptionalRule(def, state);
+      });
+      expect(tokens).toEqual([
+        supplied ? 'data-[focused]:not-[data-ready]:bg-primary' : 'data-[focused]:bg-primary',
+      ]);
+    }
+  );
+
+  it.each([
+    [false, false],
+    [false, true],
+    [true, false],
+    [true, true],
+  ])(
+    'executes only a complete native branch for reversed=%s choose=%s',
+    async (reversed, choose) => {
+      const tokens = await runtimeTokens((def, state) => {
+        const optional = reversed ? (choose ? state : state.ready) : choose ? state.ready : state;
+        // Deliberately retain the non-State alternative from the static negative
+        // fixture. The real web module must reject its entire selector candidate.
+        installOptionalRule(def, state, optional as OwnedStateHandle<boolean>);
+      });
+      expect(tokens).toEqual(
+        choose !== reversed ? ['data-[focused]:not-[data-ready]:bg-primary'] : []
+      );
+      expect(tokens).not.toContain('data-[focused]:bg-primary');
+      expect(tokens).not.toContain('not-[data-ready]:bg-primary');
+    }
+  );
+
+  it.each(['argument', 'initializer'])(
+    'does not turn the inventory vocabulary into a Runtime branch after an effectful %s',
+    async (form) => {
+      const tokens = await runtimeTokens((def, state) => {
+        const ready = state.ready;
+        const focused = state.focused;
+        function erase(bag: Partial<RuntimeFlags>) {
+          bag.ready = undefined;
+          return true;
+        }
+        function paint(optional: OwnedStateHandle<boolean> | undefined) {
+          def.rule({
+            when: (when) => (optional ? when.state(ready).eq(true) : when.state(focused).eq(true)),
+            intent: (intent) => intent.feedback.style.use(tw('bg-primary')),
+          });
+        }
+        if (form === 'argument') paint(erase(state) ? state.ready : state.ready);
+        else {
+          const optional = erase(state) ? state.ready : state.ready;
+          paint(optional);
+        }
+        expect(state.ready).toBeUndefined();
+      });
+      expect(tokens).toEqual(['data-[focused]:bg-primary']);
+      expect(tokens).not.toContain('data-[ready]:bg-primary');
+    }
+  );
+
   it('retains the actual Brutalist OTP focus and invalid conjunction', async () => {
     const tokens = await collectProtoStyleTokensFromFiles([
       path.resolve('packages/prototypes/brutalist/src/input-otp/control.proto.ts'),

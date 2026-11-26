@@ -522,7 +522,20 @@ export function createFiniteRowLifetimeProof(
     declarations: ReadonlySet<ts.VariableDeclaration | ts.ParameterDeclaration>,
     current: ts.SourceFile
   ): boolean => {
-    if (!declarations.size) return true; // An inline string array has no shared owner.
+    if (!declarations.size) {
+      // An inline list has no shared row owner, but replaying an imported
+      // helper still uses the constants loader's module admission. An opaque
+      // initializer can change inherited iteration before the helper runs.
+      // Keep the entry's existing admission; this is not a proof of whole-
+      // runtime or sibling-module intrinsic purity.
+      if (current.fileName === entry.fileName) return true;
+      let effects = moduleEffects.get(current);
+      if (effects === undefined) {
+        effects = constantModuleHasUnmodeledEffects(current);
+        moduleEffects.set(current, effects);
+      }
+      return !effects;
+    }
     const sources = graph(current);
     if (!sources) return false;
     const key = [...declarations]

@@ -771,7 +771,10 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).toContain(`data-[checked]:bg-main"])[data-checked]`);
     expect(tokensCss).not.toContain(`data-[checked]:pl-[20px]"])[data-checked]`);
     expect(tokensCss).toContain(`data-[checked]:bg-primary"])[data-checked]`);
-    expect(tokensCss).toContain(`data-[selected]:bg-background"])[data-selected]`);
+    // Tabs also guard these styles with the appearance prop. Runtime keeps the
+    // complete Rule in its JavaScript plan and consumes the bare style tokens.
+    expect(tokensCss).toContain(`[data-pui-style~="bg-background"]`);
+    expect(tokensCss).not.toContain(`data-[selected]:bg-background"])[data-selected]`);
     expect(tokensCss).toContain(`data-[hidden]:hidden"])[data-hidden]`);
     expect(tokensCss).toContain(`data-[open]:animate-in"])[data-open]`);
     expect(tokensCss).toContain('@keyframes pui-enter');
@@ -783,8 +786,9 @@ describe('@proto.ui/cli', () => {
       `data-[focus-visible]:outline-1"])[data-focus-visible] {\n    outline-style: solid;\n    outline-width: 1px;`
     );
     expect(tokensCss).toContain(
-      `data-[selected]:shadow-sm"])[data-selected] {\n    --pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);`
+      `:where([data-pui-style~="shadow-sm"]) {\n    --pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);`
     );
+    expect(tokensCss).not.toContain(`data-[selected]:shadow-sm"])[data-selected]`);
     expect(tokensCss).toContain(`[data-pui-style~="w-fit"]`);
     expect(tokensCss).toContain('width: fit-content;');
     expect(tokensCss).toContain(
