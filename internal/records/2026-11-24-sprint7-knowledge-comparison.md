@@ -10,7 +10,7 @@
 
 ## 冻结输入与实际暴露
 
-协议在 **2026-11-23 19:40:12.235609 UTC** 冻结，早于第一份参与任务的发出请求；完整输入见 [freeze.json](evidence/2026-11-24-knowledge-value-study/freeze.json) 和 [packets.json](evidence/2026-11-24-knowledge-value-study/packets.json)。
+协议在 **2026-11-23 19:40:12.235609 UTC** 冻结，早于第一份参与任务的发出请求；完整输入见 [freeze.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/freeze.json) 和 [packets.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/packets.json)。
 
 | 项目 | 实际固定值 |
 | --- | --- |
@@ -27,13 +27,13 @@
 
 成熟库路径实际使用固定的 Radix Tabs。普通要求路径没有接收 Proto 知识包，三个实现都采用自定义 React；附带知识路径获得 5 条有来源的交互事实，三个实现也都采用自定义 React。后三者没有获得最终 Proto 实现或 oracle。相同任务明确要求手动激活和循环，因此这些内容不是知识路径独占的信息。普通要求路径也允许访问公开生态文档；“普通要求”不表示模型没有预训练知识。
 
-三位成熟库参与者查阅了公共 Radix／APG 材料及固定安装版本的声明；知识组查阅了 APG，其中 knowledge-2 还查阅 React 文档。普通要求组三位记录为没有检索公共 URL。材料清单、实际读取、失败和工具自述均保留在 [participant-records.tar.gz](evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz)。安装依赖在各包的 npm ci 中实际执行；原固定 manifest 和 lock 在全部 12 个观察中保持相同。当前公开文档版本与固定安装版本的差异已由参与者记录，未把新文档版本替换进依赖。
+三位成熟库参与者查阅了公共 Radix／APG 材料及固定安装版本的声明；知识组查阅了 APG，其中 knowledge-2 还查阅 React 文档。普通要求组三位记录为没有检索公共 URL。材料清单、实际读取、失败和工具自述均保留在 [participant-records.tar.gz](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz)。安装依赖在各包的 npm ci 中实际执行；原固定 manifest 和 lock 在全部 12 个观察中保持相同。当前公开文档版本与固定安装版本的差异已由参与者记录，未把新文档版本替换进依赖。
 
 这是共享环境中的指令隔离，不是安全隔离或正式盲测。服务端精确模型 snapshot、seed、token、计算量及账单不可取得，均记为 `null` 并说明原因，没有用零代替。
 
 ## 原始结果与工作量
 
-下表时间只表示参与者自行记录的“首条命令到初次交付”，包含其局部操作，不包含其后排队等候独立浏览器的时间；不能据此推断账单或评估者工时。两项缺失没有补造。逐项原始出处和实际浏览器起止见 [results.json](evidence/2026-11-24-knowledge-value-study/results.json)。
+下表时间只表示参与者自行记录的“首条命令到初次交付”，包含其局部操作，不包含其后排队等候独立浏览器的时间；不能据此推断账单或评估者工时。两项缺失没有补造。逐项原始出处和实际浏览器起止见 [results.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/results.json)。
 
 | 路径 | 初始重复 | 干净安装／构建 | 首次独立浏览器 | 实现修复 | 已记录秒数 |
 | --- | --- | --- | --- | --- | --- |
@@ -67,23 +67,23 @@
 
 冻结前最终校准包括 3 个合法实例（宽屏、窄屏暗色、合法结构变体），均达到 22/22；6 个实际破坏对照均在对应条件失败：automatic 在 focus-only navigation，relationship 在初始关系，removal 在移除，duplicate-panel 在重复选择，live-off 和 unrelated-count 在同一个 live-region 的 0→1。
 
-全部早期记录保留在 [raw-tabs-evidence.tar.xz](evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz)：`results` 与 `results-03` 共 10 次页面创建前的浏览器启动失败；`results-04` 对合法初始容器代理焦点的错误限制导致 2 个正例误报，其余 3 个负例也在目标变异之前被同一限制挡住，不能算有效负控。后续 `results-05`、最终 `results-06` 及所有中间 evaluator 文件均保留，冻结后没有更换 oracle 来适配参与者。
+全部早期记录保留在 [raw-tabs-evidence.tar.xz](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz)：`results` 与 `results-03` 共 10 次页面创建前的浏览器启动失败；`results-04` 对合法初始容器代理焦点的错误限制导致 2 个正例误报，其余 3 个负例也在目标变异之前被同一限制挡住，不能算有效负控。后续 `results-05`、最终 `results-06` 及所有中间 evaluator 文件均保留，冻结后没有更换 oracle 来适配参与者。
 
 全部参与者本地浏览器尝试都未获得有效页面行为结果，原因包括 socket 权限错误或缺少可执行文件；library-2 另有 preview 子进程使外层 harness 超时的记录。这些是环境／harness 失败，不被统计成组件缺陷或修复轮次，也没有因后续远程成功而删除。实际行为结论来自另行记录的 Chrome145 生产观察。
 
-本次独立来源审查还找到一项真实知识入口缺口：第四条事实引用 `P-BASE-TABS-CONTENT-ROLE-CONTENT`，但冻结源 `0607c6c5c386b8a932ab850e92a8873b2121dc45` 实际 ID 为 **`P-BASE-TABS-CONTENT-ROLE-PANEL`**。该事实的语义受 `ROLE-PANEL`、`CURRENT-DERIVED` 和 `A11Y-LABELLEDBY-TARGET` 支持，问题是错误引用锚点。修复仅针对今后可发现的 `knowledge.md`；原实验包及其 SHA 不变。[修正证据](evidence/2026-11-24-knowledge-value-study/knowledge-reference-correction.json)记录原源文件 SHA `4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5` 与前后文件摘要。
+本次独立来源审查还找到一项真实知识入口缺口：第四条事实引用 `P-BASE-TABS-CONTENT-ROLE-CONTENT`，但冻结源 `0607c6c5c386b8a932ab850e92a8873b2121dc45` 实际 ID 为 **`P-BASE-TABS-CONTENT-ROLE-PANEL`**。该事实的语义受 `ROLE-PANEL`、`CURRENT-DERIVED` 和 `A11Y-LABELLEDBY-TARGET` 支持，问题是错误引用锚点。修复仅针对今后可发现的 `knowledge.md`；原实验包及其 SHA 不变。[修正证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/knowledge-reference-correction.json)记录原源文件 SHA `4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5` 与前后文件摘要。
 
 可转移的测试知识是：初次入焦可接受合法容器代理；条件 panel 与保留的隐藏 panel 应按 owner／关系接受；panel 内普通可聚焦内容不应自动判为 Tab 错误；计数必须来自同一个 connected polite region，允许正常文案且不能借用无关数字。它们已进入本次冻结 oracle 及对照，不由此次比较推导成完整 Proto 协议或业务场景保证。
 
 ## 独立复核与结清边界
 
-[/root/s7_tabs_results 的独立只读审查](evidence/2026-11-24-knowledge-value-study/independent-audit.json)核对了：1,401 个 archive 文件 SHA／字节数，12 份观察的 60 份源码绑定、204 份捕获产物、36 份 HTTP 文件摘要、12 个 trace ZIP CRC，以及 trace 中 24 个 HTML／CSS 响应正文。12 个 JS 响应正文没有被 Playwright trace 保存；其绑定来自静态服务器实际读取摘要、保留的 dist 与 trace 请求／200 响应记录，**不声称已有浏览器 JS 响应正文哈希**。冻结 oracle、任务、锁文件及初始／维护快照均匹配。
+[/root/s7_tabs_results 的独立只读审查](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/independent-audit.json)核对了：1,401 个 archive 文件 SHA／字节数，12 份观察的 60 份源码绑定、204 份捕获产物、36 份 HTTP 文件摘要、12 个 trace ZIP CRC，以及 trace 中 24 个 HTML／CSS 响应正文。12 个 JS 响应正文没有被 Playwright trace 保存；其绑定来自静态服务器实际读取摘要、保留的 dist 与 trace 请求／200 响应记录，**不声称已有浏览器 JS 响应正文哈希**。冻结 oracle、任务、锁文件及初始／维护快照均匹配。
 
 这是对已执行实验和材料的独立接受，不是 GitHub 原生 APPROVE，也不代替最终 PR 合入回读。#734 仍需把旧的“未执行／旧 automatic 校准失败”正文与这些真实后继结果对齐，并以最终合入提交记录知识入口修正及报告；原有历史失败不改写。无需补一个有利结果、第二个框架或 36+9 个样本才接受本次有限结论。
 
 ## 复现载体
 
-- [原始浏览器／校准／提交证据](evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz)：发布容器 SHA-256 `18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2`，9,821,220 bytes。原 gzip 导出 SHA 为 `04d53ec535e60ea78cbfe95e8f3aa4d565fd32005715a78932cae977de3708b4`、20,077,292 bytes；无损重压缩逐份验证所有 1,401 份证据及其 manifest 的路径、长度、SHA 不变，见 `archive-recompression.json`。
-- [参与者完整记录与固定知识源](evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz)：SHA-256 `34240aafc47d636233281b2885179a5a674bedd89d31e29a8772f2e3d01b4d84`，2,005,949 bytes；344 个参与者文件另有 manifest，安装目录不打包。
+- [原始浏览器／校准／提交证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz)：发布容器 SHA-256 `18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2`，9,821,220 bytes。原 gzip 导出 SHA 为 `04d53ec535e60ea78cbfe95e8f3aa4d565fd32005715a78932cae977de3708b4`、20,077,292 bytes；无损重压缩逐份验证所有 1,401 份证据及其 manifest 的路径、长度、SHA 不变，见 `archive-recompression.json`。
+- [参与者完整记录与固定知识源](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz)：SHA-256 `34240aafc47d636233281b2885179a5a674bedd89d31e29a8772f2e3d01b4d84`，2,005,949 bytes；344 个参与者文件另有 manifest，安装目录不打包。
 - 提取任一提交的 `project`，按其真实记录运行固定锁 `npm ci` 与 `npm run build`；在独立静态生产服务器下，以冻结 evaluator 的 `--project`、`--url`、`--out` 参数观察。需要安装协议中固定的浏览器和 Playwright；不要将本地缺浏览器当成行为通过。
 - 新模型运行只可作为新的重复，不能重建原 seed、账单或缺失时间。复核既有结果可直接使用 report、source、DOM、ARIA、截图、trace、HTTP 摘要及 manifests，不需重跑生成。

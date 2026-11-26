@@ -1,9 +1,0 @@
-{
-  "expectedOldHead": "f3cfa6801e3c2b86df3b62c47296f08f7b206ee2",
-  "newHead": "0a0e8f1768c86768804741d2b607231b150fbad3",
-  "remoteReadback": "0a0e8f1768c86768804741d2b607231b150fbad3",
-  "exitCode": 0,
-  "elapsedMs": 15924,
-  "force": false,
-  "ref": "refs/heads/work/sprint7-experiments-recovered-20261124-456f"
-}

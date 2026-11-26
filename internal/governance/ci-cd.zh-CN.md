@@ -189,4 +189,4 @@ GitHub cron 只能尽力调度，可能延迟或被跳过；cycle 不承诺精�
 
 仓库不提供局部真实发布快捷命令；package 局部修复进入下一次全局 release train。
 
-在已明确授权的 Finf 快速开发阶段，`check:package-budgets` 保留原阈值和真实失败比较，仅将尺寸超量作为 advisory；构建与测量错误仍阻断。`check:package-budgets:strict` 保持严格检查。详见[适用范围、68 项目标到期条件与恢复义务](finf-package-budgets.md)。
+`check:package-budgets` 与 `check:package-budgets:strict` 均默认强制执行 whole-entry 体积上限（已于 2026-11-22 恢复严格模式）。仅在显式选择的 Finf 开发诊断中，可通过 `check:package-budgets:development` 启用历史 advisory 模式；该诊断结果不能替代候选发布验收。详见 [ci-cd.md](ci-cd.md) 与 [finf-package-budgets.md](finf-package-budgets.md)。

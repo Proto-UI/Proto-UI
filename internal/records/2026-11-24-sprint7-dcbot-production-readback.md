@@ -44,4 +44,4 @@ Agent 按当前用户“补完 Sprint 7”的请求执行。下面使用 UTC；�
 
 原有界部署及回读条件现在有实际成功后继：源修复合入、真实生产 revision/image/binary 一致、健康与就绪成功、四份真实结果匹配、原流程暂停的计时器恢复。Issue 的旧关闭历史应保留；只回填这条条件和本次证据，不重开后再造一次关闭。
 
-完整脱敏收据：[production-readback.json](evidence/2026-11-24-sprint7-dcbot/production-readback.json)。它同时绑定原生产私有回执 SHA-256 `ce0efe08b8ecac98b1e324d7eef92f0b6f1527e57a5620738ec0fe58bea765cd` 和计时器回执 SHA-256 `29825594e307756842ede8d727ba979ce7a29c6729b249ef4bcaa7201658efef`。原始失败、时间、空平台检查、日志债务与后继成功各自保留。
+完整脱敏收据：[production-readback.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint7-dcbot/production-readback.json)。它同时绑定原生产私有回执 SHA-256 `ce0efe08b8ecac98b1e324d7eef92f0b6f1527e57a5620738ec0fe58bea765cd` 和计时器回执 SHA-256 `29825594e307756842ede8d727ba979ce7a29c6729b249ef4bcaa7201658efef`。原始失败、时间、空平台检查、日志债务与后继成功各自保留。

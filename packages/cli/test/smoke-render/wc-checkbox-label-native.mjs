@@ -180,13 +180,13 @@ const resources = new Map([
 // styles, and independently check the actual installed adapter's DOM output.
 const infrastructureStyles = {
   'proto-ui-view-visibility':
-    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]:not([data-pui-view-revealing="presence"], [data-pui-view-revealing="portal"])) { animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
+    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]), :where([data-pui-view-revealing="presence"]) :where([data-pui-root]) { transition: none !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]:not([data-pui-view-revealing="presence"], [data-pui-view-revealing="portal"])) { animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
   'proto-ui-wc-host-display':
     '\n:where(.pui-host-root) { display: block; }\n:where([data-pui-view-revealing="portal"] *) { transition: none !important; }\n:where([data-pui-portal-preparing]) { display: none !important; }\n',
 };
 const infrastructureHashes = [
   'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
-  'sha256-kUIiVlICzVrFbKV+PHF+dL/cmZ7Q0jCE2Rdj47JEk3Q=',
+  'sha256-+J4McXfxihccBJjMCxpqBONmw2MD8kKypu1GHz3R4To=',
   'sha256-6CnPTFG5Q1cqhoTby6bXuVcJGixrWsD5rKyqFtQEyOI=',
 ];
 assert.deepEqual(

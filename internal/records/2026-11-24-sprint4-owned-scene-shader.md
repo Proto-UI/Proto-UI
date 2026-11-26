@@ -56,7 +56,7 @@ Generated source size, retained bundle bytes and initialization are separate obs
 
 ## Executed evidence and remaining acceptance
 
-The [machine receipt](evidence/2026-11-24-sprint4-owned-scene/receipt.json) retains source and log hashes, toolchain, raw failures, three browser build manifests and actual result boundaries. Local executions bind the recorded worktree contents, not a commit that did not yet exist when they ran.
+The [machine receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-owned-scene/receipt.json) retains source and log hashes, toolchain, raw failures, three browser build manifests and actual result boundaries. Local executions bind the recorded worktree contents, not a commit that did not yet exist when they ran.
 
 | Evidence | Result and boundary |
 | --- | --- |

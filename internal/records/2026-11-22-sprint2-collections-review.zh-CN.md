@@ -7,8 +7,8 @@
 ## 1. 阅读入口和来源
 
 - 本路实现与原 Issue 条件：[集合交付记录](2026-11-22-sprint2-collections.md)。原始实现为 `6c59bbc20176fd523427ac46d7333908d978bc7b`，中文 Git 路径库存修复为 `b3e4cd0d2cfdeb4fe48787911cd5dd4cee7a006b`；二者均基于 `dc3b184ba10b0de53e40359c52d012b204b2cd01`。
-- [原文件哈希索引](evidence/2026-11-22-sprint2-collections-review/evidence-files.json)记录每个实际保存文件的原路径、原字节数/SHA-256、存储字节数/SHA-256和编码。`.log.gz` 是确定性、无损压缩；解压后的字节已与原文件核对。文件名中的 `green` 或 `final` 不代替实际终态，索引另保留日志打印的测试汇总。
-- [源码和执行绑定](evidence/2026-11-22-sprint2-collections-review/source-map.json)区分作者分支 commit、整合 commit、评审工作树哈希和实际 probe。cherry-pick 后的提交号不能替换原执行来源。
+- [原文件哈希索引](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/evidence-files.json)记录每个实际保存文件的原路径、原字节数/SHA-256、存储字节数/SHA-256和编码。`.log.gz` 是确定性、无损压缩；解压后的字节已与原文件核对。文件名中的 `green` 或 `final` 不代替实际终态，索引另保留日志打印的测试汇总。
+- [源码和执行绑定](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/source-map.json)区分作者分支 commit、整合 commit、评审工作树哈希和实际 probe。cherry-pick 后的提交号不能替换原执行来源。
 - 编译器作者的完整实际消费者材料单独保存在 [编译器消费者记录](2026-11-22-sprint2-compiler-consumers.zh-CN.md)及其 `evidence/2026-11-22-sprint2-compiler/evidence-files.json`，原提交 `f8ffe8e`。本包保存我的独立反例/回读，不重复那套 127 文件归档。
 
 独立 probe 的原脚本可能保留当时的绝对工作树路径。归档保留执行原文，而不将后来重写为相对路径的脚本冒充原执行源。复现时需要对照索引和源码 commit 设置对应路径。历史错误 oracle、启动方式错误和不完整运行也保留并单列。
@@ -42,7 +42,7 @@
 
 ### 网站 #1488 B/C/D 和 #1154 展示证据
 
-详见 [网站评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-website-review.md)。
+详见 [网站评审](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-website-review.md)。
 
 - `SITE-REVIEW-001`：双语 Hook R3 页面缺失原失败记录链接。补入准确 `dc3b184…` 原 preparation JSON，browser oracle 改为读取实际 doc-flow，仍明确原 exit 1、后续冻结断言未执行和 13 条件未完成。
 - `SITE-REVIEW-002`：实际 Hero 截图显示 native anchor 外圈与内部 Surface 同时绘制 focus。修复把焦点呈现集中到外层圆角原生链接，同时保留 forced-colors Highlight，并检查所有后代没有第二圈。
@@ -52,11 +52,11 @@
 
 ### TextControl 受控回调与 caret
 
-详见 [TextControl 评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-text-control-review.md)。共享模块 `b1033a4` 延伸候选保护至受控 input/change/compositionend 回调；`14c47f2` 防止实际 canonical A→B→A 再激活旧窗口。我独立执行实际模块 + Web host 的 18 条边界反例/正控，原红与修复后绿分开保存。编译器通用 helper `c5ebad5`/`a165c40` 独立实现同一契约，不能用共享 Adapter 结果代替其验收；生成消费者的 20 条 native case 仍需正式运行。
+详见 [TextControl 评审](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-text-control-review.md)。共享模块 `b1033a4` 延伸候选保护至受控 input/change/compositionend 回调；`14c47f2` 防止实际 canonical A→B→A 再激活旧窗口。我独立执行实际模块 + Web host 的 18 条边界反例/正控，原红与修复后绿分开保存。编译器通用 helper `c5ebad5`/`a165c40` 独立实现同一契约，不能用共享 Adapter 结果代替其验收；生成消费者的 20 条 native case 仍需正式运行。
 
 ### 显式 Checkbox / Radio / Switch Field
 
-详见 [Field choices 评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-field-choices-review.md)。源链 `e16e820 → ebbfc57 → 3693622 → 42ee3b9 → 095ecbd`。前四个源缺陷和新增 Switch reset 缺陷均经原独立反例复验：
+详见 [Field choices 评审](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-field-choices-review.md)。源链 `e16e820 → ebbfc57 → 3693622 → 42ee3b9 → 095ecbd`。前四个源缺陷和新增 Switch reset 缺陷均经原独立反例复验：
 
 | Finding | 原失败 | 修复及独立结果 |
 | --- | --- | --- |
@@ -72,7 +72,7 @@
 
 ## 4. 编译器、安装与真实消费者的独立评审
 
-详细分工和证据分别见 [语义评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-compiler-review.md)、[固定源码与 CLI](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-pinned-cli-review.md)、[真实下游与成本](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-real-consumer-cost-review.md)、[native 消费者源审查](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-compiler-native-review.md)。
+详细分工和证据分别见 [语义评审](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-compiler-review.md)、[固定源码与 CLI](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-pinned-cli-review.md)、[真实下游与成本](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-real-consumer-cost-review.md)、[native 消费者源审查](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-compiler-native-review.md)。
 
 原 `936a6f4` 的三个有区分力缺陷已分别修复并独立验证：
 
@@ -90,13 +90,13 @@ Shenko 最后回执使用 `a165c40` 上游产物、固定真实 consumer head，
 
 ## 5. Date Picker 补充回归与队列
 
-[Date Picker 评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-datepicker-review.md)保留原 dc3 基线四红和 `3bd5bcf` 对 outward callback/accepted completion 顺序的修复。作者完整 106/106 与我的四个 Runtime 独立 probe 属于该边界，不是以后新增 State/Context 重入的证明。
+[Date Picker 评审](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-datepicker-review.md)保留原 dc3 基线四红和 `3bd5bcf` 对 outward callback/accepted completion 顺序的修复。作者完整 106/106 与我的四个 Runtime 独立 probe 属于该边界，不是以后新增 State/Context 重入的证明。
 
 后续另一独立 reviewer 发现更早的 public State subscriber、合法更早 Calendar Context subscriber，以及嵌套 Popover Context subscriber 创建新 request 的路径。原红、中间修复的有限绿和精确三源快照分别保留；`reviewedCommit` 表示被审基线的旧 JSON header 没有被篡改成执行候选，新的 source binding 明确执行的工作树字节。初版 `8251f7f` 准确保留这些 OPEN_FINDING。随后定义 `2419927` 与实现 `322a871` 改为真正的请求开始 capture + canonical opening session：capture 先于所有可观察副作用，Picker 只匹配实际 request/root/session，当前 Popover 事实不再受旧通知回写。编译器 reviewer 原八个反例复验 8/8，我只读核对全 delta 并逐字节确认五个产品源与执行快照相同，已知源码 finding 现已解决；这仍不代替 native/整合验收。
 
 来源对账保留两个非产品差异：新测试在 dispose 前保存旧方法引用、测试记录从 pending 标 passing；`dbcdecb` 再补测试 relation since。原八 probe 不导入这两测试/登记文件。作者日志的 `green.log` 实际为 143/144（新 probe 错读已清空 exposes），`r2.log` 才是最终 144/144；原字节与解释均保留，不按文件名判断结果。
 
-队列详见 [串行验收评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-sprint2-ci-review.md)。两个实际反例已修复：timeout 不能在 leader 退出后取消 descendant 的最终 group kill；相同数量的假 case 不能替代精确 family/host/scenario 集合。新增 compiler20 的相同 count-only 弱点也用原伪造 receipt 复验拒绝，真实 ID 集合接受、selected skipped 仍 incomplete。
+队列详见 [串行验收评审](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-sprint2-ci-review.md)。两个实际反例已修复：timeout 不能在 leader 退出后取消 descendant 的最终 group kill；相同数量的假 case 不能替代精确 family/host/scenario 集合。新增 compiler20 的相同 count-only 弱点也用原伪造 receipt 复验拒绝，真实 ID 集合接受、selected skipped 仍 incomplete。
 
 `2430aeaf1c74dc1f4563a543e0021574e7d5c441` 的最终已审计划是 **10 suites / 304 cases：292 browser + 12 Node/HappyDOM**。choices 与 Date Picker 只增加原套内 case；12 阶段最大 180 分钟，加 process-group grace、安装 10 分钟、上传 3 分钟和 setup 余量，由 210 分钟 job 覆盖。整合者日志 `sprint2-integration-controls-r2.log` 实际打印 Node 合并 **26/26**（含 queue 五条）、Rhea **103/103**、catalog helper **7/7** 和 305 双语 primary routes 检查通过；不把 26 再与其子集重复相加。
 

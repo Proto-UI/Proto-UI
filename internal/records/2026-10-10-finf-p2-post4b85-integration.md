@@ -28,7 +28,7 @@ This generated SSR helper is a different path from the real `AdaptToWebComponent
 
 ## Source proof and acceptance limits
 
-Canonical proof now names A and verifies 4,206 bound paths with 121 Git tree objects. Only the two Field bindings changed; the six other changed paths are outside that inventory. The [separate eight-path manifest](./evidence/2026-10-10-finf-p2-source-manifest.json) includes 21 self-verifying Git tree objects, commit bytes, blob IDs and SHA256 values to close that source-path proof offline. Source identity is not implementation or native acceptance.
+Canonical proof now names A and verifies 4,206 bound paths with 121 Git tree objects. Only the two Field bindings changed; the six other changed paths are outside that inventory. The [separate eight-path manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-10-10-finf-p2-source-manifest.json) includes 21 self-verifying Git tree objects, commit bytes, blob IDs and SHA256 values to close that source-path proof offline. Source identity is not implementation or native acceptance.
 
 All other canonical top-level fields remain unchanged: 258 draft catalog identities; 55 core plus 13 prior-work items, 68 total, with checkedCoreTodos still zero; all four SSR profiles unimplemented; Liquid Card private and default-off; all 280 GPUI rows required-unassessed. Historical records retain their original identities.
 

@@ -1,7 +1,0 @@
-# Preserve the selected request failure identity in the older disposal fixture
-
-The November 17 disposal fixture originally required the private React SSR request to wrap even a sole cleanup failure in an `AggregateError`. Its historical receipt remains unchanged. Sprint 5 subsequently selected `C-LIFECYCLE-REQUEST-0001-E` in `788af8d4892be241ff47e15e332872ee36eb3a95`: absent an initiating error, one cleanup failure retains its identity, while multiple failures may be aggregated. The product and the newer request-owner tests already implement that selected boundary.
-
-General CI therefore produced nine failures in the older fixture: every throwing SSR case still expected the old aggregate. The fixture now checks the sole raw failure through its existing `expectFailure` observer. All ten cases remain: zero, negative zero, false, empty string, null, undefined, NaN, a truthy string, an Error and normal completion. The private timer cleanup, authored fail-fast and ordinary React/Vue 2 terminal-handle checks remain unchanged. No product error policy or SSR registry admission is modified.
-
-The complete older 30-case suite and current 83-case request-owner suite passed together: **2 files / 113 tests / zero failed or skipped**. The [receipt and original execution log](evidence/2026-11-23-ssr-disposal-oracle/receipt.json) retain the exact source, command and log digest. These generated consumer checks do not constitute canonical SSR, browser adoption or physical lifecycle acceptance.

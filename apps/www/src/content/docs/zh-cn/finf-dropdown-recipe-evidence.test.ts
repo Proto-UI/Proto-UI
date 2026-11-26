@@ -89,7 +89,8 @@ it('separates rest/focus/held press, checks disabled ownership and inset/Lucide 
     'await page.mouse.down()',
     "item.getAttribute('data-pressed')",
     "page.keyboard.press('End')",
-    "page.keyboard.press('Space')",
+    "for (const key of ['Enter', 'Space'])",
+    'await page.keyboard.press(key)',
     "menu.waitFor({ state: 'hidden' })",
     'measured.rem * insetRem',
     'observeDropdownGeometries(menu, refs)',
@@ -190,6 +191,7 @@ it('selects a fixed New York consumer without changing the authored Rhea recipe'
   expect(fixture.root).not.toBe(insetDemo.root);
   expect(insetDemo.root.props.styleProfile).toBe('rhea');
   expect(dropdownEvidenceRecipes).toEqual([
+    { recipe: 'basic', profile: 'new-york-v4' },
     { recipe: 'destructive', profile: 'new-york-v4' },
     { recipe: 'inset', profile: 'new-york-v4' },
     { recipe: 'inset', profile: 'rhea' },

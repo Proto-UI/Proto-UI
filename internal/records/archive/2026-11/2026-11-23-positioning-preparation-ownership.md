@@ -1,0 +1,11 @@
+# Pending anchored placement owns its preparation writes
+
+The general CI on `d0392fb31513b12f55b9e99b1fcf26a6338569c9` exposed five failures in `lease-generation.test.ts` and `edge-size-match-host.test.ts`. The new synchronous strategy pin kept a portaled popup inside the viewport before `computePosition` could resolve, but wrote `position`, `top` and `left` outside the lease's retirement path. Cancelled, replaced and revoked computations therefore left `fixed; top: 0px; left: 0px` on their former target.
+
+`C-ANCHORED-POSITIONING-0001-D/E/H/I` governs the geometry writer and cancellation boundary. The repair retains the pre-await pin, its coordinates, configured strategy and normal completed placement. Its temporary fields now use the existing identity-owned style lease. Disposal, target replacement and revoked input anchors restore only fields the preparation still owns, including their original priority. A completed solve retires the preparation before synchronously publishing its actual coordinates. Existing resolved coordinates retain their prior lifetime behavior.
+
+An equal pin from a newer lease acquires a distinct ownership identity. The old lease can neither clear that pin nor publish a pending result or sizing middleware after losing it. Newer author changes survive restoration. No transform, animation timing, layout policy, public API or target admission changes.
+
+The unchanged six-file baseline reproduction yielded 49 passed and 19 failed, of which five are these positioning failures; its other Vue and presence failures remain separate work. With this repair, the complete Positioning directory passed **20 files / 293 tests / zero failed or skipped**. Three added controls cover authored values and `!important`, replacement with equal provisional values, and late publication before the old owner is disposed. The existing completed-placement, sizing and input-anchor revocation checks remain.
+
+The [receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-positioning-preparation/receipt.json) binds source hashes and commands to the complete compressed baseline and candidate logs. This is controlled host/Happy DOM evidence, not native CSS geometry, performance, Apple or assistive-technology acceptance.

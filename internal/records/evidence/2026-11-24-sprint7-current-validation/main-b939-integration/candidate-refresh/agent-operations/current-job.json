@@ -1,1 +1,0 @@
-{"name": "agent-operations", "pid": 1940225, "startedAt": "2026-11-24T07:20:31.360120+00:00", "command": ["corepack", "pnpm@10.32.1", "check:agent-operations"], "outerTimeoutSeconds": 3000}

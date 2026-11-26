@@ -1,8 +1,0 @@
-{
-  "priorLocalDiagnosticHead": "4f8c56486825afbb563c3aa159c7ad76a1d3d82a",
-  "retainedBranch": "diag/portal-select-union-456f",
-  "head": "1cc4ad159da621d58e2b668d0d2ef0a22be6ed1b",
-  "branch": "fix/tooltip-consumer-readiness-456f",
-  "status": "",
-  "reason": "The original Portal PR was integrated by another actor. Preserve our unpublished merge as a diagnostic branch, and continue remaining native-consumer acceptance on a new owned branch from current main."
-}

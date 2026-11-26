@@ -26,11 +26,17 @@ These entities are draft because implementation and execution evidence are incom
 
 TypeScript factory/printer facilities serve the JavaScript-family AST paths. Rust emission can use `syn`, `prettyplease` and local typed `quote` construction; whole source files and runtime bodies must not become raw string templates. API spellings and internal data layouts remain implementation choices under the contract. There is no LLVM dependency in the first source-compilation milestone.
 
-## Current delivery state
+## Scope & Limits: current delivery
 
 The analysis API, `proto-compiler lint`, Node editor integration and source producer share the controlled TypeScript Program and checker. General lint records raw source bytes, module resolution and configuration and diagnoses implemented boolean, conversion and text-domain violations. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Complete phase, effect and ownership analysis is still missing.
 
-The frontend reads all three versioned authoring inputs from disk and resolves compiler-owned typed intrinsic declarations. Use `createProtoProgram` from `@proto.ui/compiler/frontend`, then `produceComponentIR(program, { fileName, publicName })` from `@proto.ui/compiler/producer` to select the default source export. On `status: 'produced'`, the result carries `component` and `sourceClosure`. Pass the same component to `emitReact(component)` or `await emitGpui(component)` from the respective `@proto.ui/compiler/targets/react` and `@proto.ui/compiler/targets/gpui` entries. The private CLI exposes this source path as `compile <path> --target react|gpui [--name ...] [--out ...]`. The public Core runtime has yet to export `@proto.ui/core/authoring`, and common-source execution through an Adapter remains unverified. See the [authoring inputs](authoring-surface.md) and [package entry](../../packages/compiler/README.md).
+The frontend reads all three versioned authoring inputs and resolves compiler-owned typed intrinsic declarations.
+
+1. Create the Program with `createProtoProgram` from `@proto.ui/compiler/frontend`.
+2. Select the default export with `produceComponentIR(program, { fileName, publicName })` from `@proto.ui/compiler/producer`. A produced result carries `component` and `sourceClosure`.
+3. Pass that component to `emitReact(component)` from `@proto.ui/compiler/targets/react` or `await emitGpui(component)` from `@proto.ui/compiler/targets/gpui`.
+
+The CLI provides `compile <path> --target react|gpui [--name ...] [--out ...]`. Public Core still lacks the authoring runtime export; common-source Adapter execution remains unverified. See the [authoring inputs](authoring-surface.md) and [package entry](../../packages/compiler/README.md).
 
 The [consumer intake](consumers/README.md) records exact revisions, source hashes, explicit entrypoints and unresolved inventory. Its verifier reuses that shared frontend closure; matching input bytes does not establish language validity, compilation or behavioral conformance.
 
@@ -44,7 +50,11 @@ The [consumer intake](consumers/README.md) records exact revisions, source hashe
 
 The foundation PR supplied definitions and retired the former implementation. Direct IR fixtures exercise the emitters independently of source lowering. The version 3 IR represents optional presence, the `fixed-instance` policy and closed records. In the authored Toggle, `active` has a boolean payload when present, and `activeChange` carries the readonly record `{ active: boolean }`.
 
-React and GPUI consumed the same Toggle source, checked IR and source closure. Four Chromium cases passed, covering trusted clicks, same-key rejection, retained initialization and invalid first input. Three `controlled_source` Rust cases passed, covering pointer requests awaiting owner publication, retained local state and a subscriber queuing owner acceptance. The focused run reported 17 Node tests and 22 tests in its native Rust suite, all passing with no skips. To repeat the checks from the repository root, run the following commands.
+React and GPUI consumed the same Toggle source, checked IR and source closure.
+
+- Four Chromium cases covered trusted clicks, same-key rejection, retained initialization and invalid first input.
+- Three native controlled-source cases covered pointer requests awaiting owner publication, retained local state and queued owner acceptance.
+- The focused run passed 17 Node and 22 native tests with no skips. Repeat its checks from the repository root:
 
 ```sh
 node --test packages/compiler/test/composite-ir.node-test.mjs
@@ -52,8 +62,16 @@ node --test packages/compiler/test/controlled-source-react.node-test.mjs
 node --test packages/compiler/test/gpui-target.node-test.mjs
 ```
 
-The version 4 compilation unit links the actual child definitions and nominal keys reached from the selected export. An authored `LevelOwner` provides a reactive value to a keyed `LevelReader`. Chromium and GPUI consume the same source and checked IR. Their independent cases exercise provider updates, equal-valued provider replacement, same-label key rejection and retained initialization across a React portal or GPUI physical detachment. Run `node --test packages/compiler/test/context-source-react.node-test.mjs` and the GPUI module above. [Authored Context fixture](../../packages/compiler/test/fixtures/authoring-context/owner.proto.ts.txt)
+The version 4 unit links actual child definitions and nominal keys reached from the selected export. `LevelOwner` provides a reactive value to keyed `LevelReader`; both hosts consume the same source and checked IR.
 
-The version 5 unit retains tagged state and result payloads, exact text-literal domains, typed match and await edges, creation actions and instance-owned tasks. The original default Tabs owner and named `AsyncTabPanel` both compile through this representation. On each target the registration for `authoring.load-tab` binds an application function. The Chromium fixture uses a loopback HTTP resource and the Rust fixture reads local documents. Both observe loading before completion, the original request and the current Context after suspension, an explicit business error, supersession, cancellation and withdrawal when a panel retires. The source-bound cases are in `packages/compiler/test/tabs-source-react.node-test.mjs` and `packages/compiler/test/consumers/gpui/tests/tabs_source/mod.rs`. The source inventory, Adapter execution and the remaining three targets have separate acceptance criteria.
+Independent cases cover provider updates, equal-valued provider replacement, same-label key rejection and retained initialization across a React portal or GPUI physical detachment. Run the [Context suite](../../packages/compiler/test/context-source-react.node-test.mjs) and GPUI module above. [Authored fixture](../../packages/compiler/test/fixtures/authoring-context/owner.proto.ts.txt)
+
+The version 5 unit preserves tagged state/result payloads, exact text literals, typed match/await edges, creation actions and owned tasks. Both the default Tabs owner and named `AsyncTabPanel` compile through it.
+
+- Each target binds `authoring.load-tab` to an application function: Chromium uses loopback HTTP and Rust reads local documents.
+- Both observe loading before completion, the original request and fresh Context after suspension, business error, supersession, cancellation and panel-retirement withdrawal.
+- Source inventory, common-source Adapter execution and the remaining three targets retain separate acceptance criteria.
+
+Source cases: [React](../../packages/compiler/test/tabs-source-react.node-test.mjs) and [GPUI](../../packages/compiler/test/consumers/gpui/tests/tabs_source/mod.rs).
 
 Use [the implementation checklist](atomic-lowering-completion.md) to connect work to exact contract criteria, and [application consumers](application-consumers.md) to select meaningful interactions. Collect comparable cost baselines before assigning budgets; source lines, support size, retained output and runtime cost are separate measurements.

@@ -6,7 +6,7 @@
 
 ## 1. 对象和证据入口
 
-完整机器清单为 [consumer-inventory.json](evidence/2026-11-22-sprint2-compiler/consumer-inventory.json)。它把 source × target × consumer × 验证表面分开，使用 `PASS`、`FAIL`、`UNSUPPORTED`、`UNTESTED`。其中不同表的行不能相加为完成率。
+完整机器清单为 [consumer-inventory.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/consumer-inventory.json)。它把 source × target × consumer × 验证表面分开，使用 `PASS`、`FAIL`、`UNSUPPORTED`、`UNTESTED`。其中不同表的行不能相加为完成率。
 
 | 对象 | 冻结来源 | 本轮实际消费方式 |
 | --- | --- | --- |
@@ -24,7 +24,7 @@
 - `d53d9cb41b90258c467b5614bcf4dd318786f256`：Verdant 原 producer 的上游 pin。
 - `ee943e59d6f6bd9a418c2ba6f11487e349d5ccc1`：新增真实浏览器消费者和 Shenko 初始 Git blob 校验的执行工具；这不是前面全部产物的编译器来源。
 
-原始回执保留内部的实际路径，便携副本由 [evidence-files.json](evidence/2026-11-22-sprint2-compiler/evidence-files.json) 逐文件绑定长度和 SHA-256。较大的日志、详细构建报告与执行工具使用无损 gzip，另记录解压后的原始长度与 SHA-256；不改写原日志。执行工具正文另存于 `tools/`；后续代码修订不覆盖旧执行工具。
+原始回执保留内部的实际路径，便携副本由 [evidence-files.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/evidence-files.json) 逐文件绑定长度和 SHA-256。较大的日志、详细构建报告与执行工具使用无损 gzip，另记录解压后的原始长度与 SHA-256；不改写原日志。执行工具正文另存于 `tools/`；后续代码修订不覆盖旧执行工具。
 
 ## 2. 独立定义与实现责任
 
@@ -39,17 +39,17 @@
 | controlled editing callback | `C-TEXT-CONTROL-0001-D` 的 callback boundary | 同一旧 owner 在 input/change/compositionend 回调内的同步不能提前覆写 candidate/caret；不同 canonical 立即权威；A→B→A 不重新激活旧候选窗口；拒绝仍在原 microtask 边界恢复 |
 | 严格生成类型 | 已解析 Props 和目标语言原有类型责任 | 只从无条件且相同的 scalar descriptor 建立 required/non-null 证明；条件、early return、try/catch、nullable 和未调用 helper 负例不升级。数组 literal-union 保留注解；WC `unknown` 保持 opaque unknown |
 
-独立 reviewer 找到的三个问题均有原反例和修复：listener 的 modern/legacy pair 混用；hoisted `function Object` 未阻断 builtin 静态展开；模块样式常量错误捕获 setup 同名变量。独立复验记录及红绿日志在 [review/](evidence/2026-11-22-sprint2-compiler/review/collections-agent-compiler-review.md)。后续 TextControl 修复也保留旧 helper 的 caret `2→1` 红例及四宿主、同步/queueMicrotask owner 的对照。
+独立 reviewer 找到的三个问题均有原反例和修复：listener 的 modern/legacy pair 混用；hoisted `function Object` 未阻断 builtin 静态展开；模块样式常量错误捕获 setup 同名变量。独立复验记录及红绿日志在 [review/](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/review/collections-agent-compiler-review.md)。后续 TextControl 修复也保留旧 helper 的 caret `2→1` 红例及四宿主、同步/queueMicrotask owner 的对照。
 
 ## 3. 固定版本安装、CLI 和可编辑生成文件
 
 `scripts/compiler/build-pinned.ts` 提供受支持的 source-pinned Node 产物。它要求完整 40 位 HEAD、干净工作树和冻结工具身份，输出九份文件。独立执行只依赖精确锁定的 TypeScript 和 Node built-in，不借用别的包安装的 Floating UI。`compiler-build.json` 记录 compiler 输入，生成 provenance 记录此次 build identity。
 
-实际在两个新目录构建 `3ea9e34`，九份文件逐字节相同；之后在隔离 artifact 中执行了真实 `npm ci --ignore-scripts`，安装一个锁定的 TypeScript 包。最新 `a165c40` artifact 也完成独立 `npm ci`。前一次双目录确定性证据仍绑定 `3ea9e34`，没有重标为较新源码。见 [确定性回执](evidence/2026-11-22-sprint2-compiler/receipts/pinned-determinism.json) 与 `logs/s2-pinned-*-install.log.gz`。
+实际在两个新目录构建 `3ea9e34`，九份文件逐字节相同；之后在隔离 artifact 中执行了真实 `npm ci --ignore-scripts`，安装一个锁定的 TypeScript 包。最新 `a165c40` artifact 也完成独立 `npm ci`。前一次双目录确定性证据仍绑定 `3ea9e34`，没有重标为较新源码。见 [确定性回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/pinned-determinism.json) 与 `logs/s2-pinned-*-install.log.gz`。
 
 支持路线和最小 family 命令已投影到 [中文指南](../../apps/www/src/content/docs/zh-cn/build/compiler-guide.md#受支持的固定源码编译器构建)、[英文指南](../../apps/www/src/content/docs/en/build/compiler-guide.md#supported-pinned-source-compiler-build) 及 [compiler README](../../packages/compiler/README.md#supported-source-pinned-consumption)。少量生成 family 可直接读取 pinned authored closure，无须构建全部 runtime 公共包。Runtime Adapter 消费仍拥有自己的公共包闭包，两条依赖责任分别记录。
 
-完整 [CLI 回执](evidence/2026-11-22-sprint2-compiler/receipts/pinned-cli.json) 包含以下真实 plain-Node 步骤：
+完整 [CLI 回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/pinned-cli.json) 包含以下真实 plain-Node 步骤：
 
 1. 缺父目录失败且不创建祖先；调用方创建父目录后成功。
 2. 新目录 compile、只读 diff、已有 output collision 拒绝。
@@ -71,7 +71,7 @@
 | `authored-transition-frontend.test.ts` | 4/4 PASS | 不改写作者 Transition，行为从输入定义导出 |
 | `artifact-linking-consumer.test.ts` | 后续完整运行 12/12 PASS | ordinary imports、native wrappers/portals/slots、Context 身份、不同 feature closure 的 Anatomy/Focus/A11y、生命周期 |
 
-三家族的 [原始成功回执](evidence/2026-11-22-sprint2-compiler/receipts/families-ordinary.json) 保留完整 source 文件清单。Vue2 的 JavaScript component body 使用既有 `checkJs:false` 路线，helper/TypeScript 通过严格检查；本轮**不声称修复原 strict checkJs 全量债务**。
+三家族的 [原始成功回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/families-ordinary.json) 保留完整 source 文件清单。Vue2 的 JavaScript component body 使用既有 `checkJs:false` 路线，helper/TypeScript 通过严格检查；本轮**不声称修复原 strict checkJs 全量债务**。
 
 初次严格构建暴露了 Props 非空证明、数组类型扩大和 WC unknown 投影问题，已修复实际 emitter。type-only 模块被擦除后允许无 executable mapping 的测试修正仍要求准确 `sourcesContent`，没有削弱可执行语句映射。初次 WC consumer 则错误假定默认 ShadowRoot 和自动 Props 重绘；runner 按当前 native light DOM 与 explicit update 定义校正，继续检查实际身份、更新和清理，不以旧假设要求产品改变。所有原失败回执保留。
 
@@ -79,14 +79,14 @@
 
 ## 5. 真实 Shenko 应用重放
 
-最新 [Shenko 回执](evidence/2026-11-22-sprint2-compiler/receipts/shenko-application.json) 使用 `a165c40` 固定编译器，在独立临时工作树执行。冻结时先用 Git blob 逐字节校对 39 份 `web/src` 与 `web/prototypes` 作者文件属于原 consumer commit，再检查运行前后 hash 一致。
+最新 [Shenko 回执](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/shenko-application.json) 使用 `a165c40` 固定编译器，在独立临时工作树执行。冻结时先用 Git blob 逐字节校对 39 份 `web/src` 与 `web/prototypes` 作者文件属于原 consumer commit，再检查运行前后 hash 一致。
 
 | 路线 | generate | 严格 tsc | 整个应用生产 build | 原应用测试 |
 | --- | --- | --- | --- | --- |
 | 原 source seam，仅更新上游 pin | PASS | PASS | PASS | 51/51 PASS |
 | 安装后的固定 JavaScript compiler artifact | PASS | PASS | PASS | 51/51 PASS；一次身份断言按新 seam 迁移，行为测试保留 |
 
-第二条路线先原样运行旧身份测试，得到 3 PASS / 1 FAIL，准确指出旧测试要求 `src/index.ts` 和原 Floating UI bundle 位置。之后仅把这一身份断言改成安装 artifact 路径、精确 compiler build/provenance 和已声明 TypeScript-only 闭包，再执行完整 51 项测试。原失败与 [临时消费者 patch](evidence/2026-11-22-sprint2-compiler/shenko/temporary-consumer.patch.gz) 都保留，不能称为“所有测试文件未改”。App/prototype 作者源码不变，未向下游仓库写入。
+第二条路线先原样运行旧身份测试，得到 3 PASS / 1 FAIL，准确指出旧测试要求 `src/index.ts` 和原 Floating UI bundle 位置。之后仅把这一身份断言改成安装 artifact 路径、精确 compiler build/provenance 和已声明 TypeScript-only 闭包，再执行完整 51 项测试。原失败与 [临时消费者 patch](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/shenko/temporary-consumer.patch.gz) 都保留，不能称为“所有测试文件未改”。App/prototype 作者源码不变，未向下游仓库写入。
 
 实际 consumer 锁定 React/React DOM `19.3.1`，编译器声明的 React target 是 `19.2.6`；后者在公开家族和通用消费者中独立验证，没有互相替代。原 runtime App 的三个公共入口实际公共构建闭包是 **42/47 包**，该数字是构建闭包，不是最小生成消费者的依赖或运行时 bundle 大小。
 
@@ -94,7 +94,7 @@
 
 ## 6. 实际入口的编译边界与 Verdant
 
-[source-admission.json](evidence/2026-11-22-sprint2-compiler/receipts/source-admission.json) 读取冻结 Shenko 的真实 `ui-kit.tsx` imports。20 个现用 Adapter 导出中，Button、ScrollAreaThumb、CollapsibleTrigger、CollapsibleContent、SeparatorRoot、Toggle 六个入口通过当前 React source 准入。它们在冻结 App 中仍是 Adapter 消费；准入成功没有被记成已经迁移的 App。
+[source-admission.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/source-admission.json) 读取冻结 Shenko 的真实 `ui-kit.tsx` imports。20 个现用 Adapter 导出中，Button、ScrollAreaThumb、CollapsibleTrigger、CollapsibleContent、SeparatorRoot、Toggle 六个入口通过当前 React source 准入。它们在冻结 App 中仍是 Adapter 消费；准入成功没有被记成已经迁移的 App。
 
 | 仍不支持的实际入口 | 首个诊断 |
 | --- | --- |
@@ -112,11 +112,11 @@
 
 Verdant 使用未改写的 `frontend/proto-ui/tools/build-proto-ui.mjs`：原 `--check` 对旧 pin/receipt 正确报漂移；临时上游 pin 更新到 `d53d9cb` 后，原 producer 生成 **20 份产物**，随后原 `--check` PASS。原源码 SHA-256 是 `9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78`；compiler IR source digest 为 `5a3a0f8a41876b1c5bfff90116767a7c9c2e330bbf48c07205d9ac5fb27e2806`，二者表示不同对象。
 
-目标是 `gpui-source-v1`、`gpuiDependency: workspace`，沿用实际 workspace GPUI `e5f2f9db75e97613232b5c1946333e61fa3828ab`。SDK `0.2.0` 的完整 content digest、生成 crate 身份和 20 文件 hash 在 [原 producer receipt](evidence/2026-11-22-sprint2-compiler/receipts/verdant-producer.json)。实际调用 Cargo 得到 `ENOENT`，因此 [Rust 编译为 UNTESTED](evidence/2026-11-22-sprint2-compiler/receipts/verdant-cargo.json)；桌面输入、焦点、AT、资源释放继续是各自平台验收条件。
+目标是 `gpui-source-v1`、`gpuiDependency: workspace`，沿用实际 workspace GPUI `e5f2f9db75e97613232b5c1946333e61fa3828ab`。SDK `0.2.0` 的完整 content digest、生成 crate 身份和 20 文件 hash 在 [原 producer receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/verdant-producer.json)。实际调用 Cargo 得到 `ENOENT`，因此 [Rust 编译为 UNTESTED](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/verdant-cargo.json)；桌面输入、焦点、AT、资源释放继续是各自平台验收条件。
 
 ## 7. 成本、原生浏览器与剩余条件
 
-三个完整家族 Button 的 1→3 个 independently generated module 使用普通 production bundler，保留全部导出 API。表中的 bytes 均有源路径、helper hash、metafile 与独立 gzip 记录，见 [production-costs.json](evidence/2026-11-22-sprint2-compiler/receipts/families-production-costs.json)。
+三个完整家族 Button 的 1→3 个 independently generated module 使用普通 production bundler，保留全部导出 API。表中的 bytes 均有源路径、helper hash、metafile 与独立 gzip 记录，见 [production-costs.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/receipts/families-production-costs.json)。
 
 | Profile       | module 数 |    生成输入源码 B | retained production B |          gzip B |
 | ------------- | --------: | ----------------: | --------------------: | --------------: |
@@ -131,6 +131,6 @@ Production React 在 Happy DOM 中实际创建 1/3 个 owner 的单次观察分�
 
 新增 `sprint2-native.browser.test.ts` 包含四宿主 × 三家族 Button 的 12 条，以及四宿主 × 同步/queueMicrotask owner 的八条 TextControl。真实浏览器将检查 native pointer/key/focus、disabled、普通 children identity、Shadcn colorScheme、Brutalist reducedMotion、`5678` 顺序和 caret、拒绝、detach/reconnect、旧物理输入事件、isTrusted 与 listener 释放。每条独立留下首个失败、截图和 trace。它使用宿主标准 sandbox；本地启动权限不足没有通过关闭 sandbox 绕过。
 
-静态装配生成了 16 个完整图、207 个 artifact，浏览器 bundle 为 `4,587,670 B`；执行时 source/input/artifact hash 都保留。原装配脚本返回 compact JSON 对象的 hash，但保存的是 pretty JSON 文件；提交前已改为返回实际文件字节 hash。旧日志和 manifest 不重写，实际执行脚本从 hash 核对恢复保存，具体差异见 [static-assembly-reconciliation.json](evidence/2026-11-22-sprint2-compiler/static-assembly-reconciliation.json)。这项记录仅证明静态装配，不证明原生测试通过，更不证明物理 OS IME 或辅助技术验收。
+静态装配生成了 16 个完整图、207 个 artifact，浏览器 bundle 为 `4,587,670 B`；执行时 source/input/artifact hash 都保留。原装配脚本返回 compact JSON 对象的 hash，但保存的是 pretty JSON 文件；提交前已改为返回实际文件字节 hash。旧日志和 manifest 不重写，实际执行脚本从 hash 核对恢复保存，具体差异见 [static-assembly-reconciliation.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint2-compiler/static-assembly-reconciliation.json)。这项记录仅证明静态装配，不证明原生测试通过，更不证明物理 OS IME 或辅助技术验收。
 
 本批可以按实际结果回填的独立子条件包括：#1458 的固定消费路线、F11 旅程和 F13 契约；#732/#733 的完整三个家族四 Web 普通消费和当前组合结果；#1055 的当前真实 App 与 1→N 成本记录；#1145 的上述共享定义独立实现和反例；#1061 的当前 WC 普通 DOM 生命周期结果。完整父条件继续保留：全文件/全 profile 分类与原分母审计、全部独立 Adapter 差分与 mutation/seeds/shrinking、原 F6 同边界重现、Vue2 完整 strict checkJs、原生浏览器终态、GPUI/额外后端平台、SSR、AxisInput compiler 以及原私有来源恢复。不可用本轮子项通过来关闭这些完整父条件。
