@@ -856,7 +856,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               // Runtime schedules this epoch after the complete notification
               // returns. Publish its captured acquisition after any diagnostic
               // or readiness reentry has finished scheduling a nested epoch.
-              if (event.type === 'mount.phase' && event.phase === 'mounted')
+              if (
+                event.type === 'mount.phase' &&
+                event.phase === 'mounted' &&
+                portalAcquisition === finishingAcquisition
+              )
                 completedMountAcquisition = finishingAcquisition;
             }
           },
