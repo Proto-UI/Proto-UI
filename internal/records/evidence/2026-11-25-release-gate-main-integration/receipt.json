@@ -1,0 +1,72 @@
+{
+  "parents": [
+    "224c5cdf69a9faa973dd663bae2c6f5caa4fe9a8",
+    "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057"
+  ],
+  "resolvedSourceHashes": {
+    "apps/www/src/components/PrototypePreviewer/collection-recipes.test.ts": "88b1a180f47bd7e0885d47afd21adac8cfe291a42f52a5aae315cf2dbc5c1e4a",
+    "apps/www/src/components/PrototypePreviewer/form-validation-recipes.test.ts": "dab19e916a828113d9ce8e9aa0d9363a45a7f8238a6595635444547f2fefea49",
+    "apps/www/src/components/PrototypePreviewer/projection-composition.material-stages.test.ts": "6d707dc185e45cf902ec03cd506a2d192728f95b72d83d4499e2e2c362e91290",
+    "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts": "70dc62cf283dd149628b1d6f5c29cb1756e37f464c7418aa9d2e1f9fa3e4545f",
+    "apps/www/src/components/PrototypePreviewer/runtime-tabs-style.test.ts": "b927bee45760656a17054d6ac33703150412b509a2dd16afbc52f5bd72276953",
+    "apps/www/src/components/site-contents-command.test.ts": "0845aeab0ec7675c20bb7244b74d7880e0ac3194751461eb24cbd7d70c8402d3",
+    "apps/www/src/content/docs/zh-cn/demo-brutalist-image.test.ts": "3ee530e426aa80c6336615fe758546c38e2a84940455e172a8687f5fcdaa80d1",
+    "apps/www/src/content/docs/zh-cn/demo-brutalist-live-region.test.ts": "b4ecc3d93b68d4bb874b5094a4ce26433778aa059d624e0ae2f78fb6e7ad6ad6",
+    "apps/www/src/content/docs/zh-cn/demo-brutalist-radio-group.test.ts": "6585c85fe4e3839c90092f5c147a7e43546d2c3c91392442572d544ce43397c4",
+    "apps/www/src/content/docs/zh-cn/demo-brutalist-table.test.ts": "2fa01e91159ced34d898b153a77a56ac7c70e94fd51ce449cce710c8a5648015",
+    "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts": "ac64a5f02ed98fa3d01846cc76e244f0fdebfea0ed24671a31007b1404c79303",
+    "packages/adapters/base/test/web-material-initial-paint.test.ts": "f006c236475580b071165f1b8166321d8e7fa81583cb9720ee6ed85b74a5840f",
+    "packages/adapters/web-component/src/portal-mount.ts": "40cf50d461c4192e28536b0088510b76747da71a975bf790cb9bcb611b544715",
+    "packages/core/src/spec/feedback/application-role.ts": "0f0900c247310fd34d0d59028a2ac00f09e4ddf235e299a69378c23c1258d0d2",
+    "packages/core/test/feedback/percentage-root-translation.test.ts": "6b2cdb6f33259cddb992a230e85d085efe5f08815f3a2d83dc5701c5f95b9fee",
+    "packages/prototypes/base/test/calendar-family-recipes.test.ts": "00e666486e7bc89b2b5e77d34a7ac604c61da517036b775978b383d71b23ad01",
+    "packages/prototypes/base/test/calendar-variable-weeks.test.ts": "7a80defbc8775c833059ca0bb8a539503809444212729217026a356c1d5ff5d8",
+    "packages/prototypes/base/test/data-table-header-row.test.ts": "45e4d5457c40a1498e844536dc13cbbeda32f3c38319112dccf32c012111a88b",
+    "packages/prototypes/base/test/form-actions-quality.test.ts": "e1d4a59c21e28666f0027aa1cb8402fe8c687a20cd33fb9fb7f3870d8e767b2f",
+    "packages/prototypes/base/test/form-field-invalid-feedback.test.ts": "f712d754e30e1c7e8e30a44729b1a8beeaf3354e5c6c9ae330a71f31cbff427b",
+    "packages/prototypes/base/test/form-upstream-paint.test.ts": "c688d3fa2cc14c6e960bf21f6ce94f50ceb033699651f8850e1a3f7fd4a82fa5",
+    "packages/prototypes/base/test/runtime-tabs-appearance.test.ts": "740a5d27c74ad23e024c9aa91337a49bab1f9c37e7dc9696f4e84bd213903b46",
+    "packages/prototypes/bootstrap-2-3-2/src/collapsible/content.proto.ts": "1366762cdc887102244f6ea75ff1f740018cf4b6d938bce7e71ba820ace30222",
+    "packages/prototypes/bootstrap-2-3-2/src/collapsible/trigger.proto.ts": "38f011afe5cfe88095aac2f671a4caf2bd2c38d6f5ec153a1dc8553ac3a82eed",
+    "packages/prototypes/brutalist/src/collapsible/trigger.proto.ts": "3d2948179f93c321a147bebc29a195b0420aba2b24eba93f2a651283bc0a2698",
+    "packages/prototypes/shadcn/test/collection-profiles-r91.test.ts": "cff178229996a5262cf8c52367a6f37b453ba1aa501fbec4837c9e56255f0b8e",
+    "packages/prototypes/shadcn/test/dropdown-pointer-foreground.test.ts": "5b08cc99d2ec45f5366d83ff0244789c9a143cc51250edb5b66b510d1ac97f1b",
+    "packages/prototypes/shadcn/test/overlay-profiles-r91.test.ts": "6aa48562999566fd6c78d651f53442808e1567a824e090617a1ad2bb586abbbe"
+  },
+  "focusedTests": {
+    "www": {
+      "passed": 147,
+      "failed": 0
+    },
+    "portalThumb": {
+      "passed": 65,
+      "failed": 0
+    },
+    "base7": {
+      "passed": 63,
+      "failed": 0
+    },
+    "otherFourRootSuites": {
+      "passed": 51,
+      "failed": 0
+    },
+    "collapsible": {
+      "passed": 10,
+      "failed": 0
+    }
+  },
+  "scope": "Focused integration regressions with current worktree aliases; full clean candidate CI still required",
+  "rootDecisions": [
+    "Preserve unknown-motion transition-none explanation and token",
+    "Bootstrap inset body inherits the live theme color of the unpadded animated host; metadata rule lowers to dark:border-border, so assert that exact lowering while retaining native divider checks",
+    "Retain disabled guards on Bootstrap hover/press",
+    "Adopt main state-scoped Brutalist shadow rules to avoid conflicting base shadows",
+    "Keep main hoverPaint name with every existing ToggleGroup state assertion",
+    "Retain destructive Shortcut text-inherit and reject accent-foreground override",
+    "Retain complete Tooltip primary recipe and rejection of old foreground/background tokens"
+  ],
+  "nativeStillRequired": [
+    "original Collapsible native projection journey",
+    "official complete candidate release workflows"
+  ]
+}

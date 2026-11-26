@@ -1,14 +1,16 @@
 /** Passive geometry evidence only. Never writes to the rendered page. */
 export const HOMEPAGE_GALLERY_IDS = [
   'controls',
-  'workspace-command',
+  'shortcuts',
   'workspace-analytics',
-  'workspace-progress',
+  'workspace-command',
   'preferences',
-  'workspace-help',
-  'editor',
+  'workspace-progress',
   'hover',
+  'editor',
+  'workspace-help',
   'overlays',
+  'spark',
   'choices',
 ] as const;
 
@@ -38,9 +40,9 @@ export type GalleryFlowFacts = {
 export function galleryFlowEvidence(facts: GalleryFlowFacts) {
   const issues: string[] = [];
   const epsilon = 1;
-  // Differentiated axes: columns breathe more than stacked rows; compact cards
-  // use a tighter authored rhythm. Only one CSS pixel of rounding is allowed.
-  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1.5 : 2);
+  // Tight 1.25rem rhythm on desktop and 1rem on compact viewports. Only one CSS
+  // pixel of subpixel rounding is allowed.
+  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1 : 1.25);
   if (facts.containerCount !== 1 || !facts.container)
     issues.push('expected exactly one gallery container');
   if (
@@ -130,16 +132,18 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
     const expectedColumns =
       facts.viewportWidth <= 639
         ? 1
-        : Math.max(
-            1,
-            Math.floor(
-              (facts.container.width + expectedGap) / (18 * facts.rootFontSize + expectedGap)
-            )
-          );
+        : facts.viewportWidth >= 96 * facts.rootFontSize
+          ? 5
+          : Math.max(
+              1,
+              Math.floor(
+                (facts.container.width + expectedGap) / (18 * facts.rootFontSize + expectedGap)
+              )
+            );
     if (columns.length !== expectedColumns)
       issues.push('painted gallery column count differs from available 18rem tracks');
-    if (facts.container.width > 104 * facts.rootFontSize + epsilon)
-      issues.push('gallery exceeds the 104rem wide-screen limit');
+    if (facts.container.width > 116 * facts.rootFontSize + epsilon)
+      issues.push('gallery exceeds the 116rem wide-screen limit');
     for (let index = 1; index < columns.length; index++)
       if (Math.abs(columns[index]!.left - columns[index - 1]!.right - expectedGap) > epsilon)
         issues.push('painted gallery column gap differs from the responsive spacing contract');

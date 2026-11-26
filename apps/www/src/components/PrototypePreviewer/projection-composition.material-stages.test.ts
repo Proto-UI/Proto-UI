@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import liquidSelect from '../../content/docs/demo-liquid-glass-select.demo';
+import liquidDisabled from '../../content/docs/demo_components/select/demo-liquid-glass-select-disabled.demo';
+import liquidRtl from '../../content/docs/demo_components/select/demo-liquid-glass-select-rtl.demo';
+import liquidScrollable from '../../content/docs/demo_components/select/demo-liquid-glass-select-scrollable.demo';
 import { planMaterialStages } from './demo-material-stages';
 import type { DemoChild, DemoNode, DemoSpec } from './demo-types';
 import {
@@ -133,20 +136,55 @@ describe('projection preserves static material-stage admission', () => {
 
   // These are real composition/admission checks before any host mount. They
   // do not claim native rendering, optical fidelity or four-host interaction.
-  for (const presentation of ['select', 'tabs'] as const) {
-    it.each(runtimes)(
-      `admits the real Liquid Select hero stage through ${presentation} controls for %s`,
-      (runtimeId) => {
-        const original = planMaterialStages(liquidSelect.root);
-        expect(original.map((plan) => plan.scopeRef)).toEqual(['heroStage']);
-        const projected = compose(liquidSelect, runtimeId, presentation);
-        expect(planMaterialStages(projected.root)).toEqual(original);
-        expect(
-          nodes(byRef(projected.root, 'heroStage')).filter(
-            (node) => node.kind === 'proto' && node.prototypeId === 'liquid-glass-select-root'
-          )
-        ).toHaveLength(1);
-      }
-    );
+  for (const [recipe, childDemo, stageRef, roots] of [
+    ['hero', liquidSelect, 'heroStage', 1],
+    ['disabled', liquidDisabled, 'disabledStage', 2],
+    ['rtl', liquidRtl, 'rtlStage', 1],
+    ['scrollable', liquidScrollable, 'scrollStage', 1],
+  ] as const) {
+    for (const presentation of ['select', 'tabs'] as const) {
+      it.each(runtimes)(
+        `admits the real Liquid Select ${recipe} stage through ${presentation} controls for %s`,
+        (runtimeId) => {
+          const original = planMaterialStages(childDemo.root);
+          expect(original.map((plan) => plan.scopeRef)).toEqual([stageRef]);
+          // These independent public examples use the explicit narrow recipe
+          // path; only the hero claims the complete family manifest closure.
+          const prototypeIds = [
+            ...new Set(
+              nodes(childDemo.root).flatMap((node) =>
+                node.kind === 'proto' ? [node.prototypeId] : []
+              )
+            ),
+          ];
+          const contentRecipe =
+            recipe === 'hero'
+              ? undefined
+              : {
+                  id: `demo-liquid-glass-select-${recipe}`,
+                  prototypeIds,
+                  rootPrototypeId: 'liquid-glass-select-root',
+                };
+          const projected = compose(childDemo, runtimeId, presentation, contentRecipe);
+          expect(planMaterialStages(projected.root)).toEqual(original);
+          const content = byRef(projected.root, stageRef);
+          expect(
+            nodes(content).filter(
+              (node) => node.kind === 'proto' && node.prototypeId === 'liquid-glass-select-root'
+            )
+          ).toHaveLength(roots);
+          if (recipe === 'rtl') expect(content.attrs?.dir).toBe('rtl');
+          if (recipe === 'hero')
+            expect(
+              nodes(content).filter(
+                (node) =>
+                  node.kind === 'proto' &&
+                  node.ref === 'resetProduce' &&
+                  node.prototypeId === 'liquid-glass-button'
+              )
+            ).toHaveLength(1);
+        }
+      );
+    }
   }
 });

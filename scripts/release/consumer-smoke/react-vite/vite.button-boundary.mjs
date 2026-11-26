@@ -5,6 +5,7 @@ const prototypeModulePattern =
   /\/node_modules\/@proto\.ui\/(prototypes-(?:base|shadcn))\/dist\/(.+?)(?:\?.*)?$/;
 const SHADCN_BUTTON_SHARED_SUPPORT = new Set([
   'style-scope/context.js',
+  'style-scope/ids.js',
   'style-scope/selection.js',
 ]);
 

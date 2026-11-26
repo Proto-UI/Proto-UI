@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "previewer-removal-source-binding-review",
+  "date": "2026-11-25",
+  "sourceContext": {
+    "reviewedBaseHead": "73a046222bb55d5eb0494ca7a3d15d62635ea43a",
+    "priorBehaviorHead": "56221ad7221ae454ddda36cb9724001dcbf5525e",
+    "matrixPreimageSha256": "3364375265e11150a1eaf61e3aa84687b00c7a0ad0101b635054185067281b4e",
+    "binding": "This review admits the proposed exact source bytes after the remote 73a subtree optimization. It is not a final merged-HEAD acceptance or a replacement for the separate consumer refresh workflow."
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "previousSha256": "f8a053d9f8800d6ed158fd4ac8cbec1fae433775811ce93569eb019544ce8750",
+      "sha256": "d665ac5a6043619031f43b241da54bfc131cce5cf3f036214d679e42258f8a6b",
+      "previousGitBlob": "7b144969a1ca3b7de6e7524a2c8363da2fd2a7d2",
+      "gitBlob": "a8a98a342c66307bf9f046b6ecb256946590cf3c",
+      "owners": [
+        "www.demo.lazy-mount-observer",
+        "www.demo.prototype-previewer",
+        "www.demo.runtime-select"
+      ],
+      "previousSourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/73a046222bb55d5eb0494ca7a3d15d62635ea43a/apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "review": "The full bootstrap source continues to own document scan, lazy observation, abortable eager turns, late-import revocation and Astro cleanup. The document MutationObserver retains the detached-subtree TreeWalker and identity collection before destroy. A small set records only observed tracked roots that are still connected outside the original Document root. Later document removals inspect this exception set because closed shadow descendants are not exposed by a TreeWalker over their host. Returning to the Document or releasing an owner removes the exception. No full pending-root removal scan is restored.",
+      "dependencies": "Imports, runtime/selection/focus ownership, renderer loader and Matrix warmDemoModules behavior are unchanged. No new raw import, host projection, control, public API, cache scope or observer on a shadow root is introduced."
+    }
+  ],
+  "counterexample": {
+    "environment": "Node 24.22.3, Happy DOM 15.11.7, actual complete bootstrap modules and actual MutationObserver deliveries; not native Chromium acceptance",
+    "sequence": [
+      "Document scan registers and mounts the previewer.",
+      "Move that same root into a connected closed ShadowRoot and complete one document mutation delivery.",
+      "Remove the shadow host in a later delivery without disposing the bootstrap."
+    ],
+    "firstDelivery": {
+      "connected": true,
+      "destroyCalls": 0
+    },
+    "secondDeliveryDestroyCalls": {
+      "priorH562": 1,
+      "remote73a": 0,
+      "proposedSource": 1
+    },
+    "receipt": {
+      "name": "shadow-removal-fixed-control.json",
+      "sha256": "8fa53367e5889ae0d139a03253fc6c29c3744cf799615341cb763d94921925c0"
+    }
+  },
+  "validation": {
+    "positive": {
+      "command": "vitest run previewer-bootstrap.test.ts in the owned Happy DOM configuration; default 5000ms test budget unchanged",
+      "originalTests": 18,
+      "addedTests": 5,
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "receipt": {
+        "name": "bootstrap-positive-v2.report.json",
+        "sha256": "6cb1e92a598a7254746a0feaa482e1d198c32e6ce6991aca573665f8cb042b73"
+      }
+    },
+    "negative": {
+      "source": "Restore only the complete remote 73a bootstrap source while keeping all 23 assertions.",
+      "passed": 21,
+      "failed": 2,
+      "skipped": 0,
+      "todo": 0,
+      "failedTests": [
+        "tracked previewer moves outside the observed document root retains an owner moved into a connected open ShadowRoot and releases it on a later host removal",
+        "tracked previewer moves outside the observed document root retains an owner moved into a connected closed ShadowRoot and releases it on a later host removal"
+      ],
+      "receipt": {
+        "name": "bootstrap-negative.report.json",
+        "sha256": "2d147c87cc4003c9212df168d5ad240c6779054ffaf50a822605d7509edddcb5"
+      }
+    },
+    "lifecycleControls": {
+      "source": "Actual complete bootstrap and real Happy DOM MutationObserver",
+      "returnedRootPruned": true,
+      "releasedRootPruned": true,
+      "sameDeliveryMoveRetained": true,
+      "unrelatedRemovalConnectionReadsFor10000RegisteredLightDomRoots": {
+        "priorH562": 10000,
+        "remote73a": 0,
+        "proposedSource": 0
+      },
+      "receipt": {
+        "name": "shadow-removal-lifecycle-controls.json",
+        "sha256": "42cfd51c1ac498105cb6876c219cf2a8a2225bb430674b199c013ffd6e8097ff"
+      }
+    },
+    "testSource": {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.test.ts",
+      "sha256": "533008efe018f3e7fef5c403d5d8b1046061ca85c3295d9aecdbcd5ea3a8a4f5",
+      "originalFilePreservedAsByteIdenticalPrefix": true
+    },
+    "format": "Prettier 3.8.1 using the repository TypeScript formatting options reported both files unchanged. Astro plugin loading was unavailable in the local dependency set; neither file is Astro.",
+    "retainedFirstAttempt": "The first local 23-test run had 22 passes and one new-test instrumentation failure: tinyspy recursion around inherited isConnected caused an unhandled RangeError and a default-timeout failure. The source was unchanged; replacing that counter with an own descriptor delegating to the real Node getter produced the complete positive result. The first report/log are retained separately."
+  },
+  "matrixChange": {
+    "sourceHashRows": 1,
+    "ownersChanged": false,
+    "dispositionsChanged": false,
+    "criteriaChanged": false,
+    "checkboxesChanged": false,
+    "consumerSnapshotFieldsChanged": false,
+    "pinnedMainDefinitionChanged": false,
+    "genericGateOrRawImportAllowanceChanged": false,
+    "historicalFixturesChanged": false
+  },
+  "acceptanceBoundary": [
+    "The remote subtree optimization has a demonstrated shadow-move cleanup regression and requires this fix before treating its lifecycle behavior as preserved.",
+    "These bounded local tests do not establish Search 84/600, Homepage capture 20, Matrix initialization 60, Header 22/900, production publication 1000ms, or the complete governance-suite result on a new integrated HEAD.",
+    "Before applying, recheck the exact source and matrix preimages. Keep every original criterion, blocked disposition, historical fixture, consumer field and source-specific prior failure unchanged."
+  ]
+}

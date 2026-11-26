@@ -200,7 +200,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./targets', '@proto.ui/core', '@proto.ui/module-state']),
   }),
   'packages/modules/feedback/src/motion/projector.ts': Object.freeze({
-    sourceSha256: '2408989649ea882ad3ff9ba735e88839798312eaaf66e6ed96d5d36459702359',
+    sourceSha256: '7625cd105c0a63f49becab3662c8f7ac3c09cbbe0f1c8b38ed35b3f26d586b1d',
     specifiers: Object.freeze([
       './color',
       './sampler',

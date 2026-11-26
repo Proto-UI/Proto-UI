@@ -1,9 +1,16 @@
 // @vitest-environment node
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { createServer, type Server } from 'node:http';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
-import type { Browser, Locator } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  createServer as createViteServer,
+  type ViteDevServer,
+} from '../../../../../workspace/node_modules/vite/dist/node/index.js';
 import {
   RUNTIMES,
   applyColorScheme,
@@ -27,6 +34,9 @@ import { createFieldAsyncObservation } from './field-async-observation';
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
 let browser: Browser,
   baseUrl = '';
+let companion: ViteDevServer;
+let companionServer: Server;
+let companionUrl = '';
 const ref = (previewer: Locator, id: string) => previewer.locator(`.host [data-demo-ref="${id}"]`);
 const editor = (previewer: Locator, id: string) =>
   previewer.locator('.host').locator(fieldEditorSelector(id));
@@ -104,11 +114,62 @@ async function capture(
 }
 beforeAll(async () => {
   baseUrl = await startServer(route('base'));
+  companion = await createViteServer({
+    configFile: fileURLToPath(
+      new URL('../../../../test-fixtures/field-current/vite.config.ts', import.meta.url)
+    ),
+    cacheDir: await mkdtemp(path.join(tmpdir(), 'field-companion-vite-')),
+    server: { middlewareMode: true, hmr: false },
+  });
+  companionServer = createServer(companion.middlewares);
+  await new Promise<void>((resolve, reject) => {
+    companionServer.once('error', reject);
+    companionServer.listen(0, '127.0.0.1', resolve);
+  });
+  const address = companionServer.address();
+  if (!address || typeof address === 'string') throw new Error('Missing Field companion address');
+  companionUrl = `http://127.0.0.1:${address.port}`;
   browser = await launchBrowser();
 }, 120000);
 afterAll(async () => {
-  await Promise.all([browser?.close(), stopServer()]);
+  await Promise.all([browser?.close(), stopServer(), companion?.close()]);
+  if (companionServer?.listening)
+    await new Promise<void>((resolve) => companionServer.close(() => resolve()));
 });
+
+// Public demos now show a real form with a shared Reset footer. Controlled
+// refusal/acceptance and long text remain native gates in the explicit companion
+// below, using the same public Field family and the selected host adapter.
+async function verifyPublicForm(page: Page, previewer: Locator) {
+  for (const id of ['username', 'handle', 'email', 'plan']) {
+    await expect.poll(() => editor(previewer, id).count()).toBe(1);
+    expect(await editor(previewer, id).evaluate(fieldEditorOwnerRef)).toBe(`${id}Control`);
+  }
+  const username = editor(previewer, 'username');
+  expect(await ref(previewer, 'usernameLabel').textContent()).toContain('Username');
+  expect(await username.getAttribute('aria-labelledby')).toBe(
+    await ref(previewer, 'usernameLabel').getAttribute('id')
+  );
+  await ref(previewer, 'usernameLabel').click();
+  await expect.poll(() => username.evaluate((el) => el === document.activeElement)).toBe(true);
+  await page.keyboard.press('Tab');
+  await expect.poll(() => username.getAttribute('aria-invalid')).toBe('true');
+  await username.fill('Ada');
+  await page.keyboard.press('Tab');
+  await expect.poll(() => username.getAttribute('aria-invalid')).toBe('false');
+  expect(await editor(previewer, 'email').isEditable()).toBe(false);
+  expect(await editor(previewer, 'email').isDisabled()).toBe(false);
+  expect(await editor(previewer, 'plan').isDisabled()).toBe(true);
+  await editor(previewer, 'handle').fill('taken');
+  await expect.poll(() => editor(previewer, 'handle').getAttribute('aria-busy')).toBe('true');
+  await ref(previewer, 'reset').click();
+  await expect.poll(() => ref(previewer, 'handleStatus').textContent()).toContain('Handle ready');
+  await page.waitForTimeout(650);
+  expect(await ref(previewer, 'handleStatus').textContent()).toContain('Handle ready');
+  expect(await editor(previewer, 'handle').getAttribute('aria-invalid')).toBe('false');
+  expect(await editor(previewer, 'handle').getAttribute('aria-busy')).toBe('false');
+  expect(await ref(previewer, 'handleRoot').locator('[data-demo-ref="reset"]').count()).toBe(0);
+}
 describe('Field real browser journeys', () => {
   for (const family of families)
     for (const runtime of RUNTIMES)
@@ -119,6 +180,7 @@ describe('Field real browser journeys', () => {
           previewer: mountedPreviewer,
         } = await openRoute(browser, baseUrl, route(family), { width: 1100, height: 1000 });
         let previewer: Locator | undefined;
+        let surface = 'public-demo';
         const focusObservation = createFieldFocusObservation();
         const asyncObservation =
           family === 'liquid-glass' && runtime !== 'wc'
@@ -126,7 +188,19 @@ describe('Field real browser journeys', () => {
             : undefined;
         try {
           previewer = mountedPreviewer;
-          await selectRuntime(page, previewer, runtime, 'input', 6);
+          await selectRuntime(page, previewer, runtime, 'input', 4);
+          await verifyPublicForm(page, previewer);
+          await capture(previewer, `${family}-${runtime}-public-form`, {
+            family,
+            runtime,
+            surface,
+            state: 'current-public-form-reset',
+          });
+          surface = 'test-companion';
+          await page.goto(`${companionUrl}/?family=${family}&runtime=${runtime}`);
+          await page.waitForSelector('body[data-ready="true"]', { timeout: 20000 });
+          previewer = page.locator('[data-field-companion]');
+          await expect.poll(() => previewer!.locator('.host input').count()).toBe(6);
           for (const id of ['required', 'async', 'controlled', 'readonly', 'disabled', 'long']) {
             await expect
               .poll(() => previewer!.locator('.host').locator(fieldControlSelector(id)).count())
@@ -268,7 +342,7 @@ describe('Field real browser journeys', () => {
           await capture(
             previewer,
             `${family}-${runtime}-light`,
-            { family, runtime, state: 'light-valid-and-owner-invalid' },
+            { family, runtime, surface, state: 'light-valid-and-owner-invalid' },
             focusObservation
           );
           await applyColorScheme(page, 'dark');
@@ -283,7 +357,7 @@ describe('Field real browser journeys', () => {
           await capture(
             previewer,
             `${family}-${runtime}-dark-narrow-200`,
-            { family, runtime, state: 'dark-narrow-200-percent' },
+            { family, runtime, surface, state: 'dark-narrow-200-percent' },
             focusObservation
           );
           const evidence = await page.evaluate(() => (window as any).__fieldInputEvidence);
@@ -307,7 +381,7 @@ describe('Field real browser journeys', () => {
             await capture(
               previewer,
               `${family}-${runtime}-failure`,
-              { family, runtime, state: 'failure', error: String(error) },
+              { family, runtime, surface, state: 'failure', error: String(error) },
               focusObservation,
               focusAtFailure
             ).catch((captureError) => {
@@ -323,7 +397,7 @@ describe('Field real browser journeys', () => {
         }
       }, 120000);
   for (const family of families)
-    it(`${family} Chinese public route consumes the same six atoms`, async () => {
+    it(`${family} Chinese public route consumes the current shared form`, async () => {
       const { context, page, previewer } = await openRoute(
         browser,
         baseUrl,
@@ -331,9 +405,10 @@ describe('Field real browser journeys', () => {
         { width: 1100, height: 1000 }
       );
       try {
-        await selectRuntime(page, previewer, 'wc', 'input', 6);
-        expect(await previewer.locator('.host input').count()).toBe(6);
-        expect(await ref(previewer, 'requiredLabel').textContent()).toContain('账户名');
+        await selectRuntime(page, previewer, 'wc', 'input', 4);
+        expect(await previewer.locator('.host input').count()).toBe(4);
+        expect(await ref(previewer, 'usernameLabel').textContent()).toContain('Username');
+        expect(new URL(page.url()).pathname).toBe(route(family, 'zh-cn'));
       } finally {
         await context.close();
       }

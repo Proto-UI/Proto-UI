@@ -6,7 +6,7 @@ import {
 } from '../style-scope';
 import type { ShadcnCardRootProps, ShadcnCardPartProps } from './types';
 
-export const CARD_PROJECTED_STYLES = ['new-york-v4', 'rhea'] as const;
+export const CARD_PROJECTED_STYLES = ['new-york-v4', 'rhea', 'luma'] as const;
 const CARD_DENSITY = createContextKey<{ size: 'default' | 'sm' }>('shadcn-card-density');
 /** Root deliberately creates a family style boundary for all content, not a second resolver. */
 export function setupCardRootVisual(def: DefHandle<ShadcnCardRootProps>) {
@@ -70,6 +70,14 @@ export function cardHorizontalPadding(
   });
   def.rule({
     when: (w) => w.all(w.state(style).eq('rhea'), w.state(size).eq('sm')),
+    intent: (i) => i.feedback.style.use(tw('px-4')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(style).eq('luma'), w.state(size).eq('default')),
+    intent: (i) => i.feedback.style.use(tw('px-6')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(style).eq('luma'), w.state(size).eq('sm')),
     intent: (i) => i.feedback.style.use(tw('px-4')),
   });
 }

@@ -14,7 +14,7 @@ criteria:
       en: Invoke asCheckboxIndicator() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
   - id: P-LIQUID-GLASS-CHECKBOX-INDICATOR-VISUAL
     text:
-      en: 'Passive glyph paint; no value, focus or event owner. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+      en: 'Passive glyph paint; no value, focus or event owner. Follow the six raw-hash-bound Apple website illustrations in P-LIQUID-GLASS-CHECKBOX: the high-opacity checked bounds are 18 by 16 source pixels (9 by 8 logical units at @2x), and mixed bounds are 12 by 4 (6 by 2 logical units). Center the independently drawn round-stroke check or minus in the visible box, with mixed taking precedence when both facts are true; unchecked emits neither mark. These are high-opacity artwork bounds, not a pixel-identical vector trace or physical-device measurement. Share only passive glyph geometry with Checkbox Group; each protocol retains its own state, context, activation, label, focus and teardown owners. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
   - id: P-LIQUID-GLASS-CHECKBOX-INDICATOR-CLOSURE
     text:
       en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
@@ -37,6 +37,9 @@ sources:
   - path: https://developer.apple.com/design/human-interface-guidelines/materials
     label: Apple HIG Materials design reference only
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Calibrated the passive checked and mixed glyph bounds against the public macOS Checkbox illustrations.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Liquid Glass Checkbox Indicator projection cataloged as a draft family projection over the implemented source slice.

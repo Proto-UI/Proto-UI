@@ -28,6 +28,12 @@ export function hasOwnedSplitZeroOpacity(surface: Element): boolean {
 }
 
 const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
+const DIALOG_MOTION_TOKENS = new Set([
+  'animate-in',
+  'animate-out',
+  '-translate-x-1/2',
+  '-translate-y-1/2',
+]);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
@@ -125,7 +131,15 @@ function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleE
 }
 
 function needsPercentageTranslationRecipe(token: string): boolean {
-  return token === 'translate-x-[calc(100%_-_4px)]' || isPercentageRootTranslationV1(token);
+  return (
+    token === 'translate-x-[calc(100%_-_4px)]' ||
+    token === 'translate-x-[-0.0625rem]' ||
+    token === 'translate-x-[calc(2px_-_100%)]' ||
+    token === 'translate-x-[calc(8px_-_100%)]' ||
+    token === 'translate-x-[calc(-100%_-_2px)]' ||
+    token === 'translate-x-[calc(4px_-_100%)]' ||
+    isPercentageRootTranslationV1(token)
+  );
 }
 
 function nextCssBoundary(
@@ -657,13 +671,7 @@ export function createShadowSplitEffectsPort({
     }
     const entries = mergeRootStyleEntries(readRootStyleEntries(handle, 'setup'));
     let percentage: Projection['percentage'];
-    if (
-      entries.some((entry) =>
-        ['animate-in', 'animate-out', '-translate-x-1/2', '-translate-y-1/2'].includes(
-          entry.authorToken
-        )
-      )
-    ) {
+    if (entries.some((entry) => DIALOG_MOTION_TOKENS.has(entry.authorToken))) {
       const slide = entries.find((entry) => /^slide-(in|out)-/.test(entry.authorToken));
       if (slide) fail(slide, 'K1 slide');
     }
@@ -725,12 +733,7 @@ export function createShadowSplitEffectsPort({
           percentage = { source, entry };
         }
       }
-      const needsK1 = [
-        '-translate-x-1/2',
-        '-translate-y-1/2',
-        'animate-in',
-        'animate-out',
-      ].includes(entry.authorToken);
+      const needsK1 = DIALOG_MOTION_TOKENS.has(entry.authorToken);
       if (needsK1 && !hasRecipe('dialog-motion', 'k1')) fail(entry, 'K1 recipe');
       const needsI1 = entry.authorToken === 'hidden' || entry.authorToken === 'relative';
       if (needsI1 && !hasRecipe('participation-coordinate', 'i1')) fail(entry, 'I1 recipe');

@@ -106,6 +106,8 @@ describe('Liquid Surface explicit material request, not blanket content glass', 
     expect(latest(surface).material).toEqual({ slot, candidates: [] });
     expect(latest(surface).style.tokens).toContain('bg-background');
     expect(latest(surface).style.tokens).not.toContain('bg-secondary');
+    expect(latest(surface).style.tokens).toContain('rounded-xl');
+    expect(latest(surface).style.tokens).not.toContain('rounded-md');
     expect(surface.contains(content)).toBe(true);
     expect(content.textContent).toBe('Ordinary content keeps its own identity');
     expect(surface.getExposes()).toEqual({});

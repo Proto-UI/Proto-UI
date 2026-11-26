@@ -46,7 +46,8 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
       fallback: { fill: 'style', foreground: 'style' },
     });
     def.rule({
-      when: (w) => w.all(w.state(behavior.stateHandles.open).eq(true), w.prop('material').eq('auto')),
+      when: (w) =>
+        w.all(w.state(behavior.stateHandles.open).eq(true), w.prop('material').eq('auto')),
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
     });
   },

@@ -75,7 +75,9 @@ describe('Brutalist Live Region demo contract', () => {
     (clicks.get('checkInbox')!.onClick as () => void)();
     expect(politePayload.textContent).toContain('1 unread message');
     (clicks.get('toggleIncident')!.onClick as () => void)();
-    expect(assertivePayload.textContent).toContain('API latency elevated');
+    expect(assertivePayload.textContent).toContain(
+      'API latency elevated — automatic retries active'
+    );
     (clicks.get('toggleIncident')!.onClick as () => void)();
     expect(assertivePayload.textContent).toContain('All systems operational');
   });

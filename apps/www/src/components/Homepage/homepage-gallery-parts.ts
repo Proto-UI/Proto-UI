@@ -1,20 +1,20 @@
 import { shadcnCheckboxDemoChildren } from '../PrototypePreviewer/shadcn-checkbox-composition';
 import {
   appendHomepageGalleryGlyph,
+  appendHomepageGalleryQrMatrix,
   appendHomepageGallerySampleBars,
-  HOMEPAGE_GALLERY_ICONS,
+  homepageBarHeight,
   homepageGalleryIcon,
-  type HomepageGalleryIcon,
+  renderHomepageGalleryAreaChart,
   type GalleryCardOptions,
+  type HomepageGalleryIcon,
 } from './homepage-gallery-icons';
 import { createHomepageCompositionParts } from './homepage-composition-parts';
 import { homepageTextProps, setHomepageText } from './homepage-text';
 import { homepageButtonVariant, type HomepageButtonIntent } from './homepage-button-variants';
 import type { DemoChild, DemoNode, DemoSetupContext } from '../PrototypePreviewer/demo-types';
-import {
-  resolveProjectionPart,
-  type ProjectionFamilyId,
-} from '../PrototypePreviewer/projection-families';
+import { resolveProjectionPart } from '../PrototypePreviewer/projection-families';
+import type { SiteLibraryFamily } from '../site-library-family';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import { surfacePrototypeId, panelSurfaceProps, panelSurfaceLayout } from '../surface-recipes';
 
@@ -25,8 +25,15 @@ export type {
   GalleryCardOptions,
 } from './homepage-gallery-icons';
 
+function toggleProps(family: SiteLibraryFamily): Record<string, unknown> {
+  if (family === 'shadcn' || family === 'brutalist') {
+    return { defaultActive: false, variant: 'outline', size: 'sm' };
+  }
+  return { defaultActive: false, variant: 'default', size: 'small' };
+}
+
 export function createHomepageGalleryParts(
-  family: ProjectionFamilyId,
+  family: SiteLibraryFamily,
   runtime: RuntimeId,
   locale: string,
   isActive: () => boolean,
@@ -36,6 +43,12 @@ export function createHomepageGalleryParts(
   const PREVIEW_SURFACE_ID = surfacePrototypeId(family);
   const ids = new Set<string>();
   const authoredProps = new Map<string, Record<string, unknown>>();
+  const registeredIcons: Array<{ ref: string; name: HomepageGalleryIcon; size: number }> = [];
+  const icon = (name: HomepageGalleryIcon, size = 16, ref?: string): DemoNode => {
+    const slotRef = ref ?? `gallery-icon-${registeredIcons.length}-${name}`;
+    registeredIcons.push({ ref: slotRef, name, size });
+    return homepageGalleryIcon(name, slotRef);
+  };
   const box = (
     className: string,
     children: DemoChild[],
@@ -53,10 +66,35 @@ export function createHomepageGalleryParts(
     children: DemoChild[] = [],
     props: Record<string, unknown> = {},
     ref?: string,
-    associationKey?: string
+    associationKey?: string,
+    surfaceStyle?: Record<string, string>
   ): DemoNode => {
     ids.add(id);
     if (ref) authoredProps.set(ref, { ...props });
+    const defaultSurfaceStyle =
+      id === PREVIEW_SURFACE_ID
+        ? { ...panelSurfaceLayout, padding: '1.25rem' }
+        : id === 'brutalist-tabs-list'
+          ? {
+              minWidth: '0',
+              maxWidth: '100%',
+              width: 'fit-content',
+              height: 'auto',
+              minHeight: '3rem',
+              flexWrap: 'wrap',
+            }
+          : id === 'brutalist-tabs-trigger'
+            ? {
+                minWidth: '0',
+                maxWidth: '100%',
+                whiteSpace: 'normal',
+                overflowWrap: 'anywhere',
+              }
+            : undefined;
+    const mergedSurfaceStyle =
+      defaultSurfaceStyle || surfaceStyle
+        ? { ...(defaultSurfaceStyle ?? {}), ...(surfaceStyle ?? {}) }
+        : undefined;
     return {
       kind: 'proto',
       prototypeId: id,
@@ -64,31 +102,7 @@ export function createHomepageGalleryParts(
       props,
       children,
       ...(ref ? { ref } : {}),
-      ...(id === PREVIEW_SURFACE_ID
-        ? { surfaceStyle: { ...panelSurfaceLayout, padding: '1.25rem' } }
-        : {}),
-      ...(id === 'brutalist-tabs-list'
-        ? {
-            surfaceStyle: {
-              minWidth: '0',
-              maxWidth: '100%',
-              width: '100%',
-              height: 'auto',
-              minHeight: '3rem',
-              flexWrap: 'wrap',
-            },
-          }
-        : {}),
-      ...(id === 'brutalist-tabs-trigger'
-        ? {
-            surfaceStyle: {
-              minWidth: '0',
-              maxWidth: '100%',
-              whiteSpace: 'normal',
-              overflowWrap: 'anywhere',
-            },
-          }
-        : {}),
+      ...(mergedSurfaceStyle ? { surfaceStyle: mergedSurfaceStyle } : {}),
     };
   };
   const part = (kind: Parameters<typeof resolveProjectionPart>[1], name = 'root') =>
@@ -97,23 +111,49 @@ export function createHomepageGalleryParts(
     label: string,
     ref?: string,
     variant: HomepageButtonIntent = 'primary',
-    disabled = false
+    disabled = false,
+    options: { fullWidth?: boolean; children?: DemoChild[] } = {}
   ) =>
     p(
       part('button'),
-      [label],
+      options.children ?? [label],
       {
         variant: homepageButtonVariant(family, variant),
         disabled,
         wrap: true,
       },
-      ref
+      ref,
+      undefined,
+      options.fullWidth ? { width: '100%' } : undefined
+    );
+  const pillBadge = (
+    label: string,
+    variant: 'solid' | 'secondary' | 'outline' | 'muted' = 'solid',
+    ref?: string
+  ): DemoNode =>
+    p(
+      PREVIEW_SURFACE_ID,
+      [box('home-gallery__badge-text', [label], ref)],
+      {
+        variant,
+        radius: 'full',
+        border: variant === 'outline' ? 'all' : 'none',
+        elevation: 'none',
+      },
+      undefined,
+      undefined,
+      {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 'fit-content',
+        padding: '0.1875rem 0.625rem',
+      }
     );
   const toggle = (label: string, ref: string) =>
-    p(part('toggle'), [label], { defaultActive: false }, ref);
-  const checkbox = (label: string, ref: string, checked = false) =>
-    box(
-      'home-gallery__choice',
+    p(part('toggle'), [label], toggleProps(family), ref);
+  const checkbox = (label: string, ref: string, checked = false, description?: string) => {
+    const control =
       family === 'shadcn'
         ? shadcnCheckboxDemoChildren(
             {
@@ -139,60 +179,133 @@ export function createHomepageGalleryParts(
               undefined,
               `choice:${ref}`
             ),
-          ]
-    );
+          ];
+    if (!description) return box('home-gallery__choice', control);
+    const [boxControl, boxLabel] = control;
+    return box('home-gallery__choice home-gallery__choice--detailed', [
+      boxControl!,
+      box('home-gallery__choice-copy', [
+        boxLabel!,
+        box('home-gallery__choice-desc', [description]),
+      ]),
+    ]);
+  };
   const status = (value: string, ref: string) =>
     box('home-gallery__status', [value], ref, { role: 'status', 'aria-live': 'polite' });
   const sample = zh
     ? '用同一份原型，组合你的界面。'
     : 'Compose your interface from the same prototypes.';
+
+  const wrapCardShell = (
+    headerChildren: DemoChild[] | null,
+    bodyChildren: DemoChild[],
+    options: {
+      size?: 'default' | 'sm';
+      media?: DemoChild[];
+      mediaClass?: string;
+      footerMedia?: DemoChild[];
+    } = {}
+  ): DemoNode => {
+    const { size = 'default', media, mediaClass = 'home-gallery__media', footerMedia } = options;
+    if (family === 'shadcn') {
+      const cardParts: DemoChild[] = [];
+      if (headerChildren) cardParts.push(p('shadcn-card-header', headerChildren));
+      if (media) cardParts.push(box(mediaClass, media));
+      if (bodyChildren.length)
+        cardParts.push(p('shadcn-card-content', [box('home-gallery__stack', bodyChildren)]));
+      if (footerMedia) cardParts.push(box('home-gallery__media--bleed', footerMedia));
+      return p(
+        'shadcn-card-root',
+        cardParts,
+        size === 'sm' ? { styleProfile: 'luma', size: 'sm' } : { styleProfile: 'luma' },
+        undefined,
+        undefined,
+        footerMedia ? { paddingBlockEnd: '0' } : undefined
+      );
+    }
+    if (family === 'brutalist') {
+      const cardParts: DemoChild[] = [];
+      if (headerChildren) cardParts.push(p('brutalist-card-header', headerChildren));
+      if (media) cardParts.push(box(mediaClass, media));
+      if (bodyChildren.length)
+        cardParts.push(p('brutalist-card-content', [box('home-gallery__stack', bodyChildren)]));
+      if (footerMedia) cardParts.push(box('home-gallery__media--bleed', footerMedia));
+      return p(
+        'brutalist-card-root',
+        cardParts,
+        size === 'sm' ? { size: 'sm' } : {},
+        undefined,
+        undefined,
+        footerMedia ? { paddingBlockEnd: '0' } : undefined
+      );
+    }
+    const surfaceChildren: DemoChild[] = [];
+    if (headerChildren) surfaceChildren.push(...headerChildren);
+    if (media) surfaceChildren.push(box(mediaClass, media));
+    if (bodyChildren.length) surfaceChildren.push(box('home-gallery__stack', bodyChildren));
+    if (footerMedia) surfaceChildren.push(box('home-gallery__media--bleed', footerMedia));
+    const bootstrapSurfaceStyle =
+      size === 'sm' || footerMedia
+        ? {
+            ...panelSurfaceLayout,
+            padding: size === 'sm' ? '0.875rem' : '1.25rem',
+            ...(footerMedia ? { paddingBlockEnd: '0', overflow: 'hidden' } : {}),
+          }
+        : undefined;
+    return p(
+      PREVIEW_SURFACE_ID,
+      [box('home-gallery__card-body', surfaceChildren)],
+      { ...panelSurfaceProps('card') },
+      undefined,
+      undefined,
+      bootstrapSurfaceStyle
+    );
+  };
+
   const card = (
     title: string,
     caption: string,
     children: DemoChild[],
     id: string,
-    options: GalleryCardOptions = {}
+    options: GalleryCardOptions = {},
+    media?: DemoChild[]
   ): DemoNode => {
-    const { density = 'regular', emphasis = 'standard', body = 'inset', icon } = options;
+    const {
+      density = 'regular',
+      emphasis = 'standard',
+      body = 'inset',
+      headerAction,
+      headless = false,
+      icon: headingIcon,
+    } = options;
     const titleBox = (): DemoNode => ({
       kind: 'box',
       className: 'home-gallery__title',
       attrs: { role: 'heading', 'aria-level': '2' },
       children: [title],
     });
-    const titleNode = icon
-      ? box('home-gallery__title-row', [box('home-gallery__icon', [icon]), titleBox()])
+    const titleNode = headingIcon
+      ? box('home-gallery__title-row', [headingIcon, titleBox()])
       : titleBox();
-    const captionNode = box('home-gallery__caption', [caption]);
-    const surface =
-      family === 'shadcn'
-        ? p(
-            'shadcn-card-root',
-            body === 'edge-media'
-              ? [
-                  p('shadcn-card-header', [titleNode, captionNode]),
-                  p('shadcn-card-content'),
-                  box('home-gallery__media', children),
-                ]
-              : [
-                  p('shadcn-card-header', [titleNode, captionNode]),
-                  p('shadcn-card-content', [box('home-gallery__stack', children)]),
-                ],
-            { styleProfile: 'rhea' }
-          )
-        : p(
-            PREVIEW_SURFACE_ID,
-            [
-              box(`home-gallery__card-body home-gallery__card-body--${body}`, [
-                box('home-gallery__card-heading', [titleNode, captionNode]),
-                ...(body === 'edge-media' ? [box('home-gallery__media', children)] : children),
-              ]),
-            ],
-            { ...panelSurfaceProps(id === 'editor' ? 'canvas' : 'card') }
-          );
+    const headingBlock = caption
+      ? box('home-gallery__card-heading', [titleNode, box('home-gallery__caption', [caption])])
+      : box('home-gallery__card-heading', [titleNode]);
+    const headerChildren = headless
+      ? null
+      : headerAction
+        ? [box('home-gallery__header-split', [headingBlock, headerAction])]
+        : [headingBlock];
+    const surface = wrapCardShell(headerChildren, children, {
+      media: body === 'edge-media' ? (media ?? children) : undefined,
+      mediaClass: 'home-gallery__media',
+    });
+    const finalSurface =
+      body === 'edge-media' && !media
+        ? wrapCardShell(headerChildren, [], { media: children, mediaClass: 'home-gallery__media' })
+        : surface;
     return box(
       `home-gallery__item home-gallery__item--${density} home-gallery__item--${emphasis}`,
-      [surface],
+      [finalSurface],
       undefined,
       {
         'data-gallery-demo': id,
@@ -202,23 +315,92 @@ export function createHomepageGalleryParts(
       }
     );
   };
+
+  // Column 1 Top: Title-less high-density UI Elements showcase (shadcn Luma focal card)
   const controls = card(
     zh ? '按钮与选择' : 'Buttons & selection',
-    zh ? '从一个按钮，开始组合。' : 'Small details. Endless possibilities.',
+    '',
     [
       box('home-gallery__row', [
-        button(zh ? '主要' : 'Primary', 'gallery-primary'),
-        button(zh ? '次要' : 'Outline', 'gallery-secondary', 'secondary'),
-        button(zh ? '危险' : 'Delete', 'gallery-danger', 'danger'),
+        button(zh ? '主要' : 'Button', 'gallery-primary', 'primary', false, {
+          children: [zh ? '主要' : 'Button', icon('arrow-right', 14)],
+        }),
+        button(zh ? '次要' : 'Secondary', 'gallery-secondary', 'secondary'),
+        button(zh ? '描边' : 'Outline', 'gallery-outline', 'outline'),
       ]),
-      p(part('separator')),
-      box('home-gallery__row', [
-        toggle(zh ? '粗体' : 'Bold', 'gallery-bold'),
-        toggle(zh ? '斜体' : 'Italic', 'gallery-italic'),
-        button(zh ? '禁用' : 'Disabled', undefined, 'secondary', true),
+      p(
+        `${family}-input-root`,
+        [],
+        {
+          defaultValue: '',
+          placeholder: zh ? '组件名称' : 'Name',
+          ariaLabel: zh ? '组件名称输入示例' : 'Component name example',
+        },
+        'gallery-input',
+        undefined,
+        { width: '100%', minWidth: '0' }
+      ),
+      p(
+        part('textarea'),
+        [],
+        {
+          defaultValue: '',
+          rows: 3,
+          placeholder: zh ? '写下交互说明…' : 'Message',
+          ariaLabel: zh ? '交互说明输入示例' : 'Sample message input',
+        },
+        'gallery-message',
+        undefined,
+        { width: '100%', minWidth: '0' }
+      ),
+      box('home-gallery__control-bar', [
+        box('home-gallery__row', [
+          toggle(zh ? '粗体' : 'Bold', 'gallery-bold'),
+          toggle(zh ? '斜体' : 'Italic', 'gallery-italic'),
+        ]),
+        box('home-gallery__row', [
+          p(
+            `${family}-radio-group-root`,
+            [
+              p(
+                `${family}-radio-group-item`,
+                [
+                  p(`${family}-radio-group-indicator`),
+                  box('sr-only', [zh ? '选项一' : 'Option one']),
+                ],
+                { value: 'a' }
+              ),
+              p(
+                `${family}-radio-group-item`,
+                [
+                  p(`${family}-radio-group-indicator`),
+                  box('sr-only', [zh ? '选项二' : 'Option two']),
+                ],
+                { value: 'b' }
+              ),
+            ],
+            {
+              defaultValue: 'a',
+              a11yLabel: zh ? '快速单选示例' : 'Quick radio choice',
+            },
+            'gallery-radio-group',
+            undefined,
+            {
+              display: 'inline-flex',
+              flexDirection: 'row',
+              width: 'auto',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }
+          ),
+          checkbox(zh ? '选中' : 'Select', 'gallery-checkbox', true),
+        ]),
       ]),
-      box('home-gallery__row', [
-        checkbox(zh ? '选中' : 'Select', 'gallery-checkbox', true),
+      box('home-gallery__control-bar', [
+        box('home-gallery__row', [
+          button(zh ? '危险' : 'Delete', 'gallery-danger', 'danger'),
+          button(zh ? '禁用' : 'Disabled', undefined, 'outline', true),
+        ]),
         p(
           part('switch'),
           [p(part('switch', 'thumb')), box('sr-only', [zh ? '切换状态' : 'Toggle state'])],
@@ -229,8 +411,146 @@ export function createHomepageGalleryParts(
       status(zh ? '点击任意控件' : 'Try any control', 'gallery-controls-feedback'),
     ],
     'controls',
-    { emphasis: 'accent', icon: homepageGalleryIcon('controls') }
+    { emphasis: 'accent', headless: true }
   );
+
+  // Column 1 Bottom: 2x2 nested mini-cards architecture index
+  const shortcutGroups: ReadonlyArray<{
+    title: string;
+    items: ReadonlyArray<{ label: string; glyph: HomepageGalleryIcon; active?: boolean }>;
+  }> = [
+    {
+      title: zh ? '核心原型' : 'Prototypes',
+      items: [
+        { label: zh ? '按钮与开关' : 'Buttons', glyph: 'nav-blocks' },
+        { label: zh ? '卡片容器' : 'Cards', glyph: 'nav-layers' },
+        { label: zh ? '标签与折叠' : 'Tabs', glyph: 'nav-grid' },
+        { label: zh ? '弹层对话' : 'Dialogs', glyph: 'nav-box' },
+      ],
+    },
+    {
+      title: zh ? '语义模块' : 'Modules',
+      items: [
+        { label: zh ? '焦点管理' : 'Focus', glyph: 'nav-workflow' },
+        { label: zh ? '浮层定位' : 'Overlay', glyph: 'nav-compass' },
+        { label: zh ? '无障碍语义' : 'A11y', glyph: 'nav-shield' },
+        { label: zh ? '状态协议' : 'State', glyph: 'nav-activity' },
+      ],
+    },
+    {
+      title: zh ? '多端适配' : 'Adapters',
+      items: [
+        { label: 'Web', glyph: 'nav-globe', active: runtime === 'wc' },
+        { label: 'React', glyph: 'nav-code', active: runtime === 'react' },
+        { label: 'Vue 3', glyph: 'nav-cpu', active: runtime === 'vue' },
+        { label: 'Vue 2', glyph: 'nav-terminal', active: runtime === 'vue2' },
+      ],
+    },
+    {
+      title: zh ? '设计投影' : 'Styles',
+      items: [
+        { label: 'Shadcn', glyph: 'nav-palette', active: family === 'shadcn' },
+        { label: 'Brutalist', glyph: 'nav-sparkles', active: family === 'brutalist' },
+        { label: 'Bootstrap', glyph: 'nav-wrench', active: family === 'bootstrap-2-3-2' },
+        { label: 'Glass', glyph: 'nav-book', active: false },
+      ],
+    },
+  ];
+  const shortcuts = box(
+    'home-gallery__item home-gallery__item--regular home-gallery__item--standard',
+    [
+      box(
+        'home-gallery__shortcuts-grid',
+        shortcutGroups.map((group) =>
+          wrapCardShell(
+            null,
+            [
+              box('home-gallery__shortcut-title', [group.title]),
+              box(
+                'home-gallery__shortcut-list',
+                group.items.map((entry) => {
+                  const rowContent = box('home-gallery__shortcut-row', [
+                    icon(entry.glyph, 14),
+                    box('home-gallery__shortcut-label', [entry.label]),
+                  ]);
+                  return entry.active
+                    ? p(
+                        PREVIEW_SURFACE_ID,
+                        [rowContent],
+                        { variant: 'muted', radius: 'md', border: 'none', elevation: 'none' },
+                        undefined,
+                        undefined,
+                        { display: 'block', width: '100%', padding: '0.25rem 0.5rem' }
+                      )
+                    : box('home-gallery__shortcut-item', [rowContent]);
+                })
+              ),
+            ],
+            { size: 'sm' }
+          )
+        )
+      ),
+    ],
+    undefined,
+    {
+      'data-gallery-demo': 'shortcuts',
+      'data-gallery-density': 'regular',
+      'data-gallery-emphasis': 'standard',
+    }
+  );
+
+  // Column 4 Top: Centered high-contrast geometric protocol QR + HoverCard
+  const hover = card(
+    zh ? '悬浮资料' : 'Profile preview',
+    '',
+    [
+      box('home-gallery__profile', [
+        box('home-gallery__qr', [], 'gallery-qr-matrix', {
+          role: 'img',
+          'aria-label': zh ? 'Proto UI 协议矩阵示意图' : 'Proto UI geometric protocol matrix',
+        }),
+        box('home-gallery__profile-copy', [
+          {
+            kind: 'box',
+            className: 'home-gallery__title',
+            attrs: { role: 'heading', 'aria-level': '2' },
+            children: [zh ? '同一份定义，跨框架投影' : 'One definition, every runtime'],
+          },
+          box('home-gallery__caption', [
+            zh
+              ? '悬停或聚焦下方标识，查看组件原型的多框架协议说明。'
+              : 'Hover or focus below to inspect how one prototype projects across runtimes.',
+          ]),
+        ]),
+        p(
+          part('hover-card'),
+          [
+            p(part('hover-card', 'trigger'), ['@Proto UI'], {}, 'gallery-hover-trigger'),
+            p(
+              part('hover-card', 'content'),
+              [
+                box('home-gallery__stack', [
+                  box('home-gallery__title', ['Proto UI']),
+                  box('home-gallery__copy', [
+                    zh
+                      ? '组件原型 · 交互协议 · 多 Runtime'
+                      : 'Component prototypes · interaction protocols · multiple runtimes',
+                  ]),
+                ]),
+              ],
+              { side: 'bottom', align: 'center' },
+              'gallery-hover-content'
+            ),
+          ],
+          { openDelay: 150, closeDelay: 200 }
+        ),
+      ]),
+    ],
+    'hover',
+    { density: 'compact', emphasis: 'quiet', headless: true }
+  );
+
+  // Column 4 Middle: Text Editor with Tabs + Toggles + Textarea
   const editor = card(
     zh ? '文本编辑' : 'Text editor',
     zh ? '写下来，再换个角度看。' : 'Write it down. See it take shape.',
@@ -273,13 +593,15 @@ export function createHomepageGalleryParts(
         { defaultValue: 'edit' },
         'editor-tabs'
       ),
-      box('home-gallery__row', [
-        button(zh ? '重置文本' : 'Reset text', 'editor-reset', 'secondary'),
-      ]),
+      button(zh ? '重置文本' : 'Reset text', 'editor-reset', 'secondary', false, {
+        fullWidth: true,
+      }),
     ],
     'editor',
-    { icon: homepageGalleryIcon('editor') }
+    { emphasis: 'standard' }
   );
+
+  // Column 5 Top: Centered minimal Release / Dialog + Dropdown card
   const dialog = p(
     part('dialog'),
     [
@@ -323,7 +645,11 @@ export function createHomepageGalleryParts(
   const menu = p(
     part('dropdown-menu'),
     [
-      p(part('dropdown-menu', 'trigger'), [zh ? '更多操作' : 'More actions']),
+      p(
+        part('dropdown-menu', 'trigger'),
+        [zh ? '更多操作' : 'More actions'],
+        family === 'shadcn' ? { indicator: true } : {}
+      ),
       p(
         part('dropdown-menu', 'content'),
         [
@@ -346,82 +672,129 @@ export function createHomepageGalleryParts(
     {},
     'gallery-menu'
   );
-  const overlays = card(
-    zh ? '对话与菜单' : 'Dialogs & menus',
-    'Dialog · DropdownMenu',
-    [
-      dialog,
-      p(part('separator')),
-      menu,
-      status(zh ? '等待选择' : 'Ready for a choice', 'gallery-dialog-feedback'),
-    ],
-    'overlays',
-    { icon: homepageGalleryIcon('overlays') }
-  );
-  const profileMark = p(PREVIEW_SURFACE_ID, [box('home-gallery__metric', ['P'])], {
-    variant: 'muted',
-    radius: 'xl',
-    border: 'none',
-    elevation: 'none',
-  });
-  if (profileMark.kind === 'proto')
-    profileMark.surfaceStyle = {
-      width: '4rem',
-      height: '4rem',
+  const releaseIconTile = p(
+    PREVIEW_SURFACE_ID,
+    [icon('release-plus', 18)],
+    { variant: 'muted', radius: 'xl', border: 'none', elevation: 'none' },
+    undefined,
+    undefined,
+    {
+      width: '2.75rem',
+      height: '2.75rem',
       padding: '0',
       display: 'grid',
       placeItems: 'center',
-    };
-  const hover = card(
-    zh ? '悬浮资料' : 'Profile preview',
-    zh ? '为开源而相聚' : 'Built in the open',
-    [
-      box('home-gallery__profile', [
-        profileMark,
-        box('home-gallery__copy', [
-          zh ? '同一份定义，更多可能。' : 'One definition. More possibilities.',
-        ]),
-      ]),
-      p(
-        part('hover-card'),
-        [
-          p(part('hover-card', 'trigger'), ['@Proto UI'], {}, 'gallery-hover-trigger'),
-          p(
-            part('hover-card', 'content'),
-            [
-              box('home-gallery__stack', [
-                box('home-gallery__title', ['Proto UI']),
-                box('home-gallery__copy', [
-                  zh
-                    ? '组件原型 · 交互协议 · 多 Runtime'
-                    : 'Component prototypes · interaction protocols · multiple runtimes',
-                ]),
-              ]),
-            ],
-            { side: 'bottom', align: 'start' },
-            'gallery-hover-content'
-          ),
-        ],
-        { openDelay: 150, closeDelay: 200 }
-      ),
-      box('home-gallery__copy', [zh ? '悬停或聚焦查看资料' : 'Hover or focus to reveal details']),
-    ],
-    'hover',
-    { density: 'compact', emphasis: 'quiet', icon: homepageGalleryIcon('hover') }
+    }
   );
-  const choices = card(
-    zh ? '通知选项' : 'Notification choices',
-    zh ? '只关注对你重要的事。' : 'Make space for what matters.',
+  const overlays = card(
+    zh ? '对话与菜单' : 'Dialogs & menus',
+    '',
     [
-      checkbox(zh ? '产品更新' : 'Product updates', 'choice-product', true),
-      checkbox(zh ? '新组件' : 'New components', 'choice-components', true),
-      checkbox(zh ? '社区活动' : 'Community events', 'choice-events'),
-      button(zh ? '应用选择' : 'Apply selection', 'choice-apply'),
+      box('home-gallery__release', [
+        releaseIconTile,
+        box('home-gallery__release-copy', [
+          {
+            kind: 'box',
+            className: 'home-gallery__title',
+            attrs: { role: 'heading', 'aria-level': '2' },
+            children: [zh ? '对话与菜单' : 'Dialogs & menus'],
+          },
+          box('home-gallery__caption', [
+            zh
+              ? '一份交互协议驱动模态对话框与下拉菜单，跨框架保持一致体验。'
+              : 'One interaction protocol powering modal dialogs and menus across frameworks.',
+          ]),
+        ]),
+        box('home-gallery__release-actions', [dialog, menu]),
+        status(zh ? '等待选择' : 'Ready for a choice', 'gallery-dialog-feedback'),
+      ]),
+    ],
+    'overlays',
+    { emphasis: 'standard', headless: true }
+  );
+
+  // Column 5 Middle: Compact KPI + Edge-to-Edge Area Sparkline card
+  const sparkViews = [
+    { metric: zh ? '4 套框架' : '4 Runtimes', badge: 'WC · React · Vue' },
+    { metric: zh ? '4 套风格' : '4 Styles', badge: 'Shadcn · Brutalist' },
+    { metric: zh ? '1 份协议' : '1 Protocol', badge: 'Base → Family' },
+    { metric: zh ? '0 重复写' : '0 Rewrites', badge: '+100% Reuse' },
+  ] as const;
+  const sparkHeaderBlock = box('home-gallery__card-heading', [
+    {
+      kind: 'box',
+      className: 'home-gallery__title',
+      attrs: { role: 'heading', 'aria-level': '2' },
+      children: [zh ? '多端覆盖' : 'Analytics'],
+    },
+  ]);
+  const spark = box(
+    'home-gallery__item home-gallery__item--compact home-gallery__item--quiet',
+    [
+      wrapCardShell(
+        [
+          box('home-gallery__header-split', [
+            sparkHeaderBlock,
+            button(zh ? '切换视角' : 'View', 'gallery-spark-toggle', 'secondary'),
+          ]),
+        ],
+        [
+          box('home-gallery__spark-kpi', [
+            box('home-gallery__stat-value', [sparkViews[0].metric], 'gallery-spark-metric'),
+            pillBadge(sparkViews[0].badge, 'solid', 'gallery-spark-badge'),
+          ]),
+        ],
+        {
+          footerMedia: [
+            box('home-gallery__spark-chart', [], 'gallery-spark-chart', {
+              role: 'img',
+              'aria-label': zh ? '多端覆盖趋势示意面积图' : 'Sample monochrome area trend chart',
+            }),
+          ],
+        }
+      ),
+    ],
+    undefined,
+    {
+      'data-gallery-demo': 'spark',
+      'data-gallery-density': 'compact',
+      'data-gallery-emphasis': 'quiet',
+      'data-gallery-body': 'edge-media',
+    }
+  );
+
+  // Column 5 Bottom: Rich Notifications checklist with descriptions
+  const choices = card(
+    zh ? '通知选项' : 'Notifications',
+    zh ? '选择希望在演示中开启的提醒类型。' : 'Choose which alerts you want to receive.',
+    [
+      checkbox(
+        zh ? '产品更新' : 'Product updates',
+        'choice-product',
+        true,
+        zh ? '版本发布、契约变更与迁移提示。' : 'Release notes, spec changes, and upgrades.'
+      ),
+      checkbox(
+        zh ? '新组件' : 'New components',
+        'choice-components',
+        true,
+        zh ? '新增原型与多套设计体系投影。' : 'New prototypes and design-system projections.'
+      ),
+      checkbox(
+        zh ? '社区活动' : 'Community events',
+        'choice-events',
+        false,
+        zh ? 'RFC 讨论、路线图与线上交流。' : 'RFC discussions, milestones, and meetups.'
+      ),
+      button(zh ? '应用选择' : 'Apply selection', 'choice-apply', 'primary', false, {
+        fullWidth: true,
+      }),
       status(zh ? '已选择 2 项' : '2 selected', 'choice-feedback'),
     ],
     'choices',
-    { emphasis: 'quiet', icon: homepageGalleryIcon('choices') }
+    { emphasis: 'quiet' }
   );
+
   const composition = createHomepageCompositionParts(family, locale, {
     p,
     box,
@@ -429,23 +802,25 @@ export function createHomepageGalleryParts(
     button,
     status,
   });
+
   return {
     ids,
     card,
     analytics: composition.analytics,
-    columns(form: DemoNode, analytics: DemoNode = composition.analytics): DemoNode[] {
+    columns(form: DemoNode, analyticsCard: DemoNode = composition.analytics): DemoNode[] {
       return [
-        box('home-gallery__column', [controls, composition.command]),
-        box('home-gallery__column', [analytics, composition.progress]),
-        box('home-gallery__column', [form, composition.help]),
-        box('home-gallery__column', [editor, hover]),
-        box('home-gallery__column', [overlays, choices]),
+        box('home-gallery__column', [controls, shortcuts]),
+        box('home-gallery__column', [analyticsCard, composition.command]),
+        box('home-gallery__column', [form, composition.progress]),
+        box('home-gallery__column', [hover, editor, composition.help]),
+        box('home-gallery__column', [overlays, spark, choices]),
       ];
     },
     setup(context: DemoSetupContext) {
       let alive = true,
         editorText = sample,
-        copies = 0;
+        copies = 0,
+        sparkIndex = 0;
       const selected = new Set(['choice-product', 'choice-components']);
       const pending = new Map<string, Record<string, unknown>>();
       const currentProps = new Map([...authoredProps].map(([ref, props]) => [ref, { ...props }]));
@@ -533,21 +908,24 @@ export function createHomepageGalleryParts(
                     : 'Plan complete'
           );
 
-          const factors = [0.32, 0.48, 0.56, 0.76, 0.68, 0.92];
           const bars = chart.querySelectorAll<SVGRectElement>('rect[data-gallery-bar]');
           bars.forEach((bar, index) => {
-            const height = Math.max(4, Math.round(value * 1.6 * factors[index % factors.length]!));
+            const height = homepageBarHeight(value, index);
             bar.setAttribute('y', String(166 - height));
             bar.setAttribute('height', String(height));
           });
         }
       };
-      for (const name of Object.keys(HOMEPAGE_GALLERY_ICONS) as HomepageGalleryIcon[]) {
-        const slot = context.refs[`gallery-icon-${name}`];
-        if (slot) appendHomepageGalleryGlyph(slot, name);
+      for (const entry of registeredIcons) {
+        const slot = context.refs[entry.ref];
+        if (slot) appendHomepageGalleryGlyph(slot, entry.name, entry.size);
       }
       const chartSlot = context.refs['gallery-rhythm-bars'];
       if (chartSlot) appendHomepageGallerySampleBars(chartSlot);
+      const qrSlot = context.refs['gallery-qr-matrix'];
+      if (qrSlot) appendHomepageGalleryQrMatrix(qrSlot);
+      const sparkSlot = context.refs['gallery-spark-chart'];
+      if (sparkSlot) renderHomepageGalleryAreaChart(sparkSlot, sparkIndex);
       composition.setup({ bind, write, feedback });
       // The chart observes the same public Progress value that Command, Slider
       // and Reset already share. No duplicated plan map or second write channel.
@@ -573,6 +951,7 @@ export function createHomepageGalleryParts(
       for (const [ref, label] of [
         ['gallery-primary', zh ? '主要按钮' : 'Primary button'],
         ['gallery-secondary', zh ? '次要按钮' : 'Secondary button'],
+        ['gallery-outline', zh ? '描边按钮' : 'Outline button'],
         ['gallery-danger', zh ? '危险按钮示例' : 'Destructive button example'],
       ])
         bind(ref!, 'click', () =>
@@ -585,6 +964,13 @@ export function createHomepageGalleryParts(
             `${ref.endsWith('bold') ? (zh ? '粗体' : 'Bold') : zh ? '斜体' : 'Italic'} ${active === true ? (zh ? '已开启' : 'On') : zh ? '已关闭' : 'Off'}`
           )
         );
+      bind('gallery-radio-group', 'valueChange', ({ value }) => {
+        if (typeof value === 'string')
+          feedback(
+            'gallery-controls-feedback',
+            `${zh ? '单选' : 'Radio'}: ${value === 'a' ? (zh ? '选项一' : 'Option one') : zh ? '选项二' : 'Option two'}`
+          );
+      });
       for (const ref of ['gallery-checkbox', 'gallery-switch'])
         bind(ref, 'checkedChange', ({ checked }) =>
           feedback(
@@ -592,6 +978,13 @@ export function createHomepageGalleryParts(
             checked === true ? (zh ? '已开启' : 'On') : zh ? '已关闭' : 'Off'
           )
         );
+      bind('gallery-spark-toggle', 'click', () => {
+        sparkIndex = (sparkIndex + 1) % sparkViews.length;
+        const next = sparkViews[sparkIndex]!;
+        feedback('gallery-spark-metric', next.metric);
+        feedback('gallery-spark-badge', next.badge);
+        if (sparkSlot) renderHomepageGalleryAreaChart(sparkSlot, sparkIndex);
+      });
       bind('editor-text', 'valueChange', ({ value }) => {
         if (typeof value !== 'string') return;
         editorText = value;

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "scope": "Integrated source-level website fixtures; native browser and complete general CI remain separate",
+  "base": "2f182fd10a1b1399abdd5b404563df3ee4d562c2",
+  "tests": 589,
+  "passed": 589,
+  "failed": 0,
+  "pending": 0,
+  "rawReceiptSha256": "437fb720a2fab0ea16f5d388abdf501470ad69a14109a2e98089c1c1e73e27c2",
+  "source": [
+    {
+      "path": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+      "sha256": "f9940eb03888e26ddd490d6a2cebbbdab64a246dbe92750f0f226eeac6e57c6a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/collection-recipes.test.ts",
+      "sha256": "b8a5ea67cd206381c0cd0f6bcb2465b89e5b471340e7065953a1f21a95d7cc85"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/data-table-header-row-registration.test.ts",
+      "sha256": "dac1b45e72809cab7e9f176731e3e08a0ca85e62dd87169807766fdc3d2cb73a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.callback-consumers.test.ts",
+      "sha256": "f22662203fb8e16137238a52bde8da8b15f36e23da8a4857aca2ab2ff2cc5110"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.expose-events.test.ts",
+      "sha256": "e22f29058e09bc08a9b43b50af79217bf49d634b144e6d0bfaff533c5d07ae49"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/dialog-close-recipe.test.ts",
+      "sha256": "9f624c7d43ab41903adc98b36bc411ea3ec4d9d7bf524da20bc69abc8c04580d"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/dropdown-recipe-examples.test.ts",
+      "sha256": "943e67242a84add4144e16d292bb392a2df0fb3b9138005460c8720c26e528ad"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/form-validation-recipes.test.ts",
+      "sha256": "dab19e916a828113d9ce8e9aa0d9363a45a7f8238a6595635444547f2fefea49"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.material-stages.test.ts",
+      "sha256": "b283717be7c30d18500749a6b51274b02554772de3ca38342b86f60a1402d369"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "sha256": "70188a5356fa0cbe135bf93b1656706e7cc9c83dd832194565f616e854b71af6"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/radio-group-registration.test.ts",
+      "sha256": "c3caffdc6cff8208ef1eff8272d76eed4eca9739082dc5d06f8b650b143a1915"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts",
+      "sha256": "3fc8e9227a42c2231d010e59d74b10d065f152c3c133048655b8b60587edbe0c"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/runtime-tabs-style.test.ts",
+      "sha256": "b927bee45760656a17054d6ac33703150412b509a2dd16afbc52f5bd72276953"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts",
+      "sha256": "74e376aa93f917a5718c45c0a394fe9cf07635603b0922081ec975df6e6ccb8a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/select-input-recipes.test.ts",
+      "sha256": "a82ee56924ded9fe461d2ab87ac6ba84902fab3a27027cf9c5eee48306dfd3ca"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/select-structural-demo.test.ts",
+      "sha256": "8751f813728d1f042e4e1c8a8f920913127678212f9ff0909281f074e1d69f65"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.test.ts",
+      "sha256": "b27bd70eaf6372f43f398a7be39f34ce29dd4f69575ee559812d8f82a9ff671c"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+      "sha256": "1825082468d1363b489ad33eb5de9ca33d00358b915bf42aad74f0cfaf0ded25"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/tabs-registration.test.ts",
+      "sha256": "ffff0d89a59bc7e2e84f03adf3d0d8fa2919e6eb9a069cfacfcdabab3a15d11e"
+    },
+    {
+      "path": "apps/www/src/components/site-contents-command.test.ts",
+      "sha256": "0845aeab0ec7675c20bb7244b74d7880e0ac3194751461eb24cbd7d70c8402d3"
+    },
+    {
+      "path": "apps/www/src/components/site-navigation-controls.test.ts",
+      "sha256": "d44e6079f7958015a89f6022a8743e435f3c18b3f2d0b12a873a424689bfeea8"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/bootstrap-2-3-2/bootstrap-controls-docs.test.ts",
+      "sha256": "5bcdd254a30eb391dd43f7ba087b6af8f2dfa03cb7122dd572ba67bad434fb77"
+    },
+    {
+      "path": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+      "sha256": "7a2e5cb399e8509fde27df2f9e1e56eebcbf4072c64abc0195e964f46559c9ad"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-tooltip-readiness.test.ts",
+      "sha256": "d61a3869bacb5bac918d054f217b2dec3e12814f5dbae36dbd41fc1c6290b7cb"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-async-region.test.ts",
+      "sha256": "c2e7e20222e2d0a2fd4ba1f6f97adbdb1a4897f4f82a9b532d5a80d2d8f4d014"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.test.ts",
+      "sha256": "42bec41a0035f284907386451ab3e703fe549f783397ae844e881cfb02ce8e92"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-image.test.ts",
+      "sha256": "d1a8c61b50e22fd06d2baa424e79fde61a20b880e23c818dd22198f3ac7cd576"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-live-region.test.ts",
+      "sha256": "6e2bedcfb9e48850d3b117259cf90dac607a40d976071307d519a2a769d6bbe3"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-radio-group.test.ts",
+      "sha256": "e62cfa4c79ff3ac90443b01101a454a55efd9be0f831bcec23559e12c4233d12"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-table.test.ts",
+      "sha256": "2fa01e91159ced34d898b153a77a56ac7c70e94fd51ce449cce710c8a5648015"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+      "sha256": "185b1690d5fb16ce4d1ce202a123c9c2d110b0bc55b69b4d9747653af560caec"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/finf-neo-popover-title-route.test.ts",
+      "sha256": "138d30e52772c2a82e17508683923287f6c5c03ef8f39b4968a4afa9af50cbeb"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+      "sha256": "c2b78e45c79f33cc10cb6519843c52b4ceb3c12d8f8c949560ca99fc78ba88e9"
+    },
+    {
+      "path": "apps/www/src/prototypes/site-preview-surface.test.ts",
+      "sha256": "24286917cb265c8d9798d214978ebf517dc667b5bf13aaa3febc99b890f91c61"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+      "sha256": "6e10391ff70eca5712721902c12cb768a122444907b8c4fa8831ffa42cd6c829"
+    }
+  ]
+}

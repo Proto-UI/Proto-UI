@@ -11,7 +11,7 @@ statement:
 criteria:
   - id: P-SHADCN-CARD-FOOTER-VISUAL
     text:
-      en: Footer remains a roleless flex/items-center slot; native anchors and semantic action children keep ownership. New York preserves px-6; Rhea uses inherited default20/sm16 horizontal padding and capped bottom corners. Explicit divider adds border-t with border ink and matching top padding without DOM class or child inspection.
+      en: Footer remains a roleless flex/items-center slot; native anchors and semantic action children keep ownership. New York preserves px-6; Rhea uses inherited default20/sm16 horizontal padding and capped bottom corners; Luma uses inherited default24/sm16 horizontal padding and rounded-b-4xl. Explicit divider adds border-t with border ink and matching top padding without DOM class or child inspection.
 dependsOn:
   contracts:
     - C-CORE-SYNTAX-0003
@@ -26,6 +26,9 @@ sources:
   - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
   - path: packages/prototypes/shadcn/test/card.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Add bounded Luma style profile (rounded-b-4xl and default24/sm16 horizontal padding) alongside New York and Rhea.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Project existing passive parts through bounded New York/Rhea shared scope and density; preserve native content ownership and explicit unsupported source features.

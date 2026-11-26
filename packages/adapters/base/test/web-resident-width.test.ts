@@ -317,3 +317,55 @@ describe('Web resident finite width lease and containing-block lifecycle (CSSOM 
     expect(h.el.style.width).toBe('375px');
   });
 });
+
+describe('Web static width demand retains live host admission', () => {
+  it.each([
+    { label: 'missing', tokens: [] },
+    { label: 'auto', tokens: ['w-auto'] },
+  ])(
+    'does not read width geometry for $label targets but admits a later fixed Rule target',
+    ({ tokens }) => {
+      const h = fixture();
+      const computed = vi.spyOn(window, 'getComputedStyle');
+      h.commit(0, tokens);
+      expect(computed).not.toHaveBeenCalled();
+      expect(h.observed.has(h.parent)).toBe(false);
+      expect(h.el.style.width).toBe('');
+      h.commit(100);
+      expect(computed).toHaveBeenCalled();
+      expect(h.observed.has(h.parent)).toBe(true);
+      h.frame(0);
+      h.commit(300);
+      h.frame(50);
+      expect(h.el.style.width).toBe('200px');
+    }
+  );
+
+  it('keeps percentage observation and reparenting live before its physical basis arrives', () => {
+    const h = fixture();
+    h.commit(0, []);
+    expect(h.observed.has(h.parent)).toBe(false);
+    h.commit(0, ['w-1/2']);
+    expect(h.observed.has(h.parent)).toBe(true);
+    expect(h.el.style.width).toBe('');
+    expect(h.queueStyle.mock.calls.at(-1)![0].tokens).toEqual(['w-1/2']);
+    const replacement = document.createElement('div');
+    replacement.style.display = 'block';
+    document.body.append(replacement);
+    replacement.append(h.el);
+    h.commit(0, ['w-1/2']);
+    expect(h.observed.has(h.parent)).toBe(false);
+    expect(h.observed.has(replacement)).toBe(true);
+    expect(h.el.style.width).toBe('');
+    h.measure(replacement, 400);
+    // This finite CSSOM fixture has no percentage rule: physical adoption must
+    // still reject the otherwise resolved typed sample instead of inventing paint.
+    expect(h.el.style.width).toBe('');
+    expect(h.sink.diagnostics?.()).toContain('width:projection-rejected');
+    h.commit(100);
+    h.frame(0);
+    h.commit(300);
+    h.frame(50);
+    expect(h.el.style.width).toBe('200px');
+  });
+});

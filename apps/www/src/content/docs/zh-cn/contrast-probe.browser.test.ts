@@ -1021,7 +1021,7 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       const page = await context.newPage();
       await page.setContent(
         readerSubjectFixture(
-          `<textarea id="authored-root" data-pui-root data-demo-ref="textarea"
+          `<textarea id="authored-root" data-pui-root
             data-projection-prototype="${plan.rootPrototypeId}" data-projection-owner="selected-calibration"
             data-projection-generation="1">Inline consumer</textarea>`,
           expected
@@ -1047,7 +1047,7 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       expect(anatomy.surfaces).toEqual([
         expect.objectContaining({
           prototypeId: plan.rootPrototypeId,
-          ref: 'textarea',
+          ref: null,
           parent: null,
           withinContent: true,
           currentLease: true,
@@ -1056,9 +1056,9 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       ]);
       expect(compareContrastAnatomy(plan, anatomy).achieved).toBe(true);
       expect(frame.surfaces.map(({ prototype, ref }) => ({ prototype, ref }))).toEqual([
-        { prototype: plan.rootPrototypeId, ref: 'textarea' },
+        { prototype: plan.rootPrototypeId, ref: null },
       ]);
-      expect(surface(frame, 'textarea').textContrast?.ratio).toBeCloseTo(21, 8);
+      expect(frame.surfaces[0].textContrast?.ratio).toBeCloseTo(21, 8);
 
       const observe = () =>
         page.evaluate(

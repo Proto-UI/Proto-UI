@@ -71,7 +71,7 @@ for (const [family, demo] of Object.entries({
   brutalist: brutalistDemo,
 }))
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
-    it(`${family}/${runtime} public Select composes the scroll viewport and owner refusal`, async () => {
+    it(`${family}/${runtime} public Select preserves its current recipe and controlled owner refusal`, async () => {
       const host = document.createElement('div');
       document.body.append(host);
       let api!: DemoRuntimeApi;
@@ -93,14 +93,78 @@ for (const [family, demo] of Object.entries({
         if (!cleaned) await view.destroy();
       });
       const x = (name: string) => api.getExposes(name) as any;
+      if (family !== 'base') {
+        const rootRef = family === 'shadcn' ? 'controlledSelect' : 'timezoneSelect';
+        const resetRef = family === 'shadcn' ? 'resetTheme' : 'resetTimezone';
+        const initial = family === 'shadcn' ? 'system' : 'jst';
+        const next = family === 'shadcn' ? 'dark' : 'pst';
+        const nextText = family === 'shadcn' ? 'Dark' : 'Pacific Standard Time (PST)';
+        const count = family === 'shadcn' ? 4 : 12;
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        expect(x(rootRef).getCollectionCount()).toBe(count);
+        api.call(rootRef, 'openDropdown', 'recipe');
+        const trigger = host.querySelector<HTMLElement>('[role="combobox"]')!;
+        let content!: HTMLElement;
+        await vi.waitFor(() => {
+          content = document.getElementById(trigger.getAttribute('aria-controls')!)!;
+          expect(content?.getAttribute('role')).toBe('listbox');
+          expect(content.querySelectorAll('[role="option"]')).toHaveLength(count);
+        });
+        if (family === 'brutalist') {
+          expect(content.style.maxHeight).toBe('200px');
+          expect(content.style.overflowY).toBe('auto');
+        } else {
+          const unavailable = [...content.querySelectorAll('[role="option"]')].filter(
+            (item) => item.getAttribute('aria-disabled') === 'true'
+          );
+          expect(unavailable).toHaveLength(1);
+          expect(unavailable[0].textContent).toBe('High Contrast (Coming soon)');
+        }
+        // The actual public owner now accepts changes and exposes Reset. Keep
+        // refusal coverage by supplying an ordinary controlled-owner callback.
+        expect(
+          api.call(rootRef, 'requestValue', {
+            value: next,
+            textValue: nextText,
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(next));
+        if (family === 'shadcn') expect(refs.selectedTheme.textContent).toBe('Selected: Dark');
+        refs[resetRef].click();
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        if (family === 'shadcn') expect(refs.selectedTheme.textContent).toBe('Selected: System');
+        const requests = vi.fn();
+        api.setProps(rootRef, { onValueChange: requests });
+        await flush();
+        expect(
+          api.call(rootRef, 'requestValue', {
+            value: next,
+            textValue: nextText,
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await flush();
+        expect(requests).toHaveBeenCalledOnce();
+        expect(requests.mock.calls[0][0]).toMatchObject({ value: next, reason: 'programmatic' });
+        expect(x(rootRef).value.get()).toBe(initial);
+        api.setProps(rootRef, { value: next });
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(next));
+        expect(requests).toHaveBeenCalledOnce();
+        expect(trigger.textContent).toContain(nextText);
+        await view.destroy();
+        cleaned = true;
+        await flush();
+        expect(host.childElementCount).toBe(0);
+        expect(content.isConnected).toBe(false);
+        return;
+      }
       await vi.waitFor(() => expect(x('select').value.get()).toBe('alpha'));
       expect(x('select').getCollectionCount()).toBe(18);
       expect(x('item3').disabled.get()).toBe(true);
       api.call('select', 'openDropdown', 'recipe');
-      await vi.waitFor(() =>
-        expect(refs[family === 'brutalist' ? 'selectContent' : 'selectViewport']).toBeDefined()
-      );
-      const viewport = refs[family === 'brutalist' ? 'selectContent' : 'selectViewport'];
+      await vi.waitFor(() => expect(refs.selectViewport).toBeDefined());
+      const viewport = refs.selectViewport;
       expect(viewport.style.maxHeight).toBe('180px');
       expect(viewport.style.overflowY).toBe('auto');
       refs.toggleRefusal.click();

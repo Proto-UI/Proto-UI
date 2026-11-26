@@ -10,11 +10,27 @@ import type {
   CheckboxIndicatorExposes,
 } from '@proto.ui/prototypes-base/checkbox';
 
-// Passive glyph grammar for the standalone Checkbox Indicator. Checked and
-// mixed remain solely the Root's states; this helper owns no interaction,
-// context, focus, naming or accessibility surface. The same check/minus marks
-// the shared Checkbox-Group glyph grammar already renders; no separate Apple
-// symbol is claimed.
+// Shared paint only. The 16-unit viewport holds centered 9×8 and 6×2
+// round-stroke bounds derived from the @2x HIG illustrations.
+export function renderCheckboxGlyph(r: RendererHandle<any>, checked: boolean, mixed: boolean) {
+  const path = mixed ? 'M6 8h4' : checked ? 'M4.5 8 7 11 11.5 5' : null;
+  if (!path) return null;
+  return r.svg.root(
+    {
+      viewBox: '0 0 16 16',
+      width: 16,
+      height: 16,
+      'aria-hidden': 'true',
+      fill: 'none',
+      stroke: 'currentColor',
+      strokeWidth: 2,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+    },
+    r.svg.path({ d: path })
+  );
+}
+
 export function checkboxGlyph(
   def: DefHandle<CheckboxIndicatorProps, CheckboxIndicatorExposes>,
   state: {
@@ -39,28 +55,6 @@ export function checkboxGlyph(
   };
   def.lifecycle.onUnmounted(cancelRefresh);
   def.lifecycle.onBeforeDispose(cancelRefresh);
-  return (r: RendererHandle<any>) => {
-    const path = state.indeterminate.get()
-      ? 'M5 12h14'
-      : state.checked.get()
-        ? 'm20 6-11 11-5-5'
-        : null;
-    if (!path) return null;
-    return r.svg.root(
-      {
-        viewBox: '0 0 24 24',
-        width: '100%',
-        height: '100%',
-        // The Root already carries the checkbox role and its checked/mixed
-        // states; this glyph would only add an unnamed node.
-        'aria-hidden': 'true',
-        fill: 'none',
-        stroke: 'currentColor',
-        strokeWidth: 2,
-        strokeLinecap: 'round',
-        strokeLinejoin: 'round',
-      },
-      r.svg.path({ d: path })
-    );
-  };
+  return (r: RendererHandle<any>) =>
+    renderCheckboxGlyph(r, state.checked.get(), state.indeterminate.get());
 }

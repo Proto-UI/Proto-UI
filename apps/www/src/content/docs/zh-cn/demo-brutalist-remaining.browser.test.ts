@@ -177,21 +177,38 @@ async function waitForHoverCardEndpoint(page: Page, panel: Locator): Promise<voi
   await panel.waitFor({ state: 'visible', timeout: 10_000 });
   const element = await panel.elementHandle();
   if (!element) throw new Error('Hover Card panel was not materialized.');
-  await page.waitForFunction(
-    (target) => {
-      if (!(target instanceof HTMLElement)) return false;
-      const tokens = target.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
-      return (
-        !target.hasAttribute('data-pui-view-pending') &&
-        !target.hasAttribute('data-pui-view-revealing') &&
-        target.getAttribute('data-transition-state') === 'entered' &&
-        tokens.includes('transition-none') &&
-        tokens.includes('duration-200')
-      );
-    },
-    element,
-    { timeout: 10_000 }
-  );
+  try {
+    await page.waitForFunction(
+      (target) => {
+        if (!(target instanceof HTMLElement)) return false;
+        const tokens = target.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
+        return (
+          !target.hasAttribute('data-pui-view-pending') &&
+          !target.hasAttribute('data-pui-view-revealing') &&
+          target.getAttribute('data-transition-state') === 'entered' &&
+          tokens.includes('transition-none') &&
+          tokens.includes('duration-200')
+        );
+      },
+      element,
+      { timeout: 10_000 }
+    );
+  } catch (error) {
+    console.error(
+      '[hover-card-endpoint]',
+      await element.evaluate((target) => ({
+        connected: target.isConnected,
+        tag: target.localName,
+        attributes: Object.fromEntries(
+          Array.from(target.attributes, (attribute) => [attribute.name, attribute.value])
+        ),
+        rect: target.getBoundingClientRect().toJSON(),
+        html: target.outerHTML.slice(0, 6000),
+        active: document.activeElement?.outerHTML.slice(0, 2000),
+      }))
+    );
+    throw error;
+  }
 }
 
 async function resolvedThemeColors(
@@ -915,12 +932,20 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           await first.getAttribute('aria-pressed'),
           `${runtime}/first-enabled-after-second-click`
         ).toBe('false');
-        const firstRestingSurface = await facts(first);
+        // A native click leaves the pointer over the now-inactive Toggle.
+        // Its governed hover fill is distinct from the resting fill below.
+        expect(await first.getAttribute('data-hovered'), `${runtime}/still-hovered`).toBe('');
+        const [expectedHoveredBackground] = await resolvedThemeColors(
+          opened.page,
+          'backgroundColor',
+          ['--pui-muted']
+        );
+        const firstHoveredSurface = await facts(first);
         expect(
-          firstRestingSurface.backgroundColor,
+          firstHoveredSurface.backgroundColor,
           `${runtime}/after-second-click/background`
-        ).toBe(expectedRestingBackground);
-        expect(firstRestingSurface.color, `${runtime}/after-second-click/foreground`).toBe(
+        ).toBe(expectedHoveredBackground);
+        expect(firstHoveredSurface.color, `${runtime}/after-second-click/foreground`).toBe(
           expectedRestingForeground
         );
         const firstElement = await first.elementHandle();
@@ -933,6 +958,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             getComputedStyle(target).boxShadow === 'none',
           firstElement,
           { timeout: 10_000 }
+        );
+        const firstRestingSurface = await facts(first);
+        expect(firstRestingSurface.backgroundColor, `${runtime}/pointer-leave/background`).toBe(
+          expectedRestingBackground
+        );
+        expect(firstRestingSurface.color, `${runtime}/pointer-leave/foreground`).toBe(
+          expectedRestingForeground
         );
         const disabled = toggles.nth(3);
         expect(
@@ -1057,9 +1089,19 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           triggerElement,
           { timeout: 10_000 }
         );
-        const panelText = opened.page
-          .getByText('A rounded, flat preview panel.', { exact: true })
-          .last();
+        const owner = await trigger.getAttribute('data-projection-owner');
+        const generation = await trigger.getAttribute('data-projection-generation');
+        expect(owner, `${runtime}/hover-owner`).toBeTruthy();
+        expect(generation, `${runtime}/hover-generation`).toBeTruthy();
+        // The same authored prose also appears in the source panel. Bind the
+        // portalled Content to the live Trigger's exact projection identity.
+        const panel = opened.page.locator(
+          `[data-pui-root][data-projection-prototype="brutalist-hover-card-content"][data-projection-owner=${JSON.stringify(owner)}][data-projection-runtime=${JSON.stringify(runtime)}][data-projection-generation=${JSON.stringify(generation)}]`
+        );
+        const panelText = panel.getByText(
+          'Host-neutral interaction protocols with bold Neo-Brutalist borders and hard shadows.',
+          { exact: true }
+        );
         const triggerSurface = await facts(trigger);
         const [expectedTriggerBackground] = await resolvedThemeColors(
           opened.page,
@@ -1092,7 +1134,6 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
 
         await trigger.hover();
         await expectVisibility(panelText, true, `${runtime}/hover-pointer-open`);
-        const panel = panelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
         // View visibility is not a transition endpoint. Wait for the actual
         // committed host tokens and governed enter lifecycle before sampling.
         await waitForHoverCardEndpoint(opened.page, panel);
@@ -1105,7 +1146,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const [expectedPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
-        expectHardFrame(panelSurface, 'none', 'rgb(0, 0, 0)', `${runtime}/hover-panel`);
+        expectHardFrame(panelSurface, '3px', expectedPanelForeground, `${runtime}/hover-panel`);
         expect(panelSurface.backgroundColor, `${runtime}/hover-panel/background`).toBe(
           expectedPanelBackground
         );
@@ -1173,12 +1214,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           'rgb(0, 0, 0)',
           `${runtime}/dark/hover-trigger/rest`
         );
-        const darkPanelText = opened.page
-          .getByText('A rounded, flat preview panel.', { exact: true })
-          .last();
+        const darkPanel = panel;
+        const darkPanelText = darkPanel.getByText(
+          'Host-neutral interaction protocols with bold Neo-Brutalist borders and hard shadows.',
+          { exact: true }
+        );
         await darkTrigger.focus();
         await expectVisibility(darkPanelText, true, `${runtime}/dark/hover-focus-open`);
-        const darkPanel = darkPanelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
         await waitForHoverCardEndpoint(opened.page, darkPanel);
         const darkPanelSurface = await facts(darkPanel);
         const darkTriggerSurface = await facts(darkTrigger);
@@ -1213,17 +1255,22 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkPanelSurface.animationDuration,
           `${runtime}/dark/hover-panel/animation-duration`
         ).toBe('0.2s');
-        expectHardFrame(darkPanelSurface, 'none', 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
-        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
-        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
-          'rgba(0, 0, 0, 0)'
-        );
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-background',
         ]);
         const [darkPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
+        expectHardFrame(
+          darkPanelSurface,
+          '3px',
+          darkPanelForeground,
+          `${runtime}/dark/hover-panel`
+        );
+        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
+        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
+          'rgba(0, 0, 0, 0)'
+        );
         expect(darkPanelSurface.backgroundColor, `${runtime}/dark/hover-panel/background`).toBe(
           darkPanelBackground
         );

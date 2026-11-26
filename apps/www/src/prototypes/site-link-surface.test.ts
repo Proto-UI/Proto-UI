@@ -49,11 +49,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The accepted website target remains 44px, not upstream Rhea's size-8.
-// Paint/focus/press literals follow the public passive Rhea contract; no
+// The accepted website target remains 44px, with the selected Luma action appearance.
+// Paint/focus/press literals follow the public passive Luma contract; no
 // Button, synthetic activation, or page-specific paint is installed here.
 for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
-  it(`Shadcn community ${emphasis}: real Rhea Surface/Text retires feedback without replacing the anchor`, async () => {
+  it(`Shadcn community ${emphasis}: real Luma Surface/Text retires feedback without replacing the anchor`, async () => {
     const link = document.createElement('a');
     link.href = 'https://github.com/Proto-UI/Proto-UI';
     link.target = '_blank';
@@ -84,14 +84,14 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
       await settle();
       const tokens = new Set((surface.getAttribute('data-pui-style') ?? '').split(/\s+/));
       for (const token of [
-        'rounded-[var(--pui-radius-2xl)]',
+        'rounded-[var(--pui-radius-4xl)]',
         'border',
         'bg-clip-padding',
         'transition-all',
       ])
         expect(tokens.has(token)).toBe(true);
       expect(tokens.has('rounded-lg')).toBe(false);
-      expect(tokens.has('rounded-[var(--pui-radius-4xl)]')).toBe(false);
+      expect(tokens.has('rounded-[var(--pui-radius-2xl)]')).toBe(false);
       expect(tokens.has('ring-3')).toBe(facts.focusVisible);
       expect(tokens.has('ring-ring/30')).toBe(facts.focusVisible);
       expect(tokens.has('ring-2')).toBe(false);
@@ -134,7 +134,7 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
   });
 }
 
-it('ordinary public Shadcn Surface omission still has no Rhea action feedback', async () => {
+it('ordinary public Shadcn Surface omission still has no action profile feedback', async () => {
   const surface = new Constructors.shadcn();
   document.body.append(surface);
   for (const active of [false, true, false]) {

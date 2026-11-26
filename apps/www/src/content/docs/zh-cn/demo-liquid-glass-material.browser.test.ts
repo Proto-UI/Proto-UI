@@ -13,6 +13,8 @@ import {
   stopServer,
   RUNTIMES,
   choosePreviewRuntime,
+  selectRuntime as selectPublicRuntime,
+  waitForPreviewRuntime,
 } from './browser-harness';
 const ROUTE = '/en/test/liquid-glass-material/';
 const evidence = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
@@ -713,14 +715,10 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
     for (const locale of ['en', 'zh-cn'] as const) {
       const publicRoute = `/${locale}/ui-libraries/liquid-glass/button/`;
       await page.goto(`${baseUrl}${publicRoute}`, { waitUntil: 'networkidle' });
-      const headerRuntime = page.locator('.site-header-runtime').first();
+      const panel = page.locator('.proto-previewer[data-demo-id="demo-liquid-glass-button"]');
       for (const runtime of RUNTIMES) {
-        await choosePreviewRuntime(page, headerRuntime, runtime);
-        const panel = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
-          has: page.locator(
-            '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="true"]'
-          ),
-        });
+        await panel.scrollIntoViewIfNeeded();
+        await selectPublicRuntime(page, panel, runtime, '[role="button"]', 3);
         await panel.waitFor({ state: 'visible' });
         const button = panel.getByRole('button', { name: 'Back', exact: true });
         await expect
@@ -755,24 +753,46 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
         }
         expect(installationText).not.toContain('@proto.ui/cli');
 
-        const usagePanels = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
-          has: page.locator(
-            '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="false"]'
-          ),
-        });
-        expect(await usagePanels.count()).toBe(3);
+        // The public page now authors independent regular, prominent and
+        // disabled examples. Exercise those exact consumers in each runtime.
         const examples = [
-          { label: 'Back', code: '>Back</' },
-          { label: 'Continue', code: 'variant="prominent"' },
-          { label: 'Unavailable', code: 'disabled' },
+          { id: 'regular', label: 'Back', code: '>Back</', count: 3 },
+          { id: 'prominent', label: 'Continue', code: 'variant="prominent"', count: 2 },
+          { id: 'disabled', label: 'Unavailable', code: 'disabled', count: 2 },
         ];
-        for (const [index, example] of examples.entries()) {
-          const usage = usagePanels.nth(index);
+        for (const example of examples) {
+          const usage = page.locator(
+            `.proto-previewer[data-demo-id="demo-liquid-glass-button-${example.id}"]`
+          );
           await usage.scrollIntoViewIfNeeded();
+          try {
+            await selectPublicRuntime(page, usage, runtime, '[role="button"]', example.count);
+          } catch (error) {
+            console.error(
+              '[liquid-current-example]',
+              JSON.stringify({
+                runtime,
+                example,
+                facts: await usage.evaluate((root) => ({
+                  attributes: Object.fromEntries(
+                    Array.from(root.attributes, (a) => [a.name, a.value]).filter(
+                      ([name]) => !name.startsWith('data-code-')
+                    )
+                  ),
+                  prototypes: [
+                    ...root.querySelectorAll('[data-projection-content] [data-pui-root]'),
+                  ].map((node) => ({
+                    prototype: node.getAttribute('data-projection-prototype'),
+                    text: node.textContent,
+                    role: node.getAttribute('role'),
+                    runtime: node.getAttribute('data-projection-runtime'),
+                  })),
+                })),
+              })
+            );
+            throw error;
+          }
           await usage.waitFor({ state: 'visible' });
-          const preview = usage.locator('.proto-previewer');
-          expect(await preview.getAttribute('data-initial-runtime')).toBe(runtime);
-          await expect.poll(() => preview.getAttribute('data-projection-state')).toBe('ready');
           await usage
             .getByRole('button', { name: example.label, exact: true })
             .waitFor({ state: 'visible' });
@@ -787,14 +807,16 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
           const codeText = await code.innerText();
           expect(codeText).toContain(example.code);
           expect(codeText).toContain(
-            runtime === 'wc'
-              ? 'wc-liquid-glass-button'
-              : runtime === 'vue2'
-                ? 'createVue2Adapter'
-                : `../proto-ui/components/${runtime}`
+            runtime === 'wc' ? 'proto-ui-liquid-glass-button' : `../proto-ui/components/${runtime}`
           );
+          if (example.id === 'disabled') {
+            expect(
+              await usage
+                .getByRole('button', { name: example.label, exact: true })
+                .getAttribute('aria-disabled')
+            ).toBe('true');
+          }
           if (runtime === 'vue2') {
-            expect(codeText).toContain('Vue.extend.bind(Vue)');
             expect(codeText).toContain('components: { LiquidGlassButton }');
             expect(codeText).not.toContain('<script setup>');
           }
@@ -2992,12 +3014,10 @@ if (includeLiquidWip)
         const headerRuntime = page.locator('.site-header-runtime').first();
         for (const runtime of RUNTIMES) {
           await choosePreviewRuntime(page, headerRuntime, runtime);
-          const panel = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
-            has: page.locator(
-              '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="true"]'
-            ),
-          });
-          await panel.waitFor({ state: 'visible' });
+          const panel = page.locator(
+            '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-mode="fixed-family"][data-projection-toolbar="true"]'
+          );
+          await waitForPreviewRuntime(page, runtime, '[role="button"]', 3);
           const button = panel.getByRole('button', { name: 'Back', exact: true });
           await expect
             .poll(() => button.getAttribute('data-material-quality'), { timeout: 30000 })

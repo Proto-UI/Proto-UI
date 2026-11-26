@@ -1,0 +1,22 @@
+{
+  "base": "5c79265311db7d8f3b7ff5b32c5442c99876b207",
+  "scope": "Remove unsupported autoUpdateOnPropsChange test option; no runtime API or behavior change.",
+  "files": [
+    {
+      "path": "packages/adapters/web-component/test/portal-color-scheme-reconcile.test.ts",
+      "sha256": "211298a846d4b233ca209b82be4c69f23333722cb9ffe9ea7875305a7f42de51"
+    }
+  ],
+  "tests": {
+    "passed": 3,
+    "failed": 0,
+    "receipt": "cb5d-portal-color-types-test.json.gz"
+  },
+  "workspaceTypes": {
+    "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types:workspace",
+    "exitCode": 0,
+    "diagnostics": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "limit": "Default local 2 GiB heap exhausted before diagnostics; bounded 4 GiB rerun checks the complete unchanged workspace program. Canonical Actions type job remains pending."
+  }
+}

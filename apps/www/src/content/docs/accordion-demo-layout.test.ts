@@ -131,14 +131,14 @@ describe('Accordion demo narrow-width ownership', () => {
         )
           expect(node.className?.split(' ')).toContain('wrap-anywhere');
       }
-      const long = nodes.find(
+      const longContent = nodes.find(
         (node) =>
-          typeof node !== 'string' &&
-          node.kind === 'box' &&
-          node.children?.some(
-            (child) => typeof child === 'string' && child.startsWith('UnbrokenContentBoundary_')
-          )
+          typeof node !== 'string' && node.kind === 'proto' && node.ref === 'single-long-content'
       );
+      const long =
+        longContent && typeof longContent !== 'string' && longContent.kind === 'proto'
+          ? longContent.children?.[0]
+          : undefined;
       expect(
         long && typeof long !== 'string' && long.kind === 'box' && long.className?.split(' ')
       ).toContain('wrap-anywhere');
@@ -234,7 +234,7 @@ describe('Liquid Accordion bounded source ownership', () => {
         root.children?.map((node) =>
           typeof node === 'string' || node.kind === 'text' ? null : (node.ref ?? null)
         )
-      ).toEqual(['single', null, 'multiple', null, 'rtl', 'controlled', 'requestStatus', 'accept']);
+      ).toEqual(['single', null, 'multiple', null, null, null, 'controlled', null]);
     }
   });
 });

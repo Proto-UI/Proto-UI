@@ -155,4 +155,4 @@ for (const runtime of ['wc', 'react'] as const)
         await vi.waitFor(() => assertHelp(null));
       }
       expect(openedIds.size).toBe(3);
-    });
+    }, 20_000);

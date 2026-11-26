@@ -101,6 +101,7 @@ describe('Liquid Glass Tabs draft projection', () => {
     const { root, list, a, b, content } = make();
     await flush();
     expect(styleContains(list, 'rounded-full')).toBe(true);
+    expect(styleContains(a, 'rounded-full')).toBe(true);
     expect(styleContains(a, 'bg-background')).toBe(true);
     expect(styleContains(content, 'bg-background')).toBe(false);
     b.click();

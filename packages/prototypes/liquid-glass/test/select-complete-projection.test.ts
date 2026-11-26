@@ -439,6 +439,9 @@ describe('Liquid Field Select Trigger (intent only)', () => {
       expect(trigger.frames.at(-1)?.material.candidates).toEqual([]);
       field.set({ invalid: false });
       expect(trigger.exposes.invalid.get()).toBe(false);
+      expect(trigger.frames.at(-1)?.style.tokens).toContain('border-border');
+      expect(trigger.frames.at(-1)?.style.tokens).not.toContain('border-destructive');
+      expect(trigger.frames.at(-1)?.style.tokens).not.toContain('border-2');
       expect(trigger.target.hasAttribute('aria-errormessage')).toBe(false);
       expect(trigger.frames.at(-1)?.material.candidates).toEqual([pressCandidate('rest')]);
       expect(root.exposes.value.get()).toBe('v0');

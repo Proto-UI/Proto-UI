@@ -114,6 +114,7 @@ type Case = {
   hoverCardClosedBaseline?: Observation;
   binaryKeyboardActivation?: Observation;
   pointerItemBaselines?: Record<string, unknown>[];
+  selectionPreparation?: Observation;
   projectionReadinessFailure?: Observation;
   escapeTransition?: Record<string, unknown>;
 };
@@ -202,7 +203,7 @@ function plannedStates(family: string): string[] {
     }
   }
   if (['toggle', 'switch', 'checkbox'].includes(family)) states.push('keyboard-activation');
-  if (family === 'tabs') states.push('keyboard-selection-overview', 'selected-and-pointer-held');
+  if (family === 'tabs') states.push('keyboard-selection-account', 'selected-and-pointer-held');
   if (family === 'toggle') states.push('already-active', 'active-and-pointer-held');
   for (const target of contrastHeldBinaryTargets(family))
     states.push(`${target.state}-and-pointer-held`);
@@ -212,7 +213,7 @@ function plannedStates(family: string): string[] {
   if (['dropdown-menu', 'select'].includes(family))
     states.push('item-focus-first', 'item-focus-last');
   if (family === 'dropdown-menu')
-    for (const variant of ['default', 'destructive'])
+    for (const variant of ['default', 'logout'])
       states.push(`item-${variant}-hover`, `item-${variant}-pointer-held`);
   if (family === 'select')
     for (const selection of ['selected', 'unselected'])
@@ -717,18 +718,18 @@ async function capture(
   }
 }
 function primary(previewer: Locator, family: string): Locator | null {
-  if (family === 'tabs') return previewer.getByRole('tab', { name: 'Details', exact: true });
+  if (family === 'tabs') return previewer.getByRole('tab', { name: 'Password', exact: true });
   if (family === 'input') {
     const control = '[data-pui-root][data-projection-prototype="brutalist-input-root"]';
-    // The authored editable Name example is distinct from Disabled/Read-only.
+    // The authored editable Email example is distinct from Disabled/Read-only.
     // Bind its actual editor in every host, preserving uniqueness and ownership.
     return previewer.locator(
-      `[data-projection-content] input${control}[aria-label="Name"], [data-projection-content] ${control} > input[part="control"][aria-label="Name"]:not([data-pui-root])`
+      `[data-projection-content] input${control}[aria-label="Email"], [data-projection-content] ${control} > input[part="control"][aria-label="Email"]:not([data-pui-root])`
     );
   }
   if (family === 'field') {
     const control =
-      '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="requiredControl"]';
+      '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="usernameControl"]';
     // WC exposes a direct owned native part; React/Vue roots are the input.
     // No first(): missing or duplicate physical editors remain an audit error.
     return previewer.locator(
@@ -743,12 +744,11 @@ function primary(previewer: Locator, family: string): Locator | null {
         '[data-pui-root][data-projection-prototype="brutalist-collapsible-root"][data-demo-ref="uncontrolled"] [data-pui-root][data-projection-prototype="brutalist-collapsible-trigger"]',
       accordion:
         '[data-pui-root][data-projection-prototype="brutalist-accordion-trigger"][data-demo-ref="single-lifetime-trigger"]',
-      // The authored Density preference group starts at Comfortable. It is the
+      // The authored Display density group starts at Comfortable. It is the
       // selected roving Tab entry for this family's rest/hover/keyboard-focus
-      // journey; Default, the disabled Compact and the unselected second group
-      // cannot substitute. Keep strict uniqueness and the shared lease checks.
+      // journey; the unselected Default and Compact controls cannot substitute. Keep strict uniqueness and the shared lease checks.
       'radio-group':
-        '[data-pui-root][data-projection-prototype="brutalist-radio-group-root"][data-demo-ref="Density preference"] [data-pui-root][data-projection-prototype="brutalist-radio-group-item"][data-demo-ref="density-comfortable"][role="radio"][aria-checked="true"][tabindex="0"]',
+        '[data-pui-root][data-projection-prototype="brutalist-radio-group-root"][data-demo-ref="brutalistHeroGroup"] [data-pui-root][data-projection-prototype="brutalist-radio-group-item"][data-demo-ref="hero-comfortable"][role="radio"][aria-checked="true"][tabindex="0"]',
       // The authored Enter button is the first public phase-machine control.
       // These rest/hover/keyboard-focus frames observe that exact control's
       // visual states, not the passive presence region or transition motion.
@@ -758,9 +758,9 @@ function primary(previewer: Locator, family: string): Locator | null {
       // visual states belong to the controls, not to the semantic-only regions;
       // this adds no focus behavior to those passive parts.
       'live-region':
-        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="announcePolite"][role="button"]',
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="checkInbox"][role="button"]',
       'async-region':
-        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="markBusy"][role="button"]',
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="startRefresh"][role="button"]',
     } as Record<string, string>
   )[family];
   if (named) return previewer.locator(`[data-projection-content] ${named}`);
@@ -787,7 +787,7 @@ function primary(previewer: Locator, family: string): Locator | null {
   return family === 'textarea' ? targets : targets.first();
 }
 // The current Image recipe has no authored input. Keep that rest-only scope
-// tied to its five actual presentations, not to every possible Image consumer.
+// tied to its four actual presentations, not to every possible Image consumer.
 function imagePassiveApplicability(demo: DemoSpec) {
   const failures: { prototypeId: string; reason: string }[] = [];
   const instances: { ref: string | null; props: Record<string, unknown> }[] = [];
@@ -816,14 +816,13 @@ function imagePassiveApplicability(demo: DemoSpec) {
   }
   visit(demo.root);
   const expected = [
+    ['hero-frame', 'cover', 'informative'],
     ['fit-contain', 'contain', 'informative'],
     ['fit-cover', 'cover', 'informative'],
     ['fit-fill', 'fill', 'informative'],
-    ['decorative', 'contain', 'decorative'],
-    ['error', 'contain', 'informative'],
   ];
   if (instances.length !== expected.length)
-    fail('Image static plan requires all five presentations.');
+    fail('Image static plan requires all four presentations.');
   for (const [ref, fit, a11yMode] of expected) {
     const matches = instances.filter((instance) => instance.ref === ref);
     const props = matches[0]?.props;
@@ -841,7 +840,7 @@ function imagePassiveApplicability(demo: DemoSpec) {
     applicable: failures.length === 0,
     criteria: ['P-BRUTALIST-IMAGE-VISUAL-GRAMMAR', 'P-BASE-IMAGE'],
     scope:
-      'Only the current five static authored Image presentations; no interaction variant exemption.',
+      'Only the current four static authored Image presentations; no interaction variant exemption.',
     instances,
     failures,
   };
@@ -1184,6 +1183,73 @@ async function passiveSurfaceObservation(
     }
   );
 }
+async function prepareSelectAuditSelection(page: Page, item: Case, target: Locator): Promise<void> {
+  const lease = async () =>
+    page.evaluate((subject) => {
+      const boundary = (
+        globalThis as typeof globalThis & {
+          puiContrastProbe: typeof import('./contrast-probe.browser');
+        }
+      ).puiContrastProbe.readContrastAuditSubject(subject);
+      return {
+        achieved: boundary.observation.achieved,
+        owner: boundary.owner,
+        generation: boundary.generation,
+      };
+    }, caseSubject(page));
+  const beforeLease = await lease();
+  if (!beforeLease.achieved) throw new Error('Select preparation has no current subject lease.');
+  const controlledId = await target.getAttribute('aria-controls');
+  if (!controlledId) throw new Error('Select preparation has no controlled popup relation.');
+  let popupLocator = (await owned(page, 'brutalist-select-content')).and(
+    page.locator(`[id=${JSON.stringify(controlledId)}]`)
+  );
+  if ((await popupLocator.count()) !== 1)
+    throw new Error('Select preparation requires exactly one controlled owned popup.');
+  // The public fruit recipe starts at an unselected placeholder. Preserve
+  // the selected-value Escape oracle by establishing its baseline through
+  // the real option action before observing the dismissal itself.
+  const selected = popupLocator.locator('[role="option"][aria-selected="true"]');
+  if ((await selected.count()) !== 0)
+    throw new Error('Select preparation requires the authored unselected placeholder.');
+  const beforeText = await target.textContent();
+  await popupLocator.getByRole('option', { name: 'Apple', exact: true }).click();
+  await popupLocator.waitFor({ state: 'hidden' });
+  await target.click();
+  const reopenedId = await target.getAttribute('aria-controls');
+  if (!reopenedId) throw new Error('Select preparation lost the controlled popup relation.');
+  popupLocator = (await owned(page, 'brutalist-select-content')).and(
+    page.locator(`[id=${JSON.stringify(reopenedId)}]`)
+  );
+  await popupLocator.waitFor({ state: 'visible' });
+  const apple = popupLocator.getByRole('option', { name: 'Apple', exact: true });
+  await apple.locator('xpath=self::*[@aria-selected="true"]').waitFor();
+  const appleHandle = await apple.elementHandle();
+  if (!appleHandle) throw new Error('Select preparation lost the selected physical option.');
+  try {
+    await page.waitForFunction((option) => document.activeElement === option, appleHandle);
+  } finally {
+    await appleHandle.dispose();
+  }
+  const afterLease = await lease();
+  const afterText = (await target.textContent())?.trim();
+  if (
+    !afterLease.achieved ||
+    afterLease.owner !== beforeLease.owner ||
+    afterLease.generation !== beforeLease.generation ||
+    afterText !== 'Apple'
+  )
+    throw new Error('Select preparation did not retain the same owner and committed value.');
+  item.selectionPreparation = {
+    achieved: true,
+    beforeText: beforeText?.trim(),
+    afterText,
+    selectedOption: 'Apple',
+    basis:
+      'Trusted native option click, observed close, native Trigger reopen, and selected entry focus under the same subject lease; no DOM, Props or State substitution.',
+  };
+}
+
 async function auditedPopupEscape(page: Page, item: Case, target: Locator): Promise<void> {
   const family = item.family;
   const trigger = await target.elementHandle();
@@ -1637,7 +1703,7 @@ async function pointerJourney(
   const family = item.family;
   if (family === 'tabs' && before.ariaSelected !== 'false') {
     throw new Error(
-      'Details must initially be unselected; no selection transition can be claimed.'
+      'Password must initially be unselected; no selection transition can be claimed.'
     );
   }
   const popupName = (
@@ -1691,7 +1757,7 @@ async function pointerJourney(
     if (family === 'tabs') {
       await target.locator('xpath=self::*[@aria-selected="true"]').waitFor();
       await capture(page, item, `${prefix}activation-result`, () =>
-        tabsObservation(previewer, 'Details')
+        tabsObservation(previewer, 'Password')
       );
       return;
     }
@@ -1827,12 +1893,12 @@ function dropdownPointerRows() {
       selected: null,
     },
     {
-      name: 'Delete',
-      ref: 'deleteAction',
-      value: 'delete',
-      shortcut: null,
-      identity: 'destructive',
-      pair: 'destructive',
+      name: 'Log out',
+      ref: 'logoutAction',
+      value: 'logout',
+      shortcut: '⇧⌘Q',
+      identity: 'logout',
+      pair: 'main',
       selected: null,
     },
   ];
@@ -2031,8 +2097,8 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
   const contentName = isSelect ? 'brutalist-select-content' : 'brutalist-dropdown-content';
   const rows = isSelect
     ? [
-        { name: 'Paper', identity: 'selected', pair: 'main', selected: 'true' },
-        { name: 'Ink', identity: 'unselected', pair: 'main', selected: 'false' },
+        { name: 'Apple', identity: 'selected', pair: 'main', selected: 'true' },
+        { name: 'Banana', identity: 'unselected', pair: 'main', selected: 'false' },
       ]
     : dropdownPointerRows();
   // These exact authored rows come from demo-brutalist-{select,dropdown-menu}.demo.ts.
@@ -2064,8 +2130,11 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
     // focus on the OTHER authored row, rather than merely hoping the key ran.
     const role = isSelect ? 'option' : 'menuitem';
     const otherRow = rows.find((candidate) => candidate !== row)!;
+    // The current public fruit menu has five options. End reaches Pineapple;
+    // Banana is still the unselected pointer target, but is no longer an edge.
+    const otherName = isSelect && row === rows[0] ? 'Pineapple' : otherRow.name;
     const other = isSelect
-      ? popup.getByRole(role, { name: otherRow.name, exact: true })
+      ? popup.getByRole(role, { name: otherName, exact: true })
       : await dropdownPointerTarget(
           popup,
           otherRow as ReturnType<typeof dropdownPointerRows>[number]
@@ -2073,7 +2142,7 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
     const baselineRecord: Record<string, unknown> = {
       identity: row.identity,
       targetName: row.name,
-      expectedOtherName: otherRow.name,
+      expectedOtherName: otherName,
       expectedSelection: row.selected,
       stage: 'popup-visible',
       achieved: false,
@@ -2411,19 +2480,19 @@ async function hoverCardObservation(
 }
 async function tabsObservation(
   previewer: Locator,
-  selected: 'Details' | 'Overview'
+  selected: 'Password' | 'Account'
 ): Promise<Observation> {
-  const overview = previewer.getByRole('tab', { name: 'Overview', exact: true });
-  const details = previewer.getByRole('tab', { name: 'Details', exact: true });
+  const overview = previewer.getByRole('tab', { name: 'Account', exact: true });
+  const details = previewer.getByRole('tab', { name: 'Password', exact: true });
   // The previewer itself has a tabpanel wrapper; only the materialized product
   // part proves that selection changed the current Tabs content.
   const panel = previewer.locator(
     '[data-projection-content] [data-pui-root][data-projection-prototype="brutalist-tabs-content"][role="tabpanel"]:visible'
   );
   const expectedText =
-    selected === 'Details'
-      ? 'Dark mode keeps black shadows on warm paper.'
-      : 'Hard borders, loud yellow, no radius.';
+    selected === 'Password'
+      ? "Password Change your password here. After saving, you'll be logged out. Use at least 12 characters with a mix of letters, numbers, and symbols."
+      : 'Account Make changes to your account profile and username here. Name: Pedro Duarte Username: @peduarte';
   const overviewTarget = await targetObservation(overview);
   const detailsTarget = await targetObservation(details);
   const panelTarget = (await panel.count()) === 1 ? await targetObservation(panel) : null;
@@ -2432,10 +2501,10 @@ async function tabsObservation(
       overviewTarget.achieved &&
       detailsTarget.achieved &&
       panelTarget?.achieved === true &&
-      (await overview.getAttribute('aria-selected')) === String(selected === 'Overview') &&
-      (await details.getAttribute('aria-selected')) === String(selected === 'Details') &&
+      (await overview.getAttribute('aria-selected')) === String(selected === 'Account') &&
+      (await details.getAttribute('aria-selected')) === String(selected === 'Password') &&
       (await panel.count()) === 1 &&
-      (await panel.innerText()).trim() === expectedText,
+      (await panel.innerText()).replace(/\s+/g, ' ').trim() === expectedText,
     overview: overviewTarget,
     details: detailsTarget,
     panelTarget,
@@ -2770,6 +2839,10 @@ try {
       ) {
         await pointerJourney(page, item, target, previewer);
       }
+      if (family === 'select') {
+        phase = 'select-selection-preparation';
+        await prepareSelectAuditSelection(page, item, target);
+      }
       // Dismiss open menus before testing the trigger's native keyboard route.
       // No pointer/focus reset may mask this exact Escape transition.
       phase = 'escape-attribution';
@@ -2994,15 +3067,15 @@ try {
         }
       }
       if (family === 'tabs') {
-        const overview = previewer.getByRole('tab', { name: 'Overview', exact: true });
+        const overview = previewer.getByRole('tab', { name: 'Account', exact: true });
         await target.press('ArrowLeft');
         await overview.press('Space');
         await overview.locator('xpath=self::*[@aria-selected="true"]').waitFor();
-        await capture(page, item, 'keyboard-selection-overview', () =>
-          tabsObservation(previewer, 'Overview')
+        await capture(page, item, 'keyboard-selection-account', () =>
+          tabsObservation(previewer, 'Account')
         );
         // Selection has already committed through native keyboard activation.
-        // This is not the initially unselected Details pointerdown journey.
+        // This is not the initially unselected Password pointerdown journey.
         await overview.hover();
         const physical = await overview.elementHandle();
         if (!physical) throw new Error('Selected Overview Tabs trigger has no physical target.');
@@ -3082,14 +3155,14 @@ try {
                   held.flatPaint === true,
                 historicalSetup: {
                   boundary:
-                    'Released, already-selected Overview before native pointerdown; not the held PNG state.',
+                    'Released, already-selected Account before native pointerdown; not the held PNG state.',
                   observation: releasedBefore,
                 },
                 criterion: 'P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT',
                 interactionCriterion: 'P-BRUTALIST-TABS-TRIGGER-INTERACTION',
                 criterionStatus: 'draft',
                 basis:
-                  'Already-selected physical Overview trigger remains aria-selected=true under native held pointer and :active; selected computed fill/foreground/border persist with no elevation or translation before, during and after press, per the current 0.3.0-alpha.1 draft. Zero-offset focus rings and transparent reset layers are recorded separately, not elevation. Observation only, not full criterion or WCAG acceptance.',
+                  'Already-selected physical Account trigger remains aria-selected=true under native held pointer and :active; selected computed fill/foreground/border persist with no elevation or translation before, during and after press, per the current 0.3.0-alpha.1 draft. Zero-offset focus rings and transparent reset layers are recorded separately, not elevation. Observation only, not full criterion or WCAG acceptance.',
               };
             });
           } finally {

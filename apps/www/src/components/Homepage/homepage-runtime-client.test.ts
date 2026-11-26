@@ -298,14 +298,14 @@ describe('Homepage page-owned runtime', () => {
     expect(fakes.materialize.mock.calls).toHaveLength(retiredCalls);
   });
 
-  it('admits Bootstrap through the homepage WIP family option', async () => {
+  it('admits Bootstrap through the homepage library family option', async () => {
     const root = fixture(true);
     handle = initHomepageRuntime(root);
     await settle();
     const controls = fakes.materialize.mock.calls[0]![1].controls;
     expect(controls.family.options).toContainEqual({
       value: 'bootstrap-2-3-2',
-      label: 'Bootstrap 2.3.2 · WIP',
+      label: 'Bootstrap 2.3.2',
     });
     const calls = fakes.materialize.mock.calls.length;
     controls.family.onValueChange('bootstrap-2-3-2');
@@ -966,7 +966,7 @@ it.each(['shadcn', 'brutalist'] as const)(
       expect(request.generation).toBe(handle!.getSnapshot().generation);
       expect(root.dataset.runtimeGeneration).toBe(String(request.generation));
       for (const control of [options.controls.runtime, options.controls.family]) {
-        expect(control.shadcnStyleProfile).toBe('rhea');
+        expect(control.shadcnStyleProfile).toBe('luma');
         expect(control).not.toHaveProperty('itemSizing');
       }
       expect(root.dataset.family).toBe(selected);

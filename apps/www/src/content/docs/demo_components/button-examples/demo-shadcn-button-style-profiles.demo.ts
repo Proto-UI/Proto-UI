@@ -7,7 +7,7 @@ export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'grid w-full min-w-0 gap-4',
+    className: 'grid w-full min-w-0 grid-cols-1 gap-4',
     children: [
       {
         kind: 'box',

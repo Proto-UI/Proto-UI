@@ -3,8 +3,8 @@ type: test
 title: Finite Shadow Root percentage translation candidate evidence
 status: draft
 lifecycleRationale:
-  en: Candidate classification and current-owner recipe evidence do not establish native geometry, input or independent semantic acceptance. The exact native matrix remains an explicit draft blocker until executed and reviewed.
-  zh-CN: 候选分类与当前 owner recipe 证据不证明原生几何、输入或独立语义准入；精确原生矩阵在实际运行并审查前仍为 draft blocker。
+  en: Finite classification, current-owner recipes and the executed native matrix remain candidate evidence. Independent semantic acceptance and review of the complete raw matrix remain draft blockers; no stable Shadow profile admission is claimed.
+  zh-CN: 有限分类、当前 owner recipe 与已执行的原生矩阵仍是候选证据；独立语义准入及完整原始矩阵审查仍为 draft blocker，不声称稳定 Shadow profile 准入。
 since: 0.3.0-alpha.2
 summary: Separately records finite-token provenance, real owner-state binding and native whole-Root obligations without weakening existing complete Switch or S3 gates.
 cases:
@@ -22,26 +22,46 @@ cases:
     title: Actual Root surface slot and host hit geometry agree through intermediate values and reversal
     covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION]
     expectation: independent-formula-native-geometry-and-lifecycle-matrix
+  - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-RTL-REM
+    title: Seven exact existing RTL and rem expressions retain author provenance and require the current same-source recipe
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RTL-REM-TRANSLATIONS]
+    expectation: exact-spellings-reject-near-misses-and-stale-or-foreign-percentage-owner
+  - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-PUBLIC-ENDPOINTS
+    title: Actual public Switch and Thumb preserve mirrored click and Space endpoints across profiles and root font sizes
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RTL-REM-TRANSLATIONS]
+    expectation: real-public-prototypes-nine-profiles-two-sizes-both-directions-and-light-split
+    notes:
+      - This consumer verifies transport of the existing authored equations and mirrored activation endpoints. It does not establish complete profile geometry, confinement or all draggable acceptance criteria of P-SHADCN-SWITCH-THUMB.
 implementations:
   - id: finite-role-transport
     kind: module-test
     status: passing
     path: packages/core/test/feedback/percentage-root-translation.test.ts
     required: true
-    consumesCases: [T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-TOKENS]
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-TOKENS
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-RTL-REM
   - id: current-owner-projection
     kind: adapter-test
     status: passing
     path: packages/adapters/web-component/test/shadow-percentage-translation.test.ts
     required: true
-    consumesCases: [T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-OWNER]
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-OWNER
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-RTL-REM
   - id: native-public-producer
     kind: runtime-test
-    status: missing
+    status: passing
+    path: apps/www/test/shadow-percentage-translation.browser.test.ts
     required: true
-    consumesCases: [T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-NATIVE]
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-NATIVE
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-RTL-REM
+      - T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-PUBLIC-ENDPOINTS
     notes:
       - No historical S3 replay or deterministic DOM test substitutes for the exact candidate's required native matrix.
+      - Native evidence includes the original nine and seven RTL/rem expressions at 16px and 32px root fonts, three widths, five percentages, both directions, real hit testing and clicks, transition reversal, owner withdrawal, reconnect, nesting and an actual double-transform negative control.
+      - Public endpoint evidence preserves authored entrance timing and observes settled rest before measuring subsequent click and Space travel; it is not a first-paint guarantee.
 verifies:
   modules:
     - id: M-EXPOSE-STATE-WEB-0001
@@ -51,17 +71,22 @@ verifies:
       anchors:
         - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-TOKENS
         - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RTL-REM-TRANSLATIONS
 exercises:
   modules: [M-EXPOSE-STATE-0001]
   adapters: [A-WEB-COMPONENT-0001]
+  prototypes: [P-SHADCN-SWITCH-THUMB]
 openQuestions:
   - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-Q-NATIVE
     question:
-      en: Has the native candidate matrix run with complete raw evidence and independent review?
+      en: Has the executed native candidate matrix and its complete raw evidence received independent semantic review?
     blocks:
       - activation:T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001
       - implementation:T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001#native-public-producer
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Recorded the exact existing RTL/rem spellings and executable native candidate producer with complete matrix and public endpoint evidence; independent admission review remains open and lifecycle stays draft.
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Separated finite token and owner-source candidate tests from required native acceptance; no stable admission claimed.

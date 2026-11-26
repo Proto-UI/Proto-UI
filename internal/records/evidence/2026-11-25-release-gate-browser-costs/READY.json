@@ -1,0 +1,120 @@
+{
+  "status": "ready-for-parent-review-and-commit",
+  "ownedSourcePaths": [
+    "scripts/test/runtime-test-plan.mjs",
+    "scripts/test/regression-baseline.test.mjs",
+    "scripts/test/run-runtime-tests.test.mjs",
+    "scripts/test/sprint1-evidence.test.mjs",
+    "scripts/test/fixtures/browser-suite-costs-45537881490.json"
+  ],
+  "evidenceDirectory": "internal/records/evidence/2026-11-25-release-gate-browser-costs",
+  "baseCommit": "124e329cfc3cd710c1f1d267d640f1b97ef2f4c9",
+  "controls": {
+    "passed": 206,
+    "failed": 0,
+    "skipped": 0
+  },
+  "scope": "Cost observations and controls only; no production runtime change, no shard-count increase, no deadline or assertion weakening.",
+  "files": [
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/README.md",
+      "sha256": "e30a541f116ba1798600c7274495097cd69cd0eaca34a3ea264a6a748a725931"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/controls-receipt.json",
+      "sha256": "5d5ccb10b1b649f1f478974b0b7e66461f74120e8be4f7a31f73f26f4ea247db"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342038.log.gz",
+      "sha256": "12850dae5ce096a4750c227c392efba1f998ac2670a208e0c405658417e3838c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342041.log.gz",
+      "sha256": "d8a6efd3a798d8d661921e8390877f69378b022bd3ef1921f1002e398a450f2d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342044.log.gz",
+      "sha256": "a0484f72b81e3b19d405734de70e0313f3b5d47fd0d91fa06aa411dec1043f1e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342062.log.gz",
+      "sha256": "b253a28eeef01e8fdae96ca7473707e107a751a7c56cc557bf0bf6876c2a2670"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342105.log.gz",
+      "sha256": "f4ff75ca2a252ea4046a96cf18597a81c5b65950db8645a741e2a2a5b7c35f67"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342106.log.gz",
+      "sha256": "ea5755364a666a4f5e8dbee83df3e723c24d4bd69958241b60724da51eb4b923"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342112.log.gz",
+      "sha256": "560851ce15e67a997491eadc2b075dddfc62cd6bbbe88745a51b53a061421dc2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342119.log.gz",
+      "sha256": "88a4ab6e477750cb61c1af2ce84efb8a6bede37f30efd706dcfb511a9c5b672f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342121.log.gz",
+      "sha256": "6f9a9bfd7eefb5ac01cd9b6841b71846756399f167e6810447227bb958d8e615"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342125.log.gz",
+      "sha256": "9c0e19d4de414f34f737294114cbcc9ff2b42e58cc5ec9686e69937ac6b094e6"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342131.log.gz",
+      "sha256": "a36f2a97c9b07414a2318ac70cc7f394c38ecc32b01ab09323070b5da94accab"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342140.log.gz",
+      "sha256": "60875dead0d29791649d33cb255055f91d3b8a2d5717cd4190659526bfa9b3cb"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342142.log.gz",
+      "sha256": "30d2d09d6373488643bd1ad5b343e9627139ad0b12cb295249e1ddf4c49a2774"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342143.log.gz",
+      "sha256": "311cc60ef35e3b29739b4437127aa733ff3604057cc44a18f41b4ea82cb2844a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342144.log.gz",
+      "sha256": "af7abaf0b4b606bc856f700ed7be2eae2be8b0ac7ba847750a60517c0e2d25e7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949342209.log.gz",
+      "sha256": "56eb08c3cabc96389edd2f1f7d49d83b21f34897ef994810da813986cc671856"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949343990.log.gz",
+      "sha256": "187badb5f7e540e05778cee9d9b406cfd6a28a645d6fb92a02021c54ac51bfa4"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/job-138949344068.log.gz",
+      "sha256": "1d02cf586fe32dc9e986d9b7eea983c01702c981ea832d48a87d72e0c53472c9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/planning-18.json",
+      "sha256": "3f5feb945001fa6ea7b8a615121037c0a3fe9d01a2afb86d955851ac61728d88"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/planning-correction.json",
+      "sha256": "46a6d316808cec3933da84f1f99b23322ebcf98d088975f54390cb14d1f4c340"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/receipt.json",
+      "sha256": "98978c2398810a4fe9d506b12ef78263fa473ef59407017225f4952d749dacf7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/rejected-initial-reserve-projection.json",
+      "sha256": "ca97afefc470fcc5bc2d313783c15bb989ef9e2aa5ea4c6af1ee704022a84359"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-25-release-gate-browser-costs/runtime-controls.log.gz",
+      "sha256": "c9c5467fbfe05002197ddc357aedd00194ef9ddbd00a3966873d5f61dc1f8631"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "canonicalHead": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1",
+  "transactionBase": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7",
+  "kind": "Full source-hash comparison; not a new whole-entry measurement",
+  "entries": [
+    {
+      "entry": "lucide/icons/x",
+      "inputCount": 53,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "lucide root",
+      "inputCount": 3453,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "core root",
+      "inputCount": 49,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "runtime root",
+      "inputCount": 298,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "adapter-react root",
+      "inputCount": 352,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "adapter-vue root",
+      "inputCount": 351,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "adapter-web-component root",
+      "inputCount": 380,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "prototypes-base/button",
+      "inputCount": 75,
+      "changedInputPaths": []
+    },
+    {
+      "entry": "prototypes-shadcn/button",
+      "inputCount": 85,
+      "changedInputPaths": []
+    }
+  ]
+}

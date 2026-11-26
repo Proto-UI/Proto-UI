@@ -1,0 +1,31 @@
+{
+  "kind": "current-user-directed Agent-assisted history preserving merge",
+  "parents": [
+    "fe2dc512b6715fddafdba2e31589b33677ab4fca",
+    "96e425d6bc393ce9af289728beb788cd33a8cebe"
+  ],
+  "conflicts": [
+    {
+      "path": "apps/www/src/components/library-style-seed.ts",
+      "beforeSha256": "bfb98a5e1e38273abffeb5f656b612d432cf43180bd8b8af015cbba813ee3330",
+      "incomingSha256": "74b2ff6fd9a002b7ce64f576c24a6638dea1aaa9cddae7bb9388f2cc6c18e50b",
+      "afterSha256": "74b2ff6fd9a002b7ce64f576c24a6638dea1aaa9cddae7bb9388f2cc6c18e50b",
+      "decision": "Use the independently reviewed constructor-generic repair, preserving exact adapter statics, constructor arguments, and props; emitted runtime bytes are identical under recorded proof."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+      "beforeSha256": "90d227d8b7a4f028aff03c712f3cf2c9b3b6f66dbe76318de65b9e2203b1d722",
+      "incomingSha256": "aa615d70a74d413299e16eff808523d61f8c17ab5dad064ceab31111438ae2f8",
+      "afterSha256": "90d227d8b7a4f028aff03c712f3cf2c9b3b6f66dbe76318de65b9e2203b1d722",
+      "decision": "Retain original 1914 duration narrowing. Both sides compute the same number or String(duration ?? empty) value; all original browser assertions and deadlines remain."
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "beforeSha256": "8242abf7967261c17d791dfe4e1c52662b7f97fd87be330d2e253531186a22eb",
+      "incomingSha256": "449fa5c6929c5863b472c90e2ef5ea4ca0d707f6660ccc705e49253f002b9cff",
+      "afterSha256": "077291cd81e7ecbbfdaff22c372875a6ce4b816d230617b4daa479646af75f7f",
+      "decision": "Keep all other native 1914 ownership bindings and choose the actual reviewed Library source SHA256 74b2ff6f..., without changing coverage admissions."
+    }
+  ],
+  "validation": "Prior exact source reviews retained. Latest local full coverage checker and ten-file diagnostic were killed under memory pressure; neither is claimed to pass. Complete hosted verification remains pending."
+}

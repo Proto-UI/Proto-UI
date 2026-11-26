@@ -31,6 +31,7 @@ it('gives authored Value and Trigger the fixed intrinsic recipe', async () => {
   expect(trigger).toContain('w-full');
   for (const token of ['flex', 'flex-1', 'items-center', 'gap-2', 'text-start'])
     expect(value).toContain(token);
+  expect(value).not.toContain('text-left');
   expect(readFileSync(source('content'), 'utf8')).toContain("align: 'center'");
 });
 it('new recipe tokens have document and Shadow physical CSS without a Select compiler branch', () => {
@@ -45,7 +46,7 @@ it('new recipe tokens have document and Shadow physical CSS without a Select com
     'flex-1',
     'whitespace-nowrap',
     'w-full',
-    'text-left',
+    'text-start',
   ];
   for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
     const css = render(tokens);
@@ -57,7 +58,7 @@ it('new recipe tokens have document and Shadow physical CSS without a Select com
       'width: 1rem;',
       'flex-shrink: 0;',
       'padding-right: 2rem;',
-      'text-align: left;',
+      'text-align: start;',
     ])
       expect(css).toContain(declaration);
   }

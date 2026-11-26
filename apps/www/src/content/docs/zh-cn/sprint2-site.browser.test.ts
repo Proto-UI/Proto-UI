@@ -6,7 +6,7 @@ import path from 'node:path';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
-import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
+import { launchBrowser, RUNTIMES, selectRuntime, startServer, stopServer } from './browser-harness';
 
 // #1488 B/C/D. Public page inputs and native Chromium actions; no patched
 // component state or CSS. Unit conformance separately observes public handles.
@@ -370,10 +370,9 @@ for (const locale of locales)
         runtime
       );
       try {
-        const preview = page.locator(
-          `[data-adapter-panel="${runtime}"] [data-demo-id="demo-shadcn-tabs-profile-switch"]`
-        );
+        const preview = page.locator('[data-demo-id="demo-shadcn-tabs-profile-switch"]');
         await preview.scrollIntoViewIfNeeded();
+        await selectRuntime(page, preview, runtime, '[role="tab"]', 3);
         const password = preview.getByRole('tab', { name: 'Password', exact: true });
         await password.click();
         await expect.poll(() => password.getAttribute('aria-selected')).toBe('true');
@@ -398,7 +397,7 @@ for (const locale of locales)
           await page.keyboard.press(`Alt+${key}`);
           await expect
             .poll(() => preview.locator('[data-demo-ref="profileStatus"]').textContent())
-            .toBe(`Profile: ${profile}`);
+            .toBe(`Active preset: ${profile}`);
           expect(await password.getAttribute('aria-selected')).toBe('true');
           expect(
             await tabNode!.evaluate((node) => node.isConnected && document.activeElement === node)
@@ -437,10 +436,10 @@ for (const locale of locales)
             preview.getByRole('tab', { name: 'Account', exact: true }).getAttribute('aria-selected')
           )
           .toBe('true');
-        await preview.getByRole('button', { name: 'rhea', exact: true }).click();
+        await preview.getByRole('button', { name: 'Rhea', exact: true }).click();
         await expect
           .poll(() => preview.locator('[data-demo-ref="profileStatus"]').textContent())
-          .toBe('Profile: rhea');
+          .toBe('Active preset: rhea');
       } finally {
         await context.close();
       }

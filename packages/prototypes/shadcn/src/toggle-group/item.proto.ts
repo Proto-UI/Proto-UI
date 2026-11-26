@@ -17,15 +17,6 @@ import { setupCollectionHover } from '../toolbar/action-visual';
 import type { ShadcnToggleGroupItemProps, ShadcnToggleGroupItemExposes } from './types';
 import { TOGGLE_GROUP_VISUAL_AXIS } from './visual';
 
-function resolveToggleGroupItemSize(profile: ShadcnStyleId, size: 'default' | 'sm' | 'lg'): string {
-  if (profile === 'new-york-v4' && size === 'default') return 'h-9 px-3';
-  if (profile === 'nova' && size === 'sm')
-    return 'h-7 min-w-7 rounded-[min(var(--pui-radius-md),12px)] px-2.5 text-[0.8rem]';
-  if (profile === 'mira' && size === 'sm')
-    return 'h-6 min-w-6 rounded-[min(var(--pui-radius-md),8px)] px-2 text-[0.625rem]';
-  return TOGGLE_SIZE[`${profile}-${size}`];
-}
-
 const JOINED_ENDCAP_RADIUS: Record<
   ShadcnStyleId,
   { hFirst: string; hLast: string; vFirst: string; vLast: string } | null
@@ -172,7 +163,19 @@ export default definePrototype<ShadcnToggleGroupItemProps, ShadcnToggleGroupItem
       for (const size of ['default', 'sm', 'lg'] as const) {
         def.rule({
           when: (w) => w.all(w.state(style).eq(profile), w.state(resolvedSize).eq(size)),
-          intent: (i) => i.feedback.style.use(tw(resolveToggleGroupItemSize(profile, size))),
+          // Keep the finite size recipes visible to source token collection.
+          intent: (i) =>
+            i.feedback.style.use(
+              tw(
+                profile === 'new-york-v4' && size === 'default'
+                  ? 'h-9 px-3'
+                  : profile === 'nova' && size === 'sm'
+                    ? 'h-7 min-w-7 rounded-[min(var(--pui-radius-md),12px)] px-2.5 text-[0.8rem]'
+                    : profile === 'mira' && size === 'sm'
+                      ? 'h-6 min-w-6 rounded-[min(var(--pui-radius-md),8px)] px-2 text-[0.625rem]'
+                      : TOGGLE_SIZE[`${profile}-${size}`]
+              )
+            ),
         });
       }
       def.rule({

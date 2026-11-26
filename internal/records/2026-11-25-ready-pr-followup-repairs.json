@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "kind": "ready-pr-followup-repair-source-record",
+  "mode": "human-assisted",
+  "modeSource": "current-user",
+  "request": "请把以上 ready pr 有序合并并治理 issues 然后把你提到的问题修好",
+  "agentSource": "OpenAI ChatGPT, current user-directed workspace continuation",
+  "repository": "Proto-UI/Proto-UI",
+  "baseMain": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057",
+  "sourceIntegrationParent": "ad76f763ae3473773ac84172c1b8f86bb501c855",
+  "repairs": [
+    {
+      "area": "original package ceilings",
+      "detail": "Restore original React 181800, Vue 180600 and WC 218100 gzip byte ceilings. Keep the original nine measurements and policy; do not accept #1884's proposed ceiling increases."
+    },
+    {
+      "area": "WC retained helpers",
+      "detail": "Deduplicate the identical quoted-CSS masking regex and the identical four dialog motion tokens without changing order, error paths or lease behavior."
+    },
+    {
+      "area": "CLI module state source",
+      "detail": "Retain exact declaration identity on opaque module-level identifier bindings so existing source replay can prove imported helper state handles."
+    },
+    {
+      "area": "actual omitted helper parameters",
+      "sourceCommit": "5a1236030824d05b179c2ec0c9303b3a00f2535a",
+      "sourceAuthor": "cyjin-yl <chenyejin2004@foxmail.com>",
+      "detail": "Reuse only three service hunk groups and 21 generic omission tests; add a repair requiring no spread for forwarded captured omission and four discriminating tests. Preserve exact lexical parameter identity, assignment/eval guards, default/rest/destructure rejection and unknown supplied values.",
+      "excluded": "Do not import the broader owned-state/private-map proof. Independent reflective Array-prototype counterexamples remain unresolved in that original batch."
+    },
+    {
+      "area": "CLI build",
+      "detail": "Remove only the second identical opacity-95 utility property, which caused TS1117."
+    },
+    {
+      "area": "website coverage bindings",
+      "detail": "Review precise source changes, rebind source fingerprints and narrow literal/type-only import facts, retain negative controls and all original checkbox/lifecycle/ownership criteria."
+    }
+  ],
+  "observations": [
+    {
+      "source": "ad76f763ae3473773ac84172c1b8f86bb501c855",
+      "kind": "original focused regression",
+      "files": 23,
+      "total": 430,
+      "passed": 430,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "source": "ad76f763ae3473773ac84172c1b8f86bb501c855",
+      "kind": "original four-family closure",
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "originalPerFamilyBudgetMs": 120000
+    },
+    {
+      "source": "ad76f763ae3473773ac84172c1b8f86bb501c855",
+      "kind": "original CLI inventory",
+      "files": 27,
+      "total": 823,
+      "passed": 822,
+      "failed": 1,
+      "unresolved": 3336,
+      "scope": "Preserve this actual failure; it is not converted to a passing result or removed from the retained gate."
+    },
+    {
+      "source": "dirty followup prior to omission v3 generation",
+      "kind": "original strict budget measurement",
+      "workingTreeClean": false,
+      "headMatch": false,
+      "allNinePassed": true,
+      "wcBytes": 218096,
+      "wcBudget": 218100,
+      "scope": "Diagnostic only; repeat original clean-head budget on final committed source."
+    },
+    {
+      "source": "actual combined followup working tree after omission v3",
+      "kind": "complete relevant regression files",
+      "files": 5,
+      "total": 272,
+      "passed": 272,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "includes": "142 WC + 94 CSS + 11 new module binding + 25 new omission"
+    },
+    {
+      "source": "actual combined followup working tree",
+      "kind": "CLI build",
+      "passed": true
+    },
+    {
+      "source": "followup before omission v3",
+      "kind": "public docs",
+      "passed": true,
+      "primaryBilingualRoutes": 332,
+      "libraryInventories": 4,
+      "maintainedDocuments": 449
+    },
+    {
+      "source": "dirty followup before omission v3",
+      "kind": "coverage checks",
+      "passed": false,
+      "scope": "Original full run reports source/object drift and stale consumer ledger fields; refresh through original candidate flow after a source commit."
+    },
+    {
+      "source": "dirty followup before omission v3",
+      "kind": "workspace types",
+      "passed": false,
+      "scope": "Node default heap exhaustion; no successful type-check is claimed."
+    }
+  ],
+  "acceptance": {
+    "releaseAccepted": false,
+    "githubIntegrationClaimed": false,
+    "headerFinalAcceptance": false,
+    "searchFull84OriginalBudgetAcceptance": false,
+    "matrixDesktopAcceptance": false,
+    "compilerIR10Deferred04Preserved": true
+  },
+  "nextChecks": [
+    "Original candidate refresh and full governance controls on committed source",
+    "Original 823 CLI tests plus separately counted 36 new controls",
+    "Original clean nine package budgets, full package build and packed React consumer",
+    "Original Chromium Matrix/Header and genuine hosted Search/Navbar evidence"
+  ]
+}

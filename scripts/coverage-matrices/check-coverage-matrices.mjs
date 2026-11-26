@@ -540,6 +540,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       sourceSha256: '3f4d16509a55b811796454428b796f3a52c81503da5b267b97a9f6746d023c18',
       specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
     }),
+  // Exact authored Dialog recipe: the single public Button edge is type-only.
+  // Full importer bytes remain required; no controller acceptance is promoted.
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts': Object.freeze({
+    sourceSha256: '457cfc4e34819d47a852590307b443fa28c062e0d8c91ddb296fc6b9562668b4',
+    specifiers: Object.freeze(['@proto.ui/prototypes-brutalist/button']),
+  }),
   'apps/www/src/content/docs/demo-bootstrap-2-3-2-dialog.demo.ts': Object.freeze({
     sourceSha256: 'bed828050a2f4b8157678f4d903eade26184762b97c42dd181c7e2fdcd836668',
     specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
@@ -582,7 +588,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: '34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc',
+    sourceSha256: '16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
@@ -604,7 +610,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: 'faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572',
+    sourceSha256: 'ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -614,7 +620,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3',
+    sourceSha256: '37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -890,25 +896,42 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
   'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
-    sourceSha256: 'ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7',
+    sourceSha256: '8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940',
     specifiers: Object.freeze([
+      '@proto.ui/prototypes-lucide/icons/activity',
+      '@proto.ui/prototypes-lucide/icons/arrow-right',
       '@proto.ui/prototypes-lucide/icons/bell',
+      '@proto.ui/prototypes-lucide/icons/blocks',
+      '@proto.ui/prototypes-lucide/icons/book-open',
+      '@proto.ui/prototypes-lucide/icons/box',
       '@proto.ui/prototypes-lucide/icons/chart-no-axes-column-increasing',
       '@proto.ui/prototypes-lucide/icons/circle-question-mark',
+      '@proto.ui/prototypes-lucide/icons/code',
+      '@proto.ui/prototypes-lucide/icons/compass',
+      '@proto.ui/prototypes-lucide/icons/cpu',
+      '@proto.ui/prototypes-lucide/icons/globe',
       '@proto.ui/prototypes-lucide/icons/layers',
+      '@proto.ui/prototypes-lucide/icons/layout-grid',
       '@proto.ui/prototypes-lucide/icons/mouse-pointer-click',
+      '@proto.ui/prototypes-lucide/icons/palette',
+      '@proto.ui/prototypes-lucide/icons/plus',
       '@proto.ui/prototypes-lucide/icons/scan-search',
       '@proto.ui/prototypes-lucide/icons/settings-2',
+      '@proto.ui/prototypes-lucide/icons/shield',
       '@proto.ui/prototypes-lucide/icons/sliders-horizontal',
+      '@proto.ui/prototypes-lucide/icons/sparkles',
       '@proto.ui/prototypes-lucide/icons/square-check-big',
+      '@proto.ui/prototypes-lucide/icons/terminal',
       '@proto.ui/prototypes-lucide/icons/text-cursor-input',
+      '@proto.ui/prototypes-lucide/icons/workflow',
+      '@proto.ui/prototypes-lucide/icons/wrench',
     ]),
   }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: '087311d17d74329b1e58345672da46e1767f97de9ed03fb721fe8af0f51596b5',
+    sourceSha256: '13adc1a8fbbc2ef61dc40c4c11d7c96c8c3e276373596b53f8bdc95e9baa2b00',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -9853,6 +9876,8 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir
 const WEBSITE_TEST_HELPER_PATHS = [
   '/apps/www/src/content/docs/zh-cn/browser-harness.ts',
   '/apps/www/src/content/docs/zh-cn/site-search-evidence.ts',
+  '/apps/www/src/content/docs/zh-cn/site-search-browser.ts',
+  '/apps/www/src/content/docs/zh-cn/site-search-close-focus-evidence.ts',
 ];
 function isTestNamedSource(absolutePath) {
   if (
@@ -9956,6 +9981,12 @@ const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
   // Compiler retirement removes the module Worker and three QuickJS optimizer exclusions.
   // The four Runtime Retry owners and all five exact helper bindings remain unchanged.
   '75e6a226b6038f4d6936ac876596bee90ee9b97e78e783feb5664d9452e5fe07',
+  // Removes graduated Early draft / WIP sidebar badges from component entries only.
+  // Retry imports, resolver, client chunk hook and exact helper bytes are unchanged.
+  'abce1afc9d7e4211b0cb4c6bd3fbfb9ed26b08422f3ca5ceb571d18fb8c9d9b1',
+  // Combines the reviewed compiler retirement with graduated sidebar labels.
+  // Exact four Retry owners and helper/resolver boundaries remain unchanged.
+  '07dae9498553279b22e69683d42ab8e3e47a1be4161792cebb8ef86dfb9544c6',
 ]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',
@@ -9968,7 +9999,9 @@ const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   ],
   [
     'apps/www/scripts/accordion-activation-probe.mjs',
-    '9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b',
+    // Reviewed1928 aligns three existing keyboard splice indentations with main.
+    // Exact helper binding only; virtual IDs, four owners and resolver stay closed.
+    '1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642',
   ],
 ];
 export function promotionBarePackageTargets(root, specifier, metadata) {

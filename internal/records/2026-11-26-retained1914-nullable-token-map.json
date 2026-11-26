@@ -1,0 +1,119 @@
+{
+  "kind": "bounded private nullable token-map proof repair",
+  "integrationBase": "81ab8f642bed8380ac5f5926989c05f015936d31",
+  "patchSha256": "ab9abaa63ac4f90c97a21141bd75723051fc1d641c8991739c3996d676283e7b",
+  "files": [
+    {
+      "path": "packages/cli/src/services/finite-token-map-proof.ts",
+      "new": false,
+      "beforeGitBlob": "8808fcca49ce972b07b82f44c9961090cf635f00",
+      "afterGitBlob": "fb04a69085543d493a0edf7728d6fa1aa04d329e",
+      "beforeSha256": "e0ff40c01e3424206c1f9caa8239cf91b1d2b8f2ee04d13f82e89270ad33093c",
+      "afterSha256": "e7241078a93edccd14fb780fcc8e00aeda29decebff28f5eaaf9fa460486ac79"
+    },
+    {
+      "path": "packages/cli/test/lowered-nullable-token-map.test.ts",
+      "new": true,
+      "beforeGitBlob": null,
+      "afterGitBlob": "3e57b484af68c6fa274ae165ca9623c5b125c225",
+      "beforeSha256": null,
+      "afterSha256": "73b33c66ec1c342dea3759751ac09f23878ed12feb35ff7176e3e65f413c3bda"
+    }
+  ],
+  "proofScope": [
+    "Only private const literal owner maps already admitted by the existing all-reference and source-identity proof. Public exported mutable objects remain refused.",
+    "A root map row may be literal null or a closed subtree of own string data. Arbitrary nullable deep fields, getters, inherited members, arrays and unknown objects remain refused.",
+    "One prior local const subtree projection may remove null only inside the positive branch of an enclosing if testing that exact lexical binding. Type-only wrappers are transparent.",
+    "The complete projection use set still rejects assignment, object mutation, root/child aliases, escaping objects, unknown consumers and unguarded nullable reads. Callbacks created in the branch may read the stable closed primitive leaf; no callback scheduling or State proof is added."
+  ],
+  "secondView": {
+    "reviewer": "/root",
+    "sha256": "093f1479619f4a9f1d9b68b654069cdc0125390134048bf44a72a055648e5361",
+    "status": "PASS for bounded patch only"
+  },
+  "authorValidation": {
+    "before": {
+      "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/nullable-map-before.report.json",
+      "sha256": "3f74dd21bb0dad2c4c4f26e710d9f86dd11b4857aadd549d30a16cba26dbecdc",
+      "passed": 14,
+      "failed": 2,
+      "skipped": 0,
+      "completeFiles": [
+        {
+          "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/packages/cli/test/lowered-nullable-token-map.test.ts",
+          "cases": 16
+        }
+      ]
+    },
+    "after": {
+      "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/nullable-map-complete.report.json",
+      "sha256": "c1a279bab9d5bc2406dbb60726695d5da47ae99fd4ea7dacb3df25a8843a8f6a",
+      "passed": 192,
+      "failed": 0,
+      "skipped": 0,
+      "completeFiles": [
+        {
+          "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/packages/cli/test/lowered-finite-token-map.test.ts",
+          "cases": 37
+        },
+        {
+          "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/packages/cli/test/lowered-nested-token-alias.test.ts",
+          "cases": 39
+        },
+        {
+          "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/packages/cli/test/lowered-nested-token-map.test.ts",
+          "cases": 61
+        },
+        {
+          "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/packages/cli/test/lowered-nullable-token-map.test.ts",
+          "cases": 16
+        },
+        {
+          "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/packages/cli/test/lowered-shared-token-map.test.ts",
+          "cases": 39
+        }
+      ]
+    },
+    "configuredTypes": {
+      "path": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/nullable-map-types.json",
+      "sha256": "eabe1224754d84e185f7287d8053e142167d72c60695df043fa97fbcb5e9c3f1",
+      "diagnostics": 0
+    },
+    "applyCheck": true,
+    "appliedBytesMatch": true,
+    "formatter": "Exact repository .prettierrc"
+  },
+  "realSource": {
+    "entry": "packages/prototypes/shadcn/src/toggle-group/item.proto.ts",
+    "sourceSha256": "441d7cfccdd4aca1ce372a7a3f2d0f294cb02af75a61227ecadd4f7fd7f34d90",
+    "beforeReport": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/diagnostics/nullable-intent-before.json",
+    "beforeReportSha256": "ce8354a496c0270eedf27679d72dd3f87159cf0e518e9ffa74bb6a6d07c8c465",
+    "afterReport": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-intent-proof-fix/diagnostics/nullable-intent-final.json",
+    "afterReportSha256": "4c998cbb7df2f3a2e048c6a44ccab316c8734946877ddbe14d62a5e28799d094",
+    "observationsBefore": 143,
+    "observationsAfter": 143,
+    "unresolvedBefore": 192,
+    "unresolvedAfter": 156,
+    "intentBefore": 90,
+    "intentAfter": 54,
+    "subjectBefore": 102,
+    "subjectAfter": 102,
+    "resolvedOriginalExpressions": {
+      "intent: intent: (i) => i.feedback.style.use(tw(endcaps.hFirst))": 9,
+      "intent: intent: (i) => i.feedback.style.use(tw(endcaps.hLast))": 9,
+      "intent: intent: (i) => i.feedback.style.use(tw(endcaps.vFirst))": 9,
+      "intent: intent: (i) => i.feedback.style.use(tw(endcaps.vLast))": 9
+    },
+    "productionTokensEqual": true,
+    "productionTokenCount": 97,
+    "productionTokenDigest": "09172dc184d4abe49afcaae7115fb7bc5a148c334aa581eb0d142d2001dac4e0"
+  },
+  "limitations": [
+    "No product source, existing assertion or export was changed.",
+    "The current full-library 1570 count is historical bedf data; no new full-library count is claimed. Only the exact complete ToggleGroup entry was rerun for this bounded change.",
+    "The old nullable-deep-child negative remains unchanged and passes. The first broader local attempt admitted an unrelated null deep field and is retained as nullable-map-focused.report.json (191/192); final proof restricts null to root row alternatives.",
+    "The initial new fixture expected a leaf expression while the inventory deliberately reports the complete intent source; its 0/16 assertion-shape result is retained. The corrected unchanged-implementation baseline is 14/16, failing only the two positive cases.",
+    "Original reflective iterator failures, unknown shared maps, and prefix State identity remain separate debt. No full PR or hosted CI pass is claimed."
+  ],
+  "integrationValidation": "Pending the exclusive current-main inventory scan. No current full-library count is extrapolated from the exact ToggleGroup result."
+}

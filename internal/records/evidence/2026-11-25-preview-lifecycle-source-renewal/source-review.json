@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue834.reviewed-direct-source-delta",
+  "sourceAdmission": "unverified",
+  "previousReferenceRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "reviewedSourceRevision": "d10d0e72b305bf9228f3e92ee1677cab19120d77",
+  "sourceCount": 33,
+  "previousProfile": {
+    "path": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json",
+    "sha256": "964bb99c7df94d8080f2d69ba4a31dfa427260f73a113a7d6b94384214c0ff5b",
+    "gitBlob": "1b2a4db23d864f62f52fb98cc1a4c3cdaf19bad4"
+  },
+  "archivePath": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-5f08449.json",
+  "changedSources": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "previousSha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c",
+      "previousGitBlob": "e82498f9136596c957e5bcafb53571c6b51945c0",
+      "reviewedSha256": "f7ff3708827d6c832882a3db9579a8bd5d1709018b25e6b8bf1111f4950dcebc",
+      "reviewedGitBlob": "a5927df14c425a7a59523af738ad5a5245cf214f"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "previousSha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25",
+      "previousGitBlob": "9c9eb8328a6778d1b0bf8f957855f72d8ee3dc16",
+      "reviewedSha256": "f8a053d9f8800d6ed158fd4ac8cbec1fae433775811ce93569eb019544ce8750",
+      "reviewedGitBlob": "7b144969a1ca3b7de6e7524a2c8363da2fd2a7d2"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
+      "previousSha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19",
+      "previousGitBlob": "e056a153c099cab86fe1e9f58df7efd0c69145cd",
+      "reviewedSha256": "547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89",
+      "reviewedGitBlob": "2a84406eb84dea64fe20922b7426920e525037e6"
+    },
+    {
+      "path": "apps/www/src/components/docs-header-preparation.ts",
+      "previousSha256": "545b76fa19b9633d52915c20c8e5ddb7e340dc9a73e43b88b6c790d0a42aa244",
+      "previousGitBlob": "181abe7f2523ea32a1d6364505db1cfdf752f9e5",
+      "reviewedSha256": "a9ec13d22f86a8979b3f9964cb6b8b65ab6022df922e4b21c59a728b473c8c58",
+      "reviewedGitBlob": "63e9ee567ca6b22d6c68cccaa15ac17600c8f99a"
+    }
+  ],
+  "limitations": [
+    "This is a four-source review, not a new browser result.",
+    "The renewal must independently verify all 33 final committed source files and matching worktree bytes.",
+    "Source admission, served source and transitive dependencies remain unverified."
+  ]
+}

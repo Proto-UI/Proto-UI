@@ -366,6 +366,7 @@ describe.sequential('default-document colorScheme browser contract', () => {
           await collected;
           return samples;
         });
+        observations.portalFrames = portalFrames;
         const portal = page.locator('[data-demo-ref="portalButton"]');
         const portalVisible = portalFrames.filter((sample) => sample.visible);
         expect(portalVisible.length).toBeGreaterThan(0);
@@ -375,7 +376,6 @@ describe.sequential('default-document colorScheme browser contract', () => {
         expect(
           await page.evaluate(() => (window as any).colorSchemeFixture.portalFlipAt())
         ).not.toBeNull();
-        observations.portalFrames = portalFrames;
         expect(
           await portal.evaluate((element) => !document.querySelector('#app')!.contains(element))
         ).toBe(true);

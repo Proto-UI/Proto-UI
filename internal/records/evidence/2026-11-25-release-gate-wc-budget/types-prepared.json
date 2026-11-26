@@ -1,0 +1,11 @@
+{
+  "log": "\n> @proto.ui/cli@0.3.0 build /home/ezra/proto-ui-wc-budget-cb5d/packages/cli\n> node ../../scripts/build/public-packages.mjs --package @proto.ui/cli\n\n[build:packages] @proto.ui/cli 2991ms 62 files\n[build:packages] complete: 1/47 public packages\n\n> apps-www@0.0.1 generate:proto-ui-style /home/ezra/proto-ui-wc-budget-cb5d/apps/www\n> node ./scripts/generate-cli-init-docs.mjs && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ./scripts/generate-website-prototype-tokens.mjs && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css\n\n[docs] extracted real @proto.ui/cli@0.3.0 init: 4 files\n[proto-ui] theme(shadcn): wrote src/styles/shadcn-theme.css\n[website-prototypes] generated one style sheet and its Shadow companion from 1919 package + website tokens\n[proto-ui] style: wrote src/styles/proto-ui-style.css\n",
+  "exit": 0,
+  "source": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+  "files": {
+    "packages/adapters/web-component/src/adapt.ts": "0f50397f1ae5a6d83067a9b1a85c9fb1e8bd16788f92d698069b68cf1f1b9e0e",
+    "packages/adapters/web-component/src/shadow-style-artifact.ts": "f318869491eaf1610d5da832fee0f38f54b52ff5a3f36270cb46a65c5bf944c3",
+    "packages/adapters/web-component/test/shadow-style-artifact.test.ts": "87739f4799289f3f60dde2ef9d5557ee102975f38759652b41d3f006223d9edc",
+    "packages/adapters/web-component/test/shadow-split-effects.test.ts": "f348713f9844f61c87af3917b6f62942ab66e4ac707590df64ff749a471355ad"
+  }
+}

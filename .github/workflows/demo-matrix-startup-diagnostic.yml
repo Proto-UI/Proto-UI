@@ -1,6 +1,12 @@
 name: Demo Matrix startup diagnostic
 on:
   workflow_dispatch:
+    inputs:
+      docs_selector_comparison:
+        description: Compare the two Toast selector conditions without changing Matrix assertions
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 permissions:
   contents: read
@@ -11,6 +17,7 @@ env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:
   representative-profile:
+    if: ${{ inputs.docs_selector_comparison != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -65,5 +72,95 @@ jobs:
         with:
           name: demo-matrix-startup-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/demo-matrix-startup
+          if-no-files-found: error
+          retention-days: 14
+
+  docs-selector-comparison:
+    if: ${{ inputs.docs_selector_comparison == true }}
+    runs-on: ubuntu-24.04
+    # Two original ten-minute diagnostic commands, plus isolated setup.
+    # Neither the original 180s case nor its 60s initialization oracle changes.
+    timeout-minutes: 25
+    env:
+      PROTO_UI_MATRIX_STARTUP_PROFILE: '1'
+      PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1'
+    steps:
+      - name: Prepare the runner-owned comparison directory
+        run: |
+          set -euo pipefail
+          COMPARISON_DIR="$RUNNER_TEMP/matrix-docs-selector-comparison"
+          mkdir -p "$COMPARISON_DIR"
+          echo "COMPARISON_DIR=$COMPARISON_DIR" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and preserve the diagnostic environment
+        id: setup
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$COMPARISON_DIR"
+          node --version > "$COMPARISON_DIR/node-version.txt"
+          "$CHROME" --version > "$COMPARISON_DIR/chrome-version.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          node --test scripts/test/matrix-docs-selector-experiment.test.mjs
+      - name: Observe the original selector with the shared route marker
+        id: baseline
+        if: ${{ steps.setup.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          node scripts/test/matrix-docs-selector-experiment.mjs prepare baseline "$COMPARISON_DIR"
+          export PROTO_UI_RUNTIME_EVIDENCE_DIR="$COMPARISON_DIR/baseline"
+          set +e
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+            --testNamePattern='mounts every demo in every official Web adapter$' \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json --outputFile="$COMPARISON_DIR/baseline/vitest.json" \
+            2>&1 | tee "$COMPARISON_DIR/baseline/browser.log"
+          results=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${results[0]}" > "$COMPARISON_DIR/baseline/exit-code.txt"
+          node scripts/test/matrix-docs-selector-experiment.mjs finish baseline "$COMPARISON_DIR"
+          (( results[0] == 0 && results[1] == 0 ))
+      - name: Observe the direct selector with the same declarations and adapter source
+        id: direct
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          node scripts/test/matrix-docs-selector-experiment.mjs prepare direct "$COMPARISON_DIR"
+          export PROTO_UI_RUNTIME_EVIDENCE_DIR="$COMPARISON_DIR/direct"
+          set +e
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+            --testNamePattern='mounts every demo in every official Web adapter$' \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json --outputFile="$COMPARISON_DIR/direct/vitest.json" \
+            2>&1 | tee "$COMPARISON_DIR/direct/browser.log"
+          results=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${results[0]}" > "$COMPARISON_DIR/direct/exit-code.txt"
+          node scripts/test/matrix-docs-selector-experiment.mjs finish direct "$COMPARISON_DIR"
+          (( results[0] == 0 && results[1] == 0 ))
+      - name: Preserve both actual outcomes without declaring performance acceptance
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: node scripts/test/matrix-docs-selector-experiment.mjs summary "$COMPARISON_DIR"
+      - name: Retain original logs, exact source deltas and bounded browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-docs-selector-comparison-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/matrix-docs-selector-comparison
           if-no-files-found: error
           retention-days: 14

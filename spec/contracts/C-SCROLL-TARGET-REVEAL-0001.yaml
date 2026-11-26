@@ -42,7 +42,7 @@ verifies:
 sources:
   - path: packages/modules/scroll/src/impl.ts
   - path: packages/prototypes/base/src/search-primitives/family.ts
-  - path: apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts
+  - path: apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts
 openQuestions:
   - id: C-SCROLL-TARGET-REVEAL-0001-Q-ADMISSION
     question:

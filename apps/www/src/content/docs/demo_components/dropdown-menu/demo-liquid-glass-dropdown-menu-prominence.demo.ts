@@ -54,20 +54,26 @@ export default {
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-label',
-                children: ['New item'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-item',
-                props: { value: 'note', textValue: 'Note' },
-                children: ['Note'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-item',
-                props: { value: 'folder', textValue: 'Folder' },
-                children: ['Folder'],
+                prototypeId: 'liquid-glass-dropdown-group',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-label',
+                    children: ['New item'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: { value: 'note', textValue: 'Note' },
+                    children: ['Note'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: { value: 'folder', textValue: 'Folder' },
+                    children: ['Folder'],
+                  },
+                ],
               },
             ],
           },

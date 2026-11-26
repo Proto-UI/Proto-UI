@@ -1,0 +1,72 @@
+{
+  "base": "64e10e2be3b152b3a82218daa50cc9c404446263",
+  "patchSha256": "16f5f7b1c719e924ff3f63d046e788d3b43d9a64c5f99fbf0ad523c60b577139",
+  "files": [
+    {
+      "path": "packages/adapters/web-component/test/portal-first-render-reentry.test.ts",
+      "beforeSha256": "0e7854ef0862f7dba1769ff31fe30ffcf105738db9d0f03c5031a6dffcf8960a",
+      "afterSha256": "aff8dcb20f0368a59b98b456b1daad376b27673862826d423568398436b6d815",
+      "previousReviewedAfterSha256": "aff8dcb20f0368a59b98b456b1daad376b27673862826d423568398436b6d815"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/test/collapsible-material.test.ts",
+      "beforeSha256": "723bc4d370226c691788f78d1e12ce39dbbf19ec983d06e59c9c2fa7afc25197",
+      "afterSha256": "a8e57b00ec8b905e1989811dd62b8584d296e9c12e159ee2ce0d23793235437a",
+      "previousReviewedAfterSha256": "cc27a0826f8ebe6a3038863733a3666f8aca9e5f9fe8168aecca0444b895bbf2"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/workspace/scratch/630588abef90/pr-merge-20261126/retained-local/1914-two-oracle-before.report.json",
+      "sha256": "0205aee23d8981abb9bd965639cc78daec96ccc2c906e0b7ab878515c493c0cc",
+      "tests": 5,
+      "passed": 2,
+      "failed": 3,
+      "skipped": 0
+    },
+    {
+      "path": "/workspace/scratch/630588abef90/pr-merge-20261126/retained-local/1914-two-oracle-after.report.json",
+      "sha256": "10fd7c6fd9364bf5d9a6f1df280d53a08f0fb6c27b9d3ff5376175213b0014bd",
+      "tests": 7,
+      "passed": 4,
+      "failed": 3,
+      "skipped": 0
+    },
+    {
+      "path": "/workspace/scratch/630588abef90/pr-merge-20261126/retained-local/1914-two-oracle-after-fixture.report.json",
+      "sha256": "7b0540621ec4f508c2c0e61d57278858f8a297d480a5434958b7b36d6cabc8f2",
+      "tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "sourceMeaning": [
+    "Portal keeps original diagnostic reentry against current Runtime no-stale-enqueue semantics, and independently executes a genuinely queued old task by reentry inside the actual host scheduler. All original final reveal/layout/retained relocation assertions remain.",
+    "Liquid rest retains transition-shadow while color/all are rejected. The actual no-sink host then disables the real root and proves empty material candidates and immediate shadow/transition withdrawal."
+  ],
+  "limitations": [
+    "No product source changed.",
+    "First iteration fixture duplicate custom-element names and the incorrect visual-sink style probe failed; logs preserved, final fixture names are unique and the actual no-sink style port is observed.",
+    "No browser or performance pass claimed.",
+    "Final109cases verify integrated lifecycle behavior; they do not independently demonstrate an old1949-guard negative or browser pixels/performance."
+  ],
+  "previousReviewedPatchSha256": "7927afa7eb8cbb34e2d41ebda11af179b58b231dd1d6228a3028e5b2d8fb406c",
+  "formatOnlyDelta": "1914-hosted-oracle-format-only.diff",
+  "independentReview": {
+    "reviewer": "/root/review_website_prs",
+    "reportSha256": "dadd79b4bd3969e34c3367280a293f43faf6f7aefe81a0df5675a196f62ea983",
+    "verdict": "PASS for exact2test source"
+  },
+  "finalIntegratedExecution": {
+    "head": "64e10e2be3b152b3a82218daa50cc9c404446263",
+    "testSource": "Reviewed two-file uncommitted after hashes above",
+    "files": 13,
+    "passed": 109,
+    "failed": 0,
+    "skipped": 0,
+    "reportSha256": "21d7b87d67f823fa3cdcc2e1e26c8e5896951d2a0a66bea63617b4f57ce93b4c",
+    "includesNative1949Guard": true,
+    "allOriginalTimeoutsPreserved": true
+  }
+}
