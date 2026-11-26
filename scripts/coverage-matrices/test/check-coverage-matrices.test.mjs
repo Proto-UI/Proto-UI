@@ -19074,7 +19074,6 @@ for (const [source, allowed] of [
   ['UiLibraryGallery.astro', '../../../../packages/prototypes/brutalist/src/theme'],
   ['library-card-client.ts', '@proto.ui/adapter-web-component'],
   ['library-liquid-card-client.ts', '@proto.ui/adapter-web-component'],
-  ['library-style-seed.ts', '@proto.ui/core'],
   ['library-style-seed.ts', '@proto.ui/adapter-web-component'],
   ['library-card-prototypes.ts', '@proto.ui/prototypes-brutalist/card'],
   ['library-card-prototypes.ts', '@proto.ui/prototypes-shadcn/card'],
@@ -19113,6 +19112,21 @@ for (const [source, allowed] of [
     );
   });
 }
+
+test('library style seed rejects the retired core type import', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/components/library-style-seed.ts';
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  assert.doesNotMatch(reviewed, /from\s+['"]@proto\.ui\/core['"]/u);
+  fs.writeFileSync(file, reviewed + "\nimport type { Prototype } from '@proto.ui/core';\n");
+  assert.ok(
+    validationMessage(root).includes(`raw Proto UI import \`@proto.ui/core\` in \`${relative}\``),
+    'the former core import is not an additional admitted edge'
+  );
+});
 
 for (const [relative, allowed] of [
   [
