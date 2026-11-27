@@ -115,6 +115,7 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'data-[checked]:translate-x-3',
   'data-[checked]:translate-x-5',
   'data-[collapse-blocked]:cursor-not-allowed',
+  'data-[collection-last]:border-b-0',
   'data-[direction=ltr]:border-black',
   'data-[direction=ltr]:border-l',
   'data-[direction=ltr]:direction-ltr',

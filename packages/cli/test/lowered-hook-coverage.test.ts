@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir as osTmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +15,6 @@ import {
 } from '../src/services/lowered-hook-coverage';
 import type { RuleStateScan } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
-import type { HookSourceState } from '../src/services/hook-source-summary';
 import {
   collectProtoStyleTokens,
   collectProtoStyleTokensFromFiles,
@@ -24,29 +23,6 @@ import {
 } from '../src/services/prototype-style-tokens';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-const PROTOTYPE_PACKAGES = path.join(REPO_ROOT, 'packages/prototypes');
-
-/**
- * The same file set the extractor reads, taken from the extractor itself. A
- * private glob here would be free to be narrower than production, which is the
- * blind spot this gate exists to remove.
- */
-async function prototypeSourceFiles(): Promise<string[]> {
-  const packages = await readdir(PROTOTYPE_PACKAGES, { withFileTypes: true });
-  const files: string[] = [];
-  for (const entry of packages) {
-    if (!entry.isDirectory()) continue;
-    const src = path.join(PROTOTYPE_PACKAGES, entry.name, 'src');
-    try {
-      files.push(...((await collectSourceFiles(src)) as string[]));
-    } catch (error) {
-      // A package without a src directory contributes nothing. Any other
-      // traversal failure would silently drop a whole package from the gate.
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-    }
-  }
-  return files;
-}
 
 /** A real intent: the variant is a prefix on tokens, so a stub yields nothing. */
 const rule = (condition: string) =>
@@ -5725,83 +5701,8 @@ describe('lowered hook coverage', () => {
     });
   });
 
-  it('resolves every hook state a shipped rule condition reads', async () => {
-    const found: Array<{
-      file: string;
-      hook: string;
-      state: string;
-      provenance?: HookSourceState;
-    }> = [];
-    const blind: string[] = [];
-    const exposed: Array<{ file: string; state: string; exposedAs: string; attribute: string }> =
-      [];
-
-    const inventory = scanRuleStateReadInventory(await prototypeSourceFiles());
-    for (const scan of inventory.evaluated) {
-      const file = path.relative(REPO_ROOT, scan.entryFile).split(path.sep).join('/');
-      for (const usage of scan.usages)
-        found.push({ file, hook: usage.hook, state: usage.state, provenance: usage.provenance });
-      for (const miss of scan.unresolved) blind.push(`${file}: ${miss.reason} ${miss.expression}`);
-      for (const local of scan.exposedLocals) exposed.push({ file, ...local });
-    }
-
-    // Every exposed prototype-owned state a rule reads has to name an attribute
-    // the extractor can emit, or the runtime lowers a variant with no CSS.
-    // `C-EXPOSE-0004-A` admits any non-empty key, and both analyzers normalize
-    // it, so the normalized attribute is what has to be usable — not the key.
-    expect(
-      exposed.filter(({ attribute }) => !SELECTABLE_ATTRIBUTE.test(attribute)),
-      'exposed states whose attribute cannot be written as a data selector'
-    ).toEqual([]);
-    // The two-step shape must be reached in the shipped tree, not just fixtures.
-    // Textarea now delegates its rules to a visual helper; Checkbox Group Item
-    // still reads the captured Result's stateHandles in its own authored rule.
-    expect(found).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          file: 'packages/prototypes/brutalist/src/checkbox-group/item.proto.ts',
-          hook: 'asCheckboxGroupItem',
-          state: 'focusVisible',
-        }),
-      ])
-    );
-
-    // Fail closed: a shape the scanner cannot trace is a gate failure. In
-    // particular, a privileged Focus fact remains visible as a failure until
-    // its producer supplies bounded declaration metadata.
-
-    expect(blind, 'lowerable rule states the scanner could not trace').toEqual([]);
-
-    const missing = found.filter(({ provenance }) => !provenance);
-
-    expect(
-      missing.map(({ file, hook, state }) => `${file}: ${hook}().${state}`),
-      'rule conditions whose imported producer state has no declaration provenance'
-    ).toEqual([]);
-
-    // A string comparison only lowers against a `data-[x]` variant. Every table
-    // entry is one today; if that stops being true, the scanner's string form
-    // would start counting rules the extractor drops.
-    const unshaped = found.filter(({ provenance }) => {
-      const declared = provenance?.declaredName ?? '';
-      return !/^[-a-zA-Z0-9]+$/.test(
-        declared
-          .trim()
-          .replace(/\s+/g, '-')
-          .replace(/\./g, '-')
-          .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-          .replace(/[^a-zA-Z0-9-]/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .toLowerCase()
-      );
-    });
-
-    expect(
-      unshaped.map(({ hook, state }) => `${hook}().${state}`),
-      'hook states whose declared source name cannot lower to a data selector'
-    ).toEqual([]);
-    // The whole-tree rule-state scan outgrew 60s once the R91 multi-profile
-    // family sources landed; keep the unfiltered scan.
-  }, 240_000);
+  // Repo-wide shipped-prototype lowered-rule & exposed-attribute closure is
+  // enforced by `runtime-lowered-style-closure.test.ts`, which executes all
+  // shipped prototypes through real `@proto.ui/runtime` + `RuleExposeStateWebModule`
+  // lowering rather than requiring a whole-tree static AST proof.
 });
