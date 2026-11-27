@@ -81,12 +81,17 @@ describe('pointer facts: focused draft mapping (not whole-workspace acceptance)'
       'react-pointer-author-callback',
       'vue-pointer-author-callback',
       'vue2-pointer-author-callback',
-      'compiled-web-pointer-consumers',
     ]) {
       const implementation = spec?.implementations.find((item) => item.id === id);
       expect(implementation?.status).toBe('planned');
       expect(implementation?.consumesCases).toContain('T-EVENT-0002-CASE-POINTER-FACTS');
       expect(implementation?.path).toBeTruthy();
     }
+    const retiredCompiled = spec?.implementations.find(
+      (item) => item.id === 'compiled-web-pointer-consumers'
+    );
+    expect(retiredCompiled?.status).toBe('missing');
+    expect(retiredCompiled?.consumesCases).toContain('T-EVENT-0002-CASE-POINTER-FACTS');
+    expect(retiredCompiled?.path).toBeUndefined();
   });
 });
