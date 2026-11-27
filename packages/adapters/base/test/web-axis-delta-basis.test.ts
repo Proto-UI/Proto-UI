@@ -121,6 +121,25 @@ it('ignores transformed extent summation noise while still cancelling a real sub
   pointer(f.input, 'pointerup', 110);
   expect(f.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'basis-changed' });
 });
+it('ignores Blink 6-significant-digit computed-style serialization drift when rect sums stay exact', () => {
+  const f = fixture([222.5, 222.5]);
+  f.geometry.getBoundingClientRect = () =>
+    ({ left: 0, top: 0, width: 448, height: 224 }) as DOMRect;
+  f.geometry.style.width = '448px';
+  pointer(f.input, 'pointerdown', 224);
+  // Real Blink layout at 20%/80%: exact 1/64px LayoutUnit rects sum to 445,
+  // while getComputedStyle().width rounds each part to 6 significant digits
+  // ("88.9844px" + "356.016px" = 445.0004px).
+  f.basis[0].getBoundingClientRect = () =>
+    ({ left: 0, top: 0, width: 88.984375, height: 224 }) as DOMRect;
+  f.basis[0].style.width = '88.9844px';
+  f.basis[1].getBoundingClientRect = () =>
+    ({ left: 89.984375, top: 0, width: 356.015625, height: 224 }) as DOMRect;
+  f.basis[1].style.width = '356.016px';
+  pointer(f.input, 'pointermove', 135);
+  pointer(f.input, 'pointerup', 90);
+  expect(f.samples.map((s) => s.phase)).toEqual(['start', 'move', 'end']);
+});
 it('replacing a basis target retires the old contact without accepting its late end', () => {
   const f = fixture();
   pointer(f.input, 'pointerdown', 100);

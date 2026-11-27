@@ -105,8 +105,11 @@ export const resizableHandle = definePrototype<
       });
     };
     const syncAxis = (run: RunHandle<LiquidGlassResizableHandleProps>) => {
-      axis.set(run.context.read(RESIZABLE_CONTEXT).orientation, 'resizable owner axis');
-      refresh(run);
+      const nextAxis = run.context.read(RESIZABLE_CONTEXT).orientation;
+      if (axis.get() !== nextAxis) {
+        axis.set(nextAxis, 'resizable owner axis');
+        refresh(run);
+      }
     };
     def.context.subscribe(RESIZABLE_CONTEXT, syncAxis);
     def.lifecycle.onCreated(syncAxis);
@@ -171,8 +174,16 @@ export const resizableHandle = definePrototype<
     });
     return (r) => {
       const props = r.read.props.get();
-      if (!props.withHandle) return behavior.render ? behavior.render(r) : r.slot();
       const vertical = axis.get() === 'vertical';
+      const hitArea = r.el('span', {
+        style: vertical
+          ? tw('absolute block left-0 top-1/2 -translate-y-1/2 w-full h-4 z-10 select-none')
+          : tw('absolute block top-0 left-1/2 -translate-x-1/2 h-full w-4 z-10 select-none'),
+      });
+      if (!props.withHandle) {
+        const base = behavior.render ? behavior.render(r) : r.slot();
+        return Array.isArray(base) ? [hitArea, ...base] : [hitArea, base];
+      }
       const prominent = props.prominence === 'prominent';
       const opaque = props.material === 'opaque';
       const capsuleSurface = prominent
@@ -184,6 +195,7 @@ export const resizableHandle = definePrototype<
           : 'bg-secondary/80 text-secondary-foreground ring-1 ring-inset ring-foreground/10';
       const barTone = prominent ? 'bg-primary-foreground/80' : 'bg-foreground/30';
       return [
+        hitArea,
         r.el(
           'div',
           {
