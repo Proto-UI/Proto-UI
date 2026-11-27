@@ -1,0 +1,37 @@
+id: V-PROTO-UI-0013
+type: version
+title: Proto UI 0.4.0
+status: draft
+since: 0.4.0
+summary: Draft 0.4 release train identity for the new Proto language/compiler foundation, independent adapters, and work deferred from 0.3.0.
+statement:
+  en: Proto UI 0.4.0 is the draft post-0.3 release identity governing cataloged 0.4 compiler foundation entities, deferred surfaces, and future exact-version package preparation.
+  zh-CN: Proto UI 0.4.0 是治理已编目 0.4 编译器基础实体、0.3 顺延范围及后续精确版本包准备工作的 draft 发行身份。
+release:
+  version: 0.4.0
+  channel: stable
+  gitTag: v0.4.0
+  npmDistTag: latest
+  packageVersionPolicy: exact
+  packageScope: public-@proto.ui
+dependsOn:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+criteria:
+  - id: V-PROTO-UI-0013-DRAFT-BOUNDARY
+    text:
+      en: This draft version identity declares 0.4.0 for catalog references and deferred-scope tracking only; it does not stamp VERSION or package manifests, prepare a 0.4 BOM, or claim publication evidence.
+      zh-CN: 本 draft 版本身份仅用于声明 catalog 中的 0.4.0 引用与延期范围追踪，不修改 VERSION 或 package manifest，不准备 0.4 BOM，也不声称任何发布证据。
+  - id: V-PROTO-UI-0013-PUBLICATION
+    text:
+      en: This entity may become active only after 0.4.0 release preparation, rehearsal, protected publication, v0.4.0 Git tag, npm latest alignment, and immutable snapshot evidence are complete.
+      zh-CN: 仅当 0.4.0 发行准备、演练、受保护发布、v0.4.0 Git tag、npm latest 对齐与不可变 snapshot 证据全部完成后，本实体才可转为 active。
+sources:
+  - path: internal/governance/release-0.3-plan.md
+  - path: internal/governance/release-0.3-list.md
+openQuestions: []
+revisions:
+  - version: 0.4.0
+    change: introduced
+    summary: Declared the draft 0.4.0 version identity so catalog entities introduced or retired at 0.4.0 validate under global version governance without altering the active 0.3.0 release train.
+tags: [release, global-version, '0.4']

@@ -40,8 +40,8 @@ criteria:
       zh-CN: 有效发行检查选用的生成输入必须通过其所属脚本重新生成并通过 freshness 检查。网站源码绑定仅可在审读对应源码变化后更新；同步必须保留失败、blocked 与未执行的验收状态，不能替代当前源码的 browser 或 consumer 证据。将延期 target 分类为发版 blocker 前，必须先应用有效 0.3 范围。
   - id: V-PROTO-UI-0012-REGISTRY-READINESS
     text:
-      en: Publication requires every public package identity to pass the existing registry-readiness policy. Four identities introduced by the 0.3 line still have no registry bootstrap, so preparing this version neither creates package identities nor changes registry tags.
-      zh-CN: 真实发布要求全部公开 package identity 通过既有 registry-readiness policy。0.3 线引入的四个 identity 仍缺少 registry bootstrap，准备本版本既不创建 package identity，也不改变 registry tag。
+      en: Publication requires every public package identity to pass the existing registry-readiness policy and private Trusted Publisher verification. All 47 package identities exist on npm, while four 0.3-line module identities still fail readiness because they carry deprecated bootstrap latest plus stage versions without a superseding non-bootstrap prerelease on next; preparing this version neither publishes packages nor changes registry tags.
+      zh-CN: 真实发布要求全部公开 package identity 通过既有 registry-readiness policy 及私有 Trusted Publisher 核验。47 个包身份均已在 npm 存在，但 0.3 线引入的四个 module identity 因仅保留已废弃的 bootstrap latest 与 stage 版本且缺少非 bootstrap 的 next 预发布，仍未通过 readiness；准备本版本既不发布包，也不改变 registry tag。
   - id: V-PROTO-UI-0012-PUBLICATION
     text:
       en: This entity may become active only after all 47 npm packages exist at 0.3.0, their latest tags point to it, the v0.3.0 Git tag resolves to the publication commit, and immutable snapshot evidence exists. Stable 0.2.0 retains its independent release identity.
@@ -61,3 +61,6 @@ revisions:
   - version: 0.3.0
     change: clarified
     summary: Made strict retained-bundle evidence and reviewed generated/source consistency explicit preparation criteria, preserving effective release scope, draft lifecycle and separate publication authority.
+  - version: 0.3.0
+    change: clarified
+    summary: Reconciled V-PROTO-UI-0012-REGISTRY-READINESS wording with live npm state (47/47 package identities exist; four 0.3-line module identities still fail readiness due to deprecated bootstrap latest plus stage versions without a non-bootstrap next prerelease and still require private Trusted Publisher verification).

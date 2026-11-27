@@ -861,15 +861,16 @@ describe('quick-start first-frame continuity', () => {
                 );
                 // Element screenshots can recenter an oversized element beneath the fixed header.
                 // Capture only the actual visible intersection, alongside the unmodified viewport.
-                await page.screenshot({
-                  path: path.join(directory, `${prefix}-cli-init-${label}.png`),
-                  clip: {
+                await captureViewport(
+                  page,
+                  path.join(directory, `${prefix}-cli-init-${label}.png`),
+                  {
                     x: capturePosition.clip.x - capturePosition.scroll.x,
                     y: capturePosition.clip.y - capturePosition.scroll.y,
                     width: capturePosition.clip.width,
                     height: capturePosition.clip.height,
-                  },
-                });
+                  }
+                );
                 const capturePositionAfter = await generatedBrowser.evaluate((node) => ({
                   top: node.getBoundingClientRect().top,
                   headerBottom: Math.max(

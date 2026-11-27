@@ -152,4 +152,46 @@ describe('style output set preflight and caught-failure recovery', () => {
     for (const file of [dir, ...links])
       await expect(validateStyleOutputPaths([file])).rejects.toThrow(/regular file/);
   });
+
+  it('distinguishes distinct 64-bit high-bit inodes while still rejecting equal 64-bit hard links', async () => {
+    const { dir } = await fixture();
+    const first = path.join(dir, 'tokens.css');
+    const second = path.join(dir, 'entry.css');
+    const alias = path.join(dir, 'hard-alias.css');
+    const makeBigIntStat = (ino: bigint) =>
+      ({
+        isFile: () => true,
+        dev: 42n,
+        ino,
+        size: 128n,
+        mode: 0o100644n,
+      }) as Awaited<ReturnType<typeof fs.lstat>>;
+    // Both 64-bit FUSE inodes round to the exact same IEEE-754 Number (1152921504610554600).
+    const inodeA = 1152921504610554712n;
+    const inodeB = 1152921504610554717n;
+    expect(Number(inodeA)).toBe(Number(inodeB));
+
+    const lstatByPath = new Map<string, bigint>([
+      [first, inodeA],
+      [second, inodeB],
+      [alias, inodeA],
+    ]);
+    const io = {
+      lstat: (async (target: Parameters<typeof fs.lstat>[0], options?: { bigint?: boolean }) => {
+        expect(options?.bigint).toBe(true);
+        const ino = lstatByPath.get(String(target));
+        if (ino === undefined) {
+          const error = new Error('ENOENT') as NodeJS.ErrnoException;
+          error.code = 'ENOENT';
+          throw error;
+        }
+        return makeBigIntStat(ino);
+      }) as typeof fs.lstat,
+      realpath: (async (target: Parameters<typeof fs.realpath>[0]) =>
+        String(target)) as typeof fs.realpath,
+    };
+
+    await expect(validateStyleOutputPaths([first, second], io)).resolves.toBeUndefined();
+    await expect(validateStyleOutputPaths([first, alias], io)).rejects.toThrow(/Conflicting/);
+  });
 });

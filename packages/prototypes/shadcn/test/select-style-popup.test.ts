@@ -1,5 +1,6 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, expect, it, vi } from 'vitest';
 import type { Window as HappyDOMWindow } from 'happy-dom';
+import { retainHappyDomMutationCallbacks } from '../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
   selectRoot,
@@ -22,6 +23,12 @@ for (const p of [
   selectItemText,
 ])
   AdaptToWebComponent(p as any);
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
+
 afterEach(() => {
   document.body.replaceChildren();
   document.documentElement.removeAttribute('data-theme');
