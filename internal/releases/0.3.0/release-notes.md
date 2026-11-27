@@ -27,6 +27,8 @@ Proto UI 0.3.0 is the first stable release on the 0.3 line. All 47 public `@prot
 
 The public package set remains globally exact. `@proto.ui/compiler` remains private tooling and is not added to the release BOM. The 0.3.0 lifecycle disposition records every known draft at this version: the reviewed 0.3 families are retained as draft with their outstanding activation evidence named, and the 0.4 families carry an explicit deferred disposition.
 
+Eight Compiler contracts and seven associated tests have a `not-applicable` disposition. The catalog records their removal in 0.4.0 and retains their 0.3.0 rows with unknown historical stability.
+
 ## Publication status
 
 This preparation does not publish packages, create `v0.3.0`, move the npm `latest` tag or activate `V-PROTO-UI-0012`. Package-local installation examples describe the unpublished candidate; website availability statements continue to follow the last verified release. Publication requires the four missing registry identities, a complete rehearsal over the final reviewed package set, protected release from `main` and a separate immutable-evidence review.
