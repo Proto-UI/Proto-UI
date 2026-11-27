@@ -93,6 +93,7 @@ describe('Toast actual DemoSpec registration', () => {
       const ids = [...declaredIds].sort();
       const expected = TOAST_ROLES.map((role) => `${family}-${role}`);
       if (family === 'shadcn') expected.push('shadcn-style-scope');
+      if (family === 'bootstrap-2-3-2') expected.push('lucide-x-icon');
       expect(ids).toEqual(expected.sort());
       for (const id of ids) {
         await loadPrototype(id);

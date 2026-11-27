@@ -12,6 +12,8 @@ import {
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import * as shadcnDrawer from '@proto.ui/prototypes-shadcn/drawer';
 import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import minusIcon from '../../../../../packages/prototypes/lucide/src/icons/minus';
+import plusIcon from '../../../../../packages/prototypes/lucide/src/icons/plus';
 import drawerDemo from '../../content/docs/demo-shadcn-drawer.demo';
 import drawerScrollDemo from '../../content/docs/demo-shadcn-drawer-scroll.demo';
 import drawerSnapDemo from '../../content/docs/demo-shadcn-drawer-snap.demo';
@@ -56,6 +58,8 @@ beforeAll(() => {
     dialogContent,
     shadcnButton,
     styleScope,
+    minusIcon,
+    plusIcon,
   ])
     registerPrototype(prototype.name, prototype);
   for (const prototype of Object.values(shadcnDrawer)) {
@@ -651,7 +655,13 @@ describe('actual Drawer command disabled surfaces', () => {
               node.props = { ...node.props, enterDuration: 0, leaveDuration: 0 };
               node.children = [
                 ...(node.children ?? []),
-                { kind: 'box', tag: 'span', attrs: { tabindex: '0' }, ref: 'focus-probe', children: ['Focus control'] },
+                {
+                  kind: 'box',
+                  tag: 'span',
+                  attrs: { tabindex: '0' },
+                  ref: 'focus-probe',
+                  children: ['Focus control'],
+                },
               ];
             }
             if ('children' in node)
@@ -685,41 +695,54 @@ describe('actual Drawer command disabled surfaces', () => {
             api.setProps(ref, { onClick: clicks[ref] });
           const state = (ref: string, key: string): boolean => {
             const handle = api.getExposes(ref)?.[key];
-            if (!handle || typeof handle !== 'object' || !('get' in handle) || typeof handle.get !== 'function')
+            if (
+              !handle ||
+              typeof handle !== 'object' ||
+              !('get' in handle) ||
+              typeof handle.get !== 'function'
+            )
               throw new Error(`Missing public ${ref}.${key} state.`);
             const value = handle.get();
             if (typeof value !== 'boolean') throw new Error(`Invalid public ${ref}.${key} state.`);
             return value;
           };
           const waitForPanel = async () => {
-            await expect.poll(() => Boolean(
-              api.getPublicInstance?.('close-action') &&
-              refs['close-action']?.isConnected && refs['focus-probe']?.isConnected &&
-              refs.panel && !refs.panel.hasAttribute('data-pui-view-detached')
-            )).toBe(true);
+            await expect
+              .poll(() =>
+                Boolean(
+                  api.getPublicInstance?.('close-action') &&
+                  refs['close-action']?.isConnected &&
+                  refs['focus-probe']?.isConnected &&
+                  refs.panel &&
+                  !refs.panel.hasAttribute('data-pui-view-detached')
+                )
+              )
+              .toBe(true);
             await expect.poll(() => state('panel', 'isPresent')).toBe(true);
           };
           const assertDisabled = async (trigger: boolean, close: boolean) => {
-            await expect.poll(() => {
-              // Read the projected Button before its source command, so a source
-              // get() cannot repair a missing update before this assertion.
-              for (const [ref, expected] of [
-                ['trigger-action', trigger],
-                ['close-action', close],
-                ['trigger', trigger],
-                ['close', close],
-              ] as const)
-                expect(state(ref, 'disabled'), ref).toBe(expected);
-              for (const [ref, expected] of [
-                ['trigger-action', trigger],
-                ['close-action', close],
-              ] as const) {
-                expect(refs[ref].getAttribute('aria-disabled')).toBe(String(expected));
-                if (expected) expect(refs[ref].tabIndex).toBeLessThan(0);
-                else expect(refs[ref].tabIndex).toBe(0);
-              }
-              return true;
-            }).toBe(true);
+            await expect
+              .poll(() => {
+                // Read the projected Button before its source command, so a source
+                // get() cannot repair a missing update before this assertion.
+                for (const [ref, expected] of [
+                  ['trigger-action', trigger],
+                  ['close-action', close],
+                  ['trigger', trigger],
+                  ['close', close],
+                ] as const)
+                  expect(state(ref, 'disabled'), ref).toBe(expected);
+                for (const [ref, expected] of [
+                  ['trigger-action', trigger],
+                  ['close-action', close],
+                ] as const) {
+                  expect(refs[ref].getAttribute('aria-disabled')).toBe(String(expected));
+                  if (expected) expect(refs[ref].tabIndex).toBeLessThan(0);
+                  else expect(refs[ref].tabIndex).toBe(0);
+                }
+                return true;
+              })
+              .toBe(true);
           };
           const assertSuppressed = async () => {
             const requested = requests.length;
@@ -769,12 +792,14 @@ describe('actual Drawer command disabled surfaces', () => {
           await expect.poll(() => state('panel', 'isPresent')).toBe(false);
           // C-HOST-VIEW-ATTACHMENT-0001: detached views retain authored
           // children; DOM connectivity is not the close-completion oracle.
-          await expect.poll(() => {
-            const transition = api.getExposes('panel')?.transitionState as
-              | { get(): unknown }
-              | undefined;
-            return transition?.get();
-          }).toBe('closed');
+          await expect
+            .poll(() => {
+              const transition = api.getExposes('panel')?.transitionState as
+                | { get(): unknown }
+                | undefined;
+              return transition?.get();
+            })
+            .toBe('closed');
           // WC retains the connected owner and authored descendants. Observe
           // its governed detached marker instead of demanding DOM removal.
           if (runtime === 'wc')

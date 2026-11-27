@@ -85,6 +85,10 @@ const { title, id, class: className = '' } = Astro.props;
     min-width: 0;
   }
 
+  .docs-step__body > * + * {
+    margin-top: 1rem;
+  }
+
   .docs-step__body > :first-child {
     margin-top: 0;
   }

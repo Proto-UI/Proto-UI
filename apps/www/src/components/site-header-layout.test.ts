@@ -278,7 +278,7 @@ it('spaces unframed text separately from framed controls without changing compac
   const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
   const nav = css.match(/\.site-header-navigation\s*\{([^}]+)\}/)![1];
   expect(nav).toContain('gap: var(--site-header-navigation-gap)');
-  expect(nav).toContain('calc(var(--site-header-brand-navigation-gap) - 0.25rem)');
+  expect(nav).toContain('calc(var(--site-header-brand-navigation-gap) - 0.5rem)');
   expect(css).toContain('--site-header-navigation-gap: 1.5rem');
   const framed = css.match(
     /\[data-site-library-family='brutalist'\] \.site-header\s*\{([^}]+)\}/

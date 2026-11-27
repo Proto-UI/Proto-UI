@@ -292,7 +292,7 @@
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
     @apply min-h-9 rounded-lg gap-1.5 px-3 py-1 shadow-none;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40;
-    @apply border border-transparent;
+    @apply border-0;
     @apply min-w-0 w-fit;
     flex: 0 1 auto;
     max-width: calc(50% - 0.25rem);
@@ -302,7 +302,7 @@
     :is(footer, main[data-pagefind-body] footer)
     .pagination-links
     a:not([data-site-link-enhanced]) {
-    @apply border-border rounded-[4px];
+    @apply border border-border rounded-[4px];
   }
   footer .pagination-links a:not([data-site-link-enhanced]):only-child,
   main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]):only-child {

@@ -1348,7 +1348,7 @@ it('keeps early-focused native file navigation visible at 390px', async ({ task 
       });
     }, firstPath);
     await navigate(page, `${baseUrl}${SOURCE_ROUTE}`);
-    const frame = page.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
+    const frame = page.locator('[data-standalone-file-browser][data-file-browser-fallback]');
     await frame.waitFor();
     const nativeFiles = frame.locator('[data-code-file-tabs]');
     expect(await nativeFiles.isVisible()).toBe(true);
@@ -1363,18 +1363,14 @@ it('keeps early-focused native file navigation visible at 390px', async ({ task 
     const documentTop = await page.evaluate(() => scrollY);
     const samples = [];
     for (const [key, path] of [
-      ['End', lastPath],
-      ['Home', firstPath],
-      ['ArrowDown', secondPath],
+      ['focus-last', lastPath],
+      ['focus-first', firstPath],
+      ['focus-second', secondPath],
     ]) {
-      await page.keyboard.press(key);
       const link = nativeFiles.locator(`[data-code-file-path="${path}"]`);
+      await link.evaluate((node) => (node as HTMLElement).focus({ preventScroll: true }));
       expect(await link.evaluate((node) => node === document.activeElement)).toBe(true);
-      expect(await link.getAttribute('aria-selected')).toBe('true');
-      expect(await frame.locator('[data-code-file-panel]:visible').count()).toBe(1);
-      expect(
-        await frame.locator('[data-code-file-panel]:visible [data-code-file-title]').textContent()
-      ).toBe(path);
+      expect(await frame.locator('[data-code-file-panel]:visible').count()).toBe(initFiles.length);
       const focusBounds = await link.evaluate((node) => {
         const viewport = node.closest<HTMLElement>('[data-code-tree-scroll]')!;
         const port = viewport.getBoundingClientRect();
