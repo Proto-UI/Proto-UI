@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@proto.ui/core/authoring": ["../../../packages/compiler/prelude/authoring.d.ts"]
+    }
+  },
+  "files": [
+    "readonly-badge.proto.ts.txt",
+    "controlled-toggle.proto.ts.txt",
+    "context-owned-async-tabs.proto.ts.txt"
+  ]
+}

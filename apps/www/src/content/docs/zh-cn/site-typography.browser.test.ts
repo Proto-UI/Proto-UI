@@ -726,9 +726,9 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                       galleryText,
                       galleryLabels,
                     });
-                    // The expanded gallery adds 15 authored Text owners. WC
-                    // also retains the two closed authored Accordion bodies.
-                    expect(galleryText).toHaveLength(runtime === 'wc' ? 52 : 50);
+                    // WC retains the two closed authored Accordion bodies;
+                    // framework hosts withdraw them.
+                    expect(galleryText).toHaveLength(runtime === 'wc' ? 76 : 74);
                     expect(galleryLabels).toHaveLength(4);
                     expect(new Set(galleryLabels.map((label) => label.id)).size).toBe(4);
                     for (let index = 0; index < labelNames.length; index++) {

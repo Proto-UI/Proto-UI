@@ -92,7 +92,7 @@ Every current-profile input below must be a regular file at its exact authored p
 | `apps/www/scripts/runtime-retry-urls.mjs` | `510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224` |
 | `apps/www/scripts/contrast-provenance.mjs` | `a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a` |
 | `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
-| `apps/www/scripts/accordion-activation-probe.mjs` | `9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b` |
+| `apps/www/scripts/accordion-activation-probe.mjs` | `1361552ebbd4eb835eb1155261e021ae88f9d45356800be2833407c89d645642` |
 
 This current config remains unrecognized by `promotionBarePackageTargets` for general bare-package promotion. Its extracted resolver and optional activation probe are bound as source inputs, without certifying general resolver parity, probe activation, transformed Adapter bytes, installed framework bytes, emitted URLs, or runtime behavior. The virtual edge remains terminal in source traversal; the separate production module-graph checks retain their existing responsibility.
 
@@ -225,3 +225,5 @@ Range#createContextualFragment and CSS Modules/ICSS composition imports are not 
 The first compiler analysis increment renews only the sampled lockfile identity; [its source-reference record](../../internal/records/2026-11-26-compiler-analysis-markup-reference.md) preserves the previous 32-owner reference and the independent browser evidence boundary.
 
 The frontend integration of current main preserves both parent source references and renews the lockfile binding at its real source merge; see the [frontend integration source record](../../internal/records/2026-11-26-compiler-frontend-main-c8-source-bindings.md). Browser and lifecycle admission remain independent.
+
+The [native compiler source renewal](../../internal/records/2026-11-26-compiler-native-source-markup-reference.md) retains all 32 sampled owners, renews only the reviewed lockfile digest, and archives the preceding `3ed63ef` profile byte-for-byte. Browser assertions and unverified source admission remain unchanged.

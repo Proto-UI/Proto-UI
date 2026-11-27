@@ -1,0 +1,51 @@
+import { createContextKey, definePrototype, tw } from '@proto.ui/core/authoring';
+
+export const SYNC_TONE = createContextKey<string>('tone');
+export const BRANCH_CHOICE = createContextKey<string>('branch-choice');
+
+export const SyncLeaf = definePrototype({
+  name: 'sync-leaf',
+  setup(def) {
+    const props = def.props.define({ id: { type: 'string', default: '' } });
+    const tone = def.context.consume(SYNC_TONE);
+    const choice = def.context.consume(BRANCH_CHOICE);
+    def.expose.state('id', props.id);
+    def.expose.state('tone', tone);
+    def.expose.state('choice', choice);
+    return view => view.el('span', { style: tw('sync-leaf') }, [
+      view.get(props.id), ':', view.get(tone), '/', view.get(choice),
+    ]);
+  },
+});
+
+export const SyncBranch = definePrototype({
+  name: 'sync-branch',
+  setup(def) {
+    const props = def.props.define({ id: { type: 'string', default: '' } });
+    const tone = def.context.consume(SYNC_TONE);
+    const choice = def.state.define<string>('choice', { initialize: read => read.get(props.id) });
+    const select = def.action('select', (run, next: string) => { run.set(choice, next); });
+    def.context.provide(BRANCH_CHOICE, read => read.get(choice));
+    def.expose.state('id', props.id);
+    def.expose.state('tone', tone);
+    def.expose.state('choice', choice);
+    def.expose.action('select', select);
+    return view => view.el('div', {}, [
+      view.child(SyncLeaf, { key: 'detail', props: { id: view.get(props.id) } }),
+    ]);
+  },
+});
+
+export default definePrototype({
+  name: 'sync-tree',
+  setup(def) {
+    const props = def.props.define({
+      first: { type: 'string', default: 'A' },
+      second: { type: 'string', default: 'B' },
+    });
+    return view => view.el('div', {}, [
+      view.child(SyncBranch, { key: view.get(props.first), props: { id: view.get(props.first) } }),
+      view.child(SyncBranch, { key: view.get(props.second), props: { id: view.get(props.second) } }),
+    ]);
+  },
+});

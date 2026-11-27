@@ -13,17 +13,15 @@ import {
 
 const cli = fileURLToPath(new URL('../src/cli-entry.mjs', import.meta.url));
 
-test('all five required targets remain visibly unimplemented', () => {
+test('availability identifies the two partial native targets and the remaining targets', () => {
   assert.equal(COMPILER_STATUS.legacyImplementation, 'retired');
-  assert.equal(COMPILER_STATUS.implementation, 'not-implemented');
-  assert.deepEqual(Object.keys(COMPILER_STATUS.targets), [
-    'react',
-    'gpui',
-    'vue2',
-    'vue3',
-    'web-components',
-  ]);
-  assert.ok(Object.values(COMPILER_STATUS.targets).every((status) => status === 'not-implemented'));
+  assert.deepEqual(COMPILER_STATUS.targets, {
+    react: 'partial',
+    gpui: 'partial',
+    vue2: 'not-implemented',
+    vue3: 'not-implemented',
+    'web-components': 'not-implemented',
+  });
   assert.ok(Object.isFrozen(COMPILER_STATUS));
   assert.ok(Object.isFrozen(COMPILER_STATUS.targets));
 });
@@ -43,19 +41,22 @@ test('the CLI exposes status without claiming compilation', () => {
   assert.deepEqual(JSON.parse(result.stdout), COMPILER_STATUS);
 });
 
-test('compilation invocations fail before input loading or output publication', () => {
+test('an unavailable source never publishes a component', () => {
   const directory = mkdtempSync(path.join(tmpdir(), 'proto-compiler-retired-'));
   try {
     const source = path.join(directory, 'missing.proto.ts');
     const output = path.join(directory, 'generated');
-    const result = spawnSync(process.execPath, [cli, 'compile', source, '--out', output], {
-      cwd: directory,
-      encoding: 'utf8',
-    });
-    assert.equal(result.status, 1);
+    const result = spawnSync(
+      process.execPath,
+      [cli, 'compile', source, '--target', 'react', '--out', output],
+      {
+        cwd: directory,
+        encoding: 'utf8',
+      }
+    );
+    assert.notEqual(result.status, 0);
     assert.equal(result.stdout, '');
-    assert.match(result.stderr, /\[PUI_COMPILER_NOT_IMPLEMENTED\]/);
-    assert.doesNotMatch(result.stderr, /ENOENT/);
+    assert.match(result.stderr, /missing\.proto\.ts/);
     assert.equal(existsSync(output), false);
   } finally {
     rmSync(directory, { recursive: true, force: true });

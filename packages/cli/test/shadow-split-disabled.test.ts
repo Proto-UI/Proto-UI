@@ -14,6 +14,10 @@ import {
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
 import { toggle as bootstrapToggle } from '../../prototypes/bootstrap-2-3-2/src/toggle';
+import {
+  drawerRoot as bootstrapDrawerRoot,
+  drawerTrigger as bootstrapDrawerTrigger,
+} from '../../prototypes/bootstrap-2-3-2/src/drawer';
 
 let serial = 0;
 const name = () => `cli-disabled-${++serial}`;
@@ -275,5 +279,149 @@ describe('helper-carried Rule stylesheet equivalence', () => {
       expect(matches(shadow.selector, host)).toBe(active);
       expect(matches(background.selector, host)).toBe(active);
     }
+  });
+
+  it('provides distinct pressed background and shadow rules for helper-carried button lowering', async () => {
+    const tokens = (await collectProtoStyleTokens(
+      'packages/prototypes/bootstrap-2-3-2/src/drawer'
+    )) as string[];
+    const Root = AdaptToWebComponent(bootstrapDrawerRoot, { registerAs: name() });
+    const Trigger = AdaptToWebComponent(bootstrapDrawerTrigger, { registerAs: name() });
+    const root = new Root();
+    const host = new Trigger();
+    root.append(host);
+    document.body.append(root);
+    await flush();
+
+    const runtimeTokens = host.getAttribute('data-pui-style')!.split(' ');
+    const shadowToken = runtimeTokens.find((token) => token.startsWith('data-[pressed]:shadow-'));
+    const backgroundToken = runtimeTokens.find((token) => token.startsWith('data-[pressed]:bg-'));
+    const restShadowToken = runtimeTokens.find((token) => token.startsWith('shadow-'));
+    expect(shadowToken).toBeDefined();
+    expect(backgroundToken).toBeDefined();
+    expect(restShadowToken).toBeDefined();
+    expect(tokens).toContain(shadowToken);
+    expect(tokens).toContain(backgroundToken);
+
+    const css = renderProtoStyleTokenCss(tokens);
+    const parser = parsers.css;
+    type SelectorNode = {
+      type: string;
+      nodes?: SelectorNode[];
+      value?: string;
+      attribute?: string;
+      operator?: string;
+      namespace?: string | true;
+      insensitive?: boolean;
+      raws?: { unquoted?: string };
+    };
+    type CssNode = { type: string; name?: string; selector?: SelectorNode; nodes?: CssNode[] };
+    const stylesheet: CssNode = await parser.parse(css, {
+      parser: 'css',
+      originalText: css,
+      locStart: parser.locStart,
+      locEnd: parser.locEnd,
+    } as ParserOptions);
+    expect(stylesheet.type).toBe('css-root');
+    const rules: { selector: SelectorNode; style: CSSStyleDeclaration }[] = [];
+    const visit = (node: CssNode) => {
+      if (node.type === 'css-rule') {
+        expect(node.selector).toBeDefined();
+        const style = document.createElement('div').style;
+        style.cssText = (node.nodes ?? [])
+          .filter((child) => child.type === 'css-decl')
+          .map((child) => css.slice(parser.locStart(child), parser.locEnd(child)))
+          .join(';');
+        rules.push({ selector: node.selector!, style });
+      } else if (
+        node.type === 'css-root' ||
+        (node.type === 'css-atrule' && node.name === 'layer')
+      ) {
+        for (const child of node.nodes ?? []) visit(child);
+      }
+    };
+    visit(stylesheet);
+
+    // Happy DOM 15 discards @layer and treats ~= values as regular expressions.
+    // Match parsed compound attribute selectors against raw DOM attributes;
+    // the CSS parser, rather than string serialization, owns escapes/nesting.
+    // Its lossless attribute.value includes source quotes; raws.unquoted is
+    // the operand observed in the parser's projection of this generated CSS.
+    // Reject unsupported selector shapes instead of ignoring their conditions.
+    const matches = (selector: SelectorNode, element: Element): boolean => {
+      const children = selector.nodes ?? [];
+      switch (selector.type) {
+        case 'selector-root':
+          return children.some((child) => matches(child, element));
+        case 'selector-selector':
+          return children.every((child) => matches(child, element));
+        case 'selector-pseudo':
+          if (selector.value === ':where' || selector.value === ':is')
+            return children.some((child) => matches(child, element));
+          if (selector.value === ':not') return !children.some((child) => matches(child, element));
+          break;
+        case 'selector-attribute': {
+          if (!selector.attribute || selector.namespace || selector.insensitive)
+            throw new Error('Unsupported namespace or case flag in attribute-state regression');
+          const value = element.getAttribute(selector.attribute!);
+          if (!selector.operator) return value !== null;
+          if (selector.operator === '=') return value === selector.raws?.unquoted;
+          if (selector.operator === '~=')
+            return value !== null && value.split(/[\t\n\f\r ]+/).includes(selector.raws?.unquoted!);
+          break;
+        }
+      }
+      throw new Error(`Unsupported selector in attribute-state regression: ${selector.type}`);
+    };
+    const containsToken = (selector: SelectorNode, token: string): boolean =>
+      (selector.type === 'selector-attribute' &&
+        selector.attribute === 'data-pui-style' &&
+        selector.operator === '~=' &&
+        selector.raws?.unquoted === token) ||
+      (selector.nodes ?? []).some((child) => containsToken(child, token));
+
+    const forToken = (token: string, property: string, pressed: boolean) => {
+      const probe = document.createElement('div');
+      const empty = document.createElement('div');
+      probe.setAttribute('data-pui-style', token);
+      empty.setAttribute('data-pui-style', '');
+      probe.toggleAttribute('data-pressed', pressed);
+      empty.toggleAttribute('data-pressed', pressed);
+      const matching = rules.filter(
+        (rule) =>
+          containsToken(rule.selector, token) &&
+          rule.style.getPropertyValue(property) !== '' &&
+          matches(rule.selector, probe) &&
+          !matches(rule.selector, empty)
+      );
+      expect(
+        matching.length,
+        `${token} must select its own ${property} declaration`
+      ).toBeGreaterThan(0);
+      return matching.at(-1)!;
+    };
+    const shadow = forToken(shadowToken!, '--pui-shadow', true);
+    const background = forToken(backgroundToken!, 'background-color', true);
+    const resting = forToken(restShadowToken!, '--pui-shadow', false);
+    expect(shadow.style.getPropertyValue('--pui-shadow')).not.toBe(
+      resting.style.getPropertyValue('--pui-shadow')
+    );
+    // The actual host must match both independent declarations only while
+    // pressed. Native cascade and paint remain the eight Bootstrap journeys.
+    expect(host.hasAttribute('data-pressed')).toBe(false);
+    expect(matches(shadow.selector, host)).toBe(false);
+    expect(matches(background.selector, host)).toBe(false);
+
+    host.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    await flush();
+    expect(host.hasAttribute('data-pressed')).toBe(true);
+    expect(matches(shadow.selector, host)).toBe(true);
+    expect(matches(background.selector, host)).toBe(true);
+
+    host.dispatchEvent(new Event('pointerup', { bubbles: true }));
+    await flush();
+    expect(host.hasAttribute('data-pressed')).toBe(false);
+    expect(matches(shadow.selector, host)).toBe(false);
+    expect(matches(background.selector, host)).toBe(false);
   });
 });

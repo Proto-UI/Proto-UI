@@ -101,6 +101,7 @@ describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']
       await f.edit('taken');
       expect(f.root.pending.get()).toBe(true);
       const old = f.requests.at(-1);
+      expect(old).toEqual(expect.stringMatching(/.+/));
       await f.cancel();
       expect(f.ref('handleStatus').textContent).toBe('Handle ready');
       expect(f.root.pending.get()).toBe(false);
@@ -117,8 +118,10 @@ describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']
       const f = await mount(family);
       await f.edit('taken');
       const canceled = f.requests.at(-1);
+      expect(canceled).toEqual(expect.stringMatching(/.+/));
       await f.cancel();
       await f.edit('taken', 'change');
+      expect(f.requests.at(-1)).toEqual(expect.stringMatching(/.+/));
       expect(f.requests.at(-1)).not.toBe(canceled);
       expect(f.root.resolveValidation(canceled, { invalid: false })).toBe(false);
       await vi.advanceTimersByTimeAsync(500);

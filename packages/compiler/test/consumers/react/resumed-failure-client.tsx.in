@@ -1,0 +1,53 @@
+import { createRef, StrictMode } from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { ActionFailure, type ActionSource } from '@proto.ui/compiler/support/react';
+import { EXPECTED_DOCUMENT, FailureReader, type FailureReaderHandle } from './FailureReader';
+import { enqueue, loadHistory } from './keyed-loader';
+
+const root = createRoot(document.getElementById('app')!);
+const reader = createRef<FailureReaderHandle>();
+let provider: ReturnType<typeof EXPECTED_DOCUMENT.createProvider>;
+
+function snapshot() {
+  const { stage, accepted, expected } = reader.current!;
+  return { stage, accepted, expected };
+}
+
+const failures: { reason: string; source: ActionSource; published: ReturnType<typeof snapshot> }[] = [];
+const starts: { id: string; published: ReturnType<typeof snapshot> }[] = [];
+window.addEventListener('error', event => {
+  if (event.error instanceof ActionFailure) {
+    failures.push({ reason: event.error.reason, source: event.error.source, published: snapshot() });
+  }
+});
+
+function trackRead(id: string, path: string) {
+  enqueue(id, path, true, { onStart: () => starts.push({ id, published: snapshot() }) });
+}
+
+const trace = {
+  mount(expected: string) {
+    provider = EXPECTED_DOCUMENT.createProvider(expected);
+    flushSync(() => root.render(<StrictMode><EXPECTED_DOCUMENT.Provider value={provider}>
+      <FailureReader ref={reader} />
+    </EXPECTED_DOCUMENT.Provider></StrictMode>));
+  },
+  publish(expected: string) { provider.publish(expected); },
+  begin(id: string, path: string) {
+    trackRead(id, path);
+    return reader.current!.begin(id).status;
+  },
+  cancelAndFail() { return reader.current!.cancelAndFail(); },
+  startAndFail(id: string, path: string) {
+    trackRead(id, path);
+    return reader.current!.startAndFail(id);
+  },
+  snapshot,
+  starts: () => starts,
+  failures: () => failures,
+  history: loadHistory,
+};
+
+declare global { interface Window { failureTrace: typeof trace } }
+window.failureTrace = trace;

@@ -2985,7 +2985,7 @@ for (const runtime of runtimes) {
 }
 
 for (const runtime of runtimes) {
-  it(`dropdown pointer identity/${runtime}: binds both real authored commands and their own Shortcuts`, async () => {
+  it(`dropdown pointer identity/${runtime}: binds all real authored variants and their own Shortcuts`, async () => {
     const mounted = await preview(runtime, 'dropdown-menu');
     const restore = controlledMeasurementInputs();
     try {
@@ -3010,6 +3010,7 @@ for (const runtime of runtimes) {
       expect(rows.map((row: any) => [row.ref, row.value, row.pair])).toEqual([
         ['profileAction', 'profile', 'main'],
         ['logoutAction', 'logout', 'main'],
+        ['deleteAction', 'delete', 'destructive'],
       ]);
       for (const row of rows) {
         const target = await readers.dropdownPointerTarget(popup, row);
@@ -3037,14 +3038,18 @@ for (const runtime of runtimes) {
         for (const child of node?.children ?? []) visit(child);
       };
       visit(source.root);
-      expect(items.at(-1)).toMatchObject({
+      expect(items.find((node) => node.ref === 'logoutAction')).toMatchObject({
         ref: 'logoutAction',
         props: { value: 'logout', textValue: 'Log out' },
         children: ['Log out', { prototypeId: 'brutalist-dropdown-shortcut', children: ['⇧⌘Q'] }],
       });
       expect(items.find((node) => node.props.value === 'logout').props.variant).toBeUndefined();
-      // The current hero has no destructive command; its audit cannot claim that variant.
-      expect(items.filter((node) => node.props.variant === 'destructive')).toHaveLength(0);
+      expect(items.at(-1)).toMatchObject({
+        ref: 'deleteAction',
+        props: { value: 'delete', textValue: 'Delete', variant: 'destructive' },
+        children: ['Delete'],
+      });
+      expect(items.filter((node) => node.props.variant === 'destructive')).toHaveLength(1);
       const anatomy = await readers.anatomyObservation(
         page,
         item(runtime, 'dropdown-menu'),

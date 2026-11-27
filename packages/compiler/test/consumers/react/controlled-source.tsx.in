@@ -1,0 +1,166 @@
+import { Activity, Component, createRef, StrictMode, useCallback, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { DisposedInstanceError, HostValueError, InputRejectionContext } from '@proto.ui/compiler/support/react';
+import { ControlledToggle, type ControlledToggleHandle, type ControlledToggleProps } from './ControlledToggle';
+
+type Request = Parameters<NonNullable<ControlledToggleProps['onActiveChange']>>[0];
+type SameType<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
+type Assert<Condition extends true> = Condition;
+// Keep the actual generated callback type under the external consumer's strict checker.
+type ImmutableBooleanRequest = Assert<SameType<Request, { readonly active: boolean }>>;
+
+interface Offer {
+  key: string;
+  input: boolean | 'omitted' | 'explicit-undefined';
+  defaultActive: boolean;
+  disabled: boolean;
+  channel: string;
+  width: number;
+}
+
+const host = document.getElementById('app')!;
+const root = createRoot(host);
+const ref = createRef<ControlledToggleHandle>();
+let offer: Offer = { key: 'original', input: false, defaultActive: true, disabled: false, channel: 'original', width: 2 };
+let hidden = false;
+let lastVisible: ControlledToggleHandle | undefined;
+let saved: ControlledToggleHandle | undefined;
+let trustedClicks = 0;
+const requests: Array<{ channel: string; payload: Request; observed: boolean; immutable: boolean }> = [];
+const diagnostics: Array<ReturnType<typeof describeError>> = [];
+let firstMountError: ReturnType<typeof describeError> | undefined;
+let firstMountHandles = 0;
+let recordNextErrorInState = false;
+let committedFeedback: HostValueError | null = null;
+
+host.addEventListener('click', event => {
+  if (event.isTrusted && event.target instanceof HTMLButtonElement) trustedClicks++;
+}, true);
+
+function current(): ControlledToggleHandle {
+  const owner = ref.current ?? lastVisible;
+  if (!owner) throw new Error('The consumer has no committed Toggle handle.');
+  return owner;
+}
+
+function describeError(error: HostValueError) {
+  return { typed: error instanceof HostValueError, code: error.code, origin: error.origin, message: error.message };
+}
+
+function onRejection(error: HostValueError): void { diagnostics.push(describeError(error)); }
+
+class FirstMountBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError(error: unknown) {
+    if (!(error instanceof HostValueError)) throw error;
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error): void {
+    if (!(error instanceof HostValueError)) throw error;
+    firstMountError = describeError(error);
+  }
+
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
+function propsFor(candidate: Offer): ControlledToggleProps {
+  const props: ControlledToggleProps = {
+    defaultActive: candidate.defaultActive,
+    disabled: candidate.disabled,
+    onActiveChange(payload) {
+      const requested = payload.active;
+      const observed = current().active;
+      // Exercise mutation from a native listener and retain the original record so
+      // a later emission cannot silently change the contents of an earlier request.
+      try { Reflect.set(payload, 'active', !requested); }
+      catch (error) { if (!(error instanceof TypeError)) throw error; }
+      requests.push({ channel: candidate.channel, payload, observed, immutable: payload.active === requested });
+    },
+    appearance: () => ({ borderLeftStyle: 'solid', borderLeftWidth: candidate.width }),
+  };
+  if (candidate.input === 'omitted') return props;
+  if (candidate.input === 'explicit-undefined') {
+    // A JavaScript caller can supply an own property whose value violates the bool boundary.
+    Object.defineProperty(props, 'active', { enumerable: true, value: undefined });
+    return props;
+  }
+  return { ...props, active: candidate.input };
+}
+
+function ToggleOwner({ candidate, concealed }: { candidate: Offer; concealed: boolean }) {
+  const [feedback, setFeedback] = useState<HostValueError | null>(null);
+  const report = useCallback((error: HostValueError) => {
+    onRejection(error);
+    if (recordNextErrorInState) {
+      recordNextErrorInState = false;
+      setFeedback(error);
+    }
+  }, []);
+  useLayoutEffect(() => { committedFeedback = feedback; }, [feedback]);
+  // The parent's feedback rerender keeps every host input, including both callbacks.
+  const inputs = useMemo(() => propsFor(candidate), [candidate]);
+  return (
+    <InputRejectionContext.Provider value={report}>
+      <Activity mode={concealed ? 'hidden' : 'visible'}>
+        <ControlledToggle key={candidate.key} {...inputs} ref={ref} />
+      </Activity>
+    </InputRejectionContext.Provider>
+  );
+}
+
+function render(): void {
+  flushSync(() => root.render(<StrictMode><ToggleOwner candidate={offer} concealed={hidden} /></StrictMode>));
+  if (ref.current) lastVisible = ref.current;
+}
+
+function remembered(): ControlledToggleHandle {
+  if (!saved) throw new Error('The consumer has no saved Toggle handle.');
+  return saved;
+}
+
+const toggleTrace = {
+  publish(change: Partial<Offer>) { offer = { ...offer, ...change }; render(); },
+  recordNextRejectionInState() { recordNextErrorInState = true; },
+  feedbackState() { return committedFeedback === null ? null : describeError(committedFeedback); },
+  mountInvalidFirst() {
+    const props = propsFor({ ...offer, input: 'explicit-undefined' });
+    flushSync(() => root.render(
+      <StrictMode>
+        <InputRejectionContext.Provider value={onRejection}>
+          <FirstMountBoundary>
+            <ControlledToggle key="invalid-first" {...props} ref={handle => { if (handle) firstMountHandles++; }} />
+          </FirstMountBoundary>
+        </InputRejectionContext.Provider>
+      </StrictMode>
+    ));
+  },
+  firstMountResult() { return { error: firstMountError, handles: firstMountHandles }; },
+  remember() { saved = current(); },
+  sameHandle() { return remembered() === current(); },
+  activate() { return current().activate().status; },
+  activateSaved() { return remembered().activate().status; },
+  hide() { hidden = true; render(); },
+  reveal() { hidden = false; render(); },
+  unmount() { flushSync(() => root.unmount()); },
+  savedAfterRemoval() {
+    const previous = remembered();
+    const action = previous.activate().status;
+    try { return { action, projection: previous.active }; }
+    catch (error) {
+      if (!(error instanceof DisposedInstanceError)) throw error;
+      return { action, projection: error.code };
+    }
+  },
+  snapshot() {
+    const owner = current();
+    return { active: owner.active, disabled: owner.disabled, requests, diagnostics, trustedClicks };
+  },
+  notifications() { return { requests, diagnostics }; },
+};
+
+declare global { interface Window { toggleTrace: typeof toggleTrace } }
+window.toggleTrace = toggleTrace;
+render();

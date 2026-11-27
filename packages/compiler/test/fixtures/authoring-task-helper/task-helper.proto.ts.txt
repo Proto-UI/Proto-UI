@@ -1,0 +1,33 @@
+import { definePrototype } from '@proto.ui/core/authoring';
+import type { StateHandle, TaskContext } from '@proto.ui/core/authoring';
+
+function writeChoice(task: TaskContext, state: StateHandle<string>, first: string, last: string, early: boolean): void {
+  task.set<string>(state, first);
+  if (early) return;
+  task.set<string>(state, last);
+}
+
+export default definePrototype({
+  name: 'task-helper-transaction',
+  setup(def) {
+    const message = def.state.define<string>('message', { initialize: () => 'waiting' });
+    const observed = def.state.define<string>('observed', { initialize: () => 'unread' });
+    const copy = def.task<[first: string, last: string, early: boolean], void>(
+      'copy', { policy: 'latest' }, async (task, first, last, early) => {
+        writeChoice(task, message, first, last, early);
+        const staged = task.get<string>(message);
+        task.set<string>(message, 'published');
+        task.set<string>(observed, staged);
+      }
+    );
+    const created = def.action<[], void>('created', run => { run.start(copy, 'created', 'unreached', true); });
+    const submit = def.action<[first: string, last: string, early: boolean], void>(
+      'submit', (run, first, last, early) => { run.start(copy, first, last, early); }
+    );
+    def.lifecycle.onCreated(created);
+    def.expose.action('submit', submit);
+    def.expose.state('message', message);
+    def.expose.state('observed', observed);
+    return view => view.el('span', {}, [view.get(message), ' / ', view.get(observed)]);
+  },
+});

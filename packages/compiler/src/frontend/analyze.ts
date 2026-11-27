@@ -4,6 +4,7 @@ import {
   LANGUAGE_VERSION,
   PRELUDE_PATH,
   RULE_SET_VERSION,
+  analysisConfigurationHash,
   createProtoProgram,
   getProtoSourceClosure,
 } from './program.ts';
@@ -178,7 +179,7 @@ export function analyzeProtoProgram(
   if (input.target !== undefined && !PROTO_TARGETS.includes(input.target)) {
     throw new TypeError(`Unknown Proto target: ${String(input.target)}`);
   }
-  const sourceClosure = getProtoSourceClosure(program, input.target);
+  const sourceClosure = getProtoSourceClosure(program);
   const checker = program.getTypeChecker();
   const diagnostics: ProtoDiagnostic[] = [];
   const specializedAccesses = new Set<ts.Node>();
@@ -554,7 +555,7 @@ export function analyzeProtoProgram(
   );
   missing(
     'frontend/typed-ir',
-    'Typed component/behavior IR and complete reached-call lowering are not implemented.',
+    'General lint does not produce a selected component. The source producer separately checks the reached component and behavior operations.',
     undefined,
     'proto/complete-analysis',
     ['IR', 'COMPLETE'].map(foundation)
@@ -566,7 +567,10 @@ export function analyzeProtoProgram(
       criterion: [foundation('EMISSION'), foundation('COMPLETE')],
       category: 'backend-missing',
       severity: 'info',
-      message: `The ${target} backend is not implemented; no artifact was generated.`,
+      message:
+        target === 'react' || target === 'gpui'
+          ? `Lint did not compile a selected export for ${target}. The bounded source compiler checks its reached operations separately.`
+          : `The ${target} backend is not implemented; no artifact was generated.`,
       capabilityKey: `backend/${target}`,
       trackingRef: TRACKING_REF,
       targetProfile: target,
@@ -585,6 +589,7 @@ export function analyzeProtoProgram(
   );
   return {
     schemaVersion: 1,
+    analysisConfigurationHash: analysisConfigurationHash(sourceClosure, input.target),
     languageVersion: LANGUAGE_VERSION,
     ruleSetVersion: RULE_SET_VERSION,
     compilerVersion: COMPILER_VERSION,

@@ -1,0 +1,34 @@
+import { createContextKey, definePrototype, type ReadContext, type ReadHandle } from '@proto.ui/core/authoring';
+
+export const LEVEL = createContextKey<string>('level');
+export const OTHER = createContextKey<string>('level');
+
+function readText(read: ReadContext, handle: ReadHandle<string>): string {
+  return read.get(handle);
+}
+
+export const LevelReader = definePrototype({
+  name: 'level-reader',
+  setup(def) {
+    const level = def.context.consume(LEVEL);
+    const initial = def.state.define<string>('initial', { initialize: read => readText(read, level) });
+    const visibleLevel = def.derive('visibleLevel', read => readText(read, level));
+    def.expose.state('initial', initial);
+    def.expose.state('current', level);
+    return view => view.el('span', {}, [view.get(initial), ' / ', view.get(visibleLevel)]);
+  },
+});
+
+export default definePrototype({
+  name: 'level-owner',
+  setup(def) {
+    const props = def.props.define({ seed: { type: 'string', default: 'first' } });
+    const value = def.state.define<string>('value', { initialize: read => read.get(props.seed) });
+    const select = def.action('select', (run, next: string) => { run.set(value, next); });
+    def.context.provide(OTHER, () => 'other');
+    def.context.provide(LEVEL, read => readText(read, value));
+    def.expose.state('value', value);
+    def.expose.action('select', select);
+    return view => view.el('div', {}, [view.child(LevelReader, { key: 'stable', props: {} })]);
+  },
+});

@@ -172,6 +172,16 @@ describe.each(families)(
       reorderedField.children = children(reorderedField).filter((node) => node !== error);
       reorderedField.children.splice(1, 0, error);
       expect(formActionFlow(reordered)).toBe(false);
+
+      // Keep the independent status-before-field negative control from main.
+      const prior = structuredClone(createFieldDemo(family).root);
+      const priorForm = formContent(prior)!;
+      const priorParts = children(priorForm);
+      const status = priorParts.find((node) => ref(node) === 'handleStatus')!;
+      expect(status).toBeDefined();
+      if (!('children' in priorForm)) throw new Error('Expected demo form');
+      priorForm.children = [status, ...priorParts.filter((node) => node !== status)];
+      expect(formActionFlow(prior)).toBe(false);
     });
   }
 );

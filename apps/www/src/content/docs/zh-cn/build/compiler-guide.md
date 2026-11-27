@@ -4,7 +4,7 @@ desp: '0.4 Proto 语言编译器的基础规范与实现状态'
 description: '0.4 Proto 语言编译器的基础规范与实现状态'
 ---
 
-旧的私有编译器已经退役。新编译器属于 **0.4 scope**，目前已开始交付共享前端与部分语义 lint，五个源码后端均尚未实现。[Compiler 基础文档](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md)是开发入口。
+旧的私有编译器已经退役。**0.4** 新编译器可以把仓库中的只读 Badge 和受控 Toggle 源码编译成 TypeScript React 组件和原生 Rust GPUI 组件。两个目标使用共享 TypeScript Program 生成的同一份已检查组件 IR。开发入口见 [Compiler 基础文档](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md)。
 
 现有应用继续使用 [Runtime](/zh-cn/build/runtime-architecture/) 与 [Adapter](/zh-cn/build/adapter-guide/)。真实运行的示例、组件 facade 与样式工具沿用各自版本边界。新编译器重建不会成为 0.3 发布的新增验收条件。
 
@@ -42,13 +42,15 @@ Proto 使用合法的 TypeScript 语法及其编译器基础设施，独立定�
 
 生成组件必须能够进入普通宿主应用。执行原型源码、嵌入动态 JavaScript VM、在运行时解释 Proto IR、包装现有 Runtime / Adapter，都不算编译成功的兜底。组件名与源码路径不得决定专用降低逻辑。
 
-| 源码目标       | 新实现状态 | 交付顺序           |
-| -------------- | ---------- | ------------------ |
-| React          | 尚未实现   | 第一批共同验证     |
-| GPUI           | 尚未实现   | 第一批共同验证     |
-| Vue 2          | 尚未实现   | 必须提供的源码后端 |
-| Vue 3          | 尚未实现   | 必须提供的源码后端 |
-| Web Components | 尚未实现   | 必须提供的源码后端 |
+| 源码目标       | 从作者源码得到的验证结果 |
+| -------------- | ------------------------ |
+| React          | Chromium 验证了 Badge 的 DOM 文本、计算后的颜色、子圆点宽度和只读投影。四个 Toggle 用例覆盖浏览器点击、固定模式下拒绝无效更新、本地状态保留，以及首次输入无效。 |
+| GPUI           | 原生无头宿主验证了 Badge 的标签、底色、子圆点绘制结果和只读投影。三个 Toggle 用例覆盖指针请求、重新挂接后的本地状态，以及信号订阅者排队接受请求。 |
+| Vue 2          | 源码后端尚待实现。 |
+| Vue 3          | 源码后端尚待实现。 |
+| Web Components | 源码后端尚待实现。 |
+
+两个宿主都验证了 Badge 的在线状态外观，也验证了传入未知 tone 时保留基础样式。另有一组用例直接以经过检查的 IR 为输入，独立检验目标端行为。
 
 应用专属 extern 可以声明有限的目标集合，缺少绑定时必须明确失败。这不豁免官方可移植原型库在五个后端上的实现义务。
 
@@ -56,16 +58,21 @@ Proto 使用合法的 TypeScript 语法及其编译器基础设施，独立定�
 
 仓库现已记录新合同、独立的语义测试场景、实现顺序与旧实现退役边界。旧编译器、生成物 fixture、编译器专属 runner 与浏览器编译面板已移除。Git 历史保留旧实现和当时的观察记录，它们不构成新编译器的正确性证据。
 
-私有包目前提供可用性查询与初步源码分析命令：
+私有包提供 `compile <path> --target react|gpui [--name ...] [--out ...]` 命令。`compile` 默认从输入文件所在目录向上查找最近的 `tsconfig.json`。下面两个示例均使用 `internal/compiler/examples/tsconfig.json`，其中的路径映射让作者 API 的导入指向编译器自带的类型声明。也可以通过 `--project <path>` 显式指定项目配置。`lint` 默认从当前工作目录查找配置。
 
 ```sh
 node packages/compiler/src/cli-entry.mjs --status
-node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target react --name AuthoringBadge --out AuthoringBadge.ts
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target gpui --name AuthoringBadge --out authoring_badge.rs
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target react --name ControlledToggle --out ControlledToggle.ts
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target gpui --name ControlledToggle --out controlled_toggle.rs
 ```
 
-临时 CLI 对编译请求返回 `PUI_COMPILER_NOT_IMPLEMENTED`，`requireCompilerImplementation()` 可用性检查也抛出同一错误码。导入已移除的 API 则可能在模块加载或消费方的导出检查处失败。目前没有可用的新编译命令；该包仍为私有包，可用性查询也不是已承诺的编译器 API。
+前端从磁盘读取仓库中的三个作者输入，通过编译器自带的有类型内建声明解析作者操作。公开的 Core 运行时尚未导出 `@proto.ui/core/authoring`。Adapter 执行这些源码以及消费方迁到共用源码的路径仍待验证。
 
-新的 lint 命令与编辑器接入 API 共用 TypeScript Program/checker 分析，不执行作者模块，检查已经实现的 boolean 条件、隐式转换和文本规则。报告绑定源码、依赖与配置摘要，分别报告源码错误、分析未完成与目标不可编译。完整的阶段、效果、所有权和后端分析仍待实现：当前 `analysisComplete` 为 false，尚未发现错误的源码仍保持 `sourceValid: null`，五个目标均不可编译。退出码 1 表示源码错误，2 表示分析或请求目标尚未完成；命令不改写源文件、不生成组件。
+显式传入 `active: false` 后，在按钮可用时连续按两次，每次都发出了 `{ active: true }` 请求，按钮仍显示 `Off`。宿主传入 `active: true` 后，公开状态变为 `true`，按钮显示 `On`。省略 `active` 时，组件从 `defaultActive` 初始化一次，此后自行维护状态。禁用时按下按钮没有产生请求。同一实例增删 `active` 会拒绝整次属性更新，新实例可以重新选择模式。两个宿主运行的组件均来自同一份 Toggle 源码和已检查的 IR。
+
+通用 lint 和编辑器共用 TypeScript Program 与 checker 检查已实现的布尔条件、隐式转换和文本规则，全程无需执行作者模块。可用 `node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json` 分析项目中的组件。报告记录源码、依赖和配置的摘要。`analysisComplete` 仍为 `false`。发现确定的违规时 `sourceValid` 为 `false`，否则为 `null`。退出码 `1` 表示源码无效，`2` 表示分析未完成或请求的目标不可用。编译 Tabs 源码还需要按 `key` 保留子组件身份、按逻辑层级提供和读取 Context，以及在面板拥有的任务中调用真实的加载器绑定。
 
 后续按能力集交付，每批通过普通目标构建与真实行为验证完整场景。语言不合法、编译器尚未实现、后端尚未降低、extern 缺少绑定应能分别诊断。性能工作先固定冷、热、增量、共享成本与单组件成本的测量方法，再制定硬预算。
 

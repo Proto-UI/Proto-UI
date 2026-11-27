@@ -18,7 +18,7 @@ Both paths execute independently specified behavior traces. Comparing their obse
 
 ## Analysis result
 
-The compiler, planned lint CLI and editor integration share the same frontend and rule metadata. Bind results to source, language/rule/compiler versions and the selected target profile. The three result fields have distinct meanings:
+The compiler, lint CLI and editor integration prepare the same source and project through `createProtoProgram`. The source closure identifies the effective configuration, reached file bytes, module resolutions and existence probes. The analysis additionally identifies the selected target in `analysisConfigurationHash`. The [package guide](../../packages/compiler/README.md#shared-frontend-and-partial-lint) describes project discovery and explicit selection. The three result fields have distinct meanings:
 
 | Situation | `sourceValid` | `analysisComplete` | `compilable` for the selected target |
 | --- | --- | --- | --- |

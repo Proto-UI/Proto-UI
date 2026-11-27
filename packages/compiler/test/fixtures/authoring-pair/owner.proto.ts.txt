@@ -1,0 +1,38 @@
+import { createContextKey, declareExtern, definePrototype } from '@proto.ui/core/authoring';
+
+export const PAIR_ZONE = createContextKey<string>('pair-zone');
+
+const loadItem = declareExtern<[id: string], string>({
+  name: 'fixture.load-keyed-item',
+  effect: 'after-state-commit',
+  lifetime: 'task',
+  async: true,
+  targets: ['react', 'gpui'],
+});
+
+export default definePrototype({
+  name: 'pair-reader',
+  setup(def) {
+    const zone = def.context.consume(PAIR_ZONE);
+    const stage = def.state.define<string>('stage', { initialize: () => 'idle' });
+    const readPair = def.task<[firstId: string, secondId: string], void>(
+      'readPair', { policy: 'latest' }, async (task, firstId, secondId) => {
+        const start = task.get(zone);
+        task.set(stage, 'first@' + start);
+        const first = await task.await(loadItem, firstId);
+
+        const middle = task.get(zone);
+        task.set(stage, 'second@' + start + '>' + middle + '=' + first);
+        const second = await task.await(loadItem, secondId);
+
+        task.set(stage, start + '>' + middle + '>' + task.get(zone) + '=' + first + '/' + second);
+      }
+    );
+    const begin = def.action<[firstId: string, secondId: string], void>('begin', (run, firstId, secondId) => {
+      run.start(readPair, firstId, secondId);
+    });
+    def.expose.action('begin', begin);
+    def.expose.state('stage', stage);
+    return view => view.el('span', {}, [view.get(stage)]);
+  },
+});

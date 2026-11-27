@@ -35,6 +35,8 @@ export interface ProtoDiagnostic {
 export interface ProtoProgramOptions {
   rootNames: readonly string[];
   currentDirectory?: string;
+  /** Relative to currentDirectory. Otherwise all entries must share their nearest project. */
+  project?: string;
   compilerOptions?: ts.CompilerOptions;
   /** Unsaved editor snapshots; keys must be absolute file paths. */
   sourceOverrides?: Readonly<Record<string, string>>;
@@ -76,10 +78,12 @@ export interface ProtoSourceClosure {
   configurationHash: string;
   complete: boolean;
   rootNames: string[];
+  /** The selected configuration path, or null for standalone inputs. */
+  projectFile: string | null;
   files: ProtoClosureFile[];
-  /** package.json and other files actually read during module resolution. */
+  /** Original bytes of project configurations and package metadata read by TypeScript. */
   resolutionFiles: Omit<ProtoClosureFile, 'role'>[];
-  /** Positive and negative lookup conditions that can change module resolution. */
+  /** Positive and negative lookups used in project discovery or resolution. */
   resolutionProbes: ProtoResolutionProbe[];
   resolutions: {
     from: string;
@@ -100,6 +104,8 @@ export interface ProtoTargetAnalysis {
 
 export interface ProtoAnalysis {
   schemaVersion: 1;
+  /** Includes the selected target in addition to the common source configuration. */
+  analysisConfigurationHash: string;
   languageVersion: '0.4';
   ruleSetVersion: string;
   compilerVersion: string;

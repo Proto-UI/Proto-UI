@@ -152,7 +152,7 @@ function measurements(withPaint = true) {
   cleanups.add(restore);
   return restore;
 }
-async function preview(family: Family, runtime: Runtime = 'wc') {
+async function preview(family: Family, runtime: Runtime = 'wc', prepareSelection = true) {
   localStorage.clear();
   const root = document.createElement('section');
   root.dataset.previewerId = `escape-${++fixtureId}`;
@@ -227,7 +227,7 @@ async function preview(family: Family, runtime: Runtime = 'wc') {
   );
   if (family !== 'tooltip' && family !== 'hover-card')
     await vi.waitFor(() => expect(popup.contains(document.activeElement)).toBe(true));
-  if (family === 'select') {
+  if (family === 'select' && prepareSelection) {
     // The current public recipe starts at a placeholder. Establish the exact
     // selected baseline through its real option action before testing Escape.
     const apple = [...popup.querySelectorAll<HTMLElement>('[role="option"]')].find(
@@ -742,4 +742,35 @@ for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
       restore();
     }
   });
+}
+
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+  it(
+    'select/' + runtime + ': preserves the real unselected placeholder across Escape',
+    async () => {
+      const restore = measurements();
+      const mounted = await preview('select', runtime, false);
+      try {
+        expect(mounted.baseline.observation.rootSelection).toEqual({
+          value: '',
+          textValue: '',
+          open: true,
+        });
+        expect(mounted.baseline.observation.triggerText).toBe('Select a fruit');
+        expect(
+          mounted.baseline.observation.selection.every((option: any) => option.selected === 'false')
+        ).toBe(true);
+        const result = await mounted.run();
+        expect(result.achieved).toBe(true);
+        expect(result.after.closed).toBe(true);
+        expect(result.after.triggerFocused).toBe(true);
+        expect(result.after.selectionUnchanged).toBe(true);
+        expect(result.after.triggerText).toBe('Select a fruit');
+        expect(result.after.rootSelection).toEqual({ value: '', textValue: '', open: false });
+      } finally {
+        await mounted.destroy();
+        restore();
+      }
+    }
+  );
 }
