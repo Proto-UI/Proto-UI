@@ -120,16 +120,16 @@ export function BrutalistStorageMeter() {
 ### Exposed states
 
 <ApiPropsTable
-  headers={{ name: 'State', type: 'Type', default: 'Notes' }}
+  headers={{ name: 'State', type: 'Type', description: 'Notes' }}
   rows={[
-    { name: 'value', type: 'State<number>', default: 'Current reading clamped to [min, max]' },
+    { name: 'value', type: 'State<number>', description: 'Current reading clamped to [min, max]' },
     {
       name: 'percentage',
       type: 'State<number>',
-      default: 'Normalized percentage between 0 and 100',
+      description: 'Normalized percentage between 0 and 100',
     },
-    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
-    { name: 'indeterminate', type: 'State<boolean>', default: 'Always false for Meter' },
+    { name: 'status', type: 'State<string>', description: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', description: 'Always false for Meter' },
   ]}
 />
 

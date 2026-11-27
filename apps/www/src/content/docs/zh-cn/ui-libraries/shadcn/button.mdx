@@ -232,14 +232,18 @@ export function Example() {
 ### 事件与方法
 
 <ApiPropsTable
-  headers={{ name: '成员', type: '类型', default: '说明' }}
+  headers={{ name: '成员', type: '类型', description: '说明' }}
   rows={[
     {
       name: 'click',
       type: 'Event<void>',
-      default: '指针点击或键盘 Enter / Space 激活时触发（禁用态不触发）',
+      description: '指针点击或键盘 Enter / Space 激活时触发（禁用态不触发）',
     },
-    { name: 'focusSelf(options?)', type: 'Method', default: '将焦点移动到当前按钮（禁用态忽略）' },
+    {
+      name: 'focusSelf(options?)',
+      type: 'Method',
+      description: '将焦点移动到当前按钮（禁用态忽略）',
+    },
   ]}
 />
 

@@ -130,18 +130,18 @@ host.ensureVisible('event-250', 'center');
 ### Root 暴露接口
 
 <ApiPropsTable
-  headers={{ name: '成员', type: '类型', default: '说明' }}
+  headers={{ name: '成员', type: '类型', description: '说明' }}
   rows={[
-    { name: 'logicalCount', type: 'ExposeState<number>', default: '当前逻辑条目总数' },
+    { name: 'logicalCount', type: 'ExposeState<number>', description: '当前逻辑条目总数' },
     {
       name: 'getCollection',
       type: '() => WindowedCollection',
-      default: '返回供渲染宿主接入的集合模型',
+      description: '返回供渲染宿主接入的集合模型',
     },
     {
       name: 'getWindow',
       type: '() => WindowSnapshot',
-      default: '返回当前修订、窗口区间与已挂载键快照',
+      description: '返回当前修订、窗口区间与已挂载键快照',
     },
   ]}
 />
@@ -149,28 +149,32 @@ host.ensureVisible('event-250', 'center');
 ### attachWebVirtualList
 
 <ApiPropsTable
-  headers={{ name: '参数 / 返回方法', type: '类型', default: '默认值 / 说明' }}
+  headers={{ name: '参数 / 返回方法', type: '类型', description: '默认值 / 说明' }}
   rows={[
-    { name: 'viewport', type: 'HTMLElement', default: '滚动视口元素（必填）' },
-    { name: 'content', type: 'HTMLElement', default: '承载占位器与行节点的列表元素（必填）' },
+    { name: 'viewport', type: 'HTMLElement', description: '滚动视口元素（必填）' },
+    { name: 'content', type: 'HTMLElement', description: '承载占位器与行节点的列表元素（必填）' },
     {
       name: 'collection',
       type: 'WindowedCollection',
-      default: '来自 Root getCollection()（必填）',
+      description: '来自 Root getCollection()（必填）',
     },
     {
       name: 'renderItem',
       type: '(key: string) => HTMLElement',
-      default: '按 key 创建行节点，已挂载 key 会自动复用（必填）',
+      description: '按 key 创建行节点，已挂载 key 会自动复用（必填）',
     },
-    { name: 'estimateSize', type: 'number', default: '36（未测量行的预估像素高度）' },
-    { name: 'refresh()', type: '() => void', default: '手动触发一次视口测量与窗口刷新' },
+    { name: 'estimateSize', type: 'number', description: '36（未测量行的预估像素高度）' },
+    { name: 'refresh()', type: '() => void', description: '手动触发一次视口测量与窗口刷新' },
     {
       name: 'ensureVisible(key, align?)',
       type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
-      default: '滚动定位至指定 key 并返回是否已挂载',
+      description: '滚动定位至指定 key 并返回是否已挂载',
     },
-    { name: 'dispose()', type: '() => void', default: '移除监听与观察器、清理已挂载行并释放租约' },
+    {
+      name: 'dispose()',
+      type: '() => void',
+      description: '移除监听与观察器、清理已挂载行并释放租约',
+    },
   ]}
 />
 

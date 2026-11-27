@@ -113,17 +113,17 @@ Pass `open` for controlled mode:
 ### Exposed States
 
 <ApiPropsTable
-  headers={{ name: 'State', type: 'Type', default: 'Description' }}
+  headers={{ name: 'State', type: 'Type', description: 'Description' }}
   rows={[
     {
       name: 'transitionState',
       type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
-      default: 'Current perceptual phase',
+      description: 'Current perceptual phase',
     },
     {
       name: 'isPresent',
       type: 'boolean',
-      default: 'Whether view resources stay mounted (includes preparing and leaving)',
+      description: 'Whether view resources stay mounted (includes preparing and leaving)',
     },
   ]}
 />
@@ -131,36 +131,40 @@ Pass `open` for controlled mode:
 ### Lifecycle Events
 
 <ApiPropsTable
-  headers={{ name: 'Event', type: 'Payload', default: 'Timing' }}
+  headers={{ name: 'Event', type: 'Payload', description: 'Timing' }}
   rows={[
-    { name: 'beforeEnter', type: 'void', default: 'After mount commits, before entering' },
-    { name: 'afterEnter', type: 'void', default: 'After settling in entered' },
-    { name: 'beforeLeave', type: 'void', default: 'Before entering leaving' },
-    { name: 'afterLeave', type: 'void', default: 'After entering closed, before detaching view' },
+    { name: 'beforeEnter', type: 'void', description: 'After mount commits, before entering' },
+    { name: 'afterEnter', type: 'void', description: 'After settling in entered' },
+    { name: 'beforeLeave', type: 'void', description: 'Before entering leaving' },
+    {
+      name: 'afterLeave',
+      type: 'void',
+      description: 'After entering closed, before detaching view',
+    },
   ]}
 />
 
 ### Imperative Methods
 
 <ApiPropsTable
-  headers={{ name: 'Method', type: 'Signature', default: 'Description' }}
+  headers={{ name: 'Method', type: 'Signature', description: 'Description' }}
   rows={[
-    { name: 'enter / controls.enter', type: '() => void', default: 'Start the enter phase' },
-    { name: 'leave / controls.leave', type: '() => void', default: 'Start the leave phase' },
+    { name: 'enter / controls.enter', type: '() => void', description: 'Start the enter phase' },
+    { name: 'leave / controls.leave', type: '() => void', description: 'Start the leave phase' },
     {
       name: 'complete / controls.complete',
       type: '() => void',
-      default: 'Advance entering to entered or leaving to closed',
+      description: 'Advance entering to entered or leaving to closed',
     },
     {
       name: 'retainClosedView',
       type: '(retained: boolean) => void',
-      default: 'Control whether the view stays mounted while closed',
+      description: 'Control whether the view stays mounted while closed',
     },
     {
       name: 'capturePreparation',
       type: '() => (() => void) | null',
-      default: 'Capture a cold-entry preparation token during preparing',
+      description: 'Capture a cold-entry preparation token during preparing',
     },
   ]}
 />

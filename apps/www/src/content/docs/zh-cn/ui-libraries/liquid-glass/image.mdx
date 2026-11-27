@@ -121,19 +121,23 @@ export function MediaCard() {
 ### 暴露状态与事件
 
 <ApiPropsTable
-  headers={{ name: '名称', type: '类型', default: '说明' }}
+  headers={{ name: '名称', type: '类型', description: '说明' }}
   rows={[
-    { name: 'source', type: 'ExposeState<string>', default: '当前生效的图片源 URI' },
-    { name: 'fit', type: "ExposeState<'contain' | 'cover' | 'fill'>", default: '当前缩放填充模式' },
+    { name: 'source', type: 'ExposeState<string>', description: '当前生效的图片源 URI' },
+    {
+      name: 'fit',
+      type: "ExposeState<'contain' | 'cover' | 'fill'>",
+      description: '当前缩放填充模式',
+    },
     {
       name: 'loadingStatus',
       type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
-      default: '当前加载生命周期状态',
+      description: '当前加载生命周期状态',
     },
     {
       name: 'loadingStatusChange',
       type: 'ExposeEvent<{ status, previousStatus, source }>',
-      default: '加载状态变化时触发（React/Vue 中可绑定 onLoadingStatusChange）',
+      description: '加载状态变化时触发（React/Vue 中可绑定 onLoadingStatusChange）',
     },
   ]}
 />

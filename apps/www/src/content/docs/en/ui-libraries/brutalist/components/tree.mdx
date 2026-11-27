@@ -120,42 +120,42 @@ Set `direction="rtl"` to mirror the group border guide and horizontal arrow keys
 ### Events & Methods (Root)
 
 <ApiPropsTable
-  headers={{ name: 'Name', type: 'Signature / Payload', default: 'Description' }}
+  headers={{ name: 'Name', type: 'Signature / Payload', description: 'Description' }}
   rows={[
     {
       name: 'valueChange',
       type: '{ value: string }',
-      default: 'Emitted when a selection change is requested',
+      description: 'Emitted when a selection change is requested',
     },
     {
       name: 'expandedChange',
       type: '{ expandedKeys: string[] }',
-      default: 'Emitted when branch expansion changes are requested',
+      description: 'Emitted when branch expansion changes are requested',
     },
     {
       name: 'getTree',
       type: '() => TreeEntry[]',
-      default: 'Returns the current validated tree snapshot',
+      description: 'Returns the current validated tree snapshot',
     },
     {
       name: 'getExpandedKeys',
       type: '() => string[]',
-      default: 'Returns the list of expanded branch keys',
+      description: 'Returns the list of expanded branch keys',
     },
     {
       name: 'requestValue',
       type: '(key: string) => boolean',
-      default: 'Programmatically requests selecting a node',
+      description: 'Programmatically requests selecting a node',
     },
     {
       name: 'requestExpanded',
       type: '(key: string, open: boolean) => boolean',
-      default: 'Programmatically requests expanding or collapsing a branch',
+      description: 'Programmatically requests expanding or collapsing a branch',
     },
     {
       name: 'refresh',
       type: '() => void',
-      default: 'Recomputes and publishes the tree hierarchy snapshot',
+      description: 'Recomputes and publishes the tree hierarchy snapshot',
     },
   ]}
 />

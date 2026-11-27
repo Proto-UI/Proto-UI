@@ -145,22 +145,22 @@ Tune `overscanItems` and `maxMaterializedItems` to keep the number of mounted DO
 ### Root Exposes
 
 <ApiPropsTable
-  headers={{ name: 'Member', type: 'Type', default: 'Description' }}
+  headers={{ name: 'Member', type: 'Type', description: 'Description' }}
   rows={[
     {
       name: 'logicalCount',
       type: 'ExposeState<number>',
-      default: 'Total number of logical item keys',
+      description: 'Total number of logical item keys',
     },
     {
       name: 'getCollection',
       type: '() => WindowedCollection',
-      default: 'Returns the collection model for host attachment',
+      description: 'Returns the collection model for host attachment',
     },
     {
       name: 'getWindow',
       type: '() => WindowSnapshot',
-      default: 'Returns the current revision, committed range, and materialized keys',
+      description: 'Returns the current revision, committed range, and materialized keys',
     },
   ]}
 />
@@ -168,43 +168,47 @@ Tune `overscanItems` and `maxMaterializedItems` to keep the number of mounted DO
 ### attachWebVirtualList
 
 <ApiPropsTable
-  headers={{ name: 'Option / Method', type: 'Type', default: 'Default / Description' }}
+  headers={{ name: 'Option / Method', type: 'Type', description: 'Default / Description' }}
   rows={[
-    { name: 'viewport', type: 'HTMLElement', default: 'Scrollable viewport element (required)' },
+    {
+      name: 'viewport',
+      type: 'HTMLElement',
+      description: 'Scrollable viewport element (required)',
+    },
     {
       name: 'content',
       type: 'HTMLElement',
-      default: 'List element hosting spacers and rows (required)',
+      description: 'List element hosting spacers and rows (required)',
     },
     {
       name: 'collection',
       type: 'WindowedCollection',
-      default: 'Collection from Root getCollection() (required)',
+      description: 'Collection from Root getCollection() (required)',
     },
     {
       name: 'renderItem',
       type: '(key: string) => HTMLElement',
-      default: 'Creates a row element for a key; mounted keys are reused (required)',
+      description: 'Creates a row element for a key; mounted keys are reused (required)',
     },
     {
       name: 'estimateSize',
       type: 'number',
-      default: '36 (estimated height in px before measurement)',
+      description: '36 (estimated height in px before measurement)',
     },
     {
       name: 'refresh()',
       type: '() => void',
-      default: 'Re-evaluates viewport geometry and materialization',
+      description: 'Re-evaluates viewport geometry and materialization',
     },
     {
       name: 'ensureVisible(key, align?)',
       type: "(key: string, align?: 'nearest' | 'start' | 'center' | 'end') => boolean",
-      default: 'Scrolls the target key into view and returns whether it materialized',
+      description: 'Scrolls the target key into view and returns whether it materialized',
     },
     {
       name: 'dispose()',
       type: '() => void',
-      default: 'Disconnects listeners/observers, clears rows, and releases the lease',
+      description: 'Disconnects listeners/observers, clears rows, and releases the lease',
     },
   ]}
 />

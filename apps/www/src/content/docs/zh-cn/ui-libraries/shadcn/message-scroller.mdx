@@ -117,29 +117,29 @@ Message Scroller 由 `Root`、`Viewport` 和 `Jump` 三个部件组成：
 ### Viewport
 
 <ApiPropsTable
-  headers={{ name: '属性 / 暴露能力', type: '类型', default: '说明' }}
+  headers={{ name: '属性 / 暴露能力', type: '类型', description: '说明' }}
   rows={[
     {
       name: 'styleProfile',
       type: 'ShadcnStyleChoice',
-      default: 'inherit → 最近 scope → new-york-v4',
+      description: 'inherit → 最近 scope → new-york-v4',
     },
-    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', default: '当前视口是否位于底部' },
+    { name: 'atEnd (expose)', type: 'ExposeState<boolean>', description: '当前视口是否位于底部' },
     {
       name: 'following (expose)',
       type: 'ExposeState<ScrollEndFollowState>',
-      default: '末端自动跟随状态',
+      description: '末端自动跟随状态',
     },
     {
       name: 'requestStatus (expose)',
       type: 'ExposeState<ScrollEndFollowRequestStatus>',
-      default: '最近一次滚底请求状态',
+      description: '最近一次滚底请求状态',
     },
-    { name: 'jumpToEnd() (expose)', type: '() => void', default: '显式请求滚动至末尾' },
+    { name: 'jumpToEnd() (expose)', type: '() => void', description: '显式请求滚动至末尾' },
     {
       name: 'pauseFollowing() (expose)',
       type: '() => ScrollSurfaceRequestOutcome',
-      default: '暂停末端自动跟随',
+      description: '暂停末端自动跟随',
     },
   ]}
 />

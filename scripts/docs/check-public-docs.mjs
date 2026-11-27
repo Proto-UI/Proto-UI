@@ -41,6 +41,19 @@ const UI_LIBRARY_PROSE_RULES = [
 ];
 const COMMIT_SHA_PATTERN = /\b[0-9a-f]{40}\b/gi;
 const HAN_CHARACTER_PATTERN = /[\u4e00-\u9fff]/;
+const API_PROPS_TABLE_BLOCK = /<ApiPropsTable\b[\s\S]*?\/>/g;
+const API_PROPS_TABLE_HEADERS = /headers=\{\{([^}]*)\}\}/s;
+const API_PROPS_DEFAULT_HEADER = /\bdefault\s*:\s*(['"])([^'"]+)\1/;
+const API_PROPS_ROW_DEFAULT = /(?<=[\{\s,])default\s*:\s*(['"])((?:\\.|(?!\1)[^\\])*)\1/g;
+const ALLOWED_API_TABLE_DEFAULT_HEADERS = new Set([
+  'default',
+  'defaults',
+  'initial',
+  '默认值',
+  '默认',
+  '初始值',
+]);
+const PROSE_SENTENCE_IN_DEFAULT = /[，。；！？]|(?:\.\s+[A-Z])/;
 
 function relative(root, file) {
   return path.relative(root, file).split(path.sep).join('/');
@@ -456,6 +469,45 @@ export function checkUiLibraryProse({ documents }) {
   return errors;
 }
 
+export function checkApiPropsTables({ documents }) {
+  const errors = [];
+  const seen = new Set();
+  for (const document of documents) {
+    if (seen.has(document.file)) continue;
+    seen.add(document.file);
+    const stripped = stripFencedCodeBlocks(document.text);
+    for (const match of stripped.matchAll(API_PROPS_TABLE_BLOCK)) {
+      const block = match[0];
+      const blockStart = match.index ?? 0;
+      const headerMatch = API_PROPS_TABLE_HEADERS.exec(block);
+      if (!headerMatch) continue;
+      const defaultHeader = API_PROPS_DEFAULT_HEADER.exec(headerMatch[1]);
+      if (!defaultHeader) continue;
+      const label = defaultHeader[2].trim();
+      const headerLine = lineNumber(stripped, blockStart + headerMatch.index);
+      if (!ALLOWED_API_TABLE_DEFAULT_HEADERS.has(label.toLowerCase())) {
+        errors.push(
+          `${document.file}:${headerLine}: <ApiPropsTable> uses "default" for non-default column "${label}". The "default" column renders non-wrapping <code> and crushes the adjacent "type" column into 1-char vertical lines. Move this column to headers.description / row.description (see internal/governance/prototype-docs-style-guide.md). Do NOT weaken this check or hack table tests.`
+        );
+        continue;
+      }
+      const rowsStart = block.indexOf('rows=');
+      if (rowsStart === -1) continue;
+      const rowsSegment = block.slice(rowsStart);
+      for (const rowMatch of rowsSegment.matchAll(API_PROPS_ROW_DEFAULT)) {
+        const value = rowMatch[2].trim();
+        if (PROSE_SENTENCE_IN_DEFAULT.test(value) || value.length > 60) {
+          const rowLine = lineNumber(stripped, blockStart + rowsStart + (rowMatch.index ?? 0));
+          errors.push(
+            `${document.file}:${rowLine}: <ApiPropsTable> row puts prose or overly long text into "default" ("${value.slice(0, 48)}${value.length > 48 ? '…' : ''}"). Keep "default" to short code default values and move explanations to "description" (see internal/governance/prototype-docs-style-guide.md). Do NOT weaken this check or hack table tests.`
+          );
+        }
+      }
+    }
+  }
+  return errors;
+}
+
 async function loadUiLibraryDocuments(root, locales) {
   const documents = [];
   for (const locale of locales) {
@@ -567,6 +619,7 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
 
   const uiLibraryDocuments = await loadUiLibraryDocuments(root, policy.locales);
   errors.push(...checkUiLibraryProse({ documents: uiLibraryDocuments }));
+  errors.push(...checkApiPropsTables({ documents: [...primaryDocuments, ...uiLibraryDocuments] }));
 
   errors.push(
     ...checkLibraryInventory({
