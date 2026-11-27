@@ -602,6 +602,10 @@ jobs:
           SPEC_AUTHORING_BASE: ${{ needs.cycle-plan.outputs.spec_base }}
         run: |
           set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
+          if [ -n "$CHROME" ] && [ -x "$CHROME" ]; then
+            export PUI_CHROMIUM_EXECUTABLE="$CHROME"
+          fi
           export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
           mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
           git rev-parse HEAD | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"

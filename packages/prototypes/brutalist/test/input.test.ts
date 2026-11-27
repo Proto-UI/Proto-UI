@@ -129,7 +129,7 @@ describe('Brutalist standalone Input', () => {
       'rounded-base',
       'border-2',
       'selection:bg-main',
-      'data-[focus-visible]:ring-black',
+      'data-[focus-visible]:ring-ring',
       'data-[focus-visible]:ring-offset-2',
       'data-[disabled]:cursor-not-allowed',
       'data-[disabled]:opacity-50',
