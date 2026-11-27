@@ -560,7 +560,8 @@ function assertGeometry(actual: AlertDialogLayout, root: number) {
   expect(actual.footer.display).toBe('flex');
   expect(actual.footer.flexDirection).toBe('row');
   expect(actual.footer.flexWrap).toBe('wrap-reverse');
-  expect(actual.footer.justifyContent).toBe('flex-end');
+  // Newer Chromium canonicalizes `justify-content: flex-end` as `flow-end`.
+  expect(['flex-end', 'flow-end']).toContain(actual.footer.justifyContent);
   expect(Number.parseFloat(actual.footer.columnGap)).toBeCloseTo(0.5 * root, 4);
   expect(actual.header.role).toBeNull();
   expect(actual.footer.role).toBeNull();

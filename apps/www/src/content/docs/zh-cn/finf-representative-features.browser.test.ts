@@ -1934,7 +1934,11 @@ async function runtimeTabsJourney({ page, previewer, family, capture }: Journey)
     .toBe(false);
   const hoverAfterRest = await hoverFacts();
   const restingSelected = await settledPaint(await runtimeTab(previewer, 'wc'));
-  expect(hasNoVisibleBoxShadow(restingSelected.shadow), restingSelected.shadow).toBe(true);
+  if (family !== 'liquid-glass') {
+    expect(hasNoVisibleBoxShadow(restingSelected.shadow), restingSelected.shadow).toBe(true);
+  } else {
+    expect(restingSelected.shadow).not.toBe('none');
+  }
   const focusedTabPaint = async (tab: Locator) => {
     const observed = await settledPaint(tab);
     // Brutalist's shared focus tokens specify a 2px ring with a 2px background

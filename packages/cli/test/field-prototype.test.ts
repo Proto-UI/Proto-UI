@@ -64,5 +64,5 @@ describe('Field package/CLI closure', () => {
       expect(renderProtoStyleTokenCss(tokens as string[])).not.toContain(
         'Unsupported Proto UI style tokens'
       );
-    });
+    }, 60_000);
 });

@@ -699,6 +699,23 @@
       "Re-review or removal issue": "Re-review in [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) if the notice becomes dismissible, expandable, or live-updating"
     },
     {
+      "id": "www.docs.steps",
+      "Path": "`apps/www/src/components/Steps.astro`, `apps/www/src/components/Step.astro`",
+      "User job": "Follow numbered step-by-step installation and usage instructions in documentation",
+      "Current owner": "Website content layout",
+      "targetClass": "native/static",
+      "Proto UI chain": "Native ordered section/heading layout with CSS counters",
+      "Lifecycle": "Native static documentation layout; no interactive state",
+      "WC host and SSR/no-JS strategy": "WC: not needed; SSR: numbered step rail and headings are rendered statically; no-JS: unchanged",
+      "Dependency and owner": "No Proto UI dependency; owner: website content layout",
+      "Difficulty": "F1",
+      "Milestone": "M0 / S4",
+      "state": "native/static",
+      "Evidence": "`apps/www/src/components/Steps.astro` and `apps/www/src/components/Step.astro` static layout baseline",
+      "Escape or exemption": "Reason: Static documentation step layout is the intended end state and owns no interactive controls",
+      "Re-review or removal issue": "Re-review in [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) if step containers become interactive or collapsible"
+    },
+    {
       "id": "www.docs.phase-badge",
       "Path": "`apps/www/src/components/SpecPhaseBadge.astro`",
       "User job": "Recognize a catalog entity lifecycle at a glance",
@@ -1403,7 +1420,7 @@
     {
       "source": "apps/www/src/content/docs/demo_components/combobox/demo-shadcn-combobox-controlled.demo.ts",
       "owningMatrixRow": "`www.demo.authored-controllers`",
-      "sourceSha256": "7c2dbd231145cf7cb36a894eeee314ecc4abab9b14cc96d96e0cf0632fea08bc"
+      "sourceSha256": "8a148a734b97745feb759eb83d19e48b616c3180b6e5f5954312f8fc54fa9039"
     },
     {
       "source": "apps/www/src/content/docs/demo_components/fieldset/fieldset-demo.shared.ts",
@@ -1588,17 +1605,17 @@
     {
       "source": "apps/www/src/components/code-example-tabs.ts",
       "owningMatrixRow": "`www.docs.code-example-host-tabs`",
-      "sourceSha256": "88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058"
+      "sourceSha256": "fc6c12cc1b2e905f5cbe9e9a494ec5905393c5ee5bcf3d6072e624e887b76162"
     },
     {
       "source": "apps/www/src/components/code-example-tree.ts",
       "owningMatrixRow": "`www.docs.code-example-file-tabs`",
-      "sourceSha256": "1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336"
+      "sourceSha256": "9dc99522bebdb69f6d582f8e2103be62aff3bd3cd62d1d576072b158b59014bc"
     },
     {
       "source": "apps/www/src/components/CodeFileBrowser.astro",
       "owningMatrixRow": "`www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-panel-scroll`, `www.docs.code-surface`",
-      "sourceSha256": "fb4f78c2a8f97a6d14c063fb05d1b1885baf84cef50b1d80549437cfb1a118a6"
+      "sourceSha256": "18055139bc99fe0c356401af41167847d1e13b1f442a338be3c5eb22f45942b8"
     },
     {
       "source": "apps/www/src/components/code-file-browser-client.ts",
@@ -1868,7 +1885,7 @@
     {
       "source": "apps/www/src/components/CodeExample.astro",
       "owningMatrixRow": "`www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface`",
-      "sourceSha256": "991f8c3bd93c21eaee831b98876389b77d58331b5dd68cd8bf186857958c4851"
+      "sourceSha256": "c5862e75696dc56188e1b965fdc4cd2a3bcb250ff9fbfd9eb85610815e1395ba"
     },
     {
       "source": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
@@ -1928,12 +1945,12 @@
     {
       "source": "apps/www/src/components/Homepage/homepage-gallery-icons.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "29b2d2041176aaa91fd68934b9869835482a16e7beafb99937c448f6ccd66fff"
+      "sourceSha256": "78309921dc2991d12305a481d30b7fef10fba15c31f3bec3b8bf438143cd025a"
     },
     {
       "source": "apps/www/src/components/Homepage/homepage-gallery-parts.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "de512238b31befb3c6c8830063e09a40ba39139e40d4e4ed5fc76ac673f027f5"
+      "sourceSha256": "bac1184b8e2a0887341740e2e46c635a9b05f591bcb170bf64930fcfe56dacaa"
     },
     {
       "source": "apps/www/src/components/Homepage/homepage-locale-select.ts",
@@ -2008,7 +2025,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
       "owningMatrixRow": "`www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface`",
-      "sourceSha256": "f96be6d05a5c95aee447618cecae03dee7661fe98b8fe22ebc80ecf4cdf6f1a4"
+      "sourceSha256": "4c2d49f0589a446021d8be58d304381bea19d265323eae196756d92ef93a9096"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",
@@ -2018,7 +2035,7 @@
     {
       "source": "apps/www/src/components/StaticCodeBlock.astro",
       "owningMatrixRow": "`www.docs.code-panel-copy`, `www.docs.code-surface`",
-      "sourceSha256": "755a863bb83b647e62dd8e12931eb2eb221ea179311b98aaa1b1a032230dec5b"
+      "sourceSha256": "f5f7bc9f5ae84e771c05dfa9f1f67e965736e6e563b513ae40e3516089f75120"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro",
@@ -2038,12 +2055,12 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "888fb613c697779f23f2b31fc6eb0807b4a542f7cc49c5696c83698248f2bba0"
+      "sourceSha256": "55818843e7de05a63141706d7d3e7cd82809826628da12cbafa2f51897f43175"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
       "owningMatrixRow": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
-      "sourceSha256": "65369290f4ba40a5f88a9b1bf38005aed3c7a735b471fe91fcba39dd1a9d0889"
+      "sourceSha256": "1e89bff4feaaea54f3c3192197fac2c901cf883dfa8eed223083b3e5d53a719d"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro",
@@ -2148,7 +2165,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`, `www.demo.runtime-select`",
-      "sourceSha256": "9cf1bc8e3e61275b7efb6517b2361b4d98d9cab97bfee284bd29fab2642ef3e8"
+      "sourceSha256": "e1c0bf5ebf4524c31f14c56ac81f704ae355a8b208e3b6fd8a7d7115950bef71"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/projection-materializer.ts",
@@ -2168,7 +2185,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/runtime-tabs.ts",
       "owningMatrixRow": "`www.demo.runtime-select`",
-      "sourceSha256": "474e5be107742102059b663053f8c6d30c9482731d8d82bde40c514f4083e54b"
+      "sourceSha256": "de2f0bff9e40dc6b61ca67a66240061d143b6fc044271abd4fa3fd2104fdbc29"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
@@ -2218,7 +2235,7 @@
     {
       "source": "apps/www/src/components/documentation-image-controls.ts",
       "owningMatrixRow": "`www.docs.whitepaper-diagram-viewer`",
-      "sourceSha256": "c116f197edd97a5e8762c12b224723bb58566ce7fbd2c20d8fe9087eee383ba6"
+      "sourceSha256": "40f0de7ac1a8d5a8555a0bcaa4863a6472b21fe71e07d7b96cbbc8bb2a11947a"
     },
     {
       "source": "apps/www/src/components/documentation-image-preview.ts",
@@ -2298,7 +2315,7 @@
     {
       "source": "apps/www/src/components/site-code-surface.ts",
       "owningMatrixRow": "`www.docs.code-surface`, `www.docs.note-surface`",
-      "sourceSha256": "c29c1363d7d62a5753a7142a4b2bf2a8cdd908e630d9e195e7898d3b8693dbfe"
+      "sourceSha256": "9fc53a7731f595be3971f8b77b3da3c6c56fef2236e0d97b28ddbf7be0a34138"
     },
     {
       "source": "apps/www/src/components/site-contents-command.ts",
@@ -2333,7 +2350,7 @@
     {
       "source": "apps/www/src/components/site-link-recipes.ts",
       "owningMatrixRow": "`www.shell.native-link-presentation`",
-      "sourceSha256": "16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479"
+      "sourceSha256": "65635d210e620c505cb35c419b3a82b314e70f4afb71e99dbffb711a061a346d"
     },
     {
       "source": "apps/www/src/components/site-native-controls.ts",
@@ -2553,22 +2570,22 @@
     {
       "source": "apps/www/src/content/docs/demo_components/navigation-menu/demo-bootstrap-2-3-2-navigation-menu-controlled.demo.ts",
       "owningMatrixRow": "`www.demo.authored-controllers`",
-      "sourceSha256": "cdd6be99ca814a4852a5b7b431a948c476cbd7bf409e3648c09fde958cc2176b"
+      "sourceSha256": "90c0dfa7375d8795727481a9bd91fcf9bf8e64e5b96f1ea894b5c708a74fa686"
     },
     {
       "source": "apps/www/src/content/docs/demo_components/navigation-menu/demo-brutalist-navigation-menu-controlled.demo.ts",
       "owningMatrixRow": "`www.demo.authored-controllers`",
-      "sourceSha256": "9952bc3529b18aac1880e7c82bd80ccd70b54dddd3ba015e76dc3bfe280028b9"
+      "sourceSha256": "2cbc3adc6005416f4f6aec8736925e778f9e0850df89413a7e7be406808afefa"
     },
     {
       "source": "apps/www/src/content/docs/demo_components/navigation-menu/demo-liquid-glass-navigation-menu-controlled.demo.ts",
       "owningMatrixRow": "`www.demo.authored-controllers`",
-      "sourceSha256": "c25a1289b5f2eef194c624ccb10aa4a204c7521e9e243f96e6b9cef969dc3b6d"
+      "sourceSha256": "8b692e04ffbc9ec31802709aad0008dcfea29cd41a34cd5d11c5d7886311c9f8"
     },
     {
       "source": "apps/www/src/content/docs/demo_components/navigation-menu/demo-shadcn-navigation-menu-controlled.demo.ts",
       "owningMatrixRow": "`www.demo.authored-controllers`",
-      "sourceSha256": "17845251971d6e704316f8286fb85bef15c27a4d798ef3deae4ba44d21f070dc"
+      "sourceSha256": "9481a27dd3caf4a49b2142335d34940b94e92d124685882367319264a72e1cc4"
     },
     {
       "source": "apps/www/src/content/docs/demo_components/popover/demo-bootstrap-2-3-2-popover-controlled.demo.ts",

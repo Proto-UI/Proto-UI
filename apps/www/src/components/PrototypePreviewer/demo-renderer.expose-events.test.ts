@@ -4,6 +4,8 @@ import { definePrototype } from '@proto.ui/core';
 import * as drawer from '@proto.ui/prototypes-shadcn/drawer';
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import minusIcon from '../../../../../packages/prototypes/lucide/src/icons/minus';
+import plusIcon from '../../../../../packages/prototypes/lucide/src/icons/plus';
 import drawerDemo from '../../content/docs/demo-shadcn-drawer.demo';
 import drawerScrollDemo from '../../content/docs/demo-shadcn-drawer-scroll.demo';
 import drawerSnapDemo from '../../content/docs/demo-shadcn-drawer-snap.demo';
@@ -453,6 +455,8 @@ it.each([drawerDemo, drawerScrollDemo, drawerSnapDemo])(
     vi.stubGlobal('CSS', { supports: () => true });
     registerPrototype(styleScope.name, styleScope);
     registerPrototype(shadcnButton.name, shadcnButton);
+    registerPrototype(minusIcon.name, minusIcon);
+    registerPrototype(plusIcon.name, plusIcon);
     for (const value of Object.values(drawer)) {
       if (value && typeof value === 'object' && 'name' in value)
         registerPrototype(value.name, value as any);

@@ -78,7 +78,12 @@ export function enhanceCodeExampleTabs(options: {
     variant: family === 'shadcn' ? 'line' : 'default',
     a11yLabel: list.getAttribute('aria-label') ?? 'Code example',
     loop: false,
-    surfaceStyle: { maxWidth: '100%', overflowX: 'auto' },
+    surfaceStyle: {
+      maxWidth: '100%',
+      overflowX: 'auto',
+      justifyContent: 'flex-start',
+      flexWrap: 'nowrap',
+    },
   });
   projectedList.dataset.codeExampleTablist = list.hasAttribute('data-code-host-tabs')
     ? 'host'
@@ -96,6 +101,7 @@ export function enhanceCodeExampleTabs(options: {
   for (const [index, tab] of tabs.entries()) {
     const trigger = element('trigger', {
       value: String(index),
+      surfaceStyle: { minHeight: '2.75rem', flex: 'none' },
     });
     // Astro preserves formatting whitespace around authored labels. Keep the
     // projected label exact without touching source-code whitespace.

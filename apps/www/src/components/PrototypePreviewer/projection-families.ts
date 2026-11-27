@@ -309,7 +309,8 @@ const SHADCN_MANIFEST = {
     button: {
       baseFamilyId: 'P-BASE-BUTTON',
       recipeId: 'demo-shadcn-button',
-      recipePrototypeIds: ['shadcn-button'],
+      recipePrototypeIds: ['shadcn-button', 'lucide-plus-icon'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'lucide-plus-icon' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
       },
