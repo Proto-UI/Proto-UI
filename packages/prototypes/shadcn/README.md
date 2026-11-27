@@ -65,9 +65,9 @@ The following existing family subpaths also declare a `proto` condition pointing
 
 `button`, `checkbox`, `dialog`, `input`, `select`, `separator`, `switch`, `tabs`, `textarea`, `toggle`, `scroll-area`, `label`, `collapsible`, `drawer`, `toggle-group`, `number-field`, `message-scroller`, and `data-table`.
 
-The compiler source loader uses these explicit entries instead of guessing source paths from JavaScript exports. The public package build and release staging retain their transitive package-local source and type dependencies, including shared presentation helpers. The package's ordinary `types`, `import` and `default` conditions continue to resolve to `dist`; other subpaths and the root do not gain an implicit source condition.
+These explicit source entries remain package metadata; they do not imply an available compiler. The public package build and release staging retain their transitive package-local source and type dependencies, including shared presentation helpers. The package's ordinary `types`, `import` and `default` conditions continue to resolve to `dist`; other subpaths and the root do not gain an implicit source condition.
 
-Source reachability and packed source bytes do not establish successful compilation of every family or native interaction, styling, accessibility or application acceptance. Each existing prototype lifecycle and compiler profile remains unchanged. Follow the [compiler source-consumption guide](../../compiler/README.md#source-resolution) and verify the selected family, target and exact compiler revision separately. The release above remains unpublished.
+Source reachability and packed source bytes do not establish successful compilation or native interaction, styling, accessibility or application acceptance. Existing prototype lifecycle boundaries remain in force. The old compiler and its profiles are retired; the [0.4 compiler foundation](../../../internal/compiler/README.md) defines the replacement, whose five backends remain unimplemented. The release above remains unpublished.
 
 ### Opt-in typography preset (draft)
 

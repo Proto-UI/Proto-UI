@@ -99,7 +99,7 @@ implementations:
   - id: website-command-no-addon-inset
     kind: runtime-test
     status: planned
-    path: apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts
+    path: apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts
     required: true
     consumesCases: [T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-NO-ADDON-INSET]
     exercises: [P-SHADCN-COMMAND, P-SHADCN-INPUT-SHELL]

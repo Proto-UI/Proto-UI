@@ -169,12 +169,12 @@ implementations:
       - 'Foreign identity, complete frame validation, rejected rebind and terminal cleanup.'
   - id: owned-decoration-compiler-rejection
     kind: runtime-test
-    status: active
-    path: packages/compiler/test/owned-decoration-rejection.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/owned-decoration-rejection.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - 'Unsupported portable source/serialized addressing rejects; legal host control remains accepted.'
   - id: owned-decoration-native-browser-planned
     kind: adapter-test
@@ -207,6 +207,9 @@ revisions:
   - version: 0.3.0-alpha.2
     change: revised
     summary: Mapped explicit split Root binding, native slot preservation and fail-closed reuse to the WC tests.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - feedback
   - style

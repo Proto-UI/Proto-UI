@@ -165,6 +165,14 @@ describe('prototypes/brutalist: hover-card', () => {
       expect(styleContains(content, token)).toBe(true);
     }
 
+    // The anchored-content category preserves this component's governed flat
+    // panel exception. Reject both unconditional and state-qualified shadows.
+    expect(
+      (content.getAttribute('data-pui-style') ?? '')
+        .split(/\s+/)
+        .filter((token) => /(?:^|:)shadow(?:-|$)/.test(token))
+    ).toEqual([]);
+
     await advance(199);
     expect(content.getExposes().transitionState.get()).toBe('entering');
     await advance(1);

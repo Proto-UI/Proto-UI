@@ -16,6 +16,7 @@ import {
   galleryHorizontalIssues,
   groupPaintedCards,
   HOMEPAGE_GALLERY_IDS,
+  readGalleryRhythm,
   WIDE_GALLERY_COLUMNS,
 } from '../src/components/Homepage/homepage-layout-evidence';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
@@ -139,7 +140,7 @@ async function save() {
 await save();
 
 async function measure(page: Page) {
-  return page.evaluate(() => {
+  const facts = await page.evaluate(() => {
     const root = document.querySelector<HTMLElement>('[data-home-showcase]');
     const host = root?.querySelector<HTMLElement>('[data-home-demo-host]');
     const stage = host?.querySelector<HTMLElement>('[data-home-gallery-stage]');
@@ -267,6 +268,7 @@ async function measure(page: Page) {
       },
     };
   });
+  return { ...facts, rhythm: await page.evaluate(readGalleryRhythm) };
 }
 
 async function pseudoBox(page: Page, selector: string) {
@@ -331,14 +333,14 @@ function candidateFailures(
     'The initial non-interactive gradient must actually be visible'
   );
   const expectedHeight = Math.min(
-    18 * facts.rootFontSize,
+    facts.rhythm.fadeRem * facts.rootFontSize,
     facts.fade.ownerGeometry.rect.height * 0.28
   );
   check(
     Number.isFinite(expectedHeight) &&
       expectedHeight > 0 &&
       Math.abs(fadeBox.physicalHeight - expectedHeight) <= 1,
-    'The real pseudo-element must use the unscaled 18rem/28% screen-height rule'
+    'The painted fade must use the unscaled family and breakpoint height capped at 28%'
   );
   check(
     facts.compact === facts.viewport.width < 768 && facts.stageInert === facts.compact,
@@ -477,6 +479,7 @@ try {
             width: facts.stage.contentRight - facts.stage.contentLeft,
           },
           wideMedia: facts.wideMedia,
+          gapRem: facts.rhythm.gapRem,
           enhancedMedia: facts.enhancedMedia,
           queryContainerWidth: facts.queryContainerWidth,
           readingFlowSupported: facts.readingFlowSupported,

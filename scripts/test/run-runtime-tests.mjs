@@ -216,7 +216,9 @@ async function startServer() {
       cwd: appsWwwRoot,
       detached: process.platform !== 'win32',
       shell: false,
-      env: process.env,
+      // Match browser-harness.ts: the shared server also excludes Astro's
+      // development toolbar, whose overlay and audit scans are not the site.
+      env: { ...process.env, PROTO_UI_BROWSER_TEST: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     }
   );

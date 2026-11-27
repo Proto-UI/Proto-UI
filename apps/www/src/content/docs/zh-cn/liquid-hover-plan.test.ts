@@ -82,11 +82,11 @@ describe('complete native hover matrix partitions without changing its scope', (
     const captures = cases.flatMap((entry) =>
       entry.parts.flatMap((part) => part.captures.map((capture) => capture.name))
     );
-    expect(captures).toHaveLength(2880);
+    expect(captures).toHaveLength(2904);
     expect(new Set(captures).size).toBe(captures.length);
     for (const entry of cases)
       expect(entry.parts.reduce((sum, part) => sum + part.captures.length, 0)).toBe(
-        entry.journey === 'interaction' ? 232 : 128
+        entry.journey === 'interaction' ? 232 : 131
       );
     expect(captures).toEqual(
       plan.cases.flatMap((entry) =>
@@ -158,7 +158,15 @@ describe('complete native hover matrix partitions without changing its scope', (
       );
       expect(policy.slice(-2)).toEqual(['reduced-motion', 'reduced-transparency']);
     }
-    expect(liquidHoverStages('policy-and-boundaries', 'accordion-blocked')).toHaveLength(4);
+    expect(liquidHoverStages('policy-and-boundaries', 'accordion-blocked')).toEqual([
+      'collapse-blocked',
+      'collapse-blocked-hover',
+      'collapse-blocked-down',
+      'collapse-blocked-click',
+      'collapse-blocked-focus',
+      'collapse-blocked-focus-hover',
+      'collapse-blocked-blur',
+    ]);
     for (const part of [...LIQUID_HOVER_NEGATIVES, 'accordion-tight'])
       expect(liquidHoverStages('policy-and-boundaries', part)).toEqual([
         'negative-idle',

@@ -200,10 +200,9 @@ describe.sequential('Runtime-only vertical layout parity', () => {
             await capture(page, home, `home-${family}-${width}-${index}-${runtime}`, facts);
             expect(facts.theme).toBe('light');
             expect(facts.pageOverflow).toBeLessThanOrEqual(1);
-            // The authored rhythm card adds fifteen Text owners to the former
-            // 37/35 fixture. WC retains the two closed FAQ bodies; framework
-            // hosts withdraw them. Keep exact counts and all pairwise geometry.
-            expect(facts.authoredTextCount).toBe({ wc: 52, react: 50, vue: 50, vue2: 50 }[runtime]);
+            // WC retains the two closed FAQ bodies; framework hosts withdraw
+            // them. Keep exact counts and all pairwise geometry.
+            expect(facts.authoredTextCount).toBe({ wc: 76, react: 74, vue: 74, vue2: 74 }[runtime]);
             expect(facts.text.length).toBeGreaterThan(20);
             expect(new Set(facts.text.map((text) => text.key)).size).toBe(facts.text.length);
             for (const text of facts.text) expect(text.display, text.role).toBe('block');
@@ -406,8 +405,11 @@ describe.sequential('Runtime-only vertical layout parity', () => {
           expect(facts.font).toBe(previous.font);
           expect(facts.padding).toEqual(previous.padding);
           expect(facts.typography.length).toBeGreaterThan(0);
-          expect(facts.typography.map((text) => text.identity)).toEqual(
-            previous.typography.map((text) => text.identity)
+          expect(facts.examples.map((example) => example.id)).toEqual(
+            previous.examples.map((example) => example.id)
+          );
+          expect(facts.typography.map((text) => [text.identity, text.flowAnchor])).toEqual(
+            previous.typography.map((text) => [text.identity, text.flowAnchor])
           );
           facts.typography.forEach((text, index) => {
             const expected = previous.typography[index]!;
@@ -456,10 +458,19 @@ async function docsGeometry(root: Locator) {
         const rect = owner.getBoundingClientRect();
         const surface = owner.querySelector<HTMLElement>('[data-typography-prototype]')!;
         const css = getComputedStyle(surface);
+        // Host-specific source snippets can have different line counts. Bind
+        // prose spacing to the same preceding authored example, so its source
+        // height cannot masquerade as a RuntimeBox or typography difference.
+        const preceding = [...main.querySelectorAll<HTMLElement>('[data-previewer-id]')]
+          .filter((previewer) =>
+            Boolean(previewer.compareDocumentPosition(owner) & Node.DOCUMENT_POSITION_FOLLOWING)
+          )
+          .at(-1);
         return {
           identity: `${owner.localName}/${owner.textContent}`,
+          flowAnchor: preceding ? `after:${preceding.dataset.demoId}` : 'main',
           x: rect.x - origin.x,
-          y: rect.y - origin.y,
+          y: rect.y - (preceding?.getBoundingClientRect().bottom ?? origin.y),
           width: rect.width,
           height: rect.height,
           surfaceDisplay: css.display,
@@ -468,7 +479,31 @@ async function docsGeometry(root: Locator) {
           leading: css.lineHeight,
         };
       });
+    const examples = [...main.querySelectorAll<HTMLElement>('[data-previewer-id]')].map(
+      (previewer) => {
+        const read = (element: Element | null) => {
+          if (!element) return null;
+          const bounds = element.getBoundingClientRect();
+          return {
+            y: bounds.y - origin.y,
+            height: bounds.height,
+            display: getComputedStyle(element).display,
+          };
+        };
+        return {
+          id: previewer.dataset.demoId,
+          runtime: previewer.dataset.runtime,
+          projectionRuntime: previewer.dataset.projectionRuntime,
+          state: previewer.dataset.projectionState,
+          preview: read(previewer),
+          surface: read(previewer.querySelector('.pui-runtime-preview-surface')),
+          code: read(previewer.querySelector('[data-code-shell]')),
+          codeViewport: read(previewer.querySelector('[data-code-scroll-viewport]')),
+        };
+      }
+    );
     return {
+      examples,
       width: rect.width,
       height: rect.height,
       contentHeight: content.height,

@@ -57,7 +57,7 @@ sources:
     sections:
       - defineAsHook
       - normalizeAsHookRender
-  - path: packages/compiler/src/parser-module.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/parser-module.ts
     sections:
       - static defineAsHook forwarding to an admitted definePrototype source descriptor
       - inherited Module declarations and original setup source ownership
@@ -81,6 +81,9 @@ revisions:
   - version: 0.1.1
     change: refined
     summary: Recorded Compiler source forwarding of actual imported Prototype definitions with their original setup scope and Module requirements; dynamic descriptors and Hook caller objects remain unsupported.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - as-hook
   - define

@@ -1,10 +1,15 @@
 id: T-COMPILER-GPUI-AUTHORED-INPUT-0001
 type: test
 title: Generated GPUI activation, conditional accessibility and editing-lease execution
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: T-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  These executable source-to-native tests exercise the actual emitted components and SDK host atoms. The GPUI test platform does not establish OS accessibility or real IME delivery; source-bound native receipts and independent review are required separately.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 cases:
@@ -67,48 +72,49 @@ cases:
 implementations:
   - id: native-hover-view-ownership
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/src/gpui-native-hover.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-HOVER]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/src/gpui-native-hover.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Execute the emitted SDK library tests with test-support. TestAppContext supplies physical mouse and draw observations; this is not an operating-system input claim.
   - id: generated-native-output-delivery
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/delivery.rs
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-OUTPUT]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-ordinary-values/delivery.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Both the ordinary producer and the focused produce-delivery.mjs compile the same authored validation source. The consumer observes actual generated component entries and GPUI Entity observers; it never patches emitted Rust or drives the missing notification itself.
   - id: checked-json-source-provenance
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/json-boundary-provenance.test.ts
-    required: true
-    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
-  - id: generated-web-json-getter-copy
-    kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/json-boundary-getter-consumer.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/json-boundary-provenance.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
+  - id: generated-web-json-getter-copy
+    kind: runtime-test
+    status: missing
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/json-boundary-getter-consumer.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Executes actual emitted React, Vue 3, Vue 2 and WC source in happy-dom. A local unsafe backing record is copied through safe scalar getters; actual emitted events retain finite fields, integer-key getter order, once-only copying and terminal owner guards. This bounded Web witness is not GPUI execution, physical browser acceptance or application trust.
   - id: checked-authored-inputs
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/gpui-authored-inputs.test.ts
+    status: missing
     required: true
     consumesCases:
       [
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION,
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/gpui-authored-inputs.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: generated-native-inputs
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs
+    status: missing
     required: true
     consumesCases:
       [
@@ -117,10 +123,11 @@ implementations:
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT,
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: native-editor-leases
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/src/gpui-native-text.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -128,17 +135,17 @@ implementations:
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT-A11Y,
       ]
     notes:
-      [
+      ["Retired with the old compiler at the 0.4 foundation: packages/compiler/src/gpui-native-text.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing.",
         Execute the generated SDK library tests with the test-support feature; never patch emitted Rust.,
         The actual AccessKit consumer validates text ranges. TestAppContext supplies physical view and input leases but has no platform AT channel; these tests do not establish OS Text interface delivery or character extents.,
       ]
   - id: generated-native-sequential-focus
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-a11y-value/sequential_focus.rs
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-a11y-value/sequential_focus.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The ordinary tab-focus and tab-scope authored fixtures are compiled afresh. Native test execution and its exact source receipt are required separately; fixture authorship alone is not passing evidence or operating-system keyboard acceptance.
       - The separate-App regression retains live owners with colliding App-local window identifiers and dispatches real keys. Current-App event fan-out and host driving must not invoke or update the other App's Entity; no fixture exception or weaker identity assertion is used.
       - Repeated Props updates and host driving on the same physical epoch/window/handle must not notify the App focus registry. A real detach/reattach registers the replacement binding, after which steady-state updates remain silent. The executable assertion observes native registry effects rather than a machine-dependent time limit; current target eligibility is still checked at dispatch.
@@ -153,6 +160,7 @@ verifies:
     - id: C-AS-FOCUS-SCOPE-0002
       anchors: [C-AS-FOCUS-SCOPE-0002-H]
     - id: C-COMPILER-SCALAR-INPUT-0001
+      until: 0.4.0
       anchors:
         [
           C-COMPILER-SCALAR-INPUT-0001-LENGTH,
@@ -195,4 +203,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Bind source admission and native execution to generic activation, applicability, scalar and editing-lease criteria.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, gpui, input, accessibility, text-control]

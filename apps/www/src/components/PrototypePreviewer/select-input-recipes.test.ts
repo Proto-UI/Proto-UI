@@ -6,11 +6,11 @@ import * as shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import * as brutalistButton from '@proto.ui/prototypes-brutalist/button';
 import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
 import type { Prototype } from '@proto.ui/core';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, expect, it, vi } from 'vitest';
 import baseDemo from '../../content/docs/demo-base-select-input.demo';
 import shadcnDemo from '../../content/docs/demo-shadcn-select-input.demo';
 import brutalistDemo from '../../content/docs/demo-brutalist-select-input.demo';
-import { renderDemo } from './demo-renderer';
+import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { registerPrototype } from './registry';
 import type { DemoRuntimeApi } from './demo-types';
 // Only substitute CDN acquisition. These are the public recipe and real
@@ -57,6 +57,9 @@ for (const library of [
       registerPrototype(prototype.name, prototype);
     }
 const cleanups: Array<() => void | Promise<void>> = [];
+// Each case exercises a mounted selection owner. Load its actual framework before mounting.
+for (const runtime of ['react', 'vue', 'vue2'] as const)
+  beforeAll(() => prepareDemoRuntime(runtime));
 afterEach(async () => {
   for (const cleanup of cleanups.splice(0).reverse()) await cleanup();
   document.body.replaceChildren();
@@ -71,7 +74,7 @@ for (const [family, demo] of Object.entries({
   brutalist: brutalistDemo,
 }))
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
-    it(`${family}/${runtime} public Select composes the scroll viewport and owner refusal`, async () => {
+    it(`${family}/${runtime} public Select preserves its current recipe and controlled owner refusal`, async () => {
       const host = document.createElement('div');
       document.body.append(host);
       let api!: DemoRuntimeApi;
@@ -93,14 +96,121 @@ for (const [family, demo] of Object.entries({
         if (!cleaned) await view.destroy();
       });
       const x = (name: string) => api.getExposes(name) as any;
+      if (family !== 'base') {
+        const rootRef = family === 'shadcn' ? 'controlledSelect' : 'timezoneSelect';
+        const resetRef = family === 'shadcn' ? 'resetTheme' : 'resetTimezone';
+        const initial = family === 'shadcn' ? 'system' : 'jst';
+        const next = family === 'shadcn' ? 'dark' : 'pst';
+        const nextText = family === 'shadcn' ? 'Dark' : 'Pacific Standard Time (PST)';
+        const count = family === 'shadcn' ? 4 : 12;
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        expect(x(rootRef).getCollectionCount()).toBe(count);
+        const trigger = host.querySelector<HTMLElement>('[role="combobox"]')!;
+        if (family === 'shadcn') {
+          expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          await vi.waitFor(() => expect(trigger.textContent?.trim()).toBe('System'));
+          trigger.click();
+        } else {
+          api.call(rootRef, 'openDropdown', 'recipe');
+        }
+        let content!: HTMLElement;
+        await vi.waitFor(() => {
+          content = document.getElementById(trigger.getAttribute('aria-controls')!)!;
+          expect(content?.getAttribute('role')).toBe('listbox');
+          expect(content.querySelectorAll('[role="option"]')).toHaveLength(count);
+        });
+        if (family === 'brutalist') {
+          expect(content.style.maxHeight).toBe('200px');
+          expect(content.style.overflowY).toBe('auto');
+          expect(
+            api.call(rootRef, 'requestValue', {
+              value: 'est',
+              textValue: 'Eastern Standard Time (EST)',
+              reason: 'programmatic',
+            })
+          ).toBe(true);
+          await vi.waitFor(() => expect(x(rootRef).value.get()).toBe('est'));
+          refs[resetRef].click();
+          await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        } else {
+          const unavailable = [...content.querySelectorAll('[role="option"]')].filter(
+            (item) => item.getAttribute('aria-disabled') === 'true'
+          );
+          expect(unavailable).toHaveLength(1);
+          expect(unavailable[0].textContent).toBe('High Contrast (Coming soon)');
+          (unavailable[0] as HTMLElement).click();
+          await flush();
+          expect(x(rootRef).value.get()).toBe(initial);
+          expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          expect(trigger.textContent?.trim()).toBe('System');
+          expect(trigger.getAttribute('aria-expanded')).toBe('true');
+          const dark = [...content.querySelectorAll<HTMLElement>('[role="option"]')].find(
+            (item) => item.textContent?.trim() === 'Dark'
+          )!;
+          dark.click();
+          await vi.waitFor(() => {
+            expect(x(rootRef).value.get()).toBe(next);
+            expect(trigger.textContent?.trim()).toBe('Dark');
+            expect(refs.selectedTheme.textContent).toBe('Selected: Dark');
+          });
+          refs[resetRef].click();
+          await vi.waitFor(() => {
+            expect(x(rootRef).value.get()).toBe(initial);
+            expect(trigger.textContent?.trim()).toBe('System');
+            expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          });
+        }
+        // The actual public owner now accepts changes and exposes Reset. Keep
+        // refusal coverage by supplying an ordinary controlled-owner callback.
+        expect(
+          api.call(rootRef, 'requestValue', {
+            value: next,
+            textValue: nextText,
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(next));
+        if (family === 'shadcn') {
+          expect(refs.selectedTheme.textContent).toBe('Selected: Dark');
+          expect(trigger.textContent?.trim()).toBe('Dark');
+        }
+        refs[resetRef].click();
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(initial));
+        if (family === 'shadcn') {
+          expect(refs.selectedTheme.textContent).toBe('Selected: System');
+          expect(trigger.textContent?.trim()).toBe('System');
+        }
+        const requests = vi.fn();
+        api.setProps(rootRef, { onValueChange: requests });
+        await flush();
+        expect(
+          api.call(rootRef, 'requestValue', {
+            value: next,
+            textValue: nextText,
+            reason: 'programmatic',
+          })
+        ).toBe(true);
+        await flush();
+        expect(requests).toHaveBeenCalledOnce();
+        expect(requests.mock.calls[0][0]).toMatchObject({ value: next, reason: 'programmatic' });
+        expect(x(rootRef).value.get()).toBe(initial);
+        api.setProps(rootRef, { value: next });
+        await vi.waitFor(() => expect(x(rootRef).value.get()).toBe(next));
+        expect(requests).toHaveBeenCalledOnce();
+        expect(trigger.textContent).toContain(nextText);
+        await view.destroy();
+        cleaned = true;
+        await flush();
+        expect(host.childElementCount).toBe(0);
+        expect(content.isConnected).toBe(false);
+        return;
+      }
       await vi.waitFor(() => expect(x('select').value.get()).toBe('alpha'));
       expect(x('select').getCollectionCount()).toBe(18);
       expect(x('item3').disabled.get()).toBe(true);
       api.call('select', 'openDropdown', 'recipe');
-      await vi.waitFor(() =>
-        expect(refs[family === 'brutalist' ? 'selectContent' : 'selectViewport']).toBeDefined()
-      );
-      const viewport = refs[family === 'brutalist' ? 'selectContent' : 'selectViewport'];
+      await vi.waitFor(() => expect(refs.selectViewport).toBeDefined());
+      const viewport = refs.selectViewport;
       expect(viewport.style.maxHeight).toBe('180px');
       expect(viewport.style.overflowY).toBe('auto');
       refs.toggleRefusal.click();

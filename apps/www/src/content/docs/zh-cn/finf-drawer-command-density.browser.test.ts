@@ -192,8 +192,9 @@ async function metrics(locator: Locator) {
         fontWeight: css.fontWeight,
         fontFamily: css.fontFamily,
         availableParentWidth:
-          (node.closest('[data-drawer-density-lane]') ?? node.parentElement)
-            ?.getBoundingClientRect().width ?? null,
+          (
+            node.closest('[data-drawer-density-lane]') ?? node.parentElement
+          )?.getBoundingClientRect().width ?? null,
         parentFont: node.parentElement
           ? {
               size: getComputedStyle(node.parentElement).fontSize,
@@ -375,15 +376,21 @@ async function mountLongLabel(
                     child.prototypeId === 'shadcn-drawer-footer'
                 )
               : undefined;
-          const close =
+          const closes =
             footer && typeof footer !== 'string' && footer.kind === 'proto'
-              ? footer.children?.[0]
+              ? footer.children?.filter(
+                  (child) =>
+                    typeof child !== 'string' &&
+                    child.kind === 'proto' &&
+                    child.prototypeId === 'shadcn-drawer-close'
+                )
               : undefined;
+          const close = closes?.[0];
           if (
             !footer ||
             typeof footer === 'string' ||
             footer.kind !== 'proto' ||
-            footer.children?.length !== 1 ||
+            closes?.length !== 1 ||
             !close ||
             typeof close === 'string' ||
             close.kind !== 'proto' ||
@@ -395,7 +402,9 @@ async function mountLongLabel(
           // not Footer geometry. Place the intact Close > Button group directly
           // in Content so Footer p-4 does not consume the lane a second time.
           // Content/Header/Footer recipes, portal ownership and refs stay intact.
-          footer.children = [];
+          // The public Footer also owns Submit. Retain it and its setup ref;
+          // move only the one intact Close > Button group into the test lane.
+          footer.children = footer.children?.filter((child) => child !== close);
           node.children!.push(close);
         }
         if (node.kind === 'proto' && /-drawer-(trigger|close)$/.test(node.prototypeId)) {
@@ -845,9 +854,12 @@ for (const family of families)
                 expect(structure.display).toBe('flex');
                 expect(structure.direction).toBe('column');
                 const panelPadding = Number.parseFloat(structure.rootFont);
-                expect(structure.padding.map(Number.parseFloat)).toEqual(
-                  [panelPadding, panelPadding, panelPadding, panelPadding]
-                );
+                expect(structure.padding.map(Number.parseFloat)).toEqual([
+                  panelPadding,
+                  panelPadding,
+                  panelPadding,
+                  panelPadding,
+                ]);
               }
               const close = scenario.label
                 ? panel.locator(
@@ -855,7 +867,7 @@ for (const family of families)
                   )
                 : family === 'shadcn'
                   ? panel.locator('[data-demo-ref="close"] [data-demo-ref="close-action"]')
-                  : panel.getByRole('button', { name: 'Close', exact: true });
+                  : panel.getByRole('button', { name: 'Cancel', exact: true });
               stage = 'close';
               await record(stage, close);
               if (family === 'brutalist') {

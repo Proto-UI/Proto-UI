@@ -1,0 +1,64 @@
+import { createRef, StrictMode } from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { POLICY_ZONE, PolicyReader, type PolicyReaderHandle } from './PolicyReader';
+import { enqueue, loadHistory } from './keyed-loader';
+
+const surface = document.getElementById('app')!;
+const root = createRoot(surface);
+const reader = createRef<PolicyReaderHandle>();
+let provider = POLICY_ZONE.createProvider('left');
+let key = 0;
+
+function render() {
+  flushSync(() => root.render(
+    <StrictMode><POLICY_ZONE.Provider value={provider}>
+      <PolicyReader key={key} ref={reader} />
+    </POLICY_ZONE.Provider></StrictMode>
+  ));
+}
+
+function snapshot() {
+  const current = reader.current!;
+  const span = surface.querySelector('span')!;
+  return { ordered: current.orderedLog, parallel: current.parallelLog, label: span.innerText, visible: span.getClientRects().length > 0 };
+}
+
+function replace(zone: string) {
+  provider = POLICY_ZONE.createProvider(zone);
+  key++;
+  render();
+}
+
+function replaceOnReturn(id: string, path: string, zone: string) {
+  enqueue(id, path, false, {
+    onReturn(value) {
+      const previous = reader.current!;
+      const element = surface.querySelector('span')!;
+      const before = snapshot();
+      replace(zone);
+      retirement = {
+        value, before, after: snapshot(), requests: loadHistory(),
+        originalConnected: element.isConnected, oldAction: previous.queue('retired').status,
+      };
+    },
+  });
+}
+
+let retirement: {
+  value: string; before: ReturnType<typeof snapshot>; after: ReturnType<typeof snapshot>;
+  requests: ReturnType<typeof loadHistory>; originalConnected: boolean; oldAction: string;
+} | null = null;
+
+const trace = {
+  mount: render, snapshot, enqueue, history: loadHistory, replaceOnReturn,
+  retirement: () => retirement,
+  queue(id: string) { return reader.current!.queue(id).status; },
+  cancelOrdered() { return reader.current!.cancelOrdered().status; },
+  restartOrdered(id: string) { return reader.current!.restartOrdered(id).status; },
+  submit(id: string) { return reader.current!.submit(id).status; },
+  publish(zone: string) { provider.publish(zone); },
+};
+
+declare global { interface Window { policyTrace: typeof trace } }
+window.policyTrace = trace;

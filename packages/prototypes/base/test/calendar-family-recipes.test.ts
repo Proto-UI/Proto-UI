@@ -66,6 +66,11 @@ for (const [family, atoms] of Object.entries(families)) {
       for (const token of ['p-2', 'w-fit', 'bg-background'])
         expect(tokens(root).has(token)).toBe(true);
       for (const token of ['w-7', 'h-7', 'p-0']) expect(tokens(day).has(token)).toBe(true);
+      // Calendar focus is a visible-focus recipe, not a permanent focused
+      // selector. Keyboard-vs-pointer focus is exercised separately.
+      expect(day.getExposes().focusVisible.get()).toBe(false);
+      expect(tokens(day).has('ring-3')).toBe(false);
+      expect(tokens(day).has('data-[focused]:ring-3')).toBe(false);
       expect(
         [...tokens(day)].some(
           (token) =>
@@ -80,6 +85,7 @@ for (const [family, atoms] of Object.entries(families)) {
     if (family === 'brutalist') {
       for (const token of ['p-3', 'border-2', 'shadow-[4px_4px_0_0_var(--pui-foreground)]'])
         expect(tokens(root).has(token)).toBe(true);
+      expect(tokens(root).has('shadow-[4px_4px_0_0_#000]')).toBe(false);
       for (const token of ['w-9', 'h-9', 'border-2']) expect(tokens(day).has(token)).toBe(true);
       expect(
         [...tokens(day)].some(

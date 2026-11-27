@@ -10,11 +10,11 @@ import { executeGeneralChecks } from './general-ci.mjs';
 import { assertRuntimeSource, assertVitestReport, writeJson } from './runtime-ci.mjs';
 import { readOptionalJson, runtimeSourceSnapshot } from './runtime-observation.mjs';
 import { liveOwned, observeChildren } from './linux-process-ownership.mjs';
+import { SEARCH_BROWSER_SUITES } from './runtime-test-plan.mjs';
 
 export const SPRINT1_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
-  'packages/compiler/test/sprint1-ownership.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts',
 ]);
 export const SPRINT1_UNIT_SUITES = Object.freeze([
@@ -29,10 +29,6 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'apps/www/src/components/site-search-commands.theme-lease.test.ts',
   'apps/www/src/components/site-search-data.test.ts',
   'apps/www/src/components/site-search-session.test.ts',
-  'packages/compiler/test/props-update-policy.test.ts',
-  'packages/compiler/test/props-update-analysis.test.ts',
-  'packages/compiler/test/context-key-binding-source.test.ts',
-  'packages/compiler/test/context-key-binding-consumer.test.ts',
   'apps/www/src/components/site-search-composition-paint-cost.test.ts',
   'packages/prototypes/base/test/select-legacy-slot.test.ts',
   'packages/prototypes/base/test/select.test.ts',
@@ -41,23 +37,7 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'packages/adapters/react/test/select.test.ts',
   'packages/adapters/vue/test/select.test.ts',
   'packages/adapters/vue2/test/select.test.ts',
-  'packages/compiler/test/observable-consumer.test.ts',
   'packages/adapters/react/test/raw-props-commit.integration.test.ts',
-  'packages/compiler/test/hook-admission.test.ts',
-  'packages/compiler/test/diagnostic-registry.test.ts',
-  'packages/compiler/test/source-graph.test.ts',
-  'packages/compiler/test/diagnostic-origin.test.ts',
-  'packages/compiler/src/diagnostic-format.test.ts',
-  'packages/compiler/test/public-diagnostic-boundaries.test.ts',
-  'packages/compiler/src/watch.test.ts',
-  'packages/compiler/src/artifact-linking.test.ts',
-  'packages/compiler/src/project.test.ts',
-  'packages/compiler/src/project-output.test.ts',
-  'packages/compiler/src/artifact-output.test.ts',
-  'packages/compiler/test/cli.test.ts',
-  'packages/compiler/test/targets.test.ts',
-  'packages/compiler/test/rule-declarations.test.ts',
-  'packages/compiler/src/style-plan.test.ts',
   'packages/prototypes/base/test/number-field-capabilities.test.ts',
   'packages/prototypes/base/test/number-field-format.test.ts',
   'packages/prototypes/base/test/number-field-supersession.test.ts',
@@ -71,9 +51,6 @@ export const SPRINT1_INTEGRATION_UNIT_SUITES = Object.freeze([
   'packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts',
   'packages/runtime/test/contract/anatomy.domain-fanout-cost.contract.test.ts',
   'packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts',
-  'packages/compiler/test/pointer-facts-admission.test.ts',
-  'packages/compiler/test/gpui-a11y-value.test.ts',
-  'packages/compiler/test/numeric-a11y-emitter-admission.test.ts',
   'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts',
   'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts',
   'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
@@ -142,7 +119,6 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
         report: { kind: 'vitest', path: report },
         env: {
           PROTO_UI_RUNTIME_EVIDENCE_DIR: path.join(output, id),
-          COMPILER_EVIDENCE_DIR: path.join(output, id),
         },
       }
     );
@@ -190,12 +166,12 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
     matrix,
     vitest(
       'search-native',
-      ['apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts'],
+      SEARCH_BROWSER_SUITES,
       // The complete serial Search producer exhausted its previous 900s window
       // before writing terminal Vitest JSON. Preserve that failed attempt and
-      // allow the unchanged 84-case suite enough acquisition/reporting time;
+      // allow the same 84 cases across three files their acquisition/reporting time;
       // every case, assertion and original 1000ms readiness limit remains owned
-      // by that suite. This outer resource allowance proves no product speedup.
+      // by their original callbacks. This allowance proves no product speedup.
       1200
     ),
     vitest('ownership-native', SPRINT1_BROWSER_SUITES.slice(2, 3), 180),

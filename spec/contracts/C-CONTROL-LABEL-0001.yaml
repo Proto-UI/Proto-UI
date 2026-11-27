@@ -97,7 +97,7 @@ references:
       P-BASE-NUMBER-FIELD,
     ]
 sources:
-  - path: packages/compiler/src/gpui-native-control-label.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/gpui-native-control-label.ts
   - path: packages/modules/control-label/src/anatomy-pair.ts
   - path: packages/modules/control-label/test/anatomy-pair.test.ts
   - path: packages/core/src/control-label.ts
@@ -136,4 +136,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: revised
     summary: Added focus-only explicit Label participation to standalone Select Trigger and Number Field Input, preserving author names, numeric and popup owners and the separate Field anatomy pairing; compiler admission remains definition- and backend-specific.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [label, accessibility, association, activation, lifecycle]

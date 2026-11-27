@@ -9,7 +9,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import type { Page } from 'playwright-core';
+import type { Locator, Page } from 'playwright-core';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import { verifyRevision } from './homepage-evidence-contract';
 
@@ -102,6 +102,12 @@ process.once('beforeExit', () => {
 const homeMenu = (page: Page) =>
   page.locator(
     '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+  );
+// Enhancement moves scrolling and keyboard focus from pre to the public
+// ScrollArea viewport. Keep the native pre fallback for the aged checkout.
+const sourceViewport = (shell: Locator) =>
+  shell.locator(
+    '[data-code-scroll-ready] [data-code-scroll-viewport], pre:not([data-code-scroll-ready] pre)'
   );
 const readyHome = (page: Page, runtime = 'wc') =>
   page.waitForFunction((runtime) => {
@@ -323,7 +329,7 @@ try {
             await page.keyboard.press('Enter');
           }
           assert.equal(await shell.getAttribute('data-code-expanded'), 'true');
-          const source = shell.locator('pre');
+          const source = sourceViewport(shell);
           await shell.scrollIntoViewIfNeeded();
           const copy = shell.locator('[data-copy] [data-demo-ref="copy-button"]');
           await copy.waitFor({ state: 'visible' });
@@ -439,14 +445,14 @@ try {
                   ),
                 ].find((e) => e.checkVisibility())?.dataset.codeExpanded === 'true'
             );
-            const shortSource = shortShell.locator('pre');
+            const shortSource = sourceViewport(shortShell);
             const shortCopy = shortShell.locator('[data-copy] [data-demo-ref="copy-button"]');
             await shortCopy.waitFor({ state: 'visible' });
             await shortShell.scrollIntoViewIfNeeded();
             const shortFacts = await shortSource.evaluate((e) => ({
               height: e.clientHeight,
               fullHeight: e.scrollHeight,
-              lineHeight: parseFloat(getComputedStyle(e).lineHeight),
+              lineHeight: parseFloat(getComputedStyle(e.querySelector('pre') ?? e).lineHeight),
               text: e.querySelector('code')?.getAttribute('data-raw-code'),
               documentOverflow: document.documentElement.scrollWidth - innerWidth,
             }));
@@ -727,6 +733,7 @@ try {
             '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]',
             '[data-site-header-settings]',
             '[data-code-shell]',
+            '[data-code-shell] [data-code-scroll-viewport]',
             '[data-code-shell] pre',
           ].flatMap((selector) =>
             [...document.querySelectorAll<HTMLElement>(selector)].map((node) => ({
@@ -818,16 +825,24 @@ try {
           const shell = page.locator('[data-code-shell]:visible').first();
           const toggle = shell.locator('[data-code-toggle]');
           if (await toggle.isVisible()) await toggle.click();
-          const source = shell.locator('pre');
+          const source = sourceViewport(shell);
           const copy = shell.locator('[data-copy] [data-demo-ref="copy-button"]');
           await copy.waitFor({ state: 'visible' });
           await shell.scrollIntoViewIfNeeded();
           const facts = await source.evaluate((e) => ({
+            owner: e.localName,
+            containsSource: e.matches('pre') || !!e.querySelector('pre'),
+            sourceHeight: (e.querySelector('pre') ?? e).getBoundingClientRect().height,
+            sourceWidth: (e.querySelector('pre') ?? e).getBoundingClientRect().width,
+            overflowX: getComputedStyle(e).overflowX,
+            overflowY: getComputedStyle(e).overflowY,
             height: e.clientHeight,
             fullHeight: e.scrollHeight,
             width: e.clientWidth,
             fullWidth: e.scrollWidth,
-            lineHeight: parseFloat(getComputedStyle(e).lineHeight),
+            lineHeight: parseFloat(getComputedStyle(e.querySelector('pre') ?? e).lineHeight),
+            rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            viewportHeight: innerHeight,
             raw: e.querySelector('code')?.getAttribute('data-raw-code'),
             documentOverflow: document.documentElement.scrollWidth - innerWidth,
           }));
@@ -848,8 +863,21 @@ try {
               })),
           }));
           await observe(`code-${sourceKind}-layout`);
+          assert.ok(facts.containsSource, 'The reading viewport contains the actual source pre');
           assert.ok(
-            facts.documentOverflow <= 1 && facts.height > 0 && facts.height <= 417,
+            facts.fullHeight + 1 >= facts.sourceHeight &&
+              facts.fullWidth + 1 >= facts.sourceWidth,
+            'The complete source remains within the reachable scroll extent'
+          );
+          assert.ok(
+            (facts.fullHeight <= facts.height + 1 || /^(auto|scroll)$/.test(facts.overflowY)) &&
+              (facts.fullWidth <= facts.width + 1 || /^(auto|scroll)$/.test(facts.overflowX)),
+            'Overflowing source stays scrollable on both axes'
+          );
+          assert.ok(
+            facts.documentOverflow <= 1 &&
+              facts.height > 0 &&
+              facts.height <= Math.min(36 * facts.rootFontSize, 0.65 * facts.viewportHeight) + 1,
             'Enlarged source fits its independent viewport'
           );
           if (sourceKind === 'short')
@@ -859,6 +887,10 @@ try {
             );
           entry.stage = `code-${sourceKind}-keyboard-scroll`;
           await source.focus();
+          assert.ok(
+            await source.evaluate((e) => e === document.activeElement),
+            'The source viewport owns keyboard focus'
+          );
           if (facts.fullHeight > facts.height + 1) {
             await page.keyboard.press('PageDown');
             await page.waitForFunction(

@@ -40,22 +40,6 @@ export const SPRINT3_SUITES = Object.freeze([
     screenshots: true,
   },
   {
-    id: 'transition',
-    file: 'packages/compiler/test/transition-native.browser.test.ts',
-    cases: 64,
-    surface: 'fixture',
-    seconds: 600,
-    screenshots: true,
-  },
-  {
-    id: 'focus-scope',
-    file: 'packages/compiler/test/focus-scope-native.browser.test.ts',
-    cases: 22,
-    surface: 'fixture',
-    seconds: 600,
-    screenshots: true,
-  },
-  {
     id: 'focus-retries',
     file: 'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
     cases: 90,
@@ -145,8 +129,8 @@ export const SPRINT3_SUITES = Object.freeze([
   },
 ]);
 
-// Profiles are separate acceptance inventories. The historical default remains
-// exactly 14 files / 364 cases; public Base Select is never added to that total.
+// Profiles are separate acceptance inventories. The Runtime/Adapter default has
+// 12 files / 278 cases after compiler retirement; public Base Select stays separate.
 const BASE_SELECT_SUITES = Object.freeze([
   Object.freeze({
     id: 'public-base-select',
@@ -722,7 +706,6 @@ async function execute(output, ledger, profileId = 'default') {
           PROTO_UI_BROWSER_EVIDENCE_DIR: path.join(captures, 'button'),
           PROTO_UI_SCROLL_CORNER_EVIDENCE_DIR: path.join(captures, 'scroll-corner'),
           PROTO_UI_SCROLL_CORNER_HARNESS_SHA: ledger.expectedHead,
-          COMPILER_FOCUS_NATIVE_EVIDENCE_DIR: path.join(captures, 'focus-scope'),
         };
         delete env.PROTO_UI_SPINNER_BROWSER_RUNTIME;
         delete env.PROTO_UI_SCROLL_CORNER_CAPTURE_ONLY;

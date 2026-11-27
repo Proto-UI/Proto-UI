@@ -38,8 +38,6 @@ export const LEGACY_SCHEDULE_OWNERS = Object.freeze({
 export const PR_ALLOWED = Object.freeze(
   new Set([
     'ci.yml',
-    'compiler-isolated-static-smoke.yml',
-    'compiler-wc-runner-preflight.yml',
     'effect-graph-model.yml',
     'intranet-preview-checks.yml',
     'shadcn-style-source.yml',
@@ -177,6 +175,7 @@ export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR), sourc
   }
   const metadataJobs = new Set([
     'ci-config-audit',
+    'internal-docs-lint',
     'lockstep-check',
     'public_package_plan',
     'test-plan',

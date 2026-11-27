@@ -19,8 +19,11 @@ function fixture(
   width: number,
   viewportWidth: number,
   tracks: number | number[],
-  gap = 20
+  measuredGap?: number
 ): GalleryFlowFacts {
+  const gapRem =
+    viewportWidth <= 767 ? 1 : viewportWidth < 1024 ? 2 : viewportWidth < 1900 ? 1.5 : 2.5;
+  const gap = measuredGap ?? 16 * gapRem;
   const count = HOMEPAGE_GALLERY_IDS.length;
   const columnCount = typeof tracks === 'number' ? tracks : tracks.length;
   const distribution = Array.isArray(tracks)
@@ -36,6 +39,7 @@ function fixture(
   return {
     containerCount: 1,
     viewportWidth,
+    gapRem,
     wideMedia: viewportWidth >= 1536,
     enhancedMedia: viewportWidth >= 768 && viewportWidth < 1536,
     queryContainerWidth: width,
@@ -92,7 +96,7 @@ describe('homepage evidence observers', () => {
     expect(galleryFlowEvidence(narrower).issues).toEqual([]);
   });
   it('uses wide media even with an enlarged document root', () => {
-    const scene = fixture(1840, 1920, [3, 3, 3, 4, 4], 40);
+    const scene = fixture(1840, 1920, [3, 3, 3, 4, 4], 80);
     scene.rootFontSize = 32;
     expect(galleryFlowEvidence(scene).issues).toEqual([]);
   });

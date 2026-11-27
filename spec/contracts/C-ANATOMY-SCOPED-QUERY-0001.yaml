@@ -23,10 +23,13 @@ verifies:
 sources:
   - path: packages/modules/anatomy/src/impl.ts
   - path: packages/core/src/handles.ts
-  - path: packages/compiler/src/operations.ts
-  - path: packages/compiler/src/native-support/dom-modules.template.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/operations.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-support/dom-modules.template.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the bounded author-safe form of the existing privileged strict-descendant query.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [anatomy, query, ownership]

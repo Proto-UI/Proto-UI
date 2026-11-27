@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@proto.ui/core/authoring": ["../../../prelude/authoring.d.ts"]
+    }
+  },
+  "files": ["task-helper.proto.ts.txt"]
+}

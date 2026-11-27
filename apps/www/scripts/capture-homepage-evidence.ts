@@ -231,6 +231,39 @@ async function waitForRuntime(page: Page, runtime: Runtime): Promise<void> {
   await settle(page);
 }
 
+function homepageSettingsMenu(page: Page) {
+  return page.locator(
+    '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+  );
+}
+
+async function openHomepageSettings(page: Page) {
+  const menu = homepageSettingsMenu(page);
+  if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector(
+          '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+        )
+        ?.getAttribute('aria-expanded') === 'true'
+  );
+  return menu;
+}
+
+async function closeHomepageSettings(page: Page, requireOpen = false): Promise<void> {
+  const menu = homepageSettingsMenu(page);
+  const expanded = await menu.getAttribute('aria-expanded');
+  if (!requireOpen && expanded === 'false') return;
+  assert.equal(expanded, 'true', 'Dismiss only the actual open settings owner');
+  await page.keyboard.press('Escape');
+  assert.equal(await menu.getAttribute('aria-expanded'), 'false');
+  assert.ok(
+    await menu.evaluate((element) => document.activeElement === element),
+    'Closing settings must restore focus to the real menu control'
+  );
+}
+
 function runtimeTrigger(page: Page) {
   const owner = revisionKind === 'candidate' ? '[data-homepage-runtime]' : HOME;
   return page.locator(`${owner} [data-projection-control="runtime"] [role="combobox"]`).first();
@@ -411,6 +444,38 @@ async function waitForWorkspaceSettings(page: Page, expected: Partial<WorkspaceS
   } finally {
     await result.dispose();
   }
+}
+
+async function enterMobileWorkspaceSettings(page: Page, route: string) {
+  // Runtime selection retains the compact Header disclosure. Dismiss it
+  // through its real Button before entering the gallery beneath it.
+  activeProbeStage = 'workspace-settings-header-close';
+  const menu = page.locator(
+    '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+  );
+  if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector<HTMLElement>('[data-homepage-runtime]')?.dataset.siteMenuOpen ===
+      'false'
+  );
+  const stage = page.locator(HOME).locator('[data-home-gallery-stage]');
+  if (await stage.evaluate((element) => (element as HTMLElement).inert)) {
+    // The public Hero link enters the same gallery at full size through
+    // native fragment navigation.
+    activeProbeStage = 'workspace-settings-hero-entry';
+    await page
+      .getByRole('link', {
+        name: route === '/en/' ? 'Try the components' : '试试 Demo',
+        exact: true,
+      })
+      .click();
+  }
+  await page.waitForFunction((home) => {
+    const root = document.querySelector<HTMLElement>(home);
+    const stage = root?.querySelector<HTMLElement>('[data-home-gallery-stage]');
+    return !!stage && !stage.inert && root?.dataset.homeGalleryCompact !== 'true';
+  }, HOME);
 }
 
 async function exerciseWorkspaceSettings(
@@ -996,6 +1061,9 @@ try {
           await screenshot('initial-full', true);
           if (revisionKind === 'candidate') {
             await revealHeaderPreferences(page);
+            // Desktop Runtime/Family preferences are already visible, while
+            // Locale remains in settings. Follow the real disclosure for all three.
+            await openHomepageSettings(page);
             // Initial captures intentionally show the collapsed compact Header.
             // Inspect settings fonts only after the user's real disclosure path.
             evidence.settings = await measure(page);
@@ -1055,18 +1123,7 @@ try {
           evidence.initialOwnership = await ownership(page, 'wc');
           if (revisionKind === 'candidate') {
             activeProbeStage = 'homepage-navigation';
-            const menu = page.locator(
-              '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
-            );
-            if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
-            await page.waitForFunction(
-              () =>
-                document
-                  .querySelector(
-                    '[data-homepage-runtime] [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
-                  )
-                  ?.getAttribute('aria-expanded') === 'true'
-            );
+            await openHomepageSettings(page);
             const settings = page.locator('[data-site-header-settings]');
             assert.ok(await settings.isVisible(), 'Opened settings must be visible');
             assert.ok(
@@ -1152,12 +1209,7 @@ try {
             );
             evidence.navigationOwnership = await ownership(page, 'wc');
             await screenshot('navigation-open-viewport');
-            await page.keyboard.press('Escape');
-            assert.equal(await menu.getAttribute('aria-expanded'), 'false');
-            assert.ok(
-              await menu.evaluate((element) => document.activeElement === element),
-              'Closing settings must restore focus to the real menu control'
-            );
+            await closeHomepageSettings(page, true);
             if (viewport.name === 'mobile') {
               activeProbeStage = 'gallery-hero-entry';
               await page
@@ -1185,20 +1237,25 @@ try {
               assert.deepEqual(group.live, group.fallback, `${group.group}: preserve native links`);
             let task: Record<string, unknown>;
             if (revisionKind === 'candidate') {
+              // Preserve the Select focus assertion above before dismissing the
+              // compact Header through the same native Escape path as navigation.
+              await closeHomepageSettings(page);
               task = {
                 workspaceSettings: await recordRuntimeTask(
                   evidence.runtimeTasks as Array<Record<string, unknown>>,
                   pageErrorDetails,
                   runtime,
                   index,
-                  () =>
-                    exerciseWorkspaceSettings(page, route, async (state) => {
+                  async () => {
+                    if (viewport.name === 'mobile') await enterMobileWorkspaceSettings(page, route);
+                    return exerciseWorkspaceSettings(page, route, async (state) => {
                       if (index < 4) {
                         const filename = `${id}-${runtime}-settings-${state}.png`;
                         await page.locator(HOME).screenshot({ path: path.join(out, filename) });
                         screenshots.push(filename);
                       }
-                    })
+                    });
+                  }
                 ),
               };
             } else {
@@ -1319,6 +1376,8 @@ try {
             for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
               await chooseRuntime(page, runtime, false);
               const owners = await ownership(page, runtime);
+              await closeHomepageSettings(page);
+              if (viewport.name === 'mobile') await enterMobileWorkspaceSettings(page, route);
               const task = await exerciseWorkspaceSettings(page, route, async (state) => {
                 await page.evaluate(() => scrollTo(0, 0));
                 await screenshot(`brutalist-${runtime}-${state}-viewport`);

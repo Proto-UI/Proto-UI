@@ -15,7 +15,7 @@ This directory contains build/generation commands, repository checks, evidence r
 | [`agent-operations/`](agent-operations/) and [`autonomous-maintenance/`](autonomous-maintenance/) | Governed contributor and maintenance workflows; start at [`AGENTS.md`](../AGENTS.md). |
 | [`benchmark/`](benchmark/) | Coordinators and validators for [`benchmarks/`](../benchmarks/README.md). |
 | [`analysis/`](analysis/) | Package cost, conformance and other bounded engineering analyses. |
-| [`compiler/`](compiler/) and [`gpui/`](gpui/) | Compiler consumer checks and native protocol/style/session fixture generation. |
+| [`gpui/`](gpui/) | Native protocol/style/session fixture generation for the GPUI Adapter. |
 | [`styles/`](styles/) and [`components/`](components/) | Style/token and component-preset generators. |
 | [`prototypes/`](prototypes/) and [`feedback/`](feedback/) | Scoped prototype/Feedback consumer evidence and supporting fixtures. |
 | [`preview/`](preview/README.md) | Review-preview artifact preparation and serving. |
@@ -29,7 +29,6 @@ This directory contains build/generation commands, repository checks, evidence r
 | Project boundary | Dependency and validation owner |
 | --- | --- |
 | [`analysis/declarative-agent-ui/`](analysis/declarative-agent-ui/README.md) | The pinned #757 React 18/Radix study has its own npm lockfile. Its documented sequence is `npm ci`, schema/mapping tests, the actual esbuild producer, and the browser runner. Those receipts establish their stated scope; they do not establish standalone TypeScript strict success. The historical app, dependency snapshot and measured inputs remain unchanged. |
-| [`analysis/invisible-consumption/starter/`](analysis/invisible-consumption/README.md) | The operator materializes and installs this ordinary consumer separately. Its declared `npm run build` includes `tsc --noEmit` and Vite; the owning producer retains actual command and artifact receipts. A proposed or blocked study is not a passed consumer run. |
 | [`release/consumer-smoke/`](release/consumer-smoke/README.md) | Release tooling constructs packed consumer environments with their declared dependencies and checks. The owning release receipts determine which type, build and presentation checks ran. |
 
 These exact project directories are outside the root workspace type project; this is not an exclusion of `scripts/analysis/**` or a waiver for normal repository tooling. An excluded consumer's dependencies are not supplied by the root pnpm install, and a root type-check pass does not certify that consumer. Read its owning instructions and retain the actual command results. The [A2 CI diagnosis](../internal/records/2026-11-22-ci-a2-type-project-boundary.md) records the declarative study's original workspace failure and this project-boundary repair without rewriting the experiment's evidence.

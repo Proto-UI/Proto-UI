@@ -197,8 +197,8 @@ test('Shadcn families depend only on their corresponding Base family', () => {
   }
 });
 
-test('packed Button boundary allows its shared style-selection support but rejects sibling families', async () => {
-  const { isButtonFamilyModule } =
+test('packed Button boundary allows its shared style-selection support but rejects sibling families and other prototype packages', async () => {
+  const { default: config, isButtonFamilyModule } =
     await import('../consumer-smoke/react-vite/vite.button-boundary.mjs');
 
   assert.equal(
@@ -214,7 +214,15 @@ test('packed Button boundary allows its shared style-selection support but rejec
     true
   );
   assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/ids.js' }),
+    true
+  );
+  assert.equal(
     isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/selection.js' }),
+    true
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/ids.js' }),
     true
   );
   assert.equal(
@@ -229,6 +237,96 @@ test('packed Button boundary allows its shared style-selection support but rejec
     isButtonFamilyModule({ packageName: 'prototypes-base', path: 'style-scope/context.js' }),
     false
   );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-brutalist', path: 'button/index.js' }),
+    false
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-brutalist', path: 'select/index.js' }),
+    false
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-lucide', path: 'icons/chevron-down.js' }),
+    false
+  );
+
+  const plugin = config.plugins.find((entry) => entry.name === 'proto-ui-button-family-boundary');
+  assert.ok(plugin, 'button boundary plugin must be registered');
+  const makeBundle = (ids) => ({
+    'assets/index.js': {
+      type: 'chunk',
+      modules: Object.fromEntries(ids.map((id) => [id, {}])),
+    },
+  });
+  const baseValid = [
+    '/tmp/app/node_modules/@proto.ui/prototypes-base/dist/button/index.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-shadcn/dist/button/button.proto.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-shadcn/dist/style-scope/context.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-shadcn/dist/style-scope/ids.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-shadcn/dist/style-scope/selection.js',
+  ];
+  assert.doesNotThrow(() => plugin.generateBundle({}, makeBundle(baseValid)));
+
+  for (const leaked of [
+    '/tmp/app/node_modules/@proto.ui/prototypes-shadcn/dist/select/index.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-brutalist/dist/select/index.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-brutalist/dist/button/index.js',
+    '/tmp/app/node_modules/@proto.ui/prototypes-lucide/dist/icons/chevron-down.js',
+    'C:\\app\\node_modules\\@proto.ui\\prototypes-liquid-glass\\dist\\button\\index.js?v=1',
+  ]) {
+    assert.throws(
+      () => plugin.generateBundle({}, makeBundle([...baseValid, leaked])),
+      /Button family boundary included unrelated prototype modules/,
+      `bundle must fail closed when ${leaked} leaks into button boundary`
+    );
+  }
+});
+
+test('packed Button bundle guard admits style IDs while retaining exact family exclusions', async () => {
+  const { default: config } =
+    await import('../consumer-smoke/react-vite/vite.button-boundary.mjs');
+  const guard = config.plugins.find((plugin) => plugin.name === 'proto-ui-button-family-boundary');
+  const moduleId = (packageName, path) =>
+    `/consumer/node_modules/@proto.ui/${packageName}/dist/${path}`;
+  const buttonModules = [
+    ['prototypes-base', 'button/index.js'],
+    ['prototypes-shadcn', 'button/button.proto.js'],
+    ['prototypes-shadcn', 'style-scope/context.js'],
+    ['prototypes-shadcn', 'style-scope/selection.js'],
+    ['prototypes-shadcn', 'style-scope/ids.js'],
+  ];
+  const check = (modules) =>
+    guard.generateBundle(
+      {},
+      {
+        'button.js': {
+          type: 'chunk',
+          modules: Object.fromEntries(modules.map(([name, path]) => [moduleId(name, path), {}])),
+        },
+      }
+    );
+
+  // The installed Button consumes the shared ID leaf after #1862 extracted it
+  // from context.js. Exercise the actual emitted-chunk guard, not only its predicate.
+  assert.doesNotThrow(() => check(buttonModules));
+  for (const unexpected of [
+    ['prototypes-shadcn', 'dialog/index.js'],
+    ['prototypes-shadcn', 'style-scope/root.proto.js'],
+    ['prototypes-shadcn', 'style-scope/index.js'],
+    ['prototypes-shadcn', 'style-scope/unreviewed.js'],
+    ['prototypes-base', 'style-scope/ids.js'],
+  ]) {
+    assert.throws(
+      () => check([...buttonModules, unexpected]),
+      /Button family boundary included unrelated prototype modules/
+    );
+  }
+  for (const missing of ['prototypes-base', 'prototypes-shadcn']) {
+    assert.throws(
+      () => check(buttonModules.filter(([name]) => name !== missing)),
+      new RegExp(`Button family boundary did not consume @proto.ui/${missing}`)
+    );
+  }
 });
 
 function assertFamilyExports(packageRoot, families, protoSources = {}) {

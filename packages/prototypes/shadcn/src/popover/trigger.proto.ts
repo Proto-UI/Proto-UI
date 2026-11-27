@@ -12,15 +12,8 @@ export default definePrototype<PopoverTriggerProps, PopoverTriggerExposes>({
       presentation: { type: 'enum', empty: 'fallback', options: ['default', 'navigation'] },
     });
     def.props.setDefaults({ presentation: 'default' });
-    // The concrete author owns the complete enum and composes its condition
-    // directly; the shared paint helper never mirrors presentation into State.
-    const presentationRule =
-      (presentation: 'default' | 'navigation'): typeof def.rule =>
-      (rule) =>
-        def.rule({
-          ...rule,
-          when: (w) => w.all(w.prop('presentation').eq(presentation), rule.when(w)),
-        });
+    // This concrete Trigger owns presentation's complete enum and default.
+    // The private paint installer reads it directly without a mirrored State.
     const state = behavior.getState!;
     setupPopoverCommandPaint(
       def,
@@ -30,11 +23,7 @@ export default definePrototype<PopoverTriggerProps, PopoverTriggerExposes>({
         disabled: state('disabled')!,
         pressed: state('pressed')!,
       },
-      'trigger',
-      {
-        defaultRule: presentationRule('default'),
-        navigationRule: presentationRule('navigation'),
-      }
+      'trigger'
     );
     return behavior.render;
   },

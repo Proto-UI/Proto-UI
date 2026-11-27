@@ -5,10 +5,15 @@ import assert from 'node:assert/strict';
 export async function runS4Journey(page) {
   await page.locator('[data-shadow-s4][data-ready=true]').waitFor();
   const cdp = await page.context().newCDPSession(page);
+  const { root: documentRoot } = await cdp.send('DOM.getDocument', { depth: 0 });
+  // Query the same whole Document's computed accessibility roles. This keeps
+  // the global one-dialog/zero-dialog assertions and ignored-node filter while
+  // avoiding serialization of the matrix's 90,000 unrelated AX nodes per check.
+  // https://chromedevtools.github.io/devtools-protocol/tot/Accessibility/#method-queryAXTree
   const axDialogs = async () =>
-    (await cdp.send('Accessibility.getFullAXTree')).nodes.filter(
-      (n) => !n.ignored && n.role?.value === 'dialog'
-    );
+    (
+      await cdp.send('Accessibility.queryAXTree', { nodeId: documentRoot.nodeId, role: 'dialog' })
+    ).nodes.filter((n) => !n.ignored && n.role?.value === 'dialog');
   const results = [];
   try {
     for (const profile of ['light', 'split', 'mixed']) {

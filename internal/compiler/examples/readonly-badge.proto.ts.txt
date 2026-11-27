@@ -1,0 +1,34 @@
+// 0.4 AUTHORING DESIGN INPUT (text fixture). The import is not implemented.
+// C-COMPILER-AUTHORING-0001 and its independent cases define the intended input.
+// This file is neither an executable fixture nor a completed Shenko migration.
+import { definePrototype, tw } from '@proto.ui/core/authoring';
+
+// A reached helper is compiled normally; it is not selected by component name.
+function badgeStyle(tone: string) {
+  if (tone === 'online') return tw('shenko-status-chip shenko-status-online');
+  if (tone === 'connecting') return tw('shenko-status-chip shenko-status-connecting');
+  if (tone === 'reconnecting') return tw('shenko-status-chip shenko-status-reconnecting');
+  if (tone === 'local') return tw('shenko-status-chip shenko-status-local');
+  return tw('shenko-status-chip');
+}
+
+export default definePrototype({
+  name: 'authoring-readonly-badge',
+  setup(def) {
+    const props = def.props.define({
+      label: { type: 'string', default: '' },
+      tone: { type: 'string', default: 'offline' },
+    });
+
+    const style = def.derive('style', (read) => badgeStyle(read.get(props.tone)));
+    def.expose.state('label', props.label);
+    def.expose.state('tone', props.tone);
+
+    // Prop and helper dependencies remain reactive. There is no manual update.
+    return (renderer) =>
+      renderer.el('span', { style: renderer.get(style) }, [
+        renderer.el('i', { style: tw('shenko-status-dot') }),
+        renderer.get(props.label),
+      ]);
+  },
+});

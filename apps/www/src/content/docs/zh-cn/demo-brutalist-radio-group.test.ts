@@ -27,12 +27,12 @@ function textContent(node: DemoChild): string {
 }
 
 describe('Brutalist Radio Group demo contract', () => {
-  it('admits both authored groups in the same renderer', () => {
+  it('admits the authored hero group in the renderer', () => {
     const model = createDynamicChildrenModel(radioGroupDemo);
     model.dispose();
   });
 
-  it('keeps single Base selection with visible in-item captions', () => {
+  it('keeps single Base selection with matching visible and accessible captions', () => {
     const nodes = collectNodes(radioGroupDemo.root);
     const roots = nodes.filter(
       (node) => node.kind === 'proto' && node.prototypeId === 'brutalist-radio-group-root'
@@ -47,15 +47,21 @@ describe('Brutalist Radio Group demo contract', () => {
     expect(items).toHaveLength(3);
     expect(indicators).toHaveLength(3);
 
+    // The public hero preselects its middle display-density option.
     const defaults = roots.map((root) =>
       root.kind === 'proto' ? (root.props?.defaultValue as string | undefined) : null
     );
     expect(defaults).toEqual(['comfortable']);
+    expect(items.map((item) => item.kind === 'proto' && item.props?.value)).toEqual([
+      'default',
+      'comfortable',
+      'compact',
+    ]);
 
     for (const item of items) {
       if (item.kind !== 'proto') throw new Error('Expected Radio Item');
-      // Visible caption text stays inside the item so Base nameFromContent
-      // derives the accessible name; the sr-only copy is decorative backup.
+      // Base derives the name from the hidden in-item text. Its visible
+      // sibling must carry exactly the same caption.
       const visible = (item.children ?? []).find(
         (child): child is DemoBoxNode =>
           typeof child !== 'string' &&
@@ -63,7 +69,19 @@ describe('Brutalist Radio Group demo contract', () => {
           child.className?.includes('sr-only') === true
       );
       expect(visible).toBeTruthy();
-      expect(textContent(item)).toContain(textContent(visible!));
+      expect(textContent(item)).toBe(textContent(visible!));
+      const row = nodes.find((node) => node.kind === 'box' && node.children?.includes(item));
+      const captions =
+        row?.kind === 'box'
+          ? (row.children ?? []).filter(
+              (child) =>
+                typeof child !== 'string' &&
+                child.kind === 'box' &&
+                !child.className?.includes('sr-only')
+            )
+          : [];
+      expect(captions).toHaveLength(1);
+      expect(textContent(captions[0]!)).toBe(textContent(visible!));
       const itemIndicators = (item.children ?? []).filter(
         (child): child is DemoProtoNode =>
           typeof child !== 'string' &&

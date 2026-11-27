@@ -7,6 +7,8 @@ import {
 it('bundles actual www rendering with observation-only projector and real box/reset CSS', async () => {
   const { script, css: sceneCss } = await buildPublicDrawerEntryProbe();
   expect(script).toContain('Move Goal');
+  expect(script).toContain('Daily activity goal');
+  expect(script).toContain('goal-value');
   expect(script).toContain('unresolved-units');
   expect(script).toContain('__drawerEntryProbe');
   expect(sceneCss).toContain('[data-material-overlay-mount]:empty');

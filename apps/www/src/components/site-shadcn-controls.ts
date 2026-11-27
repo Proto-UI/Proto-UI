@@ -449,13 +449,31 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   }
 
-  const content = root.querySelector<HTMLElement>(SelectContent);
+  // A breakpoint can change while this same Content is portalled. Follow the
+  // site's existing IDREF so the placement input follows its live owner too.
+  const contentId = trigger?.getAttribute('aria-controls');
+  const linkedContent = contentId ? root.ownerDocument.getElementById(contentId) : null;
+  const content =
+    root.querySelector<HTMLElement>(SelectContent) ??
+    (linkedContent?.matches(`${SelectContent}[data-site-select-content]`) ? linkedContent : null);
   if (content) {
     // Portaled content needs its own family theme rather than root inheritance.
     content.dataset.siteControlFamily = family;
     applyProps(content, {
-      // Omitted placement belongs to the selected Prototype family.
-      ...(content.dataset.position ? { position: content.dataset.position } : {}),
+      // The compact Docs field permits multi-line values. Its longest option
+      // can be taller than the selected Trigger, so use existing intrinsic
+      // popper rows there. Wide chrome retains the family's item alignment.
+      ...(docsRuntime && family === 'shadcn'
+        ? {
+            position:
+              content.dataset.position ??
+              (root.ownerDocument.defaultView?.matchMedia('(max-width: 47.999rem)').matches
+                ? 'popper'
+                : undefined),
+          }
+        : content.dataset.position
+          ? { position: content.dataset.position }
+          : {}),
       ...(content.dataset.align ? { align: content.dataset.align } : {}),
       // This consumer's popup owns a fixed, short option list. The family's
       // own height clamp would crop the rows that do not fit the current side
@@ -477,8 +495,8 @@ function initializeSelect(root: SiteSelectRoot): void {
   });
 
   if (docsRuntime) {
-    // This consumer explicitly uses popper, whose intrinsic rows can grow with
-    // the same enlarged text already allowed by its Trigger/Value surface.
+    // Compact popper rows can grow with enlarged Trigger/Value text. In wide
+    // item alignment these labels must still fit the shared row box.
     root.querySelectorAll<HTMLElement>(SelectItemText).forEach((text) => {
       applyProps(text, {
         surfaceStyle: {

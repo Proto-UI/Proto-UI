@@ -1,10 +1,7 @@
-/** Exact public demo inventory, checked against demo-shadcn-switch.demo.ts. */
+/** Exact public size-demo inventory, checked against demo-shadcn-switch-sizes.demo.ts. */
 export const SHADCN_SWITCH_DEMO_CASES = [
-  { name: 'Small email alerts', size: 'sm', checked: false, disabled: false },
-  { name: 'Small release alerts', size: 'sm', checked: true, disabled: false },
-  { name: 'Email alerts', size: 'default', checked: false, disabled: false },
-  { name: 'Release alerts', size: 'default', checked: true, disabled: false },
-  { name: 'Archived alerts', size: 'default', checked: true, disabled: true },
+  { name: 'Small', size: 'sm', checked: false, disabled: false },
+  { name: 'Default', size: 'default', checked: true, disabled: false },
 ] as const;
 
 /** Source units, not a rendered result: New York switch.tsx at this immutable revision. */

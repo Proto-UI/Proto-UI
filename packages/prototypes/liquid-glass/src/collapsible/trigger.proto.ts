@@ -79,6 +79,8 @@ const collapsibleTrigger = definePrototype<
     }
 
     // P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
+    // Optical withdrawal must expose the final opaque pair immediately; a
+    // color transition would interpolate through transparent fallback paint.
     def.feedback.style.use(
       tw(
         'min-w-0 max-w-full text-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start gap-2 rounded-xl border border-border bg-secondary px-5 py-3 text-sm font-medium shadow-sm transition-shadow'
@@ -113,7 +115,8 @@ const collapsibleTrigger = definePrototype<
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
+      // Withdraw an in-flight enabled shadow transition with the disabled paint.
+      intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED, 'transition-none')),
     });
     return inherited.render;
   },

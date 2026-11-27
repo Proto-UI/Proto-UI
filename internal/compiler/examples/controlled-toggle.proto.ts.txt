@@ -1,0 +1,42 @@
+// 0.4 AUTHORING DESIGN INPUT (text fixture). The import is not implemented.
+// This complete controlled-value scenario does not replace full Base Toggle.
+import { definePrototype, tw } from '@proto.ui/core/authoring';
+
+export default definePrototype({
+  name: 'authoring-controlled-toggle',
+  setup(def) {
+    const props = def.props.define({
+      // Presence selects the declared mode once. Switching mode needs a new key.
+      active: { type: 'boolean', optional: true, controlMode: 'fixed-instance' },
+      defaultActive: { type: 'boolean', default: false },
+      disabled: { type: 'boolean', default: false },
+    });
+    const localActive = def.state.define<boolean>('localActive', {
+      initialize: (read) => read.get(props.defaultActive),
+    });
+    const active = def.derive('active', (read) => {
+      const input = read.get(props.active);
+      return input.kind === 'present' ? input.value : read.get(localActive);
+    });
+    const activeChange = def.expose.event<{ active: boolean }>('activeChange');
+
+    const activate = def.action('activate', (run) => {
+      if (run.get(props.disabled)) return;
+      const next = !run.get(active);
+      if (run.get(props.active).kind === 'omitted') run.set(localActive, next);
+      // In controlled mode this is only a request, not an optimistic commit.
+      run.emit(activeChange, { active: next });
+    });
+
+    def.expose.state('active', active);
+    def.expose.state('disabled', props.disabled);
+    def.expose.action('activate', activate);
+    // Each target still needs its real press semantic-event implementation.
+    def.event.on('press.commit', activate);
+
+    return (renderer) =>
+      renderer.el('button', { style: tw('authoring-toggle') }, [
+        renderer.get(active) ? 'On' : 'Off',
+      ]);
+  },
+});

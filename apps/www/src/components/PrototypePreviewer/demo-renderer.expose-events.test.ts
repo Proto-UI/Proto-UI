@@ -478,6 +478,7 @@ it.each([drawerDemo, drawerScrollDemo, drawerSnapDemo])(
     expect(
       (root as HTMLElement & { getExposes(): { open: { get(): boolean } } }).getExposes().open.get()
     ).toBe(true);
+    expect(host.querySelector('[data-demo-ref="trigger-action"]')).toBe(trigger);
     await expect
       .poll(
         () => document.querySelector<HTMLElement>('[data-demo-ref="close-action"]')?.isConnected
@@ -489,5 +490,6 @@ it.each([drawerDemo, drawerScrollDemo, drawerSnapDemo])(
     expect(
       (root as HTMLElement & { getExposes(): { open: { get(): boolean } } }).getExposes().open.get()
     ).toBe(false);
+    expect(host.querySelector('[data-demo-ref="trigger-action"]')).toBe(trigger);
   }
 );

@@ -22,20 +22,26 @@ export default {
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-label',
-                children: ['Solid fallback'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-item',
-                props: { value: 'inspect', textValue: 'Inspect' },
-                children: ['Inspect'],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'liquid-glass-dropdown-item',
-                props: { value: 'export', textValue: 'Export' },
-                children: ['Export'],
+                prototypeId: 'liquid-glass-dropdown-group',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-label',
+                    children: ['Solid fallback'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: { value: 'inspect', textValue: 'Inspect' },
+                    children: ['Inspect'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: { value: 'export', textValue: 'Export' },
+                    children: ['Export'],
+                  },
+                ],
               },
             ],
           },

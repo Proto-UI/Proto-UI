@@ -11,7 +11,10 @@ import type { Page } from 'playwright-core';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import { verifyRevision } from './homepage-evidence-contract';
 import { readReadingReflow } from '../src/content/docs/zh-cn/reading-reflow-evidence';
-import { HOMEPAGE_GALLERY_IDS } from '../src/components/Homepage/homepage-layout-evidence';
+import {
+  HOMEPAGE_GALLERY_IDS,
+  readGalleryRhythm,
+} from '../src/components/Homepage/homepage-layout-evidence';
 
 /** Layout evidence only. Preserve exact spacing across grid and multicol CSS serialization. */
 export function gallerySpacingIssues(
@@ -195,6 +198,22 @@ try {
           if (v.family === 'brutalist') await switchFamily(page);
           await page.evaluate(() => window.scrollTo(0, 0));
           await shot('initial');
+          const stage = page.locator('[data-home-gallery-stage]');
+          const stageCount = await stage.count();
+          assert.ok(stageCount <= 1, 'At most one physical gallery stage');
+          if (kind === 'candidate') assert.equal(stageCount, 1, 'One current gallery stage');
+          if (v.width < 768 && stageCount === 1) {
+            if (await stage.evaluate((node) => (node as HTMLElement).inert))
+              await page
+                .locator(
+                  '.homepage-hero [data-projection-generation-state="active"] a[href="#home-demo-previewer"]'
+                )
+                .press('Enter');
+            await page.waitForFunction(() => {
+              const stage = document.querySelector<HTMLElement>('[data-home-gallery-stage]');
+              return stage && !stage.inert;
+            });
+          }
           await shot('full', true);
           const facts = await page.evaluate(() => {
             const [slogan, title, caption] = [
@@ -227,7 +246,9 @@ try {
             const primary = document.querySelector<HTMLElement>(
               '[data-demo-ref="gallery-primary"]'
             )!;
-            const gallery = document.querySelector<HTMLElement>('.home-gallery')!;
+            // Older pages put the cards directly in the gallery. Current pages use a stage.
+            const gallery = document.querySelector<HTMLElement>('.home-gallery');
+            if (!gallery) throw new Error('Missing physical gallery flow owner');
             const stage =
               gallery.querySelector<HTMLElement>('[data-home-gallery-stage]') ?? gallery;
             return {
@@ -288,11 +309,9 @@ try {
             } else {
               assert.equal(facts.cardPrototype, 'brutalist-surface-root');
             }
+            const { gapRem } = await page.evaluate(readGalleryRhythm);
             assert.deepEqual(
-              gallerySpacingIssues(
-                facts.gallerySpacing,
-                facts.rootFontSize * (v.width < 768 ? 1 : 1.25)
-              ),
+              gallerySpacingIssues(facts.gallerySpacing, facts.rootFontSize * gapRem),
               []
             );
           }
@@ -550,13 +569,27 @@ try {
             await page.waitForSelector('[data-site-contents-button]');
             await page.locator('[data-site-contents-button]').click();
           }
-          await page.waitForFunction(() =>
-            [
+          await page.waitForFunction(() => {
+            const rows = [
               ...document.querySelectorAll<HTMLElement>(
-                '.sidebar-pane a[data-site-link-appearance="sidebar"]'
+                '.sidebar-pane a[data-site-link-appearance="sidebar"],.right-sidebar a[data-site-link-appearance="toc"]'
               ),
-            ].some((e) => e.checkVisibility() && e.querySelector('[data-pui-root]'))
-          );
+            ].filter((link) => link.checkVisibility());
+            // Native link owners initialize in bounded batches. One completed
+            // row does not make the remaining physical Text/Surface leaves ready.
+            return (
+              rows.some((link) => link.dataset.siteLinkAppearance === 'sidebar') &&
+              rows.every(
+                (link) =>
+                  link.querySelector(
+                    '[data-projection-prototype$="-surface-root"],wc-site-shadcn-surface,wc-site-brutalist-surface'
+                  ) &&
+                  link.querySelector(
+                    'wc-site-shadcn-text,wc-site-brutalist-text,[data-projection-prototype$="-text-root"]'
+                  )
+              )
+            );
+          });
           const read = () =>
             page.evaluate(() => {
               const [left, right] = [
@@ -762,10 +795,52 @@ try {
                 assert.equal(reflow.rootFontSize, 32, 'Keep actual 200% root text');
                 assert.equal(reflow.overflow, 0, 'Enlarged reading layout must stay in viewport');
                 assert.ok(reflow.boxes['.docs-sidebar'].width >= 14 * reflow.rootFontSize);
-                assert.ok(reflow.boxes['.right-sidebar'].width >= 12 * reflow.rootFontSize);
-                assert.ok(
-                  reflow.boxes['.right-sidebar'].width <= reflow.boxes['.main-pane'].width + 1
-                );
+                const tocHidden = reflow.boxes['.right-sidebar-container'].display === 'none';
+                if (tocHidden) {
+                  // The current reading policy hides the lateral rail when enlarged
+                  // text cannot share its canvas with usable prose; it never stacks it.
+                  assert.equal(reflow.boxes['.right-sidebar'].width, 0);
+                  assert.equal(reflow.visibleTocLinks.length, 0);
+                  assert.ok(reflow.boxes['.main-pane'].width >= 24 * reflow.rootFontSize);
+                  const prose = await page
+                    .locator('.main-pane [data-doc-flow] > p')
+                    .first()
+                    .boundingBox();
+                  entry.text200Prose = prose;
+                  assert.ok(prose && prose.width >= 24 * reflow.rootFontSize);
+                  const navigation = await read();
+                  entry.text200Navigation = navigation;
+                  assert.ok(navigation.left.length > 0);
+                  for (const row of navigation.left)
+                    assert.ok(
+                      row.label &&
+                        row.href &&
+                        row.fontSize > 0 &&
+                        row.textHeight > 0 &&
+                        row.surfaceHeight > 0 &&
+                        row.hitHeight >= row.surfaceHeight - 1,
+                      'Enlarged navigation retains named native links and actual Surface/Text leaves'
+                    );
+                } else {
+                  assert.ok(reflow.boxes['.right-sidebar'].width >= 12 * reflow.rootFontSize);
+                  assert.ok(
+                    reflow.boxes['.right-sidebar'].width <= reflow.boxes['.main-pane'].width + 1
+                  );
+                  assert.ok(
+                    reflow.boxes['.right-sidebar-container'].left >=
+                      reflow.boxes['.main-pane'].right - 1
+                  );
+                  assert.ok(reflow.visibleTocLinks.length > 0);
+                  assert.ok(
+                    reflow.boxes['.right-sidebar-panel sl-toc'].width >= 12 * reflow.rootFontSize,
+                    'The actual visible TOC, not only its wrapper, gets reading space'
+                  );
+                  for (const link of reflow.visibleTocLinks)
+                    assert.ok(
+                      link.width >= 10 * reflow.rootFontSize,
+                      `Visible TOC link ${link.label} must not collapse into fragmented words`
+                    );
+                }
                 for (const control of reflow.controls) {
                   assert.ok(
                     control.width > 0 && control.height > 0,
@@ -776,34 +851,42 @@ try {
                     `${control.selector} stays reachable at 200% text`
                   );
                 }
-                assert.ok(
-                  reflow.boxes['.right-sidebar-panel sl-toc'].width >= 12 * reflow.rootFontSize,
-                  'The actual visible TOC, not only its wrapper, gets reading space'
-                );
-                for (const link of reflow.visibleTocLinks)
-                  assert.ok(
-                    link.width >= 10 * reflow.rootFontSize,
-                    `Visible TOC link ${link.label} must not collapse into fragmented words`
-                  );
                 const overview = page
-                  .locator('.right-sidebar a[data-site-link-appearance="toc"]:visible')
+                  .locator('.right-sidebar-panel sl-toc a[data-site-link-appearance="toc"]')
                   .first();
-                await overview.click();
-                await page.waitForFunction(() => {
-                  const title = document.querySelector('main h1[id]')!.getBoundingClientRect();
+                const overviewHref = await overview.getAttribute('href');
+                assert.ok(overviewHref && overviewHref.startsWith('#'));
+                const overviewUrl = new URL(overviewHref, page.url());
+                // At 200% the rail may be hidden. Exercise the same authored
+                // destination through native fragment navigation in that case.
+                if (tocHidden) await page.goto(overviewUrl.href);
+                else await overview.click();
+                await page.waitForFunction((hash) => {
+                  const title = document.querySelector('main h1[id]');
                   const header = document.querySelector('header')!.getBoundingClientRect();
-                  return title.top >= header.bottom - 1;
-                });
-                entry.overviewText200 = await page.evaluate(() => ({
+                  return (
+                    location.hash === hash &&
+                    title?.id === decodeURIComponent(hash.slice(1)) &&
+                    title.getBoundingClientRect().top >= header.bottom - 1 &&
+                    title.getBoundingClientRect().bottom <= innerHeight
+                  );
+                }, overviewUrl.hash);
+                const overviewText200 = await page.evaluate(() => ({
                   stressOnly: true,
                   textPercent: 200,
+                  rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
                   hash: location.hash,
                   scrollY,
                   title: document.querySelector('main h1[id]')!.getBoundingClientRect().toJSON(),
                   header: document.querySelector('header')!.getBoundingClientRect().toJSON(),
                   margin: getComputedStyle(document.querySelector('main h1[id]')!).scrollMarginTop,
                 }));
+                entry.overviewText200 = overviewText200;
+                entry.overviewText200Navigation = tocHidden
+                  ? 'native fragment'
+                  : 'native link click';
                 await shot('overview-text200');
+                assert.equal(overviewText200.rootFontSize, 32);
                 assert.equal(await overview.getAttribute('aria-current'), 'true');
               }
             }

@@ -22,7 +22,7 @@ Tooltip 在指针悬停或键盘聚焦触发元素时展示简短的补充说明
 
 ## 安装
 
-在应用中安装由同一工作区版本构建的 CLI、Shadcn 原型和目标适配器。完成初始化后，使用应用内的 CLI。
+在应用中安装由同一源码版本构建的 `@proto.ui/cli`、`@proto.ui/prototypes-shadcn` 和目标宿主适配器（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、 `@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`；Vue 2 要求 Vue `>=2.6.0 <2.7`）。本地源码安装请使用仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 和[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)。完成初始化后，使用应用内的 CLI。
 
 <InstallCommandCard command="npm exec -- proto-ui add wc shadcn-tooltip" manager="npm" />
 

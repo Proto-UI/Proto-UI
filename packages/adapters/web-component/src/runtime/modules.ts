@@ -158,10 +158,12 @@ import {
 } from '../portal-mount';
 import {
   composedParentElement,
+  hasPotentialScopeDescendant,
   hasWebComponentScopeDescendant,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../focus-scope-targets';
+import { isWebComponentNativeFocusCandidate as isNativelyFocusable } from '../native-focus-candidate';
 
 import {
   getLogicalEventTarget,
@@ -249,27 +251,12 @@ function watchLateAttachShadow(
   };
 }
 
-type EntryStyleMethodPatch = {
-  target: Record<string, unknown>;
-  key: string;
-  original: (...args: unknown[]) => unknown;
-  patched: (...args: unknown[]) => unknown;
-};
-
-type EntryStyleSetterPatch = {
-  target: object;
-  key: string;
-  original?: PropertyDescriptor;
-  patched: NonNullable<PropertyDescriptor['set']>;
-};
-
 const entryStyleWatches = new WeakMap<
   Window,
   {
     subscribers: Set<(inlineOnly: boolean) => void>;
     inlineSubscribers: Set<(inlineOnly: boolean) => void>;
-    methodPatches: EntryStyleMethodPatch[];
-    setterPatches: EntryStyleSetterPatch[];
+    restorePatches: Array<() => void>;
     observer: MutationObserver;
     stopEvents: () => void;
   }
@@ -901,12 +888,16 @@ function collectEntryStyleDependencies(
   const positionParents = new Set<Node>();
   const filteredPositionParents = new Map<Element | ShadowRoot, boolean>();
   const externalSubjects = [target, ...ancestors];
-  const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
+  // Resolve descendants only for a selector that actually consumes them.
+  // The snapshot stays local to this synchronous, read-only dependency scan.
+  let candidates: Element[] | undefined;
+  const getCandidates = () =>
+    (candidates ??= [...externalSubjects, ...target.querySelectorAll('*')]);
   let positionalCandidates: Element[] | undefined;
   let unfilteredPositionCandidates: Element[] | undefined;
   const getPositionalCandidates = () =>
     (positionalCandidates ??= [
-      ...candidates,
+      ...getCandidates(),
       ...Array.from(observedRoots)
         .filter((root) => root !== target)
         .flatMap((root) => [
@@ -919,21 +910,23 @@ function collectEntryStyleDependencies(
     if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
+    // Native CSS rule kind is immutable for this object, including after
+    // selector/declaration edits. Read it once while visiting its live data.
+    const type = rule.type;
     // A scope's start/end selectors can change entry eligibility without an
     // attribute mutation. Read their native IDL, not a whole grouping cssText
     // whose media features and nested declarations are not selector preludes.
-    if (!inputState && ScopeRule && rule instanceof ScopeRule)
+    if (type !== 1 && !inputState && ScopeRule && rule instanceof ScopeRule)
       inputState =
         selectorMayDependOnInputState(rule.start ?? '') ||
         selectorMayDependOnInputState(rule.end ?? '');
-    if (rule.type === 3 || rule.type === 4)
-      collectMedia((rule as CSSImportRule | CSSMediaRule).media);
-    if (rule.type === 3) {
+    if (type === 3 || type === 4) collectMedia((rule as CSSImportRule | CSSMediaRule).media);
+    if (type === 3) {
       const imported = (rule as CSSImportRule).styleSheet;
       if (imported) visitSheet(imported);
       else inputState = true;
     }
-    if (rule.type === 1) {
+    if (type === 1) {
       const syntax = readEntrySelectorSyntax(rule as CSSStyleRule);
       const { selector, positional } = syntax;
       inputState ||= syntax.inputState ??= selectorMayDependOnInputState(selector);
@@ -941,7 +934,7 @@ function collectEntryStyleDependencies(
         for (const subject of collectSiblingDependencySubjects(
           selector,
           externalSubjects,
-          candidates
+          getCandidates()
         ))
           siblingSubjects.add(subject);
       // Paint and anchor offsets do not change eligibility. Grid track sizes
@@ -969,10 +962,10 @@ function collectEntryStyleDependencies(
             // sibling-position dependency still needs its direct parent.
             if (
               (!relational || scoped?.positionSubjects.length) &&
-              candidates.some((candidate) => candidate.matches(probe))
+              getCandidates().some((candidate) => candidate.matches(probe))
             ) {
               const matches = scoped
-                ? candidates.filter((candidate) => candidate.matches(scoped.subject))
+                ? getCandidates().filter((candidate) => candidate.matches(scoped.subject))
                 : [];
               if (!matches.length) relational = 1;
               else for (const candidate of matches) relationalSubjects.add(candidate);
@@ -1107,7 +1100,7 @@ function watchEntryStyleInvalidation(
       });
     };
     const notify = () => schedule(false);
-    const methodPatches: EntryStyleMethodPatch[] = [];
+    const restorePatches: Array<() => void> = [];
     const customStateSize = CustomStateSetCtor
       ? Object.getOwnPropertyDescriptor(CustomStateSetCtor.prototype, 'size')?.get
       : undefined;
@@ -1159,11 +1152,8 @@ function watchEntryStyleInvalidation(
           return result;
         };
         target[key] = patched;
-        methodPatches.push({
-          target,
-          key,
-          original: original as (...args: unknown[]) => unknown,
-          patched,
+        restorePatches.push(() => {
+          if (target[key] === patched) target[key] = original;
         });
       }
     };
@@ -1198,7 +1188,6 @@ function watchEntryStyleInvalidation(
         ]);
     }
 
-    const setterPatches: EntryStyleSetterPatch[] = [];
     const patchSetter = (target: object, key: string, cssName?: string) => {
       const original = Object.getOwnPropertyDescriptor(target, key);
       if (original ? !original.configurable || !original.set : !cssName) return;
@@ -1217,7 +1206,13 @@ function watchEntryStyleInvalidation(
           },
         set: patched,
       });
-      setterPatches.push({ target, key, original, patched });
+      restorePatches.push(() => {
+        const descriptor = Object.getOwnPropertyDescriptor(target, key);
+        if (descriptor?.set === patched) {
+          if (original) Object.defineProperty(target, key, original);
+          else delete (target as Record<string, unknown>)[key];
+        }
+      });
     };
     patchSetter(Declaration.prototype, 'visibility', 'visibility');
     patchSetter(Declaration.prototype, 'display', 'display');
@@ -1259,8 +1254,7 @@ function watchEntryStyleInvalidation(
     watch = {
       subscribers,
       inlineSubscribers,
-      methodPatches,
-      setterPatches,
+      restorePatches,
       observer,
       stopEvents,
     };
@@ -1273,16 +1267,7 @@ function watchEntryStyleInvalidation(
     if (!current.subscribers.delete(onInvalidate) || current.subscribers.size > 0) return;
     current.observer.disconnect();
     current.stopEvents();
-    for (const patch of current.methodPatches) {
-      if (patch.target[patch.key] === patch.patched) patch.target[patch.key] = patch.original;
-    }
-    for (const patch of current.setterPatches) {
-      const descriptor = Object.getOwnPropertyDescriptor(patch.target, patch.key);
-      if (descriptor?.set === patch.patched) {
-        if (patch.original) Object.defineProperty(patch.target, patch.key, patch.original);
-        else delete (patch.target as Record<string, unknown>)[patch.key];
-      }
-    }
+    for (const restore of current.restorePatches) restore();
     entryStyleWatches.delete(view as Window);
   };
   return {
@@ -1416,32 +1401,44 @@ function createExposeEventSink(el: HTMLElement) {
   };
 }
 
-function addExposeStateModule(
+function addExposeStateModules(
   wiring: ReturnType<typeof createCapsWiring>,
-  setExposes: (record: Record<string, unknown>) => void
+  args: WebComponentOwnerModulesArgs<PropsBaseType>,
+  mirrorTargets?: () => HTMLElement[]
 ) {
-  return wiring.use('expose-state', [
-    [
-      EXPOSES_RECORD_SINK_CAP,
-      (record: Record<string, unknown>) => {
-        setExposes(record ?? {});
-      },
-    ],
-  ]);
+  const { el, setExposes, exposeStateWebMode } = args;
+  return wiring
+    .use('expose-state', [
+      [
+        EXPOSES_RECORD_SINK_CAP,
+        (record: Record<string, unknown>) => {
+          setExposes(record ?? {});
+        },
+      ],
+    ])
+    .use('expose-state-web', () => [
+      [HOST_ELEMENT_CAP, el],
+      [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
+      ...(mirrorTargets ? [[EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP, mirrorTargets] as const] : []),
+      ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
+    ]);
 }
 
 // Owner and view wiring share these logical capabilities. Only materialized
 // views install native Anatomy order observation; preserve that distinction.
 function addLogicalModules(
   wiring: ReturnType<typeof createCapsWiring>,
-  instanceToken: LogicalInstanceToken,
-  getMeta: (key: string) => unknown,
-  colorSchemeSource: ColorSchemeInvalidationSource | undefined,
-  preferenceSource: PreferenceInvalidationSource | undefined,
-  styleSupportSource: StyleSupportInvalidationSource | undefined,
-  viewportSource: ViewportInvalidationSource | undefined,
+  args: WebComponentOwnerModulesArgs<PropsBaseType>,
   orderObserver?: typeof createDomOrderObserver
 ) {
+  const {
+    instanceToken,
+    getMeta,
+    colorSchemeSource,
+    preferenceSource,
+    styleSupportSource,
+    viewportSource,
+  } = args;
   const anatomy: CapEntries[number][] = [
     [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
     [ANATOMY_PARENT_CAP, getLogicalParent],
@@ -1483,17 +1480,7 @@ function addLogicalModules(
 export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   args: WebComponentOwnerModulesArgs<Props>
 ) {
-  const {
-    el,
-    instanceToken,
-    rawPropsSource,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource,
-    setExposes,
-  } = args;
+  const { el, instanceToken, rawPropsSource } = args;
   const getControlLabelSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
     if (args.imageViewTarget) return args.imageViewTarget;
@@ -1547,23 +1534,9 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
       [FOCUS_PARENT_CAP, getLogicalParent],
       [FOCUS_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ]);
-  addExposeStateModule(wiring, setExposes).use('expose-state-web', () => [
-    [HOST_ELEMENT_CAP, el],
-    [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
-    ...(args.exposeStateWebMode
-      ? [[EXPOSE_STATE_WEB_MODE_CAP, args.exposeStateWebMode] as const]
-      : []),
-  ]);
+  addExposeStateModules(wiring, args);
 
-  return addLogicalModules(
-    wiring,
-    instanceToken,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource
-  )
+  return addLogicalModules(wiring, args)
     .use('overlay', () => [
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]
@@ -1626,21 +1599,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   overlayLayerScheduler?: OverlayLayerScheduler;
   overlayModal?: OverlayModal;
 }) {
-  const {
-    el,
-    instanceToken,
-    router,
-    rawPropsSource,
-    effectsPort,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource,
-    exposeStateWebMode,
-    scrollProjection,
-    setExposes,
-  } = args;
+  const { el, instanceToken, router, rawPropsSource, effectsPort, scrollProjection } = args;
 
   const getPhysicalTriggerSurface = () =>
     args.nativeLinkTarget ??
@@ -1943,6 +1902,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observedRoots = new Set<Node>();
             let entryRelationalSubjects = new Set<Element>();
             let hasExternalStyleInputs = false;
+            let dormant = false;
             let pendingEntryRefresh: boolean | undefined;
             const scheduleEntrySample = (refresh: boolean) => {
               if (pendingEntryRefresh !== undefined) {
@@ -1974,6 +1934,58 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observeTree = () => {
               if (!isCurrentEntryObservation()) return;
               disconnectEntryTreeObservers();
+              // Native inert ancestry already makes this entry unavailable to
+              // the resolver. Framework staging and modal backgrounds can
+              // mutate extensively while inert; none of those descendants or
+              // stylesheet rules can make this region eligible. Retain only
+              // the live composed chain until its native barrier is removed.
+              const ancestors: Element[] = [];
+              for (
+                let ancestor: Element | null = target;
+                ancestor;
+                ancestor = composedParentElement(ancestor)
+              )
+                ancestors.push(ancestor);
+              dormant = ancestors.some((ancestor) => ancestor.hasAttribute('inert'));
+              if (dormant) {
+                observedRoots.clear();
+                entryRelationalSubjects.clear();
+                hasExternalStyleInputs = false;
+                entryStyleWatch?.dispose();
+                entryStyleWatch = null;
+                stopEntryAttachShadowWatch?.();
+                stopEntryAttachShadowWatch = null;
+                stopEntryUpgradeWatch?.();
+                const parents = new Set<Node>();
+                const slotRoots = new Set<EventTarget>();
+                for (const ancestor of ancestors) {
+                  observedRoots.add(ancestor);
+                  // A slotted node's physical parent can differ from the
+                  // composed one. Observe both movement and reassignment.
+                  const parent = ancestor.parentNode;
+                  if (parent) parents.add(parent);
+                  if (parent?.nodeType === 11) slotRoots.add(parent);
+                  if (ancestor.parentElement?.shadowRoot)
+                    slotRoots.add(ancestor.parentElement.shadowRoot);
+                }
+                for (const ancestor of observedRoots) {
+                  entryObserver?.observe(ancestor, {
+                    attributeFilter: ['inert', 'slot', 'name'],
+                    attributeOldValue: true,
+                    childList: parents.delete(ancestor),
+                  });
+                }
+                for (const parent of parents) entryObserver?.observe(parent, { childList: true });
+                stopEntrySlotWatch = listenToEntryEvents(slotRoots, ['slotchange'], refreshTree);
+                return;
+              }
+              if (view && !entryStyleWatch)
+                entryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
+                  // DOM and stylesheet invalidation can share one observer
+                  // checkpoint. Keep the graph rebuild coalesced.
+                  if (!inlineOnly) scheduleEntrySample(true);
+                  else projectCurrent();
+                });
               let hasArea = false;
               let hasSlottedEntryContent = false;
               const radioTrees = new Set<Document | ShadowRoot>();
@@ -2111,6 +2123,18 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (!isCurrentEntryObservation()) return;
                 if (
                   records.some((record) => {
+                    // A same-valued external attribute cannot change selector
+                    // eligibility. Keep each record's old value so A -> B -> A
+                    // and author-callback mutations still invalidate the entry.
+                    if (
+                      record.type === 'attributes' &&
+                      record.oldValue ===
+                        (record.target as Element).getAttributeNS(
+                          record.attributeNamespace,
+                          record.attributeName!
+                        )
+                    )
+                      return false;
                     if (
                       !belongsToObservedEntryTree(record.target) ||
                       invalidatesEntryStyles(record)
@@ -2128,11 +2152,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // Arbitrary author attributes can participate in descendant
               // selectors, so observe every attribute on only this bounded
               // composed chain instead of guessing a global allowlist.
-              let externalAncestor = composedParentElement(target);
-              const externalAncestors: Element[] = [];
+              const externalAncestors = ancestors.slice(1);
               const externalSlots = new Set<HTMLSlotElement>();
               const externalStyleRoots = new Set<ShadowRoot>();
-              const motionTargets = new Set<Element>([target]);
+              const motionTargets = new Set(ancestors);
               const shadowAnimationTargets = new Set<EventTarget>(
                 [...observedRoots].filter((root) => root.nodeType === 11)
               );
@@ -2149,9 +2172,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   mediaRoots.add(physicalRoot as ShadowRoot);
                 }
               }
-              while (externalAncestor) {
-                externalAncestors.push(externalAncestor);
-                motionTargets.add(externalAncestor);
+              for (const externalAncestor of externalAncestors) {
                 // Container-query eligibility can change solely because a
                 // composed ancestor crosses a size threshold. Reuse the
                 // view-epoch observer over this already bounded chain.
@@ -2174,7 +2195,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalAncestor.localName === 'slot'
                 )
                   externalSlots.add(externalAncestor as HTMLSlotElement);
-                externalAncestor = composedParentElement(externalAncestor);
               }
               const [
                 mediaQueries,
@@ -2184,14 +2204,34 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 positionParents,
                 filteredPositionParents,
                 hasInputStateStyleDependency,
-              ] = collectEntryStyleDependencies(
-                view!,
-                mediaRoots,
-                target,
-                externalAncestors,
-                !!entryResizeObserver && !hasExternalStyleInputs,
-                observedRoots
-              );
+              ] =
+                // CSS can change eligibility, but cannot create a native Tab
+                // candidate in a decorative-only subtree. Keep the DOM,
+                // upgrade, late-root and portal watches live; their ordinary
+                // rebuild restores the current CSS graph when one appears.
+                // Slotted content, image maps and radio peers can depend on
+                // state outside this bounded subtree, so retain their full
+                // dependency scan even when the current sample is empty.
+                hasExternalStyleInputs ||
+                hasSlottedEntryContent ||
+                hasPotentialScopeDescendant(target)
+                  ? collectEntryStyleDependencies(
+                      view!,
+                      mediaRoots,
+                      target,
+                      externalAncestors,
+                      !!entryResizeObserver && !hasExternalStyleInputs,
+                      observedRoots
+                    )
+                  : ([
+                      [],
+                      0,
+                      new Set<Element>(),
+                      new Set<Element>(),
+                      new Set<Node>(),
+                      new Map<Element | ShadowRoot, boolean>(),
+                      false,
+                    ] as const);
               entryRelationalSubjects = relationalSubjects;
               for (const parent of positionParents) {
                 const filtered = filteredPositionParents.has(parent as Element | ShadowRoot);
@@ -2226,13 +2266,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     );
                 }
               }
-              for (const subject of entryRelationalSubjects) {
-                entryExternalStyleObserver.observe(subject, {
-                  childList: true,
-                  subtree: true,
-                  attributes: true,
-                });
-              }
+              const externalStyleOptions = {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeOldValue: true,
+              };
+              for (const subject of entryRelationalSubjects)
+                entryExternalStyleObserver.observe(subject, externalStyleOptions);
               const siblingStateTargets = new Set<EventTarget>();
               const observeSibling = (sibling: Element) => {
                 if (siblingStateTargets.has(sibling)) return;
@@ -2274,19 +2315,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     ancestor === target.ownerDocument.documentElement
                   )
                     continue;
-                  entryExternalStyleObserver.observe(ancestor, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                  });
+                  entryExternalStyleObserver.observe(ancestor, externalStyleOptions);
                 }
               }
               if (relationalDependency === 2) {
-                entryExternalStyleObserver.observe(target.ownerDocument.documentElement, {
-                  childList: true,
-                  subtree: true,
-                  attributes: true,
-                });
+                entryExternalStyleObserver.observe(
+                  target.ownerDocument.documentElement,
+                  externalStyleOptions
+                );
               }
               const stopEntryResizeEvents = listenToEntryEvents(
                 [view!],
@@ -2505,10 +2541,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (externalStyleRoots.size > 0) {
                 for (const root of externalStyleRoots) {
                   entryExternalStyleObserver.observe(root, {
-                    subtree: true,
-                    childList: true,
+                    ...externalStyleOptions,
                     characterData: true,
-                    attributes: true,
                     attributeFilter: ENTRY_STYLESHEET_ATTRS,
                   });
                 }
@@ -2648,7 +2682,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (!isCurrentEntryObservation()) return;
               if (
                 records.some((record) => {
-                  if (record.type !== 'attributes') return true;
+                  if (record.type !== 'attributes') {
+                    if (!dormant) return true;
+                    for (const node of record.addedNodes) if (observedRoots.has(node)) return true;
+                    for (const node of record.removedNodes)
+                      if (observedRoots.has(node)) return true;
+                    return false;
+                  }
                   const current = (record.target as Element).getAttributeNS(
                     record.attributeNamespace,
                     record.attributeName!
@@ -2673,14 +2713,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 scheduleEntrySample(true);
               }
             });
-            if (view)
-              entryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
-                // DOM and stylesheet invalidation can share one observer
-                // checkpoint. Use the same pending sample instead of rebuilding
-                // the dependency graph once here and again for the DOM signal.
-                if (!inlineOnly) scheduleEntrySample(true);
-                else projectCurrent();
-              });
             observeTree();
           }
         },
@@ -2728,26 +2760,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         },
       ],
     ]);
-  addExposeStateModule(wiring, setExposes).use('expose-state-web', () => [
-    [HOST_ELEMENT_CAP, el],
-    [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
-    [
-      EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
-      () => (presentationSurface === el ? [] : [presentationSurface]),
-    ],
-    ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
-  ]);
+  addExposeStateModules(wiring, args, () =>
+    presentationSurface === el ? [] : [presentationSurface]
+  );
 
-  return addLogicalModules(
-    wiring,
-    instanceToken,
-    getMeta,
-    colorSchemeSource,
-    preferenceSource,
-    styleSupportSource,
-    viewportSource,
-    createDomOrderObserver
-  )
+  return addLogicalModules(wiring, args, createDomOrderObserver)
     .use('hit-participation', [
       [HOST_ELEMENT_CAP, el],
       [HIT_PARTICIPATION_HOST_BRIDGE_CAP, createWebHitParticipationHostBridge()],
@@ -2825,36 +2842,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         : []),
     ])
     .build();
-}
-
-function isNativelyFocusable(el: HTMLElement): boolean {
-  const tag = el.tagName.toLowerCase();
-  if (tag === 'button' || tag === 'select' || tag === 'textarea' || tag === 'iframe') {
-    return true;
-  }
-  if (tag === 'input') return (el as HTMLInputElement).type !== 'hidden';
-  if (tag === 'a') return el.hasAttribute('href');
-  if (tag === 'area') {
-    const map = el.closest('map');
-    if (!el.hasAttribute('href') || !map?.name || !el.isConnected) return false;
-    for (const image of el.ownerDocument.querySelectorAll('img[usemap]')) {
-      if (
-        image.getAttribute('usemap') === `#${map.name}` &&
-        !image.closest('[hidden],[inert],[aria-hidden="true"]')
-      )
-        return true;
-    }
-    return false;
-  }
-  if (tag === 'audio' || tag === 'video') return el.hasAttribute('controls');
-  if (tag === 'summary') {
-    const parent = el.parentElement;
-    if (parent?.tagName.toLowerCase() !== 'details') return false;
-    for (const child of parent.children) {
-      if (child.tagName.toLowerCase() === 'summary') return child === el;
-    }
-  }
-  return false;
 }
 
 function projectFocusable(

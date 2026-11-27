@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded-cli-followup-repair",
+  "observedAt": "2026-11-25T14:47:34.944Z",
+  "scope": "Transparent TypeScript satisfies wrappers and computed token reads through the existing private own-string leaf proof",
+  "productionDiff": [
+    "Treat SatisfiesExpression as a transparent wrapper.",
+    "Require literalTokenMember for element access rather than proving its owner alone."
+  ],
+  "source": {
+    "path": "packages/cli/src/services/lowered-hook-coverage.ts",
+    "before": "9c663a213cc2e7b09233f784673b813b38a524cfa3355f446fc5837426396917",
+    "after": "d1b6551cca5be9a672c45323d6cbfb0c81ef96df80f16acddd840b68ed66795d",
+    "beforeBytes": 216947,
+    "afterBytes": 217070,
+    "actualBeforeReadback": "Device omp_hash final-repo, 2026-11-25"
+  },
+  "validation": {
+    "total": 53,
+    "passed": 53,
+    "failed": 0,
+    "skipTodo": 0,
+    "newFileCases": 22,
+    "priorTokenMapCases": 20,
+    "priorBindingCases": 11,
+    "report": "satisfies-prototype-boundary-final.json",
+    "reportSha256": "fbaac75d04e3a5fc0376d90e5d150935ea7b185083c2a769fdef0d67fd4bc55f",
+    "files": [
+      {
+        "file": "lowered-satisfies-transparent.test.ts",
+        "count": 22
+      },
+      {
+        "file": "lowered-token-map-coverage.test.ts",
+        "count": 20
+      },
+      {
+        "file": "rule-helper-module-bindings.test.ts",
+        "count": 11
+      }
+    ]
+  },
+  "executionEvidenceReference": "/work/evidence/cli-satisfies-merged/controls.report.json",
+  "priorOriginalGate": {
+    "source": "c738a4076e3bb1f8de0267130991416c69c9d10d",
+    "originalCases": 823,
+    "passed": 822,
+    "failed": 1,
+    "skipTodo": 0,
+    "unresolved": 3309,
+    "unchanged": true
+  },
+  "limits": [
+    "The safe candidate does not claim to reduce the original 3309 unresolved list.",
+    "The one toolbar file retains all 203 evaluated rows and 20 unresolved entries; unsafe transparency alone exposes 29 subject misses instead of certifying their origin.",
+    "Dynamic computed keys are not proven merely by enumerating owner values; unknown keys and inherited data remain unresolved.",
+    "Ordinary returned style State ownership is still unproven and remains separate.",
+    "The computed own __proto__ definition is valid and the collector emits its selector; this bounded private-leaf proof still withholds certification. Ordinary/quoted prototype setters and inherited leaves cannot obtain own-data certification."
+  ],
+  "originalAssertionsAndBudgetsChanged": false,
+  "compilerIr10DeferredIssueDispositionChanged": false
+}

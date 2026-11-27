@@ -55,7 +55,7 @@ references:
     - P-SHADCN-TOGGLE
     - P-SHADCN-CHECKBOX
 sources:
-  - path: packages/compiler/src/gpui-native-selection.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/gpui-native-selection.ts
   - path: packages/cli/src/legacy/type.ts
   - path: packages/prototypes/brutalist/src/theme.ts
   - path: packages/core/src/spec/feedback/semantic-merge.ts
@@ -75,4 +75,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Admitted one explicit subject-local selection-affordance exception, restoration vocabulary and revised same-group semantics while retaining editing and Label boundaries.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [feedback, text, selection, accessibility, host-boundary]

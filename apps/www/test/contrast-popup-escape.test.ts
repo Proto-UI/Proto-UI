@@ -152,7 +152,7 @@ function measurements(withPaint = true) {
   cleanups.add(restore);
   return restore;
 }
-async function preview(family: Family, runtime: Runtime = 'wc') {
+async function preview(family: Family, runtime: Runtime = 'wc', prepareSelection = true) {
   localStorage.clear();
   const root = document.createElement('section');
   root.dataset.previewerId = `escape-${++fixtureId}`;
@@ -227,6 +227,25 @@ async function preview(family: Family, runtime: Runtime = 'wc') {
   );
   if (family !== 'tooltip' && family !== 'hover-card')
     await vi.waitFor(() => expect(popup.contains(document.activeElement)).toBe(true));
+  if (family === 'select' && prepareSelection) {
+    // The current public recipe starts at a placeholder. Establish the exact
+    // selected baseline through its real option action before testing Escape.
+    const apple = [...popup.querySelectorAll<HTMLElement>('[role="option"]')].find(
+      (option) => option.textContent?.trim() === 'Apple'
+    )!;
+    expect(apple).toBeDefined();
+    apple.click();
+    await vi.waitFor(() => {
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(trigger.textContent?.trim()).toBe('Apple');
+    });
+    trigger.click();
+    await vi.waitFor(() => {
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      popup = document.getElementById(trigger.getAttribute('aria-controls')!)!;
+      expect(popup.contains(document.activeElement)).toBe(true);
+    });
+  }
   const owner = trigger.dataset.projectionOwner;
   const generation = trigger.dataset.projectionGeneration;
   const baseline = browserBefore({ family, trigger, popup, owner, generation });
@@ -293,11 +312,14 @@ for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
         else expect(document.activeElement).toBe(mounted.trigger);
         if (family === 'select') {
           expect(result.after.selectionUnchanged).toBe(true);
-          expect(result.after.triggerText).toBe('Paper');
-          expect(result.after.retiredOptions).toBe(runtime === 'react' || runtime === 'vue');
+          expect(result.after.triggerText).toBe('Apple');
+          // Vue preserves the same Teleport and Item owners across closure;
+          // its connected options must fully withdraw their closed view facts.
+          expect(result.after.retiredOptions).toBe(runtime === 'react');
           expect(mounted.baseline.options.every(({ element }: any) => !element.isConnected)).toBe(
-            runtime === 'react' || runtime === 'vue'
+            runtime === 'react'
           );
+          if (runtime === 'vue') expect(result.after.optionViewWithdrawn).toBe(true);
           if (result.after.retainedOptions)
             expect(result.after.selection).toEqual(result.before.selection);
         }
@@ -345,7 +367,7 @@ it('Select rejects a changed committed display after successful closure', async 
   try {
     await expect(
       mounted.run(false, () => {
-        mounted.trigger.textContent = 'Ink';
+        mounted.trigger.textContent = 'Banana';
       })
     ).rejects.toThrow('focus/selection baseline');
     expect(mounted.record.after.closed).toBe(true);
@@ -537,7 +559,7 @@ for (const mutation of [
       expect(mounted.record.after.sameOwnedPopup).toBe(true);
       expect(mounted.record.after.closed).toBe(true);
       expect(mounted.record.after.triggerFocused).toBe(true);
-      expect(mounted.record.after.triggerText).toBe('Paper');
+      expect(mounted.record.after.triggerText).toBe('Apple');
       expect(mounted.record.after.selectionUnchanged).toBe(false);
       expect(mounted.record.achieved).toBe(false);
     } finally {
@@ -579,7 +601,7 @@ it('select/vue2: public Root preserves selection when the whole closed option vi
     expect(after.retainedOptions).toBe(false);
     expect(after.optionViewWithdrawn).toBe(true);
     expect(after.rootSelectionUnchanged).toBe(true);
-    expect(after.rootSelection).toEqual({ value: 'paper', textValue: 'Paper', open: false });
+    expect(after.rootSelection).toEqual({ value: 'apple', textValue: 'Apple', open: false });
     expect(after.selectionUnchanged).toBe(true);
     expect(mounted.record.achieved).toBe(true);
   } finally {
@@ -630,11 +652,11 @@ for (const mutation of [
             );
             expect(toolbarRoot.contains(mounted.trigger)).toBe(false);
             // Matching labels/lease cannot authorize a different physical Root.
-            toolbarRoot.setAttribute('data-value', 'paper');
-            toolbarRoot.setAttribute('data-text-value', 'Paper');
+            toolbarRoot.setAttribute('data-value', 'apple');
+            toolbarRoot.setAttribute('data-text-value', 'Apple');
             toolbarRoot.removeAttribute('data-open');
-            expect(toolbarRoot.getAttribute('data-value')).toBe('paper');
-            expect(toolbarRoot.getAttribute('data-text-value')).toBe('Paper');
+            expect(toolbarRoot.getAttribute('data-value')).toBe('apple');
+            expect(toolbarRoot.getAttribute('data-text-value')).toBe('Apple');
             expect(toolbarRoot.hasAttribute('data-open')).toBe(false);
             mounted.baseline.selectRoot = toolbarRoot;
           } else if (mutation === 'missing-value') root.removeAttribute('data-value');
@@ -643,7 +665,7 @@ for (const mutation of [
           else if (mutation === 'generation')
             root.setAttribute('data-projection-generation', 'stale');
           else if (mutation === 'open') root.setAttribute('data-open', '');
-          else root.setAttribute(`data-${mutation}`, mutation === 'value' ? 'ink' : 'Ink');
+          else root.setAttribute(`data-${mutation}`, mutation === 'value' ? 'banana' : 'Banana');
         })
       ).rejects.toThrow('focus/selection baseline');
       expect(mounted.record.after.selectionUnchanged).toBe(false);
@@ -720,4 +742,35 @@ for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
       restore();
     }
   });
+}
+
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+  it(
+    'select/' + runtime + ': preserves the real unselected placeholder across Escape',
+    async () => {
+      const restore = measurements();
+      const mounted = await preview('select', runtime, false);
+      try {
+        expect(mounted.baseline.observation.rootSelection).toEqual({
+          value: '',
+          textValue: '',
+          open: true,
+        });
+        expect(mounted.baseline.observation.triggerText).toBe('Select a fruit');
+        expect(
+          mounted.baseline.observation.selection.every((option: any) => option.selected === 'false')
+        ).toBe(true);
+        const result = await mounted.run();
+        expect(result.achieved).toBe(true);
+        expect(result.after.closed).toBe(true);
+        expect(result.after.triggerFocused).toBe(true);
+        expect(result.after.selectionUnchanged).toBe(true);
+        expect(result.after.triggerText).toBe('Select a fruit');
+        expect(result.after.rootSelection).toEqual({ value: '', textValue: '', open: false });
+      } finally {
+        await mounted.destroy();
+        restore();
+      }
+    }
+  );
 }

@@ -1,6 +1,7 @@
 /** Declaration-only model of the existing socket-free inventory and plan module. */
 export const READY_ROUTES: readonly string[];
 export const BROWSER_SUITES: readonly string[];
+export const SEARCH_BROWSER_SUITES: readonly string[];
 export const PRODUCTION_BROWSER_SUITES: readonly string[];
 export const PRODUCTION_BROWSER_OWNERS: Readonly<Record<string, string>>;
 export const BROWSER_SHARD_COUNT: number;

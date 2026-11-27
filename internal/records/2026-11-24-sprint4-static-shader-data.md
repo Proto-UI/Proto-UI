@@ -18,7 +18,7 @@ The Core shader API, physical host implementation, kernel source bytes, public p
 
 ## Executed evidence
 
-The [machine receipt](evidence/2026-11-24-sprint4-static-shader/receipt.json) binds actual source hashes, original log hashes, toolchain and outcomes. Logs and independent reports are retained as lossless gzip files. These local runs occurred on an uncommitted candidate over the recorded base; they are not relabeled as runs on a later commit or as hosted CI.
+The [machine receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-static-shader/receipt.json) binds actual source hashes, original log hashes, toolchain and outcomes. Logs and independent reports are retained as lossless gzip files. These local runs occurred on an uncommitted candidate over the recorded base; they are not relabeled as runs on a later commit or as hosted CI.
 
 | Evidence | Actual result and boundary |
 | --- | --- |

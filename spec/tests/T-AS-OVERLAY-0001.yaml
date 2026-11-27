@@ -110,11 +110,11 @@ implementations:
       - Actual WC adapters in simulated DOM preserve context and origin-owned cleanup. Pointer and Escape are synthetic events; keyboard focus departure explicitly supplies the resulting native-focus state because Happy DOM has no sequential keyboard navigation.
   - id: compiled-passive-overlay
     kind: workspace-check
-    status: passing
-    path: packages/compiler/test/overlay-passive-native.test.ts
+    status: missing
     required: true
     consumesCases: [T-AS-OVERLAY-0001-CASE-COMPILED-PASSIVE-PORTAL]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/overlay-passive-native.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Four Web source profiles execute actual generated framework consumers for portal updates, close/reentry and disposal. Shared emitted host support covers Boundary arbitration with synthetic input in Happy DOM; this is not native browser or GPUI acceptance.
   - id: overlay-resource-reconciliation-barrier
     kind: module-test
@@ -272,6 +272,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: extended
     summary: Added passive Boundary stack opt-out and default Toast portal controls for context, teardown, focus retention, and other Overlay dismissal.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - overlay
   - presence

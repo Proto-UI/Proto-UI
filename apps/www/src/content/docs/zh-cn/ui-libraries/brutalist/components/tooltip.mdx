@@ -15,7 +15,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Portal 锚定定位并自动维护 `aria-describedby` 与 `role="tooltip"` 无障碍关联。Brutalist 风格为 `Content` 提供 5px 圆角中性表面与 2px 主题前景色边框，并在浅色与深色模式间自动重绘。
+Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Portal 锚定定位并自动维护 `aria-describedby` 与 `role="tooltip"` 无障碍关联。Brutalist 风格为 `Content` 提供 5px 圆角中性表面与固定的 2px 黑色边框；填色和文字随浅色与深色主题重绘。
 
 ## 预览
 
@@ -29,7 +29,7 @@ Tooltip 在悬停或键盘聚焦时展示简短的辅助说明文字，通过 Po
 
 ## 安装
 
-请使用同一工作区版本的 `@proto.ui/prototypes-brutalist/tooltip` 和目标宿主适配器。下方 React 示例通过 `@proto.ui/adapter-react` 直接适配导出的原型。
+在应用中安装由同一源码版本构建的 `@proto.ui/cli`、`@proto.ui/prototypes-brutalist` 和目标宿主适配器（`@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、 `@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`；Vue 2 要求 Vue `>=2.6.0 <2.7`）。本地源码安装请使用仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 和[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)。下方 React 示例从 `@proto.ui/prototypes-brutalist/tooltip` 导入原型，并通过 `@proto.ui/adapter-react` 直接适配。
 
 使用配套的本地 CLI 初始化 Brutalist 样式，并在应用入口引入生成的 `proto-ui-style.css`。
 
@@ -72,7 +72,7 @@ TooltipGroup (可选)
 - `Group`：统一协调同组相邻 Tooltip 的打开/关闭延迟、热切换窗口（`skipDelay`）与当前激活项。
 - `Root`：管理单个 Tooltip 的受控或非受控打开状态及单实例延迟覆盖。
 - `Trigger`：透明触发器，负责路由悬停与焦点事件并自动维护 `aria-describedby`。
-- `Content`：通过宿主 Portal 渲染 5px 圆角中性提示面板，支持浅色/深色主题边框自适应与 `Escape` 关闭。
+- `Content`：通过宿主 Portal 渲染 5px 圆角中性提示面板，保留固定黑色边框，填色和文字适应浅色/深色主题，并支持 `Escape` 关闭。
 
 ## 示例
 

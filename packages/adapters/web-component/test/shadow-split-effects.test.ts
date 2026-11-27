@@ -56,15 +56,16 @@ function wrapMatchingRulesInFalseSupports(cssText: string, selector: string): st
 }
 
 function withCommentScanCount(cssText: string, run: (count: () => number) => void) {
-  const indexOf = String.prototype.indexOf;
+  const replace = String.prototype.replace;
   let scans = 0;
-  const spy = vi.spyOn(String.prototype, 'indexOf').mockImplementation(function (
+  const spy = vi.spyOn(String.prototype, 'replace').mockImplementation(function (
     this: string,
-    search: string,
-    position?: number
+    ...args: Parameters<typeof replace>
   ) {
-    if (this === cssText && search === '*/' && position === 2) scans += 1;
-    return indexOf.call(this, search, position);
+    // Observe the full input's literal/comment pass. Later structural string
+    // replacements and scans of other CSS snapshots do not count as reuse.
+    if (this === cssText && typeof args[1] === 'function') scans += 1;
+    return replace.apply(this, args);
   });
   try {
     run(() => scans);

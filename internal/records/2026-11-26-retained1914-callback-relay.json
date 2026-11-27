@@ -1,0 +1,48 @@
+{
+  "kind": "bounded private State handle identity proof",
+  "integrationBase": "27d3d10773736f0240130c6245b0801894b12d5e",
+  "patchSha256": "cfccb3ae7cd4c146225761578d1839f69b648a785e6963e3adfd0475c0409d90",
+  "secondViewReportSha256": "4b2c99df4e6652e360799eacc0da014ddbd62aec387768835caec343eb143e88",
+  "files": [
+    {
+      "path": "packages/cli/src/services/hook-source-summary.ts",
+      "new": false,
+      "beforeGitBlob": "58a876c3537f40003bf7716cf8edd54b681e95ed",
+      "afterGitBlob": "3946edab11beaa9f69986a755a66816cbdc2ca51",
+      "beforeSha256": "86faf8fe10c3a45543ca6aa91c3b0cb5814860110909f64171f44b33b086ba6b",
+      "afterSha256": "2b214566ec1e4850ea0e669d44ba6e1546beb79dd86eddc880b838344a45f041"
+    },
+    {
+      "path": "packages/cli/test/lowered-returned-state-callback-relay.test.ts",
+      "new": true,
+      "beforeGitBlob": null,
+      "afterGitBlob": "c280678fc4282ba69f7bb618557e0b5129317e65",
+      "beforeSha256": null,
+      "afterSha256": "f5755a1f6ef9acc339ecdf44520e9c980a543a1436ec2eca818c27f66e39ef25"
+    }
+  ],
+  "scope": [
+    "The existing private stable const callback must retain at least one exact native registration. Full binding-use scans still reject escapes, aliases, writes and unknown receivers.",
+    "Each relay is a direct, nonoptional, discarded call with exact arity. Its arguments must reference the corresponding wrapper parameters and now have no binding writes; the review-raised reassignment control is present.",
+    "The wrapper is a distinct same-owner callback and itself requires the existing direct native registration proof, without a relay argument. Relay chains and recursion cannot obtain closure from each other.",
+    "No native-operation allowlist changes, timing claims, current-value claims or component-name exceptions. The conclusion is the private State handle identity only."
+  ],
+  "authorValidation": {
+    "files": 7,
+    "passed": 85,
+    "failed": 0,
+    "skipped": 0,
+    "newRelayCases": 15,
+    "positiveCases": 2,
+    "negativeCases": 13,
+    "report": "/workspace/scratch/630588abef90/pr-merge-20261126/compiler-review/1914-callback-relay-fix/callback-relay-parameter-guard.report.json",
+    "sha256": "d2c89003207643300898a68f086a649fd3663d42de3294ccd53bb35263c90348"
+  },
+  "integrationValidation": "Pending small local verification after the independent current-main inventory completes; no whole-library pass or count reduction is claimed.",
+  "limitations": [
+    "Current ordinary Tree/ToggleGroup prefix uncertainty remains; no whole-tree count reduction is claimed.",
+    "Semantically invalid product setup reordering is excluded and must not be applied.",
+    "The unresolved iterator experiment and all product changes are excluded.",
+    "This source review is not an all-CLI, hosted or complete-PR acceptance."
+  ]
+}

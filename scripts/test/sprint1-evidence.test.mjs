@@ -160,32 +160,15 @@ test('the fixed serial selection preserves the full original criteria and bounde
   for (const suite of [
     'apps/www/src/content/docs/zh-cn/demo-matrix-activation.test.ts',
     'apps/www/src/content/docs/zh-cn/site-search-evidence.test.ts',
-    'packages/compiler/test/props-update-policy.test.ts',
-    'packages/compiler/test/props-update-analysis.test.ts',
     'packages/prototypes/base/test/select-legacy-slot.test.ts',
-    'packages/compiler/test/hook-admission.test.ts',
-    'packages/compiler/test/diagnostic-registry.test.ts',
-    'packages/compiler/test/source-graph.test.ts',
-    'packages/compiler/test/diagnostic-origin.test.ts',
-    'packages/compiler/src/diagnostic-format.test.ts',
-    'packages/compiler/test/public-diagnostic-boundaries.test.ts',
-    'packages/compiler/src/watch.test.ts',
-    'packages/compiler/src/artifact-linking.test.ts',
-    'packages/compiler/src/project.test.ts',
-    'packages/compiler/src/project-output.test.ts',
-    'packages/compiler/src/artifact-output.test.ts',
-    'packages/compiler/test/cli.test.ts',
-    'packages/compiler/test/targets.test.ts',
-    'packages/compiler/test/rule-declarations.test.ts',
-    'packages/compiler/src/style-plan.test.ts',
     'packages/prototypes/base/test/number-field-capabilities.test.ts',
     'packages/prototypes/base/test/number-field-format.test.ts',
     'packages/prototypes/base/test/number-field-supersession.test.ts',
     'packages/prototypes/base/test/range-owner-supersession.test.ts',
   ])
     assert.ok(SPRINT1_UNIT_SUITES.includes(suite));
-  assert.equal(SPRINT1_UNIT_SUITES.length, 44);
-  assert.equal(new Set(SPRINT1_UNIT_SUITES).size, 44);
+  assert.equal(SPRINT1_UNIT_SUITES.length, 24);
+  assert.equal(new Set(SPRINT1_UNIT_SUITES).size, 24);
   assert.equal(steps.find((step) => step.id === 'focused-unit').timeoutMs, 120_000);
   assert.deepEqual(SPRINT1_INTEGRATION_UNIT_SUITES, [
     'packages/modules/anatomy/test/subscriber-fanout.test.ts',
@@ -193,9 +176,6 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts',
     'packages/runtime/test/contract/anatomy.domain-fanout-cost.contract.test.ts',
     'packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts',
-    'packages/compiler/test/pointer-facts-admission.test.ts',
-    'packages/compiler/test/gpui-a11y-value.test.ts',
-    'packages/compiler/test/numeric-a11y-emitter-admission.test.ts',
     'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts',
     'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts',
     'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
@@ -208,7 +188,7 @@ test('the fixed serial selection preserves the full original criteria and bounde
   const integration = steps.find((step) => step.id === 'integration-unit');
   assert.equal(integration.timeoutMs, 90_000);
   assert.deepEqual(integration.suites, SPRINT1_INTEGRATION_UNIT_SUITES);
-  assert.deepEqual(integration.args.slice(-16), SPRINT1_INTEGRATION_UNIT_SUITES);
+  assert.deepEqual(integration.args.slice(-13), SPRINT1_INTEGRATION_UNIT_SUITES);
   assert.ok(integration.suites.every((suite) => !SPRINT1_UNIT_SUITES.includes(suite)));
   assert.ok(
     integration.args.every(
@@ -219,7 +199,9 @@ test('the fixed serial selection preserves the full original criteria and bounde
   const search = steps.find((step) => step.id === 'search-native');
   assert.equal(search.timeoutMs, 1_200_000);
   assert.deepEqual(search.suites, [
-    'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
   ]);
   assert.ok(
     search.args.every(
@@ -245,7 +227,7 @@ test('the fixed serial selection preserves the full original criteria and bounde
   );
 });
 
-test('new native suites remain in the complete scheduled inventory and fit the existing 18 shards', () => {
+test('new native suites remain in the complete scheduled inventory and fit the bounded shards', () => {
   assertBrowserInventory();
   assertBrowserShardCapacity();
   const [general, browser] = createRuntimeTestPlan([]);
@@ -333,12 +315,16 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   );
   assert.deepEqual(Object.keys(workflow.on).sort(), ['workflow_call', 'workflow_dispatch']);
   assert.equal(workflow.on.workflow_dispatch.inputs.scope.default, 'repair');
-  assert.deepEqual(workflow.on.workflow_dispatch.inputs.scope.options, ['repair', 'sprint1']);
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.scope.options, [
+    'repair',
+    'sprint1',
+    'contents-wheel',
+  ]);
   assert.equal(workflow.on.workflow_call.inputs.scope.default, 'repair');
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const repair = workflow.jobs['focused-browser'];
-  for (const input of ['sprint3_acceptance', 'sprint3_followup', 'shader_presentation']) {
+  for (const input of ['sprint3_acceptance', 'sprint3_followup']) {
     assert.equal(workflow.on.workflow_dispatch.inputs[input].type, 'boolean');
     assert.equal(workflow.on.workflow_dispatch.inputs[input].required, false);
     assert.equal(workflow.on.workflow_dispatch.inputs[input].default, false);
@@ -346,7 +332,7 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   }
   assert.equal(
     repair.if,
-    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
+    "${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
   );
   assert.ok(repair.steps.some((step) => step.run === 'test "$EVIDENCE_SCOPE" = repair'));
   const original = repair.steps.find(
@@ -358,10 +344,20 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
     'brutalist-spinner.capture.browser.test.ts',
   ])
     assert.ok(original.run.includes(suite));
+  const contentsWheel = workflow.jobs['contents-wheel'];
+  assert.equal(
+    contentsWheel.if,
+    "${{ inputs.scope == 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+  );
+  assert.ok(
+    contentsWheel.steps.some((step) =>
+      step.run?.includes('apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts')
+    )
+  );
   const job = workflow.jobs.sprint1;
   assert.equal(
     job.if,
-    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
+    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
   );
   assert.equal(job['timeout-minutes'], 90);
   assert.equal(job.strategy, undefined, 'Heavy operations run in one serial worker');

@@ -37,9 +37,9 @@ dependsOn:
     - C-AS-TRANSITION-0001
 sources:
   - path: packages/core/src/presence-presentation.ts
-  - path: packages/compiler/src/native-support/web-presence.ts
-  - path: packages/compiler/src/native-async.ts
-  - path: packages/compiler/src/react-source.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-support/web-presence.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-async.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/react-source.ts
 verifies:
   tests:
     - T-FEEDBACK-PRESENCE-PRESENTATION-0001
@@ -53,3 +53,6 @@ revisions:
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Add containing-block top, independent channel easing and final semantic opacity baselines for existing modal motion goals while retaining phase ownership and draft lifecycle.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.

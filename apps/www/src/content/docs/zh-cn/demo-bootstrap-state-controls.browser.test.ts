@@ -640,14 +640,28 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         const beforeCheckbox = await paint(checkbox);
         expect(await checkbox.getAttribute('aria-checked')).toBe('false');
         expect(await indicator.locator('svg').count()).toBe(0);
+        // Compare empty and checked under the same hover and visible-focus conditions.
+        await checkbox.hover();
+        await expect.poll(async () => (await paint(checkbox)).background).toBe('rgb(230, 230, 230)');
+        const hoveredCheckbox = await paint(checkbox);
+        expect(hoveredCheckbox.background).not.toBe(beforeCheckbox.background);
+        expect(hoveredCheckbox.image).toBe(beforeCheckbox.image);
+        expect(await state(runtime, 'checkbox', 'focusVisible')).toBe(false);
         await checkbox.click();
         await expect.poll(() => checkbox.getAttribute('aria-checked')).toBe('true');
         await expect
           .poll(() => indicator.locator('svg path').getAttribute('d'))
           .toBe('M5 12L10 17L19 7');
         expect(await state(runtime, 'indicator', 'checked')).toBe(true);
-        expect((await paint(checkbox)).background).toBe(beforeCheckbox.background);
-        expect((await paint(checkbox)).color).toBe('rgb(51, 51, 51)');
+        const checkedHoveredCheckbox = await paint(checkbox);
+        expect(await state(runtime, 'checkbox', 'focusVisible')).toBe(false);
+        expect(checkedHoveredCheckbox.background).toBe(hoveredCheckbox.background);
+        expect(checkedHoveredCheckbox.color).toBe('rgb(51, 51, 51)');
+        expect(checkedHoveredCheckbox.image).toBe(hoveredCheckbox.image);
+        await page.mouse.move(0, 0);
+        await expect
+          .poll(async () => (await paint(checkbox)).background)
+          .toBe(beforeCheckbox.background);
         expect((await paint(checkbox)).image).toBe(beforeCheckbox.image);
         expect(
           (await requests(runtime, 'checkbox', 'checkedChange')).map((request) => request.detail)
@@ -658,7 +672,9 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         await expect.poll(() => checkbox.getAttribute('aria-checked')).toBe('false');
         await expect.poll(() => indicator.locator('svg').count()).toBe(0);
         expect((await requests(runtime, 'checkbox', 'checkedChange')).length).toBe(2);
-        expect((await paint(checkbox)).background).toBe(beforeCheckbox.background);
+        const uncheckedCheckbox = await paint(checkbox);
+        expect(uncheckedCheckbox.background).toBe(beforeCheckbox.background);
+        expect(uncheckedCheckbox.image).toBe(beforeCheckbox.image);
 
         const controlled = part(runtime, 'checkboxControlled');
         const noFocus = await paint(controlled);
@@ -707,7 +723,9 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
             return Math.abs(housing.x + housing.width - checkedThumb.x - checkedThumb.width - 1);
           })
           .toBeLessThan(0.5);
-        expect((await paint(switchRoot)).background).toBe('rgb(0, 109, 204)');
+        await expect.poll(async () => (await paint(switchRoot)).background).toBe('rgb(0, 68, 204)');
+        await page.mouse.move(0, 0);
+        await expect.poll(async () => (await paint(switchRoot)).background).toBe('rgb(0, 109, 204)');
         expect((await paint(switchRoot)).image).not.toBe(beforeSwitch.image);
         await switchRoot.press('Space');
         await expect.poll(() => switchRoot.getAttribute('aria-checked')).toBe('false');
@@ -821,6 +839,8 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
           runtime,
           theme,
           beforeCheckbox,
+          hoveredCheckbox,
+          checkedHoveredCheckbox,
           beforeSwitch,
           raised,
           focus,

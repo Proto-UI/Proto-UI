@@ -1,0 +1,57 @@
+{
+  "kind": "independent-source-and-boundary-review",
+  "reviewer": "ci_failure_inventory",
+  "baseCommit": "fbe8f5d9dd573d869430f69301e0b5aa8214e54e",
+  "dirtyCandidate": true,
+  "files": [
+    {
+      "path": "packages/compiler/src/parser.ts",
+      "sha256": "1622405a96821bd671ba243bdd5fdb08410c92398e3591c11f723087fbbb110c"
+    },
+    {
+      "path": "packages/compiler/src/rule-declarations.ts",
+      "sha256": "aab4b30c7f13f53d06d01a7d6b9c3d0ac0dfbf74d3d67a1d975fb944f0499a25"
+    },
+    {
+      "path": "packages/compiler/test/rule-captured-membership.test.ts",
+      "sha256": "0af3a48fe5150aefe452d4d95565cc81ca8b1fb910f1e0ba0812d26ec9a226e8"
+    },
+    {
+      "path": "internal/compiler/source-language.md",
+      "sha256": "761ac68551cbe64b11d83545882f751ac52dd0a9676783ec4310f16f65169eac"
+    }
+  ],
+  "conclusion": "No blocking issue found in this bounded review.",
+  "reasoning": "Bounded composition preserves checked nonnullable native Set membership and captured operands at declaration time. Neither source-name dispatch nor a general helper purity proof was added. Both branches remain on the ordinary declaration parser path.",
+  "independentProbeResults": [
+    {
+      "id": "destructuredCallbackShadow",
+      "ok": false,
+      "codes": ["PUI1024"],
+      "messages": ["Rule callback destructuring and uninitialized declarations are unsupported."]
+    },
+    {
+      "id": "callbackLocalFunctionShadow",
+      "ok": false,
+      "codes": ["PUI1024"],
+      "messages": ["Static when callbacks allow only constant aliases followed by one return."]
+    },
+    {
+      "id": "callbackMutatesBeforeChoice",
+      "ok": false,
+      "codes": ["PUI1024"],
+      "messages": ["Static when callbacks allow only constant aliases followed by one return."]
+    },
+    {
+      "id": "nestedPureCapture",
+      "ok": true,
+      "codes": [],
+      "messages": []
+    }
+  ],
+  "limits": [
+    "Not a GitHub approval.",
+    "Not proof of full CI or unreviewed native/backend support.",
+    "Owner full consumer/native receipts are separate evidence."
+  ]
+}

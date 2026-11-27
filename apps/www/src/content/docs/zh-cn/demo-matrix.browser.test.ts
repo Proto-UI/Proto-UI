@@ -219,20 +219,23 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
     // and transforms them one at a time, which is the page load that precedes
     // the initialization phase. Delivering them here keeps the original
     // 60000ms inited phase measuring previewer initialization.
+    // The page-owned bootstrap installs delivery on the current Matrix element;
+    // Astro retirement revokes that callback rather than retaining a global API.
+    await page.waitForFunction(() => {
+      const matrix = document.querySelector<HTMLElement & { warmDemoModules?: unknown }>(
+        '[data-demo-matrix]'
+      );
+      return typeof matrix?.warmDemoModules === 'function';
+    });
     const delivery = await page.evaluate(async () => {
-      const api = (
-        globalThis as typeof globalThis & {
-          __protoUiDemoMatrix?: {
-            warmDemoModules?: () => Promise<number>;
-            demoModuleCount?: () => number;
-          };
+      const matrix = document.querySelector<
+        HTMLElement & {
+          warmDemoModules?: () => Promise<{ delivered: number; registered: number } | null>;
         }
-      ).__protoUiDemoMatrix;
-      if (typeof api?.warmDemoModules !== 'function') return { delivered: 0, registered: 0 };
-      return {
-        delivered: await api.warmDemoModules(),
-        registered: api.demoModuleCount?.() ?? 0,
-      };
+      >('[data-demo-matrix]');
+      const result = await matrix?.warmDemoModules?.();
+      if (!result) throw new Error('The current Matrix module delivery was retired.');
+      return result;
     });
     console.log(
       `[demo-matrix-readiness] demo modules delivered: ${delivery.delivered}/${delivery.registered}`

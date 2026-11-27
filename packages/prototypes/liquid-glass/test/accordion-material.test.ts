@@ -15,7 +15,11 @@ import {
   AS_TRIGGER_PARENT_CAP,
   AS_TRIGGER_GET_PROTO_CAP,
 } from '@proto.ui/module-as-trigger';
-import { FOCUS_INSTANCE_TOKEN_CAP, FOCUS_PARENT_CAP } from '@proto.ui/module-focus';
+import {
+  FOCUS_INSTANCE_TOKEN_CAP,
+  FOCUS_PARENT_CAP,
+  FOCUS_ROOT_TARGET_CAP,
+} from '@proto.ui/module-focus';
 import {
   EFFECTS_CAP,
   MATERIAL_PAINT_RESERVATION_CAP,
@@ -31,7 +35,7 @@ import {
   accordionContent,
 } from '../src/accordion';
 
-async function fixture(withSink = true) {
+async function fixture(withSink = true, triggerProps: Record<string, unknown> = {}) {
   const partStyles: StyleHandle[][] = Array.from({ length: 5 }, () => []);
   const frames: VisualFeedbackFrame[] = [],
     styles: StyleHandle[] = [],
@@ -44,8 +48,15 @@ async function fixture(withSink = true) {
     accordionContent,
   ];
   const targets = prototypes.map(() => document.createElement('div'));
+  let nativeFocusVisible = false;
+  const matches = targets[3].matches.bind(targets[3]);
+  const focusMatch = vi
+    .spyOn(targets[3], 'matches')
+    .mockImplementation((selector) =>
+      selector === ':focus-visible' ? nativeFocusVisible : matches(selector)
+    );
   const parentIndexes = [-1, 0, 1, 2, 1],
-    raw: Record<string, unknown>[] = [{}, { value: 'a' }, {}, {}, {}];
+    raw: Record<string, unknown>[] = [{}, { value: 'a' }, {}, triggerProps, {}];
   const parent = (token: unknown) => {
     const i = targets.indexOf(token as HTMLDivElement);
     return i >= 0 ? (targets[parentIndexes[i]] ?? null) : null;
@@ -56,6 +67,10 @@ async function fixture(withSink = true) {
       prototypeName: prototype.name,
       getRawProps: () => raw[index],
       schedule: (task) => task(),
+      scheduleDelay(duration, task) {
+        const id = setTimeout(task, duration);
+        return { cancel: () => clearTimeout(id) };
+      },
       commit: (_children, signal) => signal?.done(),
       onRuntimeReady(wiring) {
         wiring.attach('anatomy', [
@@ -82,6 +97,7 @@ async function fixture(withSink = true) {
         wiring.attach('focus', [
           [FOCUS_INSTANCE_TOKEN_CAP, targets[index]],
           [FOCUS_PARENT_CAP, parent],
+          [FOCUS_ROOT_TARGET_CAP, () => targets[index]],
         ]);
         wiring.attach('event', [
           [EVENT_ROOT_TARGET_CAP, () => targets[index]],
@@ -131,16 +147,66 @@ async function fixture(withSink = true) {
     sessions,
     exposes,
     target: targets[3],
+    focus() {
+      nativeFocusVisible = true;
+      targets[3].dispatchEvent(new CustomEvent('host:focus'));
+    },
+    blur() {
+      nativeFocusVisible = false;
+      targets[3].dispatchEvent(new CustomEvent('host:blur'));
+    },
     setRoot(next: Record<string, unknown>) {
       raw[0] = next;
       sessions[0].controller.applyRawProps(next);
     },
     async dispose() {
       for (const session of [...sessions].reverse()) await session.dispose();
+      focusMatch.mockRestore();
     },
   };
 }
 describe('Accordion explicit material consumer, without native paint claims', () => {
+  it.each(['regular', 'prominent'])(
+    '%s expanded feedback preserves its own ring until the independent visible focus takes ownership',
+    async (prominence) => {
+      const f = await fixture(true, { prominence });
+      try {
+        f.setRoot({ openItems: ['a'], allowEmpty: false });
+        expect(f.exposes[3].expanded.get()).toBe(true);
+        expect(f.exposes[3].collapseBlocked.get()).toBe(true);
+        const expanded = [...f.frames.at(-1)!.style.tokens];
+        const persistentColor = prominence === 'prominent' ? 'ring-border' : 'ring-foreground/10';
+        expect(expanded).toEqual(
+          expect.arrayContaining(['font-semibold', 'ring-1', 'ring-inset', persistentColor])
+        );
+        for (const event of ['pointer.enter', 'pointer.down', 'pointer.up', 'pointer.leave']) {
+          f.target.dispatchEvent(new CustomEvent(event));
+          expect(f.frames.at(-1)!.style.tokens).toEqual(expanded);
+          expect(f.frames.at(-1)?.material.candidates).toEqual([]);
+        }
+        document.dispatchEvent(new CustomEvent('key.down'));
+        f.focus();
+        expect(f.exposes[3].focusVisible.get()).toBe(true);
+        expect(f.frames.at(-1)!.style.tokens).toEqual(
+          expect.arrayContaining([
+            'font-semibold',
+            'ring-2',
+            'ring-ring',
+            'forced-colors-focus-outline',
+          ])
+        );
+        for (const token of ['ring-1', 'ring-inset', persistentColor])
+          expect(f.frames.at(-1)!.style.tokens).not.toContain(token);
+        f.blur();
+        expect(f.exposes[3].focusVisible.get()).toBe(false);
+        expect(f.frames.at(-1)!.style.tokens).toEqual(expanded);
+        expect(f.exposes[3].expanded.get()).toBe(true);
+        expect(f.frames.at(-1)?.material.candidates).toEqual([]);
+      } finally {
+        await f.dispose();
+      }
+    }
+  );
   it('keeps Item transparent while Trigger and Content retain their own fallback paint', async () => {
     const f = await fixture(false);
     try {

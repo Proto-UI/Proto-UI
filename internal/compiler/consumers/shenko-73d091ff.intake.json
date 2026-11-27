@@ -1,0 +1,270 @@
+{
+  "configuration": {
+    "compilerVersion": "0.4.0-frontend.1",
+    "frontendConfigurationHash": null,
+    "languageVersion": "0.4",
+    "requiredTargets": ["react", "gpui", "vue2", "vue3", "web-components"],
+    "ruleSetVersion": "0.4.0-draft.1",
+    "settings": {
+      "consumerDeclaredRuntimeTarget": "react",
+      "consumerHostTsconfig": {
+        "compilerOptions": {
+          "allowImportingTsExtensions": false,
+          "jsx": "react-jsx",
+          "lib": ["ES2022", "DOM", "DOM.Iterable"],
+          "module": "ES2022",
+          "moduleResolution": "Bundler",
+          "noEmit": true,
+          "skipLibCheck": true,
+          "strict": true,
+          "target": "ES2022",
+          "types": ["react", "react-dom"]
+        },
+        "include": [
+          "src/**/*.ts",
+          "src/**/*.tsx",
+          "generated/prototypes/**/*.ts",
+          "generated/prototypes/**/*.tsx"
+        ]
+      },
+      "frontendEnvironment": "A future analysis must use the controlled Proto prelude; the consumer React/DOM tsconfig is evidence, not Proto admission configuration.",
+      "upstreamPin": {
+        "declaredLockSha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07",
+        "repository": "https://github.com/Proto-UI/Proto-UI.git",
+        "revision": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057"
+      }
+    }
+  },
+  "consumerId": "shenko",
+  "entrypoints": [
+    {
+      "exportName": "default",
+      "id": "shenko/message-bubble",
+      "path": "crates/shenko-ui/web/prototypes/message-bubble.proto.ts",
+      "repositoryId": "shenko"
+    },
+    {
+      "exportName": "default",
+      "id": "shenko/transport-badge",
+      "path": "crates/shenko-ui/web/prototypes/transport-badge.proto.ts",
+      "repositoryId": "shenko"
+    }
+  ],
+  "files": [
+    {
+      "byteLength": 13951,
+      "gitBlob": "4440f9331f141bb2f92977839f03605a627ccf06",
+      "path": "crates/shenko-ui/web/build.mjs",
+      "repositoryId": "shenko",
+      "role": "evidence",
+      "sha256": "280cd09edc6f96b33d41de70d54f9fdef48abe0de449bccebd9db3d39896f6b9"
+    },
+    {
+      "byteLength": 13290,
+      "gitBlob": "057fbf31de619e933d94af368b0bde3350c1badb",
+      "path": "crates/shenko-ui/web/compiler.mjs",
+      "repositoryId": "shenko",
+      "role": "evidence",
+      "sha256": "f1350e79abbe41abe6b1e8a3e0e292ab5828f3374e0a9bebeb9a2cf44a1f9c38"
+    },
+    {
+      "byteLength": 1553,
+      "gitBlob": "1f863431a4b09a0fec8533ad906b5a9ea920ff61",
+      "path": "crates/shenko-ui/web/prototypes/message-bubble.proto.ts",
+      "repositoryId": "shenko",
+      "role": "entrypoint",
+      "sha256": "50915675a5fb64b14bf4784594819ea64a76ceb2234e15f7db3321be03f61e8d"
+    },
+    {
+      "byteLength": 1995,
+      "gitBlob": "7db9d2206bb0a5dbbcf3278ae336a14b30c1fb05",
+      "path": "crates/shenko-ui/web/prototypes/transport-badge.proto.ts",
+      "repositoryId": "shenko",
+      "role": "entrypoint",
+      "sha256": "2ee02ccc9ca4fdd8bb4d031d4d390ba4fe78113d290cd9f011735f77c1d272ae"
+    },
+    {
+      "byteLength": 16116,
+      "gitBlob": "7d572fecbb1b086fa50c38c10b3dbb95614d953b",
+      "path": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "repositoryId": "shenko",
+      "role": "evidence",
+      "sha256": "173726b1b2e5d6eaf720f93ed0e1ca4514a5e71b26d7b3f9a722bf888a58edef"
+    },
+    {
+      "byteLength": 438,
+      "gitBlob": "e39de5152d6c3439cbb9fa605357ab8f3660e1d0",
+      "path": "crates/shenko-ui/web/tsconfig.json",
+      "repositoryId": "shenko",
+      "role": "configuration",
+      "sha256": "94cf01b1b56aff05648327d50cb8e92b8ff80caa358f37f6eab4e55c7ad517e1"
+    },
+    {
+      "byteLength": 1452,
+      "gitBlob": "7d73cb47cfc58d230eede3e573c53945130e795e",
+      "path": "crates/shenko-ui/web/upstream-pin.json",
+      "repositoryId": "shenko",
+      "role": "configuration",
+      "sha256": "a9ed79b9156fa3d428a7318dd9e986f431926c2928b2bd33a0873c7a44c105ae"
+    },
+    {
+      "byteLength": 3465,
+      "gitBlob": "a7025e696c59ddf20d2f155d0dc9b19b38ed038c",
+      "path": "docs/decisions/0010-proto-ui-adapter-and-compiler-source-compatibility-2026-11-25.md",
+      "repositoryId": "shenko",
+      "role": "evidence",
+      "sha256": "afcbfe954fd4b04ad07bf9856f1358db45b8098d89508d1c150814333dbe6eb9"
+    }
+  ],
+  "inventory": {
+    "complete": false,
+    "missing": [
+      "The reported 204 upstream paths and their per-file digests at 67fd94f5 were not supplied in review 7170144913 or decision 0010; the report is not a verified manifest.",
+      "The decision branch pins Proto-UI 710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057, whereas the reported 204-file count used 67fd94f5; no cross-revision equivalence or complete dependency closure has been established.",
+      "The two registered .proto.ts files import @proto.ui/core; their transitive source and resolution/configuration closure at the selected upstream pin has not been enumerated or byte-verified in this intake.",
+      "ui-kit.tsx contains four additional local Adapter Prototype declarations; their bindings and reached closures are not yet component entrypoint registrations in this manifest.",
+      "No new 0.4 source migration, source-valid certificate, safe autofix, generated target execution or Adapter/compiler independent behavioral comparison has been performed.",
+      "No exact controlled frontend configuration or complete shared frontend closure is bound; the full five-target obligation remains."
+    ],
+    "reportedCounts": [
+      {
+        "count": 16,
+        "revision": "67fd94f5",
+        "scope": "adopted upstream shadcn families",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "families"
+      },
+      {
+        "count": 204,
+        "revision": "67fd94f5",
+        "scope": "adopted upstream shadcn and transitive base files",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "files"
+      },
+      {
+        "count": 97,
+        "revision": "67fd94f5",
+        "scope": "shadcn files within the reported upstream set",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "files"
+      },
+      {
+        "count": 107,
+        "revision": "67fd94f5",
+        "scope": "base files within the reported upstream set",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "files"
+      },
+      {
+        "count": 98,
+        "revision": "67fd94f5",
+        "scope": ".proto.ts filenames within the reported upstream set, not an independently verified component count",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "prototype-files"
+      },
+      {
+        "count": 18483,
+        "revision": "67fd94f5",
+        "scope": "lines within the reported upstream set",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "lines"
+      },
+      {
+        "count": 2,
+        "scope": "self-authored Prototype files reported separately by Shenko",
+        "source": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+        "unit": "prototype-declarations"
+      }
+    ]
+  },
+  "provenance": {
+    "additionalUnregisteredDeclarations": [
+      {
+        "adapterConsumer": "ScrollViewportY",
+        "binding": "verticalScrollViewport",
+        "path": "crates/shenko-ui/web/src/ui-kit.tsx"
+      },
+      {
+        "adapterConsumer": "ScrollViewportX",
+        "binding": "horizontalScrollViewport",
+        "path": "crates/shenko-ui/web/src/ui-kit.tsx"
+      },
+      {
+        "adapterConsumer": "ScrollViewportBoth",
+        "binding": "bothScrollViewport",
+        "path": "crates/shenko-ui/web/src/ui-kit.tsx"
+      },
+      {
+        "adapterConsumer": "ReadingViewport",
+        "binding": "readingViewport",
+        "path": "crates/shenko-ui/web/src/ui-kit.tsx"
+      }
+    ],
+    "applicationPinModified": false,
+    "consumerRepositoryModified": false,
+    "decisionBoundary": "The decision keeps upstream families on Adapter and moves the two own Prototype files to Adapter when the pin crosses retirement. The inspected pin/compiler/build sources still declare the old compiler for those two files; the conditional transition is not reported as executed.",
+    "declaredAdapterFamilies": [
+      "button",
+      "textarea",
+      "scroll-area",
+      "message-scroller",
+      "collapsible",
+      "drawer",
+      "toggle-group",
+      "input",
+      "separator",
+      "toggle",
+      "resizable",
+      "tree",
+      "card",
+      "tabs",
+      "context-menu",
+      "dropdown"
+    ],
+    "historicalReceiptExcluded": {
+      "path": "docs/evidence/nightly-6782627-20261116/compiler-inputs.json",
+      "reason": "Older compiler/input receipt, not a supplied 204-path manifest at 67fd94f5 or the selected 710a90df pin.",
+      "recordedUpstreamPin": "7521cd501f454b4e013ec6e9656fb4b6e4951514"
+    },
+    "observedDate": "2026-11-25",
+    "primarySnapshot": {
+      "branchAtObservation": "claude/shenko-ui-redesign-qqgizc",
+      "decision": "https://github.com/cyjin-yl/shenko/blob/73d091ff581debe486b4bc809c3d001fbbdd3cb0/docs/decisions/0010-proto-ui-adapter-and-compiler-source-compatibility-2026-11-25.md",
+      "originalBytes": "Retrieved as GitHub base64 blobs; each raw-byte Git blob identity was independently recomputed before intake.",
+      "repository": "cyjin-yl/shenko",
+      "review": "https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913",
+      "revision": "73d091ff581debe486b4bc809c3d001fbbdd3cb0"
+    },
+    "registeredEntrypointEvidence": {
+      "binding": "SHENKO_PROTOTYPES",
+      "declaredMode": "legacy build-time compiler react-dom-source-v1",
+      "exportsWereReadNotExecuted": true,
+      "path": "crates/shenko-ui/web/compiler.mjs"
+    },
+    "runtimeExecutionVerified": false,
+    "separateMainObservation": {
+      "ownPrototypeBlobs": "Both .proto.ts blob identities match the selected decision branch; this does not equate their upstream dependency closures.",
+      "pinGitBlob": "2dc367595a10d6e6047ced5aded250b86b1722b2",
+      "pinPath": "crates/shenko-ui/web/upstream-pin.json",
+      "pinSha256": "3a1198796bb7e9c1f5b83af102453a26290f290389058213ab0bccba790b58ff",
+      "repository": "cyjin-yl/shenko",
+      "revision": "5e009cf7b59820f5cc002a8fc3604af22889edb3",
+      "selectedForThisIntake": false,
+      "upstreamPin": "6ca8f262a074ed19cb24b35d5cc199b5b0e23e08"
+    }
+  },
+  "repositories": [
+    {
+      "id": "proto-ui",
+      "name": "Proto-UI/Proto-UI",
+      "revision": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057"
+    },
+    {
+      "id": "shenko",
+      "name": "cyjin-yl/shenko",
+      "revision": "73d091ff581debe486b4bc809c3d001fbbdd3cb0"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceState": "unmigrated"
+}

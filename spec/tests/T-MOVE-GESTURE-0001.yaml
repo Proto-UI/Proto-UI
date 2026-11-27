@@ -49,23 +49,23 @@ implementations:
       - T-MOVE-GESTURE-0001-CASE-BOUNDARY
   - id: gpui-native-move-consumer
     kind: fixture
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs
+    status: missing
     required: true
     consumesCases:
       - T-MOVE-GESTURE-0001-CASE-LIFECYCLE
       - T-MOVE-GESTURE-0001-CASE-CANCEL
       - T-MOVE-GESTURE-0001-CASE-BOUNDARY
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The checked-in move_gesture_* tests exercise actual generated owners through GPUI framework dispatch, including early attachment, local samples, continuation outside initial bounds, release ordering, cancellation and restart, cross-window isolation, duplicate ownership refusal, replacement and disposal. No fresh passing execution is claimed by this record.
       - The producer and README bind the default SDK to GPUI 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8; this spec change does not change that pin. Physical touch-device input, pen, thresholds, velocity, keyboard movement and general recognizer competition require separate evidence.
   - id: gpui-native-direct-touch-claim
     kind: fixture
-    status: planned
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs
+    status: missing
     required: true
     consumesCases: [T-MOVE-GESTURE-0001-CASE-NATIVE-CLAIM]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - This records the native direct-touch claim controls as an execution obligation, not passing evidence. Upstream TouchDragEvent vocabulary alone does not prove emitted claim acquisition, single termination or unclaimed wheel/scroll behavior. The complete native consumer must execute against its admitted SDK and retain failures before this record can change status.
 verifies:
   contracts: [C-MOVE-GESTURE-0001]
@@ -79,4 +79,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added executable coverage for the first Web Move Gesture host realization.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [test, move, gesture, lifecycle, web]

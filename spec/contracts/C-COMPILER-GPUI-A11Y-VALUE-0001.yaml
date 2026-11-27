@@ -1,10 +1,15 @@
 id: C-COMPILER-GPUI-A11Y-VALUE-0001
 type: contract
 title: Numeric accessibility actions through the GPUI host event boundary
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  A real native numeric control must accept the platform accessibility value setter. This bounded private GPUI repair requires native bridge and OS consumer evidence; it does not promote the compiler profile or require every Adapter to implement numeric accessibility actions.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 summary: GPUI SetValue forwards a finite native numeric request to the authored owner-local event route without taking ownership of State or domain writes.
@@ -28,9 +33,12 @@ references:
   contracts: [C-A11Y-0001, C-EVENT-TYPE-0004]
   hostCaps: [HC-A11Y-0001]
 sources:
-  - path: internal/compiler/gpui-accessibility-value.md
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/internal/compiler/gpui-accessibility-value.md
 revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Define the finite numeric accessibility action bridge and its owner-local checked payload boundary.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, gpui, accessibility, event, ownership]

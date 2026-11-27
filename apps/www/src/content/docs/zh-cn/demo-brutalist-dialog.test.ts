@@ -18,7 +18,9 @@ function part(node: DemoNode, prototypeId: string): DemoNode {
 }
 
 describe('Brutalist Dialog consumer composition', () => {
-  it('reserves close-control clearance around the optional Header', () => {
+  it('reserves logical end clearance for CloseIcon outside the optional Header', () => {
+    // The current edit-profile recipe reserves the logical end of the Header
+    // for CloseIcon without taking ownership of Content padding or semantics.
     const content = part(demo.root, 'brutalist-dialog-content');
     expect(content.kind).toBe('proto');
     if (content.kind !== 'proto') throw new Error('Expected Content');
@@ -35,7 +37,7 @@ describe('Brutalist Dialog consumer composition', () => {
     });
   });
 
-  it('preserves title, description and both semantic dismissal controls', () => {
+  it('preserves title, description and both footer dismissal controls and the independent CloseIcon', () => {
     expect(part(demo.root, 'brutalist-dialog-title')).toEqual({
       kind: 'proto',
       prototypeId: 'brutalist-dialog-title',
@@ -49,8 +51,55 @@ describe('Brutalist Dialog consumer composition', () => {
     expect(part(demo.root, 'brutalist-dialog-close')).toEqual({
       kind: 'proto',
       prototypeId: 'brutalist-dialog-close',
-      children: [{ kind: 'proto', prototypeId: 'brutalist-button', children: ['Save changes'] }],
+      children: [
+        {
+          kind: 'proto',
+          prototypeId: 'brutalist-button',
+          props: { wrap: true },
+          children: ['Save changes'],
+        },
+      ],
     });
+    const footer = part(demo.root, 'brutalist-dialog-footer');
+    if (footer.kind !== 'proto') throw new Error('Expected Footer');
+    expect(footer.children).toEqual([
+      {
+        kind: 'box',
+        className: 'min-w-0 max-w-full',
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-dialog-close',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-button',
+                props: { variant: 'surface', wrap: true },
+                children: ['Cancel'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'box',
+        className: 'min-w-0 max-w-full',
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-dialog-close',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-button',
+                props: { wrap: true },
+                children: ['Save changes'],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
     expect(part(demo.root, 'brutalist-dialog-close-icon')).toEqual({
       kind: 'proto',
       prototypeId: 'brutalist-dialog-close-icon',
@@ -59,10 +108,10 @@ describe('Brutalist Dialog consumer composition', () => {
     if (content.kind !== 'proto') throw new Error('Expected Content');
     expect(
       content.children
-        ?.slice(1)
+        ?.slice(2)
         .map((node) =>
           typeof node !== 'string' && node.kind === 'proto' ? node.prototypeId : null
         )
-    ).toEqual([null, 'brutalist-dialog-footer', 'brutalist-dialog-close-icon']);
+    ).toEqual(['brutalist-dialog-footer', 'brutalist-dialog-close-icon']);
   });
 });

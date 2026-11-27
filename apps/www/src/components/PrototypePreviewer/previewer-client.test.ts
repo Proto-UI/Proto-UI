@@ -1,5 +1,14 @@
 import { observePreviewerRemoval } from './previewer-removal';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
+
+// Keep the pinned host's internal forwarding callbacks alive; actual records,
+// filters, batching and delivery still come from Happy DOM's observer.
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 
 const runtimeSpies = vi.hoisted(() => ({
   mount: vi.fn(),
@@ -75,6 +84,8 @@ vi.mock('../site-shadcn-controls', async (original) => {
 });
 
 import { initPreviewer } from './previewer-client';
+import * as projectionTheme from './projection-theme';
+import * as previewSurface from './runtime-preview-surface';
 import { initAdapterSelects } from '../adapter-preference';
 import { initSiteShadcnControls, selectValue, type SiteSelectRoot } from '../site-shadcn-controls';
 
@@ -121,31 +132,6 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
       });
     localStorage.clear();
     document.body.innerHTML = '';
-  });
-
-  it('does not adopt or rewrite a compiled target selector as the legacy runtime selector', async () => {
-    const root = createPreviewerRoot();
-    root.innerHTML =
-      '<pui-browser-compiler><select data-compiler-target><option value="web-component-source-v1">Web Components</option><option value="react-dom-source-v1">React 19</option></select></pui-browser-compiler><div class="host"></div>';
-    const target = root.querySelector<HTMLSelectElement>('[data-compiler-target]')!;
-    initPreviewer({
-      root,
-      prototypeId: 'demo',
-      initialRuntime: 'wc',
-      demoProps: {},
-      runtimeList: ['wc', 'react'],
-    });
-    await vi.waitFor(() => expect(runtimeSpies.mount).toHaveBeenCalledTimes(1));
-    expect([...target.options].map((option) => option.value)).toEqual([
-      'web-component-source-v1',
-      'react-dom-source-v1',
-    ]);
-    target.value = 'react-dom-source-v1';
-    target.dispatchEvent(new Event('change', { bubbles: true }));
-    await Promise.resolve();
-    expect(runtimeSpies.mount).toHaveBeenCalledTimes(1);
-    await (root as any).__previewer__?.destroy();
-    root.remove();
   });
 
   it('skips owner checks on add-only deliveries and still checks removal and reinsertion', async () => {
@@ -298,6 +284,177 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
       await (root as any).__previewer__.destroy();
     }
   });
+
+  it('reads every startup theme watcher before publishing either owner appearance', async () => {
+    const roots = [createPreviewerRoot(), createPreviewerRoot()];
+    const order: string[] = [];
+    const appearances: ReturnType<typeof vi.fn>[] = [];
+    const stops: ReturnType<typeof vi.fn>[] = [];
+    roots.forEach((root, index) => {
+      root.dataset.siteLibraryFamily = 'shadcn';
+      root.dataset.themeSample = `initial-${index}`;
+      root.querySelector('.host')!.innerHTML =
+        '<div class="proto-previewer__skeleton" role="status">Loading</div>';
+    });
+    const watch = vi
+      .spyOn(projectionTheme, 'watchProjectionThemeSurfaceStyle')
+      .mockImplementation((_family, scope, callback) => {
+        const index = roots.findIndex((root) => root === scope);
+        order.push(`read ${index}`);
+        callback({ '--pui-background': (scope as HTMLElement).dataset.themeSample! });
+        const stop = vi.fn();
+        stops.push(stop);
+        return stop;
+      });
+    const originalCreate = previewSurface.createRuntimePreviewSurface;
+    const create = vi
+      .spyOn(previewSurface, 'createRuntimePreviewSurface')
+      .mockImplementation((...args) => {
+        const surface = originalCreate(...args);
+        const index = appearances.length;
+        const appearance = vi.fn(async () => {
+          order.push(`write ${index}`);
+          if (index === 0) roots[1]!.dataset.themeSample = 'after-first-publication';
+        });
+        surface.setAppearance = appearance;
+        appearances.push(appearance);
+        return surface;
+      });
+    try {
+      for (const root of roots)
+        initPreviewer({
+          root,
+          demoId: 'demo-custom-preview',
+          initialRuntime: 'wc',
+          demoProps: {},
+          runtimeList: ['wc'],
+        });
+      await vi.waitFor(() =>
+        expect(roots.map((root) => (root as any).__previewer__.getCurrentRuntime())).toEqual([
+          'wc',
+          'wc',
+        ])
+      );
+      expect(order).toEqual(['read 0', 'read 1', 'write 0', 'write 1']);
+      expect(appearances[1]).toHaveBeenCalledWith('shadcn', {
+        '--pui-background': 'initial-1',
+      });
+      expect(roots[1]!.dataset.themeSample).toBe('after-first-publication');
+    } finally {
+      for (const root of roots) await (root as any).__previewer__?.destroy();
+      watch.mockRestore();
+      create.mockRestore();
+    }
+    expect(stops).toHaveLength(2);
+    for (const stop of stops) expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it.each(['commit', 'destroy', 'supersede', 'failure'] as const)(
+    'owns a live theme watcher while the initial appearance is pending: %s',
+    async (outcome) => {
+      const root = createPreviewerRoot();
+      root.dataset.siteLibraryFamily = 'shadcn';
+      const host = root.querySelector<HTMLElement>('.host')!;
+      host.innerHTML = '<div class="proto-previewer__skeleton" role="status">Loading</div>';
+      const status = host.firstElementChild!;
+      const callbacks: Array<
+        Parameters<typeof projectionTheme.watchProjectionThemeSurfaceStyle>[2]
+      > = [];
+      const stops: ReturnType<typeof vi.fn>[] = [];
+      const appearances: ReturnType<typeof vi.fn>[] = [];
+      let release!: () => void;
+      let fail!: (error: Error) => void;
+      const pending = new Promise<void>((resolve, reject) => {
+        release = resolve;
+        fail = reject;
+      });
+      const watch = vi
+        .spyOn(projectionTheme, 'watchProjectionThemeSurfaceStyle')
+        .mockImplementation((_family, _scope, callback) => {
+          callbacks.push(callback);
+          callback({ '--pui-background': 'initial-theme' });
+          const stop = vi.fn();
+          stops.push(stop);
+          return stop;
+        });
+      const originalCreate = previewSurface.createRuntimePreviewSurface;
+      const create = vi
+        .spyOn(previewSurface, 'createRuntimePreviewSurface')
+        .mockImplementation((...args) => {
+          const surface = originalCreate(...args);
+          const appearance = vi.fn(async () => {});
+          if (appearances.length === 0) appearance.mockImplementationOnce(() => pending);
+          surface.setAppearance = appearance;
+          appearances.push(appearance);
+          return surface;
+        });
+      const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+      initPreviewer({
+        root,
+        demoId: 'demo-custom-preview',
+        initialRuntime: 'wc',
+        demoProps: {},
+        runtimeList: ['wc', 'vue2'],
+      });
+      try {
+        await vi.waitFor(() => expect(appearances[0]).toHaveBeenCalledOnce());
+        expect(callbacks).toHaveLength(1);
+        expect((root as any).__previewer__.getCurrentRuntime()).toBeNull();
+        expect(status.isConnected).toBe(true);
+        expect(host.inert).toBe(true);
+        callbacks[0]!({ '--pui-background': 'during-preparation' });
+        expect(appearances[0]).toHaveBeenCalledOnce();
+
+        if (outcome === 'destroy') {
+          await (root as any).__previewer__.destroy();
+          expect(stops[0]).toHaveBeenCalled();
+        } else if (outcome === 'supersede') {
+          document.dispatchEvent(
+            new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
+          );
+          await vi.waitFor(() =>
+            expect((root as any).__previewer__.getCurrentRuntime()).toBe('vue2')
+          );
+          expect(stops[0]).toHaveBeenCalled();
+        }
+        if (outcome === 'failure') fail(new Error('controlled initial appearance failure'));
+        else release();
+
+        if (outcome === 'commit') {
+          await vi.waitFor(() =>
+            expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc')
+          );
+          expect(appearances[0]).toHaveBeenLastCalledWith('shadcn', {
+            '--pui-background': 'during-preparation',
+          });
+          expect(status.isConnected).toBe(false);
+          expect(host.inert).toBe(false);
+          callbacks[0]!({ '--pui-background': 'after-commit' });
+          expect(appearances[0]).toHaveBeenLastCalledWith('shadcn', {
+            '--pui-background': 'after-commit',
+          });
+          expect(errors).not.toHaveBeenCalled();
+        } else {
+          await vi.waitFor(() => expect(runtimeSpies.unmount).toHaveBeenCalledWith('wc', host));
+          expect(stops[0]).toHaveBeenCalled();
+          callbacks[0]!({ '--pui-background': 'retired-owner-theme' });
+          expect(appearances[0]).toHaveBeenCalledOnce();
+          expect((root as any).__previewer__.getCurrentRuntime()).toBe(
+            outcome === 'supersede' ? 'vue2' : null
+          );
+          if (outcome === 'failure')
+            expect(host.textContent).toContain('controlled initial appearance failure');
+          else expect(errors).not.toHaveBeenCalled();
+        }
+      } finally {
+        release();
+        await (root as any).__previewer__.destroy();
+        watch.mockRestore();
+        create.mockRestore();
+        errors.mockRestore();
+      }
+    }
+  );
 
   it.each(['failure', 'destroy'] as const)(
     'releases the initial status on %s without retaining a busy shell',

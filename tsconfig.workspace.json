@@ -1,13 +1,14 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+  },
   "exclude": [
     "apps/www",
     "node_modules",
     "dist",
-    "internal/records/evidence",
+    "packages/compiler/prelude",
     "scripts/analysis/declarative-agent-ui",
-    "scripts/analysis/invisible-consumption/starter",
-    "scripts/release/consumer-smoke",
-    "packages/compiler/test/fixtures/differential-browser"
+    "scripts/release/consumer-smoke"
   ]
 }

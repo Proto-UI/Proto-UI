@@ -1,0 +1,85 @@
+{
+  "baseRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "checkoutState": "dirty candidate; not official clean-head CI",
+  "runs": [
+    {
+      "label": "brutalist-remaining-current",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/brutalist-remaining-current.json",
+      "rawSha256": "e3e8de91334f7508314e49a920662f749d96c819406d9a1e26fb8f531369e221",
+      "passed": 1,
+      "failed": 1,
+      "filtered": 4,
+      "cases": [
+        {
+          "ancestorTitles": ["remaining Brutalist component browser coverage"],
+          "fullName": "remaining Brutalist component browser coverage projects Toggle active, disabled, and click state with hard frames",
+          "status": "passed",
+          "title": "projects Toggle active, disabled, and click state with hard frames",
+          "duration": 10645.875617,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["remaining Brutalist component browser coverage"],
+          "fullName": "remaining Brutalist component browser coverage opens Hover Card from pointer and focus while preserving square trigger and panel surfaces",
+          "status": "failed",
+          "title": "opens Hover Card from pointer and focus while preserving square trigger and panel surfaces",
+          "duration": 5092.356030999999,
+          "failureMessages": [
+            "AssertionError: wc/hover-panel/no-shadow: expected [ 'rgb(0, 0, 0) 3px 3px 0px 0px' ] to have a length of +0 but got 1\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1339:22)\n    at Proxy.<anonymous> (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at expectHardFrame (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts:307:81)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts:1126:9\n    at file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "brutalist-remaining-flat",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/brutalist-remaining-flat.json",
+      "rawSha256": "df5b26f9bd1c0917facd003314f0fc6396a71a80b7d180efb5ef3e9c4b32e700",
+      "passed": 1,
+      "failed": 1,
+      "filtered": 4,
+      "cases": [
+        {
+          "ancestorTitles": ["remaining Brutalist component browser coverage"],
+          "fullName": "remaining Brutalist component browser coverage projects Toggle active, disabled, and click state with hard frames",
+          "status": "passed",
+          "title": "projects Toggle active, disabled, and click state with hard frames",
+          "duration": 10028.324164,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["remaining Brutalist component browser coverage"],
+          "fullName": "remaining Brutalist component browser coverage opens Hover Card from pointer and focus while preserving square trigger and panel surfaces",
+          "status": "failed",
+          "title": "opens Hover Card from pointer and focus while preserving square trigger and panel surfaces",
+          "duration": 20391.570762,
+          "failureMessages": [
+            "page.waitForFunction: Timeout 10000ms exceeded.\n    at waitForHoverCardEndpoint (/home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts:180:14)\n    at /home/ezra/proto-ui-browser-gate-cb5d/apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts:1116:9\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/ezra/proto-ui-browser-gate-cb5d/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)"
+          ],
+          "meta": {}
+        }
+      ]
+    },
+    {
+      "label": "hover-card-exact-owner",
+      "rawPath": "/home/ezra/proto-ui-browser-gate-cb5d-control/hover-card-exact-owner.json",
+      "rawSha256": "51f1f6b0ce11641abc462e5e40d1fc74c3a894f0a5f06a94609c65f0e91489d6",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 5,
+      "cases": [
+        {
+          "ancestorTitles": ["remaining Brutalist component browser coverage"],
+          "fullName": "remaining Brutalist component browser coverage opens Hover Card from pointer and focus while preserving square trigger and panel surfaces",
+          "status": "passed",
+          "title": "opens Hover Card from pointer and focus while preserving square trigger and panel surfaces",
+          "duration": 31979.771991999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ]
+    }
+  ]
+}

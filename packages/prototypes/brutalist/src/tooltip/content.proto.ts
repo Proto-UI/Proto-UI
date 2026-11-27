@@ -13,7 +13,7 @@ export const BrutalistTooltipContent = definePrototype<
     behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 100 });
     def.feedback.style.use(
       tw(
-        'z-50 inline-flex w-fit max-w-80 items-center gap-1.5 rounded-base border-2 border-foreground bg-secondary-background px-3 py-1.5 font-sans font-medium text-sm text-foreground text-balance'
+        'z-50 inline-flex w-fit max-w-80 items-center gap-1.5 rounded-base border-2 border-black bg-secondary-background px-3 py-1.5 font-sans font-medium text-sm text-foreground text-balance transition-none'
       )
     );
     def.rule({

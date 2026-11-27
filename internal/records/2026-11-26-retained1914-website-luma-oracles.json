@@ -1,0 +1,62 @@
+{
+  "base": "81ab8f642bed8380ac5f5926989c05f015936d31",
+  "patchSha256": "604f483861fef229634f759bb9eea0f3941844d211adea117543a72ce640a4e2",
+  "files": [
+    {
+      "path": "apps/www/src/components/site-contents-command.test.ts",
+      "beforeSha256": "0845aeab0ec7675c20bb7244b74d7880e0ac3194751461eb24cbd7d70c8402d3",
+      "afterSha256": "9135b6b88ef6563e80289030bcdae59a197af4d1c1061fca68e91fcafc479e08"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.native-facts.test.ts",
+      "beforeSha256": "00fed03f55c5d93a6317143f2b5617cc6ca0824628e7449503f44b4ea4d9b420",
+      "afterSha256": "71991f38f63804798f3bd32766bc740be246c9bd74036c173c6335a42c788ba7"
+    },
+    {
+      "path": "apps/www/src/prototypes/site-link-surface.test.ts",
+      "beforeSha256": "384787ae0e5b59bf47ca8a24bae7e967752f1db97903106453d11b1d2ee85ed5",
+      "afterSha256": "d1339abe3d7edd42af444c87a1cb5d3325bf28b82ee6806307fc019b1ecc21fa"
+    }
+  ],
+  "sourceEvidence": [
+    {
+      "path": "apps/www/src/components/site-link-recipes.ts",
+      "sha256ByRef": {
+        "ea3bc53b7fdb8a13668ae24f602fda818700c0e6": "16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479",
+        "6aff106b356efa16fab432ed1c0b3219130a4900": "16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479",
+        "81ab8f642bed8380ac5f5926989c05f015936d31": "16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479"
+      }
+    },
+    {
+      "path": "apps/www/src/components/site-header-control-recipes.ts",
+      "sha256ByRef": {
+        "ea3bc53b7fdb8a13668ae24f602fda818700c0e6": "daba0fe1ab6a097077c261f778da257f35b252d446a3d1fab220d7285f4d8da5",
+        "6aff106b356efa16fab432ed1c0b3219130a4900": "daba0fe1ab6a097077c261f778da257f35b252d446a3d1fab220d7285f4d8da5",
+        "81ab8f642bed8380ac5f5926989c05f015936d31": "daba0fe1ab6a097077c261f778da257f35b252d446a3d1fab220d7285f4d8da5"
+      }
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/button/profiles.ts",
+      "sha256ByRef": {
+        "ea3bc53b7fdb8a13668ae24f602fda818700c0e6": "a95804a8f3d43f0f54e4eb236b60789cd0e4c399ae51da45aee2429893460b7a",
+        "6aff106b356efa16fab432ed1c0b3219130a4900": "a95804a8f3d43f0f54e4eb236b60789cd0e4c399ae51da45aee2429893460b7a",
+        "81ab8f642bed8380ac5f5926989c05f015936d31": "a95804a8f3d43f0f54e4eb236b60789cd0e4c399ae51da45aee2429893460b7a"
+      }
+    },
+    {
+      "path": "spec/prototypes/P-SHADCN-SURFACE.yaml",
+      "sha256ByRef": {
+        "ea3bc53b7fdb8a13668ae24f602fda818700c0e6": "3fc9f1a0d24ae34182a07c0fd473ceb0eb7dd7345d80c3537268539cdb090cae",
+        "6aff106b356efa16fab432ed1c0b3219130a4900": "3fc9f1a0d24ae34182a07c0fd473ceb0eb7dd7345d80c3537268539cdb090cae",
+        "81ab8f642bed8380ac5f5926989c05f015936d31": "3fc9f1a0d24ae34182a07c0fd473ceb0eb7dd7345d80c3537268539cdb090cae"
+      }
+    }
+  ],
+  "scope": "Test-only correction of existing website Luma consumers. Public Rhea remains 2xl. Native ownership, stale-owner prevention, pressed/hover/focus feedback, dimensions, lifecycle, defaults and deadline assertions remain intact. Adds an explicit rejection of the Rhea corner in the replacement-owner case.",
+  "validation": "Source and literal identity reviewed locally; no execution yet while another agent owns the current-main inventory memory window.",
+  "secondView": {
+    "reviewer": "/root/review_website_prs",
+    "reportSha256": "ffe5272443d8a0400a5f5b2564152bcd42fdc04f1cbc808d21816aa5d6a5dd54",
+    "verdict": "PASS for exact source patch; no test execution by reviewer"
+  }
+}

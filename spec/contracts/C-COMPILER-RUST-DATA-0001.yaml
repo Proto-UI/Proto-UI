@@ -1,10 +1,15 @@
 id: C-COMPILER-RUST-DATA-0001
 type: contract
 title: Explicit checked pure-data Rust artifacts without component ownership
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  The maintainer requested a headless generated decision layer for native consumers. This private artifact boundary requires independent review and its declared Rust consumer evidence; it is not a stable compiler profile or an Expose API promotion.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 summary: Explicit extraction of checked pure module functions produces a typed Rust data crate without instantiating a prototype or importing its native UI owner.
 statement:
@@ -31,9 +36,12 @@ references:
   contracts: [C-EXPOSE-0003, C-EXPOSE-0004, C-EXPOSE-0005]
   decisions: [D-EXPOSE-METHOD-CALL-0001]
 sources:
-  - path: internal/compiler/rust-data-artifacts.md
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/internal/compiler/rust-data-artifacts.md
 revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Define private pure-data extraction independently of component-instance Expose semantics and native view dependencies.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, rust, data, native, ownership]

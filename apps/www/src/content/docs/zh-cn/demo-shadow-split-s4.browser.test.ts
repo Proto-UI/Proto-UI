@@ -10,6 +10,7 @@ import { launchBrowser, startServer, stopServer } from './browser-harness';
 import { observeS4Startup, installS4InitJournal } from './demo-matrix-observation';
 import { settleFamilyQueryBatch } from './family-query-observer';
 import { runS4Journey } from '../../../../../../scripts/analysis/shadow-s4-journey.mjs';
+import { observeS4Journey } from './s4-journey-observation';
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
@@ -225,7 +226,11 @@ describe.sequential('S4 complete public Dialog settings', () => {
         });
         note('journey', 'begin');
         try {
-          await runS4Journey(page);
+          await runS4Journey(
+            observeS4Journey(page, (operation) => {
+              console.info('[S4 journey operation]', JSON.stringify({ locale, ...operation }));
+            })
+          );
           note('journey', 'return');
         } catch (error) {
           note('journey', 'error');

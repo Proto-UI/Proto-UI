@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-wc-reduction-forward-port",
+  "carrierPr": 1908,
+  "originPr": 1913,
+  "originHead": "8a14a0d3dfddbc475c9781a52a7954bf5b8deed2",
+  "sourceCommits": [
+    {
+      "revision": "62fee24c6ceae418595833929789e8a18b67ebf3",
+      "author": "cyjin-yl <cyjin-yl@users.noreply.github.com>"
+    },
+    {
+      "revision": "659dcfdcb8a5fa6e445d23d5334e40e99f52d1d9",
+      "author": "cyjin-yl <cyjin-yl@users.noreply.github.com>"
+    },
+    {
+      "revision": "91f4cd4bd368d0a988053708c2f9eb68dc4a238e",
+      "author": "cyjin-yl <cyjin-yl@users.noreply.github.com>"
+    }
+  ],
+  "originalHistory": "Original commits remain unmodified and reachable from the original1913 head; the coordinator will merge that complete history in the following pull request. This bounded forward port is attributed source integration, not a replacement PR or rewrite.",
+  "sourcePaths": [
+    {
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "beforeSha256": "84fe9807261f461f3eca146c8922b13ee8867c9f33ebc1b54cc4e760c028a328",
+      "originalSha256": "defab3fc457c266451b2a5dff7163104cb90c7759395820c777c69d2c1272469",
+      "afterSha256": "7f3c8ac2998cbac01bdd75c6dddbcd3e54a989ff3682e06b4b1f6ea4db3f92a4",
+      "formatting": "The integrated bytes differ from native1913 only by existing repository formatter line wrapping."
+    },
+    {
+      "path": "packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts",
+      "beforeSha256": "45ea4e1c36f1ffac74e3c832401af1617479d5e78ba45ca2dcdacdb97c391950",
+      "originalSha256": "f8c2986b44ef4b8eb7cfd90ca038fa2d70fc05683511c7ee5fc6c9c787c18b84",
+      "afterSha256": "8e6dcb779c85b0ca4d524908b5406c984a9b39c6d2778ac0c5f232924371c8cb",
+      "formatting": "The integrated bytes differ from native1913 only by existing repository formatter line wrapping."
+    }
+  ],
+  "review": {
+    "restoration": "Ordered restore closures keep the original current-method/current-setter identity guards. A third-party replacement installed after ours is never overwritten.",
+    "ancestorTraversal": "Reuse the same complete composed ancestor chain for dormant detection, observers and motion targets; physical slot-parent tracking remains intact.",
+    "observerOptions": "Share current observation options and capture old attribute values. Only truly same-valued external mutations are skipped; A-to-B-to-A batches and author callback changes still invalidate.",
+    "testBoundary": "The existing Happy DOM CSSOM fixture supplies only the native computed display input; Adapter refresh/write and original assertions remain real.",
+    "excluded": "No empty-region early guard, recursive1914 sampling, numeric ceiling change, new timeout, or frontend/compiler changes."
+  },
+  "validation": {
+    "node": "24.22.3",
+    "vitest": "2.1.9",
+    "coalescingCasesPassed": 22,
+    "observerCasesPassed": 57,
+    "totalPassed": 79,
+    "failed": 0,
+    "foreignOwnerControls": "Existing third-party stylesheet method/cssText setter and attachShadow controls passed in the57 observer cases.",
+    "logSha256": "5406abd5a77430abe44cb1b851bfa50d22018b0683dccdc88e3f9fe6b83bcbc7",
+    "strictNineBudgets": "Pending actual clean committed source measurement; this record does not claim a bundle gate pass.",
+    "fullTypes": "Pending hosted exact-head validation."
+  },
+  "agentAssistance": "ChatGPT source integration under explicit current-user direction; normal project identity and sign-off. Original source authors and commits are preserved."
+}

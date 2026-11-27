@@ -73,6 +73,23 @@ export function readContrastPopupEscapeBefore({ family, trigger, popup, owner, g
         open: selectRoot.hasAttribute('data-open'),
       }
     : null;
+  const triggerText = trigger.textContent?.trim() ?? '';
+  const selectedOptions = options.filter((option) => option.selected === 'true');
+  const selectSelectionValid =
+    rootSelection !== null &&
+    rootSelection.value !== null &&
+    rootSelection.textValue !== null &&
+    rootSelection.open === true &&
+    options.length > 0 &&
+    options.every((option) => option.text && ['true', 'false'].includes(option.selected)) &&
+    new Set(options.map((option) => option.text)).size === options.length &&
+    ((selectedOptions.length === 1 &&
+      rootSelection.textValue === triggerText &&
+      selectedOptions[0].text === triggerText) ||
+      (selectedOptions.length === 0 &&
+        rootSelection.value === '' &&
+        rootSelection.textValue === '' &&
+        triggerText.length > 0));
   const observation = {
     achieved:
       !!contentPrototype &&
@@ -88,16 +105,7 @@ export function readContrastPopupEscapeBefore({ family, trigger, popup, owner, g
         (selectRoot?.isConnected &&
           !selectRoot.hasAttribute('data-pui-view-detached') &&
           !selectRoot.hasAttribute('data-pui-view-pending') &&
-          rootSelection.value !== null &&
-          rootSelection.textValue !== null &&
-          rootSelection.open === true &&
-          rootSelection.textValue === (trigger.textContent?.trim() ?? '') &&
-          options.length > 0 &&
-          options.every((option) => option.text && ['true', 'false'].includes(option.selected)) &&
-          options.filter((option) => option.selected === 'true').length === 1 &&
-          new Set(options.map((option) => option.text)).size === options.length &&
-          options.find((option) => option.selected === 'true')?.text ===
-            (trigger.textContent?.trim() ?? ''))),
+          selectSelectionValid)),
     family,
     owner,
     generation,
@@ -107,7 +115,7 @@ export function readContrastPopupEscapeBefore({ family, trigger, popup, owner, g
     owned,
     visibility,
     rootSelection,
-    triggerText: trigger.textContent?.trim() ?? '',
+    triggerText,
     selection: options.map(({ id, text, selected }) => ({ id, text, selected })),
     focusWasTrigger: document.activeElement === trigger,
     focusBefore: document.activeElement

@@ -10,7 +10,7 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Hover Card 在 Base Hover Card 的延迟触发与防碰撞定位协议之上，还原归档版本的 `#08c` / `#005580` 链接视觉、276px 最大宽度、6px 圆角边框、经典投影以及 150ms 线性淡入淡出过渡。
+Bootstrap 2.3.2 Hover Card 将 Base Hover Card 的延迟触发与防碰撞定位同 Bootstrap 链接样式、276px 最大宽度、6px 圆角边框、经典投影及 150ms 线性淡入淡出过渡结合起来。
 
 ## 预览
 
@@ -58,7 +58,7 @@ BootstrapHoverCardRoot
 └── BootstrapHoverCardContent
 ```
 
-- 触发器在浅色主题下采用 Bootstrap 2.3.2 经典的 `#08c` 链接色与 `#005580` 悬停/聚焦下划线，并在深色宿主下自动切换为高对比度前景色。
+- 触发器默认使用 Bootstrap 2.3.2 的 `#08c` 链接色。浅色与深色主题下，悬停或聚焦时均使用主题前景色和下划线。
 - 浮层面板保留归档 `.popover` 尺寸参数（`max-width: 276px`、`border-radius: 6px`、内层 `9px 14px` 留白）及 `150ms` 线性透明度过渡。
 
 ## 示例

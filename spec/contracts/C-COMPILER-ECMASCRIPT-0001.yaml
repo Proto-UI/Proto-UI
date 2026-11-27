@@ -1,10 +1,15 @@
 id: C-COMPILER-ECMASCRIPT-0001
 type: contract
 title: Checked ordinary ECMAScript computation preserves native language semantics
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  Actual upstream NumberField authoring uses standard numeric formatting, parsing and collection computation. The private compiler admits checked ordinary source operations without replacing this behavior with a consumer-specific formatter. This draft does not claim all ECMAScript syntax or non-JavaScript target support.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 summary: Checked scalar, AggregateError, TypeError, RegExp, Intl and bounded diagnostic operations lower to their actual JavaScript operations without executing author source at compilation time.
@@ -35,15 +40,15 @@ criteria:
   - id: C-COMPILER-ECMASCRIPT-0001-CONSUMER
     text: Validation must exercise actual official NumberField formatting source and its helper closure through generated output, retaining plain, localized, currency, percent and invalid configuration behavior. Source parser success alone is not evidence that emitted computations execute correctly.
 references:
-  contracts: [C-COMPILER-OBSERVABLES-0001]
+  contracts: [{ id: C-COMPILER-OBSERVABLES-0001, until: 0.4.0 }]
 sources:
-  - path: packages/compiler/src/ecmascript-values.ts
-  - path: packages/compiler/src/source-ecmascript.ts
-  - path: packages/compiler/src/native-value-lowering.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/ecmascript-values.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/source-ecmascript.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-value-lowering.ts
   - path: packages/prototypes/base/src/number-field/format.ts
   - path: packages/prototypes/base/src/drawer/snap.ts
   - path: packages/prototypes/base/src/drawer/content.proto.ts
-  - path: packages/compiler/test/number-format-source-consumer.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/test/number-format-source-consumer.ts
   - path: packages/prototypes/base/test/number-field-format.test.ts
 openQuestions:
   - id: C-COMPILER-ECMASCRIPT-0001-Q-EVIDENCE
@@ -54,4 +59,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Record generic standard-language support needed by real upstream numerical controls with explicit binding, execution and target boundaries.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, language, intl, number-field]

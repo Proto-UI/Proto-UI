@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import canonicalCheckbox from '../../content/docs/demo_components/base-checkbox/demo-base-checkbox.demo';
 import controlledCheckbox from '../../content/docs/zh-cn/demo-base-checkbox-controlled-states.demo';
 import { buildDemoRegistry } from './demo-registry';
+import { assertDemoSpec, type DemoChild } from './demo-types';
 // Do not mock or replace this import: module initialization must collect the
 // production ../../content/**/*.demo.ts glob, including every locale/subfolder.
 import { getAvailableDemos, getDemoSourcePath, loadDemo } from './demo-modules';
@@ -16,6 +17,13 @@ function contentDemoPaths(directory: string): string[] {
     if (entry.isDirectory()) return contentDemoPaths(path);
     return entry.isFile() && entry.name.endsWith('.demo.ts') ? [path] : [];
   });
+}
+
+function popoverContents(node: DemoChild): Extract<DemoChild, { kind: 'proto' }>[] {
+  if (typeof node === 'string' || node.kind === 'text') return [];
+  const current =
+    node.kind === 'proto' && node.prototypeId === 'brutalist-popover-content' ? [node] : [];
+  return current.concat((node.children ?? []).flatMap(popoverContents));
 }
 
 describe('production demo registry', () => {
@@ -51,6 +59,30 @@ describe('production demo registry', () => {
       expect(await loadDemo(demoId)).toMatchObject({ type: 'demo' });
     }
   );
+
+  it.each([
+    ['demo-brutalist-popover-basic', 1],
+    ['demo-brutalist-popover-align', 3],
+    ['demo-brutalist-popover-controlled', 1],
+  ] as const)('loads mountable public portal examples for %s', async (demoId, expectedCount) => {
+    const demo = await loadDemo(demoId);
+    expect(() => assertDemoSpec(demo)).not.toThrow();
+    const contents = popoverContents(demo.root);
+    expect(contents).toHaveLength(expectedCount);
+    for (const content of contents) expect(content.previewTheme).toBe('portal');
+    expect(new Set(contents.map((content) => content.ref)).size).toBe(expectedCount);
+
+    // Preserve setup functions while cloning only the authored JSON-like tree.
+    const missingRef = { ...demo, root: structuredClone(demo.root) };
+    for (const content of popoverContents(missingRef.root)) {
+      const ref = content.ref;
+      delete content.ref;
+      expect(() => assertDemoSpec(missingRef)).toThrow(
+        'previewTheme requires portal and a nonempty ref'
+      );
+      content.ref = ref;
+    }
+  });
 
   it('rejects the original cross-directory duplicate basename instead of overwriting it', () => {
     const canonicalPath =

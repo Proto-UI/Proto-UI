@@ -28,6 +28,7 @@ const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2:
 import {
   galleryFlowEvidence,
   chartContainmentIssues,
+  readGalleryRhythm,
   type GalleryRect,
   type GalleryFlowFacts,
 } from '../../../components/Homepage/homepage-layout-evidence';
@@ -412,7 +413,7 @@ async function layoutFacts(page: Page) {
       const bottom = box.bottom - parseFloat(css.borderBottomWidth) - parseFloat(css.paddingBottom);
       return { left, top, right, bottom, width: right - left, height: bottom - top };
     };
-    const gallery: GalleryFlowFacts = {
+    const gallery: Omit<GalleryFlowFacts, 'gapRem'> = {
       wideMedia: matchMedia('(min-width: 96rem)').matches,
       enhancedMedia: matchMedia('(48rem <= width < 96rem)').matches,
       queryContainerWidth: viewport ? parseFloat(getComputedStyle(viewport).width) : NaN,
@@ -634,8 +635,10 @@ async function layoutFacts(page: Page) {
       issues: [...new Set(issues)],
     };
   }, ACTIVE);
+  const { gapRem } = await page.evaluate(readGalleryRhythm);
   return {
     ...facts,
+    gallery: { ...facts.gallery, gapRem },
     issues: [
       ...facts.issues,
       ...facts.charts.flatMap(({ card, parts }) => chartContainmentIssues(card, parts)),

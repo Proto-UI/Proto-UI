@@ -5,13 +5,13 @@ import {
   type MotionPresentation,
 } from '../src/motion/projector';
 import type { ResidentMotionFrame } from '../src/motion/sink';
+import type { ResidentMotionProperty } from '@proto.ui/core';
 import { colorToMotionVector, motionVectorToColor } from '../src/motion/color';
 function harness() {
   let now = 0,
     revision = 0;
   let listener = () => {};
-  let projectReceipt = () =>
-    ['translate', 'background-color'] as readonly ('translate' | 'background-color')[];
+  let projectReceipt = () => ['translate', 'background-color'] as readonly ResidentMotionProperty[];
   let next = 0;
   let schedule: ((cb: () => void) => number) | null = null;
   const callbacks = new Map<number, () => void>(),
@@ -27,10 +27,17 @@ function harness() {
     paletteRevision: 0,
   };
   const writes: { tokens: string[]; p: MotionPresentation }[] = [];
+  const requests: {
+    declared: readonly ResidentMotionProperty[];
+    targets: readonly ResidentMotionProperty[] | undefined;
+  }[] = [];
   let reasons: readonly string[] = [];
   const sink = createResidentMotionProjector({
     now: () => now,
-    environment: () => env,
+    environment: (declared, targets) => {
+      requests.push({ declared, targets });
+      return env;
+    },
     subscribe: (cb) => {
       listener = cb;
       return () => {
@@ -65,6 +72,7 @@ function harness() {
     });
   return {
     sink,
+    requests,
     receipt(fn: typeof projectReceipt) {
       projectReceipt = fn;
     },
@@ -337,4 +345,112 @@ it('reentrant retirement cannot acknowledge the attempted frame or retain schedu
   const count = h.writes.length;
   h.time(100);
   expect(h.writes.length).toBe(count);
+});
+
+function widthFrame(
+  tokens: string[],
+  revision: number,
+  numbers?: Readonly<Record<string, number>>
+): ResidentMotionFrame {
+  return {
+    view: 1,
+    revision,
+    style: { kind: 'tw', tokens },
+    declarations: [{ properties: ['width'], durationMs: 100, easing: [0, 0, 1, 1] }],
+    ...(numbers ? { numbers } : {}),
+  };
+}
+
+describe('static motion target demand', () => {
+  it.each([
+    { tokens: [], reason: 'missing-or-ambiguous-target' },
+    { tokens: ['w-auto'], reason: 'length-unavailable' },
+    { tokens: ['w-[100px]', 'w-[300px]'], reason: 'missing-or-ambiguous-target' },
+    { tokens: ['hover:w-4'], reason: 'selector-dependent-target' },
+  ])(
+    'keeps declared width and its original failure for $tokens without asking for a width basis',
+    ({ tokens, reason }) => {
+      const h = harness();
+      h.environment({ supportedProperties: ['width'], containingBlockWidth: 400 });
+      h.receipt(() => ['width']);
+      h.sink.commit(widthFrame(tokens, 1));
+      expect(h.requests.at(-1)).toEqual({ declared: ['width'], targets: [] });
+      expect(Object.isFrozen(h.requests.at(-1)!.targets)).toBe(true);
+      expect(h.last.p).toEqual({});
+      expect(h.last.tokens).toEqual(tokens);
+      expect(h.reasons).toContain(`width:${reason}`);
+      expect(h.reasons).toContain('width:unresolved-target-settled');
+      h.time(0);
+      expect(h.requests.at(-1)).toEqual({ declared: ['width'], targets: [] });
+    }
+  );
+
+  it('keeps a pending percentage observable and reevaluates later Rule targets from each new frame', () => {
+    const h = harness();
+    h.environment({ supportedProperties: ['width'], containingBlockWidth: null });
+    h.receipt(() => ['width']);
+    h.sink.commit(widthFrame([], 1));
+    expect(h.requests.at(-1)!.targets).toEqual([]);
+    h.sink.commit(widthFrame(['w-1/2'], 2));
+    expect(h.requests.at(-1)).toEqual({ declared: ['width'], targets: ['width'] });
+    expect(h.last.p.width).toBeUndefined();
+    expect(h.last.tokens).toEqual(['w-1/2']);
+    h.environment({ containingBlockWidth: 400 });
+    expect(h.last.p.width).toBe(200);
+    h.sink.commit(widthFrame(['w-auto'], 3));
+    expect(h.requests.at(-1)!.targets).toEqual([]);
+    h.sink.commit(widthFrame(['w-[100px]'], 4));
+    expect(h.requests.at(-1)!.targets).toEqual(['width']);
+    expect(h.last.p.width).toBe(100);
+    h.sink.commit(widthFrame([], 1));
+    expect(h.requests.at(-1)!.targets).toEqual(['width']);
+  });
+
+  it('does not turn a parsed target hint into host capability', () => {
+    const h = harness();
+    h.receipt(() => ['width']);
+    h.sink.commit(widthFrame(['w-[100px]'], 1));
+    expect(h.requests.at(-1)).toEqual({ declared: ['width'], targets: ['width'] });
+    expect(h.last.p.width).toBeUndefined();
+    expect(h.last.tokens).toEqual(['w-[100px]']);
+    expect(h.reasons).toContain('width:host-property-unavailable');
+    h.environment({ supportedProperties: ['width'] });
+    expect(h.last.p.width).toBe(100);
+  });
+
+  it('retains the admitted numeric snapshot while the host basis remains live', () => {
+    const h = harness();
+    h.environment({ supportedProperties: ['width'], containingBlockWidth: 400 });
+    h.receipt(() => ['width']);
+    const tokens = ['w-[calc(var(--pui-progress)*1%)]'];
+    const numbers = { progress: 25 };
+    h.sink.commit(widthFrame(tokens, 1, numbers));
+    expect(h.last.p.width).toBe(100);
+    tokens[0] = 'w-auto';
+    numbers.progress = 99;
+    h.environment({ containingBlockWidth: 200 });
+    expect(h.requests.at(-1)!.targets).toEqual(['width']);
+    expect(h.last.p.width).toBe(50);
+    h.sink.commit(widthFrame(['w-[calc(var(--pui-progress)*1%)]'], 2, numbers));
+    expect(h.last.p.width).toBe(198);
+  });
+
+  it('does not evaluate an unknown numeric getter to establish target demand', () => {
+    const h = harness();
+    h.environment({ supportedProperties: ['width'], containingBlockWidth: 400 });
+    h.receipt(() => ['width']);
+    let reads = 0;
+    const numbers = Object.defineProperty({}, 'progress', {
+      enumerable: true,
+      get() {
+        reads++;
+        return 25;
+      },
+    });
+    h.sink.commit(widthFrame(['w-[calc(var(--pui-progress)*1%)]'], 1, numbers));
+    expect(reads).toBe(0);
+    expect(h.requests.at(-1)!.targets).toEqual([]);
+    expect(h.last.p.width).toBeUndefined();
+    expect(h.reasons).toContain('width:numeric-source-unavailable');
+  });
 });

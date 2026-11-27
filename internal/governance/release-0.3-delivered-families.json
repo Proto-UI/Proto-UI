@@ -1,0 +1,922 @@
+{
+  "schemaVersion": 1,
+  "ownerDocument": "internal/governance/release-0.3-list.md",
+  "note": "Structured per-family delivery manifest extracted from Finf-promised family delivery checkboxes; records development-delivered source paths and spec entity revisions separately from release acceptance.",
+  "groups": [
+    {
+      "group": "Form/relationships: Label, Field, Fieldset, Form, Checkbox Group (`deliver.label` through `deliver.checkbox-group`; #1094)",
+      "issue": "#1094",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/label/",
+          "packages/prototypes/base/src/field/",
+          "packages/prototypes/base/src/fieldset/",
+          "packages/prototypes/base/src/form/",
+          "packages/prototypes/base/src/checkbox-group/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/label/",
+          "packages/prototypes/shadcn/src/field/",
+          "packages/prototypes/shadcn/src/fieldset/",
+          "packages/prototypes/shadcn/src/form/",
+          "packages/prototypes/shadcn/src/checkbox-group/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/label/",
+          "packages/prototypes/brutalist/src/field/",
+          "packages/prototypes/brutalist/src/fieldset/",
+          "packages/prototypes/brutalist/src/form/",
+          "packages/prototypes/brutalist/src/checkbox-group/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-LABEL.yaml",
+          "revision": "76de3e2ef"
+        },
+        {
+          "file": "P-SHADCN-LABEL.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-LABEL.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-FIELD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-FIELD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-FIELD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-FIELDSET.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-FIELDSET.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-FIELDSET.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-FORM.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-FORM.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-FORM.yaml",
+          "revision": "af3a15a9d"
+        },
+        {
+          "file": "P-BASE-CHECKBOX-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-CHECKBOX-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-CHECKBOX-GROUP.yaml",
+          "revision": "9da3dfd18"
+        }
+      ]
+    },
+    {
+      "group": "Collections/search/focus: Autocomplete, Combobox, Command, Toggle Group, Toolbar, Menubar, Navigation Menu, Context Menu",
+      "issue": "#1095",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/autocomplete/",
+          "packages/prototypes/base/src/combobox/",
+          "packages/prototypes/base/src/command/",
+          "packages/prototypes/base/src/toggle-group/",
+          "packages/prototypes/base/src/toolbar/",
+          "packages/prototypes/base/src/menubar/",
+          "packages/prototypes/base/src/navigation-menu/",
+          "packages/prototypes/base/src/context-menu/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/autocomplete/",
+          "packages/prototypes/shadcn/src/combobox/",
+          "packages/prototypes/shadcn/src/command/",
+          "packages/prototypes/shadcn/src/toggle-group/",
+          "packages/prototypes/shadcn/src/toolbar/",
+          "packages/prototypes/shadcn/src/menubar/",
+          "packages/prototypes/shadcn/src/navigation-menu/",
+          "packages/prototypes/shadcn/src/context-menu/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/autocomplete/",
+          "packages/prototypes/brutalist/src/combobox/",
+          "packages/prototypes/brutalist/src/command/",
+          "packages/prototypes/brutalist/src/toggle-group/",
+          "packages/prototypes/brutalist/src/toolbar/",
+          "packages/prototypes/brutalist/src/menubar/",
+          "packages/prototypes/brutalist/src/navigation-menu/",
+          "packages/prototypes/brutalist/src/context-menu/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-AUTOCOMPLETE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-AUTOCOMPLETE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-AUTOCOMPLETE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-COMBOBOX.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-COMBOBOX.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-COMBOBOX.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-COMMAND.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-COMMAND.yaml",
+          "revision": "ac27ffad4"
+        },
+        {
+          "file": "P-BRUTALIST-COMMAND.yaml",
+          "revision": "9025dbcb1"
+        },
+        {
+          "file": "P-BASE-TOGGLE-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TOGGLE-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TOGGLE-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-TOOLBAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TOOLBAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TOOLBAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-MENUBAR.yaml",
+          "revision": "45cc828e8"
+        },
+        {
+          "file": "P-SHADCN-MENUBAR.yaml",
+          "revision": "180591449"
+        },
+        {
+          "file": "P-BRUTALIST-MENUBAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-NAVIGATION-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-NAVIGATION-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-NAVIGATION-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-CONTEXT-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-CONTEXT-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-CONTEXT-MENU.yaml",
+          "revision": "9da3dfd18"
+        }
+      ]
+    },
+    {
+      "group": "Disclosure: Collapsible and Accordion",
+      "issue": "#1096",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/collapsible/",
+          "packages/prototypes/base/src/accordion/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/collapsible/",
+          "packages/prototypes/shadcn/src/accordion/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/collapsible/",
+          "packages/prototypes/brutalist/src/accordion/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-COLLAPSIBLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-COLLAPSIBLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-COLLAPSIBLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-ACCORDION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-ACCORDION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-ACCORDION.yaml",
+          "revision": "9da3dfd18"
+        }
+      ]
+    },
+    {
+      "group": "Overlay/notifications: Popover, Alert Dialog, Drawer, Toast",
+      "issue": "#1097",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/popover/",
+          "packages/prototypes/base/src/alert-dialog/",
+          "packages/prototypes/base/src/drawer/",
+          "packages/prototypes/base/src/toast/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/popover/",
+          "packages/prototypes/shadcn/src/alert-dialog/",
+          "packages/prototypes/shadcn/src/drawer/",
+          "packages/prototypes/shadcn/src/toast/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/popover/",
+          "packages/prototypes/brutalist/src/alert-dialog/",
+          "packages/prototypes/brutalist/src/drawer/",
+          "packages/prototypes/brutalist/src/toast/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-POPOVER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-POPOVER.yaml",
+          "revision": "5269502eb"
+        },
+        {
+          "file": "P-BRUTALIST-POPOVER.yaml",
+          "revision": "5269502eb"
+        },
+        {
+          "file": "P-BASE-ALERT-DIALOG.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-ALERT-DIALOG.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-ALERT-DIALOG.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-DRAWER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-DRAWER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-DRAWER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-TOAST.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TOAST.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TOAST.yaml",
+          "revision": "9da3dfd18"
+        }
+      ]
+    },
+    {
+      "group": "Values/dates: Slider, Number Field, Progress, Meter, Input OTP, Calendar, Date Picker",
+      "issue": "#1098",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/slider/",
+          "packages/prototypes/base/src/number-field/",
+          "packages/prototypes/base/src/progress/",
+          "packages/prototypes/base/src/meter/",
+          "packages/prototypes/base/src/input-otp/",
+          "packages/prototypes/base/src/calendar/",
+          "packages/prototypes/base/src/date-picker/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/slider/",
+          "packages/prototypes/shadcn/src/number-field/",
+          "packages/prototypes/shadcn/src/progress/",
+          "packages/prototypes/shadcn/src/meter/",
+          "packages/prototypes/shadcn/src/input-otp/",
+          "packages/prototypes/shadcn/src/calendar/",
+          "packages/prototypes/shadcn/src/date-picker/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/slider/",
+          "packages/prototypes/brutalist/src/number-field/",
+          "packages/prototypes/brutalist/src/progress/",
+          "packages/prototypes/brutalist/src/meter/",
+          "packages/prototypes/brutalist/src/input-otp/",
+          "packages/prototypes/brutalist/src/calendar/",
+          "packages/prototypes/brutalist/src/date-picker/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-SLIDER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-SLIDER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-SLIDER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-NUMBER-FIELD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-NUMBER-FIELD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-NUMBER-FIELD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-PROGRESS.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-PROGRESS.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-PROGRESS.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-METER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-METER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-METER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-INPUT-OTP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-INPUT-OTP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-INPUT-OTP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-CALENDAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-CALENDAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-CALENDAR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-DATE-PICKER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-DATE-PICKER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-DATE-PICKER.yaml",
+          "revision": "9da3dfd18"
+        }
+      ]
+    },
+    {
+      "group": "Geometry/long collections: Resizable, Carousel, Message Scroller, Tree, Virtual List, Data Table",
+      "issue": "#1099",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/resizable/",
+          "packages/prototypes/base/src/carousel/",
+          "packages/prototypes/base/src/message-scroller/",
+          "packages/prototypes/base/src/tree/",
+          "packages/prototypes/base/src/virtual-list/",
+          "packages/prototypes/base/src/data-table/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/resizable/",
+          "packages/prototypes/shadcn/src/carousel/",
+          "packages/prototypes/shadcn/src/message-scroller/",
+          "packages/prototypes/shadcn/src/tree/",
+          "packages/prototypes/shadcn/src/virtual-list/",
+          "packages/prototypes/shadcn/src/data-table/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/resizable/",
+          "packages/prototypes/brutalist/src/carousel/",
+          "packages/prototypes/brutalist/src/message-scroller/",
+          "packages/prototypes/brutalist/src/tree/",
+          "packages/prototypes/brutalist/src/virtual-list/",
+          "packages/prototypes/brutalist/src/data-table/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-RESIZABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-RESIZABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-RESIZABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-CAROUSEL.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-CAROUSEL.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-CAROUSEL.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-MESSAGE-SCROLLER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-MESSAGE-SCROLLER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-MESSAGE-SCROLLER.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-TREE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TREE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TREE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-VIRTUAL-LIST.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-VIRTUAL-LIST.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-VIRTUAL-LIST.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-DATA-TABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-DATA-TABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-DATA-TABLE.yaml",
+          "revision": "9da3dfd18"
+        }
+      ]
+    },
+    {
+      "group": "Existing Base parity: Async Region, Button, Checkbox, Dialog, Dropdown, Hover Card, Image, Input, Live Region, Radio Group, Scroll Area, Select, Separator, Surface, Switch, Table, Tabs, Text, Textarea, Toggle, Tooltip, Transition (#1100, #1159–#1162)",
+      "issue": "#1100",
+      "status": "implementation-delivered",
+      "sources": {
+        "base": [
+          "packages/prototypes/base/src/async-region/",
+          "packages/prototypes/base/src/button/",
+          "packages/prototypes/base/src/checkbox/",
+          "packages/prototypes/base/src/dialog/",
+          "packages/prototypes/base/src/dropdown/",
+          "packages/prototypes/base/src/hover-card/",
+          "packages/prototypes/base/src/image/",
+          "packages/prototypes/base/src/input/",
+          "packages/prototypes/base/src/live-region/",
+          "packages/prototypes/base/src/radio-group/",
+          "packages/prototypes/base/src/scroll-area/",
+          "packages/prototypes/base/src/select/",
+          "packages/prototypes/base/src/separator/",
+          "packages/prototypes/base/src/surface/",
+          "packages/prototypes/base/src/switch/",
+          "packages/prototypes/base/src/table/",
+          "packages/prototypes/base/src/tabs/",
+          "packages/prototypes/base/src/text/",
+          "packages/prototypes/base/src/textarea/",
+          "packages/prototypes/base/src/toggle/",
+          "packages/prototypes/base/src/tooltip/",
+          "packages/prototypes/base/src/transition/"
+        ],
+        "shadcn": [
+          "packages/prototypes/shadcn/src/async-region/",
+          "packages/prototypes/shadcn/src/button/",
+          "packages/prototypes/shadcn/src/checkbox/",
+          "packages/prototypes/shadcn/src/dialog/",
+          "packages/prototypes/shadcn/src/dropdown/",
+          "packages/prototypes/shadcn/src/hover-card/",
+          "packages/prototypes/shadcn/src/image/",
+          "packages/prototypes/shadcn/src/input/",
+          "packages/prototypes/shadcn/src/live-region/",
+          "packages/prototypes/shadcn/src/radio-group/",
+          "packages/prototypes/shadcn/src/scroll-area/",
+          "packages/prototypes/shadcn/src/select/",
+          "packages/prototypes/shadcn/src/separator/",
+          "packages/prototypes/shadcn/src/surface/",
+          "packages/prototypes/shadcn/src/switch/",
+          "packages/prototypes/shadcn/src/table/",
+          "packages/prototypes/shadcn/src/tabs/",
+          "packages/prototypes/shadcn/src/text/",
+          "packages/prototypes/shadcn/src/textarea/",
+          "packages/prototypes/shadcn/src/toggle/",
+          "packages/prototypes/shadcn/src/tooltip/",
+          "packages/prototypes/shadcn/src/transition/"
+        ],
+        "brutalist": [
+          "packages/prototypes/brutalist/src/async-region/",
+          "packages/prototypes/brutalist/src/button/",
+          "packages/prototypes/brutalist/src/checkbox/",
+          "packages/prototypes/brutalist/src/dialog/",
+          "packages/prototypes/brutalist/src/dropdown/",
+          "packages/prototypes/brutalist/src/hover-card/",
+          "packages/prototypes/brutalist/src/image/",
+          "packages/prototypes/brutalist/src/input/",
+          "packages/prototypes/brutalist/src/live-region/",
+          "packages/prototypes/brutalist/src/radio-group/",
+          "packages/prototypes/brutalist/src/scroll-area/",
+          "packages/prototypes/brutalist/src/select/",
+          "packages/prototypes/brutalist/src/separator/",
+          "packages/prototypes/brutalist/src/surface/",
+          "packages/prototypes/brutalist/src/switch/",
+          "packages/prototypes/brutalist/src/table/",
+          "packages/prototypes/brutalist/src/tabs/",
+          "packages/prototypes/brutalist/src/text/",
+          "packages/prototypes/brutalist/src/textarea/",
+          "packages/prototypes/brutalist/src/toggle/",
+          "packages/prototypes/brutalist/src/tooltip/",
+          "packages/prototypes/brutalist/src/transition/"
+        ]
+      },
+      "specEntities": [
+        {
+          "file": "P-BASE-ASYNC-REGION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-ASYNC-REGION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-ASYNC-REGION.yaml",
+          "revision": "7758dee85"
+        },
+        {
+          "file": "P-BASE-BUTTON.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-BUTTON.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-BUTTON.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-CHECKBOX.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-CHECKBOX.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-CHECKBOX.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-DIALOG.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-DIALOG.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-DIALOG.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-DROPDOWN-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-DROPDOWN-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-DROPDOWN-MENU.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-HOVER-CARD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-HOVER-CARD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-HOVER-CARD.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-IMAGE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-IMAGE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-IMAGE.yaml",
+          "revision": "6c3a5a90d"
+        },
+        {
+          "file": "P-BASE-INPUT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-INPUT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-INPUT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-LIVE-REGION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-LIVE-REGION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-LIVE-REGION.yaml",
+          "revision": "8dd8ce6cf"
+        },
+        {
+          "file": "P-BASE-RADIO-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-RADIO-GROUP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-RADIO-GROUP.yaml",
+          "revision": "6a0cce1f6"
+        },
+        {
+          "file": "P-BASE-SCROLL-AREA.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-SCROLL-AREA.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-SCROLL-AREA.yaml",
+          "revision": "73f067e22"
+        },
+        {
+          "file": "P-BASE-SELECT.yaml",
+          "revision": "0253b4fb3"
+        },
+        {
+          "file": "P-SHADCN-SELECT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-SELECT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-SEPARATOR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-SEPARATOR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-SEPARATOR.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-SURFACE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-SURFACE.yaml",
+          "revision": "87427cc1f"
+        },
+        {
+          "file": "P-BRUTALIST-SURFACE.yaml",
+          "revision": "3b7d089f4"
+        },
+        {
+          "file": "P-BASE-SWITCH.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-SWITCH.yaml",
+          "revision": "8a4dfbf9f"
+        },
+        {
+          "file": "P-BRUTALIST-SWITCH.yaml",
+          "revision": "0013b1f5c"
+        },
+        {
+          "file": "P-BASE-TABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TABLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TABLE.yaml",
+          "revision": "be6e81413"
+        },
+        {
+          "file": "P-BASE-TABS.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TABS.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TABS.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-TEXT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TEXT.yaml",
+          "revision": "026db20ca"
+        },
+        {
+          "file": "P-BRUTALIST-TEXT.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-TEXTAREA.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TEXTAREA.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TEXTAREA.yaml",
+          "revision": "0013b1f5c"
+        },
+        {
+          "file": "P-BASE-TOGGLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TOGGLE.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TOGGLE.yaml",
+          "revision": "73f067e22"
+        },
+        {
+          "file": "P-BASE-TOOLTIP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TOOLTIP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TOOLTIP.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BASE-TRANSITION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-SHADCN-TRANSITION.yaml",
+          "revision": "9da3dfd18"
+        },
+        {
+          "file": "P-BRUTALIST-TRANSITION.yaml",
+          "revision": "b8dc5e81e"
+        }
+      ]
+    }
+  ]
+}

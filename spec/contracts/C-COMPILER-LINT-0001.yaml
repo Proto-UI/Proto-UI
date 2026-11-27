@@ -1,0 +1,140 @@
+id: C-COMPILER-LINT-0001
+type: contract
+title: Shared frontend diagnostics, source validity and versioned Proto lint
+status: draft
+since: 0.4.0
+lifecycleRationale:
+  zh-CN: >-
+    单源迁移及同源诊断方向已确定。本合同把已接受的语言约束投射为作者工具接口，不重新定义语言； 完整源分析、编辑器接入、目标准入和迁移验收尚无完整执行证据，因此保留 draft。
+
+
+  en: >-
+    Shared-source migration and shared diagnostics are accepted directions. This contract projects the accepted language into author tooling rather than defining another language. Complete source analysis, editor integration, target admission and migration acceptance lack complete execution evidence, so the entity remains draft.
+
+
+summary: Keep compiler, CLI and editor analysis consistent while distinguishing invalid source, incomplete analysis and missing target capability.
+statement:
+  zh-CN: >-
+    lint 使用 compiler 前端的同一套分析和规则元数据，以所选语言版本、源快照与目标配置输出可追溯诊断。 lint 的显示严重度不等于编译成功；源是否合法、分析是否完整、目标是否可编译必须分别表达。 新规则不得把解析器实现缺口、假设的资源限制或未规定的作者习惯升级为语言禁令。
+
+
+  en: >-
+    Lint uses the compiler frontend's analysis and rule metadata, producing traceable diagnostics for a selected language version, source snapshot and target configuration. Display severity is not compilation success: source validity, analysis completeness and target compilability are separate results. Rules cannot turn parser gaps, assumed resource limitations or unspecified authoring conventions into language prohibitions.
+
+
+criteria:
+  - id: C-COMPILER-LINT-0001-SHARED-FRONTEND
+    text: >-
+      Compiler admission, the lint CLI and editor integration call the same binding, type and Proto semantic analysis with the same rule metadata. Identical source snapshots and configuration yield the same normalized rule IDs, categories, source spans and reasons, independent of presentation and diagnostic ordering. Do not maintain a separate parser whitelist or spelling-based admission table for lint. Incremental edits invalidate affected source, helper and configuration dependencies rather than reusing stale success.
+
+
+  - id: C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY
+    text: >-
+      Every source-invalid diagnostic identifies the violated rule of the selected Proto language, not a missing compiler implementation. Unspecified restrictions such as declarations only in a setup function's immediate body, every equality operator being forbidden, every computed style being invalid or Context keys only being created at module scope cannot be introduced by lint. Resolve actual bindings and effects through helpers. A genuinely absent or mistyped member can be invalid; a declared legal member missing implementation is compiler or backend work.
+
+
+  - id: C-COMPILER-LINT-0001-DIAGNOSTIC-IDENTITY
+    text: >-
+      Each rule has a stable ID, governing criterion references, positive and negative examples, a diagnostic message template and any migration preconditions. A diagnostic includes its ID, category, severity, applicable criterion, source location and the binding or call-chain context needed to understand it; target-dependent facts identify the target profile. Missing-capability diagnostics identify a stable capability key and its upstream tracking item, or explicitly record that tracking is not yet attached instead of inventing a receipt. Rule IDs are not reused for different meanings. Applicable host-unavailable observations retain their runtime category rather than becoming source errors.
+
+
+  - id: C-COMPILER-LINT-0001-RESULT-STATE
+    text: >-
+      Reports expose sourceValid as true, false or null, analysisComplete as a boolean, and compilable as a boolean for each explicitly selected target. sourceValid is false when a language violation is established, true only when the required source checks for the whole reached closure are complete with no violation, and null when validity remains undetermined. analysisComplete states whether those required source checks completed; a known violation and another incomplete path may therefore yield false, false, false. compilable is true only when sourceValid and analysisComplete are true and all reached bodies, operations and required bindings have complete admission and supported lowering for that target. Missing source analysis, missing lowering and an unbound required extern prevent that target's compilable result. A frontend-only scan cannot claim target support merely because it emitted no error.
+
+
+  - id: C-COMPILER-LINT-0001-CATEGORIES
+    text: >-
+      source-invalid is an author-facing error. compiler-missing and backend-missing are implementation diagnostics, shown as informational capability debt rather than author blame, but still prevent unsupported compilation. An analysis budget, unavailable dependency or analysis failure reports incomplete analysis and its actual cause; it cannot prove a source restriction or silently pass the file. An extern missing its selected-target binding remains extern-unbound and blocks that compilation; editor or CLI analysis may report it as soon as that configuration is known. Runtime host-unavailable does not retroactively make a valid compiled program invalid. No-error display, successful lint-process completion and complete target compilation are distinct claims.
+
+
+  - id: C-COMPILER-LINT-0001-PRELUDE
+    text: >-
+      A Proto authoring environment uses a controlled TypeScript prelude and explicit global-type configuration, retaining the primitive interfaces TypeScript requires while omitting undeclared JavaScript or host capabilities. Inspect the actual loaded declaration closure; noLib or an empty lib list alone does not establish the intended environment or Proto semantics. TypeScript still supplies binding and type information. Proto checks additionally enforce boolean conditions, allowed operator applications, value domains, phases, effects, capture ownership and target support. A type assertion, readonly annotation or branded type never substitutes for the required semantic proof or runtime boundary conversion.
+
+
+  - id: C-COMPILER-LINT-0001-AUTOFIX
+    text: >-
+      An automatic fix declares its input language/rule version, source preconditions, changed spans and preserved semantics; reapplying it is a no-op, and changed preconditions cause refusal rather than an approximate edit. Upstream provides verified migration tooling for required registered-consumer source changes, updating the common Adapter/compiler source instead of generating a second prototype. Mechanical fixes may run automatically only where their preconditions establish the promised behavior. Do not blindly replace truthiness with a zero comparison, loose equality with strict equality, UTF-16 operations with scalar operations, or assertions with invented capabilities. When a safe automatic transformation is not established, report that limitation and the migration work needed; do not change the source or claim a semantic-preserving fix has been delivered. Upstream remains responsible for completing and verifying the required official and registered-consumer migration, including establishing the safe transformation or performing the concrete migration with explicit semantic decisions. Missing general-purpose autofix proof cannot waive that obligation, require a permanent consumer-maintained source fork or be reported as completed migration tooling.
+
+
+  - id: C-COMPILER-LINT-0001-VERSIONING
+    text: >-
+      Reports identify the language version, rule-set version, compiler version and selected target profile. Published rule sets are versioned independently of transient implementation coverage. A new or changed default error that narrows the previously accepted language surface is a breaking rule-set change, with migration notes and a versioned source transition rather than a silent replacement under the old version. Correcting detection of an already specified violation does not redefine the language; still document newly surfaced diagnostics and migration impact. Capability implementation may improve without changing the language or reclassifying its earlier missing cases as invalid.
+
+
+  - id: C-COMPILER-LINT-0001-INVENTORY
+    text: >-
+      Maintain the full official-prototype and registered-consumer inventory with entrypoints, resolved authored helper closure, source revisions and per-file digests, language/rule versions and required target profiles. Files, component entrypoints and semantic capabilities are separate denominators: a helper file is not counted as an independently compiled component. Record invalid, undetermined, legal-but-missing, compilable and executed conformance results without treating unrun or rejected inputs as passing. Source or configuration changes invalidate affected evidence. A reported consumer count is intake information until its manifest is supplied and verified; it is not a source-bound acceptance result.
+
+
+  - id: C-COMPILER-LINT-0001-RATCHET
+    text: >-
+      Each delivered source/target capability enters a regression gate; an already accepted capability cannot silently become missing, invalid or excluded on the same language and scope. Preserve the full destination inventory while stages expose their actual implemented subset. Added sources may lower a percentage by enlarging the denominator and must remain visible rather than being omitted to preserve a number. Renames, removals and common-source migrations retain explicit source mappings and their evidence history. Final library acceptance requires the complete governed official and registered-consumer scope, not only the latest passing subset.
+
+
+  - id: C-COMPILER-LINT-0001-RULE-BOOL
+    text: >-
+      proto/explicit-bool-condition implements C-COMPILER-FOUNDATION-0001-VALUES: a condition must have the Proto boolean domain rather than relying on JavaScript truthiness. A boolean flag or a defined comparison producing bool is a positive example; a numeric variable used directly as a condition is negative. The message identifies the condition and its resolved type and requests an explicit predicate with the intended semantics. TypeScript accepting the condition is not evidence of Proto validity.
+
+
+    references:
+      contracts:
+        - id: C-COMPILER-FOUNDATION-0001
+          anchors: [C-COMPILER-FOUNDATION-0001-VALUES]
+  - id: C-COMPILER-LINT-0001-RULE-COERCION
+    text: >-
+      proto/no-implicit-coercion implements the VALUES and EQUALITY criteria by checking resolved operand domains and the selected language's operation, not merely an operator's spelling. Defined numeric addition and equality on compatible numeric operands are positive examples; a number implicitly converted by mixed number/string addition is negative. The message identifies the operation, operand types and required explicit conversion. Whether a particular equality spelling is admitted follows the authoring definition; lint cannot ban all == uses without such a rule.
+
+
+    references:
+      contracts:
+        - id: C-COMPILER-FOUNDATION-0001
+          anchors: [C-COMPILER-FOUNDATION-0001-VALUES, C-COMPILER-FOUNDATION-0001-EQUALITY]
+  - id: C-COMPILER-LINT-0001-RULE-TEXT
+    text: >-
+      proto/text-api implements TEXT by admitting the defined well-formed Unicode and explicit text operations while rejecting use of undeclared JavaScript code-unit members as Proto text semantics. Explicit scalar traversal is positive; interpreting a JavaScript charAt result containing an isolated surrogate as a Proto String is negative. Resolve the receiver and member identity: an unrelated record field or list length is not a text violation. The message names the text boundary or member and the applicable explicit API, without promising an unsafe Unicode autofix.
+
+
+    references:
+      contracts:
+        - id: C-COMPILER-FOUNDATION-0001
+          anchors: [C-COMPILER-FOUNDATION-0001-TEXT]
+  - id: C-COMPILER-LINT-0001-RULE-PURITY
+    text: >-
+      proto/pure-derivation implements PHASES: a pure derivation may read its declared inputs and compute a value, but cannot write Proto state or execute a host command, including through a helper call chain. A numeric derivation from state is positive; a helper reached by the derivation that writes another state cell is negative. The message identifies the forbidden effect, the derivation phase and the relevant call chain. Ordinary action writes are not rejected by this rule merely because the same syntax appears there.
+
+
+    references:
+      contracts:
+        - id: C-COMPILER-FOUNDATION-0001
+          anchors: [C-COMPILER-FOUNDATION-0001-PHASES]
+  - id: C-COMPILER-LINT-0001-RULE-CAPABILITY
+    text: >-
+      proto/no-capability-assertion implements LANGUAGE and VALUES: assertions cannot manufacture a capability's binding origin, ownership, static evaluability or target implementation. Forwarding an actual declared capability through a typed helper is positive; casting unrelated data to the capability type and using it as authority is negative. The message identifies the assertion, the missing semantic evidence and its use. An assertion that preserves an already established origin is not rejected solely because it uses as; lack of a legal capability's lowering remains implementation debt.
+
+
+    references:
+      contracts:
+        - id: C-COMPILER-FOUNDATION-0001
+          anchors: [C-COMPILER-FOUNDATION-0001-LANGUAGE, C-COMPILER-FOUNDATION-0001-VALUES]
+dependsOn:
+  decisions: [D-COMPILER-FOUNDATION-0001]
+  contracts:
+    - id: C-COMPILER-FOUNDATION-0001
+      anchors:
+        [
+          C-COMPILER-FOUNDATION-0001-LANGUAGE,
+          C-COMPILER-FOUNDATION-0001-DIAGNOSTICS,
+          C-COMPILER-FOUNDATION-0001-SOURCE-COMPATIBILITY,
+        ]
+references:
+  tests: [T-COMPILER-LINT-0001, T-COMPILER-FOUNDATION-0001]
+sources:
+  - path: internal/compiler/source-compatibility-and-lint.md
+  - path: https://github.com/Proto-UI/Proto-UI/pull/1915#issuecomment-7170144913
+revisions:
+  - version: 0.4.0
+    change: introduced
+    summary: Define shared versioned diagnostics, explicit validity/completeness/compilability states, safe single-source migration and honest coverage gates.
+tags: [compiler, lint, diagnostics, language, source-compatibility, migration]

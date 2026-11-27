@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 const markdown = readFileSync('apps/www/src/components/override/MarkdownContent.astro', 'utf8');
 const frame = readFileSync('apps/www/src/components/override/PageFrame.astro', 'utf8');
 const browser = readFileSync(
-  'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
   'utf8'
 );
 const browserHeadingSelector = browser.match(

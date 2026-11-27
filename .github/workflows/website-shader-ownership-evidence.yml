@@ -2,6 +2,7 @@ name: Website shader ownership evidence
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read

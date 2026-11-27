@@ -1,0 +1,140 @@
+import { Component, createRef, type ComponentProps, type ReactNode } from 'react';
+import { createPortal, flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { MissingProviderError } from '@proto.ui/compiler/support/react';
+import { LEVEL, OTHER, LevelOwner, LevelReader, type LevelOwnerHandle, type LevelReaderHandle } from './LevelOwner';
+
+type MustBeFalse<T extends false> = T;
+type OtherCellIsRejectedByLevel = MustBeFalse<
+  ReturnType<typeof OTHER.createProvider> extends ComponentProps<typeof LEVEL.Provider>['value'] ? true : false
+>;
+
+const app = document.getElementById('app')!;
+const surface = document.getElementById('physical')!;
+const physicalSlot = surface.parentElement!;
+const root = createRoot(app);
+const physicalRoot = createRoot(surface);
+const owner = createRef<LevelOwnerHandle>();
+const reader = createRef<LevelReaderHandle>();
+const portalTarget = createRef<HTMLDivElement>();
+
+const sources = { left: LEVEL.createProvider('left seed'), right: LEVEL.createProvider('right seed') };
+const outerSource = LEVEL.createProvider('outer');
+const physicalSource = LEVEL.createProvider('physical');
+const otherSource = OTHER.createProvider('other key');
+type Side = keyof typeof sources;
+let selected: Side = 'left';
+let originalOwner: LevelOwnerHandle | null = null;
+let originalChild: Element | null = null;
+let originalReader: LevelReaderHandle | null = null;
+let originalPortalNode: Element | null = null;
+
+function renderOwner(seed?: string): void {
+  flushSync(() => root.render(seed === undefined ? <LevelOwner ref={owner} /> : <LevelOwner ref={owner} seed={seed} />));
+}
+
+function renderLogicalProviders(): void {
+  const target = portalTarget.current;
+  if (!target) throw new Error('The physical portal target has not mounted.');
+  flushSync(() => root.render(
+    <div id="providers" data-active={selected}>
+      <LEVEL.Provider value={outerSource}>
+        <div id="outer-reader"><LevelReader /></div>
+        <LEVEL.Provider value={sources[selected]}>
+          <OTHER.Provider value={otherSource}>
+            {createPortal(<LevelReader key="retained-reader" ref={reader} />, target)}
+          </OTHER.Provider>
+        </LEVEL.Provider>
+      </LEVEL.Provider>
+      <LEVEL.Provider value={sources.left}><div id="left-reader"><LevelReader /></div></LEVEL.Provider>
+      <LEVEL.Provider value={sources.right}><div id="right-reader"><LevelReader /></div></LEVEL.Provider>
+    </div>
+  ));
+}
+
+function mountPortal(): void {
+  // This independent React root provides the same nominal key at the physical destination.
+  flushSync(() => physicalRoot.render(
+    <LEVEL.Provider value={physicalSource}>
+      <div id="physical-reader"><LevelReader /></div>
+      <div id="portal-target" ref={portalTarget} />
+    </LEVEL.Provider>
+  ));
+  renderLogicalProviders();
+}
+
+function readerValues(handle: LevelReaderHandle | null): readonly [string, string] | null {
+  return handle ? [handle.initial, handle.current] : null;
+}
+
+function portalState() {
+  const view = portalTarget.current?.querySelector('span');
+  return {
+    values: readerValues(reader.current), text: view?.textContent,
+    sameHandle: originalReader !== null && reader.current === originalReader,
+    sameNode: originalPortalNode !== null && view === originalPortalNode,
+    connected: view?.isConnected,
+    inPhysicalSurface: !!view && surface.contains(view), inLogicalRoot: !!view && app.contains(view),
+  };
+}
+
+function describeMissing(error: unknown) {
+  if (!(error instanceof MissingProviderError)) throw error;
+  return { code: error.code, keyMatches: error.key === LEVEL, debugName: error.debugName, origin: error.origin };
+}
+
+let missing: ReturnType<typeof describeMissing> | null = null;
+let acquisitions = 0;
+let acquired: LevelReaderHandle | null = null;
+function acquire(handle: LevelReaderHandle | null): void {
+  if (handle) acquisitions++;
+  acquired = handle;
+}
+
+class ReaderBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError(error: unknown) {
+    if (!(error instanceof MissingProviderError)) throw error;
+    return { failed: true };
+  }
+  componentDidCatch(error: Error) { missing = describeMissing(error); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
+function mountProbe(mode: 'absent' | 'other' | 'matching'): void {
+  missing = null;
+  acquisitions = 0;
+  const probe = <LevelReader ref={acquire} />;
+  let tree = probe;
+  if (mode === 'other') {
+    const samePayload = OTHER.createProvider(sources.left.getSnapshot());
+    tree = <OTHER.Provider value={samePayload}>{probe}</OTHER.Provider>;
+  }
+  if (mode === 'matching') tree = <LEVEL.Provider value={sources.left}>{probe}</LEVEL.Provider>;
+  flushSync(() => root.render(<ReaderBoundary key={mode}>{tree}</ReaderBoundary>));
+}
+
+const contextTrace = {
+  renderOwner,
+  rememberOwner() { originalOwner = owner.current; originalChild = app.querySelector('span'); },
+  select(next: string) { return owner.current!.select(next).status; },
+  ownerState() {
+    return {
+      value: owner.current!.value,
+      sameHandle: originalOwner !== null && owner.current === originalOwner,
+      sameChild: originalChild !== null && app.querySelector('span') === originalChild,
+    };
+  },
+  mountPortal,
+  rememberPortal() { originalReader = reader.current; originalPortalNode = portalTarget.current!.querySelector('span'); },
+  portalState,
+  publish(side: Side, value: string) { sources[side].publish(value); },
+  replaceProvider(side: Side) { selected = side; renderLogicalProviders(); },
+  detachSurface() { surface.remove(); },
+  reattachSurface() { physicalSlot.append(surface); },
+  mountProbe,
+  acquisition() { return { missing, acquisitions, values: readerValues(acquired), distinctKeys: !Object.is(LEVEL, OTHER) }; },
+};
+
+declare global { interface Window { contextTrace: typeof contextTrace } }
+window.contextTrace = contextTrace;

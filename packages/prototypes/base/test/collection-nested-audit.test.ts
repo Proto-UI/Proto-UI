@@ -30,14 +30,28 @@ for (const [family, atoms] of Object.entries(families)) {
     expect(previous.getExposes().disabled.get()).toBe(true);
     expect(previous.getAttribute('aria-disabled')).toBe('true');
     const style = previous.getAttribute('data-pui-style') ?? '';
-    console.log(family, JSON.stringify({ disabled: previous.getExposes().disabled.get(), style }));
-    expect(style.split(/\s+/), 'required disabled family rule is not registered').toContain(
+    const tokens = style.split(/\s+/);
+    expect(tokens, 'required disabled family rule is not registered').toContain(
       // Bootstrap bakes the disabled opacity into its glyph recipe and registers
       // the cursor; liquid withdraws material instead of whole-control opacity.
-      family === 'bootstrap-2-3-2' || family === 'liquid-glass'
-        ? 'data-[disabled]:cursor-default'
-        : 'data-[disabled]:opacity-50'
+      family === 'liquid-glass'
+        ? 'cursor-default'
+        : family === 'bootstrap-2-3-2'
+          ? 'data-[disabled]:cursor-default'
+          : 'data-[disabled]:opacity-50'
     );
+    if (family === 'liquid-glass') {
+      // Material-owning controls resolve the disabled candidate dynamically.
+      expect(tokens).toEqual(
+        expect.arrayContaining([
+          'pointer-events-none',
+          'shadow-none',
+          'bg-muted',
+          'text-muted-foreground',
+        ])
+      );
+      expect(tokens).not.toContain('opacity-50');
+    }
   });
 }
 it('control: legal nested capture registers disabled style without compiler changes', async () => {

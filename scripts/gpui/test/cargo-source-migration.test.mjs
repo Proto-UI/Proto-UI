@@ -307,17 +307,13 @@ function invoke(t, args) {
   return { result, output };
 }
 
-test('CLI profile selects the unchanged commit and records expectation even when Cargo is absent', (t) => {
+test('CLI rejects retired compiler profiles without producing Cargo evidence', (t) => {
   const { result, output } = invoke(t, ['--profile', 'gpui-source-v1']);
   assert.equal(result.status, 1);
-  const receipt = JSON.parse(readFileSync(output, 'utf8'));
-  assert.deepEqual(receipt.expectedDependency, {
-    kind: 'git',
-    git,
-    revision: '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
-  });
-  assert.equal(receipt.failure.stage, 'cargo-version');
-  assert.equal(receipt.metadataSha256, null);
+  assert.match(result.stderr, /Compiler dependency profiles are retired/);
+  assert.match(result.stderr, /replacement GPUI compiler is not implemented/);
+  assert.equal(result.stdout, '');
+  assert.equal(existsSync(output), false);
   assert.equal(existsSync(`${output}.metadata.json`), false);
 });
 
@@ -342,17 +338,17 @@ test('CLI registry selection retains independently specified platform version in
 });
 
 for (const [name, args, error] of [
-  ['no source', [], /Select --profile/],
-  ['future profile', ['--profile', 'gpui-standalone-v1'], /Only the existing/],
+  ['no source', [], /Select --git\/--rev or --registry\/--version/],
+  ['future profile', ['--profile', 'gpui-standalone-v1'], /profiles are retired/],
   [
     'mixed profile and source',
     ['--profile', 'gpui-source-v1', '--git', git, '--rev', revision],
-    /profile or explicit source/,
+    /profiles are retired/,
   ],
   [
     'mixed profile and platform',
     ['--profile', 'gpui-source-v1', '--platform-git', git, '--platform-rev', revision],
-    /profile or explicit source/,
+    /profiles are retired/,
   ],
   [
     'mixed source kinds',
@@ -587,7 +583,7 @@ local-registry = ${JSON.stringify(localRegistry)}
     );
     const repository = fileURLToPath(new URL('../../../', import.meta.url));
     await t.test(
-      'a compiler-root invocation honors external registry config and caller-relative paths',
+      'a repository-root invocation honors external registry config and caller-relative paths',
       () => {
         const directory = workspace(true);
         const { receipt, output } = admission(directory, [...registryArgs, ...platformArgs], true, {

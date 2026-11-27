@@ -1,10 +1,15 @@
 id: T-COMPILER-RUST-DATA-0001
 type: test
 title: Checked headless Rust data artifacts and complete native consumers
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: T-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  The private data backend needs independent review and source-bound generated Rust executions. These tests do not establish native-window or OS input acceptance.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 cases:
   - id: T-COMPILER-RUST-DATA-0001-CASE-CLOSURE
@@ -26,21 +31,23 @@ cases:
 implementations:
   - id: checked-native-data
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/rust-data-source.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-RUST-DATA-0001-CASE-CLOSURE, T-COMPILER-RUST-DATA-0001-CASE-RUST]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/rust-data-source.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Native execution requires an available Cargo toolchain; a skipped native consumer is not a pass.
   - id: source-and-publication
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/rust-data-artifacts.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-RUST-DATA-0001-CASE-SOURCE, T-COMPILER-RUST-DATA-0001-CASE-PUBLISH]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/rust-data-artifacts.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
 verifies:
   contracts:
     - id: C-COMPILER-RUST-DATA-0001
+      until: 0.4.0
       anchors:
         - C-COMPILER-RUST-DATA-0001-CLOSURE
         - C-COMPILER-RUST-DATA-0001-TYPED
@@ -56,4 +63,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Bind checked closure, native data execution, source graph and create-only artifact cases to explicit evidence.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, rust, data, conformance]

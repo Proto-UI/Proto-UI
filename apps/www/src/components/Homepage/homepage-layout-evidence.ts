@@ -25,6 +25,7 @@ export type GalleryRect = {
 export type GalleryFlowFacts = {
   containerCount: number;
   viewportWidth: number;
+  gapRem: number;
   wideMedia: boolean;
   enhancedMedia: boolean;
   queryContainerWidth: number;
@@ -42,6 +43,19 @@ export type GalleryFlowFacts = {
     fragments: GalleryRect[];
   }>;
 };
+/** Browser media queries use the initial font size, even when the page enlarges its root. */
+export function readGalleryRhythm() {
+  const large = matchMedia('(min-width: 64rem)').matches;
+  let gapRem = large ? 1.5 : 2;
+  if (matchMedia('(min-width: 118.75rem)').matches) gapRem = 2.5;
+  if (matchMedia('(max-width: 767px)').matches) gapRem = 1;
+  let fadeRem = 18;
+  if (document.documentElement.dataset.siteLibraryFamily === 'shadcn') {
+    fadeRem = matchMedia('(min-width: 80rem)').matches ? 16 : large ? 20 : 12;
+  }
+  return { gapRem, fadeRem };
+}
+
 /** Physical columns in reading direction, with cards ordered from top to bottom. */
 export function groupPaintedCards<T extends { rect: GalleryRect }>(cards: T[]) {
   const columns: T[][] = [];
@@ -87,9 +101,7 @@ export function galleryHorizontalIssues(
 export function galleryFlowEvidence(facts: GalleryFlowFacts) {
   const issues: string[] = [];
   const epsilon = 1;
-  // Tight 1.25rem rhythm on desktop and 1rem on compact viewports. Only one CSS
-  // pixel of subpixel rounding is allowed.
-  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1 : 1.25);
+  const expectedGap = facts.rootFontSize * facts.gapRem;
   if (facts.containerCount !== 1 || !facts.container)
     issues.push('expected exactly one gallery container');
   if (
