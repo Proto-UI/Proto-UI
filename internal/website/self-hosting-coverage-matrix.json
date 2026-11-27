@@ -2140,7 +2140,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
       "owningMatrixRow": "`www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select`",
-      "sourceSha256": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51"
+      "sourceSha256": "d85fae0d9413d0e863c87e6a9ee0e2caece45d61ca3af9dd607f21b77f82431b"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/previewer-startup-task.ts",
@@ -2150,7 +2150,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
       "owningMatrixRow": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
-      "sourceSha256": "d34e9445536da8c56aaca4be078449ecdc05108f93f11e5bd5828f94d5d06629"
+      "sourceSha256": "eacaa47d1b065f686a1917832530252498615b1af1bc94ce06ca8b29ebc9747f"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
@@ -2160,7 +2160,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
       "owningMatrixRow": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
-      "sourceSha256": "3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a"
+      "sourceSha256": "749d000b6e52c6b86f33ac6a7ab36b3b759a1f3bd9da4ad09d46c8f77781792c"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
@@ -2400,7 +2400,7 @@
     {
       "source": "apps/www/src/components/site-shadcn-controls.ts",
       "owningMatrixRow": "`www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle`",
-      "sourceSha256": "13adc1a8fbbc2ef61dc40c4c11d7c96c8c3e276373596b53f8bdc95e9baa2b00"
+      "sourceSha256": "d84910a32ecd3d371e560752543708b5480d85164bfc37c11313d2545fa31f1d"
     },
     {
       "source": "apps/www/src/components/site-sidebar-current-visibility.ts",

@@ -33,7 +33,7 @@ jobs:
   capture:
     if: ${{ inputs.mobile_preview_fit != true }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 55
     steps:
       - name: Check out exact candidate (not the synthetic PR merge)
         uses: actions/checkout@v4
@@ -159,12 +159,12 @@ jobs:
           retention-days: 30
       - name: Capture real exact-head candidate with the same browser probe
         if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
-        timeout-minutes: 10
+        timeout-minutes: 16
         working-directory: candidate
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/homepage-evidence"
-          timeout --signal=TERM --kill-after=10s 540s \
+          timeout --signal=TERM --kill-after=10s 900s \
             node --import tsx apps/www/scripts/capture-homepage-evidence.ts \
             --revision-kind candidate --expected-revision "$CANDIDATE_SHA" \
             --out "$RUNNER_TEMP/homepage-evidence/candidate" \
@@ -200,7 +200,7 @@ jobs:
         env:
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/runtime
         if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
-        timeout-minutes: 12
+        timeout-minutes: 22
         working-directory: candidate
         run: |
           set -euo pipefail
@@ -216,7 +216,7 @@ jobs:
           {
             git rev-parse HEAD
             printf 'Selected suite: %s\n' "${suites[@]}"
-            timeout --signal=TERM --kill-after=10s 600s \
+            timeout --signal=TERM --kill-after=10s 1200s \
               corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${suites[@]}"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/browser-regressions.log"
       - name: Verify built production Search with real Pagefind

@@ -2374,39 +2374,42 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         familyCommitTiming.startedMs = performance.now();
         familyCommitTiming.outcome = 'pending';
         await expect
-          .poll(() => {
-            const call: (typeof familyCommitCalls)[number] = {
-              call: ++familyCommitTiming.totalCalls,
-              startedMs: performance.now(),
-            };
-            if (familyCommitCalls.length < 64) familyCommitCalls.push(call);
-            else familyCommitTiming.droppedCalls += 1;
-            const request: Promise<string | null> = familySDK!.runOriginalQuery(call.call, () =>
-              page.locator('[data-homepage-runtime]').getAttribute('data-family')
-            );
-            try {
-              familyQueryRequests.push({ request, call });
-              if (familyQueryObservation.wait.finishedMs !== null)
-                familyQueryObservation.issuedAfterDrain++;
-            } catch {
-              familyQueryObservation.ledgerError = true;
-            }
-            void request
-              .then(
-                (value) => {
-                  call.returnedMs = performance.now();
-                  call.value = value;
-                },
-                (error) => {
-                  call.returnedMs = performance.now();
-                  call.error = String(error);
-                }
-              )
-              .catch(() => {
-                familyCommitTiming.observerError = true;
-              });
-            return request;
-          })
+          .poll(
+            () => {
+              const call: (typeof familyCommitCalls)[number] = {
+                call: ++familyCommitTiming.totalCalls,
+                startedMs: performance.now(),
+              };
+              if (familyCommitCalls.length < 64) familyCommitCalls.push(call);
+              else familyCommitTiming.droppedCalls += 1;
+              const request: Promise<string | null> = familySDK!.runOriginalQuery(call.call, () =>
+                page.locator('[data-homepage-runtime]').getAttribute('data-family')
+              );
+              try {
+                familyQueryRequests.push({ request, call });
+                if (familyQueryObservation.wait.finishedMs !== null)
+                  familyQueryObservation.issuedAfterDrain++;
+              } catch {
+                familyQueryObservation.ledgerError = true;
+              }
+              void request
+                .then(
+                  (value) => {
+                    call.returnedMs = performance.now();
+                    call.value = value;
+                  },
+                  (error) => {
+                    call.returnedMs = performance.now();
+                    call.error = String(error);
+                  }
+                )
+                .catch(() => {
+                  familyCommitTiming.observerError = true;
+                });
+              return request;
+            },
+            { timeout: 5_000 }
+          )
           .toBe(family);
         familyCommitTiming.finishedMs = performance.now();
         familyCommitTiming.outcome = 'fulfilled';

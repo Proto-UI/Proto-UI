@@ -697,6 +697,13 @@ for (const width of [2048, 390]) {
             expect(await page.locator('[data-homepage-runtime]').getAttribute('data-runtime')).toBe(
               runtime
             );
+          } else if (!baseline) {
+            const previewer = page.locator('.proto-previewer[data-previewer-id]').first();
+            await expect
+              .poll(() => previewer.getAttribute('data-projection-state'), {
+                timeout: 45_000,
+              })
+              .toBe('ready');
           }
           if (route === '/zh-cn/' && width === 390 && !baseline) {
             const entry = page.locator(
@@ -714,13 +721,16 @@ for (const width of [2048, 390]) {
               )
               .toBe(false);
           }
-          const trigger = page
-            .locator(
-              route === '/zh-cn/'
-                ? '[data-home-showcase] [aria-haspopup="dialog"]'
-                : '[data-previewer-id] [aria-haspopup="dialog"]'
-            )
-            .first();
+          const trigger =
+            route === '/zh-cn/'
+              ? page.locator('[data-home-showcase] [aria-haspopup="dialog"]').first()
+              : baseline
+                ? page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first()
+                : page
+                    .locator('.proto-previewer[data-previewer-id]')
+                    .first()
+                    .locator('[data-projection-generation-state="active"] [aria-haspopup="dialog"]')
+                    .first();
           await trigger.waitFor();
           const contentId = await trigger.getAttribute('aria-controls');
           if (!contentId) throw new Error('The actual Dialog Trigger has no Content identity');
