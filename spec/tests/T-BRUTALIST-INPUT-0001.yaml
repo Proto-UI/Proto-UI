@@ -11,7 +11,7 @@ cases:
     covers: [P-BRUTALIST-INPUT-BASE, P-BRUTALIST-INPUT-STATES]
     expectation: one-base-editor-without-new-value-or-field-owner
   - id: T-BRUTALIST-INPUT-0001-CASE-SURFACE
-    title: Source-relative geometry and black focus ring close through generated style output
+    title: Source-relative geometry and mutually exclusive light ring-black / dark ring-ring focus rules close through generated style output
     covers: [P-BRUTALIST-INPUT-SURFACE, P-BRUTALIST-INPUT-STATES]
     expectation: neo-input-rem-geometry-and-conditional-presentation
   - id: T-BRUTALIST-INPUT-0001-CASE-ENTRIES

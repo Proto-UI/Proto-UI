@@ -5,11 +5,23 @@ import * as menubar from '../../src/menubar';
 import * as navigation from '../../src/navigation-menu';
 import * as shadcnContextMenu from '../../../shadcn/src/context-menu';
 import * as shadcnNavigation from '../../../shadcn/src/navigation-menu';
+import * as brutalistNavigation from '../../../brutalist/src/navigation-menu';
+import * as bootstrapNavigation from '../../../bootstrap-2-3-2/src/navigation-menu';
+import * as liquidNavigation from '../../../liquid-glass/src/navigation-menu';
 
 const owned = new Set<HTMLElement>();
 const lives = { created: 0, disposed: 0 };
 
-for (const mod of [contextMenu, menubar, navigation, shadcnContextMenu, shadcnNavigation]) {
+for (const mod of [
+  contextMenu,
+  menubar,
+  navigation,
+  shadcnContextMenu,
+  shadcnNavigation,
+  brutalistNavigation,
+  bootstrapNavigation,
+  liquidNavigation,
+]) {
   for (const proto of Object.values(mod)) {
     if (proto && typeof proto === 'object' && 'name' in proto && 'setup' in proto) {
       AdaptToWebComponent(proto as any, {
@@ -303,4 +315,89 @@ describe('menu pointer-focus handoff', () => {
     expect(t0.getExposes().focused.get()).toBe(false);
     expect(t1.getExposes().focused.get()).toBe(true);
   });
+
+  for (const spec of [
+    {
+      name: 'brutalist',
+      mod: brutalistNavigation,
+      triggerHighlightToken: 'bg-secondary-background',
+      highlightToken: 'bg-main',
+    },
+    {
+      name: 'bootstrap-2-3-2',
+      mod: bootstrapNavigation,
+      triggerHighlightToken: 'bg-[#eee]',
+      highlightToken: 'bg-[linear-gradient(#08c,#0077b3)]',
+    },
+    {
+      name: 'liquid-glass',
+      mod: liquidNavigation,
+      triggerHighlightToken: 'bg-muted',
+      highlightToken: 'bg-muted',
+    },
+  ] as const) {
+    it(`${spec.name} navigation-menu keeps closed-menu trigger hover and non-family-content link/item hover while preventing stale hover double-highlight inside open Content`, async () => {
+      const root = make(spec.mod.navigationMenuRoot.name);
+      const trigger = make(spec.mod.navigationMenuTrigger.name, { value: 'docs' });
+      const content = make(spec.mod.navigationMenuContent.name, { value: 'docs' });
+      const link0 = make(spec.mod.navigationMenuLink.name, { href: '#intro' });
+      const link1 = make(spec.mod.navigationMenuLink.name, { href: '#install' });
+      const item0 = make(spec.mod.navigationMenuItem.name, { value: 'search' });
+      trigger.textContent = 'Docs';
+      link0.textContent = 'Intro';
+      link1.textContent = 'Install';
+      item0.textContent = 'Search';
+      content.append(link0, link1, item0);
+      root.append(trigger, content);
+      document.body.append(root);
+      await flush();
+
+      // When no panel is open, hovering top-level trigger highlights cleanly without stealing focus.
+      expect(tokens(trigger).has(spec.triggerHighlightToken)).toBe(false);
+      mouseEnter(trigger);
+      await flush();
+      expect(tokens(trigger).has(spec.triggerHighlightToken)).toBe(true);
+
+      // Inside open family Content, hover hands off Focus and keyboard move clears old row completely.
+      trigger.focus();
+      trigger.click();
+      await flush();
+      const a0 = link0.querySelector('a')!;
+      const a1 = link1.querySelector('a')!;
+      mouseEnter(link1);
+      mouseMove(a1);
+      await flush();
+      expect(document.activeElement).toBe(a1);
+      expect(tokens(a1).has(spec.highlightToken)).toBe(true);
+
+      link0.getExposes().focusSelf({ reason: 'keyboard' });
+      await flush();
+      expect(document.activeElement).toBe(a0);
+      expect(tokens(a0).has(spec.highlightToken)).toBe(true);
+      expect(tokens(a1).has(spec.highlightToken)).toBe(false);
+
+      // Outside family Content paint context (e.g. Base content host), hovered still highlights link/item.
+      const baseRoot = make(navigation.navigationMenuRoot.name, { defaultValue: 'docs' });
+      const baseContent = make(navigation.navigationMenuContent.name, { value: 'docs' });
+      const standaloneLink = make(spec.mod.navigationMenuLink.name, { href: '#standalone' });
+      const standaloneItem = make(spec.mod.navigationMenuItem.name, { value: 'standalone-item' });
+      standaloneLink.textContent = 'Standalone Link';
+      standaloneItem.textContent = 'Standalone Item';
+      baseContent.append(standaloneLink, standaloneItem);
+      baseRoot.append(baseContent);
+      document.body.append(baseRoot);
+      await flush();
+
+      const standaloneAnchor = standaloneLink.querySelector('a')!;
+      expect(tokens(standaloneAnchor).has(spec.highlightToken)).toBe(false);
+      mouseEnter(standaloneLink);
+      await flush();
+      expect(tokens(standaloneAnchor).has(spec.highlightToken)).toBe(true);
+
+      expect(tokens(standaloneItem).has(spec.highlightToken)).toBe(false);
+      mouseEnter(standaloneItem);
+      await flush();
+      expect(tokens(standaloneItem).has(spec.highlightToken)).toBe(true);
+    });
+  }
 });

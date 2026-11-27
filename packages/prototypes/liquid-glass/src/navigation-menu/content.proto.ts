@@ -1,9 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { createContextKey, definePrototype, tw } from '@proto.ui/core';
 import {
   asNavigationMenuContent,
   type NavigationMenuContentProps,
   type NavigationMenuContentExposes,
 } from '@proto.ui/prototypes-base/navigation-menu';
+
+export const LIQUID_GLASS_NAVIGATION_CONTENT_PAINT = createContextKey<{ content: boolean }>(
+  'liquid-glass-navigation-content-paint'
+);
 
 export interface LiquidGlassNavigationMenuContentProps extends NavigationMenuContentProps {
   material?: 'auto' | 'opaque';
@@ -15,6 +19,7 @@ export default definePrototype<LiquidGlassNavigationMenuContentProps, Navigation
     modules: asNavigationMenuContent.modules,
     setup(def) {
       const behavior = asNavigationMenuContent();
+      def.context.provide(LIQUID_GLASS_NAVIGATION_CONTENT_PAINT, { content: true });
       def.props.define({
         material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
       });

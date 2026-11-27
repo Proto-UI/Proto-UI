@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs';
 AdaptToWebComponent(input);
 const flush = async () => {
   for (let n = 0; n < 4; n++) await Promise.resolve();
+  await new Promise((resolve) => setTimeout(resolve, 0));
 };
 async function mount(props: BrutalistInputRootProps = {}) {
   const host = document.createElement('brutalist-input-root') as HTMLElement & {
@@ -117,8 +118,10 @@ describe('Brutalist standalone Input', () => {
     host.remove();
   });
   it('closes the source-relative surface and states through the real CSS renderer', async () => {
-    const { host, target } = await mount();
-    const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/);
+    const { host, target, exposes } = await mount();
+    const readTokens = () =>
+      (target.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+    const tokens = readTokens();
     for (const token of [
       'h-10',
       'w-full',
@@ -129,7 +132,7 @@ describe('Brutalist standalone Input', () => {
       'rounded-base',
       'border-2',
       'selection:bg-main',
-      'data-[focus-visible]:ring-ring',
+      'data-[focus-visible]:ring-2',
       'data-[focus-visible]:ring-offset-2',
       'data-[disabled]:cursor-not-allowed',
       'data-[disabled]:opacity-50',
@@ -142,6 +145,30 @@ describe('Brutalist standalone Input', () => {
       'data-[disabled]:pointer-events-none',
     ])
       expect(tokens).not.toContain(token);
+    // Light mode keeps literal #000000 (`ring-black`) on keyboard focus even if `--ring` is customized;
+    // dark mode drops `ring-black` and applies `ring-ring` without cascade collision.
+    document.documentElement.dataset.theme = 'light';
+    exposes.focusSelf({ reason: 'keyboard' });
+    await flush();
+    const lightFocused = readTokens();
+    expect(lightFocused).toContain('ring-black');
+    expect(lightFocused).not.toContain('ring-ring');
+    const lightCss = renderProtoStyleTokenCss(lightFocused);
+    expect(lightCss).toContain('--pui-ring-color: #000000;');
+
+    document.documentElement.dataset.theme = 'dark';
+    await flush();
+    const darkFocused = readTokens();
+    expect(darkFocused).not.toContain('ring-black');
+    expect(
+      darkFocused.includes('ring-ring') ||
+        darkFocused.includes('dark:data-[focus-visible]:ring-ring')
+    ).toBe(true);
+    const darkCss = renderProtoStyleTokenCss(darkFocused);
+    expect(darkCss).toContain('--pui-ring-color: var(--pui-ring);');
+    expect(darkCss).not.toContain('--pui-ring-color: #000000;');
+    delete document.documentElement.dataset.theme;
+
     const css = renderProtoStyleTokenCss(tokens);
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     for (const declaration of [
