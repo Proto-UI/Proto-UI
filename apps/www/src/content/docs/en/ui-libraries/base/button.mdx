@@ -55,7 +55,7 @@ Copy the files for your host below into an existing bundled app. For Web Compone
 
 `@proto.ui/prototypes-base/button` exports both the standalone `button` prototype and the `asButton()` hook for derived components.
 
-Workspace source also includes an opt-in `asFocusRetainedVisibility` hook (with `FocusRetainedVisibilityProps`), which is not included in the published 0.2.0 API. Composed with `asButton()`, it takes `requestedVisible?: boolean` (default `false`) and keeps the control visible while focused even after `requestedVisible` turns `false`—useful for floating actions such as "Jump to latest".
+Workspace source also includes an opt-in `asFocusRetainedVisibility` hook (with `FocusRetainedVisibilityProps`), which is available starting in `0.3.0-rc.1` and later releases. Composed with `asButton()`, it takes `requestedVisible?: boolean` (default `false`) and keeps the control visible while focused even after `requestedVisible` turns `false`—useful for floating actions such as "Jump to latest".
 
 ## API
 

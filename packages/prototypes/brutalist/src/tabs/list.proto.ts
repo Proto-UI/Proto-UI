@@ -44,7 +44,9 @@ const tabsList = definePrototype<BrutalistTabsListProps, BrutalistTabsListExpose
       when: (w) => w.all(w.prop('appearance').eq('default'), w.prop('variant').eq('default')),
       intent: (i) =>
         i.feedback.style.use(
-          tw('inline-flex rounded-base border-2 border-black bg-background p-1 text-foreground')
+          tw(
+            'inline-flex max-w-full overflow-x-auto rounded-base border-2 border-black bg-background p-1 text-foreground'
+          )
         ),
     });
     def.rule({

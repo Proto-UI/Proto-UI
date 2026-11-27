@@ -1,0 +1,101 @@
+---
+interface Props {
+  title: string;
+  id?: string;
+  class?: string;
+}
+const { title, id, class: className = '' } = Astro.props;
+---
+
+<section class:list={['docs-step', className]} data-docs-step>
+  <h3 id={id} class="docs-step__title">{title}</h3>
+  <div class="docs-step__body">
+    <slot />
+  </div>
+</section>
+
+<style is:global>
+  .docs-step {
+    counter-increment: docs-step;
+    position: relative;
+    min-width: 0;
+  }
+
+  .docs-step__title {
+    position: relative;
+    margin: 0 0 0.75rem;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--color-foreground);
+  }
+
+  .docs-step__title::before {
+    content: counter(docs-step);
+    position: absolute;
+    inset-inline-start: calc(-2rem - 0.875rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: var(--color-muted);
+    color: var(--color-foreground);
+    border: 3px solid var(--color-background);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  [data-site-library-family='brutalist'] .docs-step__title::before {
+    border-radius: 0;
+    background: var(--site-brutalist-main, #facc15);
+    color: var(--site-brutalist-main-foreground, #000);
+    border: 2px solid var(--site-brutalist-border, #000);
+    font-weight: 700;
+  }
+
+  [data-site-library-family='bootstrap-2-3-2'] .docs-step__title::before {
+    border-radius: 4px;
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  [data-theme='dark'][data-site-library-family='bootstrap-2-3-2'] .docs-step__title::before {
+    background: var(--color-muted);
+    color: var(--color-foreground);
+    border-color: var(--color-border);
+    box-shadow: none;
+  }
+
+  [data-site-library-family='liquid-glass'] .docs-step__title::before {
+    background: color-mix(in oklab, var(--color-secondary) 85%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
+    box-shadow: 0 1px 4px color-mix(in oklab, var(--color-foreground) 8%, transparent);
+  }
+
+  .docs-step__body {
+    min-width: 0;
+  }
+
+  .docs-step__body > :first-child {
+    margin-top: 0;
+  }
+
+  .docs-step__body > :last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .docs-step__title::before {
+      inset-inline-start: calc(-1.5rem - 0.875rem);
+    }
+  }
+</style>

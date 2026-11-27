@@ -23,11 +23,27 @@
   height: var(--docs-image-height, 0px);
   margin: 0;
   padding: 0;
+  --docs-image-spring-ease: linear(
+    0,
+    0.111 7%,
+    0.335 13%,
+    0.568 20%,
+    0.759 27%,
+    0.893 33%,
+    0.976 40%,
+    1.026 49%,
+    1.036 58%,
+    1.028 67%,
+    1.015 78%,
+    1.005 89%,
+    1
+  );
   transform-origin: top left;
   transform: var(--docs-image-origin-transform, none);
   transition-property: transform;
-  transition-duration: var(--docs-image-duration, 220ms);
-  transition-timing-function: linear;
+  transition-duration: var(--docs-image-duration, 420ms);
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-timing-function: var(--docs-image-spring-ease);
 }
 [data-docs-image-content][tabindex='-1'] {
   /* Keep the nonsequential media entry frameless. Keyboard Close and thumbnail

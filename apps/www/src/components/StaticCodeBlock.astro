@@ -1,21 +1,26 @@
 ---
 import type { CodeFileIcon } from './code-file-icon';
-import CodePanel, { type CodeLang } from './PrototypePreviewer/CodePanel.astro';
+import CodePanel, {
+  type CodeLang,
+  type HighlightLinesInput,
+} from './PrototypePreviewer/CodePanel.astro';
 interface Props {
   id?: string;
   code: string;
   title: string;
   lang?: CodeLang;
+  highlightLines?: HighlightLinesInput;
   icon?: 'terminal' | 'folder-tree' | CodeFileIcon;
   copyLabel: string;
 }
-const { id, code, title, lang = 'text', icon, copyLabel } = Astro.props;
+const { id, code, title, lang = 'text', highlightLines, icon, copyLabel } = Astro.props;
 ---
 
 <CodePanel
   id={id}
   code={code}
   lang={lang}
+  highlightLines={highlightLines}
   title={title}
   titleIcon={icon}
   copyLabel={copyLabel}

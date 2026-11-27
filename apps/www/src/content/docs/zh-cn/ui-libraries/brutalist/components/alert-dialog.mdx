@@ -19,7 +19,7 @@ Brutalist AlertDialog 用于需要用户明确确认的关键或破坏性操作�
 
 ## 安装
 
-当前仅在源码工作区 `@proto.ui/prototypes-brutalist` 中提供，尚未进入 0.2.0 稳定版。
+将于 `0.3.0-rc.1` 及后续版本中提供（`@proto.ui/prototypes-brutalist`）。
 
 ## 用法
 
@@ -120,8 +120,16 @@ Brutalist 风格保留统一的按钮配色，通过警示图标块与紧凑面�
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'openChange（事件）', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
-    { name: 'openAlertDialog / close / toggle（方法）', type: '(reason?: string) => void', default: '—' },
+    {
+      name: 'openChange（事件）',
+      type: '{ open: boolean; reason: string | null; focusReason: string | null }',
+      default: '—',
+    },
+    {
+      name: 'openAlertDialog / close / toggle（方法）',
+      type: '(reason?: string) => void',
+      default: '—',
+    },
   ]}
 />
 

@@ -19,7 +19,7 @@ Bootstrap 2.3.2 Navigation Menu 保留经典 `.nav-pills` 与 `.dropdown-menu` �
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu` 导入组件原型：
+将于 `0.3.0-rc.1` 及后续版本中提供。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu` 导入组件原型：
 
 ```ts
 import {
@@ -122,7 +122,11 @@ NavigationMenuRoot (navigation)
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
     { name: 'valueChange（事件）', type: '{ value: string; reason: string }', default: '—' },
-    { name: 'requestValue（方法）', type: '(value: string, reason?: string) => boolean', default: '—' },
+    {
+      name: 'requestValue（方法）',
+      type: '(value: string, reason?: string) => boolean',
+      default: '—',
+    },
     { name: 'close（方法）', type: '() => void', default: '—' },
   ]}
 />
@@ -172,7 +176,11 @@ NavigationMenuRoot (navigation)
     { name: 'current', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
-    { name: 'navigate（事件）', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    {
+      name: 'navigate（事件）',
+      type: '{ href: string; target: string; rel: string; modified: boolean }',
+      default: '—',
+    },
     { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
   ]}
 />

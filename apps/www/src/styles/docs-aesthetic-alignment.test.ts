@@ -1,6 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { linkSurfaceProps } from '../components/site-link-recipes';
+import {
+  highlightCode,
+  parseHighlightLines,
+} from '../components/PrototypePreviewer/code-highlight';
+import { IMAGE_ZOOM_DURATION } from '../components/documentation-image-controls';
 
 const read = (path: string) => readFileSync(path, 'utf8');
 
@@ -80,5 +85,27 @@ describe('website and workspace aesthetic & optical alignment contracts', () => 
     const workspace = read('apps/workspace/src/styles.css');
     expect(workspace).toContain('scrollbar-width: thin;');
     expect(workspace).toMatch(/\.sidebar-header\s*\{[^}]*align-items:\s*center;/);
+  });
+
+  it('supports line highlighting, step-by-step code layout, and spring image zoom physics', async () => {
+    expect([...parseHighlightLines('1, 3-5, 8')]).toEqual([1, 3, 4, 5, 8]);
+    expect([...parseHighlightLines([2, 4])]).toEqual([2, 4]);
+    const html = await highlightCode('const a = 1;\nconst b = 2;\nconst c = 3;', 'typescript', {
+      highlightLines: '2',
+    });
+    expect(html).toContain('data-has-highlighted-lines="true"');
+    expect(html).toContain('data-highlighted-line');
+
+    const codeSurfaces = read('apps/www/src/styles/code-surfaces.css');
+    expect(codeSurfaces).toContain('.line[data-highlighted-line]');
+
+    const codeExample = read('apps/www/src/components/CodeExample.astro');
+    expect(codeExample).toContain("layout = 'steps'");
+    expect(codeExample).toContain('data-code-example-steps');
+
+    const zoomCss = read('apps/www/src/components/documentation-image-zoom.css');
+    expect(zoomCss).toContain('--docs-image-spring-ease: linear(');
+    expect(zoomCss).not.toContain('transition-timing-function: linear;');
+    expect(IMAGE_ZOOM_DURATION).toBe(420);
   });
 });

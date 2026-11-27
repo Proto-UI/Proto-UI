@@ -126,10 +126,21 @@ const effectiveHasCode = codePanel && (hasCode || !!formattedCodeMap || !!format
 const effectiveCode = formattedCodeMap
   ? formattedCodeMap[effectiveInitialRuntime]
   : formattedSnippet;
+function inferDemoControlFamily(
+  demoId?: string,
+  prototypeId?: string
+): 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass' | undefined {
+  const id = demoId || prototypeId || '';
+  if (/^(?:demo-)?bootstrap-2-3-2-/.test(id)) return 'bootstrap-2-3-2';
+  if (/^(?:demo-)?brutalist-/.test(id)) return 'brutalist';
+  if (/^(?:demo-)?liquid-glass-/.test(id)) return 'liquid-glass';
+  if (/^(?:demo-)?shadcn-/.test(id)) return 'shadcn';
+  return undefined;
+}
 const projectionRecipe = demoId ? tryResolveProjectionRecipe(demoId) : null;
 const controlFamily = resolvePreviewControlFamily(
   Astro.url.pathname,
-  projectionRecipe?.projectionFamilyId
+  projectionRecipe?.projectionFamilyId ?? inferDemoControlFamily(demoId, prototypeId)
 );
 
 const highlights: Record<string, string> = {};

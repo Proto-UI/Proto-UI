@@ -2071,22 +2071,23 @@ async function runtimeTabsJourney({ page, previewer, family, capture }: Journey)
     await observation.evaluate((state) => state.stop());
     await observation.dispose();
   }
-  // Geometry follows each family's dogfood `variant="line"` recipe; screenshots still need human inspection.
+  // Geometry follows each family's authentic dogfood Tabs recipe (`line` for Shadcn, `default` for Brutalist / Bootstrap 2.3.2 / Liquid Glass).
   for (const { selected, inactive } of snapshots) {
     if (family === 'brutalist') {
       expect(selected.border[2]).toBe('2px');
-      expect(selected.radius).toBe('0px');
-      expect(selected.padding[1]).toBe('4px');
-      expect(selected.padding[3]).toBe('4px');
       expect(selected.expectedFocusShadow).not.toBe('none');
       expect(selected.shadow).toBe(selected.expectedFocusShadow);
+      expect(selected.background).not.toBe('rgba(0, 0, 0, 0)');
     } else if (family === 'shadcn') {
-      expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
+      expect(selected.background).toBe('rgba(0, 0, 0, 0)');
+      expect(selected.shadow).not.toBe('none');
+    } else if (family === 'bootstrap-2-3-2') {
+      expect(selected.border[0]).toBe('1px');
+      expect(selected.background).not.toBe('rgba(0, 0, 0, 0)');
     } else {
-      expect(selected.border[2]).toBe('2px');
-      expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
+      expect(selected.background).not.toBe('rgba(0, 0, 0, 0)');
+      expect(selected.shadow).not.toBe('none');
     }
-    expect(selected.background).toBe('rgba(0, 0, 0, 0)');
     expect(selected.textWidth).toBeGreaterThan(0);
     expect(selected.rect.width).toBeGreaterThanOrEqual(selected.textWidth - 1);
     expect(selected.color).not.toBe(inactive.color);

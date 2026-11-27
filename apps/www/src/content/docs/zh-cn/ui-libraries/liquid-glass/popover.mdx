@@ -19,7 +19,7 @@ Liquid Glass Popover 在触发按钮附近呈现半透明悬浮材质面板，�
 
 ## 安装
 
-Liquid Glass Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-liquid-glass/popover` 导入原型并使用对应框架适配器：
+Liquid Glass Popover 目前在工作区源码中提供，将于 `0.3.0-rc.1` 及后续版本中提供 CLI。可直接从 `@proto.ui/prototypes-liquid-glass/popover` 导入原型并使用对应框架适配器：
 
 ```ts
 import {
@@ -118,7 +118,11 @@ LiquidGlassPopoverRoot
     { name: 'alignOffset (Content)', type: 'number', default: '0' },
     { name: 'collisionPadding (Content)', type: 'number', default: '8' },
     { name: 'material (Content)', type: "'auto' | 'opaque'", default: "'auto'" },
-    { name: 'prominence (Trigger / Content / Close)', type: "'regular' | 'prominent'", default: "'regular'" },
+    {
+      name: 'prominence (Trigger / Content / Close)',
+      type: "'regular' | 'prominent'",
+      default: "'regular'",
+    },
     { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
   ]}
 />

@@ -1,6 +1,16 @@
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as shadcn from '@proto.ui/prototypes-shadcn/tabs';
 import * as brutalist from '@proto.ui/prototypes-brutalist/tabs';
+import * as bootstrap from '@proto.ui/prototypes-bootstrap-2-3-2/tabs';
+import * as liquid from '@proto.ui/prototypes-liquid-glass/tabs';
+import { runtimePreviewFamily } from './site-library-family';
+
+const familyDefinitions = {
+  shadcn,
+  brutalist,
+  'bootstrap-2-3-2': bootstrap,
+  'liquid-glass': liquid,
+} as const;
 
 /** Reveal only along the tab strip; never scroll the document vertically. */
 export function revealCodeExampleTab(tab: HTMLElement, viewport: HTMLElement): void {
@@ -29,14 +39,8 @@ export function enhanceCodeExampleTabs(options: {
   if (list.contains(active) || panels.some((panel) => panel.contains(active))) {
     return { select() {}, destroy() {} };
   }
-  const scope = list.closest<HTMLElement>('[data-projection-family], [data-site-library-family]');
-  const family =
-    (scope?.dataset.projectionFamily ??
-      scope?.dataset.siteLibraryFamily ??
-      doc.documentElement.dataset.siteLibraryFamily) === 'brutalist'
-      ? 'brutalist'
-      : 'shadcn';
-  const definitions = family === 'brutalist' ? brutalist : shadcn;
+  const family = runtimePreviewFamily(list);
+  const definitions = familyDefinitions[family];
   const entries = {
     root: definitions.tabsRoot,
     list: definitions.tabsList,
@@ -63,6 +67,7 @@ export function enhanceCodeExampleTabs(options: {
     value: String(value),
     orientation: 'horizontal',
     activationMode: 'automatic',
+    ...(family === 'shadcn' ? { styleProfile: 'rhea' } : {}),
   });
   const root = element('root', {
     ...rootProps(),
@@ -70,10 +75,10 @@ export function enhanceCodeExampleTabs(options: {
   });
   root.dataset.codeExampleTabsProjection = family;
   const projectedList = element('list', {
-    appearance: 'underline',
+    variant: family === 'shadcn' ? 'line' : 'default',
     a11yLabel: list.getAttribute('aria-label') ?? 'Code example',
     loop: false,
-    surfaceStyle: { paddingInline: '0.75rem', gap: '1.25rem', minWidth: '0' },
+    surfaceStyle: { maxWidth: '100%', overflowX: 'auto' },
   });
   projectedList.dataset.codeExampleTablist = list.hasAttribute('data-code-host-tabs')
     ? 'host'
@@ -91,8 +96,6 @@ export function enhanceCodeExampleTabs(options: {
   for (const [index, tab] of tabs.entries()) {
     const trigger = element('trigger', {
       value: String(index),
-      appearance: 'underline',
-      surfaceStyle: { minHeight: '2.75rem', fontSize: '0.8125rem', lineHeight: '1.25rem' },
     });
     // Astro preserves formatting whitespace around authored labels. Keep the
     // projected label exact without touching source-code whitespace.

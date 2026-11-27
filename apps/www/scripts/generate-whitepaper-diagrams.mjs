@@ -16,25 +16,102 @@ const esc = (s) =>
 let parts = [];
 let en = false;
 const tr = (zh, english) => (en ? english : zh);
+
+// Deterministic PRNG for repeatable Excalidraw-style two-pass sketch paths.
+function createRng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+const fmt = (n) => Number(n.toFixed(1));
+
+function sketchSeg(x1, y1, x2, y2, rng, roughness = 1.2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const j = (scale) => (rng() - 0.5) * 2 * roughness * scale;
+  const amp = Math.min(2.4, Math.max(0.55, len * 0.008)) * roughness;
+  const c1x = x1 + dx * 0.33 + nx * (rng() - 0.5) * amp * 2 + j(0.5);
+  const c1y = y1 + dy * 0.33 + ny * (rng() - 0.5) * amp * 2 + j(0.5);
+  const c2x = x1 + dx * 0.67 + nx * (rng() - 0.5) * amp * 2 + j(0.5);
+  const c2y = y1 + dy * 0.67 + ny * (rng() - 0.5) * amp * 2 + j(0.5);
+  return `M${fmt(x1 + j(0.5))} ${fmt(y1 + j(0.5))} C${fmt(c1x)} ${fmt(c1y)} ${fmt(c2x)} ${fmt(c2y)} ${fmt(x2 + j(0.5))} ${fmt(y2 + j(0.5))}`;
+}
+
+function handBoxPaths(x, y, w, h, r = 14, seed = 1, roughness = 1.15) {
+  const rng = createRng(seed + Math.round(x * 7 + y * 13 + w * 3 + h * 5));
+  const cr = Math.min(r, w / 2, h / 2);
+  const pass = (rough) => {
+    const j = (s = 1) => (rng() - 0.5) * 2 * rough * s;
+    const x0 = x + cr;
+    const x1 = x + w - cr;
+    const y0 = y + cr;
+    const y1 = y + h - cr;
+    const k = cr * 0.552;
+    return [
+      `M${fmt(x0 + j(0.4))} ${fmt(y + j(0.5))}`,
+      `C${fmt(x0 + (x1 - x0) * 0.35)} ${fmt(y + j(1.0))} ${fmt(x0 + (x1 - x0) * 0.68)} ${fmt(y + j(1.0))} ${fmt(x1 + j(0.4))} ${fmt(y + j(0.5))}`,
+      `C${fmt(x1 + k)} ${fmt(y + j(0.5))} ${fmt(x + w + j(0.5))} ${fmt(y0 - k)} ${fmt(x + w + j(0.5))} ${fmt(y0 + j(0.4))}`,
+      `C${fmt(x + w + j(1.0))} ${fmt(y0 + (y1 - y0) * 0.35)} ${fmt(x + w + j(1.0))} ${fmt(y0 + (y1 - y0) * 0.68)} ${fmt(x + w + j(0.5))} ${fmt(y1 + j(0.4))}`,
+      `C${fmt(x + w + j(0.5))} ${fmt(y1 + k)} ${fmt(x1 + k)} ${fmt(y + h + j(0.5))} ${fmt(x1 + j(0.4))} ${fmt(y + h + j(0.5))}`,
+      `C${fmt(x1 - (x1 - x0) * 0.35)} ${fmt(y + h + j(1.0))} ${fmt(x1 - (x1 - x0) * 0.68)} ${fmt(y + h + j(1.0))} ${fmt(x0 + j(0.4))} ${fmt(y + h + j(0.5))}`,
+      `C${fmt(x0 - k)} ${fmt(y + h + j(0.5))} ${fmt(x + j(0.5))} ${fmt(y1 + k)} ${fmt(x + j(0.5))} ${fmt(y1 + j(0.4))}`,
+      `C${fmt(x + j(1.0))} ${fmt(y1 - (y1 - y0) * 0.35)} ${fmt(x + j(1.0))} ${fmt(y1 - (y1 - y0) * 0.68)} ${fmt(x + j(0.5))} ${fmt(y0 + j(0.4))}`,
+      `C${fmt(x + j(0.5))} ${fmt(y0 - k)} ${fmt(x0 - k)} ${fmt(y + j(0.5))} ${fmt(x0 + j(0.4))} ${fmt(y + j(0.5))}`,
+    ].join(' ');
+  };
+  return [pass(roughness), pass(roughness * 0.85)];
+}
+
+function sketchBox(x, y, w, h, cls = '', r = 14, dashed = false) {
+  const [p1, p2] = handBoxPaths(x, y, w, h, r, dashed ? 37 : 11);
+  const dash = dashed ? ' hand-dash' : '';
+  parts.push(`<path d="${p1}" class="hand-stroke${dash} ${cls}"/>`);
+  if (!dashed) {
+    parts.push(`<path d="${p2}" class="hand-stroke hand-echo ${cls}"/>`);
+  }
+}
+
+function sketchCircle(cx, cy, r, cls = '') {
+  const rng = createRng(Math.round(cx * 11 + cy * 17 + r * 5));
+  const k = r * 0.552;
+  const pass = (rough) => {
+    const j = (s = 1) => (rng() - 0.5) * 2 * rough * s;
+    return [
+      `M${fmt(cx + j(0.6))} ${fmt(cy - r + j(0.6))}`,
+      `C${fmt(cx + k + j(0.8))} ${fmt(cy - r + j(0.8))} ${fmt(cx + r + j(0.8))} ${fmt(cy - k + j(0.8))} ${fmt(cx + r + j(0.6))} ${fmt(cy + j(0.6))}`,
+      `C${fmt(cx + r + j(0.8))} ${fmt(cy + k + j(0.8))} ${fmt(cx + k + j(0.8))} ${fmt(cy + r + j(0.8))} ${fmt(cx + j(0.6))} ${fmt(cy + r + j(0.6))}`,
+      `C${fmt(cx - k + j(0.8))} ${fmt(cy + r + j(0.8))} ${fmt(cx - r + j(0.8))} ${fmt(cy + k + j(0.8))} ${fmt(cx - r + j(0.6))} ${fmt(cy + j(0.6))}`,
+      `C${fmt(cx - r + j(0.8))} ${fmt(cy - k + j(0.8))} ${fmt(cx - k + j(0.8))} ${fmt(cy - r + j(0.8))} ${fmt(cx + j(0.6))} ${fmt(cy - r + j(0.6))}`,
+    ].join(' ');
+  };
+  parts.push(`<path d="${pass(1.1)}" class="hand-stroke ${cls}"/>`);
+  parts.push(`<path d="${pass(0.85)}" class="hand-stroke hand-echo ${cls}"/>`);
+}
+
+function sketchLine(x1, y1, x2, y2, arrow = true, cls = '', extra = '') {
+  const rng = createRng(Math.round(x1 * 3 + y1 * 5 + x2 * 7 + y2 * 11));
+  const d = sketchSeg(x1, y1, x2, y2, rng, 1.0);
+  parts.push(
+    `<path${extra ? ' ' + extra : ''} d="${d}" class="hand-stroke ${cls}"${arrow ? ' marker-end="url(#hand-arrow)"' : ''}/>`
+  );
+}
+
 const text = (x, y, value, size = 24, anchor = 'middle', cls = '') => {
   const lines = value.split('|');
   parts.push(
     `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" class="${cls}">${lines.map((l, i) => `<tspan x="${x}" dy="${i ? size * 1.4 : 0}">${esc(l)}</tspan>`).join('')}</text>`
   );
 };
-const rect = (x, y, w, h, cls = 'panel', r = 14) =>
-  parts.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" class="${cls}"/>`);
-const path = (d, arrow = true, cls = '') =>
-  parts.push(`<path d="${d}" class="line ${cls}"${arrow ? ' marker-end="url(#arrow)"' : ''}/>`);
-const box = (x, y, w, h, label, cls = 'panel', size = 24) => {
-  rect(x, y, w, h, cls);
-  const count = label.split('|').length;
-  text(x + w / 2, y + h / 2 + size * 0.35 - (count - 1) * size * 0.7, label, size);
-};
 const heading = (number, title, sub) => {
-  text(48, 48, number, 20, 'start', 'muted');
-  text(48, 94, title, 32, 'start', 'strong');
-  text(48, 132, sub, 22, 'start', 'muted');
+  text(48, 46, number, 20, 'start', 'muted');
+  text(48, 90, title, 32, 'start', 'strong');
+  text(48, 128, sub, 21, 'start', 'muted');
 };
 const foot = (y, value) => text(48, y, value, 21, 'start', 'muted');
 
@@ -59,59 +136,84 @@ function anatomy() {
       'Switch and Select: explain each boundary through responsibility'
     )
   );
-  rect(48, 170, 864, 240);
-  text(74, 211, 'Switch', 28, 'start', 'strong');
-  rect(90, 248, 238, 94, 'blue', 47);
-  parts.push('<circle cx="276" cy="295" r="35" class="green"/>');
-  text(145, 304, 'Root', 25);
-  text(278, 383, 'Thumb', 23);
-  path('M278 359 V335', false);
-  text(390, 241, tr('Root：checked 的唯一 owner', 'Root: sole owner of checked'), 24, 'start');
-  text(390, 274, tr('由 Root 处理 activation', 'Root handles activation'), 22, 'start');
-  text(390, 314, 'Root → Context → Thumb', 25, 'start', 'strong');
-  text(390, 352, tr('Thumb：派生展示状态', 'Thumb: derived display state'), 24, 'start');
+
+  // Switch section — open, airy hand-drawn enclosure
+  sketchBox(48, 162, 864, 248, 'hand-muted', 14);
+  text(74, 204, 'Switch', 27, 'start', 'strong');
+  sketchBox(86, 242, 236, 92, 'hand-blue', 46);
+  sketchCircle(272, 288, 34, 'hand-green');
+  text(145, 297, 'Root', 24, 'middle', 'ink-blue');
+  text(272, 376, 'Thumb', 22, 'middle', 'ink-green');
+  sketchLine(272, 352, 272, 328, false, 'hand-green');
+
   text(
-    390,
-    374,
-    tr('两个 Component，一个 Switch', 'Two Components, one Switch'),
+    384,
+    224,
+    tr('Root：checked 的唯一 owner', 'Root: sole owner of checked'),
     23,
+    'start',
+    'strong'
+  );
+  text(384, 258, tr('由 Root 处理 activation', 'Root handles activation'), 21, 'start', 'muted');
+  text(384, 300, 'Root → Context → Thumb', 23, 'start', 'ink-blue');
+  text(
+    384,
+    340,
+    tr('Thumb：派生展示状态', 'Thumb: derived display state'),
+    23,
+    'start',
+    'ink-green'
+  );
+  text(
+    384,
+    376,
+    tr('两个 Component，一个 Switch', 'Two Components, one Switch'),
+    21,
     'start',
     'muted'
   );
 
-  rect(48, 434, 864, 398);
-  text(74, 477, tr('Select：结构示意', 'Select: structural illustration'), 28, 'start', 'strong');
-  rect(80, 503, 294, 288, 'scope');
-  text(96, 535, tr('Root 范围', 'Root scope'), 22, 'start', 'muted');
-  rect(98, 553, 258, 64, 'blue');
-  text(122, 593, 'Value', 24, 'start');
-  path('M311 578 L324 591 L337 578', false);
-  path('M344 584 H387 V649 H402', false);
-  text(220, 642, 'Trigger', 22, 'middle', 'muted');
-  rect(98, 663, 258, 108, 'green');
-  text(122, 693, 'Content', 22, 'start', 'muted');
-  box(113, 708, 228, 45, 'Item', 'panel', 23);
+  // Select section
+  sketchBox(48, 434, 864, 404, 'hand-muted', 14);
+  text(74, 476, tr('Select：结构示意', 'Select: structural illustration'), 27, 'start', 'strong');
+  sketchBox(78, 502, 298, 296, 'hand-muted', 14, true);
+  text(96, 534, tr('Root 范围', 'Root scope'), 21, 'start', 'muted');
+  sketchBox(98, 550, 258, 62, 'hand-blue', 12);
+  text(120, 589, 'Value', 23, 'start', 'ink-blue');
+  // Hand-drawn caret inside Trigger + callout line
+  parts.push(
+    '<path d="M312 574 Q319 581 325 588 Q332 581 339 574" class="hand-stroke hand-amber"/>'
+  );
+  parts.push(
+    '<path d="M348 581 C372 581 384 584 388 602 L388 646 C388 652 394 654 404 654" class="hand-stroke hand-amber"/>'
+  );
+  text(224, 638, 'Trigger', 21, 'middle', 'muted');
+  sketchBox(98, 660, 258, 114, 'hand-green', 12);
+  text(118, 691, 'Content', 21, 'start', 'ink-green');
+  sketchBox(114, 708, 226, 48, '', 10);
+  text(227, 740, 'Item', 22, 'middle');
+
+  text(414, 548, 'Trigger / Value / Content / Item', 23, 'start', 'strong');
   text(
-    413,
-    549,
-    tr('Trigger / Value / Content / Item', 'Trigger / Value / Content / Item'),
+    414,
+    586,
+    tr('各自承担独立交互关系', 'Each has independent relations'),
+    22,
+    'start',
+    'muted'
+  );
+  text(
+    414,
+    658,
+    tr('固定 Caret：只有 Feedback', 'Fixed Caret: Feedback only'),
     23,
     'start',
-    'strong'
+    'ink-amber'
   );
-  text(413, 589, tr('各自承担独立交互关系', 'Each has independent relations'), 24, 'start');
+  text(414, 696, tr('可以附属于 Trigger', 'May remain inside Trigger'), 22, 'start');
   text(
-    413,
-    656,
-    tr('固定 Caret：只有 Feedback', 'Fixed Caret: Feedback only'),
-    24,
-    'start',
-    'strong'
-  );
-  text(413, 695, tr('可以附属于 Trigger', 'May remain inside Trigger'), 24, 'start');
-  text(
-    413,
-    754,
+    414,
+    748,
     tr(
       '独立的 Event / Props / Expose|或 Context：需要独立 Component。',
       'Own Event / Props / Expose|or Context: a separate Component.'
@@ -121,7 +223,7 @@ function anatomy() {
     'muted'
   );
   foot(
-    877,
+    880,
     tr(
       'Caret 是设计对照案例；结构示意不规定实际 Host tree。',
       'Caret is a design example; this does not prescribe a Host tree.'
@@ -265,23 +367,28 @@ function consistency() {
       'Establish obligations, then define the two realization contexts'
     )
   );
-  box(
-    48,
-    176,
-    864,
-    100,
+
+  // Baseline enclosure in restrained blue sketch ink
+  sketchBox(48, 170, 864, 104, 'hand-blue', 14);
+  text(
+    480,
+    210,
     tr(
       '共同底线：Prototype 与适用 profile 的必要义务|身份 · 通路 · 状态转换 · 生命周期秩序 · 必需 Feedback',
       'Shared baseline: obligations of the Prototype and applicable profile|Identity · channels · state transitions · lifecycle order · required Feedback'
     ),
-    'blue',
-    en ? 22 : 24
+    en ? 21 : 23,
+    'middle',
+    'ink-blue'
   );
-  text(72, 329, tr('共享且受控的条件', 'Shared, controlled conditions'), 25, 'start', 'strong');
-  text(625, 329, tr('可进一步比较', 'Finer comparison'), 25, 'start', 'strong');
+
+  text(72, 326, tr('共享且受控的条件', 'Shared, controlled conditions'), 24, 'start', 'strong');
+  text(628, 326, tr('可进一步比较', 'Finer comparison'), 24, 'start', 'strong');
   const rows = [
     [
-      355,
+      352,
+      'hand-green',
+      'ink-green',
       tr(
         '相同输入媒介、viewport、单位、字体等',
         'Same input medium, viewport,|units, fonts, and related conditions'
@@ -289,7 +396,9 @@ function consistency() {
       tr('输入行为与 Feedback', 'Input behavior|and Feedback'),
     ],
     [
-      491,
+      488,
+      'hand-amber',
+      'ink-amber',
       tr(
         '同属 Web family，并共享受治理的|结构、事件、样式基础与 projection policy',
         'Same Web family, with governed|structure, events, styles, and projection policy'
@@ -297,7 +406,9 @@ function consistency() {
       'Normalized DOM',
     ],
     [
-      627,
+      624,
+      'hand-purple',
+      'ink-purple',
       tr(
         '进一步控制 device metrics、字体 shaping、|色彩与 rasterization 等像素相关条件',
         'Also control device metrics, font shaping,|color, rasterization, and related conditions'
@@ -305,21 +416,22 @@ function consistency() {
       tr('像素表现', 'Pixel output'),
     ],
   ];
-  rows.forEach(([y, left, right]) => {
-    rect(48, y, 864, 112);
-    text(72, y + (left.includes('|') ? 45 : 64), left, en ? 22 : 23, 'start');
-    path(`M562 ${y + 56} H600`);
-    text(748, y + (right.includes('|') ? 44 : 65), right, 24);
+  rows.forEach(([y, strokeCls, inkCls, left, right]) => {
+    sketchBox(48, y, 502, 110, 'hand-muted', 14);
+    text(72, y + (left.includes('|') ? 45 : 64), left, en ? 21 : 22, 'start');
+    sketchLine(560, y + 55, 616, y + 55, true, strokeCls);
+    sketchBox(628, y + 10, 284, 90, strokeCls, 14);
+    text(770, y + (right.includes('|') ? 44 : 64), right, 23, 'middle', inkCls);
   });
   foot(
-    786,
+    784,
     tr(
       'tolerance / exclusion 需预先约定；这些条件不是自动晋级的等级。',
       'Agree tolerance / exclusion in advance; these are conditions, not automatic tiers.'
     )
   );
   foot(
-    821,
+    818,
     tr(
       '本图表达比较原则，不代表已有完整的跨 Host 证据。',
       'Comparison principles do not imply complete evidence across Hosts.'
@@ -339,91 +451,9 @@ function evolutionDescription() {
   );
 }
 
-function evolutionStyles() {
-  parts.push(`<defs>
-  <style>
-    .evo-root {
-      --evo-bg: #fafaf9;
-      --evo-surface: #ffffff;
-      --evo-surface-subtle: #f4f4f5;
-      --evo-border: #d4d4d8;
-      --evo-border-strong: #a1a1aa;
-      --evo-ink: #18181b;
-      --evo-muted: #52525b;
-      --evo-faint: #71717a;
-      --evo-line: #71717a;
-      --evo-blue: #2563eb;
-      --evo-blue-soft: #eff6ff;
-      --evo-green: #059669;
-      --evo-green-soft: #ecfdf5;
-      --evo-amber: #d97706;
-      --evo-amber-soft: #fffbeb;
-      --evo-slate: #475569;
-      --evo-slate-soft: #f1f5f9;
-    }
-    @media (prefers-color-scheme: dark) {
-      .evo-root {
-        --evo-bg: #111113;
-        --evo-surface: #18181b;
-        --evo-surface-subtle: #202024;
-        --evo-border: #2e2e33;
-        --evo-border-strong: #52525b;
-        --evo-ink: #f4f4f5;
-        --evo-muted: #a1a1aa;
-        --evo-faint: #71717a;
-        --evo-line: #71717a;
-        --evo-blue: #60a5fa;
-        --evo-blue-soft: #172554;
-        --evo-green: #34d399;
-        --evo-green-soft: #064e3b;
-        --evo-amber: #fbbf24;
-        --evo-amber-soft: #451a03;
-        --evo-slate: #94a3b8;
-        --evo-slate-soft: #1e293b;
-      }
-    }
-    .evo-root text {
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      fill: var(--evo-ink);
-    }
-    .evo-mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-      letter-spacing: 0.06em;
-    }
-    .evo-title { font-weight: 650; letter-spacing: -0.02em; fill: var(--evo-ink); }
-    .evo-sub { font-weight: 450; fill: var(--evo-muted); }
-    .evo-kicker { font-weight: 600; fill: var(--evo-faint); }
-    .evo-card { fill: var(--evo-surface); stroke: var(--evo-border); stroke-width: 1.25; }
-    .evo-zone { fill: var(--evo-surface-subtle); stroke: var(--evo-border); stroke-width: 1; }
-    .evo-pill { fill: var(--evo-surface); stroke: var(--evo-border); stroke-width: 1; }
-    .evo-wire { fill: none; stroke: var(--evo-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    .evo-wire-dash { fill: none; stroke: var(--evo-border-strong); stroke-width: 1.5; stroke-dasharray: 5 4; stroke-linecap: round; stroke-linejoin: round; }
-  </style>
-  <filter id="evo-shadow" x="-6%" y="-10%" width="112%" height="126%">
-    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
-  </filter>
-  <marker id="evo-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-    <path d="M1.5 1.5 L8.5 5 L1.5 8.5 Z" fill="var(--evo-line)"/>
-  </marker>
-  <marker id="evo-arrow-sm" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-    <path d="M1.5 2 L8.5 5 L1.5 8 Z" fill="var(--evo-line)"/>
-  </marker>
-</defs>`);
-}
-
 function evolutionEdge(relation, from, to, d, arrow = true) {
   parts.push(
-    `<path data-relation="${relation}" data-from="${from}" data-to="${to}" d="${d}" class="evo-wire"${arrow ? ' marker-end="url(#evo-arrow-sm)"' : ''}/>`
-  );
-}
-
-function evolutionCard(kind, id, x, y, width, height, accent) {
-  parts.push(`<g data-${kind}="${id}">`);
-  parts.push(
-    `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="12" class="evo-card" filter="url(#evo-shadow)"/>`
-  );
-  parts.push(
-    `<rect x="${x}" y="${y}" width="${width}" height="4" rx="2" fill="var(--evo-${accent})" stroke="none"/>`
+    `<path data-relation="${relation}" data-from="${from}" data-to="${to}" d="${d}" class="hand-stroke evo-wire"${arrow ? ' marker-end="url(#hand-arrow)"' : ''}/>`
   );
 }
 
@@ -431,7 +461,7 @@ function evolutionDiagnoses() {
   return [
     [
       'implementation',
-      'slate',
+      'muted',
       tr('实现偏差', 'Implementation drift'),
       tr('修正实现', 'Fix implementation'),
     ],
@@ -459,18 +489,15 @@ function evolutionDiagnoses() {
 function evolution() {
   evolutionDescription();
   parts.push('<g class="evo-root">');
-  // Markers inherit the same theme variables as the paths that reference them.
-  evolutionStyles();
-  parts.push('<rect width="960" height="928" rx="16" fill="var(--evo-bg)" stroke="none"/>');
   text(
     48,
-    64,
+    60,
     tr('实践、证据与明确修正', 'Practice, evidence, and explicit revision'),
-    40,
+    36,
     'start',
-    'evo-title'
+    'strong'
   );
-  text(48, 118, tr('三条主线并行推进', 'Three concurrent lines of work'), 36, 'start', 'evo-sub');
+  text(48, 108, tr('三条主线并行推进', 'Three concurrent lines of work'), 36, 'start', 'muted');
 
   const lanes = [
     ['theory-kernel', 96, 'blue', tr('理论与|内核', 'Theory &|kernel')],
@@ -478,62 +505,86 @@ function evolution() {
     ['translation-layer', 672, 'amber', tr('翻译层', 'Translation|layer')],
   ];
   for (const [id, x, accent, label] of lanes) {
-    evolutionCard('node', id, x, 166, 248, 126, accent);
-    text(x + 124, 241.6 - (label.split('|').length - 1) * 25.2, label, 36, 'middle', 'evo-title');
+    parts.push(`<g data-node="${id}">`);
+    sketchBox(x, 166, 248, 126, `hand-${accent}`, 16);
+    text(
+      x + 124,
+      241.6 - (label.split('|').length - 1) * 25.2,
+      label,
+      36,
+      'middle',
+      `ink-${accent}`
+    );
     parts.push('</g>');
   }
   for (let index = 0; index < 2; index++) {
     const [left, x] = lanes[index];
     const [right, next] = lanes[index + 1];
-    evolutionEdge('work-exchange', left, right, `M${x + 252} 210 H${next - 4}`);
-    evolutionEdge('work-exchange', right, left, `M${next - 4} 252 H${x + 252}`);
+    evolutionEdge(
+      'work-exchange',
+      left,
+      right,
+      `M${x + 252} 210 Q${(x + 252 + next) / 2} 207 ${next - 4} 210`
+    );
+    evolutionEdge(
+      'work-exchange',
+      right,
+      left,
+      `M${next - 4} 252 Q${(x + 252 + next) / 2} 255 ${x + 252} 252`
+    );
   }
   for (const [id, x] of lanes) {
     evolutionEdge(
       'practice-input',
       id,
       'practice-evidence',
-      `M${x + 124} 292 V316 Q${x + 124} 328 508 328`,
+      `M${x + 124} 292 C${x + 123} 312 ${x + 126} 326 508 328`,
       false
     );
   }
-  evolutionEdge('evidence-entry', 'work', 'practice-evidence', 'M508 328 V348');
-  evolutionCard('node', 'practice-evidence', 96, 352, 824, 124, 'slate');
-  text(508, 400, tr('实践提供证据', 'Practice provides evidence'), 36, 'middle', 'evo-title');
+  evolutionEdge('evidence-entry', 'work', 'practice-evidence', 'M508 328 Q507.5 339 508 350');
+
+  parts.push('<g data-node="practice-evidence">');
+  sketchBox(96, 352, 824, 120, '', 16);
+  text(508, 398, tr('实践提供证据', 'Practice provides evidence'), 36, 'middle', 'strong');
   text(
     508,
-    454,
+    448,
     tr('行为结果、失败与反例', 'Outcomes, failures, counterexamples'),
     36,
     'middle',
-    'evo-sub'
+    'muted'
   );
   parts.push('</g>');
-  evolutionEdge('diagnose', 'practice-evidence', 'diagnoses', 'M508 476 V492');
+
+  evolutionEdge('diagnose', 'practice-evidence', 'diagnoses', 'M508 472 Q508.5 484 508 494');
+
   parts.push('<g data-alternatives="diagnoses">');
-  parts.push('<rect x="80" y="496" width="856" height="376" rx="16" class="evo-zone"/>');
+  sketchBox(80, 496, 856, 376, 'hand-muted', 18, true);
   text(
-    96,
+    102,
     548,
     tr('归因：哪一层需要修正？', 'Which layer needs revision?'),
     36,
     'start',
-    'evo-title'
+    'strong'
   );
   evolutionDiagnoses().forEach(([id, accent, condition, action], index) => {
-    const x = 96 + (index % 2) * 424;
-    const y = 578 + Math.floor(index / 2) * 152;
-    evolutionCard('diagnosis', id, x, y, 400, 128, accent);
-    text(x + 200, y + 48, condition, 36, 'middle', 'evo-title');
-    text(x + 200, y + 102, action, 36, 'middle', 'evo-sub');
+    const x = 98 + (index % 2) * 422;
+    const y = 578 + Math.floor(index / 2) * 148;
+    parts.push(`<g data-diagnosis="${id}">`);
+    sketchBox(x, y, 398, 126, accent === 'muted' ? 'hand-muted' : `hand-${accent}`, 14);
+    text(x + 199, y + 50, condition, 36, 'middle', accent === 'muted' ? 'strong' : `ink-${accent}`);
+    text(x + 199, y + 102, action, 36, 'middle', 'muted');
     parts.push('</g>');
   });
   parts.push('</g>');
+
   evolutionEdge(
     'revision-loop',
     'diagnoses',
     'work',
-    'M80 684 H58 Q44 684 44 670 V146 Q44 136 58 136 H796',
+    'M80 684 H58 Q44 684 44 670 V148 Q44 136 58 136 H796',
     false
   );
   for (const [id, x] of lanes) {
@@ -541,11 +592,11 @@ function evolution() {
   }
   text(
     48,
-    908,
+    910,
     tr('明确修正，再次检验。', 'Revise explicitly, then test again.'),
     36,
     'start',
-    'evo-sub'
+    'muted'
   );
   parts.push('</g>');
   return 928;
@@ -554,11 +605,8 @@ function evolution() {
 function evolutionMobile() {
   evolutionDescription();
   parts.push('<g class="evo-root">');
-  // Markers inherit the same theme variables as the paths that reference them.
-  evolutionStyles();
-  parts.push('<rect width="500" height="1000" rx="14" fill="var(--evo-bg)" stroke="none"/>');
-  text(32, 40, tr('从实践到明确修正', 'Practice to explicit revision'), 28, 'start', 'evo-title');
-  text(32, 80, tr('三条主线并行推进', 'Three concurrent lines of work'), 26, 'start', 'evo-sub');
+  text(32, 40, tr('从实践到明确修正', 'Practice to explicit revision'), 28, 'start', 'strong');
+  text(32, 80, tr('三条主线并行推进', 'Three concurrent lines of work'), 26, 'start', 'muted');
 
   const lanes = [
     ['theory-kernel', 32, 140, 'blue', tr('理论|与内核', 'Theory &|kernel')],
@@ -566,14 +614,15 @@ function evolutionMobile() {
     ['translation-layer', 342, 144, 'amber', tr('翻译层', 'Translation|layer')],
   ];
   for (const [id, x, width, accent, label] of lanes) {
-    evolutionCard('node', id, x, 108, width, 116, accent);
+    parts.push(`<g data-node="${id}">`);
+    sketchBox(x, 108, width, 116, `hand-${accent}`, 14);
     text(
       x + width / 2,
       175.1 - (label.split('|').length - 1) * 18.2,
       label,
       26,
       'middle',
-      'evo-title'
+      `ink-${accent}`
     );
     parts.push('</g>');
   }
@@ -593,35 +642,37 @@ function evolutionMobile() {
     );
   }
   evolutionEdge('evidence-entry', 'work', 'practice-evidence', 'M258 246 V267');
-  evolutionCard('node', 'practice-evidence', 32, 270, 452, 120, 'slate');
-  text(258, 306, tr('实践提供证据', 'Practice provides evidence'), 26, 'middle', 'evo-title');
+  parts.push('<g data-node="practice-evidence">');
+  sketchBox(32, 270, 452, 120, '', 14);
+  text(258, 306, tr('实践提供证据', 'Practice provides evidence'), 26, 'middle', 'strong');
   text(
     258,
     en ? 341 : 347,
     tr('行为结果、失败与反例', 'Outcomes, failures,|counterexamples'),
     26,
     'middle',
-    'evo-sub'
+    'muted'
   );
   parts.push('</g>');
   evolutionEdge('diagnose', 'practice-evidence', 'diagnoses', 'M258 390 V402');
-  text(32, 427, tr('哪一层需要修正？', 'Which layer needs revision?'), 26, 'start', 'evo-title');
+  text(32, 427, tr('哪一层需要修正？', 'Which layer needs revision?'), 26, 'start', 'strong');
   text(
     32,
     461,
     tr('不同归因，并非先后阶段', 'Alternative diagnoses, not stages'),
     26,
     'start',
-    'evo-sub'
+    'muted'
   );
 
   parts.push('<g data-alternatives="diagnoses">');
-  parts.push('<rect x="32" y="478" width="452" height="416" rx="14" class="evo-zone"/>');
+  sketchBox(32, 478, 452, 416, 'hand-muted', 14, true);
   evolutionDiagnoses().forEach(([id, accent, condition, action], index) => {
     const y = 488 + index * 100;
-    evolutionCard('diagnosis', id, 44, y, 428, 92, accent);
-    text(258, y + 36, condition, 26, 'middle', 'evo-title');
-    text(258, y + 76, action, 26, 'middle', 'evo-sub');
+    parts.push(`<g data-diagnosis="${id}">`);
+    sketchBox(44, y, 428, 92, accent === 'muted' ? 'hand-muted' : `hand-${accent}`, 12);
+    text(258, y + 36, condition, 26, 'middle', accent === 'muted' ? 'strong' : `ink-${accent}`);
+    text(258, y + 76, action, 26, 'middle', 'muted');
     parts.push('</g>');
   });
   parts.push('</g>');
@@ -635,8 +686,8 @@ function evolutionMobile() {
   for (const [id, x, width] of lanes) {
     evolutionEdge('revision-return', 'diagnoses', id, `M${x + width / 2} 94 V105`);
   }
-  text(32, 930, tr('明确修正，再次检验。', 'Revise, then test again.'), 26, 'start', 'evo-sub');
-  text(32, 966, tr('实现结果不静默成为标准。', 'No silent rule changes.'), 26, 'start', 'evo-sub');
+  text(32, 930, tr('明确修正，再次检验。', 'Revise, then test again.'), 26, 'start', 'muted');
+  text(32, 966, tr('实现结果不静默成为标准。', 'No silent rule changes.'), 26, 'start', 'muted');
   parts.push('</g>');
   return 1000;
 }
@@ -654,15 +705,15 @@ function anatomyMobile() {
   text(32, 132, tr('用责任解释拆分', 'Boundaries follow responsibility'), 26, 'start', 'muted');
 
   parts.push('<g data-comparison="switch" data-node="switch">');
-  rect(24, 170, 452, 544);
+  sketchBox(24, 170, 452, 544, 'hand-muted', 14);
   text(48, 214, 'Switch', 30, 'start', 'strong');
-  rect(48, 242, 404, 94, 'blue', 47);
+  sketchBox(48, 242, 404, 94, 'hand-blue', 47);
   parts.push('<g data-part="switch-root">');
-  text(138, 299, 'Root', 28);
+  text(138, 299, 'Root', 28, 'middle', 'ink-blue');
   parts.push('</g><g data-part="switch-thumb">');
-  parts.push('<circle cx="398" cy="289" r="32" class="green"/>');
-  text(398, 382, 'Thumb', 26);
-  path('M398 354 V326', false);
+  sketchCircle(398, 289, 32, 'hand-green');
+  text(398, 382, 'Thumb', 26, 'middle', 'ink-green');
+  sketchLine(398, 354, 398, 326, false, 'hand-green');
   parts.push('</g>');
   text(
     48,
@@ -674,12 +725,19 @@ function anatomyMobile() {
   );
   text(48, 466, tr('由 Root 处理 activation', 'Root handles activation'), 26, 'start');
   parts.push('<g data-relation="context" data-from="switch-root" data-to="switch-thumb">');
-  text(90, 534, 'Root', 26);
+  text(90, 534, 'Root', 26, 'middle', 'ink-blue');
   text(251, 513, 'Context', 26);
-  path('M132 528 H349');
-  text(397, 534, 'Thumb', 26);
+  sketchLine(132, 528, 349, 528, true, 'hand-blue');
+  text(397, 534, 'Thumb', 26, 'middle', 'ink-green');
   parts.push('</g>');
-  text(48, 598, tr('Thumb：派生展示状态', 'Thumb: derived display state'), 26, 'start');
+  text(
+    48,
+    598,
+    tr('Thumb：派生展示状态', 'Thumb: derived display state'),
+    26,
+    'start',
+    'ink-green'
+  );
   text(48, 638, 'checked / disabled', 26, 'start', 'muted');
   text(
     48,
@@ -694,21 +752,24 @@ function anatomyMobile() {
   parts.push('<g data-comparison="select">');
   text(32, 782, tr('Select：结构示意', 'Select: structural illustration'), 28, 'start', 'strong');
   parts.push('<g data-part="select-root" data-node="select-root">');
-  rect(44, 816, 412, 320, 'scope');
+  sketchBox(44, 816, 412, 320, 'hand-muted', 14, true);
   text(64, 858, tr('Root：open 与选中值', 'Root: open and selection'), 26, 'start', 'muted');
   parts.push('<g data-part="trigger">');
-  rect(62, 890, 376, 70, 'blue');
+  sketchBox(62, 890, 376, 70, 'hand-blue', 12);
   text(80, 1000, 'Trigger', 26, 'start', 'muted');
   parts.push('<g data-part="value">');
-  text(86, 935, 'Value', 28, 'start');
+  text(86, 935, 'Value', 28, 'start', 'ink-blue');
   parts.push('</g><g data-example="fixed-caret">');
-  path('M379 916 L393 930 L407 916', false);
+  parts.push(
+    '<path d="M379 916 Q386 923 393 930 Q400 923 407 916" class="hand-stroke hand-amber"/>'
+  );
   parts.push('</g></g>');
   parts.push('<g data-part="content">');
-  rect(62, 1020, 376, 96, 'green');
-  text(80, 1055, 'Content', 26, 'start', 'muted');
+  sketchBox(62, 1020, 376, 96, 'hand-green', 12);
+  text(80, 1055, 'Content', 26, 'start', 'ink-green');
   parts.push('<g data-part="item">');
-  box(216, 1037, 204, 62, 'Item', 'panel', 26);
+  sketchBox(216, 1037, 204, 62, '', 10);
+  text(318, 1077, 'Item', 26);
   parts.push('</g></g></g>');
   text(32, 1200, 'Trigger / Value / Content / Item', 26, 'start', 'strong');
   text(32, 1240, tr('各自承担独立交互关系', 'Each has independent relations'), 26, 'start');
@@ -719,7 +780,7 @@ function anatomyMobile() {
     tr('固定 Caret：只有 Feedback', 'Fixed Caret: Feedback only'),
     26,
     'start',
-    'strong'
+    'ink-amber'
   );
   text(32, 1352, tr('可以附属于 Trigger', 'May remain inside Trigger'), 26, 'start');
   text(
@@ -917,8 +978,8 @@ function consistencyMobile() {
     'muted'
   );
   parts.push('<g data-comparison-baseline="obligations" data-node="obligations">');
-  rect(24, 236, 452, 252, 'blue');
-  text(48, 280, tr('共同底线：必要义务', 'Shared baseline: obligations'), 28, 'start', 'strong');
+  sketchBox(24, 236, 452, 252, 'hand-blue', 14);
+  text(48, 280, tr('共同底线：必要义务', 'Shared baseline: obligations'), 28, 'start', 'ink-blue');
   text(48, 324, 'Prototype / applicable profile', 26, 'start');
   text(
     48,
@@ -938,6 +999,8 @@ function consistencyMobile() {
       'input-feedback',
       544,
       312,
+      'hand-green',
+      'ink-green',
       tr(
         '相同输入媒介、viewport、|单位、字体等受控条件',
         'Same input medium, viewport,|units, fonts,|and related conditions'
@@ -948,6 +1011,8 @@ function consistencyMobile() {
       'normalized-dom',
       902,
       312,
+      'hand-amber',
+      'ink-amber',
       tr(
         '同属 Web family；共享受治理的|结构、事件、样式基础|与 projection policy',
         'Same Web family; governed|structure, events, styles,|and projection policy'
@@ -958,6 +1023,8 @@ function consistencyMobile() {
       'pixels',
       1260,
       354,
+      'hand-purple',
+      'ink-purple',
       tr(
         '进一步控制 device metrics、|单位比例、字体 shaping、|色彩与 rasterization 等条件',
         'Also control device metrics,|unit scale, font shaping,|color, rasterization|and related conditions'
@@ -965,9 +1032,9 @@ function consistencyMobile() {
       tr('像素表现', 'Pixel output'),
     ],
   ];
-  rows.forEach(([id, y, h, conditions, result]) => {
+  rows.forEach(([id, y, h, strokeCls, inkCls, conditions, result]) => {
     parts.push('<g data-comparison="' + id + '" data-node="' + id + '">');
-    rect(24, y, 452, h);
+    sketchBox(24, y, 452, h, 'hand-muted', 14);
     text(
       48,
       y + 42,
@@ -984,9 +1051,9 @@ function consistencyMobile() {
         id +
         '-result">'
     );
-    path('M250 ' + (y + h - 104) + ' V' + (y + h - 68));
+    sketchLine(250, y + h - 104, 250, y + h - 68, true, `line ${strokeCls}`);
     parts.push('</g>');
-    text(250, y + h - 30, result, 26);
+    text(250, y + h - 30, result, 26, 'middle', inkCls);
     parts.push('</g>');
   });
   text(
@@ -1034,9 +1101,11 @@ for (const locale of ['zh-cn', 'en']) {
     const baseName = mobile ? name.slice(0, -'.mobile'.length) : name;
     const width = mobile ? 500 : 960;
     const isEvolution = baseName === 'evolution-feedback';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title"${baseName === 'switch-activation' || isEvolution || mobile ? ' aria-describedby="description"' : ''} xml:lang="${locale}"${mobile ? ' data-layout="mobile"' : ''}>
+    const isSwitchActivation = baseName === 'switch-activation';
+    const svg = isSwitchActivation
+      ? `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title" aria-describedby="description" xml:lang="${locale}"${mobile ? ' data-layout="mobile"' : ''}>
 <!-- Generated by apps/www/scripts/generate-whitepaper-diagrams.mjs. -->
-<title id="title">${esc(baseName === 'switch-activation' ? tr('一次 Switch 激活', 'One Switch activation') : isEvolution ? tr('实践怎样修正当前近似', 'How practice revises the current approximation') : baseName.replaceAll('-', ' '))}</title>
+<title id="title">${esc(tr('一次 Switch 激活', 'One Switch activation'))}</title>
 <defs><style>
   :root { --ink:#24313d; --muted:#596875; --line:#94a3ae; --panel:#f7f9fb; --blue:#eaf2fc; --green:#eaf5ee; --amber:#fbf2e2; }
   @media(prefers-color-scheme:dark) { :root { --ink:#e1e8ed; --muted:#a6b5c0; --line:#667986; --panel:#161c22; --blue:#192d43; --green:#1a3028; --amber:#362d1c; } }
@@ -1047,6 +1116,28 @@ for (const locale of ['zh-cn', 'en']) {
   .scope { fill:none; stroke-dasharray:6 6; }
   .line { fill:none; stroke:var(--muted); stroke-width:2; stroke-linejoin:round; }
 </style><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker></defs>
+${parts.join('\n')}
+</svg>\n`
+      : `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title" aria-describedby="description" xml:lang="${locale}"${mobile ? ' data-layout="mobile"' : ''}>
+<!-- Generated by apps/www/scripts/generate-whitepaper-diagrams.mjs. -->
+<title id="title">${esc(isEvolution ? tr('实践怎样修正当前近似', 'How practice revises the current approximation') : baseName.replaceAll('-', ' '))}</title>
+<defs><style>
+  :root { --ink:#1e1e1e; --muted:#5c6670; --blue:#1971c2; --green:#237a35; --amber:#ad6500; --red:#c92a2a; --purple:#6741d9; }
+  @media(prefers-color-scheme:dark) { :root { --ink:#e5e5e5; --muted:#a1abb5; --blue:#74c0fc; --green:#8ce99a; --amber:#ffc078; --red:#ff8787; --purple:#b197fc; } }
+  text { fill:var(--ink); font-family:"Excalifont","Xiaolai","Kalam","STKaiti","KaiTi","Bradley Hand",cursive,sans-serif; font-weight:400; }
+  .muted { fill:var(--muted); }
+  .strong { font-weight:400; }
+  .ink-blue { fill:var(--blue); } .ink-green { fill:var(--green); } .ink-amber { fill:var(--amber); } .ink-red { fill:var(--red); } .ink-purple { fill:var(--purple); }
+  .hand-stroke { fill:none; stroke:var(--ink); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .hand-echo { opacity:.42; stroke-width:1; }
+  .hand-dash { stroke-dasharray:7 6; }
+  .hand-muted { stroke:var(--muted); }
+  .hand-blue { stroke:var(--blue); }
+  .hand-green { stroke:var(--green); }
+  .hand-amber { stroke:var(--amber); }
+  .hand-red { stroke:var(--red); }
+  .hand-purple { stroke:var(--purple); }
+</style><marker id="hand-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M2 1.5 Q6 4.2 10 6 Q6 7.8 1.5 10.5" fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
 ${parts.join('\n')}
 </svg>\n`;
     await writeFile(new URL(`whitepaper-${name}.${locale}.svg`, output), svg);

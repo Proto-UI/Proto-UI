@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadPrototype } from './prototype-modules';
 import { getPrototype } from './registry';
-import { assertDemoSpec, type DemoChild } from './demo-types';
+import { assertDemoSpec, type DemoChild, type DemoSpec } from './demo-types';
 import navWithIconsShadcn from '../../content/docs/demo_components/navigation-menu/demo-shadcn-navigation-menu-with-icons.demo';
 import navWithIconsBrutalist from '../../content/docs/demo_components/navigation-menu/demo-brutalist-navigation-menu-with-icons.demo';
 import navWithIconsBootstrap from '../../content/docs/demo_components/navigation-menu/demo-bootstrap-2-3-2-navigation-menu-with-icons.demo';
@@ -20,7 +20,7 @@ function collectPrototypeIds(node: DemoChild): string[] {
 
 function collectText(node: DemoChild): string[] {
   if (typeof node === 'string') return [node];
-  if (node.kind === 'text') return [node.value];
+  if (node.kind === 'text') return [node.text];
   return (node.children ?? []).flatMap(collectText);
 }
 
@@ -58,13 +58,13 @@ describe('demo Lucide icon registration', () => {
   });
 
   it.each([
-    ['shadcn-navigation-menu-with-icons', navWithIconsShadcn],
-    ['brutalist-navigation-menu-with-icons', navWithIconsBrutalist],
-    ['bootstrap-2-3-2-navigation-menu-with-icons', navWithIconsBootstrap],
-    ['liquid-glass-navigation-menu-with-icons', navWithIconsLiquid],
-    ['brutalist-badge-with-icon', badgeWithIconBrutalist],
-    ['shadcn-combobox', comboboxShadcn],
-    ['shadcn-drawer', drawerShadcn],
+    ['shadcn-navigation-menu-with-icons', navWithIconsShadcn as DemoSpec],
+    ['brutalist-navigation-menu-with-icons', navWithIconsBrutalist as DemoSpec],
+    ['bootstrap-2-3-2-navigation-menu-with-icons', navWithIconsBootstrap as DemoSpec],
+    ['liquid-glass-navigation-menu-with-icons', navWithIconsLiquid as DemoSpec],
+    ['brutalist-badge-with-icon', badgeWithIconBrutalist as DemoSpec],
+    ['shadcn-combobox', comboboxShadcn as DemoSpec],
+    ['shadcn-drawer', drawerShadcn as DemoSpec],
   ] as const)('%s uses real Lucide prototypes instead of character glyphs', async (_name, demo) => {
     assertDemoSpec(demo);
     const ids = [...new Set(collectPrototypeIds(demo.root))];

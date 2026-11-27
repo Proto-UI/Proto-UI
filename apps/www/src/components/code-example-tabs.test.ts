@@ -97,6 +97,24 @@ describe('CodeExample real legacy Tabs enhancement', () => {
     expect(panels.map((panel) => panel.getAttribute('aria-labelledby'))).toEqual(['a', 'b']);
   });
 
+  it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const)(
+    'projects real %s family Tabs matching the active preview scope',
+    async (family) => {
+      const { root, list, tabs, panels } = fixture();
+      root.dataset.projectionFamily = family;
+      const projection = enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} });
+      projections.push(projection);
+      await Promise.resolve();
+      const projected = root.querySelector<HTMLElement>('[data-code-example-tabs-projection]');
+      expect(projected?.dataset.codeExampleTabsProjection).toBe(family);
+      expect(projected?.tagName.toLowerCase()).toBe(`pui-code-example-${family}-tabs-root`);
+      const projectedList = projected?.querySelector<HTMLElement>('[role="tablist"]');
+      expect(projectedList?.tagName.toLowerCase()).toBe(`pui-code-example-${family}-tabs-list`);
+      const projectedTabs = projected?.querySelectorAll('[role="tab"]');
+      expect(projectedTabs).toHaveLength(2);
+    }
+  );
+
   it('normalizes SSR label edges without changing source content', () => {
     const { root, list, tabs, panels } = fixture();
     tabs[0].textContent = '\n  React \n';

@@ -174,9 +174,8 @@ async function readSelectFacts(page: Page): Promise<SelectFacts> {
 async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
   await page.locator('[data-code-example]').waitFor({ state: 'visible' });
   await page
-    .locator(
-      '[data-code-example] [data-code-file-browser]:visible [data-code-example-tree][role="tree"]'
-    )
+    .locator('[data-code-example] [data-code-example-steps]:visible [data-code-shell]')
+    .first()
     .waitFor();
   await page.locator('[data-code-presentation="docs"]').first().waitFor({ state: 'visible' });
 
@@ -205,10 +204,8 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     };
 
     const flow = document.querySelector<HTMLElement>('[data-doc-flow]');
-    const standaloneCode = flow?.querySelector<HTMLElement>(
-      ':scope > [data-code-presentation="docs"]'
-    );
-    const codeExample = flow?.querySelector<HTMLElement>(':scope > [data-code-example]');
+    const standaloneCode = flow?.querySelector<HTMLElement>('[data-code-presentation="docs"]');
+    const codeExample = flow?.querySelector<HTMLElement>('[data-code-example]');
     const standalonePrevious = standaloneCode
       ? renderedSibling(standaloneCode, 'previousElementSibling')
       : null;
@@ -228,7 +225,9 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     );
 
     const command = examplePanel?.querySelector<HTMLElement>('[data-code-example-command]');
-    const source = examplePanel?.querySelector<HTMLElement>('[data-code-file-browser]');
+    const source = examplePanel?.querySelector<HTMLElement>(
+      '[data-code-example-steps] [data-code-shell]'
+    );
 
     if (
       !command ||
@@ -254,7 +253,7 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
         !source.contains(command) &&
         command.getAttribute('data-site-code-surface') === 'frame' &&
         source.getAttribute('data-site-code-surface') === 'frame',
-      hasFileTree: Boolean(source.querySelector('[data-code-example-tree][role="tree"]')),
+      hasFileTree: Boolean(document.querySelector('[data-standalone-file-browser]')),
       paragraphToStandaloneCode:
         standaloneCode.getBoundingClientRect().top -
         standalonePrevious.getBoundingClientRect().bottom,

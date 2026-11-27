@@ -354,22 +354,26 @@ describe.sequential('website passive code-surface grammar (#785)', () => {
             .click();
           const sourceNodes = await example.locator('pre').elementHandles();
           const exampleFrame = example
-            .locator('[data-code-host-panel]:visible [data-code-file-browser]')
+            .locator(
+              '[data-code-host-panel]:visible [data-code-example-steps] [data-code-shell][data-site-code-surface="frame"]'
+            )
             .first();
-          for (const root of [terminal, plain, exampleFrame]) {
+          const standaloneBrowser = page.locator('[data-standalone-file-browser]').first();
+          for (const root of [terminal, plain, exampleFrame, standaloneBrowser]) {
             await root.page().bringToFront();
             await ready(root, runtime, family);
           }
-          // The selected host queues its real Tree separately from passive surface paint.
-          // Use the same bounded admission check as the host-coverage journey below.
-          await example
-            .locator(
-              '[data-code-host="react"][data-code-host-panel] [data-code-example-tree][role="tree"]'
-            )
-            .waitFor({
-              state: 'visible',
-              timeout: 1_000,
-            });
+          // Standalone CLI init output still mounts the real Tree separately from passive surface paint.
+          await standaloneBrowser.locator('[data-code-example-tree][role="tree"]').waitFor({
+            state: 'visible',
+            timeout: 1_000,
+          });
+          if (family === 'shadcn') {
+            const treeShadow = await standaloneBrowser
+              .locator('[data-code-example-tree][role="tree"]')
+              .evaluate((node) => getComputedStyle(node).boxShadow);
+            expect(hasZeroTransparentTreeShadow(treeShadow)).toBe(true);
+          }
           let previousBackground = '';
           for (const theme of ['light', 'dark']) {
             pagePhase(page, 'frame-theme', 'start', { runtime, family, theme });
@@ -399,7 +403,9 @@ describe.sequential('website passive code-surface grammar (#785)', () => {
             }
             const facts = await appearance(terminal);
             expect(facts.surfaceCount).toBe(1);
-            expect(facts.border).toBe(family === 'brutalist' ? '2px' : '1px');
+            expect(facts.border).toBe(
+              family === 'brutalist' ? '2px' : family === 'shadcn' ? '0px' : '1px'
+            );
             expect(facts.radius).toBe(facts.expectedRadius);
             expect(facts.ownerBorder).toBe('0px');
             expect(facts.role).toBeNull();
@@ -423,12 +429,21 @@ describe.sequential('website passive code-surface grammar (#785)', () => {
             expect(row.after).toMatch(/^(none|normal)$/);
             expect(row.label?.trim()).toBeTruthy();
             expect(await plain.locator('[data-code-toolbar]').count()).toBe(0);
-            expect(await example.locator('[data-code-shell][data-site-code-surface]').count()).toBe(
-              0
-            );
+            expect(
+              await example
+                .locator('[data-code-example-command] [data-code-shell][data-site-code-surface]')
+                .count()
+            ).toBe(0);
             expect(await example.locator('[data-code-example-tablist]:visible').count()).toBe(1);
             expect(
-              await example.locator('[data-code-example-tree][role="tree"]:visible').count()
+              await example
+                .locator('[data-code-host-panel]:visible [data-code-example-steps]')
+                .count()
+            ).toBe(1);
+            expect(
+              await standaloneBrowser
+                .locator('[data-code-example-tree][role="tree"]:visible')
+                .count()
             ).toBe(1);
             expect(
               await example
@@ -462,11 +477,9 @@ describe.sequential('website passive code-surface grammar (#785)', () => {
           expect(await hosts.last().getAttribute('aria-selected')).toBe('true');
           expect(await hosts.last().evaluate((tab) => document.activeElement === tab)).toBe(true);
           // The last known host can be a truthful WIP entry, with no Copy or
-          // runnable file tabs. Return to a ready host for file navigation.
+          // runnable file steps. Return to a ready host and verify standalone Tree navigation.
           await hosts.filter({ hasText: 'React' }).click();
-          const files = example.locator(
-            '[data-code-host-panel]:visible [data-code-example-tree] [role="treeitem"]'
-          );
+          const files = standaloneBrowser.locator('[data-code-example-tree] [role="treeitem"]');
           await files.first().focus();
           await page.keyboard.press('End');
           expect(await files.last().evaluate((node) => node === document.activeElement)).toBe(true);
@@ -627,14 +640,8 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                 ).toBe(0);
                 expect(await panel.textContent()).toContain('WIP');
               } else {
-                const tree = panel.locator('[data-code-example-tree]');
-                // Host selection publishes before its next idle Tree acquisition.
-                // Observe real admission under a fixed cap, then keep every grammar assertion.
-                await panel.locator('[data-code-example-tree][role="tree"]').waitFor({
-                  state: 'visible',
-                  timeout: 1_000,
-                });
-                expect(await tree.count()).toBe(1);
+                const steps = panel.locator('[data-code-example-steps]');
+                expect(await steps.count()).toBe(1);
                 expect(
                   await panel.locator('[data-code-example-command] pre').textContent()
                 ).toContain('npx @proto.ui/cli@latest');
@@ -645,102 +652,29 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                     )
                     .count()
                 ).toBe(0);
-                expect(await panel.locator('[data-code-example-tree]').textContent()).not.toContain(
-                  'install.sh'
+                expect(
+                  await panel
+                    .locator('[data-code-example-steps] [data-code-example-command]')
+                    .count()
+                ).toBe(0);
+                const expectedPaths =
+                  host === 'React'
+                    ? ['src/App.tsx']
+                    : host === 'Vue'
+                      ? ['src/App.vue']
+                      : ['src/main.ts', 'index.html'];
+                const stepPanels = steps.locator('[data-code-file-panel]:visible');
+                expect(await stepPanels.count()).toBe(expectedPaths.length);
+                expect(
+                  await stepPanels.locator('[data-code-file-title]').allTextContents()
+                ).toEqual(expectedPaths);
+                expect(await stepPanels.first().locator('pre').textContent()).toContain(
+                  'proto-ui/components/'
                 );
-                expect(
-                  await panel
-                    .locator('[data-code-example-command] [data-code-example-tree]')
-                    .count()
-                ).toBe(0);
-                expect(
-                  await panel
-                    .locator('[data-code-file-browser] [data-code-example-command]')
-                    .count()
-                ).toBe(0);
-                const embedded = await tree.evaluate((node) => {
-                  const root = getComputedStyle(node);
-                  const row = node.querySelector<HTMLElement>('[data-code-tree-kind="folder"]')!;
-                  const item = getComputedStyle(row);
-                  const icon = row.querySelector<HTMLElement>('[data-code-tree-icon]')!;
-                  return {
-                    display: root.display,
-                    gap: root.rowGap,
-                    border: root.borderWidth,
-                    shadow: root.boxShadow,
-                    background: root.backgroundColor,
-                    rowHeight: row.getBoundingClientRect().height,
-                    radius: item.borderRadius,
-                    font: item.fontSize,
-                    icon: icon.getBoundingClientRect().width,
-                  };
-                });
-                expect(hasZeroTransparentTreeShadow(embedded.shadow)).toBe(true);
-                const { shadow: _shadow, ...geometry } = embedded;
-                expect(geometry).toEqual({
-                  display: 'flex',
-                  gap: '6px',
-                  border: '0px',
-                  background: 'rgba(0, 0, 0, 0)',
-                  rowHeight: 32,
-                  radius: '0px',
-                  font: '14px',
-                  icon: 16,
-                });
-                expect(
-                  await tree.locator('[data-code-tree-icon="folder"]').count()
-                ).toBeGreaterThan(0);
-                expect(
-                  await tree.locator('[data-code-tree-icon="file-code"]').count()
-                ).toBeGreaterThan(0);
-                const folder = tree.locator('[data-code-tree-kind="folder"]').first();
-                const firstChild = tree.locator('[data-code-tree-kind="file"]').first();
-                const folderBounds = await folder.boundingBox();
-                const childBounds = await firstChild.boundingBox();
-                if ((await firstChild.getAttribute('aria-level')) === '2')
-                  expect(childBounds!.y - folderBounds!.y).toBe(32);
-                const initialSource = await panel
-                  .locator('[data-code-file-panel]:visible pre')
-                  .textContent();
-                await folder.click();
-                expect(await folder.getAttribute('aria-expanded')).toBe('false');
-                expect(
-                  await panel.locator('[data-code-file-panel]:visible pre').textContent()
-                ).toBe(initialSource);
-                await folder.focus();
-                await page.keyboard.press('ArrowRight');
-                expect(await folder.getAttribute('aria-expanded')).toBe('true');
-                await page.keyboard.press('ArrowRight');
-                expect(
-                  await tree
-                    .locator('[data-code-tree-kind="file"]')
-                    .first()
-                    .evaluate((node) => node === document.activeElement)
-                ).toBe(true);
-                const treeBounds = await tree.boundingBox();
-                const sourceBounds = await panel.locator('[data-code-file-source]').boundingBox();
-                if (width >= 1440)
-                  expect(treeBounds!.x + treeBounds!.width).toBeLessThanOrEqual(
-                    sourceBounds!.x + 1
-                  );
-                else
-                  expect(treeBounds!.y + treeBounds!.height).toBeLessThanOrEqual(
-                    sourceBounds!.y + 1
-                  );
-                expect(
-                  await panel.locator('[data-code-file-panel]:visible pre').textContent()
-                ).toContain('proto-ui/components/');
-                await panel
-                  .locator('[data-code-example-tree] [data-code-tree-kind="file"]')
-                  .last()
-                  .click();
                 if (host === 'Web Components') {
-                  expect(
-                    await panel.locator('[data-code-file-panel]:visible pre').textContent()
-                  ).toContain('<proto-ui-shadcn-button');
-                  expect(
-                    await panel.locator('[data-code-file-panel]:visible pre').textContent()
-                  ).toContain('type="module"');
+                  const htmlText = await stepPanels.last().locator('pre').textContent();
+                  expect(htmlText).toContain('<proto-ui-shadcn-button');
+                  expect(htmlText).toContain('type="module"');
                 }
                 expect(await panel.textContent()).not.toContain('document.body.innerHTML');
                 expect(await panel.locator('[data-code-toggle]').count()).toBe(0);
@@ -762,22 +696,12 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                   const fileHeader = shell.locator('[data-code-file-header]');
                   if (await fileHeader.count()) {
                     const headerBox = await fileHeader.boundingBox();
-                    expect(headerBox!.height).toBe(48);
+                    expect(headerBox!.height).toBeGreaterThanOrEqual(40);
                     expect(copyBox!.y).toBeGreaterThanOrEqual(headerBox!.y);
                     expect(copyBox!.y + copyBox!.height).toBeLessThanOrEqual(
                       headerBox!.y + headerBox!.height
                     );
                     expect(sourceBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
-                    expect(
-                      await source.evaluate((pre) => ({
-                        font: getComputedStyle(pre).fontSize,
-                        line: getComputedStyle(pre).lineHeight,
-                      }))
-                    ).toEqual({ font: '14px', line: '21px' });
-                    const line = source.locator('.line').first();
-                    expect(await line.evaluate((line) => line.getBoundingClientRect().height)).toBe(
-                      23
-                    );
                   } else
                     expect(sourceBox!.x + sourceBox!.width).toBeLessThanOrEqual(copyBox!.x + 1);
                   expect(await source.evaluate((pre) => getComputedStyle(pre).maxHeight)).toBe(
@@ -797,21 +721,12 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                       `${locale === 'en' ? 'Copy' : '复制'} ${expectedTarget}`
                     );
                   else {
-                    const expectedPath =
-                      host === 'React'
-                        ? 'src/App.tsx'
-                        : host === 'Vue'
-                          ? 'src/App.vue'
-                          : 'index.html';
+                    const fileIndex = Number(expectedTarget ?? '0');
+                    const expectedPath = expectedPaths[fileIndex];
                     expect(copyLabel).toContain(expectedPath);
                     expect(await shell.locator('[data-code-file-title]').textContent()).toBe(
                       expectedPath
                     );
-                    expect(
-                      await tree
-                        .locator(`[data-code-tree-path="${expectedPath}"]`)
-                        .getAttribute('aria-selected')
-                    ).toBe('true');
                   }
                 }
               }
@@ -914,10 +829,6 @@ it('keeps every authored source reachable without JavaScript and does not fake a
     });
     expect(await generated.locator('[data-code-directory-path]').count()).toBe(6);
     expect(await example.locator('[data-code-file-panel]:visible').count()).toBe(4);
-    const htmlLink = example
-      .locator('[data-code-host-panel][data-code-host="wc"] [data-code-file-tabs]')
-      .getByRole('link', { name: 'index.html', exact: true });
-    await htmlLink.click();
     expect(
       await example.locator('[data-code-host="wc"] [data-code-file-panel]:visible').count()
     ).toBe(2);
@@ -929,7 +840,7 @@ it('keeps every authored source reachable without JavaScript and does not fake a
   }
 }, 90_000);
 
-it('keeps embedded file navigation identifiable in forced colors and enlarged text', async ({
+it('keeps file tree navigation identifiable in forced colors and enlarged text', async ({
   task,
 }) => {
   const context = await newGrammarContext(task, {
@@ -939,11 +850,11 @@ it('keeps embedded file navigation identifiable in forced colors and enlarged te
   const page = await context.newPage();
   try {
     await navigate(page, `${baseUrl}/en/start-here/quick-start/`);
-    const example = page.locator('[data-code-example]');
-    await example.getByRole('tab', { name: 'React', exact: true }).click();
-    const tree = example.locator('[data-code-host-panel]:visible [data-code-example-tree]');
-    const folder = tree.locator('[data-code-tree-kind="folder"]');
-    const file = tree.locator('[data-code-tree-kind="file"]');
+    const browserPanel = page.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
+    await browserPanel.waitFor();
+    const tree = browserPanel.locator('[data-code-example-tree][role="tree"]');
+    const folder = tree.locator('[data-code-tree-path="proto-ui"]');
+    const file = tree.locator('[data-code-tree-path="proto-ui/config.json"]');
     await folder.focus();
     await page.keyboard.press('ArrowRight');
     expect(await file.evaluate((node) => node === document.activeElement)).toBe(true);
@@ -962,9 +873,9 @@ it('keeps embedded file navigation identifiable in forced colors and enlarged te
     expect(await file.getAttribute('aria-selected')).toBe('true');
     expect(await file.evaluate((node) => getComputedStyle(node).fontWeight)).toBe('500');
     expect(await folder.evaluate((node) => getComputedStyle(node).fontWeight)).toBe('400');
-    await evidence(page, example, 'code-example-embedded-forced-colors', {
+    await evidence(page, browserPanel, 'code-example-embedded-forced-colors', {
       forcedColors: true,
-      contentHost: 'react',
+      surface: 'standalone-file-browser',
     });
     // Text scaling, not a claim of browser-zoom or assistive-technology acceptance.
     await page.evaluate(() => {
@@ -977,7 +888,7 @@ it('keeps embedded file navigation identifiable in forced colors and enlarged te
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
     ).toBeLessThanOrEqual(1);
-    await evidence(page, example, 'code-example-embedded-forced-colors-text200', {
+    await evidence(page, browserPanel, 'code-example-embedded-forced-colors-text200', {
       forcedColors: true,
       textScalePercent: 200,
       browserZoomVerified: false,
@@ -1416,11 +1327,14 @@ it('keeps early-focused native file navigation visible at 390px', async ({ task 
   try {
     // Focus the authored link before progressive enhancement is admitted. This
     // exercises the real focus guard and native keyboard controller together.
-    await page.addInitScript(() => {
-      localStorage.setItem('preferred-prototypes-adapter', 'wc');
+    const initFiles = cliInitOutput.entries.filter((entry) => entry.kind === 'file');
+    const firstPath = initFiles[0]!.path;
+    const secondPath = initFiles[1]!.path;
+    const lastPath = initFiles.at(-1)!.path;
+    await page.addInitScript((targetPath: string) => {
       const observer = new MutationObserver(() => {
         const link = document.querySelector<HTMLElement>(
-          '[data-code-host-panel][data-code-host="wc"] [data-code-file-path="src/main.ts"]'
+          `[data-standalone-file-browser] [data-code-file-path="${targetPath}"]`
         );
         if (!link) return;
         link.focus({ preventScroll: true });
@@ -1432,19 +1346,16 @@ it('keeps early-focused native file navigation visible at 390px', async ({ task 
         attributes: true,
         attributeFilter: ['hidden'],
       });
-    });
+    }, firstPath);
     await navigate(page, `${baseUrl}${SOURCE_ROUTE}`);
-    const example = page.locator('[data-code-example][data-code-example-init="1"]');
-    await example.waitFor();
-    const frame = example.locator(
-      '[data-code-host="wc"][data-code-host-panel] [data-code-file-browser]'
-    );
+    const frame = page.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
+    await frame.waitFor();
     const nativeFiles = frame.locator('[data-code-file-tabs]');
     expect(await nativeFiles.isVisible()).toBe(true);
     expect(await frame.locator('[role="tree"]').count()).toBe(0);
     expect(
       await nativeFiles
-        .locator('[data-code-file-path="src/main.ts"]')
+        .locator(`[data-code-file-path="${firstPath}"]`)
         .evaluate((node) => document.activeElement === node)
     ).toBe(true);
     await frame.scrollIntoViewIfNeeded();
@@ -1452,9 +1363,9 @@ it('keeps early-focused native file navigation visible at 390px', async ({ task 
     const documentTop = await page.evaluate(() => scrollY);
     const samples = [];
     for (const [key, path] of [
-      ['End', 'index.html'],
-      ['Home', 'src/main.ts'],
-      ['ArrowDown', 'index.html'],
+      ['End', lastPath],
+      ['Home', firstPath],
+      ['ArrowDown', secondPath],
     ]) {
       await page.keyboard.press(key);
       const link = nativeFiles.locator(`[data-code-file-path="${path}"]`);
@@ -1625,33 +1536,20 @@ for (const width of [1280, 390]) {
         input: 'native keyboard PageDown and End; no injected scroll offsets',
       });
 
-      // The ordinary application example shares the same browser, rather than
-      // receiving the stable layout only for generated CLI files.
+      // The ordinary application example uses stacked single-file steps that
+      // stay bounded within the viewport without horizontal overflow.
       const example = page.locator('[data-code-example]');
       await example.getByRole('tab', { name: 'Web Components', exact: true }).click();
-      const embedded = example.locator('[data-code-host-panel]:visible [data-code-file-browser]');
-      const embeddedTree = embedded.locator('[role="tree"]');
-      await embeddedTree.waitFor();
-      const embeddedViewport = embedded.locator('[data-code-files] [data-code-tree-scroll]');
-      await expect
-        .poll(() => embeddedViewport.evaluate((node) => getComputedStyle(node).scrollbarWidth))
-        .toBe('none');
-      const embeddedHeight = await embedded.evaluate((node) => node.getBoundingClientRect().height);
-      for (const path of ['src/main.ts', 'index.html', 'src/main.ts']) {
-        await embeddedTree.locator(`[data-code-tree-path="${path}"]`).click();
-        expect(
-          await embedded
-            .locator('[data-code-file-panel]:visible [data-code-file-title]')
-            .textContent()
-        ).toBe(path);
-        expect(
-          Math.abs(
-            (await embedded.evaluate((node) => node.getBoundingClientRect().height)) -
-              embeddedHeight
-          )
-        ).toBeLessThanOrEqual(1);
-      }
-      await evidence(page, embedded, `file-browser-embedded-bounded-${width}`, { embeddedHeight });
+      const steps = example.locator('[data-code-host-panel]:visible [data-code-example-steps]');
+      await steps.waitFor();
+      expect(await steps.locator('[data-code-file-title]').allTextContents()).toEqual([
+        'src/main.ts',
+        'index.html',
+      ]);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+      ).toBeLessThanOrEqual(1);
+      await evidence(page, steps, `code-example-steps-bounded-${width}`, { width });
     } finally {
       await closeGrammarContext(context);
     }

@@ -59,7 +59,7 @@ export default definePrototype<FamilyTabsListProps, TabsListExposes>({
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'inline-flex w-fit max-w-full items-center gap-1 border border-border bg-secondary p-1 text-secondary-foreground ring-1 ring-inset ring-foreground/10 shadow-sm'
+            'inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 border border-border bg-secondary p-1 text-secondary-foreground ring-1 ring-inset ring-foreground/10 shadow-sm'
           )
         ),
     });

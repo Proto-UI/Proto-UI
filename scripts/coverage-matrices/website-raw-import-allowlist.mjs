@@ -29,7 +29,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Exact legacy runtime-selection composition; its owning row stays blocked.
   'apps/www/src/components/PrototypePreviewer/runtime-tabs.ts': Object.freeze({
-    sourceSha256: '474e5be107742102059b663053f8c6d30c9482731d8d82bde40c514f4083e54b',
+    sourceSha256: 'dc01964789ef88b6426a373c94ba5415415547ce2c1568a9bea12e165f42cf52',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tabs',
@@ -42,19 +42,23 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // remain blocked; import admission does not resolve native fallback disposition
   // or provide host, keyboard, SSR/no-JS, or remount acceptance evidence.
   'apps/www/src/components/code-example-tabs.ts': Object.freeze({
-    sourceSha256: '88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058',
+    sourceSha256: '7e3faf48eb12d7cdaf06edd4221fda0adc3664215176b860869b89ff2a8735af',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tabs',
       '@proto.ui/prototypes-brutalist/tabs',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tabs',
+      '@proto.ui/prototypes-liquid-glass/tabs',
     ]),
   }),
   'apps/www/src/components/code-example-tree.ts': Object.freeze({
-    sourceSha256: '1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336',
+    sourceSha256: '9dc99522bebdb69f6d582f8e2103be62aff3bd3cd62d1d576072b158b59014bc',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tree',
       '@proto.ui/prototypes-brutalist/tree',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tree',
+      '@proto.ui/prototypes-liquid-glass/tree',
       '@proto.ui/prototypes-lucide/icons/chevron-down',
       '@proto.ui/prototypes-lucide/icons/chevron-right',
       '@proto.ui/prototypes-lucide/icons/folder',
@@ -425,7 +429,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: '16860dec9586b26f48518fc6466119f25199ea15d9bffaf446297966e2c32479',
+    sourceSha256: '65635d210e620c505cb35c419b3a82b314e70f4afb71e99dbffb711a061a346d',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
@@ -733,7 +737,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
   'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
-    sourceSha256: '29b2d2041176aaa91fd68934b9869835482a16e7beafb99937c448f6ccd66fff',
+    sourceSha256: '78309921dc2991d12305a481d30b7fef10fba15c31f3bec3b8bf438143cd025a',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-lucide/icons/activity',
       '@proto.ui/prototypes-lucide/icons/arrow-right',
@@ -783,7 +787,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Accepted documentation-media bridge (#787/#797). These are exact source
   // imports, not a family-wide or active-SVG admission.
   'apps/www/src/components/documentation-image-controls.ts': Object.freeze({
-    sourceSha256: 'c116f197edd97a5e8762c12b224723bb58566ce7fbd2c20d8fe9087eee383ba6',
+    sourceSha256: '40f0de7ac1a8d5a8555a0bcaa4863a6472b21fe71e07d7b96cbbc8bb2a11947a',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/button',

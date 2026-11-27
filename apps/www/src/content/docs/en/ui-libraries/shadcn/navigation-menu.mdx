@@ -19,7 +19,7 @@ Navigation Menu combines expandable navigation panels with native destination li
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/navigation-menu` and adapt them for your target runtime:
+Available starting in `0.3.0-rc.1` and later releases. Import the prototypes directly from `@proto.ui/prototypes-shadcn/navigation-menu` and adapt them for your target runtime:
 
 ```ts
 import {
@@ -124,7 +124,11 @@ Manage the active panel externally with `value` and `valueChange`, while observi
     { name: 'a11yLabel', type: 'string', default: "''" },
     { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
     { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
-    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    {
+      name: 'requestValue (method)',
+      type: '(value: string, reason?: string) => boolean',
+      default: '—',
+    },
     { name: 'close (method)', type: '() => void', default: '—' },
   ]}
 />
@@ -178,7 +182,11 @@ Manage the active panel externally with `value` and `valueChange`, while observi
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
     { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
-    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    {
+      name: 'navigate (event)',
+      type: '{ href: string; target: string; rel: string; modified: boolean }',
+      default: '—',
+    },
     { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
   ]}
 />

@@ -14,13 +14,13 @@ const diagrams = new URL('../../../apps/www/public/diagrams/', import.meta.url);
 
 // The responsive variants share the generator with the reviewed desktop diagrams.
 const desktopSha256 = {
-  'component-anatomy.en': 'b198d0969717417504b0631ed58b6b6698b4243dfc5a2d4475e038b61a4c8157',
-  'component-anatomy.zh-cn': 'fca77c8262744dcc370ba89e8239d43c28122db5f6b4cfecb9ee46b4a5bd1184',
-  'conditional-consistency.en': '5d24f0d566cbcfb8bba47c43336e12afe7424137424294182bfffe81bf827e1a',
+  'component-anatomy.en': '3c5f014fa19576786b71822c769af60f303a05c7561edb4216b5e1001e9fd86a',
+  'component-anatomy.zh-cn': 'e17eceb2946b306a1a5481848f1597b0363ca71b9a476e73c7dd04c5b7b94ffe',
+  'conditional-consistency.en': '30706cc71a35aed4425553ae3ddb380ab64aa6b0a10310f89aff42ef7477a7ce',
   'conditional-consistency.zh-cn':
-    '9eaaf1b5c7f69ca6fe8cdbe6808d43695b1115830d83b003849c7ba15a529fb7',
-  'evolution-feedback.en': 'f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041',
-  'evolution-feedback.zh-cn': '81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b',
+    'c778ea8c247cd80ecbc890babb33b398f2acd1cb06891f997c69aa3d204504d8',
+  'evolution-feedback.en': '4638b9206de9204e2b6db6aa899f4753e9ee39349e6772dafa196ab9aa6b5436',
+  'evolution-feedback.zh-cn': '0ca334b7fc4792b9ebb42602be46dd7f1cefc384f247c243be765014a9488113',
   'switch-activation.en': '3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232',
   'switch-activation.zh-cn': '11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4',
 };
@@ -127,8 +127,8 @@ for (const locale of ['en', 'zh-cn']) {
       const root = svg.match(/^<svg\b[^>]*>/)?.[0];
       assert.ok(root);
       assert.match(root, /role="img" aria-labelledby="title" aria-describedby="description"/);
-      // Marker paint must inherit the same theme variables as the diagram wires.
-      assert.match(svg, /<g class="evo-root">\s*<defs>[\s\S]*?<marker id="evo-arrow-sm"/);
+      // Marker paint must inherit the same hand-drawn theme variables as the diagram wires.
+      assert.match(svg, /<defs><style>[\s\S]*?<marker id="hand-arrow"/);
       assert.ok(root.includes(`xml:lang="${locale}"`));
       for (const id of ['title', 'description']) {
         assert.equal([...svg.matchAll(new RegExp(`\\bid="${id}"`, 'g'))].length, 1, id);
@@ -230,11 +230,13 @@ for (const locale of ['en', 'zh-cn']) {
       svg.indexOf('<g data-alternatives="diagnoses">'),
       svg.indexOf('<path data-relation="revision-loop"')
     );
-    assert.match(
+    assert.equal([...svg.matchAll(/<rect\b/g)].length, 0);
+    assert.match(alternatives, /class="hand-stroke hand-dash hand-muted"/);
+    assert.doesNotMatch(
       alternatives,
-      /<rect x="80" y="496" width="856" height="376"[^>]+class="evo-zone"/
+      /data-relation=/,
+      'the diagnoses are alternatives, not stages'
     );
-    assert.doesNotMatch(alternatives, /<path\b/, 'the diagnoses are alternatives, not stages');
     assert.match(
       svg,
       /data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M80 684 /
@@ -293,16 +295,12 @@ for (const locale of ['en', 'zh-cn']) {
     assert.ok(sizes.length > 0 && sizes.every((size) => size >= 26));
 
     const lanes = ['theory-kernel', 'prototype-libraries', 'translation-layer'];
-    for (const [index, lane] of lanes.entries()) {
+    for (const lane of lanes) {
       const group = svg.match(new RegExp(`<g data-node="${lane}"[^>]*>([\\s\\S]*?)<\\/g>`))?.[1];
       assert.ok(group, lane);
-      const [x, width] = [
-        [32, 140],
-        [188, 140],
-        [342, 144],
-      ][index];
-      assert.ok(group.includes(`<rect x="${x}" y="108" width="${width}" height="116"`));
+      assert.match(group, /class="hand-stroke /);
     }
+    assert.equal([...svg.matchAll(/<rect\b/g)].length, 0);
     assert.deepEqual(
       [...svg.matchAll(/data-node="([^"]+)"/g)].map((match) => match[1]),
       [...lanes, 'practice-evidence']
@@ -312,29 +310,27 @@ for (const locale of ['en', 'zh-cn']) {
       [...svg.matchAll(/data-diagnosis="([^"]+)"/g)].map((match) => match[1]),
       ['implementation', 'host-capability', 'prototype', 'theory']
     );
-    for (const [index, diagnosis] of [
-      'implementation',
-      'host-capability',
-      'prototype',
-      'theory',
-    ].entries()) {
+    for (const diagnosis of ['implementation', 'host-capability', 'prototype', 'theory']) {
       const group = svg.match(
         new RegExp(`<g data-diagnosis="${diagnosis}"[^>]*>([\\s\\S]*?)<\\/g>`)
       )?.[1];
-      assert.ok(group?.includes(`<rect x="44" y="${488 + 100 * index}" width="428" height="92"`));
-      assert.doesNotMatch(group, /<path\b/);
+      assert.ok(group?.includes('class="hand-stroke'));
+      assert.doesNotMatch(group, /data-relation=/);
     }
     const alternatives = svg.slice(
       svg.indexOf('<g data-alternatives="diagnoses">'),
       svg.indexOf('<path data-relation="revision-loop"')
     );
-    assert.doesNotMatch(alternatives, /<path\b/, 'no edges sequence the diagnosis cards');
+    assert.doesNotMatch(alternatives, /data-relation=/, 'no edges sequence the diagnosis cards');
     const edges = [
       ...svg.matchAll(
         /<path data-relation="([^"]+)" data-from="([^"]+)" data-to="([^"]+)" d="([^"]+)"/g
       ),
     ].map((match) => match.slice(1));
-    assert.equal([...svg.matchAll(/<path\b[^>]*class="evo-wire"/g)].length, edges.length);
+    assert.equal(
+      [...svg.matchAll(/<path\b[^>]*class="hand-stroke evo-wire"/g)].length,
+      edges.length
+    );
     assert.deepEqual(
       edges.map(([relation, from, to]) => [relation, from, to]),
       [
@@ -542,7 +538,7 @@ for (const locale of ['en', 'zh-cn']) {
           ])
         );
         assert.equal(
-          [...svg.matchAll(/<path\b[^>]*class="line/g)].length,
+          [...svg.matchAll(/<path\b[^>]*class="hand-stroke line/g)].length,
           3,
           'No path must imply promotion between comparison rows'
         );

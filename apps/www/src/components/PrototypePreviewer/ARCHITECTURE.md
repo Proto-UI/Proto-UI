@@ -104,7 +104,7 @@ ensurePrototypeLoaded() 完成
 | `PrototypePreviewer.astro` | UI 容器、构建期 Prettier 宽度折叠与初始化脚本 | Props 定义 |
 | `code-format.ts` | 构建期 Prettier 预览源码折叠与缓存 | `formatPreviewCode()`, `PREVIEW_CODE_PRINT_WIDTH` |
 | `CodePanel.astro` / `code-panel-client.ts` | 源码折叠安全区、展开/收起切换、ScrollArea 增强与四家族控制适配 | `initCodePanels()`, `refreshCodePanel()` |
-| `runtime-tabs.ts` / `projection-composition.ts` | 四家族自举 `variant="line"` Runtime Tabs 挂载与焦点租约 | `createRuntimeTabs()`, `createProjectionComposition()` |
+| `runtime-tabs.ts` / `projection-composition.ts` | 四家族自举真实家族 Tabs（Shadcn `variant="line"`，Brutalist / Bootstrap 2.3.2 / Liquid Glass `variant="default"`）挂载与焦点租约 | `createRuntimeTabs()`, `createProjectionComposition()` |
 | `previewer-client.ts` / `projected-previewer-client.ts` | 客户端生命周期与稳定启动壳协调器 | `initPreviewer()`, `initProjectedPreviewer()` |
 | `registry.ts` | 原型注册表（运行时） | `registerPrototype()`, `getPrototype()` |
 | `prototype-modules.ts` | 原型模块映射表（构建时） | `prototypeModules`, `loadPrototype()` |

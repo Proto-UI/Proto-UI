@@ -19,7 +19,7 @@ A modal confirmation dialog for important or destructive actions, with safe init
 
 ## Installation
 
-Currently available from workspace source (`@proto.ui/prototypes-shadcn`); not yet included in the 0.2.0 CLI stable release.
+Available starting in `0.3.0-rc.1` and later releases (`@proto.ui/prototypes-shadcn`; currently available from workspace source).
 
 ## Usage
 
@@ -151,8 +151,16 @@ Unlike `Dialog`, `AlertDialog` `Root` always operates in `alertdialog` mode.
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
     { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → new-york-v4' },
-    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
-    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
+    {
+      name: 'openChange (event)',
+      type: '{ open: boolean; reason: string | null; focusReason: string | null }',
+      default: '—',
+    },
+    {
+      name: 'openAlertDialog / close / toggle (methods)',
+      type: '(reason?: string) => void',
+      default: '—',
+    },
   ]}
 />
 
@@ -174,7 +182,11 @@ Unlike `Dialog`, `AlertDialog` `Root` always operates in `alertdialog` mode.
 <ApiPropsTable
   headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'variant', type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'", default: "Trigger/Cancel: 'outline'; Action: 'default'" },
+    {
+      name: 'variant',
+      type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
+      default: "Trigger/Cancel: 'outline'; Action: 'default'",
+    },
     { name: 'size', type: "'default' | 'sm' | 'lg' | 'icon'", default: "'default'" },
     { name: 'wrap', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },

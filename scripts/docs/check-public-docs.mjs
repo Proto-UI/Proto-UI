@@ -18,7 +18,7 @@ const CURRENT_CONTEXT =
 const HISTORICAL_CONTEXT =
   /\b(?:historical|archived|previous|former|preceding|prerelease evidence)\b|历史|归档|此前|先前|候选阶段|历史证据/i;
 const DEVELOPMENT_CONTEXT =
-  /\b(?:draft|workspace|development train|unpublished)\b|草案|工作区|开发中|未发布/i;
+  /\b(?:draft|workspace|development train|unpublished|available starting in|will be available|planned for)\b|草案|工作区|开发中|未发布|将于|及后续版本/i;
 const UI_LIBRARY_PROSE_RULES = [
   { pattern: /\bFinf\b/gi, label: 'internal codename "Finf"' },
   { pattern: /\bsocket\s+EPERM\b/gi, label: 'internal environment error "socket EPERM"' },
@@ -54,6 +54,10 @@ const ALLOWED_API_TABLE_DEFAULT_HEADERS = new Set([
   '初始值',
 ]);
 const PROSE_SENTENCE_IN_DEFAULT = /[，。；！？]|(?:\.\s+[A-Z])/;
+const HAND_DRAWN_DIAGRAM_FONT_PATTERN =
+  /Excalifont|Xiaolai|Proto Diagram Hand|Kalam|Architects Daughter|Patrick Hand|Caveat|Comic Neue/i;
+const DIAGRAM_REMEDIATION_PROMPT =
+  'Model public diagrams on apps/www/public/diagrams/whitepaper-component-boundary.zh-cn.svg, whitepaper-switch-activation.zh-cn.svg, and apps/www/scripts/generate-whitepaper-diagrams.mjs: use a transparent canvas, two-pass hand-sketched <path> strokes, open V-stroke arrowheads (fill="none"), hand-drawn typography, and @media (prefers-color-scheme: dark). Do NOT weaken this diagram lint, wrap AI card grids in <path> lookalikes, or hack tests.';
 
 function relative(root, file) {
   return path.relative(root, file).split(path.sep).join('/');
@@ -508,6 +512,75 @@ export function checkApiPropsTables({ documents }) {
   return errors;
 }
 
+export function checkPublicDiagrams({ diagrams }) {
+  const errors = [];
+  for (const diagram of diagrams) {
+    const raw = diagram.text;
+    const withoutMasks = raw.replace(/<mask\b[\s\S]*?<\/mask>/gi, '');
+
+    if (/<(?:script|foreignObject)\b|\son[a-z]+\s*=/i.test(raw)) {
+      errors.push(
+        `${diagram.file}: public diagram contains disallowed dynamic/foreign SVG markup (<script>, <foreignObject>, or inline event handler). Keep public diagrams static pure SVG. ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+
+    if (/<(?:filter|feDropShadow)\b/i.test(raw)) {
+      errors.push(
+        `${diagram.file}: public diagram uses SVG <filter>/<feDropShadow> (AI-generated card-shadow style). Remove drop-shadow filters and use flat ink strokes on a transparent canvas. ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+
+    if (/<(?:linearGradient|radialGradient)\b/i.test(raw)) {
+      errors.push(
+        `${diagram.file}: public diagram uses <linearGradient>/<radialGradient> (AI poster/dashboard style). Remove gradients and use flat transparent ink/tint accents. ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+
+    if (/<rect\b/i.test(withoutMasks)) {
+      errors.push(
+        `${diagram.file}: public diagram contains <rect> outside <mask> (rigid rectangular card or opaque backdrop canvas). Redraw boxes/containers with organic hand-sketched <path> strokes on a transparent canvas instead of <rect> grids or backdrop panels. ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+
+    const markers = raw.match(/<marker\b[\s\S]*?<\/marker>/gi) ?? [];
+    if (markers.some((marker) => /\bfill\s*=\s*["'](?!none\b)[^"']+["']/i.test(marker))) {
+      errors.push(
+        `${diagram.file}: public diagram uses solid-filled <marker> arrowheads. Replace with open hand-drawn V-stroke arrowheads (fill="none" with stroke-linecap="round"). ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+
+    if (!HAND_DRAWN_DIAGRAM_FONT_PATTERN.test(raw)) {
+      errors.push(
+        `${diagram.file}: public diagram does not declare a hand-drawn diagram font (e.g., Excalifont, Xiaolai, Proto Diagram Hand). Plain system/UI fonts make diagrams look like stiff corporate templates. ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+
+    if (!/@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)/i.test(raw)) {
+      errors.push(
+        `${diagram.file}: public diagram is missing @media (prefers-color-scheme: dark) theme tokens. Define adaptive CSS variables for both light and dark modes on a transparent canvas. ${DIAGRAM_REMEDIATION_PROMPT}`
+      );
+    }
+  }
+  return errors;
+}
+
+async function loadPublicDiagrams(root) {
+  const directory = path.join(root, 'apps/www/public/diagrams');
+  let files;
+  try {
+    files = await walk(directory, (file) => file.endsWith('.svg'));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
+  return Promise.all(
+    files.map(async (file) => ({
+      file: relative(root, file),
+      text: await fs.readFile(file, 'utf8'),
+    }))
+  );
+}
+
 async function loadUiLibraryDocuments(root, locales) {
   const documents = [];
   for (const locale of locales) {
@@ -620,6 +693,7 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
   const uiLibraryDocuments = await loadUiLibraryDocuments(root, policy.locales);
   errors.push(...checkUiLibraryProse({ documents: uiLibraryDocuments }));
   errors.push(...checkApiPropsTables({ documents: [...primaryDocuments, ...uiLibraryDocuments] }));
+  errors.push(...checkPublicDiagrams({ diagrams: await loadPublicDiagrams(root) }));
 
   errors.push(
     ...checkLibraryInventory({
