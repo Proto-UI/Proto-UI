@@ -5,6 +5,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   checkApiPropsTables,
+  checkPublicDiagrams,
   checkSpecLifecycleProjection,
   checkLibraryInventory,
   checkLocalizedRoutes,
@@ -59,6 +60,26 @@ test('an explicitly draft workspace train is not a current release claim', () =>
   });
 
   assert.deepEqual(errors, []);
+});
+
+test('an upcoming 0.3.0-rc.1+ availability notice is not a stale install claim', () => {
+  for (const [file, text] of [
+    [
+      'upcoming.en.md',
+      'Available starting in `0.3.0-rc.1` and later releases. Import from `@proto.ui/prototypes-base/calendar`.',
+    ],
+    ['upcoming.zh-cn.md', '将于 `0.3.0-rc.1` 及后续版本中提供，当前可在源码工作区预览。'],
+  ]) {
+    assert.deepEqual(
+      findStaleReleaseClaims({
+        file,
+        text,
+        currentVersion: '0.2.0',
+        governedSource: 'spec/versions/V-STABLE.yaml',
+      }),
+      []
+    );
+  }
 });
 
 test('unavailable package export evidence is not an installation recommendation', () => {
@@ -602,4 +623,76 @@ test('checkApiPropsTables rejects prose misused in default column and accepts de
   assert.match(errors[0], /button\.mdx:2:.*non-default column "说明".*headers\.description/);
   assert.match(errors[0], /Do NOT weaken this check or hack table tests/);
   assert.match(errors[1], /button\.mdx:7:.*prose or overly long text into "default"/);
+});
+
+test('checkPublicDiagrams accepts hand-drawn Excalidraw-style SVGs and rejects AI-slop card diagrams', () => {
+  const goodSvg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">',
+    '  <defs>',
+    '    <style>',
+    '      :root { --ink: #1e1e1e; }',
+    '      @media (prefers-color-scheme: dark) { :root { --ink: #e8eef4; } }',
+    '      text { font-family: "Excalifont", "Xiaolai", sans-serif; }',
+    '    </style>',
+    '    <marker id="hand-arrow" viewBox="0 0 12 12" refX="10" refY="6">',
+    '      <path d="M2 2 Q6 4.5 10 6 Q6 7.5 2 10" fill="none" stroke="var(--ink)" />',
+    '    </marker>',
+    '    <mask id="label-mask"><rect x="0" y="0" width="400" height="200" fill="#fff"/></mask>',
+    '  </defs>',
+    '  <path d="M20 20 C120 18 280 22 380 20" fill="none" stroke="var(--ink)" marker-end="url(#hand-arrow)" />',
+    '  <text x="200" y="100">Proto UI</text>',
+    '</svg>',
+  ].join('\n');
+
+  const slopSvg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">',
+    '  <defs>',
+    '    <linearGradient id="bg"><stop offset="0%" stop-color="#0f172a"/></linearGradient>',
+    '    <filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="6"/></filter>',
+    '    <marker id="solid-arrow"><path d="M0 0 L10 5 L0 10 z" fill="#38bdf8"/></marker>',
+    '    <style>text { font-family: Inter, Arial, sans-serif; }</style>',
+    '  </defs>',
+    '  <rect width="400" height="200" fill="url(#bg)"/>',
+    '  <rect x="20" y="20" width="120" height="60" rx="12" filter="url(#shadow)"/>',
+    '  <text x="40" y="55">Card</text>',
+    '</svg>',
+  ].join('\n');
+
+  assert.deepEqual(
+    checkPublicDiagrams({
+      diagrams: [{ file: 'apps/www/public/diagrams/good.svg', text: goodSvg }],
+    }),
+    []
+  );
+
+  const slopErrors = checkPublicDiagrams({
+    diagrams: [{ file: 'apps/www/public/diagrams/slop.svg', text: slopSvg }],
+  });
+  assert.equal(slopErrors.length, 6);
+  assert.ok(slopErrors.some((e) => e.includes('<filter>/<feDropShadow>')));
+  assert.ok(slopErrors.some((e) => e.includes('<linearGradient>/<radialGradient>')));
+  assert.ok(slopErrors.some((e) => e.includes('<rect> outside <mask>')));
+  assert.ok(slopErrors.some((e) => e.includes('solid-filled <marker>')));
+  assert.ok(slopErrors.some((e) => e.includes('hand-drawn diagram font')));
+  assert.ok(slopErrors.some((e) => e.includes('prefers-color-scheme: dark')));
+  for (const error of slopErrors) {
+    assert.match(error, /whitepaper-component-boundary\.zh-cn\.svg/);
+    assert.match(error, /Do NOT weaken this diagram lint/);
+  }
+});
+
+test('all checked-in public diagrams under apps/www/public/diagrams satisfy checkPublicDiagrams', async () => {
+  const diagramsDir = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../apps/www/public/diagrams'
+  );
+  const files = (await fs.readdir(diagramsDir)).filter((f) => f.endsWith('.svg')).sort();
+  assert.ok(files.length > 0, 'expected public SVG diagrams to exist');
+  const diagrams = await Promise.all(
+    files.map(async (file) => ({
+      file: `apps/www/public/diagrams/${file}`,
+      text: await fs.readFile(path.join(diagramsDir, file), 'utf8'),
+    }))
+  );
+  assert.deepEqual(checkPublicDiagrams({ diagrams }), []);
 });

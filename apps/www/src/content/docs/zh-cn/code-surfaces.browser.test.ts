@@ -209,10 +209,17 @@ async function expectSurfaces(page: Page, ecPage: Page = page): Promise<SurfaceF
   expect(facts.source.selectable).toBe(true);
   expect(facts.source.visible).toBe(true);
   expect(facts.source.outsidePaint).toBe(true);
+  const siteFamily = await page.evaluate(
+    () => document.documentElement.dataset.siteLibraryFamily ?? 'shadcn'
+  );
   for (const frame of [facts.ecFrame, facts.previewFrame]) {
     if (!frame) continue;
     expect(frame.surfaceCount).toBe(1);
-    expect(parseFloat(frame.borderWidth)).toBeGreaterThan(0);
+    if (siteFamily === 'shadcn') {
+      expect(parseFloat(frame.borderWidth)).toBe(0);
+    } else {
+      expect(parseFloat(frame.borderWidth)).toBeGreaterThan(0);
+    }
     expect(frame.role).toBeNull();
     expect(frame.tabIndex).toBeNull();
     expect(frame.pointerEvents).toBe('none');

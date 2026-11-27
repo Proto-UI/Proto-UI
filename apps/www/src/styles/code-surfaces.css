@@ -135,6 +135,53 @@
     container: code-panel / inline-size;
     padding: min(var(--docs-code-padding), 12px);
   }
+  .proto-previewer__code > code {
+    counter-reset: code-line;
+  }
+  .proto-previewer__code .line {
+    display: block;
+    position: relative;
+    padding-inline: 0.25rem;
+    border-radius: 0.25rem;
+  }
+  [data-code-line-numbers='true'] .proto-previewer__code .line::before {
+    counter-increment: code-line;
+    content: counter(code-line);
+    display: inline-block;
+    width: 1.75rem;
+    margin-inline-end: 1rem;
+    text-align: right;
+    color: color-mix(in oklab, var(--color-muted-foreground) 60%, transparent);
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+  .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, var(--color-foreground) 7%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-foreground);
+    border-radius: 0 0.25rem 0.25rem 0;
+    margin-inline: -0.75rem;
+    padding-inline: 1rem;
+  }
+  [data-theme='dark'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, var(--color-foreground) 11%, transparent);
+  }
+  [data-site-library-family='brutalist'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, var(--site-brutalist-main, #facc15) 26%, transparent);
+    box-shadow: inset 3px 0 0 var(--site-brutalist-border, #000);
+    border-radius: 0;
+  }
+  [data-site-library-family='bootstrap-2-3-2'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, #08c 11%, transparent);
+    box-shadow: inset 2px 0 0 #08c;
+  }
+  [data-site-library-family='liquid-glass'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-primary);
+  }
+  [data-code-line-numbers='true'] .proto-previewer__code .line[data-highlighted-line]::before {
+    color: var(--color-foreground);
+    font-weight: 500;
+  }
   .proto-previewer__code,
   .install-command-card__body,
   .code-file-browser__tree-scroll,

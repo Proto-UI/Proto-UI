@@ -19,7 +19,7 @@ Popover 在触发元素附近展示非模态浮层，适合放置快捷设置、
 
 ## 安装
 
-Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-shadcn/popover` 导入并使用对应框架适配器（Web Components、React、Vue 3 或 Vue 2）：
+Popover 目前在工作区源码中提供，将于 `0.3.0-rc.1` 及后续版本中提供 CLI。可直接从 `@proto.ui/prototypes-shadcn/popover` 导入并使用对应框架适配器（Web Components、React、Vue 3 或 Vue 2）：
 
 ```ts
 import {
@@ -127,9 +127,17 @@ PopoverRoot
     { name: 'sideOffset (Content)', type: 'number', default: '4' },
     { name: 'alignOffset (Content)', type: 'number', default: '0' },
     { name: 'collisionPadding (Content)', type: 'number', default: '8' },
-    { name: 'presentation (Trigger / Content)', type: "'default' | 'navigation'", default: "'default'" },
+    {
+      name: 'presentation (Trigger / Content)',
+      type: "'default' | 'navigation'",
+      default: "'default'",
+    },
     { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
-    { name: 'styleProfile (各部件)', type: "ShadcnStyleId | 'inherit'", default: "'inherit' (回退 'nova')" },
+    {
+      name: 'styleProfile (各部件)',
+      type: "ShadcnStyleId | 'inherit'",
+      default: "'inherit' (回退 'nova')",
+    },
   ]}
 />
 

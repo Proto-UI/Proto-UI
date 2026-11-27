@@ -19,7 +19,7 @@ Brutalist Context Menu opens a crisp 2px-bordered floating menu with a 3px hard 
 
 ## Installation
 
-This component is currently available from the workspace source and is not yet included in the 0.2.0 stable CLI registry.
+Available starting in `0.3.0-rc.1` and later releases (available in workspace source).
 
 ## Usage
 
@@ -39,7 +39,9 @@ export function Example() {
       </BrutalistContextMenuTrigger>
       <BrutalistContextMenuContent>
         <BrutalistContextMenuItem value="back">Back</BrutalistContextMenuItem>
-        <BrutalistContextMenuItem value="forward" disabled>Forward</BrutalistContextMenuItem>
+        <BrutalistContextMenuItem value="forward" disabled>
+          Forward
+        </BrutalistContextMenuItem>
         <BrutalistContextMenuItem value="reload">Reload</BrutalistContextMenuItem>
       </BrutalistContextMenuContent>
     </BrutalistContextMenuRoot>

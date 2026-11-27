@@ -19,7 +19,7 @@ Bootstrap 2.3.2 AlertDialog pairs classic `.modal.fade` and `.modal-backdrop.fad
 
 ## Installation
 
-Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2`); not yet included in the 0.2.0 stable release.
+Available starting in `0.3.0-rc.1` and later releases (`@proto.ui/prototypes-bootstrap-2-3-2`).
 
 ## Usage
 
@@ -107,8 +107,16 @@ Pass `open` and listen to `openChange` and `action` to manage dialog state exter
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
-    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
+    {
+      name: 'openChange (event)',
+      type: '{ open: boolean; reason: string | null; focusReason: string | null }',
+      default: '—',
+    },
+    {
+      name: 'openAlertDialog / close / toggle (methods)',
+      type: '(reason?: string) => void',
+      default: '—',
+    },
   ]}
 />
 
@@ -122,8 +130,16 @@ Pass `open` and listen to `openChange` and `action` to manage dialog state exter
     { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
     { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
     { name: 'Footer', type: 'Passive container (no props)', default: '—' },
-    { name: 'Trigger.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'default'" },
-    { name: 'Action.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'primary'" },
+    {
+      name: 'Trigger.variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+    },
+    {
+      name: 'Action.variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'primary'",
+    },
     { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
     { name: 'Action.action (event)', type: '{ reason: string }', default: '—' },
   ]}

@@ -1,10 +1,11 @@
-import type { CodeLang } from './PrototypePreviewer/code-highlight';
+import type { CodeLang, HighlightLinesInput } from './PrototypePreviewer/code-highlight';
 import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/ids';
 
 export type CodeExampleFile = Readonly<{
   name: string;
   lang: CodeLang;
   code: string;
+  highlightLines?: HighlightLinesInput;
 }>;
 
 export type CodeExamplesByHost = Partial<Record<PublicRuntimeId, readonly CodeExampleFile[]>>;
@@ -19,9 +20,16 @@ export interface CodeExampleProps {
   pendingHosts?: readonly Readonly<{ id: CodeExampleHostId; label: string; message: string }>[];
   /** Host-specific integration guidance, shown beside that host’s usage. */
   guidance?: Partial<Record<PublicRuntimeId, string>>;
-  labels?: Readonly<{ install: string; usage: string; copy: string; pending: string; overflow: string; files?: string }>;
+  labels?: Readonly<{
+    install: string;
+    usage: string;
+    copy: string;
+    pending: string;
+    overflow: string;
+    files?: string;
+  }>;
   initialHost?: CodeExampleHostId;
   label?: string;
+  layout?: 'steps' | 'browser';
   class?: string;
 }
-

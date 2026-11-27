@@ -19,7 +19,7 @@ Liquid Glass Popover displays a floating translucent surface anchored to a trigg
 
 ## Installation
 
-Liquid Glass Popover is currently available from the workspace source and not yet included in the 0.2.0 stable CLI release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/popover` and adapt them for your target runtime:
+Liquid Glass Popover will be available starting in `0.3.0-rc.1` and later releases (currently available from workspace source). Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/popover` and adapt them for your target runtime:
 
 ```ts
 import {
@@ -118,7 +118,11 @@ Pass `open` and handle `openChange` to synchronize open state with parent state.
     { name: 'alignOffset (Content)', type: 'number', default: '0' },
     { name: 'collisionPadding (Content)', type: 'number', default: '8' },
     { name: 'material (Content)', type: "'auto' | 'opaque'", default: "'auto'" },
-    { name: 'prominence (Trigger / Content / Close)', type: "'regular' | 'prominent'", default: "'regular'" },
+    {
+      name: 'prominence (Trigger / Content / Close)',
+      type: "'regular' | 'prominent'",
+      default: "'regular'",
+    },
     { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
   ]}
 />

@@ -19,7 +19,7 @@ Brutalist Navigation Menu builds site- or app-level navigation following the Bru
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/navigation-menu` and adapt them for your target runtime:
+Available starting in `0.3.0-rc.1` and later releases. Import the prototypes directly from `@proto.ui/prototypes-brutalist/navigation-menu` and adapt them for your target runtime:
 
 ```ts
 import {
@@ -123,7 +123,11 @@ Drive the active panel with `value` and `valueChange` while observing `Item.sele
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
     { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
-    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    {
+      name: 'requestValue (method)',
+      type: '(value: string, reason?: string) => boolean',
+      default: '—',
+    },
     { name: 'close (method)', type: '() => void', default: '—' },
   ]}
 />
@@ -173,7 +177,11 @@ Drive the active panel with `value` and `valueChange` while observing `Item.sele
     { name: 'current', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
-    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    {
+      name: 'navigate (event)',
+      type: '{ href: string; target: string; rel: string; modified: boolean }',
+      default: '—',
+    },
     { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
   ]}
 />

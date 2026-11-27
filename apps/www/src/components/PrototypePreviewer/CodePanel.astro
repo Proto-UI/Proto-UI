@@ -13,13 +13,14 @@ import {
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const defaultSiteControls = siteControlTags(siteFamily);
 const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
-import { highlightCode, type CodeLang } from './code-highlight';
+import { highlightCode, type CodeLang, type HighlightLinesInput } from './code-highlight';
 
-export type { CodeLang } from './code-highlight';
+export type { CodeLang, HighlightLinesInput } from './code-highlight';
 
 interface Props {
   code: string | undefined;
   lang?: CodeLang;
+  highlightLines?: HighlightLinesInput;
   id?: string;
   labelledBy?: string;
   hidden?: boolean;
@@ -43,6 +44,7 @@ interface Props {
 const {
   code,
   lang = 'tsx',
+  highlightLines,
   id,
   labelledBy,
   hidden,
@@ -66,7 +68,7 @@ const Button =
   effectiveControlFamily === siteFamily
     ? defaultSiteControls.Button
     : previewButtonTag(effectiveControlFamily);
-const highlighted = await highlightCode(code, lang);
+const highlighted = await highlightCode(code, lang, { highlightLines });
 ---
 
 <SiteCopyBootstrap />

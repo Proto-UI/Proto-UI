@@ -19,7 +19,7 @@ Liquid Glass Alert Dialog 用于需要用户显式确认的重要或破坏性操
 
 ## 安装
 
-当前仅在源码工作区 `@proto.ui/prototypes-liquid-glass` 中提供，尚未进入 0.2.0 稳定版。
+将于 `0.3.0-rc.1` 及后续版本中提供（`@proto.ui/prototypes-liquid-glass`）。
 
 ## 用法
 
@@ -116,8 +116,16 @@ export function Example() {
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'openChange（事件）', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
-    { name: 'openAlertDialog / close / toggle（方法）', type: '(reason?: string) => void', default: '—' },
+    {
+      name: 'openChange（事件）',
+      type: '{ open: boolean; reason: string | null; focusReason: string | null }',
+      default: '—',
+    },
+    {
+      name: 'openAlertDialog / close / toggle（方法）',
+      type: '(reason?: string) => void',
+      default: '—',
+    },
   ]}
 />
 
@@ -130,9 +138,17 @@ export function Example() {
     { name: 'Content.material', type: "'auto' | 'opaque'", default: "'auto'" },
     { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '200 / 150' },
     { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
-    { name: 'Trigger.variant', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    {
+      name: 'Trigger.variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'regular'",
+    },
     { name: 'Trigger.material', type: "'auto' | 'opaque'", default: "'auto'" },
-    { name: 'Action.variant', type: "'prominent' | 'regular' | 'destructive'", default: "'prominent'" },
+    {
+      name: 'Action.variant',
+      type: "'prominent' | 'regular' | 'destructive'",
+      default: "'prominent'",
+    },
     { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
     { name: 'Action.action（事件）', type: '{ reason: string }', default: '—' },
   ]}

@@ -19,7 +19,7 @@ Liquid Glass Navigation Menu pairs a floating capsule bar with open-gated Liquid
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/navigation-menu`:
+Available starting in `0.3.0-rc.1` and later releases. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/navigation-menu`:
 
 ```ts
 import {
@@ -122,7 +122,11 @@ Manage the active panel externally via `value` and `valueChange`, while observin
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
     { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
-    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    {
+      name: 'requestValue (method)',
+      type: '(value: string, reason?: string) => boolean',
+      default: '—',
+    },
     { name: 'close (method)', type: '() => void', default: '—' },
   ]}
 />
@@ -174,7 +178,11 @@ Manage the active panel externally via `value` and `valueChange`, while observin
     { name: 'current', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
-    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    {
+      name: 'navigate (event)',
+      type: '{ href: string; target: string; rel: string; modified: boolean }',
+      default: '—',
+    },
     { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
   ]}
 />

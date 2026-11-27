@@ -968,7 +968,7 @@ export function createProjectionComposition(
         children: [
           createProjectedProto(tabsParts.list, coordinateAttrs, rendererThemeSurfaceStyle, {
             props: {
-              variant: 'line',
+              variant: options.projectionFamilyId === 'shadcn' ? 'line' : 'default',
               a11yLabel: options.controls.runtime.label,
               loop: true,
             },

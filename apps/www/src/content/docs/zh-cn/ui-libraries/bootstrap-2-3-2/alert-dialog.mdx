@@ -19,7 +19,7 @@ Bootstrap 2.3.2 AlertDialog 沿用经典 `.modal.fade` 与 `.modal-backdrop.fade
 
 ## 安装
 
-当前仅在源码工作区 `@proto.ui/prototypes-bootstrap-2-3-2` 中提供，尚未进入 0.2.0 稳定版。
+将于 `0.3.0-rc.1` 及后续版本中提供（`@proto.ui/prototypes-bootstrap-2-3-2`）。
 
 ## 用法
 
@@ -107,8 +107,16 @@ export function Example() {
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'openChange（事件）', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
-    { name: 'openAlertDialog / close / toggle（方法）', type: '(reason?: string) => void', default: '—' },
+    {
+      name: 'openChange（事件）',
+      type: '{ open: boolean; reason: string | null; focusReason: string | null }',
+      default: '—',
+    },
+    {
+      name: 'openAlertDialog / close / toggle（方法）',
+      type: '(reason?: string) => void',
+      default: '—',
+    },
   ]}
 />
 
@@ -122,8 +130,16 @@ export function Example() {
     { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
     { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
     { name: 'Footer', type: '被动容器（无独立属性）', default: '—' },
-    { name: 'Trigger.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'default'" },
-    { name: 'Action.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'primary'" },
+    {
+      name: 'Trigger.variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+    },
+    {
+      name: 'Action.variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'primary'",
+    },
     { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
     { name: 'Action.action（事件）', type: '{ reason: string }', default: '—' },
   ]}

@@ -52,7 +52,10 @@ export default definePrototype<FamilyTabsListProps, TabsListExposes>({
           w.prop('variant').eq('default'),
           w.state(orientation).eq('horizontal')
         ),
-      intent: (i) => i.feedback.style.use(tw('flex min-w-0 items-end border-b border-[#ddd]')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('flex min-w-0 max-w-full items-end overflow-x-auto border-b border-[#ddd]')
+        ),
     });
     def.rule({
       when: (w) =>
