@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 import { collectProtoStyleTokensFromFiles } from '../../packages/cli/src/services/prototype-style-tokens.js';
+import { collectFamilyRuntimeTokensFromRoot } from './runtime-style-closure.js';
 
 /** Follow the family's actual static value dependencies into Base, not every Base family. */
 export async function collectFamilyStyleClosure(familyRoot: string, baseRoot: string) {
@@ -76,8 +77,10 @@ export async function collectFamilyStyleClosure(familyRoot: string, baseRoot: st
   };
   await walk(familyRoot);
   const sourceFiles = [...files].sort();
+  const staticTokens = (await collectProtoStyleTokensFromFiles(sourceFiles)) as string[];
+  const runtimeTokens = await collectFamilyRuntimeTokensFromRoot(familyRoot);
   return {
-    tokens: (await collectProtoStyleTokensFromFiles(sourceFiles)) as string[],
+    tokens: [...new Set([...staticTokens, ...runtimeTokens])].sort(),
     baseFiles: sourceFiles.filter((file) => within(file, baseRoot)),
   };
 }

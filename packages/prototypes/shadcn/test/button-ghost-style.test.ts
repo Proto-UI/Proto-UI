@@ -49,7 +49,7 @@ it('carries real ghost Rules through the official preset and all existing physic
   }
   // This deliberately checks the complete family+inherited closure, rather
   // than narrowing the scan to Button to fit the unit-test default timeout.
-}, 180_000);
+}, 300_000);
 
 if (!customElements.get(button.name)) AdaptToWebComponent(button);
 const flush = async () => {
