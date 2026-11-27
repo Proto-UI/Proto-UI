@@ -14,7 +14,7 @@ Proto UI 0.3.0 是 0.3 线的首个稳定版。全部 47 个公开 `@proto.ui/*`
 
 - 0.3.0-alpha.2 train 准备了 Control Label 定义与 compiler 修复候选，其 47 package 候选 BOM、本地化说明与 spec snapshot 保留为上一条 alpha 记录。
 - 0.3.0 候选 BOM 列出同样的 47 个公开 package，全部为 `0.3.0`，且每一个都与当前公开 package manifest 一致。
-- 0.3 线引入的四个 identity 仍缺少 registry bootstrap：`@proto.ui/module-axis-input`、`@proto.ui/module-native-link`、`@proto.ui/module-control-label` 与 `@proto.ui/module-table-structure`。registry 中不存在这四个名字的 npm package，因此每个 identity 仍需各自的 registry bootstrap 与受保护工作流配置才能发布。准备本版本不会创建这些 identity。
+- 0.3 线新增的四个模块包（`@proto.ui/module-axis-input`、`@proto.ui/module-native-link`、`@proto.ui/module-control-label`、`@proto.ui/module-table-structure`）已在 npm 完成包身份创建（缺失包数为 0）。正式发布前仍需废弃其 bootstrap 版本以通过注册表就绪检查。
 - Sprint 2、Sprint 7 与 release-convergence 集成列车已在本次准备之前合入 `main`：CLI 覆盖门禁的跨文件 helper replay、compiler 发布取值重写与其合并后的 view-aware 数据边界、网站 source 归属与 wheel 证据修复，以及 Header scene 隔离与其 runtime 进程归属修复。
 
 ## 已知问题与验收状态
@@ -32,4 +32,4 @@ Proto UI 0.3.0 是 0.3 线的首个稳定版。全部 47 个公开 `@proto.ui/*`
 
 ## 发布状态
 
-本次准备不发布 package、不创建 `v0.3.0`、不移动 npm `latest` tag，也不激活 `V-PROTO-UI-0012`。package 内安装示例描述的是未发布候选；网站可用性表述继续跟随最后一次已验证的发布。发布需要四个缺失的 registry identity、覆盖最终已评审 package 集合的完整 rehearsal、来自 `main` 的受保护发布，以及独立的不可变证据评审。
+本次准备不发布 package、不创建 `v0.3.0`、不移动 npm `latest` tag，也不激活 `V-PROTO-UI-0012`。package 内安装示例描述的是未发布候选；网站可用性表述继续跟随最后一次已验证的发布。发布需要清理四个新增包的 bootstrap deprecate 检查、覆盖最终已评审 package 集合的完整 rehearsal、来自 `main` 的受保护发布，以及独立的不可变证据评审。

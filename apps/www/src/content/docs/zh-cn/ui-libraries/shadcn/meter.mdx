@@ -153,12 +153,12 @@ export function StorageMeter() {
 `Root` 与各子部件同步暴露以下只读状态，`Indicator` 同时以 `--pui-percentage` 驱动宽度比例：
 
 <ApiPropsTable
-  headers={{ name: '状态', type: '类型', default: '说明' }}
+  headers={{ name: '状态', type: '类型', description: '说明' }}
   rows={[
-    { name: 'value', type: 'State<number>', default: '钳制在 [min, max] 内的当前数值' },
-    { name: 'percentage', type: 'State<number>', default: '0 到 100 之间的归一化百分比' },
-    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
-    { name: 'indeterminate', type: 'State<boolean>', default: 'Meter 恒为 false' },
+    { name: 'value', type: 'State<number>', description: '钳制在 [min, max] 内的当前数值' },
+    { name: 'percentage', type: 'State<number>', description: '0 到 100 之间的归一化百分比' },
+    { name: 'status', type: 'State<string>', description: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', description: 'Meter 恒为 false' },
   ]}
 />
 

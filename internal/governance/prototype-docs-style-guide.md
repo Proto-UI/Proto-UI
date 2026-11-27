@@ -58,10 +58,11 @@ Replace internal architecture jargon in `ui-libraries/` prose with reader-facing
 - Wrap all literal JSON or object payloads in prose in backticks (for example, `` `{ active: boolean }` `` or `` `{ open, reason }` ``) so MDX compiles cleanly.
 - Never write authoring placeholders (`写作提示`, `Coming soon`) or stale release claims (`稳定版发布仍待完成`, `stable publication pending`, or recommending prerelease installs as current stable).
 - Never invent props, defaults, events, or exports that are not backed by the original documentation or source implementation.
+- **`<ApiPropsTable>` column ownership**: use `headers.default` / `row.default` **only** for short code default or initial values (`Default` / `Defaults` / `Initial` / `默认值` / `默认` / `初始值`). Use `headers.description` / `row.description` for prose explanations, notes, timing, or part ownership (`Description` / `Notes` / `Part` / `说明` / `所属部件` / `触发时机`). `default` renders non-wrapping `<code>` and crushes adjacent columns into single-character vertical lines when misused for prose. When `check:public-docs` flags a table violation, fix the MDX column mapping (or `<ApiPropsTable>` layout) directly—never weaken the linter or hack tests to silence it.
 
 ## Automated checks
 
-`checkUiLibraryProse` in [scripts/docs/check-public-docs.mjs](../../scripts/docs/check-public-docs.mjs) checks all `.md` and `.mdx` files under `apps/www/src/content/docs/{zh-cn,en}/ui-libraries/` (ignoring fenced code blocks) for forbidden audit/hedging phrases, raw 40-character commit SHAs outside `design-contract.mdx`, and non-Chinese `zh-cn` frontmatter descriptions. Run it through the public documentation gate:
+`checkUiLibraryProse` and `checkApiPropsTables` in [scripts/docs/check-public-docs.mjs](../../scripts/docs/check-public-docs.mjs) check all `.md` and `.mdx` files under `apps/www/src/content/docs/{zh-cn,en}/ui-libraries/` (ignoring fenced code blocks) for forbidden audit/hedging phrases, raw 40-character commit SHAs outside `design-contract.mdx`, non-Chinese `zh-cn` frontmatter descriptions, and misused `<ApiPropsTable>` `default` columns. Run them through the public documentation gate:
 
 ```sh
 corepack pnpm@10.32.1 check:public-docs

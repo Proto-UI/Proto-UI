@@ -107,23 +107,23 @@ Switch sources interactively to see an application-owned fallback panel and retr
 ### Exposes & Events
 
 <ApiPropsTable
-  headers={{ name: 'Name', type: 'Type', default: 'Description' }}
+  headers={{ name: 'Name', type: 'Type', description: 'Description' }}
   rows={[
-    { name: 'source', type: 'ExposeState<string>', default: 'Active image source URI' },
+    { name: 'source', type: 'ExposeState<string>', description: 'Active image source URI' },
     {
       name: 'fit',
       type: "ExposeState<'contain' | 'cover' | 'fill'>",
-      default: 'Current object-fit mode',
+      description: 'Current object-fit mode',
     },
     {
       name: 'loadingStatus',
       type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
-      default: 'Current image load lifecycle state',
+      description: 'Current image load lifecycle state',
     },
     {
       name: 'loadingStatusChange',
       type: 'ExposeEvent<{ status, previousStatus, source }>',
-      default: 'Emitted on status transitions with previous and next states',
+      description: 'Emitted on status transitions with previous and next states',
     },
   ]}
 />

@@ -126,33 +126,33 @@ Pass `open` for controlled mode:
 ### Exposed States, Events & Methods
 
 <ApiPropsTable
-  headers={{ name: 'Member', type: 'Type / Signature', default: 'Description' }}
+  headers={{ name: 'Member', type: 'Type / Signature', description: 'Description' }}
   rows={[
     {
       name: 'transitionState',
       type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
-      default: 'Current perceptual phase',
+      description: 'Current perceptual phase',
     },
-    { name: 'isPresent', type: 'boolean', default: 'Whether view resources stay mounted' },
+    { name: 'isPresent', type: 'boolean', description: 'Whether view resources stay mounted' },
     {
       name: 'beforeEnter / afterEnter',
       type: 'ExposeEvent<void>',
-      default: 'Enter boundary signals',
+      description: 'Enter boundary signals',
     },
     {
       name: 'beforeLeave / afterLeave',
       type: 'ExposeEvent<void>',
-      default: 'Leave boundary signals',
+      description: 'Leave boundary signals',
     },
     {
       name: 'enter / leave / complete',
       type: '() => void',
-      default: 'Drive the phase machine (also on controls)',
+      description: 'Drive the phase machine (also on controls)',
     },
     {
       name: 'retainClosedView',
       type: '(retained: boolean) => void',
-      default: 'Retain or detach the closed view',
+      description: 'Retain or detach the closed view',
     },
   ]}
 />

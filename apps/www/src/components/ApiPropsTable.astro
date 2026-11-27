@@ -73,7 +73,9 @@ function splitTypeParts(type: string): string[] {
                   {row.default !== undefined ? <code>{row.default}</code> : '—'}
                 </td>
               )}
-              {showDescription && <td>{row.description ?? '—'}</td>}
+              {showDescription && (
+                <td class="api-props-table__description">{row.description ?? '—'}</td>
+              )}
             </tr>
           );
         })
@@ -87,9 +89,19 @@ function splitTypeParts(type: string): string[] {
     overflow-x: auto;
   }
 
+  .api-props-table th {
+    white-space: nowrap;
+  }
+
   .api-props-table__name {
     white-space: nowrap;
     width: 1%;
+  }
+
+  .api-props-table__type code {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   .api-props-table__union {
@@ -109,5 +121,11 @@ function splitTypeParts(type: string): string[] {
 
   .api-props-table__default {
     white-space: nowrap;
+  }
+
+  .api-props-table__description {
+    white-space: normal;
+    overflow-wrap: break-word;
+    min-width: 14rem;
   }
 </style>

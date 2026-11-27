@@ -132,7 +132,7 @@ Pass `open` for controlled mode and subscribe to `openChange`. Exposes `openDraw
 Exposes `open`, `snapPoint`, `dragging`, `dragProgress`, `offsetPercentage`, `extentValid`, `requestSnapPoint()`, and `snapPointChange`.
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
     { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
     { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
@@ -143,7 +143,9 @@ Exposes `open`, `snapPoint`, `dragging`, `dragProgress`, `offsetPercentage`, `ex
     {
       name: 'maxExtent',
       type: 'AvailableLayoutLength',
-      default: "vertical { unit: 'available', value: 1 } / horizontal { unit: 'root-text', value: 20 }",
+      default: 'by side',
+      description:
+        "vertical { unit: 'available', value: 1 } / horizontal { unit: 'root-text', value: 20 }",
     },
     { name: 'dragDismissible', type: 'boolean', default: 'true' },
     { name: 'dragDismissThreshold', type: 'number', default: '0.25' },

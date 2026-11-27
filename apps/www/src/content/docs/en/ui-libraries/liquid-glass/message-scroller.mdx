@@ -94,28 +94,28 @@ Toggle between `variant="regular"` and `variant="prominent"` or disable `Jump` t
 ### Viewport
 
 <ApiPropsTable
-  headers={{ name: 'Expose', type: 'Type', default: 'Notes' }}
+  headers={{ name: 'Expose', type: 'Type', description: 'Notes' }}
   rows={[
     {
       name: 'atEnd',
       type: 'ExposeState<boolean>',
-      default: 'Whether the viewport is currently at the bottom',
+      description: 'Whether the viewport is currently at the bottom',
     },
     {
       name: 'following',
       type: 'ExposeState<ScrollEndFollowState>',
-      default: 'Current end-follow state',
+      description: 'Current end-follow state',
     },
     {
       name: 'requestStatus',
       type: 'ExposeState<ScrollEndFollowRequestStatus>',
-      default: 'Status of the latest end-follow request',
+      description: 'Status of the latest end-follow request',
     },
-    { name: 'jumpToEnd()', type: '() => void', default: 'Programmatically scroll to the end' },
+    { name: 'jumpToEnd()', type: '() => void', description: 'Programmatically scroll to the end' },
     {
       name: 'pauseFollowing()',
       type: '() => ScrollSurfaceRequestOutcome',
-      default: 'Pause automatic end-following',
+      description: 'Pause automatic end-following',
     },
   ]}
 />

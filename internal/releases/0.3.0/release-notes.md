@@ -13,7 +13,7 @@ Proto UI 0.3.0 is the first stable release on the 0.3 line. All 47 public `@prot
 
 - The 0.3.0-alpha.2 train prepared the Control Label definition and compiler repair candidate. Its 47-package candidate BOM, localized notes and spec snapshot remain the previous alpha record.
 - The 0.3.0 candidate BOM names the same 47 public packages, all at `0.3.0`, and every one of them matches a current public package manifest.
-- Four identities introduced on the 0.3 line still have no registry bootstrap: `@proto.ui/module-axis-input`, `@proto.ui/module-native-link`, `@proto.ui/module-control-label` and `@proto.ui/module-table-structure`. The registry holds no npm package under any of those four names, so each still needs its registry bootstrap and protected-workflow configuration before this release can be published. Preparing this version does not create those identities.
+- Four new 0.3 module packages (`@proto.ui/module-axis-input`, `@proto.ui/module-native-link`, `@proto.ui/module-control-label`, `@proto.ui/module-table-structure`) are now bootstrapped on npm (0 missing identities). Their bootstrap latest versions still need deprecation before registry readiness turns green.
 - The Sprint 2, Sprint 7 and release-convergence integration trains landed on `main` before this preparation: cross-file helper replay in the CLI coverage gate, the compiler publication-value rework with the merged view-aware data boundary, the website source-ownership and wheel evidence repair, and the Header scene isolation with its runtime process-ownership repair.
 
 ## Known issues and acceptance state
@@ -31,4 +31,4 @@ Eight Compiler contracts and seven associated tests have a `not-applicable` disp
 
 ## Publication status
 
-This preparation does not publish packages, create `v0.3.0`, move the npm `latest` tag or activate `V-PROTO-UI-0012`. Package-local installation examples describe the unpublished candidate; website availability statements continue to follow the last verified release. Publication requires the four missing registry identities, a complete rehearsal over the final reviewed package set, protected release from `main` and a separate immutable-evidence review.
+This preparation does not publish packages, create `v0.3.0`, move the npm `latest` tag or activate `V-PROTO-UI-0012`. Package-local installation examples describe the unpublished candidate; website availability statements continue to follow the last verified release. Publication requires clearing the four bootstrap deprecation checks, a complete rehearsal over the final reviewed package set, protected release from `main` and a separate immutable-evidence review.

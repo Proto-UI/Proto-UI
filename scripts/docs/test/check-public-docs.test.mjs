@@ -4,6 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
+  checkApiPropsTables,
   checkSpecLifecycleProjection,
   checkLibraryInventory,
   checkLocalizedRoutes,
@@ -568,4 +569,37 @@ test('checkUiLibraryProse flags zh-cn ui-libraries frontmatter descriptions with
 
   assert.equal(errors.length, 1);
   assert.match(errors[0], /zh-cn\/ui-libraries\/base\/field\.mdx:3:.*must contain Chinese text/);
+});
+
+test('checkApiPropsTables rejects prose misused in default column and accepts description column', () => {
+  const errors = checkApiPropsTables({
+    documents: [
+      {
+        file: 'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx',
+        text: [
+          '<ApiPropsTable',
+          "  headers={{ name: '成员', type: '类型', default: '说明' }}",
+          "  rows={[{ name: 'click', type: 'Event<void>', default: '指针点击时触发' }]}",
+          '/>',
+          '<ApiPropsTable',
+          "  headers={{ name: '属性', type: '类型', default: '默认值' }}",
+          "  rows={[{ name: 'mode', type: 'string', default: '这是很长的说明句子，不应该放在默认值里。' }]}",
+          '/>',
+          '<ApiPropsTable',
+          "  headers={{ name: '成员', type: '类型', description: '说明' }}",
+          "  rows={[{ name: 'click', type: 'Event<void>', description: '指针点击或键盘 Enter / Space 激活时触发（禁用态不触发）' }]}",
+          '/>',
+          '<ApiPropsTable',
+          "  headers={{ name: '属性', type: '类型', default: '默认值' }}",
+          "  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}",
+          '/>',
+        ].join('\n'),
+      },
+    ],
+  });
+
+  assert.equal(errors.length, 2);
+  assert.match(errors[0], /button\.mdx:2:.*non-default column "说明".*headers\.description/);
+  assert.match(errors[0], /Do NOT weaken this check or hack table tests/);
+  assert.match(errors[1], /button\.mdx:7:.*prose or overly long text into "default"/);
 });

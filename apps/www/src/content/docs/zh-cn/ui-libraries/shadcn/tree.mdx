@@ -152,27 +152,27 @@ import { treeRoot, treeItem, treeGroup, treeToggle } from '@proto.ui/prototypes-
 ### 事件与方法（Root）
 
 <ApiPropsTable
-  headers={{ name: '名称', type: '签名 / 载荷', default: '说明' }}
+  headers={{ name: '名称', type: '签名 / 载荷', description: '说明' }}
   rows={[
-    { name: 'valueChange', type: '{ value: string }', default: '请求变更选中节点时触发' },
+    { name: 'valueChange', type: '{ value: string }', description: '请求变更选中节点时触发' },
     {
       name: 'expandedChange',
       type: '{ expandedKeys: string[] }',
-      default: '请求展开或折叠分支时触发',
+      description: '请求展开或折叠分支时触发',
     },
-    { name: 'getTree', type: '() => TreeEntry[]', default: '返回当前有效节点的层级快照' },
-    { name: 'getExpandedKeys', type: '() => string[]', default: '返回当前已展开分支的键列表' },
+    { name: 'getTree', type: '() => TreeEntry[]', description: '返回当前有效节点的层级快照' },
+    { name: 'getExpandedKeys', type: '() => string[]', description: '返回当前已展开分支的键列表' },
     {
       name: 'requestValue',
       type: '(key: string) => boolean',
-      default: '以编程方式请求选中指定节点',
+      description: '以编程方式请求选中指定节点',
     },
     {
       name: 'requestExpanded',
       type: '(key: string, open: boolean) => boolean',
-      default: '以编程方式请求展开或折叠分支',
+      description: '以编程方式请求展开或折叠分支',
     },
-    { name: 'refresh', type: '() => void', default: '重新计算并同步树形结构快照' },
+    { name: 'refresh', type: '() => void', description: '重新计算并同步树形结构快照' },
   ]}
 />
 

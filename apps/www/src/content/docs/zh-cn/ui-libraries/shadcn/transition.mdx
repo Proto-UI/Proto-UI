@@ -113,17 +113,17 @@ export function NotificationTransition() {
 ### 暴露状态
 
 <ApiPropsTable
-  headers={{ name: '状态', type: '类型', default: '说明' }}
+  headers={{ name: '状态', type: '类型', description: '说明' }}
   rows={[
     {
       name: 'transitionState',
       type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
-      default: '当前感知过渡阶段',
+      description: '当前感知过渡阶段',
     },
     {
       name: 'isPresent',
       type: 'boolean',
-      default: '视图资源是否需要保持挂载（包含 preparing 与 leaving）',
+      description: '视图资源是否需要保持挂载（包含 preparing 与 leaving）',
     },
   ]}
 />
@@ -131,36 +131,36 @@ export function NotificationTransition() {
 ### 生命周期事件
 
 <ApiPropsTable
-  headers={{ name: '事件', type: '负载', default: '触发时机' }}
+  headers={{ name: '事件', type: '负载', description: '触发时机' }}
   rows={[
-    { name: 'beforeEnter', type: 'void', default: '视图挂载完成、进入 entering 前' },
-    { name: 'afterEnter', type: 'void', default: '进入 entered 后' },
-    { name: 'beforeLeave', type: 'void', default: '开始 leaving 前' },
-    { name: 'afterLeave', type: 'void', default: '进入 closed 后、请求卸载视图前' },
+    { name: 'beforeEnter', type: 'void', description: '视图挂载完成、进入 entering 前' },
+    { name: 'afterEnter', type: 'void', description: '进入 entered 后' },
+    { name: 'beforeLeave', type: 'void', description: '开始 leaving 前' },
+    { name: 'afterLeave', type: 'void', description: '进入 closed 后、请求卸载视图前' },
   ]}
 />
 
 ### 命令式方法
 
 <ApiPropsTable
-  headers={{ name: '方法', type: '签名', default: '说明' }}
+  headers={{ name: '方法', type: '签名', description: '说明' }}
   rows={[
-    { name: 'enter / controls.enter', type: '() => void', default: '触发入场过渡' },
-    { name: 'leave / controls.leave', type: '() => void', default: '触发离场过渡' },
+    { name: 'enter / controls.enter', type: '() => void', description: '触发入场过渡' },
+    { name: 'leave / controls.leave', type: '() => void', description: '触发离场过渡' },
     {
       name: 'complete / controls.complete',
       type: '() => void',
-      default: '将 entering 推进至 entered，或将 leaving 推进至 closed',
+      description: '将 entering 推进至 entered，或将 leaving 推进至 closed',
     },
     {
       name: 'retainClosedView',
       type: '(retained: boolean) => void',
-      default: '控制 closed 阶段是否继续保留视图节点',
+      description: '控制 closed 阶段是否继续保留视图节点',
     },
     {
       name: 'capturePreparation',
       type: '() => (() => void) | null',
-      default: '在 preparing 阶段捕获冷准备句柄，返回释放回调',
+      description: '在 preparing 阶段捕获冷准备句柄，返回释放回调',
     },
   ]}
 />

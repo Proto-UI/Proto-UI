@@ -132,7 +132,7 @@ DrawerRoot
 暴露 `open`、`snapPoint`、`dragging`、`dragProgress`、`offsetPercentage`、`extentValid`、`requestSnapPoint()` 及 `snapPointChange` 事件。
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
     { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
     { name: 'snapPoints', type: 'number[]', default: '—' },
@@ -142,7 +142,8 @@ DrawerRoot
     {
       name: 'maxExtent',
       type: 'AvailableLayoutLength',
-      default: "上下 { unit: 'available', value: 1 } / 左右 { unit: 'root-text', value: 20 }",
+      default: '按方向默认',
+      description: "上下 { unit: 'available', value: 1 } / 左右 { unit: 'root-text', value: 20 }",
     },
     { name: 'dragDismissible', type: 'boolean', default: 'true' },
     { name: 'dragDismissThreshold', type: 'number', default: '0.25' },

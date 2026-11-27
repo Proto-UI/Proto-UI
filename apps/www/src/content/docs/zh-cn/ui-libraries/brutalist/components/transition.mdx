@@ -118,17 +118,17 @@ export function BrutalistBannerTransition() {
 ### 暴露状态
 
 <ApiPropsTable
-  headers={{ name: '状态', type: '类型', default: '说明' }}
+  headers={{ name: '状态', type: '类型', description: '说明' }}
   rows={[
     {
       name: 'transitionState',
       type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
-      default: '当前感知过渡阶段',
+      description: '当前感知过渡阶段',
     },
     {
       name: 'isPresent',
       type: 'boolean',
-      default: '视图资源是否需要保持挂载',
+      description: '视图资源是否需要保持挂载',
     },
   ]}
 />
@@ -136,19 +136,19 @@ export function BrutalistBannerTransition() {
 ### 生命周期事件与命令式方法
 
 <ApiPropsTable
-  headers={{ name: '成员', type: '签名', default: '说明' }}
+  headers={{ name: '成员', type: '签名', description: '说明' }}
   rows={[
-    { name: 'beforeEnter / afterEnter', type: 'ExposeEvent<void>', default: '入场边界事件' },
-    { name: 'beforeLeave / afterLeave', type: 'ExposeEvent<void>', default: '离场边界事件' },
+    { name: 'beforeEnter / afterEnter', type: 'ExposeEvent<void>', description: '入场边界事件' },
+    { name: 'beforeLeave / afterLeave', type: 'ExposeEvent<void>', description: '离场边界事件' },
     {
       name: 'enter / leave / complete',
       type: '() => void',
-      default: '手动推进状态机（亦挂载于 controls）',
+      description: '手动推进状态机（亦挂载于 controls）',
     },
     {
       name: 'retainClosedView',
       type: '(retained: boolean) => void',
-      default: '控制 closed 阶段是否保留视图节点',
+      description: '控制 closed 阶段是否保留视图节点',
     },
   ]}
 />

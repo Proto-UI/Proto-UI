@@ -144,20 +144,20 @@ Number Field 由 `Root`、`Label`、`Input`、`Control`、`Increment` 和 `Decre
 ### 事件、方法与状态
 
 <ApiPropsTable
-  headers={{ name: '成员', type: '签名 / 类型', default: '所属部件' }}
+  headers={{ name: '成员', type: '签名 / 类型', description: '所属部件' }}
   rows={[
-    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
-    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
-    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
-    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
-    { name: 'commitValue()', type: '() => void', default: 'Root' },
-    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
-    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
-    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', description: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', description: 'Root' },
+    { name: 'getValue()', type: '() => number | null', description: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', description: 'Root' },
+    { name: 'commitValue()', type: '() => void', description: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', description: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', description: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', description: 'Root' },
     {
       name: 'disabled / focusVisible',
       type: 'ExposeState<boolean>',
-      default: 'Increment / Decrement',
+      description: 'Increment / Decrement',
     },
   ]}
 />

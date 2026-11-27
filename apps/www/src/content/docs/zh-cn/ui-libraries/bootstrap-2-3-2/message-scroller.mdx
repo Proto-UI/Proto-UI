@@ -91,20 +91,24 @@ import {
 ### Viewport
 
 <ApiPropsTable
-  headers={{ name: '暴露能力', type: '类型', default: '说明' }}
+  headers={{ name: '暴露能力', type: '类型', description: '说明' }}
   rows={[
-    { name: 'atEnd', type: 'ExposeState<boolean>', default: '当前视口是否位于底部' },
-    { name: 'following', type: 'ExposeState<ScrollEndFollowState>', default: '末端自动跟随状态' },
+    { name: 'atEnd', type: 'ExposeState<boolean>', description: '当前视口是否位于底部' },
+    {
+      name: 'following',
+      type: 'ExposeState<ScrollEndFollowState>',
+      description: '末端自动跟随状态',
+    },
     {
       name: 'requestStatus',
       type: 'ExposeState<ScrollEndFollowRequestStatus>',
-      default: '最近一次滚底请求状态',
+      description: '最近一次滚底请求状态',
     },
-    { name: 'jumpToEnd()', type: '() => void', default: '显式滚动至末尾' },
+    { name: 'jumpToEnd()', type: '() => void', description: '显式滚动至末尾' },
     {
       name: 'pauseFollowing()',
       type: '() => ScrollSurfaceRequestOutcome',
-      default: '暂停自动跟随',
+      description: '暂停自动跟随',
     },
   ]}
 />

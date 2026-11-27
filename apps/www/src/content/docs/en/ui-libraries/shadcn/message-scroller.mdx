@@ -117,37 +117,37 @@ Mix multi-author messages, avatars, and inline system event markers inside one t
 ### Viewport
 
 <ApiPropsTable
-  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Notes' }}
+  headers={{ name: 'Prop / Expose', type: 'Type', description: 'Notes' }}
   rows={[
     {
       name: 'styleProfile',
       type: 'ShadcnStyleChoice',
-      default: 'inherit → nearest scope → new-york-v4',
+      description: 'inherit → nearest scope → new-york-v4',
     },
     {
       name: 'atEnd (expose)',
       type: 'ExposeState<boolean>',
-      default: 'Whether the viewport is currently at the bottom',
+      description: 'Whether the viewport is currently at the bottom',
     },
     {
       name: 'following (expose)',
       type: 'ExposeState<ScrollEndFollowState>',
-      default: 'Current end-follow state',
+      description: 'Current end-follow state',
     },
     {
       name: 'requestStatus (expose)',
       type: 'ExposeState<ScrollEndFollowRequestStatus>',
-      default: 'Status of the latest end-follow request',
+      description: 'Status of the latest end-follow request',
     },
     {
       name: 'jumpToEnd() (expose)',
       type: '() => void',
-      default: 'Programmatically scroll to the end',
+      description: 'Programmatically scroll to the end',
     },
     {
       name: 'pauseFollowing() (expose)',
       type: '() => ScrollSurfaceRequestOutcome',
-      default: 'Pause automatic end-following',
+      description: 'Pause automatic end-following',
     },
   ]}
 />
