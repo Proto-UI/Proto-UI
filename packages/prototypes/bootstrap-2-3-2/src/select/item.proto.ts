@@ -8,7 +8,7 @@ export default definePrototype<Bootstrap232SelectItemProps, Bootstrap232SelectIt
     const state = asSelectItem().stateHandles;
     if (!state)
       throw new Error('[bootstrap-2-3-2-select-item] Required Base state handles are missing.');
-    const { active, selected, hovered, focused, focusVisible, disabled } = state;
+    const { active, selected, focused, focusVisible, disabled } = state;
     def.feedback.style.use(
       tw(
         'relative flex min-w-0 w-full items-center justify-between gap-[8px] px-[20px] py-[3px] text-[14px] font-normal leading-[20px] text-[#333] whitespace-normal wrap-anywhere text-start cursor-pointer select-none outline-none'
@@ -18,12 +18,7 @@ export default definePrototype<Bootstrap232SelectItemProps, Bootstrap232SelectIt
       when: (w) =>
         w.all(
           w.state(disabled).eq(false),
-          w.any(
-            w.state(selected).eq(true),
-            w.state(active).eq(true),
-            w.state(hovered).eq(true),
-            w.state(focused).eq(true)
-          )
+          w.any(w.state(selected).eq(true), w.state(active).eq(true), w.state(focused).eq(true))
         ),
       intent: (i) =>
         i.feedback.style.use(tw('bg-[linear-gradient(#08c,#0077b3)] text-primary-foreground')),

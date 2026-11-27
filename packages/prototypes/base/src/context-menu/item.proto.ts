@@ -98,16 +98,27 @@ function setupContextMenuItem(def: DefHandle<ContextMenuItemProps, ContextMenuIt
     if (event.type !== 'next') return;
     if (event.next) {
       // Disabled items are intentionally included in menu focus navigation.
-      updateActiveValue(run);
+      const ownValue = (run.props.get() as Readonly<ContextMenuItemProps>).value ?? '';
+      if (ownValue) {
+        updateActiveValue(run);
+      } else {
+        run.context.update(CONTEXT_MENU_CONTEXT, (prev) =>
+          prev.activeValue ? { ...prev, activeValue: '' } : prev
+        );
+        syncActive(run.context.read(CONTEXT_MENU_CONTEXT), ownValue);
+      }
       return;
     }
     const currentRun = run as any;
     syncActive(currentRun.context.read(CONTEXT_MENU_CONTEXT), currentRun.props.get().value ?? '');
   });
-  def.event.on('pointer.enter', (run) => {
-    if (command.disabled.get()) return;
-    if (!run.context.read(CONTEXT_MENU_CONTEXT).open) return;
-    updateActiveValue(run);
+  def.event.on('pointer.move', (run, event) => {
+    const ctx = run.context.read(CONTEXT_MENU_CONTEXT);
+    if (!ctx.open || ctx.disabled || run.props.get().disabled || command.disabled.get()) return;
+    // Hand off the shared Focus owner on confirmed mouse hover so the previously
+    // focused item blurs and clears its active highlight cleanly.
+    if (event.pointerType !== 'mouse' || event.pointerButtons !== 'none') return;
+    command.focusSelf({ reason: 'pointer', preventScroll: true });
   });
 }
 

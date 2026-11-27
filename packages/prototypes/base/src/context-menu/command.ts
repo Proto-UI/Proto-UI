@@ -1,5 +1,6 @@
 import type {
   DefHandle,
+  FocusRequestOptions,
   FocusRovingMemberStatus,
   ObservedStateHandle,
   OwnedStateHandle,
@@ -14,7 +15,7 @@ export type ContextMenuCommand = {
   focused: ObservedStateHandle<boolean, ContextMenuCommandProps>;
   focusVisible: ObservedStateHandle<boolean, ContextMenuCommandProps>;
   pressed: OwnedStateHandle<boolean>;
-  focusSelf(options?: { reason?: 'programmatic' | 'keyboard' | 'pointer' }): void;
+  focusSelf(options?: FocusRequestOptions): void;
   setRovingStatus(status: FocusRovingMemberStatus): void;
   syncDisabled(disabled: boolean): void;
 };
@@ -43,7 +44,7 @@ export function setupContextMenuCommand(
   def.expose.state('focusVisible', focusVisible);
   def.expose.state('pressed', pressed);
 
-  const focusSelf = (focusOptions?: { reason?: 'programmatic' | 'keyboard' | 'pointer' }) => {
+  const focusSelf = (focusOptions?: FocusRequestOptions) => {
     if (disabled.get() && !options?.focusableWhenDisabled) return;
     focusable.focusSelf(focusOptions);
   };
@@ -72,6 +73,7 @@ export function setupContextMenuCommand(
   });
   def.event.on('pointer.leave', () => clearTransient(`reason: ${reasonPrefix} pointer.leave`));
   def.event.on('pointer.cancel', () => clearTransient(`reason: ${reasonPrefix} pointer.cancel`));
+  def.event.on('press.cancel', () => clearTransient(`reason: ${reasonPrefix} press.cancel`));
   def.event.on('pointer.down', () => {
     if (!disabled.get()) pressed.set(true, `reason: ${reasonPrefix} pointer.down`);
   });
@@ -79,6 +81,9 @@ export function setupContextMenuCommand(
   def.event.on('press.commit', () => {
     pressed.set(false, `reason: ${reasonPrefix} press.commit`);
   });
+  def.lifecycle.onUnmounted(() =>
+    clearTransient(`reason: ${reasonPrefix} view unmounted => reset interaction`)
+  );
 
   return {
     disabled,

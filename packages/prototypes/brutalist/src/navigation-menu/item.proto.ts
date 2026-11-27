@@ -14,27 +14,13 @@ export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExpose
     const disabled = behavior.getState!('disabled')!;
     const focused = behavior.getState!('focused')!;
     const focusVisible = behavior.getState!('focusVisible')!;
-    const hovered = def.state.bool('hovered', false);
-    def.event.on('pointer.enter', () => {
-      if (!disabled.get()) hovered.set(true, 'reason: pointer entered brutalist nav item');
-    });
-    def.event.on('pointer.leave', () => {
-      hovered.set(false, 'reason: pointer left brutalist nav item');
-    });
-    def.event.on('pointer.cancel', () => {
-      hovered.set(false, 'reason: pointer cancelled brutalist nav item');
-    });
     def.feedback.style.use(
       tw(
         'flex w-full min-w-0 cursor-pointer select-none items-center rounded-base border-2 border-transparent px-3 py-2 text-sm text-foreground font-sans font-medium text-left outline-none transition-colors break-words'
       )
     );
     def.rule({
-      when: (w) =>
-        w.all(
-          w.state(disabled).eq(false),
-          w.any(w.state(focused).eq(true), w.state(hovered).eq(true))
-        ),
+      when: (w) => w.all(w.state(disabled).eq(false), w.state(focused).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
     });
     def.rule({

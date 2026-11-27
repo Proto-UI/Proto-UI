@@ -47,7 +47,7 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
     // P-SHADCN-SELECT-ITEM-CURRENT-BASE-DEVIATIONS
     const state = asSelectItem().stateHandles;
     if (!state) throw new Error('[shadcn-select-item] Select Item must project option states.');
-    const { disabled, hovered, focused, focusVisible, pressed, active, selected } = state;
+    const { disabled, focused, focusVisible, pressed, active, selected } = state;
 
     // P-SHADCN-SELECT-ITEM-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
@@ -65,16 +65,13 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
         intent: (i) => i.feedback.style.use(tw(SELECT_ITEM_SURFACE[profile])),
       });
     // P-SHADCN-SELECT-ITEM-STATE-DRIVEN-STYLES
+    // Base pointer.move hands off Focus/active directly; hovered alone must not
+    // leave a second painted row behind after keyboard navigation moves focus.
     def.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),
-          w.any(
-            w.state(active).eq(true),
-            w.state(hovered).eq(true),
-            w.state(focused).eq(true),
-            w.state(focusVisible).eq(true)
-          )
+          w.any(w.state(active).eq(true), w.state(focused).eq(true), w.state(focusVisible).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
@@ -91,12 +88,7 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
       when: (w) =>
         w.all(
           w.not(w.state(style).eq('new-york-v4')),
-          w.any(
-            w.state(active).eq(true),
-            w.state(hovered).eq(true),
-            w.state(focused).eq(true),
-            w.state(focusVisible).eq(true)
-          )
+          w.any(w.state(active).eq(true), w.state(focused).eq(true), w.state(focusVisible).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-foreground/10 text-accent-foreground')),
     });
