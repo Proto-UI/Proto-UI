@@ -863,9 +863,48 @@ describe.sequential(
               // Expansion precedes the popup's deferred entry focus on some hosts.
               const expectEntryFocus = async (name: string) => {
                 const option = portal.getByRole('option', { name, exact: true });
-                await expect
-                  .poll(() => option.and(portal.locator(':focus')).count(), { timeout: 3_000 })
-                  .toBe(1);
+                try {
+                  await expect
+                    .poll(() => option.and(portal.locator(':focus')).count(), { timeout: 3_000 })
+                    .toBe(1);
+                } catch (error) {
+                  record.selectEntryFailure = await portal.evaluate((content, expected) => {
+                    const active = document.activeElement;
+                    const exposes = (
+                      content as Element & {
+                        getExposes?(): Record<string, { get?(): unknown }>;
+                      }
+                    ).getExposes?.();
+                    const trigger = document.querySelector(
+                      `[aria-controls=${JSON.stringify(content.id)}]`
+                    );
+                    const describe = (element: Element) => ({
+                      tag: element.localName,
+                      id: element.id,
+                      role: element.getAttribute('role'),
+                      visibility: getComputedStyle(element).visibility,
+                      rect: element.getBoundingClientRect().toJSON(),
+                    });
+                    return {
+                      expected,
+                      active: active && describe(active),
+                      content: describe(content),
+                      trigger: trigger && describe(trigger),
+                      expanded: trigger?.getAttribute('aria-expanded'),
+                      open: exposes?.open?.get?.(),
+                      phase: exposes?.transitionState?.get?.(),
+                      alignmentDiagnostic: exposes?.alignmentDiagnostic?.get?.(),
+                      viewDetached: content.hasAttribute('data-pui-view-detached'),
+                      viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
+                      options: Array.from(content.querySelectorAll('[role="option"]'), (item) => ({
+                        ...describe(item),
+                        text: item.textContent?.trim(),
+                        selected: item.getAttribute('aria-selected'),
+                      })),
+                    };
+                  }, name);
+                  throw error;
+                }
               };
               await expect.poll(() => portal.count()).toBe(1);
               await expect.poll(() => portal.getByRole('option').count()).toBe(3);
@@ -889,17 +928,22 @@ describe.sequential(
                     '[data-projection-prototype="shadcn-select-group"]'
                   );
                   const item = element.querySelector<HTMLElement>('[role="option"]');
+                  const themePopover = css.getPropertyValue('--pui-popover');
                   const reference = document.createElement('span');
                   reference.setAttribute('aria-hidden', 'true');
                   reference.style.cssText =
                     'position:fixed;visibility:hidden;pointer-events:none;width:0;height:0;background:color-mix(in oklab,var(--pui-popover) 70%,transparent)';
-                  element.append(reference);
+                  // Resolve the popup's own theme color outside its live child collection.
+                  reference.style.setProperty('--pui-popover', themePopover);
+                  reference.style.colorScheme = css.colorScheme;
+                  reference.style.color = css.color;
+                  document.body.append(reference);
                   try {
                     return {
                       radius: css.borderRadius,
                       background: css.backgroundColor,
                       expectedBackground: getComputedStyle(reference).backgroundColor,
-                      themePopover: css.getPropertyValue('--pui-popover').trim(),
+                      themePopover: themePopover.trim(),
                       isolation: css.isolation,
                       leafCount: element.querySelectorAll('[data-pui-owned-decoration]').length,
                       filter: leaf ? getComputedStyle(leaf).backdropFilter : null,
@@ -960,6 +1004,7 @@ describe.sequential(
                 .popup.background;
               expect(background).not.toBe('transparent');
               expect(background).not.toBe('rgba(0, 0, 0, 0)');
+              await expectEntryFocus('Email');
               await capture('select-luma-open');
               await expectEntryFocus('Email');
               await page.keyboard.press('End');

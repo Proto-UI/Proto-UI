@@ -3,6 +3,7 @@
 import {
   groupPaintedCards,
   HOMEPAGE_GALLERY_IDS,
+  readGalleryRhythm,
   WIDE_GALLERY_COLUMNS,
 } from '../../../components/Homepage/homepage-layout-evidence';
 import { revealHeaderPreferences } from './site-header-browser';
@@ -135,8 +136,8 @@ async function createHomeGalleryObservation(
   );
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  const sample = () =>
-    stage.evaluate((node) => {
+  const sample = async () => {
+    const facts = await stage.evaluate((node) => {
       const stage = node as HTMLElement;
       const bounds = stage.getBoundingClientRect();
       const gallery = stage.closest<HTMLElement>('.home-gallery')!;
@@ -288,6 +289,9 @@ async function createHomeGalleryObservation(
         sourceOutsideViewport: !viewport.contains(source),
       };
     });
+    const { fadeRem } = await page.evaluate(readGalleryRhythm);
+    return { ...facts, fadeRem };
+  };
   const evidenceDirectory = path.join(
     process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ||
       path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
@@ -348,7 +352,7 @@ async function createHomeGalleryObservation(
     expect(facts.liveRoots).toBeGreaterThan(0);
     expect(facts.fade).toContain('linear-gradient');
     expect(facts.fadeHeight).toBeCloseTo(
-      Math.min(18 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
+      Math.min(facts.fadeRem * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
       1
     );
     expect(facts.fadeColorMeasurementError).toBeNull();
@@ -1244,7 +1248,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(desktop.fadePointerEvents).toBe('none');
         expect(desktop.fadeVisible).toBe(false);
         expect(desktop.fadeHeight).toBeCloseTo(
-          Math.min(18 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
+          Math.min(desktop.fadeRem * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
           1
         );
         await page.setViewportSize({ width: 390, height: 900 });
