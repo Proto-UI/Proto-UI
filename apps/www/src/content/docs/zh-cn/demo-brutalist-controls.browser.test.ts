@@ -918,8 +918,8 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     });
     try {
       for (const runtime of RUNTIMES) {
-        // The current authored account menu has 24 prototype nodes.
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 24);
+        // The current authored account menu has 25 prototype nodes (including Delete).
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 25);
         const trigger = previewer
           .locator(
             '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
