@@ -12,6 +12,7 @@ function initCliInitTabsRoot(root: HTMLElement): void {
   if (tabs.length === 0 || tabs.length !== panels.length) return;
 
   const doc = root.ownerDocument;
+  const lifetime = new AbortController();
   let alive = true;
   let projection: TabProjection | undefined;
 
@@ -37,13 +38,38 @@ function initCliInitTabsRoot(root: HTMLElement): void {
     const selected = tab.dataset.cliFileSelected === 'true';
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
-    tab.addEventListener('click', (event) => {
-      if (!alive) return;
-      event.preventDefault();
-      select(index);
-      projection?.select(index);
-    });
+    tab.addEventListener(
+      'click',
+      (event) => {
+        if (!alive) return;
+        event.preventDefault();
+        select(index);
+        projection?.select(index);
+      },
+      { signal: lifetime.signal }
+    );
   }
+  list.addEventListener(
+    'keydown',
+    (event) => {
+      if (!alive) return;
+      if (!(event.target instanceof HTMLElement)) return;
+      const currentIndex = tabs.indexOf(event.target);
+      if (currentIndex < 0) return;
+      let nextIndex: number | undefined;
+      if (event.key === 'ArrowLeft') nextIndex = currentIndex - 1;
+      else if (event.key === 'ArrowRight') nextIndex = currentIndex + 1;
+      else if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = tabs.length - 1;
+      else return;
+      if (nextIndex < 0 || nextIndex >= tabs.length) return;
+      event.preventDefault();
+      tabs[nextIndex]!.focus({ preventScroll: true });
+      select(nextIndex);
+      projection?.select(nextIndex);
+    },
+    { signal: lifetime.signal }
+  );
   list.setAttribute('role', 'tablist');
 
   try {
@@ -66,6 +92,7 @@ function initCliInitTabsRoot(root: HTMLElement): void {
   const dispose = () => {
     if (!alive) return;
     alive = false;
+    lifetime.abort();
     projection?.destroy();
     projection = undefined;
     owners.delete(root);

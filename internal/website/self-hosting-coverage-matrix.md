@@ -303,7 +303,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/CodeFileBrowser.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-panel-scroll`, `www.docs.code-surface` | `18055139bc99fe0c356401af41167847d1e13b1f442a338be3c5eb22f45942b8` |
 | `apps/www/src/components/code-file-browser-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-panel-scroll` | `315a30074f97c4fd94aad261bfcedde61add36122e4f8c56f2ab56bd98f48d5e` |
 | `apps/www/src/components/CliInitOutput.astro` | `www.content.native-disclosures`, `www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-surface` | `aff01f832933ee3cbe6ed3d68db80a66378a95f621cdfdf25245f4a780b404cc` |
-| `apps/www/src/components/cli-init-tabs-client.ts` | `www.docs.code-example-file-tabs` | `22e106ba71906227d87e570f7708b6b6391583d8f45a5c61b7760b5759a5cdcb` |
+| `apps/www/src/components/cli-init-tabs-client.ts` | `www.docs.code-example-file-tabs` | `fe62f7329784f62fabb90461c20d50afd98b5ad7a5a85b7b60c473e11b010428` |
 | `apps/www/src/components/override/Sidebar.astro` | `www.shell.sidebar-navigation` | `9cf7486a4a86e8512c9f75215cff83f0ffb0b1a3f3753c802782c08f0fb0ece5` |
 | `apps/www/src/components/site-contents-panel.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `5b431e8813cfae83c06bb5542c179bc9c961569557fbb45c432521fce5201812` |
 | `apps/www/src/components/site-sidebar-disclosure-bootstrap.js` | `www.shell.sidebar-navigation` | `288fea49c1e048164274439f1d25b65cd51a19a06a09ed5672981478f4811edd` |

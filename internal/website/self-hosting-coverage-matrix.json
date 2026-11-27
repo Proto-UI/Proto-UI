@@ -1630,7 +1630,7 @@
     {
       "source": "apps/www/src/components/cli-init-tabs-client.ts",
       "owningMatrixRow": "`www.docs.code-example-file-tabs`",
-      "sourceSha256": "22e106ba71906227d87e570f7708b6b6391583d8f45a5c61b7760b5759a5cdcb"
+      "sourceSha256": "fe62f7329784f62fabb90461c20d50afd98b5ad7a5a85b7b60c473e11b010428"
     },
     {
       "source": "apps/www/src/components/override/Sidebar.astro",
