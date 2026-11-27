@@ -23,13 +23,9 @@ export const BrutalistInputRoot = definePrototype<
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'outline-none forced-colors-focus-outline ring-2 ring-black ring-offset-2 ring-offset-background'
+            'outline-none forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background'
           )
         ),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.meta('colorScheme').eq('dark')),
-      intent: (i) => i.feedback.style.use(tw('ring-ring')),
     });
     def.rule({
       when: (w) => w.state(state.readOnly).eq(true),
