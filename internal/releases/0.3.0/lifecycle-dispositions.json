@@ -540,6 +540,33 @@
       ]
     },
     {
+      "id": "0.3.0-retired-compiler-disposition",
+      "entities": [
+        "C-COMPILER-ARTIFACT-LINKING-0001",
+        "C-COMPILER-ECMASCRIPT-0001",
+        "C-COMPILER-GPUI-A11Y-VALUE-0001",
+        "C-COMPILER-OBSERVABLES-0001",
+        "C-COMPILER-RELATIONAL-0001",
+        "C-COMPILER-RUST-DATA-0001",
+        "C-COMPILER-SCALAR-0001",
+        "C-COMPILER-SCALAR-INPUT-0001",
+        "T-COMPILER-ARTIFACT-LINKING-0001",
+        "T-COMPILER-GPUI-A11Y-VALUE-0001",
+        "T-COMPILER-GPUI-AUTHORED-INPUT-0001",
+        "T-COMPILER-GPUI-CONTROL-LABEL-0001",
+        "T-COMPILER-RELATIONAL-0001",
+        "T-COMPILER-RUST-DATA-0001",
+        "T-COMPILER-SCALAR-0001"
+      ],
+      "disposition": "not-applicable",
+      "rationale": "The current catalog records removal of these eight contracts and seven tests in 0.4.0. Their replacements belong to the 0.4 compiler foundation. Their historical stability at 0.3.0 is unknown because the retained entities have no recorded activation version.",
+      "evidence": [
+        "spec/contracts/C-COMPILER-FOUNDATION-0001.yaml",
+        "spec/tests/T-COMPILER-FOUNDATION-0001.yaml",
+        "internal/governance/release-0.3-list.md"
+      ]
+    },
+    {
       "id": "0.3.0-shadcn-disposition",
       "entities": [
         "P-SHADCN-ACCORDION",
@@ -732,14 +759,6 @@
         "C-BOUNDARY-0001",
         "C-CALENDAR-SELECTION-0001",
         "C-CHECKBOX-LABEL-COMPOSITION-0001",
-        "C-COMPILER-ARTIFACT-LINKING-0001",
-        "C-COMPILER-ECMASCRIPT-0001",
-        "C-COMPILER-GPUI-A11Y-VALUE-0001",
-        "C-COMPILER-OBSERVABLES-0001",
-        "C-COMPILER-RELATIONAL-0001",
-        "C-COMPILER-RUST-DATA-0001",
-        "C-COMPILER-SCALAR-0001",
-        "C-COMPILER-SCALAR-INPUT-0001",
         "C-CONTENT-SELECTION-AFFORDANCE-0001",
         "C-CONTEXT-0001",
         "C-CONTEXT-0002",
@@ -1159,13 +1178,6 @@
         "T-COLLECTION-0002",
         "T-COLLECTION-CONTROL-REQUESTS-0001",
         "T-COMMAND-DIALOG-CONTENT-0001",
-        "T-COMPILER-ARTIFACT-LINKING-0001",
-        "T-COMPILER-GPUI-A11Y-VALUE-0001",
-        "T-COMPILER-GPUI-AUTHORED-INPUT-0001",
-        "T-COMPILER-GPUI-CONTROL-LABEL-0001",
-        "T-COMPILER-RELATIONAL-0001",
-        "T-COMPILER-RUST-DATA-0001",
-        "T-COMPILER-SCALAR-0001",
         "T-CONTENT-SELECTION-AFFORDANCE-0001",
         "T-CONTEXT-0001",
         "T-CONTEXT-0002",

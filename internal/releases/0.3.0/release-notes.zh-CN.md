@@ -28,6 +28,8 @@ Proto UI 0.3.0 是 0.3 线的首个稳定版。全部 47 个公开 `@proto.ui/*`
 
 公开 package 集合保持全局精确。`@proto.ui/compiler` 仍为私有工具，不进入发行 BOM。0.3.0 生命周期处置记录本版本的每个已知 draft：已评审的 0.3 家族保留为 draft 并点名其未决 activation 证据，0.4 家族带有明确的顺延处置。
 
+8 个 Compiler 契约和 7 个相关测试的处置为 `not-applicable`。目录记录了它们自 0.4.0 起移除，仍保留其 0.3.0 条目。这些条目在 0.3.0 的历史稳定性未知。
+
 ## 发布状态
 
 本次准备不发布 package、不创建 `v0.3.0`、不移动 npm `latest` tag，也不激活 `V-PROTO-UI-0012`。package 内安装示例描述的是未发布候选；网站可用性表述继续跟随最后一次已验证的发布。发布需要四个缺失的 registry identity、覆盖最终已评审 package 集合的完整 rehearsal、来自 `main` 的受保护发布，以及独立的不可变证据评审。
