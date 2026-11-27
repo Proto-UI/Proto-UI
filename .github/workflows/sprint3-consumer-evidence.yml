@@ -329,8 +329,3 @@ jobs:
     uses: ./.github/workflows/package-budget-evidence.yml
     permissions:
       contents: read
-
-  production-compiler:
-    uses: ./.github/workflows/compiler-browser-acceptance.yml
-    permissions:
-      contents: read

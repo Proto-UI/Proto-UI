@@ -42,43 +42,6 @@ export const SPRINT2_SUITES = [
     36
   ),
   {
-    id: 'ordinary-linked-consumers',
-    files: ['packages/compiler/test/artifact-linking-consumer.test.ts'],
-    evidenceKind: 'ordinary framework imports in Node/HappyDOM; not native browser evidence',
-    expectedCases: 12,
-    expectedIds: [
-      'fails visibly when an ordinary import evaluates an unlinked external obligation',
-      'uses React imports through native wrappers and portals, updates repeatedly and disposes subscriptions',
-      'uses Vue 3 native component slots, nearest providers and disposal',
-      'uses Vue 2 ordinary options imports and native children without a Proto launcher',
-      'uses registered Web Components through ordinary DOM wrappers and terminal disconnect',
-      'shares Anatomy membership and Focus Scope keys between different independently compiled feature closures',
-      'resolves structured A11y targets across independent feature closures without crossing domains or private families',
-      'rejects incompatible Focus metadata and declaration kinds before native import',
-      ...['react-dom-source-v1', 'vue-source-v1', 'vue2-source-v1', 'web-component-source-v1'].map(
-        (profile) => `preserves actual nominal references for every declaration kind in ${profile}`
-      ),
-    ].map((name) => `ordinary consumers of independently compiled and linked libraries ${name}`),
-    format: 'vitest',
-  },
-  {
-    id: 'compiled-consumers',
-    files: ['packages/compiler/test/sprint2-native.browser.test.ts'],
-    evidenceVariable: 'PROTO_UI_RUNTIME_EVIDENCE_DIR',
-    expectedCases: 20,
-    expectedIds: runtimes.flatMap((target) => [
-      ...families.map(
-        (family) =>
-          `${target}/${family}: native Button activation, preferences and terminal cleanup`
-      ),
-      ...['sync', 'queued'].map(
-        (mode) =>
-          `${target}/${mode}: trusted controlled typing preserves caret through candidate refresh`
-      ),
-    ]),
-    format: 'vitest',
-  },
-  {
     id: 'site',
     files: ['apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts'],
     evidenceVariable: 'PROTO_UI_SPRINT2_SITE_EVIDENCE_DIR',

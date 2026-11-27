@@ -1,13 +1,15 @@
 id: C-COMPILER-RELATIONAL-0001
 type: contract
 title: Portable relational comparison admission and ordering
-status: draft
+status: removed
 since: 0.3.0-alpha.1
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  Current human-directed Proto language direction for the bounded Compiler slice.
-  Admission tightens previously accepted primitive coercion; migration and independent
-  review remain required. Native consumer execution and complete host string-domain
-  evidence are missing, so this is not a stable cross-target guarantee.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 summary: Same-kind numeric or UTF-16 string relations with explicit diagnostics and ordered operand evaluation.
 statement:
   en: >-
@@ -60,11 +62,14 @@ openQuestions:
     blocks:
       - activation:C-COMPILER-RELATIONAL-0001
 sources:
-  - path: packages/compiler/src/expression-types.ts
-  - path: packages/compiler/src/gpui-source.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/expression-types.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/gpui-source.ts
   - path: internal/records/2026-10-27-compiler-relational-admission.md
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Define the bounded same-kind relational migration and independent ordering criteria as draft direction.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, relational, portable-semantics]

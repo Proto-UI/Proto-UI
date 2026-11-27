@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { launchBrowser } from '../../../apps/www/src/content/docs/zh-cn/browser-harness.ts';
 import { json, readJson, safeFile, sha256, writeNew } from '../../benchmark/evidence.mjs';
-import { bindProductionAsset } from '../invisible-consumption/asset-binding.mjs';
+import { bindProductionAsset } from './asset-binding.mjs';
 
 const [, , evidenceDirectory, requestedUrl] = process.argv;
 if (!evidenceDirectory || !requestedUrl || process.argv.length !== 4)

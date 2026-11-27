@@ -4,7 +4,7 @@
 
 ## 分母和状态
 
-[`library-profile-inventory.mjs`](../../../../scripts/compiler/library-profile-inventory.mjs) 从当前 Git tree 枚举 `packages/prototypes/*/src/**/*.proto.ts` 的每个 tracked 文件，验证实际工作树字节对应其 Git blob，保存 entry / family / bytes / SHA-256 / blob / mode。不固定成某几个消费入口，也不把文件数写死。
+[`library-profile-inventory.mjs`](https://github.com/Proto-UI/Proto-UI/blob/df54e9b7bb8f5cd8a110dfff1ab42980242dea5d/scripts/compiler/library-profile-inventory.mjs) 从当前 Git tree 枚举 `packages/prototypes/*/src/**/*.proto.ts` 的每个 tracked 文件，验证实际工作树字节对应其 Git blob，保存 entry / family / bytes / SHA-256 / blob / mode。不固定成某几个消费入口，也不把文件数写死。
 
 profile 来自实际 `TARGET_PROFILES`：当前六个 implemented profile 全部独立运行 `compileFile`；包括 `react-runtime-v1`，不是将它换成 Vue2 的四个 source profile。另外六个 Qt / Flutter / SSR 公开 profile 按真实 registry 声明生成 `UNIMPLEMENTED` / `profile-declaration-only` 行，并保留 resolver 的拒绝诊断。它们没有被调用私有 emitter 后记成公开成功。
 
@@ -42,7 +42,7 @@ node scripts/compiler/library-profile-inventory.mjs --merge /tmp/library-report.
 
 ## 原 394 × 四 named profiles 已按真实 Git bytes 恢复
 
-原 revision 为 `35195a6e6f1ba6a7d800da0029f2683013abd18b`，实际 tree 为 `de698a62e9ecf41db438e039830eacf5e71cf5aa`。本地 tree 先可枚举全部文件；其中 30 个旧 blob 当时尚缺。仅从已连接 Git origin 取回这些确切对象后，394 份 authored entry 全部实际读回，再生成 [`library-profile-history-35195a6.json`](../../../compiler/library-profile-history-35195a6.json)。
+原 revision 为 `35195a6e6f1ba6a7d800da0029f2683013abd18b`，实际 tree 为 `de698a62e9ecf41db438e039830eacf5e71cf5aa`。本地 tree 先可枚举全部文件；其中 30 个旧 blob 当时尚缺。仅从已连接 Git origin 取回这些确切对象后，394 份 authored entry 全部实际读回，再生成 [`library-profile-history-35195a6.json`](https://github.com/Proto-UI/Proto-UI/blob/df54e9b7bb8f5cd8a110dfff1ab42980242dea5d/internal/compiler/library-profile-history-35195a6.json)。
 
 原 Base 178、Shadcn 216 和四个原具名 profile 分母均保留，共 1,576 个原 pair。文件清单含真实旧 mode、blob、bytes、SHA-256；成员账本 digest 为 `8ff2977a9c5d101beba1975b999cd87d7a257f4470fa97a86643e58278a7b8f8`。当旧 Git objects 不可用时，执行器明确写 `recovered: false` 与原错误，不编造 hash。
 

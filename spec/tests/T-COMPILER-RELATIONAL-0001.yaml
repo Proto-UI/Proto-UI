@@ -1,9 +1,16 @@
 id: T-COMPILER-RELATIONAL-0001
 type: test
 title: Compiler relational admission and generated consumer conformance
-status: draft
+status: removed
 since: 0.3.0-alpha.1
-lifecycleRationale: Local targeted evidence and source emission do not replace independent review or native consumer execution; retain draft status.
+removedSince: 0.4.0
+replacedBy: T-COMPILER-FOUNDATION-0001
+lifecycleRationale: >-
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
+
 cases:
   - id: T-COMPILER-RELATIONAL-0001-CASE-ADMISSION
     title: Reject invalid scalar pairs and all invalid union alternatives at source and IR boundaries
@@ -24,22 +31,24 @@ cases:
 implementations:
   - id: compiler-targeted
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/relational-comparison.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-RELATIONAL-0001-CASE-ADMISSION, T-COMPILER-RELATIONAL-0001-CASE-NUMBER, T-COMPILER-RELATIONAL-0001-CASE-STRING, T-COMPILER-RELATIONAL-0001-CASE-EVALUATION]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/relational-comparison.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Actual generated WC execution uses happy-dom; this is not browser or native acceptance.
       - Actual generated React, Vue3 and Vue2 consumers also execute the handwritten relation matrix and effect-order probe; native execution remains separate evidence debt.
   - id: expression-types-migration
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/expression-types.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-RELATIONAL-0001-CASE-ADMISSION]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/expression-types.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
 verifies:
   contracts:
     - id: C-COMPILER-RELATIONAL-0001
+      until: 0.4.0
       anchors: [C-COMPILER-RELATIONAL-0001-ADMISSION, C-COMPILER-RELATIONAL-0001-NUMBER, C-COMPILER-RELATIONAL-0001-STRING, C-COMPILER-RELATIONAL-0001-EVALUATION, C-COMPILER-RELATIONAL-0001-MIGRATION]
 openQuestions:
   - id: T-COMPILER-RELATIONAL-0001-Q-INDEPENDENT-AND-NATIVE
@@ -49,4 +58,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Map bounded relational migration cases to targeted executable evidence without stable activation.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, relational, conformance]

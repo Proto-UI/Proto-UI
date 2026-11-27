@@ -1,10 +1,15 @@
 id: C-COMPILER-SCALAR-0001
 type: contract
 title: Bounded scalar operations in checked compiler source
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  User-directed native control work requires ordinary scalar conversion, rounding and text length without copying control policy into the compiler. This private admission slice has checked source and generated Rust evidence; full native component execution and independent acceptance remain separate. It does not promote any compiler profile or promise arbitrary JavaScript coercion.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 summary: Checked scalar operations preserve source-language values and evaluation while keeping capability authority and target admission explicit.
@@ -54,10 +59,10 @@ criteria:
 
 
 references:
-  contracts: [C-COMPILER-RUST-DATA-0001, C-COMPILER-OBSERVABLES-0001]
+  contracts: [{ id: C-COMPILER-RUST-DATA-0001, until: 0.4.0 }, { id: C-COMPILER-OBSERVABLES-0001, until: 0.4.0 }]
 sources:
-  - path: internal/compiler/source-language.md
-  - path: internal/compiler/atomic-lowering-completion.md
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/internal/compiler/source-language.md
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/internal/compiler/atomic-lowering-completion.md
   - path: internal/records/2026-11-22-compiler-control-consumer-boundaries.md
 openQuestions:
   - id: C-COMPILER-SCALAR-0001-Q-NATIVE-ACCEPTANCE
@@ -67,4 +72,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Define ordinary bounded scalar conversion, rounding and UTF-16 length independently of application control policy.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, scalar, rust, gpui, data, conformance]

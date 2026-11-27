@@ -43,7 +43,7 @@ openQuestions:
 sources:
   - path: packages/modules/rule-meta/src/caps.ts
   - path: packages/modules/rule-meta/src/create.ts
-  - path: packages/compiler/src/native-rule-meta.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-rule-meta.ts
 revisions:
   - version: 0.3.0-alpha.2
     change: revised
@@ -51,4 +51,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Proposed fixed live preference namespace without broadening existing sampled Meta keys.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [rule, preferences, accessibility, lifecycle, draft]

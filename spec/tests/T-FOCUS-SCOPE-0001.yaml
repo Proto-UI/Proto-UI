@@ -114,8 +114,7 @@ implementations:
       - Real Runtime Focus handles with controlled host capability outcomes exercise private Module ownership, absence versus rejected acquisition, role disable, replacement intent and retained-view cancellation. Controlled observations do not certify native input.
   - id: emitted-native-scope-owned-entry
     kind: fixture
-    status: planned
-    path: packages/compiler/src/focus-activation-entry.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
@@ -124,12 +123,12 @@ implementations:
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/src/focus-activation-entry.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Actual generic DOM helpers exercise initial resolution gaps, explicit inactive cancellation, current logical child priority and temporary Entry self focusability. Ordinary generated React, Vue, Vue2 and WC consumers distinguish logical child selection from native descendant fallback. Historical helper source and migration captures remain unchanged.
       - Happy DOM 15.11.7 returns -1 for absent tabindex in lib/nodes/html-element/HTMLElement.js lines 167-169; HTMLButtonElement inherits that getter. These helper and framework fixtures explicitly set tabindex 0 on their native Entry inputs before requests, including the fallback candidate beside a logical child. Exact physical focus and lifetime assertions remain; intrinsic unannotated-button eligibility requires the separate real-browser fixture and is not established by this controlled input.
   - id: native-scope-owned-entry-consumer
     kind: fixture
-    status: planned
-    path: packages/compiler/test/focus-scope-native.browser.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
@@ -138,11 +137,11 @@ implementations:
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/focus-scope-native.browser.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Ordinary generated WC owners exercise native descendant entry and removable programmatic self focusability, empty logical selection, missing selected child views, initial Entry resolution gaps, unavailable native focus, retained Scope view cancellation, manual suppression and independent subsequent Entry. Exact browser execution and source-bound receipts remain required.
   - id: gpui-scope-owned-entry-consumer
     kind: fixture
-    status: planned
-    path: packages/compiler/test/fixtures/gpui-native-template/focus-consumer.rs
+    status: missing
     required: true
     consumesCases:
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
@@ -152,6 +151,7 @@ implementations:
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REENTRY
       - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-native-template/focus-consumer.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Current authored inputs are packages/compiler/test/fixtures/gpui-native-template/focus-region.proto.ts with its default, ManualRegion, DefaultRegion and ContainerRegion exports, and packages/compiler/test/fixtures/gpui-native-template/focus-target.proto.ts with its default and TextTarget exports. The canonical CLI producer shares one pinned native SDK; packages/compiler/test/fixtures/gpui-native-template/README.md records the current recipe separately from historical composed/consumer/snapshot fixtures.
       - The current focus-consumer.rs defines 20 live GPUI test cases for logical priority, self entry, current-view replacement, role-specific cancellation, retained views, independent intent and state/native-text reentry. All definitions and the producer remain unexecuted. Source authorship and GPUI framework-test-platform execution do not establish operating-system display or input acceptance.
       - The live ordinary_native_only_descendant_wins_over_self_without_logical_membership counterexample is unexecuted and predicted to fail until a permitted native descendant discovery mechanism exists. It requires an ordinary nested native FocusHandle to win over self without compiled logical membership. No passing result, skipped obligation or complete descendant-first host capability is claimed; Main retains the actual native admission and unresolved host-mechanism boundary.
@@ -169,14 +169,14 @@ implementations:
       - The distinct-old/new pending case requires a closed scope's old C request to be retired even when its inactive observer queues unavailable D outside that scope. C becomes ready before D is delivered so a later owner transfer cannot hide missed retirement; a subsequent ordinary close still restores its previous owner. The current pending-only repair requires execution.
   - id: emitted-native-scope-restore-policy
     kind: fixture
-    status: planned
-    path: packages/compiler/src/native-focus-scope-restore.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FOCUS-SCOPE-0001-CASE-RESTORE-NONE
       - T-FOCUS-SCOPE-0001-CASE-RESTORE-OWNERSHIP
       - T-FOCUS-SCOPE-0001-CASE-RESTORE-CLEANUP
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/src/native-focus-scope-restore.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Executes actual emitted Vue2 split support/shared ownership and the WC monolithic helper in Happy DOM. Covers restore policy, nested boundaries, stale captures, cross-owner notifications and view retirement.
       - Actual createNativeInteraction owners exercise ordinary focus and focusSelf requests through the separate adapter and interaction queues, with active-scope remount controls. Scope closure retires pending work without physical blur. These are controlled helper fixtures, not ordinary-framework or browser-input acceptance.
       - Planned close-notification cases use both real target-request queues with default previous restoration and no new scope or DOM focus change; the newer request survives to remount, and a subsequent ordinary activation still restores its captured owner. These cases have no executed before-result.
@@ -314,6 +314,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Mapped scope activation runtime tests to the focus scope activation contract.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - focus
   - focus-scope

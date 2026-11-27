@@ -170,66 +170,65 @@ cases:
 implementations:
   - id: control-label-gpui-native-consumer
     kind: runtime-test
-    status: active
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/control-label-consumer.rs
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-GPUI-COMPILED
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-ordinary-values/control-label-consumer.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The separate control_label integration target is wired into the existing Linux and macOS locked native-consumer workflow. Candidate-bound Rust execution is required; source emission or the older Adapter PNG receipt is not a native pass.
   - id: control-label-gpui-source-admission
     kind: module-test
-    status: passing
-    path: packages/compiler/test/gpui-control-label.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-GPUI-COMPILED
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/gpui-control-label.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Thirteen executed source cases compile the three complete unchanged Base entries, check shared typed native identity, generic defaults and setup/callback sync admission, and retain explicit Anatomy and other-target diagnostics. This source evidence does not claim native execution.
   - id: control-label-private-client-hydration
     kind: runtime-test
-    status: passing
-    path: packages/compiler/test/control-label-ssr.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-PRIVATE-SSR
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-ssr.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Sixteen executed happy-dom cases pair the actual independently compiled Label with the real hydrated Button before and after adoption, then check disabled ownership, rebinding, clearing, disposal and strict client/server/carrier negative inputs. No Prototype substitution or no-op association facade is used.
       - The existing forty Button SSR behavior cases and eight server/evidence/type cases also pass, including actual Node execution without browser globals and the complete generated helper closure. This private compatibility repair does not admit public SSR profiles or server-side association serialization.
   - id: control-label-actual-source-admission
     kind: module-test
-    status: passing
-    path: packages/compiler/test/control-label-source-admission.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-COMPILED-ADMISSION
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-source-admission.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Executed 29 cases comprise twelve actual component/profile admissions, four complete strict generated-graph checks, eight precise unsupported Toggle Group diagnostics and five IR schema/version guards. No helper or dependency diagnostics are filtered, and generated components do not import a Proto Runtime to interpret unsupported operations.
       - The same-compiler source-baseline comparison established that Toggle Group language admission was already absent before ControlLabel composition; explicit rejection is retained as a boundary and does not claim Group support.
   - id: control-label-ordinary-generated-consumers
     kind: runtime-test
-    status: passing
-    path: packages/compiler/test/control-label-consumer-source.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-COMPILED-CONSUMER
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-consumer-source.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Executed 55 happy-dom cases use ordinary imports of the actual compiled Label, Button and Toggle with the public Core factory across React, Vue, Vue2 and Web Component. The matrix includes eight Runtime/Runtime harness controls, three compiled or mixed composition directions, and seven genuine Vue2 reactive-wrapper or strict negative-input cases.
       - This is generated component and real framework integration evidence, with independent output graphs and unchanged semantic assertions. Native input, other prototypes, unsupported Group compilation and OS assistive-technology acceptance remain separate.
   - id: control-label-generated-native-consumers
     kind: adapter-test
-    status: passing
-    path: packages/compiler/test/control-label-native.browser.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-COMPILED-NATIVE
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-native.browser.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Twenty-four actual Chromium cases passed for four Web profiles, Button or Toggle, and compiled/compiled plus both mixed Runtime directions, using a normal uid-1000 process with chromiumSandbox enabled. Pointer, keyboard, browser-computed naming, controlled/disabled ownership, rebinding and focus-reentry assertions all executed.
       - The source-bound provisional candidate run retains compiler and harness manifests, loaded source and generated graph hashes, native event traces, screenshots and first-failure-preserving results. Final verification must rerun the frozen integrated candidate; this bounded result does not certify OS assistive technology or Toggle Group.
   - id: control-label-native-helper
     kind: module-test
-    status: passing
-    path: packages/compiler/test/control-label-native.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-INTEROP
@@ -237,6 +236,7 @@ implementations:
       - T-CONTROL-LABEL-0001-CASE-PAIR
       - T-CONTROL-LABEL-0001-CASE-IDENTITY
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/control-label-native.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Executed emitted-helper DOM-harness evidence covers independent helper copies, duplicate pairing, physical scope, source ID collisions and recovery, shared generated-ID receipts, reentrant disposal and strict association validation. Four-backend compiled components and native-browser admission remain separate.
   - id: control-label-vue2-reactive-channel
     kind: adapter-test
@@ -478,6 +478,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded real owner/Adapter/compiler tests while leaving native admission explicitly pending.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - test
   - label

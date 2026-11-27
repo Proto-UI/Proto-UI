@@ -39,16 +39,16 @@ const cases = ['en', 'zh-cn'].flatMap((locale) =>
 );
 const writeJson = (file, value) => writeFileSync(file, JSON.stringify(value) + '\n');
 
-test('default stays 14/364 and Base Select is an explicit independent 1/8 profile', () => {
+test('default has 12/278 and Base Select is an explicit independent 1/8 profile', () => {
   assert.equal(sprint3Profile().id, 'default');
   assert.equal(sprint3Profile().suites, SPRINT3_SUITES);
-  assert.equal(SPRINT3_SUITES.length, 14);
+  assert.equal(SPRINT3_SUITES.length, 12);
   assert.equal(
     SPRINT3_SUITES.reduce((sum, row) => sum + row.cases, 0),
-    364
+    278
   );
-  assert.equal(profileBinding('default').files, 14);
-  assert.equal(profileBinding('default').cases, 364);
+  assert.equal(profileBinding('default').files, 12);
+  assert.equal(profileBinding('default').cases, 278);
   const selected = sprint3Profile('base-select');
   assert.equal(selected.suites.length, 1);
   assert.equal(
@@ -221,14 +221,14 @@ test('Select receipts cannot finalize under default or an unknown profile', (t) 
   }
 });
 
-test('a default 364 receipt cannot be relabelled as the one-file Select inventory', (t) => {
+test('a default 278 receipt cannot be relabelled as the one-file Select inventory', (t) => {
   const f = fixture(t);
   f.ledger.profile = profileBinding('default');
   f.ledger.suites = SPRINT3_SUITES.map((row) => ({ ...row, status: 'not-run' }));
   assert.equal(f.run(), 1);
   const saved = f.stored();
   assert.equal(saved.status, 'failed');
-  assert.equal(saved.profile.cases, 364, 'retain the mismatched source receipt for diagnosis');
+  assert.equal(saved.profile.cases, 278, 'retain the mismatched source receipt for diagnosis');
   assert.ok(saved.suites.every((row) => row.status === 'blocked'));
   assert.match(saved.profileProblems.join('\n'), /binding differs|missing or extra/);
 });
@@ -445,7 +445,7 @@ function cliFixture(t) {
 test('actual CLI init binds separate plans and cross-profile run finalizes before any build', (t) => {
   const f = cliFixture(t);
   for (const [initialized, requested, count] of [
-    [undefined, 'base-select', 14],
+    [undefined, 'base-select', 12],
     ['base-select', 'default', 1],
   ]) {
     const output = path.join(f.outer, 'evidence-' + String(initialized));

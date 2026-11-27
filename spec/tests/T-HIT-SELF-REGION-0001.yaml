@@ -33,10 +33,11 @@ implementations:
     consumesCases: [T-HIT-SELF-REGION-0001-CASE-LEASE]
   - id: self-region-compiler-boundary
     kind: module-test
-    status: passing
-    path: packages/compiler/test/self-hit-region-boundary.test.ts
+    status: missing
     required: true
     consumesCases: [T-HIT-SELF-REGION-0001-CASE-COMPILER]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/self-hit-region-boundary.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: self-region-native-four-web
     kind: adapter-test
     status: planned
@@ -47,4 +48,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Records bounded runtime lease and explicit compiler rejection evidence.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [hit-participation, lifecycle]

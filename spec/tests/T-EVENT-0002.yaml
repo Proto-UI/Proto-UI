@@ -140,11 +140,12 @@ implementations:
       - T-EVENT-0002-CASE-POINTER-FACTS
   - id: compiled-web-pointer-consumers
     kind: adapter-test
-    status: planned
-    path: packages/compiler/test/pointer-facts-native.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-EVENT-0002-CASE-POINTER-FACTS
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/pointer-facts-native.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
 verifies:
   modules:
     - id: M-EVENT-0001
@@ -195,6 +196,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Added event type, payload, host-bound event, and expose emit ownership test entity.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - event
   - event-type

@@ -13,7 +13,9 @@ The reviewed release facts are preserved in the [0.2.0 release notes](https://gi
 
 Current development follows the [0.3 delivery plan](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/release-0.3-plan.md), which owns the committed scope, target dates and acceptance stages. Planned delivery and completed release acceptance remain separate.
 
-The development workspace is identified by [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) and its corresponding [version entity](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions); a draft train does not establish publication. The repository also contains a [private compiler implementation](https://github.com/Proto-UI/Proto-UI/blob/main/packages/compiler/README.md) with profile-specific support and evidence boundaries. Its source availability does not make it a published compiler package or establish general native-host maturity.
+The development workspace is identified by [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) and its corresponding [version entity](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions); a draft train does not establish publication. The old private compiler is retired. Its [0.4 replacement foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) defines the new contract. Initial shared frontend/lint analysis is available; full semantic analysis and all five backends remain unimplemented and do not block 0.3 delivery.
+
+Existing compiler consumers should read the [retirement and migration guidance](/en/build/compiler-guide/#existing-compiler-consumers) before updating their pin. [`67fd94f58372cf35fa929f24ef731416b5817e31`](https://github.com/Proto-UI/Proto-UI/tree/67fd94f58372cf35fa929f24ef731416b5817e31) is this change's pre-retirement baseline. Keep an already-validated earlier pin, or explicitly migrate affected components to Runtime/Adapters; old compiler exports are unavailable after the reset.
 
 ## What is currently being built?
 

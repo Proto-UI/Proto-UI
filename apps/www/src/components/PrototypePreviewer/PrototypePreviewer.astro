@@ -1,8 +1,6 @@
 ---
 import { AdapterIds, InternalAdapterIds, selectRuntimeIds, type RuntimeId } from './runtimes/ids';
 import CodePanel from './CodePanel.astro';
-import BrowserCompilerPanel from './BrowserCompilerPanel.astro';
-import type { CompiledPreviewItem } from './compiled-preview-sandbox';
 import { formatPreviewCode } from './code-format';
 import { highlightCode, type CodeLang } from './code-highlight';
 import { tryResolveProjectionRecipe } from './projection-families';
@@ -29,9 +27,6 @@ interface Props {
   lazy?: boolean; // 进入视口附近后再加载 demo 与原型模块
   /** Allows internal validation pages to opt into runtimes outside the public adapter set. */
   allowExperimentalRuntimes?: boolean;
-  /** Canonical source registration with independently verified compiled delivery. */
-  compiledPrototypeId?: string;
-  compiledItems?: CompiledPreviewItem[];
 }
 
 function assertJsonLike(value: unknown, path: string[] = []) {
@@ -104,8 +99,6 @@ const {
   codePanel = true,
   lazy = false,
   allowExperimentalRuntimes = false,
-  compiledPrototypeId,
-  compiledItems,
 } = Astro.props;
 
 const permittedRuntimes = allowExperimentalRuntimes ? InternalAdapterIds : AdapterIds;
@@ -243,12 +236,6 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
       </div>
     </div>
   </div>
-
-  {
-    compiledPrototypeId && (
-      <BrowserCompilerPanel prototypeId={compiledPrototypeId} items={compiledItems} isZh={isZh} />
-    )
-  }
 
   {
     effectiveHasCode && (

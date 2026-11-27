@@ -35,8 +35,7 @@ cases:
 implementations:
   - id: generated-react-dom
     kind: module-test
-    status: passing
-    path: packages/compiler/test/react-rule-meta-source.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -45,6 +44,8 @@ implementations:
         T-RULE-COMPILER-META-0001-CASE-BOUNDARY,
         T-RULE-COMPILER-META-0001-CASE-INSTALLED,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/react-rule-meta-source.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
 verifies:
   contracts:
     - id: C-RULE-COLOR-SCHEME-0001
@@ -57,4 +58,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Separates generated React source evidence from Runtime/Adapter and native-browser acceptance.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [rule, compiler, meta, lifecycle, draft]

@@ -1,0 +1,95 @@
+id: C-COMPILER-AUTHORING-0001
+type: contract
+title: Explicit 0.4 prototype authoring surface
+status: draft
+since: 0.4.0
+lifecycleRationale:
+  zh-CN: >-
+    本合同为已接受的编译器语义选择明确的作者 API，并保留 definePrototype/setup/def 结构。该 0.4 surface 的导出、Adapter 执行与 compiler 降低尚未实现，样例是完整设计输入而非可执行支持证据，因此保留 draft。
+
+
+  en: >-
+    This contract chooses explicit authoring APIs for the accepted compiler semantics while preserving the definePrototype/setup/def structure. The 0.4 exports, Adapter execution and compiler lowering remain unimplemented; examples are complete design inputs rather than executable support evidence, so the entity remains draft.
+
+
+summary: Map explicit declarations, instance initialization, pure reads, actions, Context and owned tasks onto the accepted foundation without changing its semantics.
+statement:
+  zh-CN: >-
+    @proto.ui/core/authoring 是本合同选定、尚未实现的 0.4 导出面，不改变现有 @proto.ui/core 的历史 Runtime/Adapter 含义。源码通过真实绑定解析获得语义；API 拼写不许可只认某种语法外形。作者输入、Adapter 与 compiler 共同迁移，不能以仅有声明的 .d.ts、伪运行时或内部文档代替实现。本合同仅将 foundation 中既定语义映射为可审查的输入，不开放第二套语言语义。
+
+
+  en: >-
+    @proto.ui/core/authoring is the selected, not-yet-implemented 0.4 export surface. It does not change the historical Runtime/Adapter meaning of @proto.ui/core. Resolved bindings determine semantics; these API spellings do not authorize syntax-shape-only recognition. Source, Adapter and compiler migrate together, and declaration-only .d.ts files, a mock runtime or internal prose cannot substitute for implementation. This contract maps the accepted foundation into reviewable input rather than introducing a second language semantics.
+
+
+criteria:
+  - id: C-COMPILER-AUTHORING-0001-ENTRY
+    text: >-
+      definePrototype({ name, setup(def) }) remains the entry structure. setup is a declaration phase: it declares typed locations, pure computations, actions, connections and a returned view function. Legal setup helpers, imported helpers, closures, aliases and re-exports retain their meaning through their actual bindings and reached bodies. The compiler does not execute setup or a module to discover declarations, and runtime props cannot be reduced to declaration-time defaults. The proposed authoring export is distinct from the unchanged historical API until a verified common-source migration adopts it.
+
+
+  - id: C-COMPILER-AUTHORING-0001-PROPS
+    text: >-
+      def.props.define(schema) returns a record of typed readonly prop handles. In this surface a field declares its type, any default, or optional:true; optional fields expose Presence<T> as { kind: 'omitted' } or { kind: 'present', value: T }, distinct from a business Option value. A controlled optional field may declare controlMode:'fixed-instance': presence at instance creation selects the declared mode, later values may change within that mode, and a presence change is rejected at the typed input boundary rather than silently switching owner. A new instance may choose another mode. This is the examples' explicit schema policy, not a ban on other separately declared transition policies. Runtime handle reads use the current phase view, never incidental JavaScript object-property presence.
+
+
+  - id: C-COMPILER-AUTHORING-0001-INIT
+    text: >-
+      def.state.define<T>(name, { initialize(read) }) declares an owned state location and an explicitly typed per-instance initializer. The initializer computes once from the instance's allowed initial read view, not at build time and not again after an ordinary prop change, hide or physical reattachment. read.get(handle) reads a typed readonly value. Pure initializer helpers preserve their ordinary value semantics. Declaration handles identify locations; neither a type assertion nor retaining an initializer read object creates a writable capability or a frozen lifetime snapshot.
+
+
+  - id: C-COMPILER-AUTHORING-0001-DERIVE
+    text: >-
+      def.derive(name, read => value) declares a readonly derived handle. read.get handles props, state, other derived values and consumed Context under the current consistent view. Reads through helpers contribute dependencies; conservative invalidation may repeat pure computation without introducing actions, host commands or task starts. Derived reads within an action observe that segment's pending writes. A literal String is a well-formed Proto String; text operations, conversions, comparisons and assertions retain their foundation rules, with no blanket prohibition on all as or == spellings.
+
+
+  - id: C-COMPILER-AUTHORING-0001-ACTIONS
+    text: >-
+      def.action(name, (run, ...typedArguments) => body) declares a typed action handle. run.get reads the current segment, run.set writes an owned state handle, and run.emit queues a declared public event for successful publication. Ordinary synchronous helper calls stay in the current segment; host invocation or implicit callbacks enter through the defined action scheduler. def.event.on(eventName, actionHandle) and def.lifecycle.onCreated(actionHandle) explicitly connect an action to an owned event or creation callback. The event connection still requires the declared semantic-event/host realization; its presence is not evidence of target support. Connections retire with their owner, and creation is not repeated by physical remount. Action contexts are segment-scoped capabilities rather than transferable writable transaction references.
+
+
+  - id: C-COMPILER-AUTHORING-0001-PUBLIC
+    text: >-
+      def.expose.state(publicName, readonlyHandle) exposes a typed readonly projection; def.expose.action(publicName, actionHandle) exposes its declared typed arguments and outcome. def.expose.event<Payload>(publicName) declares and returns a typed event handle used by run.emit. Public names are semantic names, not runtime string lookups of private state or universal JSON payloads. In the controlled example activeChange is a request after a successful segment; the actual active projection changes only when the external owner publishes an accepted input. Handled Result errors remain ordinary typed data, distinct from propagated failure, task cancellation and owner disposal.
+
+
+  - id: C-COMPILER-AUTHORING-0001-VIEW
+    text: >-
+      The function returned by setup is a pure view declaration. Its renderer.get(handle) reads typed reactive values, renderer.el creates declared portable elements, and renderer.child(prototype, { key, props }) declares a typed child invocation with stable logical key identity. The compiler lowers these declarations and dynamic regions into ordinary host component structure, not a shipped template interpreter. Props passed to a child follow that child's schema. Pure tw token expressions may be selected through legal helpers and passed to style; their resolved semantics and applicable style contracts govern admissibility, not a blanket static-literal-only lint rule. View computation cannot start tasks or modify state. A view description is not a real host view-commit acknowledgement.
+
+
+  - id: C-COMPILER-AUTHORING-0001-CONTEXT
+    text: >-
+      createContextKey<T>(debugName) creates a nominal typed Context identity. Module scope is a convenient shared-key example, not the only legal lifetime. def.context.provide(key, read => value) declares a pure reactive provider projection, while def.context.consume(key) returns the readonly handle for a required nearest logical provider; an absent required provider produces an explicit typed initialization failure. Fresh action or resumed-task reads resolve the current provider, including identity replacement and logical moves. Equal labels or equal values do not preserve a retired provider subscription. Ordinary Context value changes do not themselves start or cancel tasks. An author must declare a separate effect/action trigger when a Context change should request work; neither renderer nor derive recomputation supplies that trigger.
+
+
+  - id: C-COMPILER-AUTHORING-0001-TASKS
+    text: >-
+      def.task(name, { policy: 'latest' | 'parallel' | 'serial' }, async (task, ...typedArguments) => body) declares an instance-owned task; an explicitly declared scope may supply another owner. run.start(taskHandle, ...arguments) stages a scheduler start on successful segment completion, and run.cancel(taskHandle) stages cancellation of this owner's active and queued invocations of that declaration without preventing future starts. Supersession, explicit cancellation and owner termination retain distinct typed scheduler outcomes; none is a business Result error. task.get and task.set access the currently executing segment, with no exposed writable view that can survive await. Every legal await commits the preceding segment and resumes through the scheduler in a new segment, including an already-ready result. task.await(externHandle, ...arguments) is the examples' explicit owned async-operation form: it stages the declared command after local commit and supplies its typed result. This convenience form does not restrict legal await to that spelling. A local captured value remains captured, whereas a fresh task.get after resumption reads the current state or Context. latest withdraws older invocations' subsequent submission eligibility when a new invocation starts; ordinary Context changes alone do not. Disposal withdraws all owner eligibility and cancels cancellable work; uncancellable late results cannot write to disposed or replacement instances. The three listed policies are the foundation-required modes, not a new rejection rule against a separately defined policy. Any additional policy requires declared semantics, and missing lowering alone does not make it source-invalid.
+
+
+  - id: C-COMPILER-AUTHORING-0001-EXTERNS
+    text: >-
+      declareExtern<ArgumentsTuple, ResultType>({ name, effect, lifetime, async, targets }) declares an explicit atomic capability with concrete argument and result types, effect class, lifetime and target set. The example async loader declares effect:'after-state-commit', lifetime:'task' and async:true, returning Result<String, PanelFailure>. Each target must bind that declared operation to a real implementation and convert host outcomes at its typed boundary. Listing a target or writing a signature does not implement it. An unbound loader is extern-unbound and prevents target compilation; it is neither an invalid author program nor a whole-prototype escape hatch. Typed cancellation belongs to the scheduler and is not fabricated as a successful loader result. In this input surface Result<T, E> is represented as { kind: 'ok', value: T } or { kind: 'err', error: E }; the tag does not change the foundation's distinction between a handled error value and propagated failure.
+
+
+  - id: C-COMPILER-AUTHORING-0001-MIGRATION
+    text: >-
+      The readonly Badge, fixed-mode controlled Toggle and Context/owned-async Tabs inputs demonstrate this surface and carry independently specified traces. They are bounded authoring scenarios, not replacements for the full official Toggle or Tabs definitions or a completed consumer migration. The shared source and reached authored helper bytes must be consumed unchanged by the future Adapter and compiler paths; target bindings remain explicit. Before adopting a migration, verify the consumer's original behavior, the common-source transformation and both independent conformance routes. Removing watch/update plumbing is justified only when automatic dependencies implement the corresponding output behavior. A new .d.ts file, parsed example or mock implementation does not close the missing Adapter/compiler routes. Upstream owns completing and verifying the required common-source migrations and delivering safe migration tooling; absence of a proven general autofix cannot waive that work or require a permanent consumer-maintained fork.
+
+
+dependsOn:
+  decisions: [D-COMPILER-FOUNDATION-0001]
+  contracts: [C-COMPILER-FOUNDATION-0001, C-COMPILER-LINT-0001]
+references:
+  tests: [T-COMPILER-AUTHORING-0001, T-COMPILER-FOUNDATION-0001]
+sources:
+  - path: internal/compiler/authoring-surface.md
+  - path: internal/compiler/examples/readonly-badge.proto.ts.txt
+  - path: internal/compiler/examples/controlled-toggle.proto.ts.txt
+  - path: internal/compiler/examples/context-owned-async-tabs.proto.ts.txt
+revisions:
+  - version: 0.4.0
+    change: introduced
+    summary: Select explicit authoring spellings and complete design inputs for the accepted foundation while retaining missing implementation evidence.
+tags: [compiler, authoring, language, migration, controlled, context, async]

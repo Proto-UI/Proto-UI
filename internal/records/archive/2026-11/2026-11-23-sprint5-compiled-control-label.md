@@ -21,7 +21,7 @@ Two further generic host prerequisites were exposed by consuming the unchanged r
 - Plain native Text creates no selection controller. The compiler SDK now has the existing host's exact `user-select: none` and `-webkit-user-select: none` mappings. `auto`, `text` and other unimplemented values still produce explicit unmapped diagnostics. The separate native style test protects both sides of this boundary.
 - A declared accessibility `activate` action enters the existing `press.commit` route. Under `C-A11Y-0001-F`, the declaration's event is the authored outward result, not a fabricated input or an instruction to emit directly. Original Button/Toggle disabled and controlled guards remain in their authored code. The callback lease binds the exact setup declaration and metadata, current mounted epoch, live owner and actual Window. Other admitted native routes retain their declared/default behavior; unknown action names still reject explicitly.
 
-The source lowering explanation is updated in [control-label-native-lowering.md](../../../compiler/control-label-native-lowering.md). Current Input, ToggleGroup, native Anatomy, mixed Adapter/compiled association, and canonical Qt/Flutter coverage are not asserted by this slice.
+The source lowering explanation is updated in [control-label-native-lowering.md](https://github.com/Proto-UI/Proto-UI/blob/df54e9b7bb8f5cd8a110dfff1ab42980242dea5d/internal/compiler/control-label-native-lowering.md). Current Input, ToggleGroup, native Anatomy, mixed Adapter/compiled association, and canonical Qt/Flutter coverage are not asserted by this slice.
 
 ## Real failures and corrections
 

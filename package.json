@@ -115,12 +115,12 @@
     "check:types": "corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style && corepack pnpm@10.32.1 -s check:types:workspace && corepack pnpm@10.32.1 -s check:types:docs",
     "format": "prettier --write .",
     "prepare": "husky install",
-    "test": "corepack pnpm@10.32.1 -s check:release-version && corepack pnpm@10.32.1 -s release:assets:check && corepack pnpm@10.32.1 -s check:styles:preset && corepack pnpm@10.32.1 -s check:styles:variant-order && corepack pnpm@10.32.1 -s check:component-presets && corepack pnpm@10.32.1 -s check:prototype-catalog && corepack pnpm@10.32.1 -s check:coverage-matrices && corepack pnpm@10.32.1 -s check:website-production-bundle && corepack pnpm@10.32.1 -s check:agent-operations && corepack pnpm@10.32.1 -s check:gpui-style-fixture && corepack pnpm@10.32.1 -s check:gpui-event-fixture && corepack pnpm@10.32.1 -s check:gpui-message-fixture && corepack pnpm@10.32.1 -s check:gpui-session-fixtures && corepack pnpm@10.32.1 -s test:gpui-scripts && corepack pnpm@10.32.1 -s test:public-docs && corepack pnpm@10.32.1 -s test:release && corepack pnpm@10.32.1 -s test:types && corepack pnpm@10.32.1 -s test:runtime",
+    "test": "corepack pnpm@10.32.1 -s check:release-version && corepack pnpm@10.32.1 -s release:assets:check && corepack pnpm@10.32.1 -s check:styles:preset && corepack pnpm@10.32.1 -s check:styles:variant-order && corepack pnpm@10.32.1 -s check:component-presets && corepack pnpm@10.32.1 -s check:prototype-catalog && corepack pnpm@10.32.1 -s check:coverage-matrices && corepack pnpm@10.32.1 -s check:website-production-bundle && corepack pnpm@10.32.1 -s check:agent-operations && corepack pnpm@10.32.1 -s check:gpui-style-fixture && corepack pnpm@10.32.1 -s check:gpui-event-fixture && corepack pnpm@10.32.1 -s check:gpui-message-fixture && corepack pnpm@10.32.1 -s check:gpui-session-fixtures && corepack pnpm@10.32.1 -s test:gpui-scripts && corepack pnpm@10.32.1 -s test:public-docs && corepack pnpm@10.32.1 -s test:release && corepack pnpm@10.32.1 -s test:types && corepack pnpm@10.32.1 -s test:compiler-analysis && corepack pnpm@10.32.1 -s test:runtime",
     "test:release": "node --test scripts/release/test/*.test.mjs",
     "test:public-docs": "node --test scripts/docs/test/*.test.mjs apps/www/scripts/contrast-provenance.test.mjs apps/www/scripts/contrast-report-journal.test.mjs apps/www/scripts/contrast-probe-serialization.test.mjs apps/www/scripts/contrast-audit-plan.test.mjs apps/www/scripts/contrast-anatomy.test.mjs apps/www/scripts/runtime-retry-urls.test.mjs apps/www/scripts/generate-cli-init-docs.test.mjs",
     "test:types": "echo \"[types] checking type contracts...\" && tsc -p internal/contracts/types/tsconfig.json && echo \"[types] OK\"",
     "test:web-conformance": "vitest run packages/web-conformance/test",
-    "test:runtime": "node --test scripts/test/run-runtime-tests.test.mjs scripts/test/runtime-process-owner.test.mjs scripts/test/regression-baseline.test.mjs scripts/test/wc-native-isolation.test.mjs scripts/test/happy-dom-mutation-keepalive.test.mjs scripts/analysis/shadow-s4-paint-cleanup.test.mjs && node scripts/test/run-runtime-tests.mjs",
+    "test:runtime": "node --test scripts/test/run-runtime-tests.test.mjs scripts/test/runtime-process-owner.test.mjs scripts/test/regression-baseline.test.mjs scripts/test/happy-dom-mutation-keepalive.test.mjs scripts/analysis/shadow-s4-paint-cleanup.test.mjs && node scripts/test/run-runtime-tests.mjs",
     "styles:variant-order:generate": "node --import tsx scripts/styles/generate-lowered-variant-order.ts",
     "check:styles:variant-order": "node --import tsx scripts/styles/generate-lowered-variant-order.ts --check",
     "agent:review:smoke": "node scripts/agent-operations/smoke-live-review-input.mjs",
@@ -131,7 +131,8 @@
     "benchmark:dry-run": "node scripts/benchmark/benchmark.mjs dry-run",
     "test:draft-packages": "node --test scripts/release/test/draft-prototype-packages.test.mjs scripts/build/test/draft-prototype-consumer.test.mjs",
     "lint:material-composition": "node scripts/analysis/material-composition-lint.mjs",
-    "test:material-composition-lint": "node --test scripts/analysis/test/material-composition-lint.test.mjs"
+    "test:material-composition-lint": "node --test scripts/analysis/test/material-composition-lint.test.mjs",
+    "test:compiler-analysis": "node --test packages/compiler/test/*.node-test.mjs"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,mts,json,css,md,mdx,astro,yaml,yml}": "prettier --write",

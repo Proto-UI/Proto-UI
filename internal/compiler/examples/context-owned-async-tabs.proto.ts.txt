@@ -1,0 +1,117 @@
+// 0.4 AUTHORING DESIGN INPUT (text fixture). The import is not implemented.
+// This scoped selection/loading scenario is not the full Base Tabs protocol.
+import { createContextKey, declareExtern, definePrototype, tw } from '@proto.ui/core/authoring';
+import type { Result } from '@proto.ui/core/authoring';
+
+type Selection = { value: string };
+type PanelFailure = { kind: 'unavailable'; message: string };
+type PanelState =
+  | { kind: 'idle' }
+  | { kind: 'loading'; requested: string }
+  | { kind: 'ready'; selected: string; text: string }
+  | { kind: 'failed'; selected: string; failure: PanelFailure }
+  | { kind: 'stale'; requested: string; current: string }
+  | { kind: 'cancelled' };
+
+// A nominal shared identity. Module scope is convenient, not a language ban.
+export const TAB_SELECTION = createContextKey<Selection>('authoring-tab-selection');
+
+// A real target binding is still required; this declaration is not executable.
+const loadTab = declareExtern<[selected: string], Result<string, PanelFailure>>({
+  name: 'authoring.load-tab',
+  effect: 'after-state-commit',
+  lifetime: 'task',
+  async: true,
+  targets: ['react', 'gpui', 'vue2', 'vue3', 'web-components'],
+});
+
+function panelLabel(state: PanelState): string {
+  switch (state.kind) {
+    case 'idle':
+      return 'Idle';
+    case 'loading':
+      return 'Loading';
+    case 'ready':
+      return state.text;
+    case 'failed':
+      return state.failure.message;
+    case 'stale':
+      return 'Selection changed; reload requested content';
+    case 'cancelled':
+      return 'Cancelled';
+  }
+}
+
+export const AsyncTabPanel = definePrototype({
+  name: 'authoring-async-tab-panel',
+  setup(def) {
+    const selection = def.context.consume(TAB_SELECTION);
+    const panel = def.state.define<PanelState>('panel', {
+      initialize: () => ({ kind: 'idle' }),
+    });
+    const label = def.derive('label', (read) => panelLabel(read.get(panel)));
+
+    const load = def.task('load', { policy: 'latest' }, async (task) => {
+      const requested = task.get(selection).value;
+      task.set(panel, { kind: 'loading', requested });
+
+      // Even a ready result commits loading, then resumes in a fresh segment.
+      // No writable segment view is captured across this await.
+      const result = await task.await(loadTab, requested);
+      const current = task.get(selection).value;
+      if (current !== requested) {
+        // Ordinary Context changes did not cancel us. This is explicit policy.
+        task.set(panel, { kind: 'stale', requested, current });
+        return;
+      }
+      if (result.kind === 'err') {
+        // A handled business failure commits a typed failed value.
+        task.set(panel, { kind: 'failed', selected: current, failure: result.error });
+        return;
+      }
+      task.set(panel, { kind: 'ready', selected: current, text: result.value });
+    });
+
+    const reload = def.action('reload', (run) => {
+      run.start(load);
+    });
+    const cancel = def.action('cancel', (run) => {
+      run.cancel(load);
+      run.set(panel, { kind: 'cancelled' });
+    });
+    def.lifecycle.onCreated(reload);
+    def.expose.state('panel', panel);
+    def.expose.state('label', label);
+    def.expose.action('reload', reload);
+    def.expose.action('cancel', cancel);
+
+    // Context invalidation only recomputes pure readers. Reload is an action.
+    // Owner disposal retires task eligibility; there is no late cleanup write.
+    return (renderer) =>
+      renderer.el('section', { style: tw('authoring-tab-panel') }, [renderer.get(label)]);
+  },
+});
+
+export default definePrototype({
+  name: 'authoring-tabs-owner',
+  setup(def) {
+    const props = def.props.define({
+      defaultValue: { type: 'string', default: 'alpha' },
+    });
+    const value = def.state.define<string>('value', {
+      initialize: (read) => read.get(props.defaultValue),
+    });
+    const select = def.action('select', (run, next: string) => {
+      run.set(value, next);
+    });
+    def.context.provide(TAB_SELECTION, (read) => ({ value: read.get(value) }));
+    def.expose.state('value', value);
+    def.expose.action('select', select);
+
+    return (renderer) =>
+      renderer.el('div', { style: tw('authoring-tabs') }, [
+        renderer.get(value),
+        renderer.child(AsyncTabPanel, { key: 'panel', props: {} }),
+      ]);
+  },
+});

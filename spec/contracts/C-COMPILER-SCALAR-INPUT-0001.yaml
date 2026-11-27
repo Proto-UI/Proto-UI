@@ -1,10 +1,15 @@
 id: C-COMPILER-SCALAR-INPUT-0001
 type: contract
 title: Bounded scalar conversion and readonly JSON output in Compiler source
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  Human-directed consumer work exposes these ordinary source operations. The slice has checked source and IR admission plus executable generated-native regressions, but independent review and source-bound native execution are required before activation.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 summary: Preserve checked scalar conversion, UTF-16 length, numeric rounding and finite readonly data snapshots without admitting arbitrary JavaScript coercion.
@@ -40,18 +45,21 @@ criteria:
 
 
 references:
-  contracts: [C-COMPILER-SCALAR-0001, C-COMPILER-OBSERVABLES-0001]
+  contracts: [{ id: C-COMPILER-SCALAR-0001, until: 0.4.0 }, { id: C-COMPILER-OBSERVABLES-0001, until: 0.4.0 }]
 sources:
-  - path: packages/compiler/src/value-types.ts
-  - path: packages/compiler/src/callable-effects.ts
-  - path: packages/compiler/src/expression-types.ts
-  - path: packages/compiler/src/gpui-native-values.ts
-  - path: packages/compiler/test/gpui-authored-inputs.test.ts
-  - path: packages/compiler/test/json-boundary-provenance.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/value-types.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/callable-effects.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/expression-types.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/gpui-native-values.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/test/gpui-authored-inputs.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/test/json-boundary-provenance.test.ts
 verifies:
-  tests: [T-COMPILER-GPUI-AUTHORED-INPUT-0001]
+  tests: [{ id: T-COMPILER-GPUI-AUTHORED-INPUT-0001, until: 0.4.0 }]
 revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Define scalar and readonly data operations reached by native authored text and continuous controls.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, scalar, data, native]

@@ -1,10 +1,15 @@
 id: C-COMPILER-ARTIFACT-LINKING-0001
 type: contract
 title: Explicit nominal identity across independently compiled DOM libraries
-status: draft
+status: removed
 since: 0.3.0-alpha.1
+removedSince: 0.4.0
+replacedBy: C-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  Human-directed compiler architecture repair. The versioned DOM library/link format is bounded to its declared profiles; independent review and complete native-browser evidence remain required before stable activation.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 summary: Explicit declaration ownership and compatible shared transport preserve identity across separately compiled libraries without merging private names.
@@ -29,9 +34,12 @@ criteria:
   - id: C-COMPILER-ARTIFACT-LINKING-0001-PROVENANCE
     text: Library input hashes, linked artifact hashes and canonical owners remain separately recorded; malformed paths, modified files and unsupported target profiles reject, and create-only publication preserves existing files.
 sources:
-  - path: internal/compiler/artifact-linking.md
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/internal/compiler/artifact-linking.md
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Define explicit DOM separate-compilation identity and support ABI linking without changing private nominal semantics.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, linking, context, identity, abi]

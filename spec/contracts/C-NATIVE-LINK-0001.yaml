@@ -32,8 +32,8 @@ sources:
   - path: packages/hooks/src/as-native-link.ts
   - path: packages/modules/native-link/src/create.ts
   - path: packages/modules/native-link/src/web.ts
-  - path: packages/compiler/src/native-support/dom-modules.template.ts
-  - path: packages/compiler/test/native-link-source.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/src/native-support/dom-modules.template.ts
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/test/native-link-source.test.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
@@ -41,6 +41,9 @@ revisions:
   - version: 0.3.0-alpha.2
     change: revised
     summary: Added Compiler React DOM source lowering with real anchor roots, retained slots, complete destination replacement and deferred native navigation observations; other source profiles and native-browser admission remain explicitly incomplete.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags:
   - navigation
   - native-link

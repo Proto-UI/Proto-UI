@@ -1,14 +1,12 @@
 import { builtinModules } from 'node:module';
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
-import { BROWSER_COMPILER_IMPORT_ALLOWLIST } from './browser-compiler-imports.mjs';
 import { LIBRARY_CARD_IMPORT_ALLOWLIST } from './library-card-imports.mjs';
 
 export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
-  ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({

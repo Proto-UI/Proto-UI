@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "description": "Frozen legacy internal-docs debt baseline. New files must pass with zero errors; existing files may only reduce debt. Refresh via `pnpm check:internal-docs:baseline` after cleaning debt.",
-  "totalFilesWithDebt": 1227,
-  "totalViolations": 8923,
+  "totalFilesWithDebt": 1216,
+  "totalViolations": 8810,
   "files": {
     "internal/agent-operations/autonomous-tasks.md": {
       "prose/max-paragraph-length": 4,
@@ -123,60 +123,8 @@
       "prose/no-inline-code-stuffing": 1,
       "prose/structural-rhythm": 1
     },
-    "internal/compiler/application-consumers.md": {
-      "prose/max-paragraph-length": 1,
-      "prose/no-stacked-negatives": 1,
-      "prose/single-slot-disclaimer": 1
-    },
-    "internal/compiler/artifact-linking.md": {
-      "prose/max-paragraph-length": 12,
-      "prose/no-inline-code-stuffing": 1,
-      "prose/no-stacked-negatives": 1,
-      "prose/structural-rhythm": 3
-    },
     "internal/compiler/atomic-lowering-completion.md": {
-      "prose/max-paragraph-length": 12,
       "prose/single-slot-disclaimer": 1
-    },
-    "internal/compiler/control-label-native-lowering.md": {
-      "prose/max-paragraph-length": 12,
-      "prose/structural-rhythm": 2
-    },
-    "internal/compiler/gpui-accessibility-value.md": {
-      "prose/max-paragraph-length": 3,
-      "prose/single-slot-disclaimer": 1,
-      "prose/structural-rhythm": 2
-    },
-    "internal/compiler/gpui-authored-inputs.md": {
-      "prose/max-paragraph-length": 16,
-      "prose/single-slot-disclaimer": 1,
-      "prose/structural-rhythm": 3
-    },
-    "internal/compiler/gpui-control-label.md": {
-      "prose/max-paragraph-length": 11,
-      "prose/single-slot-disclaimer": 1,
-      "prose/structural-rhythm": 3
-    },
-    "internal/compiler/gpui-dependency-migration.md": {
-      "internal/no-inline-forensics": 1,
-      "prose/max-paragraph-length": 6,
-      "prose/no-inline-code-stuffing": 2,
-      "prose/no-stacked-negatives": 2,
-      "prose/single-slot-disclaimer": 1
-    },
-    "internal/compiler/gpui-scroll-host-binding.md": {
-      "prose/max-paragraph-length": 5,
-      "prose/structural-rhythm": 1
-    },
-    "internal/compiler/portable-pointer-facts.md": {
-      "prose/max-paragraph-length": 5
-    },
-    "internal/compiler/rust-data-artifacts.md": {
-      "prose/max-paragraph-length": 1,
-      "prose/structural-rhythm": 1
-    },
-    "internal/compiler/website-demo-migrations.json": {
-      "internal/size-budget": 1
     },
     "internal/contracts/_debt/feedback.flush.runtime.md": {
       "internal/single-h1": 1

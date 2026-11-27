@@ -1,17 +1,21 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "0ee5c606be88dc39f3782067d53c9d40eac45319",
-  "scope": "Direct source inventory for the sampled website routes. Four reviewed lifecycle members changed: batched initial theme watching, shared Previewer bootstrap observation, removal-only cleanup notifications, and document preparation leases. The 33 source identities, sampled highlighted/raw-code/Copy owners and unverified admission remain unchanged. All 33 fixed source hashes match this committed source revision and its working files. The preceding reference is byte-preserved in website-markup-provenance-5f08449.json. Browser execution, served content and transitive dependencies require separate evidence.",
+  "revision": "8434063a326125db48d7ddcd03dbdc0aa5682c72",
+  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1922 integration source commit 8434063a326125db48d7ddcd03dbdc0aa5682c72. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-a56f93c.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "4fd03809c049a6a70e774dd6a5402edad258b08e16fdd43648cc6e4159f73460"
+      "sha256": "65369290f4ba40a5f88a9b1bf38005aed3c7a735b471fe91fcba39dd1a9d0889"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "a4ae6efe883bdbbd038167179669e811df6582a13bf77853b7314ea2bbcabde3"
+      "sha256": "f96be6d05a5c95aee447618cecae03dee7661fe98b8fe22ebc80ecf4cdf6f1a4"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-format.ts",
+      "sha256": "f9e89b4a1f6ea31e267de5a2329b262c13ad174fdb8ce5470720cd7337aac81c"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
@@ -23,19 +27,19 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "f7ff3708827d6c832882a3db9579a8bd5d1709018b25e6b8bf1111f4950dcebc"
+      "sha256": "d34e9445536da8c56aaca4be078449ecdc05108f93f11e5bd5828f94d5d06629"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
-      "sha256": "b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b"
+      "sha256": "3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "f8a053d9f8800d6ed158fd4ac8cbec1fae433775811ce93569eb019544ce8750"
+      "sha256": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
-      "sha256": "0d9271cdf2edb564cfbe0441d717a55278026ca18ef96301f77b006d27640c0c"
+      "sha256": "8ee4c63e5b1581afcade0b02ada62710ad3da7538a986471fc176ff0f3582cc7"
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
@@ -51,7 +55,7 @@
     },
     {
       "path": "apps/www/src/components/site-copy-command.ts",
-      "sha256": "a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b"
+      "sha256": "710162afb336fa41ab0975a41caab455b45200be09b351760bc4b7918ab9bff9"
     },
     {
       "path": "apps/www/src/components/site-copy-controller.ts",
@@ -79,7 +83,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "36a90352d9b22089abfde1318c29cd9e920dda2e79f088f259eec9c2de10be70"
+      "sha256": "07dae9498553279b22e69683d42ab8e3e47a1be4161792cebb8ef86dfb9544c6"
     },
     {
       "path": "apps/www/package.json",
@@ -87,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+      "sha256": "833a3ddcceceb8321ff8afb78003a0f6ef5a61da5e759e7356cae158e92820b6"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
@@ -103,7 +107,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
-      "sha256": "58dc6a7cda823502e29d4b000d0cc2934b7acf7b8a2ba177be598aa93b471c4e"
+      "sha256": "5870ef290174f759bb5414b0df56e3615335f0d258522cee4cdb150f93f5ac69"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
@@ -120,14 +124,6 @@
     {
       "path": "apps/www/src/components/install-command-card-client.ts",
       "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
-    },
-    {
-      "path": "apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro",
-      "sha256": "f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a"
-    },
-    {
-      "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
-      "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",

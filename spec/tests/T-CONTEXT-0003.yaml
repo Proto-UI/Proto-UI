@@ -112,19 +112,19 @@ implementations:
       - Driven by context-ancestor.test.ts in the four Web Adapters; real Runtime owner composition, derived DOM text, cleanup and fresh generations in Happy DOM. No native-browser visual or non-Web support claim.
   - id: context-ancestor-compiler-refusal
     kind: module-test
-    status: passing
-    path: packages/modules/context/test/ancestor-compiler-boundary.test.ts
+    status: missing
     required: true
     consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
     notes:
-      - Historical implementation ID retained. Web source profiles now admit strict-ancestor operations; GPUI, Qt and Flutter continue to reject missing native implementations explicitly.
+      - "Retired with the old compiler at the 0.4 foundation: packages/modules/context/test/ancestor-compiler-boundary.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Independent replacement evidence is missing."
+      - Historical implementation ID retained. Before retirement, Web source profiles admitted strict-ancestor operations while GPUI, Qt and Flutter rejected their missing native implementations; this is not a new-compiler support claim.
   - id: context-ancestor-compiler-web-consumer
     kind: fixture
-    status: passing
-    path: packages/compiler/test/react-context-source.test.ts
+    status: missing
     required: true
     consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/react-context-source.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Actual generated React owners distinguish self and strict-ancestor providers, reject stale deliveries after rebinding, retain write authority and clean up subscriptions. Happy DOM evidence does not establish native-browser geometry or non-Web conformance.
   - id: context-module-catalog
     kind: module-test
@@ -266,6 +266,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: Mapped generic owner-authority marker reentry and real retained-provider Context/Anatomy Adapter evidence; no native-browser claim.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 
 tags:
   - context

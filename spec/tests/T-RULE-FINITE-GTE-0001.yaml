@@ -32,10 +32,11 @@ implementations:
     consumesCases: [T-RULE-FINITE-GTE-0001-CASE-RUNTIME]
   - id: rule-finite-gte-compiler-boundary
     kind: module-test
-    status: passing
-    path: packages/compiler/test/rule-gte-boundary.test.ts
+    status: missing
     required: true
     consumesCases: [T-RULE-FINITE-GTE-0001-CASE-COMPILER]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/rule-gte-boundary.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
 revisions:
   - version: 0.3.0-alpha.2
     change: revised
@@ -43,4 +44,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Red/green runtime gte tests plus explicit current compiler rejection boundary.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.
 tags: [rule, comparison, numeric]
