@@ -3,43 +3,47 @@ import path from 'node:path';
 
 export type StyleOutput = { path: string; content: string };
 
-async function existingStat(file: string) {
+async function existingStat(file: string, io: Pick<typeof fs, 'lstat'> = fs) {
   try {
-    return await fs.lstat(file);
+    return await io.lstat(file, { bigint: true });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
     throw error;
   }
 }
 
-async function canonicalPath(file: string): Promise<string> {
+async function canonicalPath(file: string, io: Pick<typeof fs, 'realpath'> = fs): Promise<string> {
   try {
-    return await fs.realpath(file);
+    return await io.realpath(file);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-    return path.join(await canonicalPath(path.dirname(file)), path.basename(file));
+    return path.join(await canonicalPath(path.dirname(file), io), path.basename(file));
   }
 }
 
 /** Read-only preflight. Fold case conservatively, including on case-sensitive volumes. */
-export async function validateStyleOutputPaths(files: readonly string[]) {
-  const targets: { path: string; key: string; inode?: string; size?: number }[] = [];
+export async function validateStyleOutputPaths(
+  files: readonly string[],
+  io: Pick<typeof fs, 'lstat' | 'realpath'> = fs
+) {
+  const targets: { path: string; key: string; inode?: string; size?: bigint }[] = [];
   for (const file of files) {
     if (typeof file !== 'string' || !file.trim()) throw new Error('Missing style output path');
     const absolute = path.resolve(file);
-    const stat = await existingStat(absolute);
+    const stat = await existingStat(absolute, io);
     if (stat && !stat.isFile()) {
       throw new Error(
         `Style output must be a regular file, not a symlink or directory: ${absolute}`
       );
     }
-    const canonical = await canonicalPath(absolute);
+    const canonical = await canonicalPath(absolute, io);
     const key = canonical.normalize('NFC').toLowerCase();
     // Some Windows volumes report unreliable inode values (zero or shared
     // across distinct files). Treat zero as unknown, and require matching
     // size before calling two paths hard-link aliases: linked entries always
-    // share one physical size.
-    const inode = stat?.ino ? `${stat.dev}:${stat.ino}` : undefined;
+    // share one physical size. Use BigInt lstat so 64-bit FUSE/overlay inodes
+    // above Number.MAX_SAFE_INTEGER never collide after float rounding.
+    const inode = stat && stat.ino !== 0n ? `${stat.dev}:${stat.ino}` : undefined;
     const size = stat?.size;
     for (const previous of targets) {
       if (
@@ -58,7 +62,10 @@ export async function validateStyleOutputPaths(files: readonly string[]) {
 /** Stage a complete generation before replacement; recover caught failures, not crashes.
  * The IO seam is internal and exists to exercise failures at each write boundary. */
 export async function writeStyleOutputSet(outputs: readonly StyleOutput[], io = fs) {
-  await validateStyleOutputPaths(outputs.map((output) => output.path));
+  await validateStyleOutputPaths(
+    outputs.map((output) => output.path),
+    io
+  );
   const staged: {
     target: string;
     dir: string;
@@ -80,13 +87,13 @@ export async function writeStyleOutputSet(outputs: readonly StyleOutput[], io = 
         replaced: false,
       };
       staged.push(item);
-      const stat = await existingStat(target);
+      const stat = await existingStat(target, io);
       if (stat) {
         item.backup = path.join(dir, 'previous');
         await io.copyFile(target, item.backup);
       }
       await io.writeFile(item.next, output.content, 'utf8');
-      if (stat) await io.chmod(item.next, stat.mode & 0o777);
+      if (stat) await io.chmod(item.next, Number(stat.mode & 0o777n));
     }
     for (const item of staged) {
       await io.rename(item.next, item.target);
