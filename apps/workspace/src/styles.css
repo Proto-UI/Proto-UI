@@ -53,7 +53,7 @@ select {
 
 .sidebar-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
@@ -183,6 +183,18 @@ h1 {
   overflow: auto;
   padding-right: 4px;
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(22 32 28 / 20%) transparent;
+}
+.entity-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.entity-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.entity-nav::-webkit-scrollbar-thumb {
+  background: rgb(22 32 28 / 20%);
+  border-radius: 999px;
 }
 
 .entity-nav section {

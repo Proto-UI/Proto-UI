@@ -143,7 +143,12 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
                       : root.dataset.siteCodeSurface === 'toolbar'
                         ? 'none'
                         : 'default',
-                  border: root.dataset.siteCodeSurface === 'toolbar' ? 'bottom' : 'all',
+                  border:
+                    root.dataset.siteCodeSurface === 'toolbar'
+                      ? 'bottom'
+                      : purpose === 'code' && family === 'shadcn'
+                        ? 'none'
+                        : 'all',
                   elevation: 'none',
                 },
               },

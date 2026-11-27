@@ -82,6 +82,8 @@
 
   site-search :is([data-open-modal], [data-search-startup-button]) .site-search-shortcut {
     margin-inline-start: auto;
+    align-items: center;
+    line-height: 1;
     gap: 0.25em;
   }
 }

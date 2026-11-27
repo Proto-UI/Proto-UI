@@ -181,8 +181,8 @@ export function appendHomepageGallerySampleBars(slot: HTMLElement): void {
   for (let index = 0; index < HOMEPAGE_BAR_FACTORS.length; index++) {
     const bar = slot.ownerDocument.createElementNS(svg.namespaceURI, 'rect');
     const height = homepageBarHeight(40, index);
-    bar.setAttribute('x', String(index * 52 + 11));
-    bar.setAttribute('width', '38');
+    bar.setAttribute('x', String(index * 52 + 9));
+    bar.setAttribute('width', '42');
     bar.setAttribute('rx', '10');
     bar.setAttribute('y', String(166 - height));
     bar.setAttribute('height', String(height));

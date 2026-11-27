@@ -322,7 +322,7 @@ export function createHomepageGalleryParts(
     zh ? '按钮与选择' : 'Buttons & selection',
     '',
     [
-      box('home-gallery__row', [
+      box('home-gallery__row home-gallery__row--spread', [
         button(zh ? '主要' : 'Button', 'gallery-primary', 'primary', false, {
           children: [zh ? '主要' : 'Button', icon('arrow-right', 14)],
         }),
