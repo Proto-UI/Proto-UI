@@ -12,7 +12,7 @@ import {
 
 export interface SourceData {
   readonly entries: readonly DataType[];
-  /** Explicit checked types retain their declarations. Expressions can widen in a primitive text context. */
+  /** Explicit checked types retain their declarations. Expressions can widen in a checked primitive context. */
   type(node: ts.Node, type?: ts.Type): ValueType;
   textLiteral(value: string, node: ts.Node): DataRef;
   presence(value: ValueType, node: ts.Node): DataRef;
@@ -149,8 +149,8 @@ export function createSourceData(
 
   function scalar(type: ts.Type): ScalarType | undefined {
     if (type.flags & ts.TypeFlags.EnumLike) return undefined;
-    if (type.flags & ts.TypeFlags.BooleanLike) return 'bool';
-    if (type.flags & ts.TypeFlags.NumberLike) return 'number';
+    if (type.flags & ts.TypeFlags.Boolean) return 'bool';
+    if (type.flags & ts.TypeFlags.Number) return 'number';
     if (type.flags & ts.TypeFlags.String) return 'text';
     if (type.flags & ts.TypeFlags.Void) return 'unit';
     if (tokenSymbol && (type.getSymbol() === tokenSymbol || type.aliasSymbol === tokenSymbol))
@@ -392,6 +392,15 @@ export function createSourceData(
     }
     const simple = scalar(type);
     if (simple !== undefined) return simple;
+    const literalFlags = ts.TypeFlags.NumberLiteral | ts.TypeFlags.BooleanLiteral;
+    if ((type.flags & literalFlags) ||
+        (type.isUnion() && type.types.some(part => part.flags & literalFlags))) {
+      return missing(
+        node,
+        'producer/value-type',
+        `The checked literal type ${checker.typeToString(type)} needs an exact value-domain representation.`
+      );
+    }
     const prior = expanding.get(node);
     // The declared Presence proves its immediate record payload. Further record
     // recursion passes through independently checked source fields.
@@ -439,6 +448,24 @@ export function createSourceData(
       const context = checker.getContextualType(node);
       if (context ? checker.isTypeAssignableTo(checker.getStringType(), context) : ts.isStringLiteralLike(node)) {
         return 'text';
+      }
+    }
+    if (!(type.flags & ts.TypeFlags.EnumLike) && ts.isExpression(node)) {
+      const alternatives = type.isUnion() ? type.types : [type];
+      const primitive = alternatives.every(part =>
+        (part.flags & ts.TypeFlags.NumberLiteral) && !(part.flags & ts.TypeFlags.EnumLike))
+        ? checker.getNumberType()
+        : alternatives.every(part => part.flags & ts.TypeFlags.BooleanLiteral)
+          ? checker.getBooleanType()
+          : undefined;
+      if (primitive) {
+        const context = checker.getContextualType(node);
+        // Uncontextualized expressions retain their primitive value representation.
+        // A contextual restriction, explicit type or recursive field stays exact;
+        // expression widening never populates the declared-type cache.
+        if (!context || checker.isTypeAssignableTo(primitive, context)) {
+          return primitive.flags & ts.TypeFlags.Number ? 'number' : 'bool';
+        }
       }
     }
     return lower(node, type);

@@ -23,6 +23,7 @@ const categories = {
   'component-cycle': 'compiler-missing',
   'numeric-child-key': 'compiler-missing',
   'host-name': 'backend-missing',
+  'child-parent-topology': 'backend-missing',
 } as const;
 
 type DiagnosticCode = keyof typeof categories;

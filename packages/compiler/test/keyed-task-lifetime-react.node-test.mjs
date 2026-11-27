@@ -9,6 +9,7 @@ import { build } from 'esbuild';
 import { chromium } from 'playwright-core';
 import ts from 'typescript';
 import { emitReact } from '@proto.ui/compiler/targets/react';
+import { validateComponent } from '../src/targets/validate.ts';
 import { authoredKeyedTaskSource, authoredPairSource, authoredTaskPolicySource } from './fixtures/authoring-source.mjs';
 import { resumedFailure } from './fixtures/backend-programs.ts';
 import { directPair } from './fixtures/direct-pair.mjs';
@@ -886,4 +887,148 @@ test('a failed action starts no read and the same reader can submit its first ta
   if (evidence) await writeFile(path.join(evidence, 'discarded-start-react-native.json'), JSON.stringify({
     initial, outcome, afterFailure, unissued, checking, completed, starts, network, serverRequests, sameLabel, errors,
   }));
+});
+
+let topologyComponent;
+function keyedTopologyFixture() {
+  if (!topologyComponent) {
+    const result = authoredKeyedTaskSource();
+    assert.equal(result.status, 'produced', JSON.stringify(result.diagnostics));
+    topologyComponent = result.component;
+  }
+  return structuredClone(topologyComponent);
+}
+
+function hostWrapper(children, source) {
+  return { kind: 'element', tag: 'section', source, children };
+}
+
+function expectReactTopologyMissing(ir, body, first, second) {
+  // This is valid shared component IR. The limitation belongs to React, not
+  // source admission or GPUI's logical child table.
+  assert.doesNotThrow(() => validateComponent(ir));
+  const checkDiagnostic = error => {
+    assert.equal(error.name, 'ComponentIRDiagnostic');
+    assert.equal(error.code, 'child-parent-topology');
+    assert.equal(error.category, 'backend-missing');
+    assert.deepEqual(error.source, second.source);
+    assert.deepEqual(error.bindings, [body.id, second.component, first.key, second.key]);
+    assert.match(error.message, /React backend.*logical keyed child identity/);
+    assert.match(error.message, /even when the current keys are distinct/);
+    return true;
+  };
+  // A supplied implementation must not allow unsafe lifetime lowering.
+  assert.throws(() => emitReact(ir, {
+    bindings: { 'fixture.load-keyed-item': { module: './keyed-loader', export: 'loadKeyedItem' } },
+  }), checkDiagnostic);
+  // Topology is diagnosed before binding externs or generating any source.
+  assert.throws(() => emitReact(ir), checkDiagnostic);
+}
+
+function emitTopology(ir) {
+  assert.doesNotThrow(() => validateComponent(ir));
+  const source = emitReact(ir, {
+    bindings: { 'fixture.load-keyed-item': { module: './keyed-loader', export: 'loadKeyedItem' } },
+  });
+  assert.equal(ts.createSourceFile('topology.ts', source, ts.ScriptTarget.Latest, true).parseDiagnostics.length, 0);
+}
+
+for (const [name, arrange] of [
+  ['separate sibling wrappers', (first, second, source) => [
+    hostWrapper([first], source), hostWrapper([second], source),
+  ]],
+  ['root and nested host parents', (first, second, source) => [
+    first, hostWrapper([hostWrapper([second], source)], source),
+  ]],
+  ['different parents at different nesting depths', (first, second, source) => [
+    hostWrapper([hostWrapper([first], source)], source),
+    hostWrapper([hostWrapper([hostWrapper([second], source)], source)], source),
+  ]],
+]) {
+  test(`React reports missing keyed child lifetime support across ${name}`, () => {
+    const ir = keyedTopologyFixture();
+    const [first, second] = ir.view.children;
+    // Keep both original prop-driven keys: changing the props can exchange
+    // identities, or retire one key and later place it at the other site.
+    ir.view.children = arrange(first, second, ir.view.source);
+    expectReactTopologyMissing(ir, ir, first, second);
+  });
+}
+
+test('React conservatively rejects distinct constant keys across host parents', () => {
+  const ir = keyedTopologyFixture();
+  const [first, second] = ir.view.children;
+  for (const [child, value] of [[first, 'A'], [second, 'B']]) {
+    const key = ir.behaviors.find(fn => fn.binding.id === child.key);
+    key.dependencies = [];
+    key.entry = 'constant-key';
+    key.blocks = [{
+      id: key.entry, params: [], instructions: [],
+      end: { kind: 'return', value: { kind: 'text', value }, source: key.binding.source },
+    }];
+  }
+  ir.view.children = [hostWrapper([first], first.source), hostWrapper([second], second.source)];
+  expectReactTopologyMissing(ir, ir, first, second);
+});
+
+test('React checks keyed child topology inside linked component bodies', () => {
+  const ir = keyedTopologyFixture();
+  const [first, second] = ir.view.children;
+  const nested = structuredClone(ir);
+  for (const key of ['version', 'types', 'keys', 'externs', 'components']) delete nested[key];
+  nested.id += ':nested-owner';
+  nested.name = 'NestedKeyedTaskOwner';
+  nested.view.children = [
+    hostWrapper([first], first.source),
+    hostWrapper([hostWrapper([second], second.source)], second.source),
+  ];
+  ir.components.push(nested);
+  ir.view.children = [{ ...first, component: nested.id, props: [] }];
+  expectReactTopologyMissing(ir, nested, first, second);
+});
+
+test('React treats repeated direct-IR wrapper objects as separate host parent occurrences', () => {
+  const ir = keyedTopologyFixture();
+  const [first] = ir.view.children;
+  const wrapper = hostWrapper([first], first.source);
+  ir.view.children = [wrapper, wrapper];
+  expectReactTopologyMissing(ir, ir, first, first);
+});
+
+test('React emits same-prototype keyed siblings inside a common nested host parent', () => {
+  const ir = keyedTopologyFixture();
+  ir.view.children = [hostWrapper([hostWrapper(ir.view.children, ir.view.source)], ir.view.source)];
+  emitTopology(ir);
+});
+
+test('React emits a single keyed child site at arbitrary host depth', () => {
+  const ir = keyedTopologyFixture();
+  const [first] = ir.view.children;
+  ir.view.children = [hostWrapper([hostWrapper([hostWrapper([first], first.source)], first.source)], first.source)];
+  emitTopology(ir);
+});
+
+test('React permits different child prototypes under different host parents', () => {
+  const ir = keyedTopologyFixture();
+  const [first, second] = ir.view.children;
+  const other = structuredClone(ir.components.find(body => body.id === second.component));
+  other.id += ':other';
+  other.name += 'Other';
+  ir.components.push(other);
+  second.component = other.id;
+  ir.view.children = [hostWrapper([first], first.source), hostWrapper([second], second.source)];
+  emitTopology(ir);
+});
+
+test('React scopes child parent admission to each logical component body', () => {
+  const ir = keyedTopologyFixture();
+  const [first, second] = ir.view.children;
+  const nested = structuredClone(ir);
+  for (const key of ['version', 'types', 'keys', 'externs', 'components']) delete nested[key];
+  nested.id += ':nested-owner';
+  nested.name = 'NestedKeyedTaskOwner';
+  nested.view.children = [hostWrapper([second], second.source)];
+  ir.components.push(nested);
+  ir.view.children = [first, hostWrapper([{ ...second, component: nested.id, props: [] }], second.source)];
+  emitTopology(ir);
 });

@@ -152,3 +152,125 @@ test('an eager imported constant must be initialized when the module reads it', 
   await p.write('b.ts', `import './a.ts'; export const b = 1;`);
   assert.equal(await p.render(p.produce(), 'acyclic-read.ts'), '<span>visible</span>');
 });
+
+
+const restrictedDomains = [
+  ['a numeric singleton', '1', '1'],
+  ['a numeric union alias', '1 | 2', '1'],
+  ['a signed numeric singleton', '-1', '-1'],
+  ['the true singleton', 'true', 'true'],
+  ['the false singleton', 'false', 'false'],
+  ['a readonly numeric record field', '{ readonly mode: 1 | 2 }', '{ mode: 1 }'],
+  ['a readonly boolean record field', '{ readonly active: true }', '{ active: true }'],
+  ['a Presence payload', 'Presence<1 | 2>', "{ kind: 'present', value: 1 }"],
+  ['a tagged payload', "{ kind: 'active'; mode: 1 | 2 } | { kind: 'idle' }", "{ kind: 'active', mode: 1 }"],
+];
+
+for (const [description, domain, initial] of restrictedDomains) {
+  for (const surface of ['state', 'action']) {
+    test(`declared ${surface} preserves ${description} as a missing exact-domain capability`, async (t) => {
+      const p = await project(t);
+      const declaration = surface === 'state'
+        ? `const value = def.state.define<Domain>('value', { initialize: () => (${initial}) });
+           def.expose.state('value', value);`
+        : `const change = def.action<[mode: Domain], void>('change', (_run, mode) => {});
+           def.expose.action('change', change);`;
+      await p.write('entry.ts', `
+        import { definePrototype, type Presence } from '@proto.ui/core/authoring';
+        type Domain = ${domain};
+        export default definePrototype({ name: 'restricted-domain', setup(def) {
+          ${declaration}
+          return view => view.el('span', {}, ['visible']);
+        } });`);
+      const result = p.produce();
+      assert.equal(result.status, 'unavailable', 'A valid restricted source domain must not become an unrestricted public scalar.');
+      assert.equal(result.component, undefined);
+      const diagnostic = result.diagnostics.find(item => item.capabilityKey === 'producer/value-type');
+      assert.ok(diagnostic, JSON.stringify(result.diagnostics));
+      assert.equal(diagnostic.category, 'compiler-missing');
+      assert.equal(diagnostic.severity, 'info');
+      assert.ok(diagnostic.criterion.length);
+      assert.ok(diagnostic.trackingRef);
+      assert.ok(!result.diagnostics.some(item => item.capabilityKey?.startsWith('frontend/')));
+    });
+  }
+}
+
+test('an exposed restricted state and its action are never emitted as an unrestricted host number API', async (t) => {
+  const p = await project(t);
+  await p.write('entry.ts', `
+    import { definePrototype } from '@proto.ui/core/authoring';
+    export default definePrototype({ name: 'restricted-action', setup(def) {
+      const mode = def.state.define<1 | 2>('mode', { initialize: () => 1 });
+      const change = def.action<[mode: 1 | 2], void>('change', (run, value) => run.set(mode, value));
+      def.expose.state('mode', mode);
+      def.expose.action('change', change);
+      return view => view.el('span', {}, ['visible']);
+    } });`);
+  const result = p.produce();
+  assert.equal(result.status, 'unavailable');
+  assert.equal(result.component, undefined);
+  assert.ok(result.diagnostics.some(item => item.capabilityKey === 'producer/value-type' &&
+    item.category === 'compiler-missing' && item.severity === 'info'));
+});
+
+for (const [description, domain, initial, lowered] of [
+  ['positive number', 'number', '1', 'number'],
+  ['negative number', 'number', '-1', 'number'],
+  ['true boolean', 'boolean', 'true', 'bool'],
+  ['false boolean', 'boolean', 'false', 'bool'],
+  ['the complete boolean union', 'true | false', 'false', 'bool'],
+]) {
+  test(`ordinary ${description} keeps its complete public scalar domain`, async (t) => {
+    const p = await project(t);
+    await p.write('entry.ts', `
+      import { definePrototype } from '@proto.ui/core/authoring';
+      type Domain = ${domain};
+      export default definePrototype({ name: 'complete-domain', setup(def) {
+        const value = def.state.define<Domain>('value', { initialize: () => (${initial}) });
+        const change = def.action<[next: Domain], void>('change', (run, next) => run.set(value, next));
+        def.expose.state('value', value);
+        def.expose.action('change', change);
+        return view => view.el('span', {}, ['visible']);
+      } });`);
+    const result = p.produce();
+    assert.equal(result.status, 'produced', JSON.stringify(result.diagnostics));
+    assert.equal(result.component.fields.find(field => field.kind === 'state').binding.type, lowered);
+    const action = result.component.actions.find(item => item.name === 'change');
+    const behavior = result.component.behaviors.find(item => item.binding.id === action.fn);
+    assert.deepEqual(behavior.params.map(item => item.type), [lowered]);
+    assert.equal(await p.render(result, 'complete-domain.ts'), '<span>visible</span>');
+  });
+}
+
+test('ordinary signed and boolean setup constants retain primitive contextual uses', async (t) => {
+  const p = await project(t);
+  await p.write('entry.ts', `
+    import { definePrototype } from '@proto.ui/core/authoring';
+    export default definePrototype({ name: 'ordinary-constants', setup() {
+      const amount = (-1);
+      const enabled = true;
+      const disabled = false;
+      const negated = !false;
+      const plainAlias = enabled;
+      const copy: number = amount;
+      const alias: boolean = enabled;
+      return view => view.el('span', {}, [amount + copy === -2 ? 'matched' : 'wrong', enabled ? 'on' : 'off', disabled ? 'on' : 'off', alias ? 'on' : 'off', negated ? 'on' : 'off', plainAlias ? 'on' : 'off']);
+    } });`);
+  assert.equal(await p.render(p.produce(), 'ordinary-constants.ts'), '<span>matchedonoffononon</span>');
+});
+
+
+for (const annotation of ['', ': number']) {
+  test(`ordinary conditional numeric expressions preserve ${annotation ? 'a number context' : 'inferred values'}`, async (t) => {
+    const p = await project(t);
+    await p.write('entry.ts', `
+      import { definePrototype } from '@proto.ui/core/authoring';
+      export default definePrototype({ name: 'ordinary-conditional', setup() {
+        const flag: boolean = true;
+        const value${annotation} = flag ? 1 : 2;
+        return view => view.el('span', {}, [value === 1 ? 'first' : 'second']);
+      } });`);
+    assert.equal(await p.render(p.produce(), 'ordinary-conditional.ts'), '<span>first</span>');
+  });
+}

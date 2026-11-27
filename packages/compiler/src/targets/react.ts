@@ -3,6 +3,7 @@ import type { ComponentIR } from './component-ir.ts';
 import type { ReactExternBindings } from './extern-bindings.ts';
 import { validateComponent } from './validate.ts';
 import { emitBehavior } from './react/behavior.ts';
+import { checkReactChildTopology } from './react/child-topology.ts';
 import { component, dispatchers, taskViews } from './react/component.ts';
 import { ReactProgram } from './react/program.ts';
 import { fieldStorage, inputReader, publicSurface } from './react/surface.ts';
@@ -11,6 +12,7 @@ import { ReactUnit } from './react/unit.ts';
 /** Print an ordinary TypeScript React module from checked component and behavior IR. */
 export function emitReact(ir: ComponentIR, options: { readonly bindings?: ReactExternBindings } = {}): string {
   const reached = validateComponent(ir);
+  checkReactChildTopology(ir);
   const unit = new ReactUnit(ir, reached, options.bindings);
   const programs = [ir, ...ir.components].map(body => new ReactProgram(unit, body));
   const channels = unit.channels();
