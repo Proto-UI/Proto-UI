@@ -11,6 +11,10 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-BRUTALIST-NAVIGATION-MENU-HOVER-HANDOFF
+    text:
+      zh-CN: Trigger 保留关闭态悬停高亮；Content 提供家族面板边界上下文，其内 Item/Link 仅按 Base Focus 高亮以杜绝悬停与键盘焦点双高亮，离开家族 Content 边界时恢复悬停高亮。
+      en: Trigger retains closed-menu hover highlight; Content provides the family panel boundary context so descendant Item/Link paint active highlight solely from Base Focus (preventing stale hover double-highlight) while keeping hover highlight outside family Content.
   - id: P-BRUTALIST-NAVIGATION-MENU-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -31,6 +35,9 @@ openQuestions:
     blocks:
       - activation:P-BRUTALIST-NAVIGATION-MENU
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Document family Content paint boundary context for single-highlight Focus handoff inside open Content and hover fallback outside family Content.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Brutalist navigationMenu family as draft.

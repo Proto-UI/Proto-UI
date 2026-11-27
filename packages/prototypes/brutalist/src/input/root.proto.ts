@@ -22,10 +22,19 @@ export const BrutalistInputRoot = definePrototype<
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
         i.feedback.style.use(
-          tw(
-            'outline-none forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background'
-          )
+          tw('outline-none forced-colors-focus-outline ring-2 ring-offset-2 ring-offset-background')
         ),
+    });
+    // Light mode keeps literal #000000 (`ring-black`) even under customized `--ring`;
+    // dark mode switches exclusively to `ring-ring` (#f5f5f5) without colliding in cascade.
+    def.rule({
+      when: (w) =>
+        w.all(w.state(state.focusVisible).eq(true), w.not(w.meta('colorScheme').eq('dark'))),
+      intent: (i) => i.feedback.style.use(tw('ring-black')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('ring-ring')),
     });
     def.rule({
       when: (w) => w.state(state.readOnly).eq(true),

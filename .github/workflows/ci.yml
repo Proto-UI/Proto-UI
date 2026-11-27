@@ -200,6 +200,11 @@ jobs:
       - name: Type check workspace TypeScript packages
         run: corepack pnpm@10.32.1 -s check:types:packages
 
+      - name: Check generated coverage matrices and style-token presets
+        run: |
+          corepack pnpm@10.32.1 -s coverage:matrices:check
+          corepack pnpm@10.32.1 -s check:styles:preset
+
   type-check:
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
