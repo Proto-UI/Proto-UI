@@ -200,3 +200,92 @@ test('terminal local reviews and integration receipts do not require a published
     assert.equal(validateSkillHandoff(handoff, registry).nextSkill, null);
   }
 });
+
+test('internal fast-linear PR handoff enters pui-integrate with exact-head verification and without review packets', () => {
+  const head = 'a'.repeat(40);
+  const digest = (ch) => `sha256:${ch.repeat(64)}`;
+  const baseHandoff = {
+    schemaVersion: 2,
+    kind: 'proto-ui.skill-handoff',
+    entrypoint: 'development',
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    fromId: 'pui-validate',
+    nextSkillId: 'pui-integrate',
+    outcome: 'completed',
+    binding: {
+      repositoryId: 'github.com:Proto-UI/Proto-UI',
+      scopeId: 'pr-1988',
+      headSha: head,
+      reviewInputDigest: null,
+    },
+    artifacts: [
+      { type: 'capability-envelope', reference: 'memory:env', digest: digest('1') },
+      {
+        type: 'evidence-report',
+        reference: 'memory:evidence',
+        digest: digest('2'),
+        revision: head,
+        result: 'passed',
+      },
+      { type: 'github-snapshot', reference: 'memory:gh', digest: digest('3') },
+      { type: 'mutation-authorization', reference: 'memory:auth', digest: digest('4') },
+      {
+        type: 'internal-pr-verification',
+        reference: 'memory:internal-pr',
+        digest: digest('5'),
+        revision: head,
+      },
+    ],
+    humanGates: [],
+    notes: [],
+  };
+
+  const validated = validateSkillHandoff(baseHandoff, registry);
+  assert.equal(validated.nextSkill.id, 'pui-integrate');
+  assert.deepEqual(validated.nextSkill.requires, [
+    'capability-envelope',
+    'evidence-report',
+    'github-snapshot',
+    'mutation-authorization',
+    'internal-pr-verification',
+  ]);
+
+  // Mismatched head revision fails closed.
+  assert.throws(
+    () =>
+      validateSkillHandoff(
+        {
+          ...baseHandoff,
+          artifacts: baseHandoff.artifacts.map((artifact) =>
+            artifact.type === 'internal-pr-verification'
+              ? { ...artifact, revision: 'b'.repeat(40) }
+              : artifact
+          ),
+        },
+        registry
+      ),
+    /internal-pr-verification must bind its exact current head/
+  );
+
+  // Non-passed evidence report fails closed.
+  assert.throws(
+    () =>
+      validateSkillHandoff(
+        {
+          ...baseHandoff,
+          artifacts: baseHandoff.artifacts.map((artifact) =>
+            artifact.type === 'evidence-report' ? { ...artifact, result: 'failed' } : artifact
+          ),
+        },
+        registry
+      ),
+    /requires a passed current-head evidence-report with digest/
+  );
+
+  // Routing to another leaf fails closed.
+  assert.throws(
+    () => validateSkillHandoff({ ...baseHandoff, nextSkillId: 'pui-review' }, registry),
+    /next leaf does not admit internal linear integration/
+  );
+});

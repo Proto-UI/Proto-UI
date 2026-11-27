@@ -22,6 +22,13 @@ const HUMAN_DIRECTED_ARTIFACTS = [
   'mutation-authorization',
   'human-directed-operation',
 ];
+const INTERNAL_LINEAR_ARTIFACTS = [
+  'capability-envelope',
+  'evidence-report',
+  'github-snapshot',
+  'mutation-authorization',
+  'internal-pr-verification',
+];
 const MODE_SOURCES = {
   'human-assisted': new Set(['current-user', 'active-human-loop']),
   autonomous: new Set(['maintainer-invocation', 'schedule', 'governed-queue']),
@@ -128,6 +135,7 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
         'mutation',
         'requires',
         'produces',
+        ...(Object.hasOwn(skill, 'internalLinearRequires') ? ['internalLinearRequires'] : []),
         ...(Object.hasOwn(skill, 'humanDirectedRequires') ? ['humanDirectedRequires'] : []),
         ...(Object.hasOwn(skill, 'conditionalProduces') ? ['conditionalProduces'] : []),
         ...(Object.hasOwn(skill, 'allowedNextSkillIds') ? ['allowedNextSkillIds'] : []),
@@ -185,6 +193,20 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
     );
     assertStringList(skill.requires, `${label}.requires`, { nonempty: true });
     assertStringList(skill.produces, `${label}.produces`, { nonempty: true });
+    if (Object.hasOwn(skill, 'internalLinearRequires')) {
+      assert(
+        skill.id === 'pui-integrate',
+        `${label}.internalLinearRequires is limited to internal linear integration`
+      );
+      assertStringList(skill.internalLinearRequires, `${label}.internalLinearRequires`, {
+        nonempty: true,
+      });
+      for (const required of INTERNAL_LINEAR_ARTIFACTS)
+        assert(
+          skill.internalLinearRequires.includes(required),
+          `${label}.internalLinearRequires is missing ${required}`
+        );
+    }
     if (Object.hasOwn(skill, 'humanDirectedRequires')) {
       assert(
         ['pui-integrate', 'pui-collaborate'].includes(skill.id),
@@ -620,6 +642,7 @@ export function validateSkillHandoff(
       registry.skills
         .flatMap((skill) => [
           ...skill.requires,
+          ...(skill.internalLinearRequires ?? []),
           ...(skill.humanDirectedRequires ?? []),
           ...skill.produces,
           ...(skill.conditionalProduces ?? []).map((value) => value.artifact),
@@ -691,6 +714,11 @@ export function validateSkillHandoff(
     artifactTypes.add(artifact.type);
   });
   const humanDirected = artifactTypes.has('human-directed-operation');
+  const internalLinear = artifactTypes.has('internal-pr-verification');
+  assert(
+    !(humanDirected && internalLinear),
+    'handoff cannot combine human-directed-operation and internal-pr-verification'
+  );
   if (humanDirected) {
     assert(
       handoff.schemaVersion === 2 &&
@@ -716,6 +744,41 @@ export function validateSkillHandoff(
         `human-directed operation requires content-bound ${required}`
       );
     }
+  }
+  if (internalLinear) {
+    assert(
+      handoff.schemaVersion === 2 &&
+        handoff.outcome === 'completed' &&
+        handoff.entrypoint === 'development',
+      'internal linear integration requires completed v2 development handoff'
+    );
+    assert(
+      [expectedEntrypoint, 'pui-validate', 'pui-pr', 'pui-collaborate', 'pui-integrate'].includes(
+        handoff.fromId
+      ),
+      'internal linear integration must originate at development, validation, PR inspection, collaboration, or integration'
+    );
+    assert(
+      getHandoffArtifacts(handoff, 'internal-pr-verification')[0].revision ===
+        handoff.binding.headSha,
+      'internal-pr-verification must bind its exact current head'
+    );
+    for (const required of INTERNAL_LINEAR_ARTIFACTS) {
+      const artifacts = getHandoffArtifacts(handoff, required);
+      assert(
+        artifacts.some((artifact) => DIGEST.test(artifact.digest)),
+        `internal linear integration requires content-bound ${required}`
+      );
+    }
+    assert(
+      getHandoffArtifacts(handoff, 'evidence-report').some(
+        (artifact) =>
+          artifact.revision === handoff.binding.headSha &&
+          artifact.result === 'passed' &&
+          DIGEST.test(artifact.digest)
+      ),
+      'internal linear integration requires a passed current-head evidence-report with digest'
+    );
   }
   if (fromLeaf && handoff.outcome !== 'interrupted') {
     for (const produced of fromLeaf.produces) {
@@ -783,7 +846,17 @@ export function validateSkillHandoff(
       nextSkill.humanDirectedRequires,
       'next leaf does not admit a human-directed connected operation'
     );
-  for (const required of humanDirected ? nextSkill.humanDirectedRequires : nextSkill.requires) {
+  if (internalLinear)
+    assert(
+      nextSkill.internalLinearRequires,
+      'next leaf does not admit internal linear integration'
+    );
+  const activeRequires = humanDirected
+    ? nextSkill.humanDirectedRequires
+    : internalLinear
+      ? nextSkill.internalLinearRequires
+      : nextSkill.requires;
+  for (const required of activeRequires) {
     assert(
       artifactTypes.has(required),
       `handoff lacks artifact required by ${nextSkill.id}: ${required}`
@@ -796,9 +869,8 @@ export function validateSkillHandoff(
     validateRefreshedEvidence(handoff, priorHandoff, registry);
   return {
     handoff,
-    nextSkill: humanDirected
-      ? { ...nextSkill, requires: nextSkill.humanDirectedRequires }
-      : nextSkill,
+    nextSkill:
+      humanDirected || internalLinear ? { ...nextSkill, requires: activeRequires } : nextSkill,
   };
 }
 

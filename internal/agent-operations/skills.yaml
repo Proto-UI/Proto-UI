@@ -191,11 +191,19 @@ skills:
   - id: pui-integrate
     entrypoints: [development]
     loadPath: .agents/skills/pui-integrate/SKILL.md
-    transition: independently reviewed or explicitly human-directed exact head -> real integration receipt
+    transition: verified internal PR, independently reviewed external PR, or explicitly human-directed exact head -> real integration receipt
     autonomousMinimumBand: C2
     taskClass: integrate-reviewed-pull-request
     mutation: conditional-pull-request-merge
     requires: [review-packet, review-input, published-review-packet, mutation-authorization]
+    internalLinearRequires:
+      [
+        capability-envelope,
+        evidence-report,
+        github-snapshot,
+        mutation-authorization,
+        internal-pr-verification,
+      ]
     humanDirectedRequires:
       [capability-envelope, github-snapshot, mutation-authorization, human-directed-operation]
     produces: [mutation-receipt]

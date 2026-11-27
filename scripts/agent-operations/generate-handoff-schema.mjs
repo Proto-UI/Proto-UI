@@ -14,7 +14,7 @@ const legacy = JSON.parse(
 delete legacy.$schema;
 delete legacy.$id;
 Object.assign(legacy.properties.artifacts.items, {
-  if: { properties: { type: { const: 'human-directed-operation' } } },
+  if: { properties: { type: { enum: ['human-directed-operation', 'internal-pr-verification'] } } },
   then: { required: ['digest'] },
 });
 const registry = loadSkillRegistry();
@@ -23,6 +23,7 @@ const types = [
     registry.skills
       .flatMap((skill) => [
         ...skill.requires,
+        ...(skill.internalLinearRequires ?? []),
         ...(skill.humanDirectedRequires ?? []),
         ...skill.produces,
         ...(skill.conditionalProduces ?? []).map((x) => x.artifact),
