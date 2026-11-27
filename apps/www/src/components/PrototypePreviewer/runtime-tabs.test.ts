@@ -61,6 +61,8 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] 
       expect(p.shell.querySelectorAll('[role=tabpanel]:not([hidden])')).toHaveLength(1);
       const tablist = p.shell.querySelector<HTMLElement>('[role=tablist]')!;
       expect(styleContains(tablist, 'bg-transparent')).toBe(true);
+      expect(tablist.style.maxWidth).toBe('100%');
+      expect(tablist.style.overflowX).toBe('auto');
       expect(styleContains(triggers[1]!, 'bg-transparent')).toBe(true);
       expect(styleContains(triggers[1]!, 'text-foreground')).toBe(true);
       if (family === 'shadcn') {

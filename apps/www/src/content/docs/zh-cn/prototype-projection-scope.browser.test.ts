@@ -125,8 +125,13 @@ const GALLERY_TASK_PARTS = {
     button: 2,
   },
   choices: { 'checkbox-root': 3, 'checkbox-indicator': 3, 'label-root': 3, button: 1 },
-  shortcuts: {},
+  ecosystem: {},
+  highlights: {},
+  milestones: { 'progress-root': 3, 'progress-track': 3, 'progress-indicator': 3 },
+  protocol: { 'input-root': 2, button: 1 },
+  shortcuts: { 'toggle-group-root': 4, 'toggle-group-item': 16 },
   spark: { button: 1 },
+  throughput: { 'separator-root': 1 },
 } as const;
 const TASK_PART_REFS = {
   'settings-view': 'select',

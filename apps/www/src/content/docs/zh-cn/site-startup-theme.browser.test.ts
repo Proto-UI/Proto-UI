@@ -454,7 +454,27 @@ for (const width of [2048, 390, 430, 320]) {
         await expect.poll(() => value.textContent()).toContain('Web Components');
         const facts = await value.evaluate((e) => {
           const label = e.ownerDocument.createRange();
-          label.selectNodeContents(e);
+          const walker = e.ownerDocument.createTreeWalker(e, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              const parent = node.parentElement;
+              if (
+                parent?.closest('[data-pui-owned-decoration], [aria-hidden="true"]') ||
+                !node.nodeValue?.trim()
+              ) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              return NodeFilter.FILTER_ACCEPT;
+            },
+          });
+          const firstText = walker.nextNode();
+          if (firstText) {
+            let lastText = firstText;
+            for (let next = walker.nextNode(); next; next = walker.nextNode()) lastText = next;
+            label.setStartBefore(firstText);
+            label.setEndAfter(lastText);
+          } else {
+            label.selectNodeContents(e);
+          }
           return {
             measurement: 'rendered-label-range',
             text: e.textContent,

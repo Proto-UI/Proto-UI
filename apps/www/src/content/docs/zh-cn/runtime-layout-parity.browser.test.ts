@@ -202,7 +202,9 @@ describe.sequential('Runtime-only vertical layout parity', () => {
             expect(facts.pageOverflow).toBeLessThanOrEqual(1);
             // WC retains the two closed FAQ bodies; framework hosts withdraw
             // them. Keep exact counts and all pairwise geometry.
-            expect(facts.authoredTextCount).toBe({ wc: 76, react: 74, vue: 74, vue2: 74 }[runtime]);
+            expect(facts.authoredTextCount).toBe(
+              { wc: 110, react: 108, vue: 108, vue2: 108 }[runtime]
+            );
             expect(facts.text.length).toBeGreaterThan(20);
             expect(new Set(facts.text.map((text) => text.key)).size).toBe(facts.text.length);
             for (const text of facts.text) expect(text.display, text.role).toBe('block');

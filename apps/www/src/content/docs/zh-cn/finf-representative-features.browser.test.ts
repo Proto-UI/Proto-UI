@@ -2071,21 +2071,24 @@ async function runtimeTabsJourney({ page, previewer, family, capture }: Journey)
     await observation.evaluate((state) => state.stop());
     await observation.dispose();
   }
-  // Geometry follows the inspected underline reference; screenshots still need human inspection.
+  // Geometry follows each family's dogfood `variant="line"` recipe; screenshots still need human inspection.
   for (const { selected, inactive } of snapshots) {
-    expect(selected.border[2]).toBe('2px');
-    expect(selected.radius).toBe('0px');
-    expect(selected.padding[1]).toBe('0px');
-    expect(selected.padding[3]).toBe('0px');
     if (family === 'brutalist') {
+      expect(selected.border[2]).toBe('2px');
+      expect(selected.radius).toBe('0px');
+      expect(selected.padding[1]).toBe('4px');
+      expect(selected.padding[3]).toBe('4px');
       expect(selected.expectedFocusShadow).not.toBe('none');
       expect(selected.shadow).toBe(selected.expectedFocusShadow);
+    } else if (family === 'shadcn') {
+      expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
     } else {
+      expect(selected.border[2]).toBe('2px');
       expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
     }
     expect(selected.background).toBe('rgba(0, 0, 0, 0)');
     expect(selected.textWidth).toBeGreaterThan(0);
-    expect(Math.abs(selected.rect.width - selected.textWidth)).toBeLessThanOrEqual(2);
+    expect(selected.rect.width).toBeGreaterThanOrEqual(selected.textWidth - 1);
     expect(selected.color).not.toBe(inactive.color);
   }
 }

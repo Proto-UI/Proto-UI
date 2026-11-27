@@ -972,6 +972,7 @@ export function createProjectionComposition(
               a11yLabel: options.controls.runtime.label,
               loop: true,
             },
+            surfaceStyle: { maxWidth: '100%', overflowX: 'auto' },
             children: options.controls.runtime.options.map((option) =>
               createProjectedProto(tabsParts.trigger, coordinateAttrs, undefined, {
                 ref: runtimeTriggerRef(option.value),
