@@ -180,12 +180,24 @@ export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR), sourc
     'public_package_plan',
     'test-plan',
   ]);
+  const prOnlyLightweightJobs = new Set(['pr-typecheck']);
   const cycleOnly = "github.event_name != 'pull_request'";
+  const prOnly = "github.event_name == 'pull_request'";
   for (const [job, config] of Object.entries(ownerDoc.jobs ?? {})) {
     if (metadataJobs.has(job)) continue;
     const condition = String(config.if ?? '')
       .replace(/^\$\{\{\s*|\s*\}\}$/g, '')
       .trim();
+    if (prOnlyLightweightJobs.has(job)) {
+      if (condition !== prOnly) {
+        violations.push({
+          file: REGRESSION_OWNER,
+          rule: 'pr-only-lightweight-guard',
+          detail: `lightweight PR job '${job}' must declare if: \${{ ${prOnly} }}`,
+        });
+      }
+      continue;
+    }
     if (
       ![
         cycleOnly,

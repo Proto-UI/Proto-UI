@@ -8,7 +8,7 @@ Release identity comes from the applicable `V-*` entity and immutable release ev
 
 | Workflow | File | Purpose |
 | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | Lightweight PR planning and policy checks; full regression on schedule or explicit dispatch |
+| CI | `.github/workflows/ci.yml` | Lightweight PR compile (`pr-typecheck`) and lint/planning checks; full heavy regression on Nightly/scheduled cycles or explicit dispatch |
 | Release Packages | `.github/workflows/release-packages.yml` | Manual release scan, stage rehearsal, or full-set publication |
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request intake/reconciliation lane |
@@ -35,7 +35,9 @@ Repository policy requires the relevant CI evidence before merge. GitHub ruleset
 
 `release-consumer-react` additionally builds tarballs for every public package and installs the current declared release closure in a temporary React + Vite project outside the monorepo. The gate prevents `@proto.ui/*` from falling back to the npm registry or workspace sources, validates every non-wildcard export target in staged manifests, then verifies CLI facade generation, TypeScript, a production build, and baseline runtime behavior. Before expanding the full fixture, it generates only Shadcn Button and checks that the final Rollup module graph contains no other Base/Shadcn prototype family. This is a family-boundary assertion rather than a fixed bundle-size budget.
 
-Automatic PR updates run policy parsing, exact-version checks, package planning and browser-inventory planning, not full builds, types, Rust, browser execution or package consumers. Full checks run on schedule or explicit exact-ref dispatch. A skipped PR check is not successful full validation: trusted CI/DCO and independent exact-head review remain required for integration, and an older main baseline cannot supply missing exact-head checks. Dispatch a completed reviewed branch once when those checks are needed, rather than on each development push.
+Automatic PR updates run only fast compile and lint gates (`pr-typecheck`, `ci-config-audit`, `lockstep-check`, `internal-docs-lint`, `public_package_plan`, and `test-plan`) plus native DCO. Full Astro/docs builds, full coverage-matrix AST scans, Rust/GPUI, browser execution, package builds, and release consumers run on the scheduled Nightly/periodic cycles (or explicit dispatch), with an independent Agent loop triaging and landing linear fixes onto `main`.
+
+Per the 2026-11-27 maintainer policy, internal same-repository PRs merge linearly once focused local checks, lightweight PR CI, and native DCO pass (without waiting on a second-Agent review or manual full-CI fan-out); external/fork PRs retain mandatory independent exact-head review. A skipped heavy PR check is still not release acceptance—release acceptance comes from scheduled cycles on `main`.
 
 ## Regression cadence and event inventory
 

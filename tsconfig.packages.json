@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.workspace.json",
+  "include": ["types/**/*.d.ts", "packages/**/*.ts", "packages/**/*.tsx"],
+  "exclude": [
+    "apps/www",
+    "node_modules",
+    "dist",
+    "packages/compiler/prelude",
+    "packages/**/dist",
+    "scripts"
+  ]
+}

@@ -52,9 +52,11 @@ jobs:
           node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs
           node scripts/ci/check-ci-schedule.mjs
 
-  # Expensive checks run once per cycle or explicit exact-ref dispatch, not
-  # once per PR update. A skipped PR check is not successful full validation;
-  # existing integration requirements still need exact-head evidence.
+  # Lightweight PR compile/lint checks run on pull_request so internal PRs can
+  # merge linearly without waiting on multi-hour suites; heavy integration,
+  # full Astro/browser, Rust, coverage-matrix and release suites run on the
+  # scheduled Nightly/periodic cycles (or explicit dispatch) and are triaged
+  # and repaired asynchronously by the Agent loop.
   coverage-governance:
     if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/coverage-governance.yml
@@ -178,6 +180,25 @@ jobs:
     uses: ./.github/workflows/package-budget-evidence.yml
     permissions:
       contents: read
+
+  # Lightweight PR-only TypeScript workspace compile check (no Astro build, no
+  # browser, no full test fan-out). Scheduled/dispatched cycles run full `type-check`.
+  pr-typecheck:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install locked dependencies without lifecycle scripts
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+
+      - name: Type check workspace TypeScript packages
+        run: corepack pnpm@10.32.1 -s check:types:packages
 
   type-check:
     if: ${{ github.event_name != 'pull_request' }}

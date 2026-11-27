@@ -51,9 +51,9 @@ Load only the skill needed for the current transition. The list below is routing
 - use `pui-regression` first whenever the task starts from a reproducible failure against governed expected behavior, including Adapter parity, Prototype, Runtime, export, or public-projection failures;
 - select `pui-test` as a separate transition when evidence must be designed or changed;
 - select `pui-docs` as a separate transition for reader projections;
-- select `pui-validate` after a technical change;
-- use a fresh context with `pui-review` when independent acceptance is required;
-- use `pui-integrate` after `pui-review` for an ordinary exact-head clean packet under current-user or active standing merge authorization, or select the separately explicit current-user connected-operation branch below;
+- select `pui-validate` after a technical change (run fast, focused local checks only for ordinary internal PRs; defer heavy full-repo scans such as `check-coverage-matrices.mjs`, full `astro check`, and full browser matrices to Nightly/Scheduled CI);
+- use a fresh context with `pui-review` for **external / fork PRs**, explicit review requests, or privileged/release audits — do **not** stall internal maintainer/Agent PRs waiting for a second-Agent review;
+- use `pui-integrate` for fast linear integration of internal PRs once focused local validation, lightweight PR CI, and native DCO pass (recording an honest exact-head self-verification summary), for external PRs after `pui-review` produces an independent `APPROVE` packet, or for a separately explicit current-user connected-operation branch below;
 - use `pui-release-prep` and `pui-release-audit` for their purpose-bound release preparation and immutable-evidence phases.
 
 Pass only registered artifacts through the validated handoff. Return a terminal handoff when there is no eligible next transition.

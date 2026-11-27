@@ -11,7 +11,7 @@ compositionRules:
   - treat assessment as advice in human-assisted mode
   - enforce the fresh self-assessed ceiling before every autonomous transition
   - revalidate live permission and current authorization at every external action
-  - continue governed ready work through implementation, review, and integration
+  - continue governed ready work through focused fast validation and linear integration (internal PRs skip second-agent review; external/fork PRs require independent review)
   - stop only for unresolved product direction or a privileged or irreversible operation
 skills:
   - id: pui-assess

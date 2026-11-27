@@ -203,6 +203,29 @@ test('an OR bypass cannot turn a scheduled-only condition into a PR flood', () =
   assert.ok(collectViolations(dir).some((v) => v.rule === 'heavy-pr-fanout'));
 });
 
+test('lightweight pr-typecheck is admitted only on pull_request and rejected otherwise', () => {
+  const validDir = fixtureWorkflowDir({
+    'ci.yml': ciSkeleton.replace(
+      '  type-check:',
+      "  pr-typecheck: { if: \"github.event_name == 'pull_request'\", runs-on: ubuntu-latest, steps: [] }\n  type-check:"
+    ),
+  });
+  assert.deepEqual(
+    collectViolations(validDir).filter((v) =>
+      ['heavy-pr-fanout', 'pr-only-lightweight-guard'].includes(v.rule)
+    ),
+    []
+  );
+
+  const invalidDir = fixtureWorkflowDir({
+    'ci.yml': ciSkeleton.replace(
+      '  type-check:',
+      '  pr-typecheck: { runs-on: ubuntu-latest, steps: [] }\n  type-check:'
+    ),
+  });
+  assert.ok(collectViolations(invalidDir).some((v) => v.rule === 'pr-only-lightweight-guard'));
+});
+
 test('nested cycle evidence cannot be cancelled by a manual dispatch', (t) => {
   for (const cancellation of ['false', 'true', '${{ true }}']) {
     const dir = fixtureWorkflowDir({

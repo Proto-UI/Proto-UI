@@ -12,7 +12,9 @@ For state/ownership or rendered-projection changes, selective test commands, or 
 1. Read `AGENTS.md`, the actual diff, the `pui-trace` map, and the governed validation boundary.
 2. Check worktree and generated-file discipline before running tests.
 3. Run focused evidence first. Confirm it exercises the intended failure and owning layer.
-4. Expand through affected entity graph, Runtime or Adapter integration, types, public docs, package surfaces, consumer smoke, and release governance as the change requires.
+4. **Apply the fast-PR vs Nightly-CI validation split (2026-11-27 policy):**
+   - For ordinary **internal PRs**, keep local validation fast and proportional so PRs merge linearly without stacking on stale `main`: run focused unit/contract tests for the changed files, `check:types:packages` when TypeScript packages change, `coverage:matrices:check` (`render-consumer-matrices.mjs --check`, <1s) when matrix JSON/MD changes, and `check:internal-docs` when `internal/**` changes.
+   - **Do not block ordinary internal PRs locally on slow full-repo I/O scans** (`check:coverage-matrices` / `check-coverage-matrices.mjs`, full `check:types` / `astro check` + style generation, full browser shards, full `pnpm test`, or `release:rehearse`). Those heavy suites belong to **Nightly/Scheduled CI** (`ci.yml`) and the autonomous repair loop; run them locally only when explicitly diagnosing a failure in that suite or executing a release rehearsal.
 5. Run generators before their corresponding check mode. Never hand-edit generated output.
 6. Record command, exit status, relevant output, environment, and skipped checks. Do not claim a check that did not run.
 7. Separate machine evidence, observable acceptance evidence, authority resolution, and deployment evidence.
