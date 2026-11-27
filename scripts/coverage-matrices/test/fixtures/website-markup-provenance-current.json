@@ -27,15 +27,15 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "d34e9445536da8c56aaca4be078449ecdc05108f93f11e5bd5828f94d5d06629"
+      "sha256": "19fd64683b702a2fd19568fcd63099f22c17f669df04d63c28dcf787774a02c0"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
-      "sha256": "3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a"
+      "sha256": "cdffa4bede28092607fc7300d1587dc3ce2b1ddb1a210d56cd1ee19b25008b38"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51"
+      "sha256": "d85fae0d9413d0e863c87e6a9ee0e2caece45d61ca3af9dd607f21b77f82431b"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",

@@ -1,4 +1,6 @@
 import { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
+import { createCanonicalMotionPalette } from './PrototypePreviewer/canonical-motion-palette';
+import { createPreviewMaterialSink } from './PrototypePreviewer/preview-material-provider';
 import { headerButtonProps, headerIconButtonLayout } from './site-header-control-recipes';
 import { bindSiteSelectDismissal } from './site-select-dismissal';
 import {
@@ -172,6 +174,12 @@ export function registerSiteControls(): void {
     const constructor = AdaptToWebComponent(prototype, {
       register: false,
       registerAs: tagName,
+      ...(tagName.startsWith('wc-liquid-glass-')
+        ? {
+            createVisualSink: createPreviewMaterialSink,
+            residentMotion: { palette: createCanonicalMotionPalette },
+          }
+        : {}),
     });
     customElements.define(tagName, constructor);
   }

@@ -1,5 +1,9 @@
 import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import { diagnoseHostProps } from './host-prop-diagnostics';
+import {
+  notifyPortalSubtreeReadiness,
+  registerPortalViewReadiness,
+} from './platform/portal-readiness';
 import type { EventPort } from '@proto.ui/module-event';
 import {
   collectWebOwnedDecorationTargets,
@@ -383,8 +387,21 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           return;
         }
         material.commitProjection();
-        if (portalProjectionRef.current?.material === material && mount.parentNode === destination)
-          notifyWebPortalProjection(host);
+        if (
+          portalProjectionRef.current?.material === material &&
+          mount.parentNode === destination
+        ) {
+          notifyPortalSubtreeReadiness(
+            host,
+            () =>
+              portalProjectionRef.current?.material === material && mount.parentNode === destination
+          );
+          if (
+            portalProjectionRef.current?.material === material &&
+            mount.parentNode === destination
+          )
+            notifyWebPortalProjection(host);
+        }
       };
       runtime.useLayoutEffect(() => {
         const off = subscribeWebPortalDestinations(refreshPortalDestination);
@@ -822,6 +839,16 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           },
           { deferPublication: true }
         );
+        const releasePortalReadiness = registerPortalViewReadiness(rootEl, () => {
+          if (
+            !viewDisposed &&
+            viewGenerationRef.current === viewGeneration &&
+            boundRootRef.current === rootEl &&
+            eventGateRef.current === eventGate &&
+            rootRef.current === rootEl
+          )
+            notifyFocusTargetReady();
+        });
         const disposeView = () => {
           if (viewDisposed) return;
           viewDisposed = true;
@@ -837,6 +864,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             viewReadyRef.current = false;
           }
           const releases = [
+            releasePortalReadiness,
             () => {
               if (ownedStyle !== null && rootEl.getAttribute('data-pui-style') === ownedStyle)
                 rootEl.removeAttribute('data-pui-style');
@@ -1211,6 +1239,22 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         }
         eventGateRef.current?.enable();
         notifyFocusTargetReady();
+        const readyHost = rootRef.current;
+        if (
+          readyHost &&
+          readyHost.isConnected &&
+          portalProjectionRef.current?.host === readyHost &&
+          portalMountRef.current?.parentNode === portalProjectionRef.current.destination
+        ) {
+          const projection = portalProjectionRef.current;
+          notifyPortalSubtreeReadiness(
+            readyHost,
+            () =>
+              rootRef.current === readyHost &&
+              portalProjectionRef.current === projection &&
+              portalMountRef.current?.parentNode === projection.destination
+          );
+        }
       }, [renderCommit.version, hostStyleRevision]);
 
       // A renderer can replace the host element after the Proto commit that

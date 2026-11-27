@@ -49,10 +49,7 @@ export function readGalleryRhythm() {
   let gapRem = large ? 1.5 : 2;
   if (matchMedia('(min-width: 118.75rem)').matches) gapRem = 2.5;
   if (matchMedia('(max-width: 767px)').matches) gapRem = 1;
-  let fadeRem = 18;
-  if (document.documentElement.dataset.siteLibraryFamily === 'shadcn') {
-    fadeRem = matchMedia('(min-width: 80rem)').matches ? 16 : large ? 20 : 12;
-  }
+  const fadeRem = large ? 20 : 12;
   return { gapRem, fadeRem };
 }
 

@@ -1,5 +1,9 @@
 import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import {
+  notifyPortalSubtreeReadiness,
+  registerPortalViewReadiness,
+} from './platform/portal-readiness';
+import {
   collectWebOwnedDecorationTargets,
   createWebOwnedDecorationStage,
   type WebOwnedDecorationStage,
@@ -343,7 +347,19 @@ export function createVueAdapter(runtime: VueRuntime) {
             lastPortalProjection.parent !== host.parentNode
           ) {
             lastPortalProjection = { host, parent: host.parentNode };
-            notifyWebPortalProjection(host);
+            notifyPortalSubtreeReadiness(
+              host,
+              () =>
+                rootRef.value === host &&
+                portalEpoch === committedEpoch &&
+                host.parentNode === committedEpoch.destination
+            );
+            if (
+              rootRef.value === host &&
+              portalEpoch === committedEpoch &&
+              host.parentNode === committedEpoch.destination
+            )
+              notifyWebPortalProjection(host);
           }
         };
         const offPortalDestination = subscribeWebPortalDestinations(refreshPortalDestination);
@@ -720,8 +736,23 @@ export function createVueAdapter(runtime: VueRuntime) {
                 generation === commitGeneration &&
                 gate === eventGateRef.value &&
                 rootRef.value === readyTarget
-              )
+              ) {
                 notifyFocusTargetReady();
+                const committedEpoch = portalEpoch;
+                if (
+                  committedEpoch &&
+                  committedEpoch.host === readyTarget &&
+                  readyTarget.parentNode === committedEpoch.destination
+                ) {
+                  notifyPortalSubtreeReadiness(
+                    readyTarget,
+                    () =>
+                      rootRef.value === readyTarget &&
+                      portalEpoch === committedEpoch &&
+                      readyTarget.parentNode === committedEpoch.destination
+                  );
+                }
+              }
             });
           },
           { flush: 'post' }
@@ -789,6 +820,16 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             { deferPublication: true }
           );
+          const releasePortalReadiness = registerPortalViewReadiness(rootEl, () => {
+            if (
+              !viewDisposed &&
+              viewGeneration === physicalGeneration &&
+              boundRoot === rootEl &&
+              eventGateRef.value === eventGate &&
+              rootRef.value === rootEl
+            )
+              notifyFocusTargetReady();
+          });
           const disposeView = () => {
             if (viewDisposed) return;
             viewDisposed = true;
@@ -798,6 +839,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               decorationView = null;
             }
             const releases = [
+              releasePortalReadiness,
               () => {
                 if (
                   ownedVisualStyle !== null &&
