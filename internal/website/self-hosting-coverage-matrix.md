@@ -366,7 +366,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/Homepage/homepage-ghost-theme.ts` | `www.demo.home-demo-select` | `106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4` |
 | `apps/www/src/components/Homepage/HomepageGhostCard.astro` | `www.demo.home-demo-select` | `d6877d9fac6a4265df5845b2539a696adb8a3277d6d5d6ec71028328c3100196` |
 | `apps/www/src/components/Homepage/homepage-gallery-icons.ts` | `www.demo.home-demo-select` | `29b2d2041176aaa91fd68934b9869835482a16e7beafb99937c448f6ccd66fff` |
-| `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `07943a2da1a7d418779e3217b6a40208e4050d65490c3ca5ccd0e055102c1504` |
+| `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `a4a28595f6cbe125f48f27dd63a0c23b43b431def77f75d635299a2eb951bad9` |
 | `apps/www/src/components/Homepage/homepage-locale-select.ts` | `www.shell.language-select` | `c98f69429cdb314c7d0f5a48bd1076ec00fa0a84733b8922e81c0f88fc4d1dac` |
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/content/docs/zh-cn/site-search-ime-evidence.ts` | `www.search.input-results` | `c84f1c2e125dcebd7d6096b1f5fa7441dcaf40c8110d83015324b7d85350d3ba` |
@@ -387,7 +387,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `28e2afbcee6a6a538157cc7714e8ffaea08394df89bdae390ea10ab55e209479` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
-| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `bb78fee6960a73d8333808ca0495fcf55eeeea169b9b0ad7f052bb3f992b340e` |
+| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `5dbd896e5bb3fda184e0a03c42f5d614b760685b5c52e3c572d6b23b8f167e61` |
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `65369290f4ba40a5f88a9b1bf38005aed3c7a735b471fe91fcba39dd1a9d0889` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel`, `www.docs.code-panel-expand` | `8ee4c63e5b1581afcade0b02ada62710ad3da7538a986471fc176ff0f3582cc7` |

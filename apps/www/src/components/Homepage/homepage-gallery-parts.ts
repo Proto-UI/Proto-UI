@@ -1093,12 +1093,26 @@ export function createHomepageGalleryParts(
     card,
     analytics: composition.analytics,
     columns(form: DemoNode, analyticsCard: DemoNode = composition.analytics): DemoNode[] {
+      // Direct children participate in the responsive flex reading order. The
+      // default DOM order follows the five wide columns, top to bottom.
       return [
-        box('home-gallery__column', [controls, shortcuts, milestones]),
-        box('home-gallery__column', [analyticsCard, form, protocol]),
-        box('home-gallery__column', [ecosystem, composition.progress, throughput]),
-        box('home-gallery__column', [hover, editor, composition.help, spark]),
-        box('home-gallery__column', [composition.command, highlights, overlays, choices]),
+        controls,
+        shortcuts,
+        milestones,
+        analyticsCard,
+        form,
+        protocol,
+        ecosystem,
+        composition.progress,
+        throughput,
+        hover,
+        editor,
+        composition.help,
+        spark,
+        composition.command,
+        highlights,
+        overlays,
+        choices,
       ];
     },
     setup(context: DemoSetupContext) {

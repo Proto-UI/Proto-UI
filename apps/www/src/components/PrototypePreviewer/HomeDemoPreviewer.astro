@@ -404,9 +404,14 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   /* Keep the authored reading/tab order while allowing cards, not fixed
      groups, to fill responsive columns. No component paint is owned here. */
-  .home-demo-previewer :global(.home-gallery__flow),
-  .home-demo-previewer :global(.home-gallery__column) {
+  .home-demo-previewer :global(.home-gallery__flow) {
     display: contents;
+  }
+  .home-demo-previewer :global([data-gallery-demo='workspace-analytics']),
+  .home-demo-previewer :global([data-gallery-demo='ecosystem']),
+  .home-demo-previewer :global([data-gallery-demo='hover']),
+  .home-demo-previewer :global([data-gallery-demo='workspace-command']) {
+    break-before: var(--homepage-gallery-wide-break, auto);
   }
   .home-demo-previewer :global(.home-gallery__item) {
     min-width: 0;
@@ -664,13 +669,8 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   /* Each wide column starts at its authored group, regardless of wrapping. */
   @media (min-width: 96rem) {
     .home-demo-previewer :global(.home-gallery__stage) {
+      --homepage-gallery-wide-break: column;
       columns: var(--homepage-gallery-wide-columns);
-    }
-    .home-demo-previewer :global(.home-gallery__column) {
-      display: block;
-    }
-    .home-demo-previewer :global(.home-gallery__column:not(:first-child)) {
-      break-before: column;
     }
   }
   .home-demo-previewer :global(.home-gallery__attribution) {
@@ -761,16 +761,10 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       /* The same five desktop columns, not five stacks of miniature controls
          in the tab order. CSS zoom also scales layout height, unlike transform. */
       --homepage-gallery-mini-width: 90rem;
+      --homepage-gallery-wide-break: column;
       width: var(--homepage-gallery-mini-width);
       columns: var(--homepage-gallery-wide-columns);
       zoom: var(--homepage-gallery-scale, 1);
-    }
-    .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__column) {
-      display: block;
-    }
-    .home-demo-previewer[data-home-gallery-compact='true']
-      :global(.home-gallery__column:not(:first-child)) {
-      break-before: column;
     }
   }
   @media (max-width: 639px) {
