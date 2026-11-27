@@ -548,7 +548,10 @@ export function initPreviewer(options: PreviewerOptions) {
     writeSelectValue(id);
     if (version !== receivingVersion || (request && !request.isCurrent())) return;
     // The source already started this exact request; peers enter once here.
-    if (request?.source === root) return;
+    if (request?.source === root) {
+      pendingAdapterSwitch = null;
+      return;
+    }
     pendingAdapterSwitch = { id, expectedVersion: receivingVersion };
     void deferredAdapterSwitch.prepare();
   };

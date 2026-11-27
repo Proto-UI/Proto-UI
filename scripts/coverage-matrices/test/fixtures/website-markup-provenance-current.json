@@ -27,11 +27,11 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "19fd64683b702a2fd19568fcd63099f22c17f669df04d63c28dcf787774a02c0"
+      "sha256": "eacaa47d1b065f686a1917832530252498615b1af1bc94ce06ca8b29ebc9747f"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
-      "sha256": "cdffa4bede28092607fc7300d1587dc3ce2b1ddb1a210d56cd1ee19b25008b38"
+      "sha256": "749d000b6e52c6b86f33ac6a7ab36b3b759a1f3bd9da4ad09d46c8f77781792c"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",

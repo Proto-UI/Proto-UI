@@ -407,9 +407,9 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/PrototypePreviewer/preview-error-surface.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2e87c9b3070858d025dc741cd7815c1c97e8c207ff1d681bd8149daed19e1d93` |
 | `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `d85fae0d9413d0e863c87e6a9ee0e2caece45d61ca3af9dd607f21b77f82431b` |
 | `apps/www/src/components/PrototypePreviewer/previewer-startup-task.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `50f0fec29776cfaa282d655614d7ce4639c5be833e5cdefb9a4f8042e6686f65` |
-| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `19fd64683b702a2fd19568fcd63099f22c17f669df04d63c28dcf787774a02c0` |
+| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `eacaa47d1b065f686a1917832530252498615b1af1bc94ce06ca8b29ebc9747f` |
 | `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89` |
-| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `cdffa4bede28092607fc7300d1587dc3ce2b1ddb1a210d56cd1ee19b25008b38` |
+| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `749d000b6e52c6b86f33ac6a7ab36b3b759a1f3bd9da4ad09d46c8f77781792c` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `e1c0bf5ebf4524c31f14c56ac81f704ae355a8b208e3b6fd8a7d7115950bef71` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `7b44a01b23f7910150ca875cdf5e9f0320e3be7ac28b1372f167be78c9029e10` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `5132e72d71f6bb2ce093c2f87ff582fb9359d5636ad3cbbacaa7de257a1bac10` |
