@@ -8,7 +8,7 @@
 
 | 工作流 | 文件 | 作用 |
 | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | PR 的轻量计划与策略检查；定时或显式 dispatch 执行完整回归 |
+| CI | `.github/workflows/ci.yml` | PR 轻量编译（`pr-typecheck`）与 lint/计划检查；定时 Nightly/周期或显式 dispatch 执行全量重型回归 |
 | Release Packages | `.github/workflows/release-packages.yml` | 手动执行 release scan、stage 彩排或全量发布 |
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR intake/reconciliation lane |
@@ -35,7 +35,9 @@ CI 在 pull request、手动触发，以及每天三次针对默认分支 head �
 
 `release-consumer-react` 会从当前源码构建全部公开 package tarball，并在 monorepo 外的临时 React + Vite 项目中安装当前发布依赖闭包。该门禁禁止 `@proto.ui/*` 回退到 npm registry 或 workspace 源码，验证 staged manifest 的全部非通配 export target，并验证 CLI facade 生成、TypeScript、production build 和基础运行时行为。在扩展完整 fixture 前，它还会先只生成 Shadcn Button，并检查最终 Rollup module graph 不包含其他 Base/Shadcn prototype family；这是一项 family 边界检测，不是固定 bundle 大小预算。
 
-PR 更新只自动运行策略解析、精确版本核对、package 计划和 browser inventory 计划，不自动运行全量构建、类型检查、Rust、浏览器或 package consumer。完整检查仅由定时 cycle 或显式 exact-ref dispatch 运行。跳过不是通过：可信 CI/DCO、独立 exact-head review 与实际平台门禁保持不变，旧 main baseline 不能补齐新 head 缺失的检查；需要时在分支完成并受评审后显式运行一次，而不是每次开发 push 都扇出。
+PR 更新仅自动运行轻量编译与 lint 门禁（`pr-typecheck`、`ci-config-audit`、`lockstep-check`、`internal-docs-lint`、`public_package_plan` 与 `test-plan`）以及原生 DCO。重型的全量构建、Astro/文档检查、全仓覆盖矩阵扫描、Rust/GPUI、浏览器分片与 package consumer 统一在定时 Nightly/周期 cycle（或显式 dispatch）中运行，由独立的 Agent Loop 持续集成并向 `main` 线性合入修复。
+
+按 2026-11-27 维护者策略，仓库内部 PR（维护者/写权限协作者及 Agent）在聚焦本地校验、轻量 PR CI 与 DCO 通过后即可线性快速合入，不再等待第二个 Agent 的 Review 或逐 PR 扇出全量回归；独立 Review 仅保留给外部 / fork PR 与发布/特权审计。PR 上跳过的重型检查仍不代表发布验收，发布验收由主干定时周期产出。
 
 ## 回归 cadence 与 event inventory
 

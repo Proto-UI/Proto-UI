@@ -101,6 +101,14 @@ The result records `recommendedTaskClasses`, cumulative `recommendedReviewClasse
 
 Regenerate it before autonomous selection when the bound commit, catalog, policy, rubric, assessment generator, or expiry changed. The captured worktree digest preserves the assessment context; bounded edits made during the same task do not alone invalidate the result. In human-assisted work, a missing or low result means narrower claims and stronger review, not refusal.
 
+## Internal fast-linear merge versus external PR review
+
+To keep `main` linear and prevent stale-branch merge conflicts (2026-11-27 maintainer decision), review and validation split by PR origin and CI tier:
+
+- **Internal same-repository PRs** (branches in this repo by maintainers, write-access collaborators, or their Agents): skip the second-Agent peer review gate. Run focused local checks, wait for lightweight PR CI and native DCO, post an exact-head verification summary, and merge linearly onto `main`. Never fabricate `APPROVED` or bypass DCO.
+- **External / fork PRs** (fork branches or contributors without write permission): keep mandatory independent `pui-review`, a distinct `APPROVED` review, and provenance/license/DCO checks before `pui-integrate`.
+- **Fast local PR checks vs Nightly CI:** keep local checks fast (focused tests, `check:types:packages`, `coverage:matrices:check`, `check:internal-docs`). Do not block internal PRs locally on slow full-repo scans; scheduled `ci.yml` cycles and the autonomous Agent loop own heavy integration, Astro, browser, and coverage-matrix suites.
+
 ## Ordinary contribution boundaries
 
 With current user authorization, ordinary contributor work includes local edits, tests, commits, pushes to an owned or authorized branch, PR creation and updates, review responses, ready-for-review, and exact-head integration when its independent evidence passes. These actions do not depend on an online assessment or repository-issued credential. External writes still require a live credential with the necessary permission and a fresh read of the target.

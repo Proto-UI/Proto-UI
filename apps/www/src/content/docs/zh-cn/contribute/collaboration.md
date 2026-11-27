@@ -7,7 +7,7 @@ description: '让每个 GitHub 协作面只负责一种状态，并分开权限�
 
 ## 工作放在哪里
 
-Discussion 承接开放问题。Issue 承接边界明确的结果。PR 是一个可审阅的集成单元。Review 记录独立判断，Actions 记录机器证据，Deployment 与 Release 记录外部交付事实。
+Discussion 承接开放问题。Issue 承接边界明确的结果。PR 是一个可审阅的集成单元。按 2026-11-27 维护者策略，仓库内部 PR（维护者/写权限协作者及 Agent）在聚焦本地校验、轻量 PR CI 与 DCO 通过后线性快速合入以减少旧基线合并冲突；独立 Review 保留给外部 / fork PR 与发布/特权审计。重型集成、全量文档/浏览器与覆盖矩阵扫描由定时 Nightly/周期 CI 与独立 Agent Loop 持续承接。Actions 记录机器证据，Deployment 与 Release 记录外部交付事实。
 
 Milestone 表达一个发布结果或独立 program，不承担日常状态。
 

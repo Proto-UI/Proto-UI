@@ -110,6 +110,7 @@
     "test:gpui-scripts": "node --test scripts/gpui/test/*.test.mjs",
     "check:release-version": "node scripts/release/check-version-governance.mjs",
     "spec:snapshot:release": "tsx scripts/spec/create-release-snapshot.mjs",
+    "check:types:packages": "tsc -p tsconfig.packages.json --noEmit",
     "check:types:workspace": "tsc -p tsconfig.workspace.json --noEmit",
     "check:types:docs": "corepack pnpm@10.32.1 --filter apps-www check",
     "check:types": "corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style && corepack pnpm@10.32.1 -s check:types:workspace && corepack pnpm@10.32.1 -s check:types:docs",

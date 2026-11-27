@@ -51,7 +51,11 @@
               "reference": { "type": "string", "minLength": 1, "maxLength": 1000 },
               "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
             },
-            "if": { "properties": { "type": { "const": "human-directed-operation" } } },
+            "if": {
+              "properties": {
+                "type": { "enum": ["human-directed-operation", "internal-pr-verification"] }
+              }
+            },
             "then": { "required": ["digest"] }
           }
         },
@@ -149,6 +153,7 @@
                   "governed-behavior",
                   "human-directed-operation",
                   "implementation-authorization",
+                  "internal-pr-verification",
                   "interruption-receipt",
                   "issue-report",
                   "maintenance-mission",
@@ -186,7 +191,11 @@
               "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
               "result": { "enum": ["passed", "failed", "not-run", "partial"] }
             },
-            "if": { "properties": { "type": { "const": "human-directed-operation" } } },
+            "if": {
+              "properties": {
+                "type": { "enum": ["human-directed-operation", "internal-pr-verification"] }
+              }
+            },
             "then": { "required": ["digest"] }
           }
         },
@@ -542,6 +551,19 @@
               "contains": {
                 "type": "object",
                 "properties": { "type": { "const": "implementation-authorization" } },
+                "required": ["type"]
+              },
+              "minContains": 0,
+              "maxContains": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "artifacts": {
+              "contains": {
+                "type": "object",
+                "properties": { "type": { "const": "internal-pr-verification" } },
                 "required": ["type"]
               },
               "minContains": 0,

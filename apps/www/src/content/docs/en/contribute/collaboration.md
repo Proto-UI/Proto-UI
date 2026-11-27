@@ -7,7 +7,7 @@ Proto UI moves quickly when work is easy to locate, claim, review, and verify. T
 
 ## Where work lives
 
-Discussions hold open questions. Issues hold bounded outcomes. A pull request is one reviewable integration unit. Review records independent judgment. Actions record machine evidence. Deployments and Releases record external delivery facts.
+Discussions hold open questions. Issues hold bounded outcomes. A pull request is one integration unit. Under the 2026-11-27 maintainer policy, internal same-repository PRs (maintainers, write-access collaborators, and their Agents) merge linearly after fast focused local checks, lightweight PR CI, and native DCO to prevent stale-branch merge conflicts; independent review is reserved for external/fork PRs and release/privileged audits. Heavy integration, browser, coverage-matrix, and release suites run in Nightly/Scheduled CI with an independent Agent loop handling continuous fixes. Actions record machine evidence. Deployments and Releases record external delivery facts.
 
 Milestones group a release outcome or an independent program. They are not a daily status field.
 

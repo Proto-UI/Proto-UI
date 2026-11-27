@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "description": "Frozen legacy internal-docs debt baseline. New files must pass with zero errors; existing files may only reduce debt. Refresh via `pnpm check:internal-docs:baseline` after cleaning debt.",
   "totalFilesWithDebt": 1216,
-  "totalViolations": 8810,
+  "totalViolations": 8808,
   "files": {
     "internal/agent-operations/autonomous-tasks.md": {
       "prose/max-paragraph-length": 4,
@@ -325,14 +325,14 @@
     },
     "internal/governance/ci-cd.md": {
       "internal/size-budget": 1,
-      "prose/max-paragraph-length": 25,
+      "prose/max-paragraph-length": 24,
       "prose/no-inline-code-stuffing": 2,
       "prose/no-stacked-negatives": 1,
       "prose/single-slot-disclaimer": 1,
       "prose/structural-rhythm": 2
     },
     "internal/governance/ci-cd.zh-CN.md": {
-      "prose/max-paragraph-length": 5,
+      "prose/max-paragraph-length": 4,
       "prose/no-inline-code-stuffing": 1,
       "prose/no-stacked-negatives": 3,
       "prose/structural-rhythm": 1

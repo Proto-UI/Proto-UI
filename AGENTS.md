@@ -24,7 +24,15 @@ A separately explicit current-user decision may select [the registered human-dir
 
 Read `internal/agent-operations/contributor-agents.md` before selecting work autonomously. Local comprehension assessment is advisory in `human-assisted` mode and ordinary work covered by verified durable owner delegation; uncovered `autonomous` work retains its binding task/review ceiling. It never grants GitHub permission, proves identity, or predicts acceptance. Current authorization, repository rules, live platform permission, relevant Discord or Poppy trust, provenance, CI, independent review, and exact-target mutation controls remain execution conditions that the workflow revalidates at the action boundary.
 
-An Agent defaults to selecting and claiming ready, bounded, unclaimed work with explicit acceptance and validation boundaries, then continues through implementation, evidence, review response, ready-for-review, and exact-head integration while current-user or standing authorization covers those transitions. Returning no eligible work is correct, but routine review, commit grouping, or merge mechanics are not reasons to stop. Pause only when existing authority leaves product direction unresolved or the next action is privileged or difficult to reverse, such as publication, release, access, secrets, rulesets, security disclosure, or a provenance exception. Never manufacture a task, bypass a real `needs semantic decision` boundary, or treat a high assessment score as semantic authority.
+An Agent defaults to selecting and claiming ready, bounded, unclaimed work with explicit acceptance and validation boundaries, then continues through implementation, focused fast validation, ready-for-review, and exact-head integration while current-user or standing authorization covers those transitions. Returning no eligible work is correct, but routine commit grouping or merge mechanics are not reasons to stop. Pause only when existing authority leaves product direction unresolved or the next action is privileged or difficult to reverse, such as publication, release, access, secrets, rulesets, security disclosure, or a provenance exception. Never manufacture a task, bypass a real `needs semantic decision` boundary, or treat a high assessment score as semantic authority.
+
+## Fast linear integration and Nightly CI (2026-11-27 policy)
+
+Maintainers established a two-tier PR/CI workflow to prevent stale-branch stacking and context-blind merge conflicts:
+
+- **Internal PRs (same-repository branches in `Proto-UI/Proto-UI` by maintainers, write-access collaborators, or their Agents):** **do not wait for a second-Agent / peer `pui-review` gate.** Run fast, focused local checks, open the PR, let lightweight PR CI (`pr-typecheck`, `lockstep-check`, `ci-config-audit`, `internal-docs-lint`, `public_package_plan`, `test-plan`) and native **DCO** pass, record an honest exact-head self-verification summary (`COMMENT` or PR body with commands run, results, skipped checks, and residual risks), and **merge linearly onto `main` immediately**. Never fabricate `APPROVED` or bypass DCO.
+- **External / fork PRs (`headRepository != Proto-UI/Proto-UI` or external contributors without repository write permission):** **independent review (`pui-review` + distinct `APPROVED` review + provenance/license/DCO verification) remains mandatory** before `pui-integrate`.
+- **Fast local PR checks vs Nightly/Scheduled CI:** during ordinary internal PR loops, **do not block locally on slow full-repo I/O scans** (`pnpm check:coverage-matrices` / `check-coverage-matrices.mjs`, full `pnpm check:types` / `astro check`, full browser matrices, `pnpm test`, or `release:rehearse`). Run only fast targeted checks locally (focused unit/contract tests for touched files, `corepack pnpm@10.32.1 check:types:packages` when packages change, `corepack pnpm@10.32.1 coverage:matrices:check` when matrix files change, `corepack pnpm@10.32.1 check:internal-docs` when `internal/**` changes). Heavy integration, full Astro/browser, Rust/GPUI, coverage-matrix, and release suites run in **Nightly/Scheduled CI** (`ci.yml`), and the independent **Agent Loop** triages failures and ships small linear fix PRs onto `main`.
 
 For an accepted capability within authorized work, Agents may decide bounded numeric package-budget increases without an additional human gate. Follow [`pui-dev`'s package-budget evidence rules](.agents/skills/pui-dev/SKILL.md#decide-package-budget-ceilings); canonical measurements, separately reviewable transactions, independent review and all other gates remain required.
 
@@ -122,12 +130,13 @@ corepack pnpm@10.32.1 check:types
 corepack pnpm@10.32.1 test
 ```
 
-Choose verification proportional to the change:
+Choose verification proportional to the change (keep internal PR loops fast; defer heavy full-repo scans to Nightly/Scheduled CI unless diagnosing or preparing a release):
 
-- Agent/documentation-only changes: run `check:internal-docs`, `check:public-docs` (including repository links and supported package-script references), `check:agent-operations`, and `check:agent-doc`; generate the local Agent project understanding when its snapshot needs inspection. Run `test:public-docs` when changing documentation checks.
-- Spec changes: run the relevant spec/schema/graph tests, `check:prototype-catalog` when prototypes are involved, regenerate projections, then run type checks.
-- Runtime, module, adapter, or prototype behavior changes: run focused tests first, then the relevant workspace-wide checks.
-- Release-governance changes: run the release checks documented under `internal/governance/**`.
+- **Fast local PR baseline (default for internal PRs):** focused unit/contract tests for changed files, `corepack pnpm@10.32.1 check:types:packages` for TypeScript package edits, `corepack pnpm@10.32.1 coverage:matrices:check` (`render-consumer-matrices.mjs --check`, <1s) when matrix JSON/MD changes, and `corepack pnpm@10.32.1 check:internal-docs` when `internal/**` changes.
+- **Heavy full-repo checks (Nightly/Scheduled CI & release/diagnosis only):** `check:coverage-matrices` (full AST/Astro/MDX/Vue scanner), full `check:types` (`astro check` + style generation), full browser suites, `check:website-production-bundle`, `pnpm test`, and `release:rehearse`. Do not block ordinary internal PR merges waiting on these locally.
+- Agent/documentation-only changes: run `check:internal-docs`, `check:agent-operations`, and `check:agent-doc` (plus `check:public-docs` / `test:public-docs` when public docs or doc checks change).
+- Spec changes: run the relevant spec/schema/graph tests and `check:prototype-catalog` when prototypes are involved, plus `check:types:packages`.
+- Release-governance changes: run the focused release checks documented under `internal/governance/**`.
 
 Generated files must be changed through their generator. `internal/agent/PROJECT-UNDERSTANDING.zh-CN.md` is a disposable, Git-ignored local projection generated by `scripts/spec/generate-agent-project-understanding.mjs`; do not add it to commits.
 

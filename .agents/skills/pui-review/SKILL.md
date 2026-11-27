@@ -5,6 +5,8 @@ description: Independently review a Proto UI change against current authority, b
 
 # Review independently
 
+**Scope (2026-11-27 maintainer policy):** Independent review (`pui-review`) is reserved for **external / fork PRs** (`headRepository != Proto-UI/Proto-UI` or contributors without repository write permission), privileged/release audits, and explicit review requests. **Internal same-repository PRs** by maintainers, write-access collaborators, or their Agents do **not** require a second-Agent pre-merge review; they use fast linear integration in `pui-integrate` after focused local checks, lightweight PR CI, native DCO, and an exact-head self-verification summary.
+
 Use the [development/acceptance distinction](../../../internal/governance/release-0.3-plan.md). Review the exact bounded criteria and their actual evidence; report satisfied subcriteria and actionable remaining findings separately. Do not deny a completed repair because an unrelated umbrella is open, or approve missing in-scope acceptance by calling it unrelated debt. Keep rights, DCO, independence and platform approval requirements intact.
 
 ## Distinguish deferral from review
