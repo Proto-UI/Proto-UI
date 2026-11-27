@@ -855,6 +855,54 @@ describe.sequential(
               const sameEditor = () =>
                 note.evaluate((current, original) => current === original, originalEditor);
               await note.fill('Retain this note across Select choices');
+              const session = await context.newCDPSession(page);
+              const sources: { scriptId: string; url: string }[] = [];
+              const lossMessages: string[] = [];
+              record.selectStyleLoss = lossMessages;
+              page.on('console', (event) => {
+                if (event.text().startsWith('geometry check ') && lossMessages.length < 24)
+                  lossMessages.push(event.text());
+              });
+              session.on('Debugger.scriptParsed', ({ url, scriptId }) => {
+                if (
+                  url.startsWith(baseUrl) &&
+                  /owned-style-lease|border-box-size-lease|\/deps\/.*\.js/.test(url)
+                )
+                  sources.push({ scriptId, url });
+              });
+              await session.send('Debugger.enable');
+              const points: { url: string; line: number; text: string }[] = [];
+              record.selectStyleLogpoints = points;
+              for (const src of sources) {
+                const { result } = await session.send('Debugger.searchInContent', {
+                  scriptId: src.scriptId,
+                  query:
+                    'currentOwners\\.get\\(name\\)|!ownsCurrentFields\\(\\)|!matches\\(name, record\\)',
+                  isRegex: true,
+                });
+                for (const { lineContent, lineNumber } of result) {
+                  const field =
+                    lineContent.includes('if (') &&
+                    lineContent.includes('record') &&
+                    !lineContent.includes('continue');
+                  const sizing = lineContent.includes(
+                    '!ownsCurrentFields() || hasNewAuthoredSizing()'
+                  );
+                  if (!field && !sizing) continue;
+                  const condition = field
+                    ? `typeof record !== 'undefined' && record && (currentOwners.get(name) !== record || !matches(name,record)) && (console.debug('geometry check '+JSON.stringify({name,element:target.localName,role:target.getAttribute('role'),expected:record.written,value:target.style.getPropertyValue(name),expectedPriority:record.writtenPriority,priority:target.style.getPropertyPriority(name),sameOwner:currentOwners.get(name)===record,stack:new Error().stack})), false)`
+                    : `(!ownsCurrentFields() || hasNewAuthoredSizing()) && (console.debug('geometry check '+JSON.stringify({generation,current:ownsCurrentFields(),authored:hasNewAuthoredSizing(),targets:owners.map(({target})=>[target.localName,admittedSizeGenerations.get(target),target.style.cssText])})), false)`;
+                  await session.send('Debugger.setBreakpoint', {
+                    location: { scriptId: src.scriptId, lineNumber },
+                    condition,
+                  });
+                  points.push({
+                    url: new URL(src.url).pathname,
+                    line: lineNumber + 1,
+                    text: lineContent,
+                  });
+                }
+              }
               await trigger.press('ArrowDown');
               await attribute(trigger, 'aria-expanded', 'true');
               const portalId = await trigger.getAttribute('aria-controls');
@@ -1005,8 +1053,62 @@ describe.sequential(
               expect(background).not.toBe('transparent');
               expect(background).not.toBe('rgba(0, 0, 0, 0)');
               await expectEntryFocus('Email');
-              await capture('select-luma-open');
-              await expectEntryFocus('Email');
+              const geometry = await portal.evaluateHandle((content) => {
+                const nodes = new Set<Element>();
+                for (const item of [content, ...content.querySelectorAll('[role="option"]')])
+                  for (let node: Element | null = item; node; node = node.parentElement)
+                    nodes.add(node);
+                const describe = (el: Element) => ({
+                  tag: el.localName,
+                  role: el.getAttribute('role'),
+                  id: el.id,
+                  ref: el.getAttribute('data-demo-ref'),
+                });
+                const initial = Array.from(nodes, (el) => ({
+                  ...describe(el),
+                  style: el.getAttribute('style'),
+                }));
+                const changes: {
+                  node: ReturnType<typeof describe>;
+                  before: string | null;
+                  after: string | null;
+                }[] = [];
+                const observer = new MutationObserver((records) => {
+                  // Within one delivery, the next record's old value is the
+                  // actual value after the preceding mutation on that element.
+                  const next = new Map<Node, string | null>();
+                  const batch = [];
+                  for (const mutation of records.reverse()) {
+                    const el = mutation.target as Element;
+                    const after = next.has(el) ? next.get(el)! : el.getAttribute('style');
+                    next.set(el, mutation.oldValue);
+                    if (after !== mutation.oldValue)
+                      batch.push({ node: describe(el), before: mutation.oldValue, after });
+                  }
+                  changes.push(...batch.reverse().slice(0, Math.max(0, 96 - changes.length)));
+                });
+                for (const node of nodes)
+                  observer.observe(node, {
+                    attributes: true,
+                    attributeFilter: ['style'],
+                    attributeOldValue: true,
+                  });
+                return { initial, changes, stop: () => observer.disconnect() };
+              });
+              try {
+                await capture('select-luma-open');
+                await expectEntryFocus('Email');
+              } catch (error) {
+                record.selectGeometry = await geometry.evaluate(({ initial, changes }) => ({
+                  initial,
+                  changes,
+                }));
+                throw error;
+              } finally {
+                await geometry.evaluate((observation) => observation.stop());
+                await geometry.dispose();
+                await session.detach();
+              }
               await page.keyboard.press('End');
               await page.keyboard.press('Enter');
               await attribute(trigger, 'aria-expanded', 'false');
