@@ -6,11 +6,11 @@ The [authoring contract](../../spec/contracts/C-COMPILER-AUTHORING-0001.yaml) ch
 
 **Implementation status:**
 
-- `@proto.ui/core/authoring` is a planned 0.4 export, not an available package subpath. The complete design inputs currently have no Adapter or compiled-target execution.
-- The initial executable frontend supplies a partial binding/type and value-diagnostic pass. Complete phase, ownership, task and native-output support remain missing; use its explicit analysis result to determine admission.
-- The examples have no declaration-only shim or mock runtime.
+- The shared TypeScript Program reads all three versioned inputs from disk. Compiler-owned typed intrinsic declarations bind `@proto.ui/core/authoring` for source lowering.
+- The historical public Core package has yet to provide that runtime export. Adapter execution and common-source consumer migration remain open.
+- The readonly Badge, controlled Toggle and both async Tabs exports have run as ordinary React and native Rust GPUI components. Both hosts recorded the same checked IR and source closure for each selected export.
 
-The inputs are stored as `.proto.ts.txt` text fixtures: their contents are complete TypeScript source for future compiler/Adapter harnesses. This keeps a planned import from becoming a current workspace compilation unit. Syntax validation uses the TypeScript parser on those exact bytes; it does not supply a fake authoring declaration or suppress type errors to claim an executable example.
+The `.proto.ts.txt` files contain complete TypeScript examples outside the ordinary workspace build. The source producer resolves their imports and analyzes reached declarations without executing author modules. General lint still reports `analysisComplete: false`. `sourceValid` is `false` when a violation is proven and `null` otherwise.
 
 The Tabs example covers selection and loading. The full anatomy, keyboard, activation, focus, controlled-selection, accessibility and indicator protocol remains separate work. Its explicit loader is a scenario dependency, not a new platform-extern blocker for ordinary official prototypes.
 
@@ -57,11 +57,19 @@ The table is not a complete implementation inventory. The foundation also requir
 | Existing author intent | 0.4 input | Independent observation |
 | --- | --- | --- |
 | Read caller label and tone | Readonly prop handles | New input updates both public projections and the view |
-| Request a render after label changes | Automatic dependency from `renderer.get(props.label)` | No author `watch` + `update` plumbing is necessary once that capability is implemented |
+| Request a render after label changes | Automatic dependency from `renderer.get(props.label)` | Updating the input updates the generated view without an author `watch` or `update` |
 | Choose appearance from tone | Pure `badgeStyle` helper and derived style handle | Known tone adds its token; unknown tone retains the common token |
 | Keep transport logic in the caller | No transport task, timer or network access | Pure recomputation produces no effects |
 
-Start with `Offline`/`offline`, then publish `Connected`/`online`: both the displayed label and online token change. Renaming or extracting the helper preserves meaning, and an extracted helper joins the common Adapter/compiler source closure. Registered Shenko migration still requires its manifest, safe transformation and both execution routes.
+The Badge consumers exercise one mounted generated component:
+
+- Chromium observes the DOM label, computed color, nested dot width and public `label` and `tone`.
+- The headless GPUI host observes those projections and the painted label, chip and nested dot.
+- Both cover `Offline`/`offline`, `Connected`/`online` and an unknown tone retaining common appearance. Separate backend controls take checked IR directly.
+
+See the [React consumer](../../packages/compiler/test/react-target.node-test.mjs) and [GPUI consumer](../../packages/compiler/test/gpui-target.node-test.mjs).
+
+The authoring contract also requires equivalent behavior when a reached helper is renamed or extracted into shared source. Migrating the registered Shenko source still requires its source manifest, safe transformation and both Adapter and compiler execution.
 
 ## Complete input 2: controlled Toggle
 
@@ -83,7 +91,19 @@ The `active` prop declares `optional: true, controlMode: 'fixed-instance'`.
 
 The local initializer executes once. Changing `defaultActive`, hiding or physically remounting that same instance does not reset it. The action's derived reads use its current transaction view, public emission occurs after successful publication, and implicit callbacks queue rather than reentering a partially completed action. Owned input connections and captured handles retire on terminal disposal.
 
-These dependencies belong in M1 with the controlled example. Calling the example “reactivity” does not defer its controlled-value, transaction, capture, reentry or disposal requirements to M2.
+The source producer follows the narrowed `Presence<boolean>` from `run.get(props.active)` and retains named event fields in checked IR. For `--name ControlledToggle`:
+
+- React reads `handle.active` and `handle.disabled`, receiving `{ readonly active: boolean }` through `onActiveChange`.
+- Rust selects controlled mode with `active: Some(false)` and local mode with `active: None`.
+- Rust reads `projection().active()` and matches `ControlledToggleSignal::activeChange(payload)` to read `payload.active`.
+
+Both consumers observed the typed requests and actual states in the table.
+
+- Rejected same-instance presence changes preserved the prior accepted input, including `disabled`; the next legal update succeeded. Chromium rejected supplied `undefined` on first mount.
+- Retained local state survived React hide/reveal and GPUI physical reattachment. A fresh instance could select a new mode.
+- A GPUI signal subscriber queued host acceptance while its current snapshot still held the prior value.
+
+See the [four Chromium cases](../../packages/compiler/test/controlled-source-react.node-test.mjs) and [three GPUI cases](../../packages/compiler/test/consumers/gpui/tests/controlled_source/mod.rs).
 
 ## Complete input 3: Context and owned async Tabs
 
@@ -104,7 +124,11 @@ The created panel explicitly starts loading through `def.lifecycle.onCreated(rel
 
 The example's visible `cancelled` value is written by the explicit cancel action. Disposal does not write another value into a dead component. Scheduler evidence separately distinguishes completion, explicit cancellation, supersession and owner termination. The task's local `requested` value crosses suspension; its writable transaction view does not.
 
-The loader's signature and listed targets do not implement it. Each target needs a real atomic binding with typed argument/result conversion. Until then that selected-target compilation reports `extern-unbound`. This declaration cannot be used to package an entire prototype as an external implementation.
+The synchronous Context fixture exercises nominal provider identity, required reads and stable keyed composition in React and GPUI.
+
+Both original Tabs exports exercise tagged state, creation-triggered tasks, fresh post-await reads and the typed loader binding. React uses a loopback fetch; GPUI reads files. Each independently observes the outcomes above, and both emitters locate missing registration at the reached await.
+
+[React consumer](../../packages/compiler/test/tabs-source-react.node-test.mjs) · [GPUI consumer](../../packages/compiler/test/consumers/gpui/tests/tabs_source/mod.rs)
 
 ## Migration and executable completion
 
@@ -112,6 +136,6 @@ Implement the authoring exports and their Adapter path together with the shared 
 
 Upstream owns delivering and verifying necessary official and registered-consumer migrations. Where a general autofix is not yet safe, upstream must finish the concrete migration and establish verified tooling/preconditions instead of transferring a permanent source fork to consumers. The safety boundary prohibits a guessed edit or an unsupported claim of semantic preservation; it does not waive the migration obligation.
 
-The [source/lint projection](source-compatibility-and-lint.md) defines reporting for undetermined source, missing implementation, safe migration and the full inventory.
+The [source/lint projection](source-compatibility-and-lint.md) covers undetermined source, missing implementation, safe migration and the full inventory. The [implementation sequence](atomic-lowering-completion.md) maps all 28 criteria into M1–M3 and the remaining three targets.
 
-The [implementation sequence](atomic-lowering-completion.md) maps all 28 foundation criteria into M1–M3 and the remaining three targets. Syntax checks provide authoring hygiene; native compilation, Adapter compatibility and full component conformance remain missing catalog routes.
+Badge, controlled Toggle and the selected async Tabs scenario have source-bound React/GPUI observations. Other primitives, Vue 2, Vue 3, Web Components and common-source Adapter execution still require implementation and consumer evidence.

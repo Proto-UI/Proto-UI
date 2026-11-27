@@ -1,0 +1,73 @@
+import type { AsyncTabPanelHandle, LoadTabResult } from './AsyncTabPanel';
+
+type PanelObservation = Pick<AsyncTabPanelHandle, 'panel' | 'label'>;
+type RequestPlan = { kind: 'fetch'; path: string; cancellable: boolean }
+  | { kind: 'ready'; selected: string; value: LoadTabResult };
+interface Attempt {
+  readonly selected: string;
+  readonly signal: AbortSignal;
+  readonly atIssue: PanelObservation | null;
+  delivery: 'pending' | 'returned' | 'rejected';
+  result: LoadTabResult | null;
+  readyCheckpoint: PanelObservation | null;
+}
+
+const plans: RequestPlan[] = [];
+const attempts: Attempt[] = [];
+const unexpected: string[] = [];
+let readPanel: () => PanelObservation | null = () => null;
+
+async function readResource(path: string, selected: string, signal?: AbortSignal): Promise<LoadTabResult> {
+  const url = new URL(path, window.location.origin);
+  url.searchParams.set('selected', selected);
+  const response = await fetch(url, { signal, cache: 'no-store' });
+  const text = await response.text();
+  if (response.status === 200) return { kind: 'ok', value: text };
+  if (response.status === 404) return { kind: 'err', error: { kind: 'unavailable', message: text } };
+  throw new Error(`Unexpected loopback response ${response.status}: ${text}`);
+}
+
+export function loadTab(selected: string, signal: AbortSignal): LoadTabResult | Promise<LoadTabResult> {
+  const plan = plans.shift();
+  if (!plan || (plan.kind === 'ready' && selected !== plan.selected)) {
+    unexpected.push(selected);
+    throw new Error(`No matching loopback response was scheduled for ${selected}`);
+  }
+  const attempt: Attempt = {
+    selected, signal, atIssue: readPanel(), delivery: 'pending', result: null, readyCheckpoint: null,
+  };
+  attempts.push(attempt);
+  if (plan.kind === 'ready') {
+    // A result already fetched from the real server returns synchronously. This microtask
+    // is queued before the caller receives it, independently observing the scheduling boundary.
+    queueMicrotask(() => { attempt.readyCheckpoint = readPanel(); });
+    attempt.delivery = 'returned';
+    attempt.result = plan.value;
+    return plan.value;
+  }
+  // A host can also expose an operation that has no transport cancellation capability.
+  return readResource(plan.path, selected, plan.cancellable ? signal : undefined).then(value => {
+    attempt.delivery = 'returned';
+    attempt.result = value;
+    return value;
+  }, error => {
+    attempt.delivery = 'rejected';
+    throw error;
+  });
+}
+
+export const loader = {
+  observe(read: () => PanelObservation | null) { readPanel = read; },
+  enqueue(path: string, cancellable: boolean) { plans.push({ kind: 'fetch', path, cancellable }); },
+  async prime(path: string, selected: string) {
+    const value = await readResource(path, selected);
+    plans.push({ kind: 'ready', selected, value });
+  },
+  unexpectedCalls() { return [...unexpected]; },
+  calls() {
+    return attempts.map(({ selected, signal, atIssue, delivery, result, readyCheckpoint }) => ({
+      selected, atIssue, delivery, result, readyCheckpoint, aborted: signal.aborted,
+      reason: signal.aborted ? signal.reason : null,
+    }));
+  },
+};

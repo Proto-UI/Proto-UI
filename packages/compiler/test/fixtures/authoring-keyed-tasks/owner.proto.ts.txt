@@ -1,0 +1,48 @@
+import { createContextKey, declareExtern, definePrototype, tw } from '@proto.ui/core/authoring';
+
+export const ITEM_ZONE = createContextKey<string>('keyed-item-zone');
+
+const loadItem = declareExtern<[id: string], string>({
+  name: 'fixture.load-keyed-item',
+  effect: 'after-state-commit',
+  lifetime: 'task',
+  async: true,
+  targets: ['react', 'gpui'],
+});
+
+export const KeyedTaskItem = definePrototype({
+  name: 'keyed-task-item',
+  setup(def) {
+    const props = def.props.define({ id: { type: 'string', default: '' } });
+    const zone = def.context.consume(ITEM_ZONE);
+    const initialZone = def.state.define<string>('initialZone', { initialize: read => read.get(zone) });
+    const answer = def.state.define<string>('answer', { initialize: () => 'pending' });
+    const load = def.task<[], void>('load', { policy: 'latest' }, async task => {
+      const id = task.get(props.id);
+      const startedIn = task.get(zone);
+      const text = await task.await(loadItem, id);
+      task.set<string>(answer, text + '@' + startedIn + '>' + task.get(zone));
+    });
+    const start = def.action<[], void>('start', run => { run.start(load); });
+    def.lifecycle.onCreated(start);
+    def.expose.state('initialZone', initialZone);
+    def.expose.state('answer', answer);
+    const label = def.derive('label', read =>
+      read.get(props.id) + ':' + read.get(initialZone) + '/' + read.get(zone) + '/' + read.get(answer));
+    return view => view.el('span', { style: tw('keyed-task-item') }, [view.get(label)]);
+  },
+});
+
+export default definePrototype({
+  name: 'keyed-task-owner',
+  setup(def) {
+    const props = def.props.define({
+      first: { type: 'string', default: 'A' },
+      second: { type: 'string', default: 'B' },
+    });
+    return view => view.el('div', {}, [
+      view.child(KeyedTaskItem, { key: view.get(props.first), props: { id: view.get(props.first) } }),
+      view.child(KeyedTaskItem, { key: view.get(props.second), props: { id: view.get(props.second) } }),
+    ]);
+  },
+});

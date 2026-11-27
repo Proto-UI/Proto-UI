@@ -1,0 +1,74 @@
+import { createRef, version as reactVersion } from 'react';
+import { flushSync, version as domVersion } from 'react-dom';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
+import { SelectionControl, type SelectionControlHandle } from './SelectionControl';
+
+const ref = createRef<SelectionControlHandle>();
+const requests: string[] = [];
+
+function selection(attachRef: boolean) {
+  return <SelectionControl ref={attachRef ? ref : null} controlled={false} accepted="unused"
+    initial="A" candidate="B" disabled={false} prefix="Local: " onRequested={value => requests.push(value)} />;
+}
+
+export function serverSnapshot() {
+  return {
+    html: renderToString(selection(true)),
+    refPublished: ref.current !== null,
+    versions: { react: reactVersion, 'react-dom': domVersion },
+  };
+}
+
+export function hydrate(markup: string) {
+  const region = document.getElementById('app')!;
+  region.innerHTML = markup;
+  const original = region.querySelector('button');
+  if (!original) throw new Error('No server-rendered selection button to hydrate.');
+  const recoveries: string[] = [];
+  const root = hydrateRoot(region, selection(true), {
+    onRecoverableError: error => recoveries.push(error instanceof Error ? error.message : String(error)),
+  });
+  let saved: SelectionControlHandle;
+
+  function dom() {
+    return {
+      sameButton: region.firstChild === original && region.lastChild === original,
+      attached: region.isConnected,
+      text: original!.textContent,
+    };
+  }
+
+  function callSaved() {
+    const start = requests.length;
+    const action = saved.choose().status;
+    return { action, selection: saved.selection, attempts: saved.attempts, requests: requests.slice(start) };
+  }
+
+  return {
+    ready() { return ref.current !== null; },
+    takeHandle() {
+      if (!ref.current) throw new Error('Hydration has not attached the public ref.');
+      saved = ref.current;
+      return { dom: dom(), selection: saved.selection, attempts: saved.attempts, recoveries: [...recoveries] };
+    },
+    detach() {
+      flushSync(() => root.render(selection(false)));
+      region.remove();
+      return { dom: dom(), refCleared: ref.current === null, call: callSaved() };
+    },
+    reattach() {
+      document.body.appendChild(region);
+      flushSync(() => root.render(selection(true)));
+      return { dom: dom(), sameHandle: ref.current === saved, selection: saved.selection, attempts: saved.attempts };
+    },
+    unmount() {
+      flushSync(() => root.unmount());
+      const start = requests.length;
+      const action = saved.choose().status;
+      return { action, requests: requests.slice(start), empty: region.childNodes.length === 0, refCleared: ref.current === null, recoveries };
+    },
+  };
+}
+
+declare global { interface Window { hydratedPeer: ReturnType<typeof hydrate> } }

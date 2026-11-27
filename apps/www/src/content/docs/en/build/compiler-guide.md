@@ -4,7 +4,7 @@ desp: 'The 0.4 Proto language compiler foundation and implementation status'
 description: 'The 0.4 Proto language compiler foundation and implementation status'
 ---
 
-The old private compiler has been retired. The replacement belongs to **0.4 scope** and now includes an initial shared frontend and partial semantic lint; none of its five source backends is implemented yet. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
+The old private compiler has been retired. Its **0.4** replacement compiles the versioned readonly Badge and controlled Toggle into TypeScript React components and native Rust GPUI components. Both targets consume the same checked component IR from the shared TypeScript Program. The [compiler foundation](https://github.com/Proto-UI/Proto-UI/blob/main/internal/compiler/README.md) is the implementation entry point.
 
 Existing applications continue to use [Runtime](/en/build/runtime-architecture/) and [Adapters](/en/build/adapter-guide/). Their working examples, component facades and style tooling remain supported within their own release boundaries. The compiler rebuild does not add an acceptance condition to the 0.3 release.
 
@@ -42,13 +42,15 @@ The compiler must analyze authored behavior and lower it through typed semantic 
 
 Generated components must integrate with ordinary host applications. Executing the original prototype, embedding a dynamic JavaScript VM, interpreting Proto IR at runtime, or wrapping the existing Runtime/Adapter is not a successful compilation fallback. Component names and source paths must not select bespoke lowering behavior.
 
-| Source target  | Replacement status | Delivery plan             |
-| -------------- | ------------------ | ------------------------- |
-| React          | Not implemented    | First implementation pair |
-| GPUI           | Not implemented    | First implementation pair |
-| Vue 2          | Not implemented    | Required source backend   |
-| Vue 3          | Not implemented    | Required source backend   |
-| Web Components | Not implemented    | Required source backend   |
+| Source target  | Evidence from authored source |
+| -------------- | ----------------------------- |
+| React          | Chromium observed the Badge's DOM text, computed color, nested dot width and readonly projections. Four Toggle cases exercised trusted clicks, fixed-mode input rejection, retained local state and invalid initial input. |
+| GPUI           | A native headless host observed the Badge's painted label, chip, nested dot and readonly projections. Three Toggle cases exercised pointer requests, local state across reattachment and queued acceptance by a signal subscriber. |
+| Vue 2          | Source backend still missing. |
+| Vue 3          | Source backend still missing. |
+| Web Components | Source backend still missing. |
+
+Both Badge hosts observed the online appearance and the common chip appearance for an unknown tone. Separate fixtures start directly from checked IR to exercise target behavior independently of the authoring frontend.
 
 Application-specific externs may declare a limited target set and must fail clearly when a binding is missing. This does not waive any of the five backend obligations for the official portable library.
 
@@ -56,16 +58,21 @@ Application-specific externs may declare a limited target set and must fail clea
 
 The repository now records the new contract, independent semantic test scenarios, implementation order and the retirement boundary. The old compiler, generated fixtures, compiler-specific runners and browser compilation panel are removed. Git history retains the old implementation and dated observations; they are not evidence for the replacement.
 
-The private package exposes availability and an initial source-analysis command:
+The private package accepts `compile <path> --target react|gpui [--name ...] [--out ...]`. By default, `compile` finds the nearest `tsconfig.json` starting at the input file's directory. For both examples below, `internal/compiler/examples/tsconfig.json` maps the authoring import to the compiler's typed declarations. Use `--project <path>` to select a project explicitly. The `lint` command starts its default project search in the working directory.
 
 ```sh
 node packages/compiler/src/cli-entry.mjs --status
-node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target react --name AuthoringBadge --out AuthoringBadge.ts
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/readonly-badge.proto.ts.txt --target gpui --name AuthoringBadge --out authoring_badge.rs
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target react --name ControlledToggle --out ControlledToggle.ts
+node packages/compiler/src/cli-entry.mjs compile internal/compiler/examples/controlled-toggle.proto.ts.txt --target gpui --name ControlledToggle --out controlled_toggle.rs
 ```
 
-The temporary CLI rejects compilation requests with `PUI_COMPILER_NOT_IMPLEMENTED`; the `requireCompilerImplementation()` availability guard raises the same code. Imports of removed APIs can instead fail at module loading or a consumer's export check. There is no supported replacement compile command yet. The package remains private; this status boundary is not a promised compiler API.
+The frontend reads all three versioned authoring examples from disk. Compiler-owned typed intrinsic declarations resolve the authoring operations. The public Core runtime has yet to export `@proto.ui/core/authoring`. Adapter execution and migration of a consumer to common source remain unverified.
 
-The new lint command shares its TypeScript Program/checker analysis with an editor integration API. It checks implemented boolean, coercion and text rules without executing author modules. Reports bind source/dependency bytes and configuration, and distinguish invalid source, incomplete analysis and unavailable targets. Full phase, effect, ownership and backend analysis remains missing: `analysisComplete` is currently false, an otherwise undiagnosed source remains `sourceValid: null`, and all targets remain non-compilable. Exit status 1 indicates invalid source; 2 indicates incomplete analysis or an unavailable requested target. The command does not rewrite source or generate components.
+With `active: false`, two enabled presses each requested `{ active: true }` while the button stayed `Off`. When the host published `active: true`, the public value became `true` and the button displayed `On`. Omitting `active` selected local ownership and initialized it once from `defaultActive`. Disabled input produced no request. A same-instance change in the presence of `active` was rejected as a whole, and a new instance could select a different mode. Both hosts ran components generated from the same Toggle source and checked IR.
+
+General lint and the editor use the shared TypeScript Program and checker to check implemented boolean, coercion and text rules without executing author modules. To analyze a component in your project, run `node packages/compiler/src/cli-entry.mjs lint path/to/component.proto.ts --target react --json`. Reports bind source and dependency bytes and configuration. `analysisComplete` remains `false`. `sourceValid` is `false` for a proven violation and `null` otherwise. Lint exits with status `1` for invalid source or `2` for incomplete analysis or an unavailable target. The Tabs source still needs a keyed child, a logical Context provider and consumer, and an owned task with a real loader binding.
 
 Each implementation batch must demonstrate its complete scenario through ordinary target builds and observed behavior. Unsupported language features, missing compiler work, missing backend lowering and unbound externs must remain distinguishable. Performance work starts with reproducible cold, warm, incremental, shared and per-component measurements before adopting hard budgets.
 

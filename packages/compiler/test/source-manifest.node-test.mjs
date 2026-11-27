@@ -23,6 +23,7 @@ function fixture(t, input = {}) {
     'entry.proto.ts': 'import { label } from "./helper.proto.ts"; export const component = label;',
     'helper.proto.ts': 'export const label = "A🙂";',
     'consumer.json': '{"mode":"adapter"}\r\n',
+    'tsconfig.json': '{"files":["entry.proto.ts"]}\n',
     ...input,
   };
   for (const [file, source] of Object.entries(contents))
@@ -50,6 +51,7 @@ function fixture(t, input = {}) {
       { repositoryId: 'consumer', path: 'entry.proto.ts', role: 'entrypoint' },
       { repositoryId: 'consumer', path: 'helper.proto.ts', role: 'dependency' },
       { repositoryId: 'consumer', path: 'consumer.json', role: 'configuration' },
+      { repositoryId: 'consumer', path: 'tsconfig.json', role: 'configuration' },
     ],
     entrypoints: [
       {
@@ -78,7 +80,7 @@ test('a matched exact input set distinguishes entrypoints, helper files and comp
   const f = fixture(t);
   const report = f.verify();
   assert.equal(report.status, 'matched');
-  assert.equal(report.counts.declaredFiles, 3);
+  assert.equal(report.counts.declaredFiles, 4);
   assert.equal(report.counts.declaredSourceFiles, 2);
   assert.equal(report.counts.declaredDependencyFiles, 1);
   assert.equal(report.counts.declaredEntrypoints, 1);

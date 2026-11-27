@@ -1,0 +1,63 @@
+interface Resource {
+  readonly path: string;
+  readonly cancellable: boolean;
+  readonly onStart?: () => void;
+  readonly onReturn?: (value: string) => void;
+}
+interface Request {
+  readonly key: string;
+  readonly path: string;
+  readonly signal: AbortSignal;
+  state: 'pending' | 'returned' | 'rejected';
+  value: string | null;
+}
+
+// A retired key and its new incarnation can have different HTTP responses in flight.
+const resources = new Map<string, Resource[]>();
+const requests: Request[] = [];
+const unexpected: string[] = [];
+
+export function enqueue(key: string, path: string, cancellable: boolean, hooks: Pick<Resource, 'onStart' | 'onReturn'> = {}): void {
+  const queue = resources.get(key) ?? [];
+  queue.push({ path, cancellable, ...hooks });
+  resources.set(key, queue);
+}
+
+export function loadKeyedItem(key: string, signal: AbortSignal): Promise<string> {
+  const resource = resources.get(key)?.shift();
+  if (!resource) {
+    unexpected.push(key);
+    return Promise.reject(new Error(`No loopback resource was scheduled for ${key}`));
+  }
+  const request: Request = { key, path: resource.path, signal, state: 'pending', value: null };
+  requests.push(request);
+  resource.onStart?.();
+  const result = readResponse(request, resource.cancellable);
+  // Register the host's reaction before handing this same promise to the generated task.
+  if (resource.onReturn) void result.then(resource.onReturn, () => {});
+  return result;
+}
+
+async function readResponse(request: Request, cancellable: boolean): Promise<string> {
+  const url = new URL(request.path, location.origin);
+  url.searchParams.set('selected', request.key);
+  try {
+    const response = await fetch(url, { cache: 'no-store', signal: cancellable ? request.signal : undefined });
+    if (!response.ok) throw new Error(`Loopback request for ${request.key} returned ${response.status}`);
+    request.value = await response.text();
+    request.state = 'returned';
+    return request.value;
+  } catch (error) {
+    request.state = 'rejected';
+    throw error;
+  }
+}
+
+export function loadHistory() {
+  return {
+    unexpected: [...unexpected],
+    requests: requests.map(({ key, path, signal, state, value }) => ({
+      key, path, state, value, aborted: signal.aborted, reason: signal.aborted ? signal.reason : null,
+    })),
+  };
+}

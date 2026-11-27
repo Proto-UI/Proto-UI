@@ -1,6 +1,6 @@
 /** Availability of the replacement compiler. This module does not compile source. */
 export const COMPILER_STATUS = Object.freeze({
-  implementation: 'not-implemented',
+  implementation: 'partial',
   legacyImplementation: 'retired',
   frontend: Object.freeze({
     implementation: 'partial',
@@ -8,8 +8,8 @@ export const COMPILER_STATUS = Object.freeze({
     languageVersion: '0.4',
   }),
   targets: Object.freeze({
-    react: 'not-implemented',
-    gpui: 'not-implemented',
+    react: 'partial',
+    gpui: 'partial',
     vue2: 'not-implemented',
     vue3: 'not-implemented',
     'web-components': 'not-implemented',
@@ -23,8 +23,7 @@ export class CompilerUnavailableError extends Error {
 
   constructor() {
     super(
-      'The legacy Proto UI compiler has been retired. The replacement Proto language compiler ' +
-        'is not implemented for React, GPUI, Vue 2, Vue 3 or Web Components. No artifact was generated.'
+      'This portable entry exposes compiler availability. Use the Node compiler with an explicit source entry and target.'
     );
     this.name = 'CompilerUnavailableError';
   }

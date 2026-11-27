@@ -1,11 +1,12 @@
 import path from 'node:path';
-import ts from 'typescript';
 import { COMPILER_STATUS } from './index.ts';
-import { analyzeProtoFiles } from './frontend/index.ts';
+import { analyzeProtoProgram, createProtoProgram } from './frontend/index.ts';
 
 const usage = `Usage: proto-compiler lint <source.proto.ts...> [--target TARGET] [--project tsconfig.json] [--json]
 
 Analyze source without executing author modules or generating an artifact.
+Entries use their nearest tsconfig.json. For entries from different projects, select
+one common --project path relative to the working directory.
 Targets: ${Object.keys(COMPILER_STATUS.targets).join(', ')}
 Exit status: 0 = complete requested analysis; 1 = invalid source;
              2 = incomplete analysis or unavailable requested target; 64 = invalid invocation.
@@ -33,51 +34,25 @@ function parseArguments(args) {
   return result;
 }
 
-function projectOptions(project, cwd) {
-  const config = project ? path.resolve(project) : ts.findConfigFile(cwd, ts.sys.fileExists);
-  if (!config) return {};
-  const read = ts.readConfigFile(config, ts.sys.readFile);
-  if (read.error) throw new Error(ts.flattenDiagnosticMessageText(read.error.messageText, '\n'));
-  const parsed = ts.parseJsonConfigFileContent(
-    read.config,
-    ts.sys,
-    path.dirname(config),
-    {},
-    config
-  );
-  // Explicit CLI entries select the closure. A config's include/files selection
-  // is not a requirement that a separate, explicitly supplied entry match it.
-  const errors = parsed.errors.filter((diagnostic) => diagnostic.code !== 18003);
-  if (errors.length) {
-    throw new Error(
-      errors
-        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
-        .join('\n')
-    );
-  }
-  return parsed.options;
-}
-
 export function runLintCli(args, io = process) {
   if (args.length === 1 && (args[0] === '--help' || args[0] === '-h')) {
     io.stdout.write(usage);
     return 0;
   }
   let options;
-  let compilerOptions;
+  let program;
   try {
     options = parseArguments(args);
-    compilerOptions = projectOptions(options.project, process.cwd());
+    program = createProtoProgram({
+      rootNames: options.rootNames,
+      currentDirectory: process.cwd(),
+      project: options.project,
+    });
   } catch (error) {
     io.stderr.write(`${error instanceof Error ? error.message : String(error)}\n${usage}`);
     return 64;
   }
-  const analysis = analyzeProtoFiles({
-    rootNames: options.rootNames,
-    compilerOptions,
-    currentDirectory: process.cwd(),
-    target: options.target,
-  });
+  const analysis = analyzeProtoProgram(program, { target: options.target });
   if (options.json) io.stdout.write(`${JSON.stringify(analysis, null, 2)}\n`);
   else {
     for (const diagnostic of analysis.diagnostics) {

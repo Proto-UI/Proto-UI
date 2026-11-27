@@ -1,0 +1,89 @@
+import { Activity, createRef, StrictMode } from 'react';
+import { createPortal, flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { DisposedInstanceError } from '@proto.ui/compiler/support/react';
+import { AsyncTabsOwner, type AsyncTabsOwnerHandle } from './AsyncTabsOwner';
+import { AsyncTabPanel, TAB_SELECTION, type AsyncTabPanelHandle, type LoadTabResult } from './AsyncTabPanel';
+import { loader } from './tabs-loader';
+
+type Failure = { readonly kind: 'unavailable'; readonly message: string };
+type ExpectedPanel = { readonly kind: 'idle' } | { readonly kind: 'cancelled' }
+  | { readonly kind: 'loading'; readonly requested: string }
+  | { readonly kind: 'ready'; readonly selected: string; readonly text: string }
+  | { readonly kind: 'failed'; readonly selected: string; readonly failure: Failure }
+  | { readonly kind: 'stale'; readonly requested: string; readonly current: string };
+type ExpectedResult = { readonly kind: 'ok'; readonly value: string } | { readonly kind: 'err'; readonly error: Failure };
+type SameDomain<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+type Assert<T extends true> = T;
+type PanelDomain = Assert<SameDomain<AsyncTabPanelHandle['panel'], ExpectedPanel>>;
+type LoaderDomain = Assert<SameDomain<LoadTabResult, ExpectedResult>>;
+
+const root = createRoot(document.getElementById('app')!);
+const surface = document.getElementById('panel-surface')!;
+const owner = createRef<AsyncTabsOwnerHandle>();
+const panel = createRef<AsyncTabPanelHandle>();
+let provider = TAB_SELECTION.createProvider({ value: 'alpha' });
+let hidden = false;
+let instance = 0;
+let saved: AsyncTabPanelHandle | null = null;
+let savedView: HTMLElement | null = null;
+
+function observe(handle: AsyncTabPanelHandle | null) {
+  return handle ? { panel: handle.panel, label: handle.label } : null;
+}
+loader.observe(() => observe(panel.current));
+
+function renderPanel() {
+  flushSync(() => root.render(
+    <StrictMode>
+      <TAB_SELECTION.Provider value={provider}>
+        {createPortal(
+          <Activity mode={hidden ? 'hidden' : 'visible'}><AsyncTabPanel key={instance} ref={panel} /></Activity>,
+          surface
+        )}
+      </TAB_SELECTION.Provider>
+    </StrictMode>
+  ));
+}
+
+const trace = {
+  enqueue: loader.enqueue,
+  prime: loader.prime,
+  calls: loader.calls,
+  unexpectedCalls: loader.unexpectedCalls,
+  mountOwner(defaultValue?: string, attachRef = true) {
+    const inputs = defaultValue === undefined ? {} : { defaultValue };
+    flushSync(() => root.render(
+      <StrictMode><AsyncTabsOwner key={++instance} {...inputs} ref={attachRef ? owner : undefined} /></StrictMode>
+    ));
+  },
+  value() { return owner.current!.value; },
+  select(value: string) { return owner.current!.select(value).status; },
+  mountPanel(value: string) {
+    instance++;
+    hidden = false;
+    provider = TAB_SELECTION.createProvider({ value });
+    renderPanel();
+  },
+  publishSelection(value: string) { provider.publish({ value }); },
+  replaceProvider(value: string) { provider = TAB_SELECTION.createProvider({ value }); renderPanel(); },
+  reload() { return panel.current!.reload().status; },
+  cancel() { return panel.current!.cancel().status; },
+  snapshot() { return observe(panel.current ?? saved); },
+  remember() { saved = panel.current; savedView = surface.querySelector('section'); },
+  retained() { return saved !== null && saved === panel.current && savedView !== null && savedView === surface.querySelector('section'); },
+  hide(value: boolean) { hidden = value; renderPanel(); },
+  remove() { flushSync(() => root.render(null)); },
+  savedAfterRemoval() {
+    if (!saved) throw new Error('The native consumer did not retain a panel handle.');
+    let code: string | null = null;
+    try { void saved.panel; } catch (error) {
+      if (!(error instanceof DisposedInstanceError)) throw error;
+      code = error.code;
+    }
+    return { read: code, reload: saved.reload().status };
+  },
+};
+
+declare global { interface Window { tabsTrace: typeof trace } }
+window.tabsTrace = trace;

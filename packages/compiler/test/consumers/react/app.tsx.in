@@ -1,0 +1,80 @@
+import { Activity, createRef, StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
+import { DeliveryBadge } from './DeliveryBadge';
+import { AuthoringBadge, type AuthoringBadgeHandle } from './AuthoringBadge';
+import { SelectionControl, type SelectionControlHandle } from './SelectionControl';
+
+const root = createRoot(document.getElementById('app')!);
+const primary = createRef<SelectionControlHandle>();
+const secondary = createRef<SelectionControlHandle>();
+const authored = createRef<AuthoringBadgeHandle>();
+let authoredProps: { label?: string; tone?: string } = {};
+let secondaryHidden = false;
+let savedSecondary: SelectionControlHandle;
+const requests: Array<[string, string, number]> = [];
+const nested: Array<[string, number]> = [];
+let reenter = false;
+let connected = true;
+let caption = 'Connected';
+let accepted = 'A';
+let disabled = false;
+let prefix = 'Old: ';
+
+function render() {
+  flushSync(() => root.render(
+    <StrictMode>
+      <section id="badge"><DeliveryBadge connected={connected} caption={caption}
+        appearance={({ available }) => ({ color: available ? 'green' : 'gray' })} /></section>
+      <section id="authored"><AuthoringBadge ref={authored} {...authoredProps} /></section>
+      <section id="primary"><SelectionControl ref={primary} controlled={true}
+        accepted={accepted} candidate="B" initial="unused" disabled={disabled} prefix={prefix}
+        appearance={({ selection }) => ({ borderTopWidth: selection === 'C' ? 7 : 2, borderTopStyle: 'solid' })}
+        onRequested={(value) => {
+          const handle = primary.current!;
+          requests.push([value, handle.selection, handle.attempts]);
+          if (reenter) {
+            reenter = false;
+            const result = handle.choose();
+            nested.push([result.status, handle.attempts]);
+          }
+        }} /></section>
+      <Activity mode={secondaryHidden ? 'hidden' : 'visible'}>
+      <section id="secondary"><SelectionControl ref={secondary} controlled={false}
+        accepted="unused" candidate="U2" initial="U1" disabled={false} prefix="Local: " /></section>
+      </Activity>
+    </StrictMode>
+  ));
+}
+
+const trace = {
+  authored(label: string, tone: string) { authoredProps = { label, tone }; render(); },
+  authoredProjection() { return [authored.current!.label, authored.current!.tone]; },
+  hideSecondary() { savedSecondary = secondary.current!; secondaryHidden = true; render(); },
+  revealSecondary() { secondaryHidden = false; render(); },
+  savedSecondaryAction() { return savedSecondary.choose().status; },
+  savedSecondaryState() { return [savedSecondary.selection, savedSecondary.attempts]; },
+  badge(online: boolean, label: string) { connected = online; caption = label; render(); },
+  publish(value: string, locked = false) { accepted = value; disabled = locked; prefix = 'New: '; render(); },
+  enableReentry() { reenter = true; },
+  snapshot() {
+    return {
+      primary: [primary.current!.selection, primary.current!.attempts],
+      secondary: [secondary.current!.selection, secondary.current!.attempts],
+      requests: [...requests], nested: [...nested],
+    };
+  },
+  discard() {
+    const result = primary.current!.discard();
+    return result.status === 'failed' ? [result.status, result.reason] : [result.status];
+  },
+  dispose() {
+    const saved = primary.current!;
+    flushSync(() => root.unmount());
+    return [saved.choose().status, savedSecondary.choose().status];
+  },
+};
+
+declare global { interface Window { selectionTrace: typeof trace } }
+window.selectionTrace = trace;
+render();
