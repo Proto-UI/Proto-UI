@@ -35,7 +35,9 @@ export default withShadcnRheaDemo({
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-combobox-trigger',
-                children: ['▾'],
+                children: [
+                  { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 14 } },
+                ],
               },
               {
                 kind: 'proto',
@@ -87,7 +89,9 @@ export default withShadcnRheaDemo({
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-combobox-trigger',
-                children: ['▾'],
+                children: [
+                  { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 14 } },
+                ],
               },
               {
                 kind: 'proto',

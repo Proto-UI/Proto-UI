@@ -38,7 +38,9 @@ export default withShadcnRheaDemo({
                     className:
                       'mb-2 inline-flex size-10 items-center justify-center rounded-lg bg-muted text-base font-semibold text-foreground',
                     attrs: { 'aria-hidden': 'true' },
-                    children: ['+'],
+                    children: [
+                      { kind: 'proto', prototypeId: 'lucide-plus-icon', props: { size: 20 } },
+                    ],
                   },
                   {
                     kind: 'proto',
@@ -48,9 +50,7 @@ export default withShadcnRheaDemo({
                   {
                     kind: 'proto',
                     prototypeId: 'shadcn-alert-dialog-description',
-                    children: [
-                      'Anyone with the link will be able to view and edit this project.',
-                    ],
+                    children: ['Anyone with the link will be able to view and edit this project.'],
                   },
                 ],
               },

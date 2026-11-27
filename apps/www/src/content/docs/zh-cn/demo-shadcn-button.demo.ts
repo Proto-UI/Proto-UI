@@ -27,7 +27,7 @@ export default {
         kind: 'proto',
         prototypeId: 'shadcn-button',
         props: { variant: 'ghost', size: 'icon' },
-        children: ['+'],
+        children: [{ kind: 'proto', prototypeId: 'lucide-plus-icon', props: { size: 16 } }],
       },
       {
         kind: 'proto',

@@ -1019,6 +1019,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-down');
     registerPrototype('lucide-chevron-down-icon', mod.default);
   },
+  'lucide-chevron-up-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-up');
+    registerPrototype('lucide-chevron-up-icon', mod.default);
+  },
   'lucide-chevron-left-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-left');
     registerPrototype('lucide-chevron-left-icon', mod.default);
@@ -1030,6 +1034,62 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'lucide-x-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/x');
     registerPrototype('lucide-x-icon', mod.default);
+  },
+  'lucide-star-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/star');
+    registerPrototype('lucide-star-icon', mod.default);
+  },
+  'lucide-plus-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/plus');
+    registerPrototype('lucide-plus-icon', mod.default);
+  },
+  'lucide-minus-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/minus');
+    registerPrototype('lucide-minus-icon', mod.default);
+  },
+  'lucide-arrow-left-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/arrow-left');
+    registerPrototype('lucide-arrow-left-icon', mod.default);
+  },
+  'lucide-arrow-up-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/arrow-up');
+    registerPrototype('lucide-arrow-up-icon', mod.default);
+  },
+  'lucide-arrow-down-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/arrow-down');
+    registerPrototype('lucide-arrow-down-icon', mod.default);
+  },
+  'lucide-circle-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/circle');
+    registerPrototype('lucide-circle-icon', mod.default);
+  },
+  'lucide-circle-dot-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/circle-dot');
+    registerPrototype('lucide-circle-dot-icon', mod.default);
+  },
+  'lucide-circle-check-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/circle-check');
+    registerPrototype('lucide-circle-check-icon', mod.default);
+  },
+  'lucide-layout-grid-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/layout-grid');
+    registerPrototype('lucide-layout-grid-icon', mod.default);
+  },
+  'lucide-calendar-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/calendar');
+    registerPrototype('lucide-calendar-icon', mod.default);
+  },
+  'lucide-chart-bar-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chart-bar');
+    registerPrototype('lucide-chart-bar-icon', mod.default);
+  },
+  'lucide-ellipsis-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/ellipsis');
+    registerPrototype('lucide-ellipsis-icon', mod.default);
+  },
+  'lucide-external-link-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/external-link');
+    registerPrototype('lucide-external-link-icon', mod.default);
   },
   'shadcn-separator-root': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/separator');

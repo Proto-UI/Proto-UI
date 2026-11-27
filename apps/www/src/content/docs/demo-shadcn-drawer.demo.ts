@@ -76,7 +76,9 @@ export default withShadcnRheaDemo({
                         prototypeId: 'shadcn-button',
                         ref: 'decrease',
                         props: { variant: 'outline', size: 'icon' },
-                        children: ['-'],
+                        children: [
+                          { kind: 'proto', prototypeId: 'lucide-minus-icon', props: { size: 16 } },
+                        ],
                       },
                       {
                         kind: 'box',
@@ -100,7 +102,9 @@ export default withShadcnRheaDemo({
                         prototypeId: 'shadcn-button',
                         ref: 'increase',
                         props: { variant: 'outline', size: 'icon' },
-                        children: ['+'],
+                        children: [
+                          { kind: 'proto', prototypeId: 'lucide-plus-icon', props: { size: 16 } },
+                        ],
                       },
                     ],
                   },

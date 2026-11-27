@@ -54,7 +54,7 @@ export default {
             kind: 'proto',
             prototypeId: 'liquid-glass-carousel-previous',
             children: [
-              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['‹'] },
+              { kind: 'proto', prototypeId: 'lucide-chevron-left-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Previous slide'] },
             ],
           },
@@ -62,7 +62,7 @@ export default {
             kind: 'proto',
             prototypeId: 'liquid-glass-carousel-next',
             children: [
-              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['›'] },
+              { kind: 'proto', prototypeId: 'lucide-chevron-right-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Next slide'] },
             ],
           },

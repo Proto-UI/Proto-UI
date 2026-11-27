@@ -63,13 +63,7 @@ export default {
             kind: 'proto',
             prototypeId: 'bootstrap-2-3-2-carousel-previous',
             children: [
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'inline-block rotate-90',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['‹'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-up-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Previous slide'] },
             ],
           },
@@ -77,13 +71,7 @@ export default {
             kind: 'proto',
             prototypeId: 'bootstrap-2-3-2-carousel-next',
             children: [
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'inline-block rotate-90',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['›'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Next slide'] },
             ],
           },

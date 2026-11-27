@@ -11,13 +11,7 @@ function iconLink(href: string, icon: string, label: string, current = false): D
         tag: 'span',
         className: 'inline-flex items-center gap-2',
         children: [
-          {
-            kind: 'box',
-            tag: 'span',
-            className: 'inline-block w-4 text-center',
-            attrs: { 'aria-hidden': 'true' },
-            children: [icon],
-          },
+          { kind: 'proto', prototypeId: icon, props: { size: 14 } },
           { kind: 'box', tag: 'span', children: [label] },
         ],
       },
@@ -42,13 +36,7 @@ export default {
             props: { value: 'status' },
             children: [
               'With Icon',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {
@@ -56,9 +44,9 @@ export default {
             prototypeId: 'bootstrap-2-3-2-navigation-menu-content',
             props: { value: 'status', a11yLabel: 'Task status links' },
             children: [
-              iconLink('#backlog', '○', 'Backlog'),
-              iconLink('#todo', '◔', 'To Do', true),
-              iconLink('#done', '●', 'Done'),
+              iconLink('#backlog', 'lucide-circle-icon', 'Backlog'),
+              iconLink('#todo', 'lucide-circle-dot-icon', 'To Do', true),
+              iconLink('#done', 'lucide-circle-check-icon', 'Done'),
             ],
           },
           {
@@ -67,13 +55,7 @@ export default {
             props: { value: 'views' },
             children: [
               'Views',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {
@@ -81,9 +63,9 @@ export default {
             prototypeId: 'bootstrap-2-3-2-navigation-menu-content',
             props: { value: 'views', a11yLabel: 'Workspace views' },
             children: [
-              iconLink('#board', '▦', 'Board'),
-              iconLink('#timeline', '═', 'Timeline'),
-              iconLink('#metrics', '▲', 'Metrics'),
+              iconLink('#board', 'lucide-layout-grid-icon', 'Board'),
+              iconLink('#timeline', 'lucide-calendar-icon', 'Timeline'),
+              iconLink('#metrics', 'lucide-chart-bar-icon', 'Metrics'),
             ],
           },
         ],

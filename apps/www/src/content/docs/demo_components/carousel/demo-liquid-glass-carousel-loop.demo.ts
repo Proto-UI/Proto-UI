@@ -59,7 +59,7 @@ export default {
             prototypeId: 'liquid-glass-carousel-previous',
             props: { variant: 'regular' },
             children: [
-              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['‹'] },
+              { kind: 'proto', prototypeId: 'lucide-chevron-left-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Previous slide'] },
             ],
           },
@@ -68,7 +68,7 @@ export default {
             prototypeId: 'liquid-glass-carousel-next',
             props: { variant: 'prominent' },
             children: [
-              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['›'] },
+              { kind: 'proto', prototypeId: 'lucide-chevron-right-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Next slide'] },
             ],
           },

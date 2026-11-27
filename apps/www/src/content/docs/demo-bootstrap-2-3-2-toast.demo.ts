@@ -33,7 +33,7 @@ export default {
               {
                 kind: 'proto',
                 prototypeId: 'bootstrap-2-3-2-toast-close',
-                children: ['×'],
+                children: [{ kind: 'proto', prototypeId: 'lucide-x-icon', props: { size: 14 } }],
               },
               {
                 kind: 'proto',

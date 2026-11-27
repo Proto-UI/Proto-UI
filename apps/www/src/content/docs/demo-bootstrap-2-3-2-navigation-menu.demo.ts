@@ -30,16 +30,7 @@ function linkItem(href: string, title: string, description: string, current = fa
 }
 
 function triggerLabel(label: string) {
-  return [
-    label,
-    {
-      kind: 'box' as const,
-      tag: 'span' as const,
-      className: 'text-[10px] leading-none',
-      attrs: { 'aria-hidden': 'true' },
-      children: ['▾'],
-    },
-  ];
+  return [label, { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } }];
 }
 
 export default {

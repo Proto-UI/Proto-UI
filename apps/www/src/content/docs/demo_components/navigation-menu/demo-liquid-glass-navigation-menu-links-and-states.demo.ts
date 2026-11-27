@@ -17,13 +17,7 @@ export default {
             props: { value: 'guides', prominence: 'prominent' },
             children: [
               'Guides',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none opacity-80',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {
@@ -69,13 +63,7 @@ export default {
             props: { value: 'opaque-panel' },
             children: [
               'Opaque Panel',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none opacity-75',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {

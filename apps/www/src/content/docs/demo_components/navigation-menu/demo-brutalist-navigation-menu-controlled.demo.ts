@@ -18,13 +18,7 @@ export default {
             props: { value: 'docs' },
             children: [
               'Docs',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {
@@ -60,13 +54,7 @@ export default {
             props: { value: 'community' },
             children: [
               'Community',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {
