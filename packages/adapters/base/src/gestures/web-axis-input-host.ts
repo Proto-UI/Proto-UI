@@ -108,6 +108,7 @@ function geometryOf(
   };
   let origin = horizontal ? rect.left : rect.top;
   let span = horizontal ? rect.width : rect.height;
+  const rectSpan = span;
   if (!Number.isFinite(origin) || !Number.isFinite(span) || span <= 0) return null;
   let basisBefore = 0;
   let travelExtent = 0;
@@ -169,12 +170,15 @@ function geometryOf(
   if (!Number.isFinite(basisSpan) || basisSpan <= 0) return null;
   let basisDeltaSpan = basisSpan;
   if (deltaBasis) {
-    basisDeltaSpan = 0;
-    for (const part of deltaBasis) {
-      const extent = untransformedExtent(part);
-      if (!Number.isFinite(extent) || extent < 0) return null;
-      basisDeltaSpan += extent;
-    }
+    // Summing getComputedStyle().width strings across flex panels is corrupted
+    // by Blink's 6-significant-digit CSS serialization (e.g. "88.9844px" +
+    // "356.016px" = 445.0004px vs exact LayoutUnit sum 445px), causing false
+    // basis-changed cancellations whenever a panel crosses a power-of-10 width.
+    // Normalize the exact summed border-box rect extent by the target's axis
+    // scale so untransformed LayoutUnit sums remain exact and scale-invariant.
+    const targetScale = rectSpan / targetExtent;
+    if (!Number.isFinite(targetScale) || targetScale <= 0) return null;
+    basisDeltaSpan = deltaSpan / targetScale;
     if (!Number.isFinite(basisDeltaSpan) || basisDeltaSpan <= 0) return null;
   }
   return { origin, span, deltaSpan, sign: reverse ? -1 : 1, basisSpan, basisDeltaSpan };

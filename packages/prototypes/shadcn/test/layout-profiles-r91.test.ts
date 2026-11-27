@@ -597,6 +597,11 @@ describe('source-bound layout profiles preserve inherited owners', () => {
     setElementProps(handle, { withHandle: false });
     await settle();
     expect((handle.shadowRoot ?? handle).querySelector('div')).toBeNull();
+    const verticalHitArea = (handle.shadowRoot ?? handle).querySelector('span');
+    expect(verticalHitArea).not.toBeNull();
+    expect(styleContains(verticalHitArea!, 'h-4')).toBe(true);
+    expect(verticalHitArea!.getAttribute('role')).toBeNull();
+    expect(verticalHitArea!.getAttribute('tabindex')).toBeNull();
     expect(root.getExposes().value).toBe(value);
     expect(handle.getAttribute('role')).toBe('separator');
     expect(document.activeElement).toBe(handle);

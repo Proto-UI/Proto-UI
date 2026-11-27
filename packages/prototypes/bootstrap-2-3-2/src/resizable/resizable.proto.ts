@@ -69,8 +69,11 @@ export const resizableHandle = definePrototype<
       });
     };
     const syncAxis = (run: RunHandle<Bootstrap232ResizableHandleProps>) => {
-      axis.set(run.context.read(RESIZABLE_CONTEXT).orientation, 'resizable owner axis');
-      refresh(run);
+      const nextAxis = run.context.read(RESIZABLE_CONTEXT).orientation;
+      if (axis.get() !== nextAxis) {
+        axis.set(nextAxis, 'resizable owner axis');
+        refresh(run);
+      }
     };
     def.context.subscribe(RESIZABLE_CONTEXT, syncAxis);
     def.lifecycle.onCreated(syncAxis);
@@ -120,9 +123,18 @@ export const resizableHandle = definePrototype<
       pending = null;
     });
     return (r) => {
-      if (!r.read.props.get().withHandle) return inherited.render ? inherited.render(r) : r.slot();
       const vertical = axis.get() === 'vertical';
+      const hitArea = r.el('span', {
+        style: vertical
+          ? tw('absolute block left-0 top-1/2 -translate-y-1/2 w-full h-4 z-10 select-none')
+          : tw('absolute block top-0 left-1/2 -translate-x-1/2 h-full w-4 z-10 select-none'),
+      });
+      if (!r.read.props.get().withHandle) {
+        const base = inherited.render ? inherited.render(r) : r.slot();
+        return Array.isArray(base) ? [hitArea, ...base] : [hitArea, base];
+      }
       return [
+        hitArea,
         r.el(
           'div',
           {
