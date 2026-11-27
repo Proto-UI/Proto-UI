@@ -25,7 +25,9 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'bootstrap-2-3-2-combobox-trigger',
-            children: ['▾'],
+            children: [
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 14 } },
+            ],
           },
           {
             kind: 'proto',

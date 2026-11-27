@@ -39,7 +39,9 @@ export default {
                     className:
                       'mb-1 inline-flex size-10 items-center justify-center rounded-base border-2 border-black bg-secondary-background text-base font-bold text-foreground',
                     attrs: { 'aria-hidden': 'true' },
-                    children: ['+'],
+                    children: [
+                      { kind: 'proto', prototypeId: 'lucide-plus-icon', props: { size: 20 } },
+                    ],
                   },
                   {
                     kind: 'proto',
@@ -49,9 +51,7 @@ export default {
                   {
                     kind: 'proto',
                     prototypeId: 'brutalist-alert-dialog-description',
-                    children: [
-                      'Anyone with the link will be able to view and edit this project.',
-                    ],
+                    children: ['Anyone with the link will be able to view and edit this project.'],
                   },
                 ],
               },

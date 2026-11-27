@@ -259,12 +259,7 @@ function buildRowActionsMenu(family: string, productKey: string): DemoNode {
         prototypeId: `${family}-dropdown-trigger`,
         ref: `${productKey}-trigger`,
         children: [
-          {
-            kind: 'box',
-            tag: 'span',
-            attrs: { 'aria-hidden': 'true' },
-            children: ['⋯'],
-          },
+          { kind: 'proto', prototypeId: 'lucide-ellipsis-icon', props: { size: 16 } },
           {
             kind: 'box',
             tag: 'span',

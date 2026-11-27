@@ -142,12 +142,7 @@ export default withShadcnRheaDemo({
                 kind: 'proto',
                 prototypeId: 'shadcn-message-scroller-jump',
                 children: [
-                  {
-                    kind: 'box',
-                    tag: 'span',
-                    attrs: { 'aria-hidden': 'true' },
-                    children: ['↓'],
-                  },
+                  { kind: 'proto', prototypeId: 'lucide-arrow-down-icon', props: { size: 14 } },
                   {
                     kind: 'box',
                     tag: 'span',

@@ -9,7 +9,7 @@ export default {
         prototypeId: 'brutalist-badge-root',
         props: { tone: 'info' },
         children: [
-          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['✓'] },
+          { kind: 'proto', prototypeId: 'lucide-check-icon', props: { size: 12 } },
           'Verified',
         ],
       },
@@ -18,7 +18,7 @@ export default {
         prototypeId: 'brutalist-badge-root',
         props: { tone: 'accent' },
         children: [
-          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['★'] },
+          { kind: 'proto', prototypeId: 'lucide-star-icon', props: { size: 12 } },
           'Featured',
         ],
       },
@@ -28,7 +28,7 @@ export default {
         props: { tone: 'danger' },
         children: [
           'Breaking',
-          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['!'] },
+          { kind: 'proto', prototypeId: 'lucide-circle-alert-icon', props: { size: 12 } },
         ],
       },
     ],

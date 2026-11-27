@@ -32,7 +32,9 @@ export default {
                 kind: 'proto',
                 prototypeId: 'liquid-glass-combobox-trigger',
                 props: { prominence: 'prominent' },
-                children: ['▾'],
+                children: [
+                  { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 14 } },
+                ],
               },
               {
                 kind: 'proto',
@@ -86,7 +88,9 @@ export default {
               {
                 kind: 'proto',
                 prototypeId: 'liquid-glass-combobox-trigger',
-                children: ['▾'],
+                children: [
+                  { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 14 } },
+                ],
               },
               {
                 kind: 'proto',

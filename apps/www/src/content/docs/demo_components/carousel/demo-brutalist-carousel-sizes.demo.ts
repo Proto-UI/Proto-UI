@@ -54,7 +54,7 @@ export default {
             kind: 'proto',
             prototypeId: 'brutalist-carousel-previous',
             children: [
-              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['←'] },
+              { kind: 'proto', prototypeId: 'lucide-arrow-left-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Previous slide'] },
             ],
           },
@@ -62,7 +62,7 @@ export default {
             kind: 'proto',
             prototypeId: 'brutalist-carousel-next',
             children: [
-              { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['→'] },
+              { kind: 'proto', prototypeId: 'lucide-arrow-right-icon', props: { size: 16 } },
               { kind: 'box', tag: 'span', className: 'sr-only', children: ['Next slide'] },
             ],
           },

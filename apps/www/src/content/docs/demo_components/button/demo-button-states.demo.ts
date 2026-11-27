@@ -22,7 +22,7 @@ export default {
         prototypeId: 'shadcn-button',
         props: { variant: 'ghost', size: 'icon' },
         children: [
-          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['+'] },
+          { kind: 'proto', prototypeId: 'lucide-plus-icon', props: { size: 16 } },
           { kind: 'box', tag: 'span', className: 'sr-only', children: ['Add'] },
         ],
       },

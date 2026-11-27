@@ -19,13 +19,7 @@ export default withShadcnRheaDemo({
             props: { value: 'docs' },
             children: [
               'Docs',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none opacity-70',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {
@@ -61,13 +55,7 @@ export default withShadcnRheaDemo({
             props: { value: 'community' },
             children: [
               'Community',
-              {
-                kind: 'box',
-                tag: 'span',
-                className: 'text-[10px] leading-none opacity-70',
-                attrs: { 'aria-hidden': 'true' },
-                children: ['▾'],
-              },
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } },
             ],
           },
           {

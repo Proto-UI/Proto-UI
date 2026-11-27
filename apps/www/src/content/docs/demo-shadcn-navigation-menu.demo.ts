@@ -31,16 +31,7 @@ function linkCard(href: string, title: string, description: string, current = fa
 }
 
 function triggerLabel(label: string) {
-  return [
-    label,
-    {
-      kind: 'box' as const,
-      tag: 'span' as const,
-      className: 'text-[10px] leading-none opacity-70',
-      attrs: { 'aria-hidden': 'true' },
-      children: ['▾'],
-    },
-  ];
+  return [label, { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } }];
 }
 
 export default withShadcnRheaDemo({
@@ -163,7 +154,21 @@ export default withShadcnRheaDemo({
                     kind: 'proto',
                     prototypeId: 'shadcn-navigation-menu-link',
                     props: { href: '#examples', target: '_blank' },
-                    children: ['Examples ↗'],
+                    children: [
+                      {
+                        kind: 'box',
+                        tag: 'span',
+                        className: 'inline-flex items-center gap-1.5',
+                        children: [
+                          'Examples',
+                          {
+                            kind: 'proto',
+                            prototypeId: 'lucide-external-link-icon',
+                            props: { size: 12 },
+                          },
+                        ],
+                      },
+                    ],
                   },
                   {
                     kind: 'proto',
