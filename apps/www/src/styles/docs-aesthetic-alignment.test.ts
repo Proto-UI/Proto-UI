@@ -60,8 +60,20 @@ describe('website and workspace aesthetic & optical alignment contracts', () => 
     expect(markdown).toContain('scrollbar-width: thin;');
 
     const codeSurfaces = read('apps/www/src/styles/code-surfaces.css');
-    expect(codeSurfaces).toContain('scrollbar-width: thin;');
-    expect(codeSurfaces).toContain('::-webkit-scrollbar-thumb');
+    expect(codeSurfaces).toContain('scrollbar-width: none;');
+    expect(codeSurfaces).toContain('::-webkit-scrollbar');
+
+    const codePanel = read('apps/www/src/components/PrototypePreviewer/CodePanel.astro');
+    expect(codePanel).toContain("scrollLimit = 'unbounded'");
+    expect(codePanel).toContain('<CodeScrollArea');
+
+    const cliInit = read('apps/www/src/components/CliInitOutput.astro');
+    expect(cliInit).not.toContain('CodeFileBrowser');
+    expect(cliInit).toContain('data-cli-init-tabs');
+
+    const installCard = read('apps/www/src/components/InstallCommandCard.astro');
+    expect(installCard).toContain('<CodeScrollArea');
+    expect(installCard).toContain('data-install-managers');
 
     const notice = read('apps/www/src/components/DocStageNotice.astro');
     expect(notice).toContain("[data-site-library-family='brutalist']");

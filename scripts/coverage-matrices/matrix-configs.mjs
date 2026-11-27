@@ -21,6 +21,10 @@ export const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   ]),
   'www.docs.api-table': Object.freeze(['apps/www/src/components/ApiPropsTable.astro']),
   'www.docs.stage-notice': Object.freeze(['apps/www/src/components/DocStageNotice.astro']),
+  'www.docs.steps': Object.freeze([
+    'apps/www/src/components/Steps.astro',
+    'apps/www/src/components/Step.astro',
+  ]),
   'www.docs.phase-badge': Object.freeze(['apps/www/src/components/SpecPhaseBadge.astro']),
   'www.docs.entity-links': Object.freeze(['apps/www/src/components/SpecEntityLinks.astro']),
   'www.gallery.lucide-card-grid': Object.freeze([
@@ -77,6 +81,7 @@ export const WEBSITE_NON_INTERACTIVE_EXPECTATIONS = Object.freeze({
       'www.docs.spec-contract-preview',
       'www.docs.api-table',
       'www.docs.stage-notice',
+      'www.docs.steps',
       'www.docs.entity-links',
       'www.gallery.lucide-card-grid',
       'www.gallery.prototype-library-cards',
@@ -209,6 +214,7 @@ export const WEBSITE_SURFACE_IDS = Object.freeze([
   'www.docs.spec-contract-preview',
   'www.docs.api-table',
   'www.docs.stage-notice',
+  'www.docs.steps',
   'www.docs.phase-badge',
   'www.docs.entity-links',
   'www.gallery.lucide-search',

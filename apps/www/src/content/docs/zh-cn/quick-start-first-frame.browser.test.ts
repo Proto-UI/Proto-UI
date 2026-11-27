@@ -727,7 +727,7 @@ describe('quick-start first-frame continuity', () => {
               await captureViewport(page, path.join(directory, `${componentPrefix}.png`));
               const init = page.locator('[data-cli-init-output]');
               const generatedBrowser = init.locator(
-                '[data-standalone-file-browser][data-file-browser-init="1"]'
+                '[data-cli-init-tabs][data-cli-init-tabs-init="1"]'
               );
               await generatedBrowser.waitFor();
               await init.scrollIntoViewIfNeeded();
@@ -770,9 +770,11 @@ describe('quick-start first-frame continuity', () => {
                 ['proto-ui/config.json', 'config'],
                 ['src/styles/proto-ui-style.css', 'style'],
               ] as const) {
-                const item = generatedBrowser.locator(`[data-code-tree-path="${filePath}"]`);
+                const item = generatedBrowser.locator(
+                  `[role="tab"][data-cli-file-path="${filePath}"]`
+                );
                 await item.click();
-                const detail = generatedBrowser.locator('[data-code-file-panel]:visible');
+                const detail = generatedBrowser.locator('[data-cli-file-panel]:visible');
                 expect(await detail.locator('[data-code-file-title]').textContent()).toBe(filePath);
                 await detail
                   .locator('[data-copy-view="ready"] [data-demo-ref="copy-button"]')

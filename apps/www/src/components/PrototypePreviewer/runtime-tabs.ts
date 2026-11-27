@@ -75,6 +75,7 @@ export function createRuntimeTabs(options: {
   });
   list.style.maxWidth = '100%';
   list.style.overflowX = 'auto';
+  list.style.scrollbarWidth = 'none';
   root.append(list);
   const panels = new Map<RuntimeId, HTMLElement>();
   const triggers = new Map<RuntimeId, RuntimeTab>();

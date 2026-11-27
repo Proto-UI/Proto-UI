@@ -7,11 +7,11 @@
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "1e89bff4feaaea54f3c3192197fac2c901cf883dfa8eed223083b3e5d53a719d"
+      "sha256": "eacb228e0ee96af988daabd80232da70457b8ebef9d291adcd4785db036c43ef"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "4c2d49f0589a446021d8be58d304381bea19d265323eae196756d92ef93a9096"
+      "sha256": "ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-format.ts",
@@ -43,7 +43,7 @@
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
-      "sha256": "05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7"
+      "sha256": "027c3e56da086a9affd423aa43aa9278a9c01807a513d237efbbe426db1fb253"
     },
     {
       "path": "apps/www/src/components/SiteCopyBootstrap.astro",
@@ -123,7 +123,7 @@
     },
     {
       "path": "apps/www/src/components/install-command-card-client.ts",
-      "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
+      "sha256": "3fa1ee7d45176e12e0f6837cb3d6c6c8edc0b8e401ca911bddd448e3be4df610"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",
@@ -131,7 +131,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
-      "sha256": "ab62bf88b33cbb13cf52d0b1dc6a1d0b201cfbd6591f394565f751999542606e"
+      "sha256": "a3e0bda829aea1d1e2c95be4a20a54731d2bf8d9253c0a8cde95390c10d3a96b"
     }
   ]
 }

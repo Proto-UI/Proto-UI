@@ -29,7 +29,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Exact legacy runtime-selection composition; its owning row stays blocked.
   'apps/www/src/components/PrototypePreviewer/runtime-tabs.ts': Object.freeze({
-    sourceSha256: 'de2f0bff9e40dc6b61ca67a66240061d143b6fc044271abd4fa3fd2104fdbc29',
+    sourceSha256: '189a42e840f4b60f38c9454e48fc26898bc340421a44b14da768fa70506ec2f2',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tabs',
@@ -42,7 +42,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // remain blocked; import admission does not resolve native fallback disposition
   // or provide host, keyboard, SSR/no-JS, or remount acceptance evidence.
   'apps/www/src/components/code-example-tabs.ts': Object.freeze({
-    sourceSha256: 'fc6c12cc1b2e905f5cbe9e9a494ec5905393c5ee5bcf3d6072e624e887b76162',
+    sourceSha256: '949ac9e5e3008c23dadb693912f511662bec19ae277c65afa1657dabe4defda4',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tabs',
@@ -425,7 +425,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The reviewed extracted client owns the same manager selection. Its exact
   // importer bytes remain required; this does not admit sibling helpers.
   'apps/www/src/components/install-command-card-client.ts': Object.freeze({
-    sourceSha256: 'dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64',
+    sourceSha256: '3fa1ee7d45176e12e0f6837cb3d6c6c8edc0b8e401ca911bddd448e3be4df610',
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({

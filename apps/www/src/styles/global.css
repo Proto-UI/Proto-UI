@@ -232,32 +232,11 @@ proto-concept {
 
 .no-scrollbar {
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.proto-previewer__code {
-  counter-reset: code-line;
-}
-
-.proto-previewer__code .line {
-  position: relative;
-}
-
-.proto-previewer__code .line::before {
-  counter-increment: code-line;
-  content: counter(code-line);
-  color: var(--color-muted-foreground, #9ca3af);
-  width: calc(var(--spacing) * 16);
-  padding-right: calc(var(--spacing) * 6);
-  text-align: right;
-  display: inline-block;
-  /* Decorative line numbers scroll with the text instead of covering it. */
-  user-select: none;
-  pointer-events: none;
-}
-
-/* Line numbers are decorative; let enlarged source use a narrow container. */
-@container code-panel (max-width: 14rem) {
-  .proto-previewer__code .line::before {
-    display: none;
-  }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }

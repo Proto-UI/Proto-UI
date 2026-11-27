@@ -56,8 +56,15 @@ export async function enhanceCodeScrollArea(shell: HTMLElement): Promise<void> {
     track.append(create('thumb'));
     root.append(track);
   }
-  viewport.append(content);
   container.append(root);
+  const atomicViewport = viewport as HTMLElement & {
+    moveBefore?: (node: Node, child: Node | null) => void;
+  };
+  if (typeof atomicViewport.moveBefore === 'function') {
+    atomicViewport.moveBefore(content, null);
+  } else {
+    viewport.append(content);
+  }
   container.dataset.codeScrollReady = '';
   if (previousScroll) {
     // Tree focus reveal must address the actual viewport after adoption. Keep
@@ -73,7 +80,9 @@ export async function enhanceCodeScrollArea(shell: HTMLElement): Promise<void> {
 }
 
 export function codeScrollTarget(shell: HTMLElement): HTMLElement | null {
-  const pre = shell.querySelector<HTMLElement>('.proto-previewer__code');
+  const pre = shell.querySelector<HTMLElement>(
+    '.proto-previewer__code, .install-command-card__body'
+  );
   const viewport = shell.querySelector<HTMLElement>(
     '[data-code-scroll-ready] [data-code-scroll-viewport]'
   );

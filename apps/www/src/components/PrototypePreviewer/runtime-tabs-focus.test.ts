@@ -23,6 +23,7 @@ vi.mock('./runtime-preview-surface', () => ({
   }),
 }));
 vi.mock('./projection-theme', () => ({
+  clearProjectionThemeSurfaceStyle: () => {},
   resolveProjectionThemeSurfaceStyle: () => ({}),
   watchProjectionThemeSurfaceStyle: () => () => {},
 }));

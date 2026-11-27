@@ -496,7 +496,7 @@
     },
     {
       "id": "www.docs.code-example-file-tabs",
-      "Path": "`apps/www/src/components/CodeExample.astro`, `apps/www/src/components/code-example-client.ts`, `apps/www/src/components/code-example-tree.ts`, `apps/www/src/components/CodeFileBrowser.astro`, `apps/www/src/components/code-file-browser-client.ts`, `apps/www/src/components/CliInitOutput.astro`",
+      "Path": "`apps/www/src/components/CodeExample.astro`, `apps/www/src/components/code-example-client.ts`, `apps/www/src/components/code-example-tree.ts`, `apps/www/src/components/CodeFileBrowser.astro`, `apps/www/src/components/code-file-browser-client.ts`, `apps/www/src/components/CliInitOutput.astro`, `apps/www/src/components/cli-init-tabs-client.ts`",
       "User job": "Browse files and directories in host-specific examples and standalone CLI output",
       "Current owner": "Base Tree semantic owner with Shadcn/Brutalist family projections; website examples and CLI documentation own paths, source content and controlled values",
       "targetClass": "site-composition",
@@ -547,7 +547,7 @@
     },
     {
       "id": "www.docs.code-panel-scroll",
-      "Path": "`apps/www/src/components/CodeFileBrowser.astro`, `apps/www/src/components/code-file-browser-client.ts`, `apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro`, `apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts`",
+      "Path": "`apps/www/src/components/CodeFileBrowser.astro`, `apps/www/src/components/code-file-browser-client.ts`, `apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro`, `apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts`, `apps/www/src/components/InstallCommandCard.astro`, `apps/www/src/components/install-command-card-client.ts`",
       "User job": "Browse files and read long highlighted source in bounded file panels and the RuntimeBox footer",
       "Current owner": "Website CodeFileBrowser and CodePanel own frame dimensions, source and enhancement lifetime; public Shadcn WC Scroll Area owns the viewport and tracks; Tree retains file semantics",
       "targetClass": "site-composition",
@@ -1605,7 +1605,7 @@
     {
       "source": "apps/www/src/components/code-example-tabs.ts",
       "owningMatrixRow": "`www.docs.code-example-host-tabs`",
-      "sourceSha256": "fc6c12cc1b2e905f5cbe9e9a494ec5905393c5ee5bcf3d6072e624e887b76162"
+      "sourceSha256": "949ac9e5e3008c23dadb693912f511662bec19ae277c65afa1657dabe4defda4"
     },
     {
       "source": "apps/www/src/components/code-example-tree.ts",
@@ -1625,7 +1625,12 @@
     {
       "source": "apps/www/src/components/CliInitOutput.astro",
       "owningMatrixRow": "`www.content.native-disclosures`, `www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-surface`",
-      "sourceSha256": "6b17d95499e4442265d74cec71bab184266e7abe7d40396b0bd80bc956c8bdcf"
+      "sourceSha256": "aff01f832933ee3cbe6ed3d68db80a66378a95f621cdfdf25245f4a780b404cc"
+    },
+    {
+      "source": "apps/www/src/components/cli-init-tabs-client.ts",
+      "owningMatrixRow": "`www.docs.code-example-file-tabs`",
+      "sourceSha256": "fe62f7329784f62fabb90461c20d50afd98b5ad7a5a85b7b60c473e11b010428"
     },
     {
       "source": "apps/www/src/components/override/Sidebar.astro",
@@ -1885,7 +1890,7 @@
     {
       "source": "apps/www/src/components/CodeExample.astro",
       "owningMatrixRow": "`www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface`",
-      "sourceSha256": "c5862e75696dc56188e1b965fdc4cd2a3bcb250ff9fbfd9eb85610815e1395ba"
+      "sourceSha256": "c85aba347ae58ec0fecbb493701be1caecf4d43ee6706d3ad9615c294d4d324a"
     },
     {
       "source": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
@@ -1989,13 +1994,13 @@
     },
     {
       "source": "apps/www/src/components/InstallCommandCard.astro",
-      "owningMatrixRow": "`www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs`",
-      "sourceSha256": "05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7"
+      "owningMatrixRow": "`www.docs.code-panel-scroll`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs`",
+      "sourceSha256": "027c3e56da086a9affd423aa43aa9278a9c01807a513d237efbbe426db1fb253"
     },
     {
       "source": "apps/www/src/components/install-command-card-client.ts",
-      "owningMatrixRow": "`www.docs.install-manager-tabs`",
-      "sourceSha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
+      "owningMatrixRow": "`www.docs.code-panel-scroll`, `www.docs.install-manager-tabs`",
+      "sourceSha256": "3fa1ee7d45176e12e0f6837cb3d6c6c8edc0b8e401ca911bddd448e3be4df610"
     },
     {
       "source": "apps/www/src/components/LanguageRedirect.astro",
@@ -2025,7 +2030,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
       "owningMatrixRow": "`www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface`",
-      "sourceSha256": "4c2d49f0589a446021d8be58d304381bea19d265323eae196756d92ef93a9096"
+      "sourceSha256": "ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",
@@ -2060,7 +2065,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
       "owningMatrixRow": "`www.demo.prototype-previewer`, `www.demo.runtime-select`",
-      "sourceSha256": "1e89bff4feaaea54f3c3192197fac2c901cf883dfa8eed223083b3e5d53a719d"
+      "sourceSha256": "eacb228e0ee96af988daabd80232da70457b8ebef9d291adcd4785db036c43ef"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro",
@@ -2075,7 +2080,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
       "owningMatrixRow": "`www.docs.code-panel-scroll`",
-      "sourceSha256": "ab62bf88b33cbb13cf52d0b1dc6a1d0b201cfbd6591f394565f751999542606e"
+      "sourceSha256": "a3e0bda829aea1d1e2c95be4a20a54731d2bf8d9253c0a8cde95390c10d3a96b"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
@@ -2185,7 +2190,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/runtime-tabs.ts",
       "owningMatrixRow": "`www.demo.runtime-select`",
-      "sourceSha256": "de2f0bff9e40dc6b61ca67a66240061d143b6fc044271abd4fa3fd2104fdbc29"
+      "sourceSha256": "189a42e840f4b60f38c9454e48fc26898bc340421a44b14da768fa70506ec2f2"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
@@ -2315,7 +2320,7 @@
     {
       "source": "apps/www/src/components/site-code-surface.ts",
       "owningMatrixRow": "`www.docs.code-surface`, `www.docs.note-surface`",
-      "sourceSha256": "9fc53a7731f595be3971f8b77b3da3c6c56fef2236e0d97b28ddbf7be0a34138"
+      "sourceSha256": "6cf51091f35bf055d781ac31f0e407a096ac0c992a3d396f3a501fdd78c2d583"
     },
     {
       "source": "apps/www/src/components/site-contents-command.ts",
@@ -2695,7 +2700,7 @@
     {
       "source": "apps/www/src/components/site-startup-paint.ts",
       "owningMatrixRow": "`www.build.style-generation`, `www.docs.code-surface`, `www.search.launcher`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle`",
-      "sourceSha256": "714685626c3aae0ac056e2732d3d518206ecd70d0e9d26f3d3a35dcc3bbb7c36"
+      "sourceSha256": "e55759d20e64e41137c72e3cc8de69e0793ac46e7fbc659bdfe630d4ac224edd"
     },
     {
       "source": "apps/www/src/components/snapshot-prototype-style.ts",
