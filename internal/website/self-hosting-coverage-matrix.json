@@ -2038,7 +2038,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "4db55528c2597733709b71acfabbc21e9dd16fe77a28933881bd21f89c3703ac"
+      "sourceSha256": "888fb613c697779f23f2b31fc6eb0807b4a542f7cc49c5696c83698248f2bba0"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",

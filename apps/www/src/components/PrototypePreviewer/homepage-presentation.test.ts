@@ -67,6 +67,32 @@ describe('Homepage presentation source boundaries', () => {
     expect(preview).not.toContain('grid-template-columns: repeat(4,');
     expect(preview).toContain('grid-template-columns: minmax(0, 1fr);');
   });
+
+  it('unifies the multi-stop bottom fade horizon across Shadcn, Brutalist, and Bootstrap 2.3.2', () => {
+    const preview = read('apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro');
+    const readme = read('apps/www/README.md');
+    expect(readme).toContain('All three homepage presentation families');
+    expect(readme).toContain('--homepage-gallery-fade');
+    expect(preview).toContain('--homepage-gallery-fade: min(12rem, 28%);');
+    expect(preview).toContain('--homepage-gallery-fade: min(20rem, 28%);');
+    expect(preview).not.toContain('--homepage-gallery-fade: min(16rem, 28%);');
+    expect(preview).toContain('height: var(--homepage-gallery-fade);');
+    expect(preview).toContain('var(--color-background) 14%,');
+    expect(preview).toContain('color-mix(in srgb, var(--color-background) 85%, transparent) 38%,');
+    expect(preview).toContain('color-mix(in srgb, var(--color-background) 42%, transparent) 68%,');
+    expect(preview).not.toContain(
+      'color-mix(in srgb, var(--color-background) 12%, transparent) var(--homepage-gallery-row-gap)'
+    );
+    expect(preview).not.toContain(
+      ":global(html[data-site-library-family='shadcn'])\n    .home-demo-previewer\n    :global(.home-gallery__viewport)::after"
+    );
+    expect(preview).toContain(
+      '.home-demo-previewer :global(.home-gallery__viewport:focus-within)::after'
+    );
+    expect(preview).toContain(
+      '@media (forced-colors: active), (prefers-reduced-transparency: reduce)'
+    );
+  });
   it('uses one defined bilingual sans-serif stack instead of an unresolved color token', () => {
     const style = read('apps/www/src/styles/tailwindcss.css');
     expect(style).toContain('--font-sans:');

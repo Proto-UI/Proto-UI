@@ -91,7 +91,8 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
        >=1900px 2.5rem; top inset p-12, lg p-6, >=1900px p-12, pb-0. */
     --homepage-gallery-gap: 2rem;
     --homepage-gallery-inset-block-start: 3rem;
-    /* Upstream bottom fade h-48 / lg:h-80 / xl:h-64, bounded for short stages. */
+    /* Bottom fade horizon shared by all three families: compact 12rem,
+       desktop (>=64rem) 20rem matching upstream shadcn CardsDemo, bounded for short stages. */
     --homepage-gallery-fade: min(12rem, 28%);
     --homepage-gallery-column-gap: var(--homepage-gallery-gap);
     --homepage-gallery-row-gap: var(--homepage-gallery-gap);
@@ -107,11 +108,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       --homepage-gallery-gap: 1.5rem;
       --homepage-gallery-inset-block-start: 1.5rem;
       --homepage-gallery-fade: min(20rem, 28%);
-    }
-  }
-  @media (min-width: 80rem) {
-    .home-demo-previewer {
-      --homepage-gallery-fade: min(16rem, 28%);
     }
   }
   @media (min-width: 118.75rem) {
@@ -352,23 +348,17 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     columns: 18rem;
     column-gap: var(--homepage-gallery-column-gap);
   }
-  /* Bring the bottom edge to the page background inside the card gutter.
-     Above the gutter, live labels and controls need to remain readable. */
+  /* Shared across Shadcn, Brutalist, and Bootstrap 2.3.2 (light and dark):
+     dissolve the trailing row smoothly into each family's page background over
+     --homepage-gallery-fade, synchronized with the outer ghost rails and
+     centered attribution. Focused controls clear the overlay via :focus-within. */
   .home-demo-previewer :global(.home-gallery__viewport)::after {
     content: '';
     position: absolute;
     inset: auto 0 0;
-    height: min(18rem, 28%);
+    height: var(--homepage-gallery-fade);
     z-index: 1;
     pointer-events: none;
-    background-image: linear-gradient(
-      to top,
-      var(--color-background),
-      color-mix(in srgb, var(--color-background) 12%, transparent) var(--homepage-gallery-row-gap),
-      transparent
-    );
-  }
-  .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__viewport)::after {
     background-image: linear-gradient(
       to top,
       var(--color-background),
@@ -377,14 +367,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       color-mix(in srgb, var(--color-background) 42%, transparent) 68%,
       transparent
     );
-  }
-  /* Shadcn: the card fade shares the stage's fade length and ends in the same
-     background, so cards and the full-bleed band dissolve together. */
-  :global(html[data-site-library-family='shadcn'])
-    .home-demo-previewer
-    :global(.home-gallery__viewport)::after {
-    height: var(--homepage-gallery-fade);
-    background-image: linear-gradient(to top, var(--color-background), transparent);
   }
   .home-demo-previewer :global(.home-gallery__viewport:focus-within)::after {
     visibility: hidden;
