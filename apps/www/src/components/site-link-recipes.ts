@@ -141,6 +141,7 @@ export function linkSurfaceProps(
     }).surface;
   const action =
     ['icon', 'pagination'].includes(appearance) && !['minimal', 'link'].includes(emphasis);
+  const shadcnPagination = family === 'shadcn' && appearance === 'pagination';
   const framedNavigation = family === 'brutalist' && ['brand', 'nav'].includes(appearance);
   const framed = action || framedNavigation;
   const group = appearance === 'nav-group';
@@ -149,11 +150,13 @@ export function linkSurfaceProps(
     variant:
       row && (facts.current || (family === 'brutalist' && facts.hovered))
         ? 'accent'
-        : framed
-          ? family === 'brutalist'
-            ? 'secondary'
-            : 'outline'
-          : 'transparent',
+        : shadcnPagination
+          ? 'secondary'
+          : framed
+            ? family === 'brutalist'
+              ? 'secondary'
+              : 'outline'
+            : 'transparent',
     radius: framed
       ? family === 'brutalist'
         ? 'default'
@@ -163,8 +166,9 @@ export function linkSurfaceProps(
           ? 'default'
           : 'md'
         : 'none',
-    border:
-      framed || (family === 'brutalist' && row && (facts.current || facts.hovered))
+    border: shadcnPagination
+      ? 'none'
+      : framed || (family === 'brutalist' && row && (facts.current || facts.hovered))
         ? 'all'
         : family === 'brutalist' && group
           ? 'bottom'

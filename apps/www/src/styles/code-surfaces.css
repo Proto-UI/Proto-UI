@@ -135,6 +135,44 @@
     container: code-panel / inline-size;
     padding: min(var(--docs-code-padding), 12px);
   }
+  .proto-previewer__code,
+  .install-command-card__body,
+  .code-file-browser__tree-scroll,
+  [data-code-scroll-viewport],
+  [data-code-title-scroll] {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-foreground) 20%, transparent) transparent;
+  }
+  .proto-previewer__code::-webkit-scrollbar,
+  .install-command-card__body::-webkit-scrollbar,
+  .code-file-browser__tree-scroll::-webkit-scrollbar,
+  [data-code-scroll-viewport]::-webkit-scrollbar,
+  [data-code-title-scroll]::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .proto-previewer__code::-webkit-scrollbar-track,
+  .install-command-card__body::-webkit-scrollbar-track,
+  .code-file-browser__tree-scroll::-webkit-scrollbar-track,
+  [data-code-scroll-viewport]::-webkit-scrollbar-track,
+  [data-code-title-scroll]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .proto-previewer__code::-webkit-scrollbar-thumb,
+  .install-command-card__body::-webkit-scrollbar-thumb,
+  .code-file-browser__tree-scroll::-webkit-scrollbar-thumb,
+  [data-code-scroll-viewport]::-webkit-scrollbar-thumb,
+  [data-code-title-scroll]::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-foreground) 20%, transparent);
+    border-radius: 9999px;
+  }
+  .proto-previewer__code::-webkit-scrollbar-thumb:hover,
+  .install-command-card__body::-webkit-scrollbar-thumb:hover,
+  .code-file-browser__tree-scroll::-webkit-scrollbar-thumb:hover,
+  [data-code-scroll-viewport]::-webkit-scrollbar-thumb:hover,
+  [data-code-title-scroll]::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-foreground) 34%, transparent);
+  }
   .proto-previewer__code {
     margin: 0;
     min-width: 0;
