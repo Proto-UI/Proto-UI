@@ -1,4 +1,4 @@
-import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
+import { defineAsHook, definePrototype, tw, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asAccessible, asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { useTypeaheadNavigation } from '../behaviors';
 import { asTransition } from '../tools';
@@ -27,11 +27,7 @@ function projectDropdownContentHandle(
   return { stateHandles: { open }, asTransition };
 }
 
-function setupDropdownContent(
-  def: DefHandle<DropdownContentProps, DropdownContentExposes>,
-  _options?: void,
-  api?: { store: Record<string, unknown> }
-): void {
+function setupDropdownContent(def: DefHandle<DropdownContentProps, DropdownContentExposes>): void {
   const accessible = asAccessible();
   def.anatomy.claim(DROPDOWN_FAMILY, { role: 'content' });
   def.props.define({
@@ -107,10 +103,7 @@ function setupDropdownContent(
 
   const open = def.state.bool('open', false);
   def.expose.state('open', open);
-  const store = (api?.store ?? {}) as {
-    run: any;
-  };
-  store.run = null;
+  let mountedRun: RunHandle<DropdownContentProps> | null = null;
 
   const readContext = (run: any): DropdownContextValue | null => {
     try {
@@ -255,7 +248,7 @@ function setupDropdownContent(
     updateOpen(run, ctx, 'reason: lifecycle.onCreated => dropdown content sync');
   });
   def.lifecycle.onMounted((run) => {
-    store.run = run;
+    mountedRun = run;
     const trigger = run.anatomy.partsOf(DROPDOWN_FAMILY, 'trigger')[0] ?? null;
     if (trigger) overlay.registerAnchorPart(trigger);
     syncPosition(run);
@@ -270,7 +263,7 @@ function setupDropdownContent(
 
   overlay.open.watch((_ctx, event) => {
     if (event.type !== 'next' || event.next || event.reason !== 'escape') return;
-    const run = store.run;
+    const run = mountedRun;
     const ctx = currentContext;
     if (!run || !ctx?.open) return;
     requestDropdownOpen(run, false, 'escape', 'keyboard');
@@ -278,7 +271,7 @@ function setupDropdownContent(
   });
 
   def.event.onGlobal('key.down', (run, ev) => {
-    if (store.run !== run) return;
+    if (mountedRun !== run) return;
     const ctx = readContext(run);
     if (!ctx) return;
     if (!ctx.open || ctx.disabled) return;
@@ -290,14 +283,14 @@ function setupDropdownContent(
   });
 
   boundary.subscribeOutside(() => {
-    const run = store.run;
+    const run = mountedRun;
     const ctx = currentContext;
     if (!run || !ctx?.open || ctx.disabled) return;
     requestDropdownOpen(run, false, 'outside.press', 'pointer');
   });
 
   def.lifecycle.onUnmounted(() => {
-    store.run = null;
+    mountedRun = null;
     currentContext = null;
   });
 

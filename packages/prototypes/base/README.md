@@ -34,6 +34,8 @@ import { radioGroupRoot, radioGroupItem } from '@proto.ui/prototypes-base/radio-
 
 The root package export remains available for compatibility. Compound anatomy parts share one family subpath. Shared authoring capabilities are available through `transition`, `tools`, and `behaviors` subpaths.
 
+Dropdown and Context Menu Content support direct composition and the `asDropdownContent` and `asContextMenuContent` hooks, respectively. Each Content instance uses its mounted runtime for Escape, Tab, and outside-press dismissal and releases that reference on unmount.
+
 ## Internal Structure
 
 - `src/async-region/`
