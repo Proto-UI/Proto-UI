@@ -165,12 +165,17 @@ export function setupNavigationActionPaint<
       when: (w) => w.all(w.state(content).eq(true), w.state(states.focused).eq(true)),
       intent: (i) => i.feedback.style.use(tw('ring-0 outline-none')),
     });
+  // Inside open Content, Base pointer.move hands off Focus directly, so hovered
+  // alone must not keep a second row highlighted after keyboard focus moves.
   def.rule({
     when: (w) =>
       w.all(
         w.not(w.state(style).eq('new-york-v4')),
         w.state(states.disabled).eq(false),
-        w.any(w.state(states.focused).eq(true), w.state(hovered).eq(true))
+        w.any(
+          w.state(states.focused).eq(true),
+          w.all(w.state(content).eq(false), w.state(hovered).eq(true))
+        )
       ),
     intent: (i) => i.feedback.style.use(tw('bg-muted')),
   });
@@ -179,7 +184,10 @@ export function setupNavigationActionPaint<
       w.all(
         w.state(style).eq('new-york-v4'),
         w.state(states.disabled).eq(false),
-        w.any(w.state(states.focused).eq(true), w.state(hovered).eq(true))
+        w.any(
+          w.state(states.focused).eq(true),
+          w.all(w.state(content).eq(false), w.state(hovered).eq(true))
+        )
       ),
     intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
   });
@@ -217,7 +225,7 @@ export function setupNavigationActionPaint<
           w.prop('current').eq(true),
           w.state(states.disabled).eq(false),
           w.state(states.focused).eq(false),
-          w.state(hovered).eq(false)
+          w.any(w.state(content).eq(true), w.state(hovered).eq(false))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
@@ -228,7 +236,7 @@ export function setupNavigationActionPaint<
           w.prop('current').eq(true),
           w.state(states.disabled).eq(false),
           w.state(states.focused).eq(false),
-          w.state(hovered).eq(false)
+          w.any(w.state(content).eq(true), w.state(hovered).eq(false))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent/50 text-accent-foreground')),
     });

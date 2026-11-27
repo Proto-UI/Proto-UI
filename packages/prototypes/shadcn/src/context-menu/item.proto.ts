@@ -11,7 +11,6 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
     const disabled = behavior.getState!('disabled')!;
     const focused = behavior.getState!('focused')!;
     const focusVisible = behavior.getState!('focusVisible')!;
-    const hovered = behavior.getState!('hovered')!;
     const active = behavior.getState!('active')!;
     const pressed = behavior.getState!('pressed')!;
 
@@ -21,20 +20,20 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
         disabled,
         focused,
         focusVisible,
-        hovered,
         active,
         pressed,
       },
       'context-menu'
     );
 
-    // Highlight enabled context-menu items on pointer hover / active tracking across all profiles.
+    // Pointer navigation reaches active through Base Focus handoff; hovered alone
+    // must not leave a second painted row behind when focus moves elsewhere.
     def.rule({
       when: (w) =>
         w.all(
           w.prop('variant').eq('default'),
           w.state(disabled).eq(false),
-          w.any(w.state(hovered).eq(true), w.state(active).eq(true))
+          w.state(active).eq(true)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
@@ -43,7 +42,7 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
         w.all(
           w.prop('variant').eq('destructive'),
           w.state(disabled).eq(false),
-          w.any(w.state(hovered).eq(true), w.state(active).eq(true))
+          w.state(active).eq(true)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/10 text-destructive')),
     });
@@ -53,7 +52,7 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
           w.prop('variant').eq('destructive'),
           w.state(disabled).eq(false),
           w.meta('colorScheme').eq('dark'),
-          w.any(w.state(hovered).eq(true), w.state(active).eq(true))
+          w.state(active).eq(true)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
     });

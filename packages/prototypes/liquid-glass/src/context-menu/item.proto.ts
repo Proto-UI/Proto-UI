@@ -23,7 +23,6 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
 
     const behavior = asContextMenuItem();
     const disabled = behavior.getState!('disabled')!;
-    const hovered = behavior.getState!('hovered')!;
     const focused = behavior.getState!('focused')!;
     const focusVisible = behavior.getState!('focusVisible')!;
     const active = behavior.getState!('active')!;
@@ -55,12 +54,7 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
         w.all(
           w.prop('variant').eq('default'),
           w.state(disabled).eq(false),
-          w.any(
-            w.state(hovered).eq(true),
-            w.state(active).eq(true),
-            w.state(focused).eq(true),
-            w.state(focusVisible).eq(true)
-          )
+          w.any(w.state(active).eq(true), w.state(focused).eq(true), w.state(focusVisible).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
     });
@@ -69,12 +63,7 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
         w.all(
           w.prop('variant').eq('destructive'),
           w.state(disabled).eq(false),
-          w.any(
-            w.state(hovered).eq(true),
-            w.state(active).eq(true),
-            w.state(focused).eq(true),
-            w.state(focusVisible).eq(true)
-          )
+          w.any(w.state(active).eq(true), w.state(focused).eq(true), w.state(focusVisible).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive text-destructive-foreground')),
     });

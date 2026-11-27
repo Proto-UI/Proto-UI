@@ -349,6 +349,12 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       if (!disabled.get() && ctx.value)
         invoke(run, 'requestValue', run.props.get().value, 'pointer-switch');
     });
+    def.event.on('pointer.move', (run, event) => {
+      const ctx = run.context.read(context);
+      if (disabled.get() || !ctx.value || ctx.value !== run.props.get().value) return;
+      if (event.pointerType !== 'mouse' || event.pointerButtons !== 'none') return;
+      focus.focusSelf({ reason: 'pointer', preventScroll: true });
+    });
     def.event.onGlobal('key.down', (run, event) => {
       if (!focus.focused.get() || disabled.get()) return;
       if (event.key === ' ')
@@ -606,6 +612,11 @@ export function createMenuFamily(slug: string, navigation: boolean) {
         invoke(run, 'close');
     };
     if (!link) def.event.on('press.commit', (run) => commit(run));
+    def.event.on('pointer.move', (run, event) => {
+      if (disabled.get() || !run.context.read(contentContext).open) return;
+      if (event.pointerType !== 'mouse' || event.pointerButtons !== 'none') return;
+      focus.focusSelf({ reason: 'pointer', preventScroll: true });
+    });
     return { disabled, commit };
   }
 

@@ -9,7 +9,7 @@ export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItem
     const state = asSelectItem().stateHandles;
     if (!state)
       throw new Error('[liquid-glass-select-item] Required Base state handles are missing.');
-    const { active, hovered, selected, focusVisible, disabled } = state;
+    const { active, selected, focusVisible, disabled } = state;
     def.feedback.style.use(
       tw(
         'relative flex min-w-0 w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm whitespace-normal wrap-anywhere text-start cursor-default select-none outline-none'
@@ -21,11 +21,7 @@ export default definePrototype<LiquidGlassSelectItemProps, LiquidGlassSelectItem
     });
     def.rule({
       when: (w) =>
-        w.all(
-          w.any(w.state(active).eq(true), w.state(hovered).eq(true)),
-          w.state(selected).eq(false),
-          w.state(disabled).eq(false)
-        ),
+        w.all(w.state(active).eq(true), w.state(selected).eq(false), w.state(disabled).eq(false)),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
