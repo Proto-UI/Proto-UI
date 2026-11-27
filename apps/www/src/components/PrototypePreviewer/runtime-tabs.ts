@@ -64,6 +64,8 @@ export function createRuntimeTabs(options: {
   const root = element('root', rootProps(value));
   root.dataset.runtimeTabsRoot = '';
   const list = element('list', { variant: 'line', a11yLabel: 'Runtime', loop: true });
+  list.style.maxWidth = '100%';
+  list.style.overflowX = 'auto';
   root.append(list);
   const panels = new Map<RuntimeId, HTMLElement>();
   const triggers = new Map<RuntimeId, RuntimeTab>();

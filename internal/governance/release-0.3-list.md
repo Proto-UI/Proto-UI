@@ -53,6 +53,8 @@ Each group covers Base semantics, Shadcn and Brutalist projections, Lucide parti
   - [x] Implementation delivered (#1100): 22 families across Base/Shadcn/Brutalist + 66 spec entities — see [delivered families manifest](release-0.3-delivered-families.json).
   - [ ] 验收层（原生视觉、辅助技术证据与 #1100 中保留的 TODO 条件）
 - [ ] Overlay scrollbar-coordinate repair and scoped prior-work closeouts (#1163/#1164).
+  - [x] Overlay scrollbar-coordinate repair (#1163): fixed in PR #1303 and verified closed on `main` (`94e1c11f7`).
+  - [ ] Scoped prior-work closeouts (#1164): 8 independent closeouts still open.
 
 Check completed source-bound children promptly; do not hold a completed repair waiting on an unrelated umbrella family.
 

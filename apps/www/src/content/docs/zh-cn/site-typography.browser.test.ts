@@ -728,7 +728,7 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                     });
                     // WC retains the two closed authored Accordion bodies;
                     // framework hosts withdraw them.
-                    expect(galleryText).toHaveLength(runtime === 'wc' ? 76 : 74);
+                    expect(galleryText).toHaveLength(runtime === 'wc' ? 110 : 108);
                     expect(galleryLabels).toHaveLength(4);
                     expect(new Set(galleryLabels.map((label) => label.id)).size).toBe(4);
                     for (let index = 0; index < labelNames.length; index++) {
