@@ -722,13 +722,16 @@ for (const width of [2048, 390]) {
               )
               .toBe(false);
           }
-          const trigger = page
-            .locator(
-              route === '/zh-cn/'
-                ? '[data-home-showcase] [aria-haspopup="dialog"]'
-                : '[data-previewer-id] [aria-haspopup="dialog"]'
-            )
-            .first();
+          // The current docs page hydrates six examples independently. Read and
+          // activate the Trigger in its primary Preview throughout the journey.
+          const trigger =
+            route === '/zh-cn/'
+              ? page.locator('[data-home-showcase] [aria-haspopup="dialog"]').first()
+              : baseline
+                ? page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first()
+                : page.locator(
+                    '[data-demo-id="demo-shadcn-dialog"] [data-projection-generation-state="active"] [aria-haspopup="dialog"]'
+                  );
           await trigger.waitFor();
           const contentId = await trigger.getAttribute('aria-controls');
           if (!contentId) throw new Error('The actual Dialog Trigger has no Content identity');
