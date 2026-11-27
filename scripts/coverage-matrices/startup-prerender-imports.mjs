@@ -8,7 +8,7 @@
 // internal/records/2026-11-24-main-website-boundary-repair.json.
 export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/site-startup-paint.ts': Object.freeze({
-    sourceSha256: '714685626c3aae0ac056e2732d3d518206ecd70d0e9d26f3d3a35dcc3bbb7c36',
+    sourceSha256: 'e55759d20e64e41137c72e3cc8de69e0793ac46e7fbc659bdfe630d4ac224edd',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
       '@proto.ui/prototypes-bootstrap-2-3-2/surface',

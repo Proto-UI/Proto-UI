@@ -1,5 +1,7 @@
 ---
 import SiteCopyBootstrap from './SiteCopyBootstrap.astro';
+import StaticLucideIcon from './StaticLucideIcon.astro';
+import CodeScrollArea from './PrototypePreviewer/CodeScrollArea.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from './site-library-family';
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(siteFamily);
@@ -63,8 +65,13 @@ const activeManager =
   id={shellId}
 >
   <div class="install-command-card__toolbar" data-code-toolbar data-site-code-surface="toolbar">
+    <span class="install-command-card__icon" aria-hidden="true">
+      <StaticLucideIcon name="terminal" size="12px" />
+    </span>
+
     <div
       class="install-command-card__managers"
+      data-install-managers
       aria-label={isChinese ? '包管理器' : 'Package manager'}
     >
       {
@@ -107,18 +114,30 @@ const activeManager =
 
   {
     normalizedEntries.map((entry) => (
-      <pre
+      <div
+        id={`${shellId}-panel-${entry.manager}`}
         class:list={[
-          'install-command-card__body',
+          'install-command-card__panel',
           entry.manager === activeManager || 'install-command-card__body--hidden',
         ]}
-        tabindex="0"
-        aria-label={`${entry.manager} · ${isChinese ? '安装命令' : 'Install command'}`}
         data-command-panel={entry.manager}
         hidden={entry.manager !== activeManager}
       >
-        <code data-command>{entry.command}</code>
-      </pre>
+        <CodeScrollArea
+          limit="unbounded"
+          label={`${entry.manager} · ${isChinese ? '安装命令' : 'Install command'}`}
+        >
+          <div data-code-content>
+            <pre
+              class="install-command-card__body"
+              tabindex="0"
+              aria-label={`${entry.manager} · ${isChinese ? '安装命令' : 'Install command'}`}
+            >
+              <code data-command>{entry.command}</code>
+            </pre>
+          </div>
+        </CodeScrollArea>
+      </div>
     ))
   }
 </figure>
@@ -145,27 +164,67 @@ const activeManager =
   .install-command-card {
     margin: 1.5rem 0 0;
   }
+  .install-command-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 0.25rem;
+    background: color-mix(in oklab, var(--color-foreground) 72%, transparent);
+    color: var(--color-background);
+    flex: none;
+  }
+  :global([data-site-library-family='brutalist']) .install-command-card__icon {
+    border-radius: 0;
+    background: var(--site-brutalist-foreground, #000);
+    color: var(--site-brutalist-background, #fff);
+  }
   .install-command-card__managers {
     display: flex;
     align-items: center;
     gap: 0.25rem;
     min-width: 0;
     overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .install-command-card__managers::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .install-command-card__managers[hidden] {
+    display: none;
   }
   .install-command-card__manager {
     flex: none;
-    min-height: 2.75rem;
+    height: 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
   }
   .install-command-card__copy {
     margin-inline-start: auto;
     flex: none;
   }
+  .install-command-card__panel {
+    min-width: 0;
+    max-width: 100%;
+  }
   .install-command-card__body {
     margin: 0;
-    padding: var(--docs-code-padding);
+    padding: 0.875rem 1rem;
     overflow: auto;
     white-space: normal;
     text-align: start;
+  }
+  .install-command-card
+    :global([data-code-scroll-ready] [data-code-scroll-viewport] .install-command-card__body) {
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+    overflow: visible;
   }
   .install-command-card__body--hidden {
     display: none;

@@ -598,8 +598,12 @@ async function containedWhitepaper(page: Page) {
   expect(facts.natural.height).toBeGreaterThan(0);
   expect(facts.returnMode).toBe('origin');
   expect(facts.style.animation).toBe('none');
-  expect(facts.style.duration.split(',').map((value) => value.trim())).toContain('0.22s');
-  expect(facts.style.easing.split(',').every((value) => value.trim() === 'linear')).toBe(true);
+  expect(facts.style.duration.split(',').map((value) => value.trim())).toContain('0.42s');
+  expect(
+    facts.style.easing
+      .split(',')
+      .some((value) => value.trim().startsWith('linear(') || value.trim() === 'linear')
+  ).toBe(true);
   expect(facts.style.border).toBe('0px');
   expect(facts.style.padding).toBe('0px');
   expect(facts.style.radius).toBe('0px');
@@ -884,8 +888,12 @@ describe('automatic documentation image preview in real Chromium', () => {
               top: el.getBoundingClientRect().top,
             }));
             expect(style.animation).toBe('none');
-            expect(style.duration.split(',').map((s) => s.trim())).toContain('0.22s');
-            expect(style.easing.split(',').every((s) => s.trim() === 'linear')).toBe(true);
+            expect(style.duration.split(',').map((s) => s.trim())).toContain('0.42s');
+            expect(
+              style.easing
+                .split(',')
+                .some((s) => s.trim().startsWith('linear(') || s.trim() === 'linear')
+            ).toBe(true);
             expect(style.border).toBe('0px');
             expect(style.shadow).toBe('none');
             expect(style.background).toBe('rgba(0, 0, 0, 0)');

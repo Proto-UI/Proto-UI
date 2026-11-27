@@ -18,6 +18,7 @@ describe('Brutalist preset generator', () => {
         'package.json',
         'scripts/styles/generate-brutalist-style-tokens.ts',
         'scripts/styles/family-style-closure.ts',
+        'scripts/styles/runtime-style-closure.ts',
         'packages/cli/src/services',
         'packages/cli/src/generated/lowered-variant-order.ts',
         'packages/prototypes/brutalist/src',

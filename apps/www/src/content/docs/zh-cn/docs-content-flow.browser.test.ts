@@ -253,7 +253,7 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
         !source.contains(command) &&
         command.getAttribute('data-site-code-surface') === 'frame' &&
         source.getAttribute('data-site-code-surface') === 'frame',
-      hasFileTree: Boolean(document.querySelector('[data-standalone-file-browser]')),
+      hasFileTree: Boolean(document.querySelector('[data-cli-init-tabs]')),
       paragraphToStandaloneCode:
         standaloneCode.getBoundingClientRect().top -
         standalonePrevious.getBoundingClientRect().bottom,

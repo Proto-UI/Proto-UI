@@ -89,4 +89,44 @@ describe('InstallCommandCard navigation lifetime', () => {
     expect(command.textContent).toBe('pnpm dlx @proto.ui/cli@0.2.0 add wc base-button');
     expect(command.hidden).toBe(true);
   });
+
+  it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const)(
+    'upgrades [data-install-managers] to real %s family Tabs without native scrollbar and tears down cleanly',
+    async (family) => {
+      const card = document.createElement('figure');
+      card.id = `tabs-${family}`;
+      card.dataset.installCommandCard = '';
+      card.dataset.activeManager = 'npm';
+      card.dataset.projectionFamily = family;
+      card.innerHTML = `
+        <div data-install-managers aria-label="Package manager">
+          <button type="button" data-manager-tab="npm" aria-pressed="true">npm</button>
+          <button type="button" data-manager-tab="pnpm" aria-pressed="false">pnpm</button>
+        </div>
+        <div id="p-npm" data-command-panel="npm"><pre class="install-command-card__body"><code data-command>npx @proto.ui/cli add</code></pre></div>
+        <div id="p-pnpm" data-command-panel="pnpm" hidden><pre class="install-command-card__body"><code data-command>pnpm dlx @proto.ui/cli add</code></pre></div>`;
+      document.body.append(card);
+      initInstallCommandCards(card);
+      const projectedRoot = card.querySelector<HTMLElement>(
+        `[data-install-command-tabs-projection="${family}"]`
+      );
+      expect(projectedRoot?.tagName.toLowerCase()).toBe(`pui-install-command-${family}-tabs-root`);
+      const list = projectedRoot?.querySelector<HTMLElement>('[role="tablist"]');
+      expect(list?.tagName.toLowerCase()).toBe(`pui-install-command-${family}-tabs-list`);
+      expect(list?.style.getPropertyValue('scrollbar-width')).toBe('none');
+      const tabs = [...(projectedRoot?.querySelectorAll<HTMLElement>('[role="tab"]') ?? [])];
+      expect(tabs.map((tab) => tab.dataset.managerTab)).toEqual(['npm', 'pnpm']);
+      expect(card.querySelector<HTMLElement>('[data-install-managers]')?.hidden).toBe(true);
+
+      projectedRoot!.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'pnpm' } }));
+      await Promise.resolve();
+      expect(card.dataset.activeManager).toBe('pnpm');
+      expect(card.querySelector<HTMLElement>('[data-command-panel="pnpm"]')!.hidden).toBe(false);
+      expect(card.querySelector<HTMLElement>('[data-command-panel="npm"]')!.hidden).toBe(true);
+
+      document.dispatchEvent(new Event('astro:before-swap'));
+      expect(card.querySelector('[data-install-command-tabs-projection]')).toBeNull();
+      expect(card.querySelector<HTMLElement>('[data-install-managers]')?.hidden).toBe(false);
+    }
+  );
 });

@@ -85,6 +85,7 @@ export function enhanceCodeExampleTabs(options: {
       flexWrap: 'nowrap',
     },
   });
+  projectedList.style.setProperty('scrollbar-width', 'none');
   projectedList.dataset.codeExampleTablist = list.hasAttribute('data-code-host-tabs')
     ? 'host'
     : 'file';
@@ -107,6 +108,8 @@ export function enhanceCodeExampleTabs(options: {
     // projected label exact without touching source-code whitespace.
     trigger.textContent = tab.dataset.codeHostName ?? tab.textContent?.trim() ?? '';
     if (tab.dataset.codeHostName) trigger.dataset.codeHostName = tab.dataset.codeHostName;
+    if (tab.dataset.cliFilePath) trigger.dataset.cliFilePath = tab.dataset.cliFilePath;
+    if (tab.title) trigger.title = tab.title;
     if (tab.dataset.codeHostAvailability) {
       const status = doc.createElement('span');
       status.dataset.codeHostStatus = '';
@@ -245,6 +248,172 @@ export function enhanceCodeExampleTabs(options: {
     select(index) {
       if (destroyed || index < 0 || index >= tabs.length) return;
       value = index;
+      publishValue();
+    },
+    destroy,
+  };
+}
+
+export type InstallCommandTabsProjection = {
+  select(manager: string): void;
+  destroy(): void;
+};
+
+/** Real family Tabs strip for InstallCommandCard package-manager selection. */
+export function enhanceInstallCommandTabs(options: {
+  container: HTMLElement;
+  managers: readonly string[];
+  activeManager: string;
+  panelIds: ReadonlyMap<string, string>;
+  label: string;
+  onSelect(manager: string): void;
+}): InstallCommandTabsProjection {
+  const { container, managers, panelIds, label, onSelect } = options;
+  const doc = container.ownerDocument;
+  if (container.contains(doc.activeElement)) {
+    return { select() {}, destroy() {} };
+  }
+  const family = runtimePreviewFamily(container);
+  const definitions = familyDefinitions[family];
+  const entries = {
+    root: definitions.tabsRoot,
+    list: definitions.tabsList,
+    trigger: definitions.tabsTrigger,
+  };
+  for (const [part, proto] of Object.entries(entries)) {
+    const tag = `pui-install-command-${family}-tabs-${part}`;
+    if (!customElements.get(tag)) {
+      customElements.define(tag, AdaptToWebComponent(proto, { register: false }));
+    }
+  }
+  const element = (part: keyof typeof entries, props: Record<string, unknown>) => {
+    const node = doc.createElement(`pui-install-command-${family}-tabs-${part}`);
+    setElementProps(node, props);
+    return node;
+  };
+  let value = managers.includes(options.activeManager) ? options.activeManager : managers[0]!;
+  let destroyed = false;
+  const rootProps = () => ({
+    value,
+    orientation: 'horizontal',
+    activationMode: 'automatic',
+    ...(family === 'shadcn' ? { styleProfile: 'new-york-v4' } : {}),
+  });
+  const root = element('root', {
+    ...rootProps(),
+    surfaceStyle: { display: 'inline-flex', minWidth: '0', maxWidth: '100%' },
+  });
+  root.dataset.installCommandTabsProjection = family;
+  const projectedList = element('list', {
+    variant: 'default',
+    a11yLabel: label,
+    loop: true,
+    surfaceStyle:
+      family === 'shadcn'
+        ? {
+            maxWidth: '100%',
+            overflowX: 'auto',
+            background: 'transparent',
+            padding: '0',
+            height: 'auto',
+            gap: '0.125rem',
+            justifyContent: 'flex-start',
+            flexWrap: 'nowrap',
+          }
+        : {
+            maxWidth: '100%',
+            overflowX: 'auto',
+            height: 'auto',
+            justifyContent: 'flex-start',
+            flexWrap: 'nowrap',
+          },
+  });
+  projectedList.style.setProperty('scrollbar-width', 'none');
+  projectedList.dataset.installCommandTablist = '';
+  root.append(projectedList);
+  const triggers: HTMLElement[] = [];
+  for (const manager of managers) {
+    const trigger = element('trigger', {
+      value: manager,
+      surfaceStyle:
+        family === 'shadcn'
+          ? {
+              flex: 'none',
+              height: '1.75rem',
+              paddingInline: '0.5rem',
+              paddingBlock: '0.125rem',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.8125rem',
+              lineHeight: '1.25rem',
+              boxShadow: 'none',
+            }
+          : {
+              flex: 'none',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.8125rem',
+            },
+    });
+    trigger.textContent = manager;
+    trigger.dataset.managerTab = manager;
+    trigger.dataset.installCommandProjectedTab = manager;
+    const panelId = panelIds.get(manager);
+    if (panelId) trigger.setAttribute('aria-controls', panelId);
+    projectedList.append(trigger);
+    triggers.push(trigger);
+  }
+  const previousHidden = container.hidden;
+  let queued = false;
+  const publishValue = () => {
+    if (queued || destroyed) return;
+    queued = true;
+    queueMicrotask(() => {
+      queued = false;
+      if (!destroyed) {
+        setElementProps(root, {
+          ...rootProps(),
+          surfaceStyle: { display: 'inline-flex', minWidth: '0', maxWidth: '100%' },
+        });
+      }
+    });
+  };
+  const change = (event: Event) => {
+    if (destroyed || event.target !== root) return;
+    const next = (event as CustomEvent<{ value?: unknown }>).detail?.value;
+    if (typeof next !== 'string' || !managers.includes(next) || next === value) return;
+    value = next;
+    onSelect(next);
+    publishValue();
+  };
+  const destroy = () => {
+    if (destroyed) return;
+    destroyed = true;
+    root.removeEventListener('valueChange', change);
+    root.remove();
+    container.hidden = previousHidden;
+  };
+  try {
+    root.addEventListener('valueChange', change);
+    container.after(root);
+    if (
+      projectedList.getAttribute('role') !== 'tablist' ||
+      !triggers.every((trigger) => trigger.getAttribute('role') === 'tab')
+    ) {
+      destroy();
+      throw new Error('[InstallCommandCard] Tabs projection did not initialize.');
+    }
+    if (container.contains(doc.activeElement)) {
+      destroy();
+      return { select() {}, destroy() {} };
+    }
+    container.hidden = true;
+  } catch (error) {
+    destroy();
+    throw error;
+  }
+  return {
+    select(manager) {
+      if (destroyed || !managers.includes(manager) || manager === value) return;
+      value = manager;
       publishValue();
     },
     destroy,

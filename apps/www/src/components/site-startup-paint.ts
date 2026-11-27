@@ -36,10 +36,14 @@ export async function codeStartupPaintCss() {
       const tokens = await snapshotStartupStyle(`${family}-surface`, {
         variant: part === 'toolbar' ? 'transparent' : family === 'shadcn' ? 'muted' : 'outline',
         radius: part === 'toolbar' ? 'none' : 'default',
-        border: part === 'toolbar' ? 'bottom' : 'all',
+        border: part === 'toolbar' ? 'bottom' : family === 'shadcn' ? 'none' : 'all',
         elevation: 'none',
       });
       const declarations = staticSurfaceDeclarations(tokens);
+      if (family === 'shadcn' && part === 'frame') {
+        declarations['background-color'] = 'var(--pui-code)';
+        declarations['border-color'] = 'transparent';
+      }
       const variables = Object.entries(declarations).map(([property, raw]) => {
         // Runtime's Brutalist projection resolves these exact family inputs.
         const value = family === 'brutalist' ? raw.replaceAll('--pui-', '--site-brutalist-') : raw;
