@@ -136,6 +136,8 @@
     padding: min(var(--docs-code-padding), 12px);
   }
   .proto-previewer__code > code {
+    display: grid;
+    min-width: max-content;
     counter-reset: code-line;
   }
   .proto-previewer__code .line {

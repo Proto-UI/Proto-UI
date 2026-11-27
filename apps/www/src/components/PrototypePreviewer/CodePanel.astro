@@ -80,7 +80,7 @@ const highlighted = await highlightCode(code, lang, { highlightLines });
   role={labelledBy ? panelRole : undefined}
   aria-labelledby={labelledBy}
   hidden={hidden}
-  data-code-file-panel={labelledBy ? '' : undefined}
+  data-code-file-panel={labelledBy || fileIndex !== undefined ? '' : undefined}
   data-code-file-index={fileIndex}
   data-code-shell
   data-code-presentation={presentation}
