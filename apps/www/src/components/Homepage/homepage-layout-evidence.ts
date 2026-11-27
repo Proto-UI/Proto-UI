@@ -1,17 +1,17 @@
 /** Passive geometry evidence only. Never writes to the rendered page. */
-export const HOMEPAGE_GALLERY_IDS = [
-  'controls',
-  'shortcuts',
-  'workspace-analytics',
-  'workspace-command',
-  'preferences',
-  'workspace-progress',
-  'hover',
-  'editor',
-  'workspace-help',
-  'overlays',
-  'spark',
-  'choices',
+export const WIDE_GALLERY_COLUMNS = [
+  ['controls', 'shortcuts', 'milestones'],
+  ['workspace-analytics', 'preferences', 'protocol'],
+  ['ecosystem', 'workspace-progress', 'throughput'],
+  ['hover', 'editor', 'workspace-help', 'spark'],
+  ['workspace-command', 'highlights', 'overlays', 'choices'],
+] as const;
+export const HOMEPAGE_GALLERY_IDS = WIDE_GALLERY_COLUMNS.flat();
+const FOUR_GALLERY_COLUMNS = [
+  ['controls', 'shortcuts', 'workspace-analytics', 'workspace-help'],
+  ['milestones', 'workspace-command', 'ecosystem', 'highlights'],
+  ['preferences', 'workspace-progress', 'protocol', 'hover'],
+  ['editor', 'overlays', 'spark', 'choices', 'throughput'],
 ] as const;
 
 export type GalleryRect = {
@@ -25,6 +25,13 @@ export type GalleryRect = {
 export type GalleryFlowFacts = {
   containerCount: number;
   viewportWidth: number;
+  gapRem: number;
+  wideMedia: boolean;
+  enhancedMedia: boolean;
+  queryContainerWidth: number;
+  readingFlowSupported: boolean;
+  flowDisplay: string;
+  flowReadingFlow: string;
   rootFontSize: number;
   columnGap: number;
   container: GalleryRect | null;
@@ -36,13 +43,65 @@ export type GalleryFlowFacts = {
     fragments: GalleryRect[];
   }>;
 };
+/** Browser media queries use the initial font size, even when the page enlarges its root. */
+export function readGalleryRhythm() {
+  const large = matchMedia('(min-width: 64rem)').matches;
+  let gapRem = large ? 1.5 : 2;
+  if (matchMedia('(min-width: 118.75rem)').matches) gapRem = 2.5;
+  if (matchMedia('(max-width: 767px)').matches) gapRem = 1;
+  let fadeRem = 18;
+  if (document.documentElement.dataset.siteLibraryFamily === 'shadcn') {
+    fadeRem = matchMedia('(min-width: 80rem)').matches ? 16 : large ? 20 : 12;
+  }
+  return { gapRem, fadeRem };
+}
+
+/** Physical columns in reading direction, with cards ordered from top to bottom. */
+export function groupPaintedCards<T extends { rect: GalleryRect }>(cards: T[]) {
+  const columns: T[][] = [];
+  for (const card of cards) {
+    const column = columns.find((group) => Math.abs(group[0]!.rect.left - card.rect.left) <= 1);
+    if (column) column.push(card);
+    else columns.push([card]);
+  }
+  columns.sort((a, b) => a[0]!.rect.left - b[0]!.rect.left);
+  for (const column of columns) column.sort((a, b) => a.rect.top - b.rect.top);
+  return columns;
+}
+
+/** All bounds are painted viewport coordinates, including in a zoomed overview. */
+export function galleryHorizontalIssues(
+  container: Pick<GalleryRect, 'left' | 'right'>,
+  cards: GalleryFlowFacts['cards']
+) {
+  const issues: string[] = [];
+  if (
+    !Number.isFinite(container.left) ||
+    !Number.isFinite(container.right) ||
+    container.right <= container.left
+  )
+    return ['invalid gallery content bounds'];
+  for (const card of cards) {
+    if (
+      [card.rect, ...card.fragments].some(
+        (bounds) => !(bounds.left >= container.left - 1 && bounds.right <= container.right + 1)
+      )
+    )
+      issues.push(`${card.id}: gallery card or fragment outside gallery content`);
+  }
+  if (
+    Math.abs(Math.min(...cards.map((card) => card.rect.left)) - container.left) > 1 ||
+    Math.abs(Math.max(...cards.map((card) => card.rect.right)) - container.right) > 1
+  )
+    issues.push('outer gallery columns differ from gallery content edges');
+  return issues;
+}
+
 /** Pure geometry observer. One CSS pixel allows fractional layout rounding only. */
 export function galleryFlowEvidence(facts: GalleryFlowFacts) {
   const issues: string[] = [];
   const epsilon = 1;
-  // Tight 1.25rem rhythm on desktop and 1rem on compact viewports. Only one CSS
-  // pixel of subpixel rounding is allowed.
-  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1 : 1.25);
+  const expectedGap = facts.rootFontSize * facts.gapRem;
   if (facts.containerCount !== 1 || !facts.container)
     issues.push('expected exactly one gallery container');
   if (
@@ -59,7 +118,12 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
     right: number;
     cards: GalleryFlowFacts['cards'];
     adjacentGaps: Array<{ before: string | null; after: string | null; gap: number }>;
-  }> = [];
+  }> = groupPaintedCards(facts.cards).map((cards) => ({
+    left: cards[0]!.rect.left,
+    right: cards[0]!.rect.right,
+    cards,
+    adjacentGaps: [],
+  }));
   for (const card of facts.cards) {
     const rect = card.rect;
     if (
@@ -86,18 +150,11 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
       issues.push(`${card.id}: split or inconsistent gallery card fragment`);
     if (rect.left < -epsilon || rect.right > facts.viewportWidth + epsilon)
       issues.push(`${card.id}: gallery card outside viewport`);
-    let column = columns.find((entry) => Math.abs(entry.left - rect.left) <= epsilon);
-    if (!column) {
-      column = { left: rect.left, right: rect.right, cards: [], adjacentGaps: [] };
-      columns.push(column);
-    }
-    if (Math.abs(column.right - rect.right) > epsilon)
-      issues.push(`${card.id}: inconsistent gallery column width`);
-    column.cards.push(card);
   }
-  columns.sort((a, b) => a.left - b.left);
   for (const column of columns) {
-    column.cards.sort((a, b) => a.rect.top - b.rect.top);
+    for (const card of column.cards)
+      if (Math.abs(column.right - card.rect.right) > epsilon)
+        issues.push(`${card.id}: inconsistent gallery column width`);
     if (facts.container && Math.abs(column.cards[0]!.rect.top - facts.container.top) > epsilon)
       issues.push(`${column.cards[0]!.id}: gallery column starts with a hole`);
     for (let index = 1; index < column.cards.length; index++) {
@@ -113,7 +170,25 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
         );
     }
   }
-  if (
+  if (!Number.isFinite(facts.queryContainerWidth) || facts.queryContainerWidth <= 0)
+    issues.push('invalid gallery query container width');
+  const enhancedExpected =
+    facts.enhancedMedia &&
+    facts.readingFlowSupported &&
+    facts.queryContainerWidth >= 75.75 * facts.rootFontSize;
+  const enhancedActive = facts.flowDisplay === 'flex' && facts.flowReadingFlow === 'flex-visual';
+  if (enhancedExpected && !enhancedActive)
+    issues.push('eligible gallery lacks its visual reading flow');
+  const ordinaryReadingFlow = facts.flowReadingFlow === '' || facts.flowReadingFlow === 'normal';
+  if (!enhancedExpected && (facts.flowDisplay !== 'contents' || !ordinaryReadingFlow))
+    issues.push('ordinary gallery lacks its authored contents flow');
+  if (enhancedExpected) {
+    if (
+      JSON.stringify(columns.map((column) => column.cards.map((card) => card.id))) !==
+      JSON.stringify(FOUR_GALLERY_COLUMNS)
+    )
+      issues.push('painted four-column gallery differs from its authored reading order');
+  } else if (
     JSON.stringify(columns.flatMap((column) => column.cards.map((card) => card.id))) !==
     JSON.stringify(facts.cards.map((card) => card.id))
   )
@@ -128,11 +203,34 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
       )
         issues.push(`${a.id}/${b.id}: gallery cards overlap`);
     }
+  const paintedColumns = columns.map((column) => ({
+    left: column.left,
+    right: column.right,
+    ids: column.cards.map((card) => card.id),
+    bottom: Math.max(...column.cards.map((card) => card.rect.bottom)),
+    adjacentGaps: column.adjacentGaps,
+  }));
+  if (
+    facts.wideMedia &&
+    JSON.stringify(paintedColumns.map((column) => column.ids)) !==
+      JSON.stringify(WIDE_GALLERY_COLUMNS)
+  )
+    issues.push('painted wide gallery columns differ from authored card groups');
   if (facts.container) {
+    issues.push(...galleryHorizontalIssues(facts.container, facts.cards));
+    if (columns.length) {
+      const tails = columns.map((column) => column.cards.at(-1)!);
+      const paintedBottom = Math.max(...tails.map((card) => card.rect.bottom));
+      const marginBottom = Math.max(...tails.map((card) => card.rect.bottom + card.rowGap));
+      if (facts.container.bottom < paintedBottom - epsilon)
+        issues.push('gallery ends before its lowest painted card');
+      if (facts.container.bottom > marginBottom + epsilon)
+        issues.push('gallery continues below its final card margins');
+    }
     const expectedColumns =
       facts.viewportWidth <= 639
         ? 1
-        : facts.viewportWidth >= 96 * facts.rootFontSize
+        : facts.wideMedia
           ? 5
           : Math.max(
               1,
@@ -149,14 +247,15 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
         issues.push('painted gallery column gap differs from the responsive spacing contract');
   }
   return {
+    enhancedExpected,
+    enhancedActive,
     issues: [...new Set(issues)],
     expectedGap,
-    columns: columns.map((column) => ({
-      left: column.left,
-      right: column.right,
-      ids: column.cards.map((card) => card.id),
-      adjacentGaps: column.adjacentGaps,
-    })),
+    columns: paintedColumns,
+    bottomSpread: paintedColumns.length
+      ? Math.max(...paintedColumns.map((column) => column.bottom)) -
+        Math.min(...paintedColumns.map((column) => column.bottom))
+      : null,
   };
 }
 

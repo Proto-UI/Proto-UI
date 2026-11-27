@@ -11,11 +11,16 @@ import type { Page } from 'playwright-core';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import { verifyRevision } from './homepage-evidence-contract';
 import { readReadingReflow } from '../src/content/docs/zh-cn/reading-reflow-evidence';
+import {
+  HOMEPAGE_GALLERY_IDS,
+  readGalleryRhythm,
+} from '../src/components/Homepage/homepage-layout-evidence';
 
 /** Layout evidence only. Preserve exact spacing across grid and multicol CSS serialization. */
 export function gallerySpacingIssues(
   facts: {
     columnGap: string;
+    physicalScale: number;
     cards: Array<{
       id: string | null;
       x: number;
@@ -29,22 +34,13 @@ export function gallerySpacingIssues(
   expectedGap: number
 ): string[] {
   const issues: string[] = [];
-  const ids = [
-    'controls',
-    'hover',
-    'workspace-command',
-    'workspace-help',
-    'preferences',
-    'workspace-progress',
-    'workspace-analytics',
-    'editor',
-    'overlays',
-    'choices',
-  ].sort();
+  const ids = [...HOMEPAGE_GALLERY_IDS].sort();
   const observedIds = facts.cards.map((card) => card.id).sort();
   if (observedIds.length !== ids.length || observedIds.some((id, i) => id !== ids[i]))
     issues.push('missing, duplicate or unexpected gallery task');
   if (facts.columnGap !== `${expectedGap}px`) issues.push('column spacing');
+  if (!Number.isFinite(facts.physicalScale) || facts.physicalScale <= 0)
+    issues.push('invalid gallery scale');
   const columns: (typeof facts.cards)[] = [];
   for (const card of facts.cards) {
     if (
@@ -67,12 +63,15 @@ export function gallerySpacingIssues(
       const previous = column[i - 1]!;
       if (!Number.isFinite(previous.rowGap) || previous.rowGap <= 0)
         issues.push('invalid card row gap');
-      if (Math.abs(column[i]!.y - previous.bottom - previous.rowGap) > 1)
+      if (Math.abs(column[i]!.y - previous.bottom - previous.rowGap * facts.physicalScale) > 1)
         issues.push('vertical card spacing');
     }
   }
   for (let i = 1; i < columns.length; i++)
-    if (Math.abs(columns[i]![0]!.x - columns[i - 1]![0]!.right - expectedGap) > 1)
+    if (
+      Math.abs(columns[i]![0]!.x - columns[i - 1]![0]!.right - expectedGap * facts.physicalScale) >
+      1
+    )
       issues.push('horizontal card spacing');
   return issues;
 }
@@ -247,12 +246,11 @@ try {
             const primary = document.querySelector<HTMLElement>(
               '[data-demo-ref="gallery-primary"]'
             )!;
-            // The pinned historical baseline flows on the gallery itself;
-            // current pages give the same content a distinct physical stage.
-            const gallery =
-              document.querySelector('[data-home-gallery-stage]') ??
-              document.querySelector('.home-gallery');
+            // Older pages put the cards directly in the gallery. Current pages use a stage.
+            const gallery = document.querySelector<HTMLElement>('.home-gallery');
             if (!gallery) throw new Error('Missing physical gallery flow owner');
+            const stage =
+              gallery.querySelector<HTMLElement>('[data-home-gallery-stage]') ?? gallery;
             return {
               slogan,
               title,
@@ -272,10 +270,12 @@ try {
                 );
                 return content ? getComputedStyle(content).padding : null;
               })(),
-              gridGap: getComputedStyle(gallery).gap,
+              gridGap: getComputedStyle(stage).gap,
+              rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
               gallerySpacing: {
-                columnGap: getComputedStyle(gallery).columnGap,
-                cards: [...document.querySelectorAll('[data-gallery-demo]')].map((card) => {
+                columnGap: getComputedStyle(stage).columnGap,
+                physicalScale: stage.getBoundingClientRect().width / stage.offsetWidth,
+                cards: [...stage.querySelectorAll('[data-gallery-demo]')].map((card) => {
                   const rect = card.getBoundingClientRect();
                   return {
                     id: card.getAttribute('data-gallery-demo'),
@@ -309,8 +309,9 @@ try {
             } else {
               assert.equal(facts.cardPrototype, 'brutalist-surface-root');
             }
+            const { gapRem } = await page.evaluate(readGalleryRhythm);
             assert.deepEqual(
-              gallerySpacingIssues(facts.gallerySpacing, v.width === 390 ? 24 : 32),
+              gallerySpacingIssues(facts.gallerySpacing, facts.rootFontSize * gapRem),
               []
             );
           }
@@ -881,7 +882,9 @@ try {
                   margin: getComputedStyle(document.querySelector('main h1[id]')!).scrollMarginTop,
                 }));
                 entry.overviewText200 = overviewText200;
-                entry.overviewText200Navigation = tocHidden ? 'native fragment' : 'native link click';
+                entry.overviewText200Navigation = tocHidden
+                  ? 'native fragment'
+                  : 'native link click';
                 await shot('overview-text200');
                 assert.equal(overviewText200.rootFontSize, 32);
                 assert.equal(await overview.getAttribute('aria-current'), 'true');

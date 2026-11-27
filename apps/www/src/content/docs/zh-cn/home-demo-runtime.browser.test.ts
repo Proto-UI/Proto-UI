@@ -1,5 +1,11 @@
 // @vitest-environment node
 
+import {
+  groupPaintedCards,
+  HOMEPAGE_GALLERY_IDS,
+  readGalleryRhythm,
+  WIDE_GALLERY_COLUMNS,
+} from '../../../components/Homepage/homepage-layout-evidence';
 import { revealHeaderPreferences } from './site-header-browser';
 import {
   measureLabelTextDrag,
@@ -104,17 +110,34 @@ async function chooseRuntime(page: Page, root: Locator, runtime: string) {
   await waitForHomeRuntime(page, runtime);
 }
 
+async function selectByDragging(page: Page, target: Locator) {
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
+  if (!box) throw new Error('Selection target has no visible bounds');
+  // Reset on the target so selecting a modal description keeps its dialog open.
+  await page.mouse.click(box.x + 2, box.y + box.height / 2);
+  await page.mouse.down();
+  try {
+    await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2, { steps: 12 });
+  } finally {
+    await page.mouse.up();
+  }
+  return page.evaluate(() => window.getSelection()?.toString() ?? '');
+}
+
 async function createHomeGalleryObservation(
   page: Page,
   evidenceLabel: string,
   initialColorScheme: 'light' | 'dark'
 ) {
   const home = page.locator(HOME_SELECTOR);
-  const stage = home.locator('[data-home-gallery-stage]');
+  const stage = home.locator(
+    '[data-home-demo-host] [data-projection-generation-state="active"] [data-projection-scope] [data-home-gallery-stage]'
+  );
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  const sample = () =>
-    stage.evaluate((node) => {
+  const sample = async () => {
+    const facts = await stage.evaluate((node) => {
       const stage = node as HTMLElement;
       const bounds = stage.getBoundingClientRect();
       const gallery = stage.closest<HTMLElement>('.home-gallery')!;
@@ -197,24 +220,50 @@ async function createHomeGalleryObservation(
       const card = stage.querySelector<HTMLElement>(
         '[data-gallery-demo="controls"] [data-projection-prototype="shadcn-card-root"]'
       )!;
+      const cards = [...stage.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
+      const scope = stage.closest<HTMLElement>('[data-projection-scope]')!;
+      const adapters = stage.querySelectorAll<HTMLElement>(
+        '[data-demo-ref="shortcut-group-adapters"] [aria-pressed]'
+      );
       const home = stage.closest<HTMLElement>('[data-home-showcase]')!;
       return {
         viewportWidth: innerWidth,
         theme: document.documentElement.dataset.theme,
         runtime: home.dataset.runnerRuntime,
         generation: home.dataset.projectionGeneration,
+        scopeGeneration: scope.dataset.projectionGeneration,
+        scopeRuntime: scope.dataset.projectionRuntime,
+        adapterItems: Array.from(adapters, (item) => ({
+          ref: item.dataset.demoRef,
+          pressed: item.getAttribute('aria-pressed'),
+          background: getComputedStyle(item).backgroundColor,
+          visible:
+            item.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) &&
+            item.getBoundingClientRect().width > 0 &&
+            item.getBoundingClientRect().height > 0,
+        })),
         liveRoots: stage.querySelectorAll('[data-pui-root]').length,
         cardPaint: {
           background: getComputedStyle(card).backgroundColor,
           color: getComputedStyle(card).color,
         },
         inert: stage.inert,
-        columnCount: new Set(
-          [...stage.querySelectorAll('.home-gallery__column')].map(
-            (column) => column.getBoundingClientRect().left
-          )
-        ).size,
-        cardCount: stage.querySelectorAll('[data-gallery-demo]').length,
+        stageRect: {
+          left: bounds.left,
+          right: bounds.right,
+          top: bounds.top,
+          bottom: bounds.bottom,
+        },
+        paintedCards: cards.map((item) => {
+          const { left, right, top, bottom, width, height } = item.getBoundingClientRect();
+          return {
+            id: item.dataset.galleryDemo,
+            fragments: item.getClientRects().length,
+            rect: { left, right, top, bottom, width, height },
+          };
+        }),
+        cardCount: cards.length,
+        cardIds: cards.map((card) => card.dataset.galleryDemo),
         noOverflow:
           bounds.left >= -1 &&
           bounds.right <= innerWidth + 1 &&
@@ -240,6 +289,9 @@ async function createHomeGalleryObservation(
         sourceOutsideViewport: !viewport.contains(source),
       };
     });
+    const { fadeRem } = await page.evaluate(readGalleryRhythm);
+    return { ...facts, fadeRem };
+  };
   const evidenceDirectory = path.join(
     process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ||
       path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
@@ -250,7 +302,7 @@ async function createHomeGalleryObservation(
     revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim() !== '',
   };
-  const capture = async (name: string) => {
+  const captureObservation = async <T>(name: string, observe: () => Promise<T>) => {
     // Native layout and ResizeObserver delivery settle across real frames;
     // neither this observer nor the capture changes component state.
     await page.evaluate(
@@ -259,7 +311,7 @@ async function createHomeGalleryObservation(
           requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
         )
     );
-    const facts = await sample();
+    const facts = await observe();
     const id = `${evidenceLabel}-${name}`;
     await writeFile(
       path.join(evidenceDirectory, `${id}.json`),
@@ -272,11 +324,11 @@ async function createHomeGalleryObservation(
     await page.screenshot({ path: path.join(evidenceDirectory, `${id}.png`), fullPage: true });
     return facts;
   };
+  const capture = (name: string) => captureObservation(name, sample);
   const expectCompactPreview = (facts: Awaited<ReturnType<typeof sample>>) => {
     expect(facts).toMatchObject({
       inert: true,
-      columnCount: 5,
-      cardCount: 12,
+      cardCount: HOMEPAGE_GALLERY_IDS.length,
       noOverflow: true,
       fitsGallery: true,
       fadePointerEvents: 'none',
@@ -284,10 +336,23 @@ async function createHomeGalleryObservation(
       sourceOutsideStage: true,
       sourceOutsideViewport: true,
     });
+    expect(facts.cardIds).toEqual(HOMEPAGE_GALLERY_IDS);
+    expect(
+      groupPaintedCards(facts.paintedCards).map((column) => column.map((item) => item.id))
+    ).toEqual(WIDE_GALLERY_COLUMNS);
+    for (const { id, rect, fragments } of facts.paintedCards) {
+      expect(fragments, id).toBe(1);
+      expect(rect.width, id).toBeGreaterThan(0);
+      expect(rect.height, id).toBeGreaterThan(0);
+      expect(rect.left, id).toBeGreaterThanOrEqual(facts.stageRect.left - 1);
+      expect(rect.right, id).toBeLessThanOrEqual(facts.stageRect.right + 1);
+      expect(rect.top, id).toBeGreaterThanOrEqual(facts.stageRect.top - 1);
+      expect(rect.bottom, id).toBeLessThanOrEqual(facts.stageRect.bottom + 1);
+    }
     expect(facts.liveRoots).toBeGreaterThan(0);
     expect(facts.fade).toContain('linear-gradient');
     expect(facts.fadeHeight).toBeCloseTo(
-      Math.min(8 * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
+      Math.min(facts.fadeRem * facts.rootFontSize, facts.fadeViewportHeight * 0.28),
       1
     );
     expect(facts.fadeColorMeasurementError).toBeNull();
@@ -297,7 +362,7 @@ async function createHomeGalleryObservation(
     expect(facts.bodyBackgroundRgba?.[3]).toBe(255);
     expect(facts.fadeFirstStopRgba).toEqual(facts.bodyBackgroundRgba);
   };
-  return { home, stage, errors, sample, capture, expectCompactPreview };
+  return { home, stage, errors, sample, capture, captureObservation, expectCompactPreview };
 }
 
 let browser: Browser;
@@ -314,6 +379,219 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Homepage Runtime demobox browser smoke', () => {
+  it('operates the four homepage shortcut groups and compact Brutalist editor tabs with native input', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      colorScheme: 'light',
+    });
+    const page = await context.newPage();
+    try {
+      const { home, stage, errors, captureObservation } = await createHomeGalleryObservation(
+        page,
+        'shortcuts-native',
+        'light'
+      );
+      await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
+      await waitForHomeRuntime(page, 'wc');
+      const shortcuts = stage.locator('[data-gallery-demo="shortcuts"]');
+      const groups = [
+        [
+          'prototypes',
+          '核心原型',
+          [
+            ['buttons', '按钮与开关'],
+            ['cards', '卡片容器'],
+            ['tabs', '标签与折叠'],
+            ['dialogs', '弹层对话'],
+          ],
+        ],
+        [
+          'modules',
+          '语义模块',
+          [
+            ['focus', '焦点管理'],
+            ['overlay', '浮层定位'],
+            ['a11y', '无障碍语义'],
+            ['state', '状态协议'],
+          ],
+        ],
+        [
+          'adapters',
+          '多端适配',
+          [
+            ['wc', 'Web'],
+            ['react', 'React'],
+            ['vue', 'Vue 3'],
+            ['vue2', 'Vue 2'],
+          ],
+        ],
+        [
+          'styles',
+          '设计投影',
+          [
+            ['shadcn', 'Shadcn'],
+            ['brutalist', 'Brutalist'],
+            ['bootstrap-2-3-2', 'Bootstrap'],
+            ['liquid-glass', 'Glass'],
+          ],
+        ],
+      ] as const;
+      const prototypes = shortcuts.getByRole('group', { name: '核心原型', exact: true });
+      const cards = prototypes.getByRole('button', { name: '卡片容器', exact: true });
+      const tabs = prototypes.getByRole('button', { name: '标签与折叠', exact: true });
+      const dialogs = prototypes.getByRole('button', { name: '弹层对话', exact: true });
+      const pressed = (owner: Locator) =>
+        owner
+          .getByRole('button', { pressed: true })
+          .evaluateAll((items) => items.map((item) => item.getAttribute('data-demo-ref')));
+      const focused = (row: Locator) => row.evaluate((el) => el === document.activeElement);
+      const paint = (row: Locator) => row.screenshot({ animations: 'disabled' });
+      const expectSelection = (key: string) =>
+        expect.poll(() => pressed(prototypes)).toEqual([`shortcut-prototypes-${key}`]);
+
+      await expect.poll(() => shortcuts.getByRole('group').count()).toBe(4);
+      await expectSelection('buttons');
+      const otherGroups = shortcuts.getByRole('group').filter({
+        hasNot: page.getByRole('button', { name: '卡片容器', exact: true }),
+      });
+      expect(await otherGroups.count()).toBe(3);
+      const otherSelections = await pressed(otherGroups);
+      await cards.scrollIntoViewIfNeeded();
+      await page.mouse.move(0, 0);
+      const idle = await paint(cards);
+      await cards.hover();
+      await expect.poll(async () => (await paint(cards)).equals(idle)).toBe(false);
+      await expectSelection('buttons');
+      await captureObservation('hover', () => pressed(shortcuts));
+      await cards.click();
+      await expectSelection('cards');
+      expect(await pressed(otherGroups)).toEqual(otherSelections);
+      await page.keyboard.press('Shift+Tab');
+      expect(await prototypes.locator(':focus').count()).toBe(0);
+      await page.keyboard.press('Tab');
+      await expect.poll(() => focused(cards)).toBe(true);
+      await page.mouse.move(0, 0);
+      for (const [row, key, previous, stroke] of [
+        [tabs, 'tabs', 'cards', 'Space'],
+        [dialogs, 'dialogs', 'tabs', 'Enter'],
+      ] as const) {
+        await page.keyboard.press('ArrowDown');
+        await expect.poll(() => focused(row)).toBe(true);
+        await expectSelection(previous);
+        const unpressed = await paint(row);
+        await page.keyboard.press(stroke);
+        await expectSelection(key);
+        await expect.poll(() => focused(row)).toBe(true);
+        await expect.poll(async () => (await paint(row)).equals(unpressed)).toBe(false);
+      }
+      await page.keyboard.press('Tab');
+      await expect
+        .poll(() => focused(shortcuts.getByRole('button', { name: '焦点管理', exact: true })))
+        .toBe(true);
+      await page.keyboard.press('Shift+Tab');
+      await expect.poll(() => focused(dialogs)).toBe(true);
+      await expectSelection('dialogs');
+      expect(await pressed(otherGroups)).toEqual(otherSelections);
+      await captureObservation('keyboard', () => pressed(shortcuts));
+
+      for (const [group, name, items] of groups) {
+        const owner = shortcuts.getByRole('group', { name, exact: true });
+        expect(await owner.getAttribute('data-demo-ref')).toBe(`shortcut-group-${group}`);
+        expect(await owner.getByRole('button').count()).toBe(4);
+        for (const [key, label] of items) {
+          const row = owner.getByRole('button', { name: label, exact: true });
+          expect(await row.getAttribute('data-demo-ref')).toBe(`shortcut-${group}-${key}`);
+          expect(await row.evaluate((item) => getComputedStyle(item).userSelect)).toBe('none');
+          await row.scrollIntoViewIfNeeded();
+          const glyph = await row.locator('svg').boundingBox();
+          const text = await row.locator('.home-gallery__shortcut-text').boundingBox();
+          if (!glyph?.width || !glyph.height || !text?.height || text.width <= 2) {
+            throw new Error(`Missing visible glyph or text for ${group}/${key}`);
+          }
+          await page.mouse.move(glyph.x + glyph.width / 2, glyph.y + glyph.height / 2);
+          await page.mouse.down();
+          try {
+            await page.mouse.move(text.x + text.width - 2, text.y + text.height / 2, { steps: 14 });
+          } finally {
+            await page.mouse.up();
+          }
+          expect(
+            await page.evaluate(() => getSelection()?.toString()),
+            `${group}/${key} drag`
+          ).toBe('');
+        }
+      }
+
+      const editorCard = stage.locator('[data-gallery-demo="editor"]');
+      const heading = editorCard.getByRole('heading', { name: '文本编辑', exact: true });
+      expect(await selectByDragging(page, heading)).toContain('文本编辑');
+      const textarea = editorCard.getByRole('textbox', { name: '编辑示例文本', exact: true });
+      await textarea.fill('Selectable');
+      await textarea.press('ControlOrMeta+A');
+      expect(
+        await textarea.evaluate((element) => {
+          const input = element as HTMLTextAreaElement;
+          return input.value.slice(input.selectionStart, input.selectionEnd);
+        })
+      ).toBe('Selectable');
+
+      await chooseProjectionControl(page, home, 'family', 'brutalist');
+      const editor = stage.locator('[data-gallery-demo="editor"]');
+      await expect
+        .poll(
+          () =>
+            stage.evaluate((el) =>
+              el.closest('[data-projection-scope]')?.getAttribute('data-projection-family')
+            ),
+          { timeout: 30_000 }
+        )
+        .toBe('brutalist');
+      await waitForHomeRuntime(page, 'wc');
+      const list = editor.getByRole('tablist');
+      const edit = list.getByRole('tab', { name: '编辑', exact: true });
+      const preview = list.getByRole('tab', { name: '预览', exact: true });
+      expect(await list.getByRole('tab').count()).toBe(2);
+      await list.scrollIntoViewIfNeeded();
+      const bounds = await list.boundingBox();
+      const root = await editor.locator('[data-demo-ref="editor-tabs"]').boundingBox();
+      if (!bounds || !root) throw new Error('Missing Brutalist editor tab geometry');
+      expect(bounds.width).toBeLessThan(root.width);
+      for (const tab of [edit, preview]) {
+        const box = await tab.boundingBox();
+        if (!box) throw new Error('Missing Brutalist editor tab');
+        expect(box.width).toBeGreaterThan(0);
+        expect(box.x).toBeGreaterThanOrEqual(bounds.x - 1);
+        expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1);
+      }
+      await edit.click();
+      const panel = editor.getByRole('tabpanel');
+      for (const [key, tab, content] of [
+        ['ArrowRight', preview, panel.locator('[data-demo-ref="editor-preview"]')],
+        ['ArrowLeft', edit, panel.getByRole('textbox', { name: '编辑示例文本', exact: true })],
+      ] as const) {
+        await page.keyboard.press(key);
+        await expect.poll(() => focused(tab)).toBe(true);
+        if ((await tab.getAttribute('aria-selected')) !== 'true')
+          await page.keyboard.press('Enter');
+        await expect.poll(() => tab.getAttribute('aria-selected')).toBe('true');
+        expect(await list.getByRole('tab', { selected: true }).count()).toBe(1);
+        await panel.waitFor({ state: 'visible' });
+        const id = await panel.getAttribute('id');
+        expect(id).toBeTruthy();
+        expect(id).toBe(await tab.getAttribute('aria-controls'));
+        await content.waitFor({ state: 'visible' });
+        await captureObservation(`brutalist-${key}`, async () => ({
+          list: bounds,
+          root,
+          panel: id,
+        }));
+      }
+      expect(errors).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
   it('keeps the compact Bootstrap homepage checkbox operable through its visible label', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const page = await context.newPage();
@@ -423,20 +701,6 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
         ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'content-selection')
         : undefined);
-    const selectByDragging = async (target: Locator) => {
-      await target.scrollIntoViewIfNeeded();
-      const box = await target.boundingBox();
-      expect(box).not.toBeNull();
-      if (!box) throw new Error('Selection target has no visible bounds');
-      // Reset through the target itself. Clicking the document corner would
-      // dismiss a modal before its description could be selected.
-      await page.mouse.click(box.x + 2, box.y + box.height / 2);
-      await page.mouse.move(box.x + 2, box.y + box.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2, { steps: 12 });
-      await page.mouse.up();
-      return page.evaluate(() => window.getSelection()?.toString() ?? '');
-    };
     try {
       if (evidenceDirectory) await mkdir(evidenceDirectory, { recursive: true });
       await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
@@ -447,7 +711,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         const action = editorCard.getByRole('button', { name: '斜体', exact: true });
         await action.waitFor({ state: 'visible' });
         expect(await action.evaluate((el) => getComputedStyle(el).userSelect)).toBe('none');
-        expect(await selectByDragging(action)).not.toContain('斜体');
+        expect(await selectByDragging(page, action)).not.toContain('斜体');
         if (evidenceDirectory) {
           await editorCard.screenshot({
             path: path.join(evidenceDirectory, `selection-${runtime}-action.png`),
@@ -461,7 +725,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           .toBe(activeBefore === 'true' ? 'false' : 'true');
 
         const title = editorCard.getByRole('heading', { name: '文本编辑', exact: true });
-        expect(await selectByDragging(title)).toContain('文本编辑');
+        expect(await selectByDragging(page, title)).toContain('文本编辑');
         if (evidenceDirectory) {
           await editorCard.screenshot({
             path: path.join(evidenceDirectory, `selection-${runtime}-content.png`),
@@ -551,7 +815,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         };
         await waitForEnteredDialog();
         const description = dialog.getByText('这是一个可操作的对话框示例。', { exact: true });
-        expect(await selectByDragging(description)).toContain('可操作的对话框');
+        expect(await selectByDragging(page, description)).toContain('可操作的对话框');
         await waitForEnteredDialog();
         expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toContain(
           '可操作的对话框'
@@ -951,17 +1215,6 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(await home.textContent()).not.toMatch(
           /打开交互演示|关闭交互演示|查看桌面缩略图|Open interactive demos|Show desktop overview/
         );
-        expect(initial).toMatchObject({
-          inert: true,
-          columnCount: 5,
-          cardCount: 12,
-          noOverflow: true,
-          fitsGallery: true,
-          fadePointerEvents: 'none',
-          fadeVisible: true,
-          sourceOutsideStage: true,
-        });
-        expect(initial.fade).toContain('linear-gradient');
         expectCompactPreview(initial);
         // Playwright 1.58's role selector does not implement inert ancestry.
         // The native AX tree and actual focus behavior establish this boundary.
@@ -990,9 +1243,12 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await page.setViewportSize({ width: 1440, height: 900 });
         const desktop = await capture('desktop-after-entry');
         expect(desktop.inert).toBe(false);
-        expect(desktop.fade).toBe(initial.fade);
+        expect(desktop.fadeColorMeasurementError).toBeNull();
+        expect(desktop.fadeFirstStopRgba).toEqual(desktop.bodyBackgroundRgba);
+        expect(desktop.fadePointerEvents).toBe('none');
+        expect(desktop.fadeVisible).toBe(false);
         expect(desktop.fadeHeight).toBeCloseTo(
-          Math.min(8 * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
+          Math.min(desktop.fadeRem * desktop.rootFontSize, desktop.fadeViewportHeight * 0.28),
           1
         );
         await page.setViewportSize({ width: 390, height: 900 });
@@ -1078,19 +1334,46 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         );
         if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
       };
-      const beforeRuntime = afterTheme.generation;
+      const expectMountedAdapter = (facts: typeof afterTheme, runtime: string) => {
+        expect(facts.runtime).toBe(runtime);
+        expect(facts.scopeRuntime).toBe(runtime);
+        expect(facts.generation).toMatch(/^[1-9]\d*$/);
+        expect(facts.scopeGeneration).toBe(facts.generation);
+        expect(facts.adapterItems).toHaveLength(4);
+        const selected = facts.adapterItems.filter((item) => item.pressed === 'true');
+        expect(selected.map((item) => item.ref)).toEqual([`shortcut-adapters-${runtime}`]);
+        expect(selected[0]!.visible).toBe(true);
+        for (const item of facts.adapterItems.filter((item) => item.pressed !== 'true')) {
+          expect(item.pressed).toBe('false');
+          expect(item.background).not.toBe(selected[0]!.background);
+        }
+      };
+      expectMountedAdapter(afterTheme, 'wc');
       await chooseRuntime(page, home, 'react');
       await closeHeaderMenu();
       const afterRuntime = await capture('react');
       expectCompactPreview(afterRuntime);
-      expect(afterRuntime.runtime).toBe('react');
-      expect(afterRuntime.generation).not.toBe(beforeRuntime);
+      expectMountedAdapter(afterRuntime, 'react');
       await chooseRuntime(page, home, 'wc');
       await closeHeaderMenu();
       const returnedRuntime = await capture('wc-return');
       expectCompactPreview(returnedRuntime);
-      expect(returnedRuntime.runtime).toBe('wc');
-      expect(returnedRuntime.generation).not.toBe(afterRuntime.generation);
+      expectMountedAdapter(returnedRuntime, 'wc');
+      expect(
+        new Set([afterTheme.generation, afterRuntime.generation, returnedRuntime.generation]).size
+      ).toBe(3);
+      await page.getByRole('link', { name: '试试 Demo', exact: true }).click();
+      const adapterGroup = home
+        .locator('[data-projection-generation-state="active"] [data-home-gallery-stage]')
+        .getByRole('group', { name: '多端适配', exact: true });
+      await adapterGroup.getByRole('button', { name: 'Vue 3', exact: true }).click();
+      await expect
+        .poll(() =>
+          adapterGroup
+            .getByRole('button', { pressed: true })
+            .evaluateAll((items) => items.map((item) => item.getAttribute('data-demo-ref')))
+        )
+        .toEqual(['shortcut-adapters-vue']);
       expect(errors).toEqual([]);
     } finally {
       await context.close();

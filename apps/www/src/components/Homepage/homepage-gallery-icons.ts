@@ -285,3 +285,61 @@ export function renderHomepageGalleryAreaChart(slot: HTMLElement, seriesIndex = 
 
   slot.append(svg);
 }
+
+const MINI_BAR_SERIES = [
+  [0.42, 0.72, 0.56, 0.96],
+  [0.52, 0.86, 0.64, 0.92],
+  [0.38, 0.66, 0.88, 0.74],
+  [0.34, 0.58, 0.78, 0.68],
+] as const;
+
+/** Compact four-bar monochrome indicator for bottom parity rows. */
+export function appendHomepageGalleryMiniBars(slot: HTMLElement, seriesIndex = 0): void {
+  const heights = MINI_BAR_SERIES[seriesIndex % MINI_BAR_SERIES.length]!;
+  const svg = slot.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 64 26');
+  svg.setAttribute('width', '64');
+  svg.setAttribute('height', '26');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  for (let index = 0; index < heights.length; index++) {
+    const bar = slot.ownerDocument.createElementNS(svg.namespaceURI, 'rect');
+    const h = Math.max(6, Math.round(heights[index]! * 24));
+    bar.setAttribute('x', String(index * 16 + 2));
+    bar.setAttribute('y', String(26 - h));
+    bar.setAttribute('width', '12');
+    bar.setAttribute('height', String(h));
+    bar.setAttribute('rx', '3');
+    bar.setAttribute('fill', 'currentColor');
+    bar.setAttribute('fill-opacity', String(0.35 + index * 0.16));
+    svg.append(bar);
+  }
+  slot.append(svg);
+}
+
+const ACTIVITY_BAR_FACTORS = [0.48, 0.76, 0.88, 0.64, 0.94, 0.82, 0.9, 0.86] as const;
+const ACTIVITY_BAR_OPACITIES = [0.46, 0.64, 0.74, 0.56, 0.82, 0.72, 0.78, 0.74] as const;
+
+/** Eight-bar rounded monochrome histogram for the bottom-right matrix card. */
+export function appendHomepageGalleryActivityBars(slot: HTMLElement): void {
+  const svg = slot.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 320 164');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '164');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  for (let index = 0; index < ACTIVITY_BAR_FACTORS.length; index++) {
+    const bar = slot.ownerDocument.createElementNS(svg.namespaceURI, 'rect');
+    const h = Math.max(28, Math.round(ACTIVITY_BAR_FACTORS[index]! * 150));
+    bar.setAttribute('x', String(index * 39 + 6));
+    bar.setAttribute('y', String(160 - h));
+    bar.setAttribute('width', '30');
+    bar.setAttribute('height', String(h));
+    bar.setAttribute('rx', '6');
+    bar.setAttribute('fill', 'currentColor');
+    bar.setAttribute('fill-opacity', String(ACTIVITY_BAR_OPACITIES[index]!));
+    svg.append(bar);
+  }
+  slot.append(svg);
+}

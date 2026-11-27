@@ -11,6 +11,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import type { Browser, Page } from 'playwright-core';
+import {
+  galleryFlowEvidence,
+  galleryHorizontalIssues,
+  groupPaintedCards,
+  HOMEPAGE_GALLERY_IDS,
+  readGalleryRhythm,
+  WIDE_GALLERY_COLUMNS,
+} from '../src/components/Homepage/homepage-layout-evidence';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 
 const { values } = parseArgs({
@@ -51,13 +59,32 @@ const generatedNames = [
   'proto-ui-shadow-style.generated.js',
   'proto-ui-shadow-style.generated.d.ts',
 ];
+// Reading order of the workflow's immutable before image.
+const baselineGalleryIds = [
+  'controls',
+  'shortcuts',
+  'workspace-analytics',
+  'workspace-command',
+  'preferences',
+  'workspace-progress',
+  'hover',
+  'editor',
+  'workspace-help',
+  'overlays',
+  'spark',
+  'choices',
+];
 const plan = ['zh-cn', 'en'].flatMap((locale) =>
-  [390, 1440].flatMap((width) =>
+  [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+    { width: 1920, height: 1080 },
+  ].flatMap((viewport) =>
     (['light', 'dark'] as const).map((theme) => ({
-      id: `${locale}-${width}-${theme}`,
+      id: `${locale}-${viewport.width}-${theme}`,
       locale,
       theme,
-      viewport: { width, height: width === 390 ? 844 : 1000 },
+      viewport,
     }))
   )
 );
@@ -72,6 +99,7 @@ const report = {
     files: await Promise.all(
       [
         'apps/www/scripts/capture-homepage-preview-fit.ts',
+        'apps/www/src/components/Homepage/homepage-layout-evidence.ts',
         'apps/www/src/content/docs/zh-cn/browser-harness.ts',
         'scripts/test/server-readiness.mjs',
       ].map((file) => fileBinding(probeRoot, file))
@@ -99,7 +127,7 @@ const report = {
   failures: [] as string[],
   acceptance: 'pending-independent-visual-review-and-project-gates',
   limitations: [
-    'Eight initial WC/Shadcn views per source; this is not complete Runtime/family coverage',
+    'Twelve initial WC/Shadcn views per source; this is not complete Runtime/family coverage',
     'Initial live DOM observations do not prove dynamic interaction; selected native tests are separate',
     'No screenshot-state injection, browser-zoom, assistive-technology or other-engine acceptance',
     'Historical width need not fail in modern Chromium; old toggle and scaled fade remain observations',
@@ -112,7 +140,7 @@ async function save() {
 await save();
 
 async function measure(page: Page) {
-  return page.evaluate(() => {
+  const facts = await page.evaluate(() => {
     const root = document.querySelector<HTMLElement>('[data-home-showcase]');
     const host = root?.querySelector<HTMLElement>('[data-home-demo-host]');
     const stage = host?.querySelector<HTMLElement>('[data-home-gallery-stage]');
@@ -145,6 +173,12 @@ async function measure(page: Page) {
           transform: style.transform,
           boxSizing: style.boxSizing,
           physicalScaleX,
+          contentLeft:
+            bounds.left +
+            (number(style.borderLeftWidth) + number(style.paddingLeft)) * (physicalScaleX ?? NaN),
+          contentRight:
+            bounds.right -
+            (number(style.borderRightWidth) + number(style.paddingRight)) * (physicalScaleX ?? NaN),
           physicalContentWidth:
             physicalScaleX === null ? null : bounds.width - (borderX + paddingX) * physicalScaleX,
         };
@@ -162,6 +196,9 @@ async function measure(page: Page) {
       },
     };
     const cards = [...stage.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
+    const flow = stage.querySelector('.home-gallery__flow');
+    const flowStyle = flow && getComputedStyle(flow);
+    const queryBox = viewport && geometry(viewport);
     const toggles = [...root.querySelectorAll<HTMLElement>('[data-home-gallery-layout-toggle]')];
     const fade = getComputedStyle(fadeOwner, '::after');
     const ancestorZoom: Array<{ tag: string; className: string; zoom: string; transform: string }> =
@@ -180,6 +217,15 @@ async function measure(page: Page) {
       documentWidth: document.documentElement.scrollWidth,
       bodyBackgroundColor: getComputedStyle(document.body).backgroundColor,
       rootFontSize: number(getComputedStyle(document.documentElement).fontSize),
+      wideMedia: matchMedia('(min-width: 96rem)').matches,
+      enhancedMedia: matchMedia('(48rem <= width < 96rem)').matches,
+      readingFlowSupported: CSS.supports('reading-flow', 'flex-visual'),
+      flowDisplay: flowStyle?.display ?? '',
+      flowReadingFlow: flowStyle?.getPropertyValue('reading-flow').trim() ?? '',
+      queryContainerWidth:
+        queryBox?.physicalScaleX && queryBox.physicalContentWidth !== null
+          ? queryBox.physicalContentWidth / queryBox.physicalScaleX
+          : NaN,
       theme: document.documentElement.dataset.theme,
       scroll: { x: scrollX, y: scrollY },
       readyState: document.readyState,
@@ -192,6 +238,8 @@ async function measure(page: Page) {
       showcase: geometry(root),
       host: geometry(host),
       stage: geometry(stage),
+      stageCount: host.querySelectorAll('[data-home-gallery-stage]').length,
+      columnGap: number(getComputedStyle(stage).columnGap),
       parent: geometry(stage.parentElement),
       unscaledViewport: viewport ? geometry(viewport) : null,
       cardCount: cards.length,
@@ -202,6 +250,8 @@ async function measure(page: Page) {
         livePrototypeRoots:
           card.querySelectorAll('[data-pui-root]').length + Number(card.matches('[data-pui-root]')),
         bounds: card.getBoundingClientRect().toJSON(),
+        rowGap: number(getComputedStyle(card).marginBlockEnd),
+        fragments: [...card.getClientRects()].map((rect) => rect.toJSON()),
       })),
       toggles: toggles.map((toggle) => ({ text: toggle.textContent, visible: isVisible(toggle) })),
       fade: {
@@ -218,6 +268,7 @@ async function measure(page: Page) {
       },
     };
   });
+  return { ...facts, rhythm: await page.evaluate(readGalleryRhythm) };
 }
 
 async function pseudoBox(page: Page, selector: string) {
@@ -256,14 +307,6 @@ function candidateFailures(
   const check = (condition: boolean, message: string) => {
     if (!condition) failures.push(message);
   };
-  check(
-    facts.cardCount === 10 && new Set(facts.cards.map((card) => card.id)).size === 10,
-    'Exactly ten distinct real gallery cards must remain mounted'
-  );
-  check(
-    facts.cards.every((card) => card.connected && card.visible && card.livePrototypeRoots > 0),
-    'Each visible card must contain live public Prototype roots'
-  );
   check(facts.toggles.length === 0, 'The extra layout toggle must be absent, not only hidden');
   check(facts.documentWidth <= facts.viewport.width + 1, 'The page must not overflow horizontally');
   check(
@@ -290,14 +333,14 @@ function candidateFailures(
     'The initial non-interactive gradient must actually be visible'
   );
   const expectedHeight = Math.min(
-    8 * facts.rootFontSize,
+    facts.rhythm.fadeRem * facts.rootFontSize,
     facts.fade.ownerGeometry.rect.height * 0.28
   );
   check(
     Number.isFinite(expectedHeight) &&
       expectedHeight > 0 &&
       Math.abs(fadeBox.physicalHeight - expectedHeight) <= 1,
-    'The real pseudo-element must use the unscaled 8rem/28% screen-height rule'
+    'The painted fade must use the unscaled family and breakpoint height capped at 28%'
   );
   check(
     facts.compact === facts.viewport.width < 768 && facts.stageInert === facts.compact,
@@ -410,6 +453,70 @@ try {
           fadeBox.physicalHeight / Number.parseFloat(facts.fade.computedHeight),
       };
       const failures: string[] = kind === 'candidate' ? candidateFailures(facts, fadeBox) : [];
+      const cards = facts.cards.map((card) => ({
+        ...card,
+        id: card.id ?? null,
+        rect: card.bounds,
+      }));
+      if (kind === 'candidate' && item.viewport.width === 390) {
+        failures.push(
+          ...galleryHorizontalIssues(
+            { left: facts.stage.contentLeft, right: facts.stage.contentRight },
+            cards
+          )
+        );
+        const columns = groupPaintedCards(cards).map((column) => column.map((card) => card.id));
+        entry.compactColumns = columns;
+        if (JSON.stringify(columns) !== JSON.stringify(WIDE_GALLERY_COLUMNS))
+          failures.push('The inert overview must show all five authored columns in order');
+      } else if (kind === 'candidate') {
+        const flow = galleryFlowEvidence({
+          containerCount: facts.stageCount,
+          container: {
+            ...facts.stage.rect,
+            left: facts.stage.contentLeft,
+            right: facts.stage.contentRight,
+            width: facts.stage.contentRight - facts.stage.contentLeft,
+          },
+          wideMedia: facts.wideMedia,
+          gapRem: facts.rhythm.gapRem,
+          enhancedMedia: facts.enhancedMedia,
+          queryContainerWidth: facts.queryContainerWidth,
+          readingFlowSupported: facts.readingFlowSupported,
+          flowDisplay: facts.flowDisplay,
+          flowReadingFlow: facts.flowReadingFlow,
+          viewportWidth: facts.viewport.width,
+          rootFontSize: facts.rootFontSize,
+          columnGap: facts.columnGap,
+          cards,
+        });
+        entry.galleryFlow = flow;
+        failures.push(...flow.issues);
+        if (item.viewport.width === 1440 && flow.columns.length !== 4)
+          failures.push('Expected four painted columns at 1440px');
+        if (facts.wideMedia || (item.viewport.width === 1440 && flow.enhancedExpected)) {
+          const rowGap = flow.columns[0]?.adjacentGaps[0]?.gap;
+          if (
+            rowGap === undefined ||
+            !(rowGap > 0) ||
+            flow.bottomSpread === null ||
+            !(flow.bottomSpread <= 2 * rowGap)
+          )
+            failures.push(
+              `${flow.columns.length}-column tail spread ${flow.bottomSpread}px must fit two measured row gaps of ${rowGap}px`
+            );
+        }
+      }
+      const expectedCards = kind === 'baseline' ? baselineGalleryIds : HOMEPAGE_GALLERY_IDS;
+      if (
+        facts.cards.length !== expectedCards.length ||
+        facts.cards.some((card, index) => card.id !== expectedCards[index])
+      )
+        failures.push('The mounted gallery must contain every authored card once in DOM order');
+      if (
+        !facts.cards.every((card) => card.connected && card.visible && card.livePrototypeRoots > 0)
+      )
+        failures.push('Each visible card must contain live public Prototype roots');
       failures.push(...(entry.pageErrors as string[]).map((error) => `Page error: ${error}`));
       entry.validationFailures = failures;
       assert.deepEqual(failures, [], item.id);

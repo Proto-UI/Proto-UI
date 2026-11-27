@@ -28,6 +28,7 @@ const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2:
 import {
   galleryFlowEvidence,
   chartContainmentIssues,
+  readGalleryRhythm,
   type GalleryRect,
   type GalleryFlowFacts,
 } from '../../../components/Homepage/homepage-layout-evidence';
@@ -350,6 +351,26 @@ async function plan(page: Page, value: number) {
     .toBe(`Plan progress: ${value}%`);
 }
 
+// Record card crossings from native keyboard navigation. Roving controls and other
+// stops within one card contribute a single visit. A trapped cycle fails the bound.
+async function galleryTabWalk(page: Page, key: 'Tab' | 'Shift+Tab') {
+  const stage = page.locator(`${ACTIVE} [data-home-gallery-stage]`);
+  const limit = (await stage.locator('*').count()) + 2;
+  const visits: string[] = [];
+  if (key === 'Shift+Tab') await page.keyboard.press(key);
+  for (let step = 0; step < limit; step++) {
+    const card = await stage.evaluate((root) => {
+      const focused = document.activeElement;
+      if (!focused || !root.contains(focused)) return null;
+      return focused.closest<HTMLElement>('[data-gallery-demo]')?.dataset.galleryDemo ?? '(stage)';
+    });
+    if (card === null) return visits;
+    if (card !== visits.at(-1)) visits.push(card);
+    await page.keyboard.press(key);
+  }
+  throw new Error(`Gallery focus did not exit after ${limit} ${key} presses`);
+}
+
 // Passive geometry observer: never repairs overflow or rewrites scene behavior.
 async function layoutFacts(page: Page) {
   const facts = await page.evaluate((active) => {
@@ -379,12 +400,31 @@ async function layoutFacts(page: Page) {
     const galleries = [
       ...document.querySelectorAll<HTMLElement>(`${active} [data-home-gallery-stage]`),
     ];
-    const gallery: GalleryFlowFacts = {
+    const stage = galleries[0];
+    const viewport = stage?.closest('.home-gallery__viewport');
+    const flow = stage?.querySelector(':scope > .home-gallery__flow');
+    const style = flow && getComputedStyle(flow);
+    const contentBounds = (node: HTMLElement) => {
+      const box = node.getBoundingClientRect();
+      const css = getComputedStyle(node);
+      const left = box.left + parseFloat(css.borderLeftWidth) + parseFloat(css.paddingLeft);
+      const top = box.top + parseFloat(css.borderTopWidth) + parseFloat(css.paddingTop);
+      const right = box.right - parseFloat(css.borderRightWidth) - parseFloat(css.paddingRight);
+      const bottom = box.bottom - parseFloat(css.borderBottomWidth) - parseFloat(css.paddingBottom);
+      return { left, top, right, bottom, width: right - left, height: bottom - top };
+    };
+    const gallery: Omit<GalleryFlowFacts, 'gapRem'> = {
+      wideMedia: matchMedia('(min-width: 96rem)').matches,
+      enhancedMedia: matchMedia('(48rem <= width < 96rem)').matches,
+      queryContainerWidth: viewport ? parseFloat(getComputedStyle(viewport).width) : NaN,
+      readingFlowSupported: CSS.supports('reading-flow', 'flex-visual'),
+      flowDisplay: style?.display ?? '',
+      flowReadingFlow: style?.getPropertyValue('reading-flow').trim() ?? '',
       containerCount: galleries.length,
       viewportWidth: innerWidth,
       rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
       columnGap: galleries[0] ? parseFloat(getComputedStyle(galleries[0]).columnGap) : NaN,
-      container: galleries[0] ? rect(galleries[0].getBoundingClientRect()) : null,
+      container: stage ? contentBounds(stage) : null,
       cards: [...document.querySelectorAll<HTMLElement>(`${active} [data-gallery-demo]`)].map(
         (card) => ({
           id: card.getAttribute('data-gallery-demo'),
@@ -595,8 +635,10 @@ async function layoutFacts(page: Page) {
       issues: [...new Set(issues)],
     };
   }, ACTIVE);
+  const { gapRem } = await page.evaluate(readGalleryRhythm);
   return {
     ...facts,
+    gallery: { ...facts.gallery, gapRem },
     issues: [
       ...facts.issues,
       ...facts.charts.flatMap(({ card, parts }) => chartContainmentIssues(card, parts)),
@@ -731,7 +773,9 @@ describe.sequential(
             expect(await page.locator(`${HOME} [data-home-demo-nojs] [aria-live]`).count()).toBe(0);
             if (family === 'shadcn') {
               await stage('hero-responsive-typography');
-              const note = page.locator(`${ACTIVE} textarea`).first();
+              const note = page
+                .locator(ACTIVE)
+                .getByRole('textbox', { name: 'Additional note', exact: true });
               const originalNote = await note.elementHandle();
               const originalHeading = await page.locator('.homepage-hero h1').elementHandle();
               await note.fill('Preserved across Hero viewport changes');
@@ -803,15 +847,14 @@ describe.sequential(
               }
               await note.fill('');
               await page.setViewportSize({ width: 1400, height: 1000 });
-              await stage('select-rhea');
+              await stage('select-luma');
               const trigger = page.locator(
                 `${ACTIVE} [data-demo-ref="settings-view-trigger"][role="combobox"]`
               );
-              const editor = page.locator(`${ACTIVE} textarea`).first();
-              const originalEditor = await editor.elementHandle();
+              const originalEditor = await note.elementHandle();
               const sameEditor = () =>
-                editor.evaluate((current, original) => current === original, originalEditor);
-              await editor.fill('Retain this note across Select choices');
+                note.evaluate((current, original) => current === original, originalEditor);
+              await note.fill('Retain this note across Select choices');
               await trigger.press('ArrowDown');
               await attribute(trigger, 'aria-expanded', 'true');
               const portalId = await trigger.getAttribute('aria-controls');
@@ -820,9 +863,48 @@ describe.sequential(
               // Expansion precedes the popup's deferred entry focus on some hosts.
               const expectEntryFocus = async (name: string) => {
                 const option = portal.getByRole('option', { name, exact: true });
-                await expect
-                  .poll(() => option.and(portal.locator(':focus')).count(), { timeout: 3_000 })
-                  .toBe(1);
+                try {
+                  await expect
+                    .poll(() => option.and(portal.locator(':focus')).count(), { timeout: 3_000 })
+                    .toBe(1);
+                } catch (error) {
+                  record.selectEntryFailure = await portal.evaluate((content, expected) => {
+                    const active = document.activeElement;
+                    const exposes = (
+                      content as Element & {
+                        getExposes?(): Record<string, { get?(): unknown }>;
+                      }
+                    ).getExposes?.();
+                    const trigger = document.querySelector(
+                      `[aria-controls=${JSON.stringify(content.id)}]`
+                    );
+                    const describe = (element: Element) => ({
+                      tag: element.localName,
+                      id: element.id,
+                      role: element.getAttribute('role'),
+                      visibility: getComputedStyle(element).visibility,
+                      rect: element.getBoundingClientRect().toJSON(),
+                    });
+                    return {
+                      expected,
+                      active: active && describe(active),
+                      content: describe(content),
+                      trigger: trigger && describe(trigger),
+                      expanded: trigger?.getAttribute('aria-expanded'),
+                      open: exposes?.open?.get?.(),
+                      phase: exposes?.transitionState?.get?.(),
+                      alignmentDiagnostic: exposes?.alignmentDiagnostic?.get?.(),
+                      viewDetached: content.hasAttribute('data-pui-view-detached'),
+                      viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
+                      options: Array.from(content.querySelectorAll('[role="option"]'), (item) => ({
+                        ...describe(item),
+                        text: item.textContent?.trim(),
+                        selected: item.getAttribute('aria-selected'),
+                      })),
+                    };
+                  }, name);
+                  throw error;
+                }
               };
               await expect.poll(() => portal.count()).toBe(1);
               await expect.poll(() => portal.getByRole('option').count()).toBe(3);
@@ -846,17 +928,22 @@ describe.sequential(
                     '[data-projection-prototype="shadcn-select-group"]'
                   );
                   const item = element.querySelector<HTMLElement>('[role="option"]');
+                  const themePopover = css.getPropertyValue('--pui-popover');
                   const reference = document.createElement('span');
                   reference.setAttribute('aria-hidden', 'true');
                   reference.style.cssText =
                     'position:fixed;visibility:hidden;pointer-events:none;width:0;height:0;background:color-mix(in oklab,var(--pui-popover) 70%,transparent)';
-                  element.append(reference);
+                  // Resolve the popup's own theme color outside its live child collection.
+                  reference.style.setProperty('--pui-popover', themePopover);
+                  reference.style.colorScheme = css.colorScheme;
+                  reference.style.color = css.color;
+                  document.body.append(reference);
                   try {
                     return {
                       radius: css.borderRadius,
                       background: css.backgroundColor,
                       expectedBackground: getComputedStyle(reference).backgroundColor,
-                      themePopover: css.getPropertyValue('--pui-popover').trim(),
+                      themePopover: themePopover.trim(),
                       isolation: css.isolation,
                       leafCount: element.querySelectorAll('[data-pui-owned-decoration]').length,
                       filter: leaf ? getComputedStyle(leaf).backdropFilter : null,
@@ -895,18 +982,18 @@ describe.sequential(
                     { timeout: 1500, interval: 25 }
                   )
                   .toEqual({
-                    trigger: { radius: '18px', height: 32, fontSize: '14px', gap: '6px' },
+                    trigger: { radius: '22px', height: 36, fontSize: '14px', gap: '6px' },
                     backgroundMatches: true,
                     validTheme: true,
                     popup: {
-                      radius: '18px',
+                      radius: '22px',
                       isolation: 'isolate',
                       leafCount: 1,
                       filter: 'blur(40px) saturate(1.5)',
-                      leafRadius: '18px',
+                      leafRadius: '22px',
                       leafAriaHidden: 'true',
-                      padding: '4px',
-                      itemRadius: '14px',
+                      padding: '6px',
+                      itemRadius: '18px',
                       escaped: true,
                     },
                   });
@@ -917,7 +1004,8 @@ describe.sequential(
                 .popup.background;
               expect(background).not.toBe('transparent');
               expect(background).not.toBe('rgba(0, 0, 0, 0)');
-              await capture('select-rhea-open');
+              await expectEntryFocus('Email');
+              await capture('select-luma-open');
               await expectEntryFocus('Email');
               await page.keyboard.press('End');
               await page.keyboard.press('Enter');
@@ -925,7 +1013,7 @@ describe.sequential(
               await expect.poll(() => trigger.textContent()).toBe('In-app');
               await hasFocus(trigger);
               await expect
-                .poll(() => editor.inputValue())
+                .poll(() => note.inputValue())
                 .toBe('Retain this note across Select choices');
               expect(await sameEditor()).toBe(true);
               await trigger.press('ArrowDown');
@@ -938,9 +1026,9 @@ describe.sequential(
               await hasFocus(trigger);
               expect(await sameEditor()).toBe(true);
               await expect
-                .poll(() => editor.inputValue())
+                .poll(() => note.inputValue())
                 .toBe('Retain this note across Select choices');
-              await editor.fill('');
+              await note.fill('');
               await originalEditor!.dispose();
               record.selectJourney = [
                 'Email',
@@ -1004,14 +1092,19 @@ describe.sequential(
                   try {
                     const inner = getComputedStyle(input),
                       outer = getComputedStyle(shell),
+                      wrapperStyle = getComputedStyle(wrapper),
                       item = getComputedStyle(active);
                     return {
                       rootRadius: getComputedStyle(root).borderRadius,
                       shellRadius: outer.borderRadius,
                       shellHeight: shell.getBoundingClientRect().height,
-                      wrapperPadding: getComputedStyle(wrapper).padding,
+                      shellBorderStart: outer.borderInlineStartWidth,
+                      wrapperPadding: wrapperStyle.padding,
+                      wrapperInsetStart: wrapperStyle.paddingInlineStart,
                       innerRadius: inner.borderRadius,
                       innerBorder: inner.borderTopWidth,
+                      editorInsets: [inner.paddingInlineStart, inner.paddingInlineEnd],
+                      optionInsets: [item.paddingInlineStart, item.paddingInlineEnd],
                       innerFont: inner.fontSize,
                       activeRadius: item.borderRadius,
                       activeBackground: item.backgroundColor,
@@ -1053,44 +1146,43 @@ describe.sequential(
                     async () => {
                       paint = await readPaint();
                       samples.push(paint);
-                      return (
-                        paint.shellCount === 1 &&
-                        paint.rootRadius === '22px' &&
-                        paint.shellRadius === '18px' &&
-                        paint.shellHeight === 32 &&
-                        paint.wrapperPadding === '4px 4px 0px' &&
-                        paint.innerRadius === '0px' &&
-                        paint.innerBorder === '0px' &&
-                        paint.innerFont === '14px' &&
-                        paint.activeRadius === '14px' &&
-                        paint.activeText === 'Build a prototype' &&
-                        paint.themeMutedToken.length > 0 &&
-                        !['transparent', 'rgba(0, 0, 0, 0)'].includes(paint.expectedMuted) &&
-                        paint.activeBackground === paint.expectedMuted
-                      );
+                      return {
+                        ...paint,
+                        mutedSelection:
+                          paint.themeMutedToken.length > 0 &&
+                          !['transparent', 'rgba(0, 0, 0, 0)'].includes(paint.expectedMuted) &&
+                          paint.activeBackground === paint.expectedMuted,
+                      };
                     },
                     { timeout: 1500, interval: 25 }
                   )
-                  .toBe(true);
+                  .toMatchObject({
+                    // Luma Command and its grouped InputShell both use 4xl.
+                    // The h-9 shell owns the border, and the option uses 2xl.
+                    rootRadius: '26px',
+                    shellCount: 1,
+                    shellRadius: '26px',
+                    shellHeight: 36,
+                    shellBorderStart: '1px',
+                    wrapperPadding: '4px 4px 0px',
+                    innerRadius: '0px',
+                    innerBorder: '0px',
+                    editorInsets: ['12px', '12px'],
+                    optionInsets: ['12px', '12px'],
+                    innerFont: '14px',
+                    activeRadius: '18px',
+                    activeText: 'Build a prototype',
+                    mutedSelection: true,
+                  });
               } finally {
                 record.commandPaint = paint;
                 await save();
               }
-              expect(paint.themeMutedToken).not.toBe('');
-              expect(paint.expectedMuted).not.toBe('rgba(0, 0, 0, 0)');
-              expect(paint.expectedMuted).not.toBe('transparent');
-              expect(paint.shellCount).toBe(1);
-              expect(paint.rootRadius).toBe('22px');
-              expect(paint.shellRadius).toBe('18px');
-              expect(paint.shellHeight).toBe(32);
-              expect(paint.wrapperPadding).toBe('4px 4px 0px');
-              expect(paint.innerRadius).toBe('0px');
-              expect(paint.innerBorder).toBe('0px');
-              expect(paint.innerFont).toBe('14px');
-              expect(Math.abs(paint.inlineTextOffset)).toBeLessThanOrEqual(1);
-              expect(paint.activeRadius).toBe('14px');
-              expect(paint.activeBackground).toBe(paint.expectedMuted);
-              expect(paint.activeText).toBe('Build a prototype');
+              // P-SHADCN-COMMAND-NO-ADDON-INSET gives the grouped editor its
+              // own inset. Only the editor also sits inside a padded wrapper and bordered shell.
+              const editorNestingInset =
+                parseFloat(paint.wrapperInsetStart) + parseFloat(paint.shellBorderStart);
+              expect(Math.abs(paint.inlineTextOffset - editorNestingInset)).toBeLessThanOrEqual(1);
             }
             await input.press('Enter');
             await plan(page, 60);
@@ -1276,6 +1368,107 @@ describe.sequential(
             // Longest answer and all results remain visible during every layout sample.
             await help.getByRole('button', { name: questions[2], exact: true }).press('Enter');
             await input.fill('');
+            if (runtime === 'wc' && family === 'shadcn') {
+              await stage('focused-gallery-resize');
+              const options = [
+                'Outline an idea',
+                'Build a prototype',
+                'Review the details',
+                'Publish online (unavailable)',
+              ];
+              const answer = help.getByRole('region');
+              const assertExpanded = async () => {
+                await expect
+                  .poll(() => command.getByRole('option').allTextContents())
+                  .toEqual(options);
+                for (const name of options)
+                  expect(await command.getByRole('option', { name, exact: true }).isVisible()).toBe(
+                    true
+                  );
+                expect(await answer.isVisible()).toBe(true);
+                expect((await answer.textContent())?.trim()).toBe(
+                  'This is an interactive example on the current page. Nothing is uploaded, published or saved to an account. Reloading restores the defaults.'
+                );
+                await attribute(
+                  help.getByRole('button', { name: questions[2], exact: true }),
+                  'aria-expanded',
+                  'true'
+                );
+              };
+              await assertExpanded();
+              const note = page.locator(`${ACTIVE} [data-gallery-demo="preferences"] textarea`);
+              const first = page
+                .locator(`${ACTIVE} [data-gallery-demo="controls"]`)
+                .getByRole('button', { name: 'Button', exact: true });
+              const original = await note.inputValue();
+              const draft = 'Draft kept across gallery layouts';
+              await note.fill(draft);
+              const owner = await note.elementHandle();
+              if (!owner) throw new Error('Missing focused preferences editor');
+              const generation = await page
+                .locator(HOME)
+                .getAttribute('data-projection-generation');
+              expect(generation).toBeTruthy();
+              const steps: unknown[] = [];
+              record.focusedGalleryResize = steps;
+              try {
+                for (const width of [1920, 1440]) {
+                  await page.setViewportSize({ width, height: 1000 });
+                  await settled(page);
+                  await assertExpanded();
+                  const facts = await layoutFacts(page);
+                  const { gallery } = facts;
+                  const flow = galleryFlowEvidence(gallery);
+                  const retained = await owner.evaluate((node) => ({
+                    focused: node === document.activeElement,
+                    connected: node.isConnected,
+                    draft: (node as HTMLTextAreaElement).value,
+                    generation:
+                      node.closest<HTMLElement>('[data-home-showcase]')?.dataset
+                        .projectionGeneration,
+                  }));
+                  const step = {
+                    width,
+                    retained,
+                    columns: flow.columns,
+                    domOrder: gallery.cards.map((card) => card.id),
+                    expanded: {
+                      facts,
+                      bottomSpread: flow.bottomSpread,
+                      expectedGap: flow.expectedGap,
+                    },
+                    forward: [] as string[],
+                    reverse: [] as string[],
+                  };
+                  steps.push(step);
+                  expect(retained).toEqual({ focused: true, connected: true, draft, generation });
+                  expect(flow.issues).toEqual([]);
+                  expect(captureSelectionIssues(facts.selection, runtime, family)).toEqual([]);
+                  expect(facts.issues).toEqual([]);
+                  const enhanced = gallery.enhancedMedia && gallery.readingFlowSupported;
+                  if (width === 1920 || enhanced)
+                    expect(flow.columns).toHaveLength(width === 1920 ? 5 : 4);
+                  // Milestones, ecosystem, highlights and throughput contain only passive content.
+                  const passive = ['milestones', 'ecosystem', 'highlights', 'throughput'];
+                  const expected = (
+                    enhanced
+                      ? flow.columns.flatMap((column) => column.ids)
+                      : gallery.cards.map((card) => card.id)
+                  ).filter((id): id is string => id !== null && !passive.includes(id));
+                  await first.focus();
+                  await hasFocus(first);
+                  step.forward = await galleryTabWalk(page, 'Tab');
+                  expect(step.forward).toEqual(expected);
+                  step.reverse = await galleryTabWalk(page, 'Shift+Tab');
+                  expect(step.reverse).toEqual([...expected].reverse());
+                  await note.focus();
+                }
+                await note.fill(original);
+              } finally {
+                await owner.dispose();
+                await save();
+              }
+            }
             for (const layout of LAYOUTS) {
               await stage(`layout-${layout.name}`);
               await page.setViewportSize({ width: layout.width, height: 1000 });

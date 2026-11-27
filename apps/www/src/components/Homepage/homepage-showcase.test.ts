@@ -10,6 +10,7 @@ import {
   createProjectionComposition,
 } from '../PrototypePreviewer/projection-composition';
 import { createHomepageShowcase, HOMEPAGE_SHOWCASE_ID } from './homepage-showcase';
+import { HOMEPAGE_GALLERY_IDS } from './homepage-layout-evidence';
 import { PREVIEW_SURFACE_ID } from './homepage-live-preview';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/registry';
 
@@ -198,27 +199,29 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     );
     expect(JSON.stringify(composition.demo.root)).not.toContain('"data-projection-id":"button"');
   });
-  it(`${family} composes twelve task cards without a veil over live controls and with real source attribution`, () => {
+  it(`${family} composes the gallery task cards without a veil over live controls and with real source attribution`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
     const root = content.demo.root;
     if (root.kind !== 'box') throw new Error('gallery root must be a box');
     const cards: Array<{ id: string; density: string; emphasis: string; body?: string }> = [];
-    const icons: string[] = [];
+    const icons: Record<string, string[]> = {};
     let charts = 0;
     let fades = 0;
     const links: Array<{ href?: string; text?: string }> = [];
-    const visit = (node: DemoChild) => {
+    const visit = (node: DemoChild, cardId = 'outside gallery cards') => {
       if (typeof node === 'string' || node.kind === 'text') return;
-      if (node.kind === 'box' && node.attrs?.['data-gallery-demo'])
+      if (node.kind === 'box' && node.attrs?.['data-gallery-demo']) {
+        cardId = node.attrs['data-gallery-demo'];
         cards.push({
-          id: node.attrs['data-gallery-demo'],
+          id: cardId,
           density: node.attrs['data-gallery-density']!,
           emphasis: node.attrs['data-gallery-emphasis']!,
           ...(node.attrs['data-gallery-body'] ? { body: node.attrs['data-gallery-body'] } : {}),
         });
+      }
       if (node.kind === 'box' && node.attrs?.['data-gallery-icon'])
-        icons.push(node.attrs['data-gallery-icon']);
+        (icons[cardId] ??= []).push(node.attrs['data-gallery-icon']);
       if (node.kind === 'box' && node.ref === 'gallery-rhythm-bars') charts++;
       if (node.kind === 'box' && node.attrs?.['data-gallery-fade'] !== undefined) {
         fades++;
@@ -226,23 +229,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       }
       if (node.kind === 'box' && node.tag === 'a')
         links.push({ href: node.attrs?.href, text: node.children?.[0] as string });
-      for (const child of node.children ?? []) visit(child);
+      for (const child of node.children ?? []) visit(child, cardId);
     };
     visit(root);
-    expect(cards.map((card) => card.id)).toEqual([
-      'controls',
-      'shortcuts',
-      'workspace-analytics',
-      'workspace-command',
-      'preferences',
-      'workspace-progress',
-      'hover',
-      'editor',
-      'workspace-help',
-      'overlays',
-      'spark',
-      'choices',
-    ]);
+    expect(cards.map((card) => card.id)).toEqual(HOMEPAGE_GALLERY_IDS);
     expect(new Set(cards.map((card) => card.density))).toEqual(new Set(['regular', 'compact']));
     expect(new Set(cards.map((card) => card.emphasis))).toEqual(
       new Set(['quiet', 'standard', 'accent'])
@@ -251,8 +241,29 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       'workspace-analytics',
       'spark',
     ]);
-    expect(icons).toHaveLength(18);
-    expect(new Set(icons).size).toBe(18);
+    expect(icons).toEqual({
+      controls: ['arrow-right'],
+      shortcuts: [
+        'nav-blocks',
+        'nav-layers',
+        'nav-grid',
+        'nav-box',
+        'nav-workflow',
+        'nav-compass',
+        'nav-shield',
+        'nav-activity',
+        'nav-globe',
+        'nav-code',
+        'nav-cpu',
+        'nav-terminal',
+        'nav-palette',
+        'nav-sparkles',
+        'nav-wrench',
+        'nav-book',
+      ],
+      highlights: ['controls', 'preferences'],
+      overlays: ['release-plus'],
+    });
     expect(charts).toBe(1);
     expect(fades).toBe(0);
     expect(links).toEqual([

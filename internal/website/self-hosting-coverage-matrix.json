@@ -1928,12 +1928,12 @@
     {
       "source": "apps/www/src/components/Homepage/homepage-gallery-icons.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "8ed70c54c924a2b9757839f48f6414a4bbfa1a5bb7bb2278f0ea6e2f711b7940"
+      "sourceSha256": "29b2d2041176aaa91fd68934b9869835482a16e7beafb99937c448f6ccd66fff"
     },
     {
       "source": "apps/www/src/components/Homepage/homepage-gallery-parts.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "756b8ff7a5bada74985afe4a8aad70f61bf38219515549be0a81539c9b11b270"
+      "sourceSha256": "de512238b31befb3c6c8830063e09a40ba39139e40d4e4ed5fc76ac673f027f5"
     },
     {
       "source": "apps/www/src/components/Homepage/homepage-locale-select.ts",
@@ -1963,12 +1963,12 @@
     {
       "source": "apps/www/src/components/Homepage/homepage-showcase.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "b80ff7afc6408fbbe4a1561a1acff19e36a4c23365ccb0dce2bb66189d7dbe95"
+      "sourceSha256": "ff541d019f1fe2c0c10da5e322f5c8a87ee67b3d6729d3ddb1972f5cfeb5f8b1"
     },
     {
       "source": "apps/www/src/components/Homepage/homepage-text.ts",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "ff74daefab110366d895efb116a04b3d56de035255cf6f016a2bf0dbd3f7348a"
+      "sourceSha256": "9f1ab8493b9c409449ebad144acfa241b1a0ca268dfad6bc152ed5646eb03cc4"
     },
     {
       "source": "apps/www/src/components/InstallCommandCard.astro",
@@ -2038,7 +2038,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro",
       "owningMatrixRow": "`www.demo.home-demo-select`",
-      "sourceSha256": "1c0c2f4bf6b32a49c21f15211bd3b7b69aef4a47fc9f99c90900c5b49de45f25"
+      "sourceSha256": "4db55528c2597733709b71acfabbc21e9dd16fe77a28933881bd21f89c3703ac"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",

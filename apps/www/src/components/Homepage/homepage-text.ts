@@ -16,6 +16,12 @@ const roles: Record<string, Partial<TextRootProps>> = {
   'home-gallery__title': { size: 'base', weight: 'semibold', font: 'heading' },
   'home-gallery__caption': { size: 'xs', tone: 'muted' },
   'home-gallery__metric': { size: '3xl', weight: 'semibold', tracking: 'tight', leading: 'tight' },
+  'home-gallery__submetric': {
+    size: 'xl',
+    weight: 'semibold',
+    tracking: 'tight',
+    leading: 'tight',
+  },
   'home-gallery__eyebrow': { size: 'xs', tone: 'muted', weight: 'medium' },
   'home-gallery__chart-label': { size: 'xs', tone: 'muted' },
   'home-gallery__stat-value': { size: 'sm', weight: 'semibold' },
@@ -24,7 +30,6 @@ const roles: Record<string, Partial<TextRootProps>> = {
   'home-gallery__choice-label': { size: 'sm', weight: 'medium' },
   'home-gallery__choice-desc': { size: 'xs', tone: 'muted' },
   'home-gallery__shortcut-title': { size: 'xs', tone: 'muted', weight: 'medium' },
-  'home-gallery__shortcut-label': { size: 'xs', weight: 'medium' },
   'home-gallery__badge-text': { size: 'xs', tone: 'inherit', weight: 'medium', leading: 'tight' },
   'home-gallery__text-preview': { size: 'base', leading: 'relaxed' },
 };

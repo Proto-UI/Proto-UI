@@ -4,6 +4,7 @@ import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import type { DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import { createHomepageShowcase } from './homepage-showcase';
+import { HOMEPAGE_GALLERY_IDS } from './homepage-layout-evidence';
 import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 
 // Real prototypes require the same generated host layout rules as the website.
@@ -47,12 +48,12 @@ function fill(input: HTMLInputElement, text: string) {
     new InputEvent('input', { bubbles: true, data: text, inputType: 'insertText' })
   );
 }
-async function mount(family: Family) {
+async function mount(family: Family, locale: 'en' | 'zh-cn' = 'en') {
   const errors: string[] = [];
   const onError = (event: ErrorEvent) => errors.push(event.message);
   window.addEventListener('error', onError);
   stopErrorWatch = () => window.removeEventListener('error', onError);
-  const content = createHomepageShowcase(family, 'wc', 'en', () => true);
+  const content = createHomepageShowcase(family, 'wc', locale, () => true);
   await loadPrototypes([...content.recipe.prototypeIds]);
   const setup = content.demo.setup!;
   const writes = vi.fn<DemoSetupContext['api']['setProps']>();
@@ -101,26 +102,54 @@ async function mount(family: Family) {
   return { host, ref, errors, writes, verifyPlan, stopSetup: () => cleanup?.() };
 }
 
+it.each([
+  {
+    locale: 'en',
+    preview: 'Target runtime: vue · CLI command: npm run demo',
+    missingTarget: 'Target runtime: (required) · CLI command: npm run demo',
+    missingCommand: 'Target runtime: vue · CLI command: (required)',
+  },
+  {
+    locale: 'zh-cn',
+    preview: '目标框架：vue · 初始化命令：npm run demo',
+    missingTarget: '目标框架：（必填） · 初始化命令：npm run demo',
+    missingCommand: '目标框架：vue · 初始化命令：（必填）',
+  },
+] as const)(
+  'previews the current Quick setup inputs in $locale',
+  async (copy) => {
+    const view = await mount('shadcn', copy.locale);
+    const target = view.ref('gallery-protocol-target').querySelector<HTMLInputElement>('input')!;
+    const command = view.ref('gallery-protocol-cmd').querySelector<HTMLInputElement>('input')!;
+    const button = view.ref('gallery-protocol-preview');
+    const status = view.ref('gallery-protocol-status');
+    expect(status.getAttribute('role')).toBe('status');
+
+    fill(target, 'vue');
+    fill(command, 'npm run demo');
+    button.click();
+    await expect.poll(() => status.textContent).toBe(copy.preview);
+
+    fill(target, ' ');
+    button.click();
+    await expect.poll(() => status.textContent).toBe(copy.missingTarget);
+
+    fill(target, 'vue');
+    fill(command, '');
+    button.click();
+    await expect.poll(() => status.textContent).toBe(copy.missingCommand);
+    expect(view.errors).toEqual([]);
+  },
+  20_000
+);
+
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
-    it('mounts twelve real cards, decorative icons, a labelled sample chart and attribution', async () => {
+    it('mounts the gallery cards, decorative icons, a labelled sample chart and attribution', async () => {
       const view = await mount(family);
       await settle();
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
-      expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
-        'controls',
-        'shortcuts',
-        'workspace-analytics',
-        'workspace-command',
-        'preferences',
-        'workspace-progress',
-        'hover',
-        'editor',
-        'workspace-help',
-        'overlays',
-        'spark',
-        'choices',
-      ]);
+      expect(cards.map((card) => card.dataset.galleryDemo)).toEqual(HOMEPAGE_GALLERY_IDS);
       const analytics = cards.find((card) => card.dataset.galleryDemo === 'workspace-analytics')!;
       expect(analytics.dataset.galleryBody).toBe('edge-media');
       expect(analytics.querySelector('.home-gallery__media')).not.toBeNull();
@@ -134,11 +163,30 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       await expect
         .poll(() => [...bars].map((bar) => bar.getAttribute('height')).join(','))
         .not.toBe(initialHeights.join(','));
-      const icons = view.host.querySelectorAll('[data-gallery-icon] svg');
-      expect(icons).toHaveLength(18);
-      for (const icon of icons) {
-        expect(icon.getAttribute('aria-hidden')).toBe('true');
-        expect(icon.closest('[data-gallery-icon]')?.getAttribute('aria-hidden')).toBe('true');
+      const glyphsIn = (id: string) =>
+        [...view.host.querySelectorAll(`[data-gallery-demo="${id}"] [data-gallery-icon]`)].map(
+          (slot) => slot.getAttribute('data-gallery-icon')
+        );
+      expect(glyphsIn('controls')).toEqual(['arrow-right']);
+      expect(glyphsIn('overlays')).toEqual(['release-plus']);
+      expect(glyphsIn('highlights')).toEqual(['controls', 'preferences']);
+      const highlights = cards.find((card) => card.dataset.galleryDemo === 'highlights')!;
+      const rows = highlights.querySelectorAll('.home-gallery__highlight-row');
+      expect(
+        [...rows].map((row) => [
+          row.querySelector('[data-gallery-icon]')?.getAttribute('data-gallery-icon'),
+          row.querySelector('.home-gallery__stat-value')?.textContent?.trim(),
+          row.querySelector('.home-gallery__caption')?.textContent?.trim(),
+        ])
+      ).toEqual([
+        ['controls', 'Portable protocols', 'One state and a11y model across every host.'],
+        ['preferences', 'Swappable projections', 'Swap design systems without rewriting logic.'],
+      ]);
+      for (const slot of view.host.querySelectorAll('[data-gallery-icon]')) {
+        expect(slot.getAttribute('aria-hidden')).toBe('true');
+        const icons = slot.querySelectorAll('svg');
+        expect(icons, slot.getAttribute('data-gallery-icon') ?? '').toHaveLength(1);
+        expect(icons[0]!.getAttribute('aria-hidden')).toBe('true');
       }
       expect(view.host.querySelector('[data-gallery-fade]')).toBeNull();
       expect(view.ref('gallery-rhythm-value').textContent).toBe('90%');

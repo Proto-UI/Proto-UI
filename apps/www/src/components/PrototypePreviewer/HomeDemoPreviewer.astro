@@ -48,8 +48,8 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       {
         ['left', 'right'].map((side) => (
           <div class:list={['home-demo-previewer__rail', `home-demo-previewer__rail--${side}`]}>
-            {[0, 1, 2].map((index) => (
-              <HomepageGhostCard tall={index === 1} />
+            {[0, 1, 2, 3].map((index) => (
+              <HomepageGhostCard tall={index === 1 || index === 3} />
             ))}
           </div>
         ))
@@ -165,12 +165,13 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   .home-demo-previewer__rail {
     /* The padded mask admits outside family paint. Equal negative margins
-       retain card tracks; fade stops remain at 68%/100% of their content height. */
+       retain card tracks; fade stops dissolve the outer rails into the same
+       bottom horizon as the five live columns, clear of the attribution line. */
     mask-image: linear-gradient(
       to bottom,
       black,
-      black calc(68% - var(--homepage-gallery-paint-gutter) * 0.3),
-      transparent calc(100% - var(--homepage-gallery-paint-gutter))
+      black calc(64% - var(--homepage-gallery-paint-gutter) * 0.3),
+      transparent calc(94% - var(--homepage-gallery-paint-gutter))
     );
     box-sizing: content-box;
     padding: var(--homepage-gallery-paint-gutter);
@@ -351,20 +352,29 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     columns: 18rem;
     column-gap: var(--homepage-gallery-column-gap);
   }
-  /* The page decoration is not a scrolling mask or a pointer/focus boundary.
-     Its unscaled viewport keeps the same fade on desktop and the live mobile
-     overview. Attribution and focused controls remain outside its paint. */
+  /* Bring the bottom edge to the page background inside the card gutter.
+     Above the gutter, live labels and controls need to remain readable. */
   .home-demo-previewer :global(.home-gallery__viewport)::after {
     content: '';
     position: absolute;
     inset: auto 0 0;
-    height: min(8rem, 28%);
+    height: min(18rem, 28%);
     z-index: 1;
     pointer-events: none;
     background-image: linear-gradient(
       to top,
       var(--color-background),
-      color-mix(in srgb, var(--color-background) 65%, transparent) 30%,
+      color-mix(in srgb, var(--color-background) 12%, transparent) var(--homepage-gallery-row-gap),
+      transparent
+    );
+  }
+  .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__viewport)::after {
+    background-image: linear-gradient(
+      to top,
+      var(--color-background),
+      var(--color-background) 14%,
+      color-mix(in srgb, var(--color-background) 85%, transparent) 38%,
+      color-mix(in srgb, var(--color-background) 42%, transparent) 68%,
       transparent
     );
   }
@@ -394,8 +404,14 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   /* Keep the authored reading/tab order while allowing cards, not fixed
      groups, to fill responsive columns. No component paint is owned here. */
-  .home-demo-previewer :global(.home-gallery__column) {
+  .home-demo-previewer :global(.home-gallery__flow) {
     display: contents;
+  }
+  .home-demo-previewer :global([data-gallery-demo='workspace-analytics']),
+  .home-demo-previewer :global([data-gallery-demo='ecosystem']),
+  .home-demo-previewer :global([data-gallery-demo='hover']),
+  .home-demo-previewer :global([data-gallery-demo='workspace-command']) {
+    break-before: var(--homepage-gallery-wide-break, auto);
   }
   .home-demo-previewer :global(.home-gallery__item) {
     min-width: 0;
@@ -452,14 +468,46 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     padding-inline: 0;
     display: block;
   }
-  .home-demo-previewer :global(.home-gallery__chart) {
+  .home-demo-previewer :global(.home-gallery__chart),
+  .home-demo-previewer :global(.home-gallery__activity-chart) {
     display: block;
     color: var(--pui-foreground, currentColor);
   }
   .home-demo-previewer :global(.home-gallery__chart-bars svg),
+  .home-demo-previewer :global(.home-gallery__activity-bars svg),
   .home-demo-previewer :global(.home-gallery__spark-chart svg) {
     display: block;
     width: 100%;
+  }
+  .home-demo-previewer :global(.home-gallery__parity-row) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__highlight-row) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__highlight-row .home-gallery__icon) {
+    margin-block-start: 0.125rem;
+  }
+  .home-demo-previewer :global(.home-gallery__parity-copy) {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__mini-bars) {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: flex-end;
+    color: var(--pui-foreground, currentColor);
+  }
+  .home-demo-previewer :global(.home-gallery__mini-bars svg) {
+    display: block;
   }
   .home-demo-previewer :global(.home-gallery__spark-kpi) {
     display: flex;
@@ -516,17 +564,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.2rem;
     min-width: 0;
   }
-  /* The icon-free Shadcn example keeps the 4px wrapper inset. Its native
-     editor therefore needs 4px more, not the standalone 10px, to align
-     to the 8px option text inset. The shell and option paint stay untouched. */
-  .home-demo-previewer
-    :global(
-      [data-gallery-demo='workspace-command']
-        [data-projection-prototype='shadcn-command-input-wrapper']
-        input
-    ) {
-    padding-inline-start: 0.25rem;
-  }
   .home-demo-previewer :global(.home-gallery__profile),
   .home-demo-previewer :global(.home-gallery__release) {
     display: grid;
@@ -568,20 +605,10 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.75rem;
     min-width: 0;
   }
-  .home-demo-previewer :global(.home-gallery__shortcut-list) {
-    display: grid;
-    gap: 0.25rem;
+  .home-demo-previewer :global(.home-gallery__shortcut-text) {
     min-width: 0;
-  }
-  .home-demo-previewer :global(.home-gallery__shortcut-item) {
-    padding: 0.25rem 0.5rem;
-    min-width: 0;
-  }
-  .home-demo-previewer :global(.home-gallery__shortcut-row) {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .home-demo-previewer :global(.home-gallery__control-bar) {
     display: flex;
@@ -591,17 +618,59 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 0.5rem;
     min-width: 0;
   }
-  /* Explicit five-column composition on large displays. Narrow layouts retain
-     the same authored reading order and flow cards instead of empty tracks. */
+  /* The flex column breaks at the start of each reading group. Its fragmented
+     height ends at the longest painted column, including the final card margin. */
+  @media (48rem <= width < 96rem) {
+    @supports (reading-flow: flex-visual) {
+      .home-demo-previewer :global(.home-gallery__viewport) {
+        container: gallery / inline-size;
+      }
+      @container gallery (min-width: 75.75rem) {
+        .home-demo-previewer :global(.home-gallery__flow) {
+          display: flex;
+          flex-direction: column;
+          reading-flow: flex-visual;
+        }
+        .home-demo-previewer :global([data-gallery-demo='controls']),
+        .home-demo-previewer :global([data-gallery-demo='shortcuts']),
+        .home-demo-previewer :global([data-gallery-demo='workspace-analytics']),
+        .home-demo-previewer :global([data-gallery-demo='workspace-help']) {
+          order: -3;
+        }
+        .home-demo-previewer :global([data-gallery-demo='milestones']),
+        .home-demo-previewer :global([data-gallery-demo='workspace-command']) {
+          order: -2;
+        }
+        .home-demo-previewer :global([data-gallery-demo='ecosystem']),
+        .home-demo-previewer :global([data-gallery-demo='highlights']) {
+          order: -1;
+        }
+        .home-demo-previewer :global([data-gallery-demo='protocol']),
+        .home-demo-previewer :global([data-gallery-demo='hover']),
+        .home-demo-previewer :global([data-gallery-demo='editor']),
+        .home-demo-previewer :global([data-gallery-demo='overlays']) {
+          order: 1;
+        }
+        .home-demo-previewer :global([data-gallery-demo='spark']),
+        .home-demo-previewer :global([data-gallery-demo='choices']) {
+          order: 2;
+        }
+        .home-demo-previewer :global([data-gallery-demo='throughput']) {
+          order: 3;
+        }
+        .home-demo-previewer :global([data-gallery-demo='milestones']),
+        .home-demo-previewer :global([data-gallery-demo='preferences']),
+        .home-demo-previewer :global([data-gallery-demo='editor']) {
+          break-before: column;
+        }
+      }
+    }
+  }
+  /* Each wide column starts at its authored group, regardless of wrapping. */
   @media (min-width: 96rem) {
     .home-demo-previewer :global(.home-gallery__stage) {
-      display: grid;
-      grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
-      align-items: start;
-    }
-    .home-demo-previewer :global(.home-gallery__column) {
-      display: block;
-      min-width: 0;
+      --homepage-gallery-wide-break: column;
+      columns: var(--homepage-gallery-wide-columns);
     }
   }
   .home-demo-previewer :global(.home-gallery__attribution) {
@@ -610,12 +679,16 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
+    justify-content: center;
+    text-align: center;
+    gap: 0.25rem 0.5rem;
     min-width: 0;
-    padding-block: 2rem 0.5rem;
+    padding-block: 0.5rem 1.75rem;
     font-size: var(--sl-text-sm, 0.875rem);
     color: var(--sl-color-gray-3, inherit);
+  }
+  .home-demo-previewer :global(.home-gallery__attribution-sep) {
+    opacity: 0.55;
   }
   .home-demo-previewer :global(.home-gallery__attribution-link) {
     color: inherit;
@@ -664,7 +737,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   .home-demo-previewer :global(.home-gallery__choice-label),
   .home-demo-previewer :global(.home-gallery__choice-desc),
   .home-demo-previewer :global(.home-gallery__shortcut-title),
-  .home-demo-previewer :global(.home-gallery__shortcut-label),
+  .home-demo-previewer :global(.home-gallery__submetric),
   .home-demo-previewer :global(.home-gallery__chart-label),
   .home-demo-previewer :global(.home-gallery__stat-value),
   .home-demo-previewer :global(.home-gallery__eyebrow),
@@ -688,15 +761,10 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
       /* The same five desktop columns, not five stacks of miniature controls
          in the tab order. CSS zoom also scales layout height, unlike transform. */
       --homepage-gallery-mini-width: 90rem;
-      display: grid;
+      --homepage-gallery-wide-break: column;
       width: var(--homepage-gallery-mini-width);
-      grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
-      align-items: start;
+      columns: var(--homepage-gallery-wide-columns);
       zoom: var(--homepage-gallery-scale, 1);
-    }
-    .home-demo-previewer[data-home-gallery-compact='true'] :global(.home-gallery__column) {
-      display: block;
-      min-width: 0;
     }
   }
   @media (max-width: 639px) {
