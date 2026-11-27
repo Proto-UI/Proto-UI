@@ -361,18 +361,21 @@ try {
               });
               return {
                 prototype: e.getAttribute('data-projection-prototype'),
+                floating: Boolean(e.closest('[data-code-inner] > .site-code-copy-overlay')),
                 backgroundAlpha,
                 borderAlpha,
+                borderWidth: parseFloat(style.borderTopWidth),
                 role: e.getAttribute('role'),
                 tabindex: e.getAttribute('tabindex'),
               };
             });
+            entry.copyAppearance = appearance;
             assert.equal(appearance.prototype, 'shadcn-button');
-            assert.equal(appearance.backgroundAlpha, 0);
-            assert.equal(appearance.borderAlpha, 0);
+            assert.equal(appearance.floating, true);
+            assert.equal(appearance.backgroundAlpha, 255);
+            assert.ok(appearance.borderWidth > 0 && appearance.borderAlpha > 0);
             assert.equal(appearance.role, 'button');
             assert.equal(appearance.tabindex, '0');
-            entry.copyAppearance = appearance;
           }
           await copy.hover();
           await screenshot('copy-hover');

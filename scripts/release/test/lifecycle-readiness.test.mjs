@@ -27,10 +27,12 @@ const plan = JSON.parse(
   readFileSync(path.join(root, 'internal/releases', version, 'lifecycle-dispositions.json'), 'utf8')
 );
 
-function assertCurrentDraftDispositions(data) {
-  // Read the authored inventory independently of the report producer. A disposition
-  // records review of a draft; it does not implement or admit the entity as stable.
+function assertCurrentReleaseDispositions(data) {
+  // Read the authored inventory independently of the report producer.
   const expectedIds = plan.slices.flatMap((slice) => slice.entities).sort();
+  const draftIds = plan.slices
+    .filter((slice) => slice.disposition === 'remain-draft')
+    .flatMap((slice) => slice.entities);
   assert.equal(new Set(expectedIds).size, expectedIds.length);
   assert.equal(data.version, version);
   assert.deepEqual(data.issues, []);
@@ -43,12 +45,19 @@ function assertCurrentDraftDispositions(data) {
     expectedIds,
     'reviewed entity inventory must match the authored plan exactly'
   );
-  assert.equal(data.summary.reviewedDrafts, expectedIds.length);
+  assert.equal(data.summary.reviewedDrafts, draftIds.length);
   for (const slice of plan.slices) {
-    assert.equal(slice.disposition, 'remain-draft');
     for (const entityId of slice.entities) {
       const row = data.rows.find((candidate) => candidate.entityId === entityId);
       assert.deepEqual(row.disposition, slice, entityId);
+      if (slice.disposition === 'not-applicable') {
+        assert.equal(row.status, 'removed', entityId);
+        assert.equal(row.activationProvenanceMissing, true, entityId);
+        assert.equal(row.draftAtVersion, false, entityId);
+        assert.equal(row.stableAtVersion, null, entityId);
+        continue;
+      }
+      assert.equal(slice.disposition, 'remain-draft', entityId);
       assert.equal(row.status, 'draft', `${entityId} must remain draft`);
       assert.equal(row.draftAtVersion, true, `${entityId} must be draft at the selected version`);
       assert.equal(row.stableAtVersion, false, `${entityId} must not be admitted as stable`);
@@ -82,8 +91,8 @@ test('current disposition oracle rejects missing, extra, and incorrectly admitte
   const result = report(['--json']);
   assert.equal(result.status, 0, result.stderr);
   const original = JSON.parse(result.stdout);
-  assertCurrentDraftDispositions(original);
-  const reviewedId = plan.slices[0].entities[0];
+  assertCurrentReleaseDispositions(original);
+  const reviewedId = plan.slices.find((slice) => slice.disposition === 'remain-draft').entities[0];
   const mutations = {
     'missing row': (data) => {
       data.rows = data.rows.filter((row) => row.entityId !== reviewedId);
@@ -103,8 +112,12 @@ test('current disposition oracle rejects missing, extra, and incorrectly admitte
     'incorrect stable admission': (data, row) => {
       row.stableAtVersion = true;
     },
+    'invented historical stability': (data) => {
+      const retired = data.rows.find((row) => row.disposition?.disposition === 'not-applicable');
+      retired.stableAtVersion = true;
+    },
     'stale summary count': (data) => {
-      data.summary.reviewedDrafts = 11;
+      data.summary.reviewedDrafts += 1;
     },
   };
   for (const [name, mutate] of Object.entries(mutations)) {
@@ -114,7 +127,7 @@ test('current disposition oracle rejects missing, extra, and incorrectly admitte
         data,
         data.rows.find((row) => row.entityId === reviewedId)
       );
-      assert.throws(() => assertCurrentDraftDispositions(data), { code: 'ERR_ASSERTION' });
+      assert.throws(() => assertCurrentReleaseDispositions(data), { code: 'ERR_ASSERTION' });
     });
   }
 });
