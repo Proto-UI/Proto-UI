@@ -13,13 +13,6 @@ const bounded = 'timeout --signal=TERM --kill-after=5s 220s bash ' + helper;
 const realTimeout = execFileSync('bash', ['-c', 'command -v timeout'], { encoding: 'utf8' }).trim();
 const lanes = [
   [
-    'compiler-browser-acceptance.yml',
-    'browser-acceptance',
-    35,
-    'PUI_EVIDENCE_DIR',
-    'Install and record Chinese fonts for the bilingual captures',
-  ],
-  [
     'brutalist-contrast-evidence.yml',
     'family-audit-evidence',
     45,
@@ -64,7 +57,7 @@ const lanes = [
   return { file, jobId, job, setup, deadline, evidence };
 });
 
-test('all six font lanes use the existing verified package owner within a fixed deadline', () => {
+test('all font lanes use the existing verified package owner within a fixed deadline', () => {
   for (const { file, job, setup, deadline } of lanes) {
     assert.ok(setup.run.includes(bounded), file + ' must use the bounded existing font owner');
     assert.equal(setup['timeout-minutes'], 5);

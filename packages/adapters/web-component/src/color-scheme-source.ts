@@ -16,6 +16,10 @@ export function createRebindableColorSchemeSource(getter: (key: string) => unkno
   };
   return {
     getter,
+    // A newly projected view samples while its first-render barrier is still
+    // owned. Ordinary Document changes keep the source's asynchronous path;
+    // this local sample also deduplicates that later notification.
+    reconcileForView: notify,
     subscribe(listener: () => void) {
       listeners.add(listener);
       if (listeners.size === 1) {

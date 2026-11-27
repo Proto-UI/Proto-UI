@@ -72,6 +72,6 @@ No product repair is justified yet by a specific measured hotspot. A next contro
 
 ## Repository archive binding
 
-This diagnostic packet is retained with its complete raw receipts, passive observers, finite probe drivers, failure screenshots, and the eleven source snapshots in the [immutable evidence manifest](evidence/2026-11-23-sprint5-browser-retirement-diagnostic/manifest.json). Every gzip file round-trips to its recorded raw SHA-256. Per-file comparisons to the archive worktree are provenance information, not execution on that newer head.
+This diagnostic packet is retained with its complete raw receipts, passive observers, finite probe drivers, failure screenshots, and the eleven source snapshots in the [immutable evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-browser-retirement-diagnostic/manifest.json). Every gzip file round-trips to its recorded raw SHA-256. Per-file comparisons to the archive worktree are provenance information, not execution on that newer head.
 
 The observed 17/19 result remains a failed, instrumented diagnostic. The later CPU/layout-profile attempt contains zero cases and no executed fill or captured CPU profile. Neither result is an unobserved canonical acceptance receipt. The separate public db747 browser job stopped before its journey at font setup; this archive does not convert it or the earlier cleanup failure into a pass. The original 250-millisecond acknowledgement requirement remains intact.

@@ -1,0 +1,673 @@
+{
+  "kind": "bounded-package-budget-numeric-transaction",
+  "createdAt": "2026-11-26T18:21:04.408561+00:00",
+  "transactionBase": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+  "acceptedDevelopmentCapability": "Native1949 mount-epoch outcome and acquisition/readiness ownership repair integrated with retained1914.",
+  "canonicalBefore": {
+    "head": "1c4a23455175ec65d3b41a630cfa9797d74a721d",
+    "runId": 45846356745,
+    "jobId": 140001166933,
+    "artifactId": 15131612702,
+    "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45846356745/artifacts/15131612702",
+    "zipSha256": "ddb45c855ea688bfdae805fb08eb08b3d83cce37aa07ae08484fc94c333c52a7",
+    "reportSha256": "77c0f23d93ea3033578d72539bf8a2cfc51dafcc184f962a12436e982a3183c2",
+    "result": "9/9 strict pass",
+    "source": {
+      "head": "1c4a23455175ec65d3b41a630cfa9797d74a721d",
+      "tree": "b119219eaae6973e99c6bea637c4eb192eaa1b46",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8107,
+      "fingerprintSha256": "c56c97a7ff2616c78acf41b3c3bbb253ac2978de46d1db200a2659778a7e4a2c",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "1c4a23455175ec65d3b41a630cfa9797d74a721d"
+    }
+  },
+  "canonicalAcceptedSource": {
+    "head": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+    "runId": 45872556365,
+    "jobId": 140091733420,
+    "artifactId": 15144715141,
+    "reportArtifactId": 15144370650,
+    "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45872556365/artifacts/15144715141",
+    "zipSha256": "576c2ed4e86e9897b3e3ce9ee9a1fad148b635c4d0b33c2b0ec0f98691488229",
+    "reportZipSha256": "24fa7dc7aea661d573f2d376eb3c9c3276329bb67a3a04f8aff06d235ce75ab7",
+    "reportSha256": "3d45d2168a77ed8a87ec6de41f5ee7eefebbb9ae7381bb03fba1270a1b1f2eba",
+    "result": "7/9 strict pass;React13 andWC62 bytes over old ceilings",
+    "source": {
+      "head": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+      "tree": "ef4086e539afffe09937de95ada39171f69f9691",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 8107,
+      "fingerprintSha256": "cadbca8233510e89626de6eec7c42ccd5ced9b6f6bd1adee27ce8a01e9da2146",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "0089f8642f4cc9fac90d6b17dafe666f780bb01b"
+    },
+    "publicBuild": "47/47 passed",
+    "publicManifests": "47 passed",
+    "measurementControls": "28/28 passed"
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "policy": {
+    "mode": "strict",
+    "scope": "whole-entry package budgets"
+  },
+  "entries": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "oldCeiling": 3000,
+      "proposedCeiling": 3000,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 4765,
+        "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+        "gzipBytes": 1796,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 4765,
+        "minifiedSha256": "f7fa573b04db4ac0e3c64776cc485623622ab14b2f6c75b4fad47141d7f540f9",
+        "gzipBytes": 1796,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "previousHeadroom": 1204,
+      "headroomAtMeasuredSource": 1204
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "oldCeiling": 700000,
+      "proposedCeiling": 700000,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "previousHeadroom": 64154,
+      "headroomAtMeasuredSource": 64154
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "oldCeiling": 13100,
+      "proposedCeiling": 13100,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 41284,
+        "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+        "gzipBytes": 13012,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 41284,
+        "minifiedSha256": "454e0c894e9eb5f35fe36ea0b6e43cd1e83bd87fcb18b9ef2f29144fc73acd3c",
+        "gzipBytes": 13012,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "previousHeadroom": 88,
+      "headroomAtMeasuredSource": 88
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "oldCeiling": 107400,
+      "proposedCeiling": 107400,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 408629,
+        "minifiedSha256": "f96a5240051f00ea278a7e8cc1755ddffeb9147ac18830371ba50dd7ff6c8652",
+        "gzipBytes": 107129,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 408672,
+        "minifiedSha256": "7aed51a922867191b17c54022e3b94e75761e17aedfe997dcb4b7850d715d573",
+        "gzipBytes": 107150,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 21,
+      "previousHeadroom": 271,
+      "headroomAtMeasuredSource": 250
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 182400,
+      "proposedCeiling": 182450,
+      "increase": 50,
+      "baseline": {
+        "minifiedBytes": 629990,
+        "minifiedSha256": "154c793e0f3b99d174d070682b1e7c0a70638b172821d48060fe9767a8e5bb0f",
+        "gzipBytes": 182369,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 630031,
+        "minifiedSha256": "5cca13588df8527fb6345b3e0bc28ac425f7b560af54b8477448381834b9379f",
+        "gzipBytes": 182413,
+        "pass": false,
+        "overBudgetBytes": 13
+      },
+      "gzipGrowth": 44,
+      "previousHeadroom": 31,
+      "headroomAtMeasuredSource": 37
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 181300,
+      "proposedCeiling": 181300,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 625441,
+        "minifiedSha256": "0e53ecb1901235e249b6c4dc751cb20a796d3fd03512438cb47b28f7fe55b085",
+        "gzipBytes": 181252,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 625482,
+        "minifiedSha256": "399acdaf1c83b2c8a6ed849277bb1e132399ffe08da313b7ec861e3ff160b5ad",
+        "gzipBytes": 181282,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 30,
+      "previousHeadroom": 48,
+      "headroomAtMeasuredSource": 18
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 219000,
+      "proposedCeiling": 219100,
+      "increase": 100,
+      "baseline": {
+        "minifiedBytes": 737570,
+        "minifiedSha256": "01b7b9d0cbe92e61d96235cb04942b9de3a099558f914776e81a4594b436e3da",
+        "gzipBytes": 218974,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 737747,
+        "minifiedSha256": "39938d85c18d3a3031facf5c49bc6dcc00c4f2a861d5a8491b324191aa784c8c",
+        "gzipBytes": 219062,
+        "pass": false,
+        "overBudgetBytes": 62
+      },
+      "gzipGrowth": 88,
+      "previousHeadroom": 26,
+      "headroomAtMeasuredSource": 38
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "oldCeiling": 6000,
+      "proposedCeiling": 6000,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 14562,
+        "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+        "gzipBytes": 4311,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 14562,
+        "minifiedSha256": "6dff8377eae2cf21e3a000370423392feb1c2eaad1f98daa7bed92e470b002f2",
+        "gzipBytes": 4311,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "previousHeadroom": 1689,
+      "headroomAtMeasuredSource": 1689
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "oldCeiling": 7900,
+      "proposedCeiling": 7900,
+      "increase": 0,
+      "baseline": {
+        "minifiedBytes": 34003,
+        "minifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+        "gzipBytes": 7158,
+        "pass": true
+      },
+      "candidate": {
+        "minifiedBytes": 34003,
+        "minifiedSha256": "53a09e5f704a6b54253018a7706b310f7fc59f8ba8e75a3eba242230866adb8c",
+        "gzipBytes": 7158,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "previousHeadroom": 742,
+      "headroomAtMeasuredSource": 742
+    }
+  ],
+  "closureAttribution": [
+    {
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "gzipBefore": 1796,
+      "gzipAfter": 1796,
+      "gzipDelta": 0,
+      "minifiedDelta": 0,
+      "inputsBefore": 53,
+      "inputsAfter": 53,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [],
+      "changedRetainedBytes": []
+    },
+    {
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "gzipBefore": 635846,
+      "gzipAfter": 635846,
+      "gzipDelta": 0,
+      "minifiedDelta": 0,
+      "inputsBefore": 3453,
+      "inputsAfter": 3453,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [],
+      "changedRetainedBytes": []
+    },
+    {
+      "entry": "packages/core/src/index.ts",
+      "gzipBefore": 13012,
+      "gzipAfter": 13012,
+      "gzipDelta": 0,
+      "minifiedDelta": 0,
+      "inputsBefore": 49,
+      "inputsAfter": 49,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [],
+      "changedRetainedBytes": []
+    },
+    {
+      "entry": "packages/runtime/src/index.ts",
+      "gzipBefore": 107129,
+      "gzipAfter": 107150,
+      "gzipDelta": 21,
+      "minifiedDelta": 43,
+      "inputsBefore": 298,
+      "inputsAfter": 298,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 23948,
+            "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+            "retainedBytes": 6956
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 6999
+          }
+        }
+      ],
+      "changedRetainedBytes": [
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "delta": 43
+        }
+      ]
+    },
+    {
+      "entry": "packages/adapters/react/src/index.ts",
+      "gzipBefore": 182369,
+      "gzipAfter": 182413,
+      "gzipDelta": 44,
+      "minifiedDelta": 41,
+      "inputsBefore": 352,
+      "inputsAfter": 352,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 23948,
+            "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+            "retainedBytes": 6959
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 7000
+          }
+        }
+      ],
+      "changedRetainedBytes": [
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "delta": 41
+        }
+      ]
+    },
+    {
+      "entry": "packages/adapters/vue/src/index.ts",
+      "gzipBefore": 181252,
+      "gzipAfter": 181282,
+      "gzipDelta": 30,
+      "minifiedDelta": 41,
+      "inputsBefore": 351,
+      "inputsAfter": 351,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 23948,
+            "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+            "retainedBytes": 6963
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 7004
+          }
+        }
+      ],
+      "changedRetainedBytes": [
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "delta": 41
+        }
+      ]
+    },
+    {
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "gzipBefore": 218974,
+      "gzipAfter": 219062,
+      "gzipDelta": 88,
+      "minifiedDelta": 177,
+      "inputsBefore": 381,
+      "inputsAfter": 381,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [
+        {
+          "path": "packages/adapters/web-component/src/adapt.ts",
+          "before": {
+            "path": "packages/adapters/web-component/src/adapt.ts",
+            "sourceBytes": 68200,
+            "sourceSha256": "8e2c2ee977a66c86078ee906ccd44fed99355e78f3664e1a7046deb8d8339686",
+            "retainedBytes": 21637
+          },
+          "after": {
+            "path": "packages/adapters/web-component/src/adapt.ts",
+            "sourceBytes": 68919,
+            "sourceSha256": "a315be46bfe952d7a79014ad90248bb340f952f953a4a135101578d1c76737c6",
+            "retainedBytes": 21767
+          }
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "before": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 23948,
+            "sourceSha256": "c47945aee4bcedecc425c360ad40710c9dcf7fe5d8259dd6de2c4f5d842aa4cb",
+            "retainedBytes": 6956
+          },
+          "after": {
+            "path": "packages/runtime/src/instance/session.ts",
+            "sourceBytes": 24316,
+            "sourceSha256": "aa5545f7a96d7d46c9dcf652b84fbbb72da98d2d4f44de26553658e6f009a3b3",
+            "retainedBytes": 7003
+          }
+        }
+      ],
+      "changedRetainedBytes": [
+        {
+          "path": "packages/adapters/web-component/src/adapt.ts",
+          "delta": 130
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "delta": 47
+        }
+      ]
+    },
+    {
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "gzipBefore": 4311,
+      "gzipAfter": 4311,
+      "gzipDelta": 0,
+      "minifiedDelta": 0,
+      "inputsBefore": 75,
+      "inputsAfter": 75,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [],
+      "changedRetainedBytes": []
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "gzipBefore": 7158,
+      "gzipAfter": 7158,
+      "gzipDelta": 0,
+      "minifiedDelta": 0,
+      "inputsBefore": 85,
+      "inputsAfter": 85,
+      "added": [],
+      "removed": [],
+      "changedSourceInputs": [],
+      "changedRetainedBytes": []
+    }
+  ],
+  "sourceInvestigation": {
+    "allNineInputSetsIdentical": true,
+    "addedInputs": 0,
+    "removedInputs": 0,
+    "runtimeCopies": "Existing exact Runtime paths unchanged; each source path remains unique. No newly duplicated Runtime or imported package.",
+    "changedProducerSources": [
+      "packages/runtime/src/instance/session.ts",
+      "packages/adapters/web-component/src/adapt.ts"
+    ],
+    "commonRuntimeGzipGrowth": {
+      "runtime": 21,
+      "react": 44,
+      "vue": 30
+    },
+    "integratedWcGzipGrowth": 88,
+    "wcMinifiedAttribution": {
+      "runtimeSession": 47,
+      "wcAdapt": 130
+    },
+    "qualification": "Per-input retained bytes describe minified source, not additive gzip. WC88 is the measured integrated whole-entry delta.",
+    "avoidableCode": "No avoidable eager import, dead capability, duplicate dependency or plainly redundant ownership state was found. Preserve the reviewed reentry and error-settlement semantics rather than rewriting them for13/62 bytes."
+  },
+  "authority": {
+    "policySources": [
+      {
+        "path": "AGENTS.md",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "a419a31a815b06a293308d75042019b0d155c6c4980d4940486ecab9e7aadf6e",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/AGENTS.md"
+      },
+      {
+        "path": ".agents/skills/pui-dev/SKILL.md",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "e3c2294093aac66722417dcbf03ffba2648e7baaaf4f97c84cb35a87dd129b41",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/.agents/skills/pui-dev/SKILL.md"
+      },
+      {
+        "path": ".agents/skills/pui-package-budget/SKILL.md",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "61dd888c4d9c13bd54ed1c06f8e4f918906b053f8bd5354876e3439cb8354cea",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/.agents/skills/pui-package-budget/SKILL.md"
+      },
+      {
+        "path": "internal/governance/finf-package-budgets.md",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "0833c407d3cc775fd9340939d28e2c9369b064cdc11d22728669c1c3df3361e9",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/internal/governance/finf-package-budgets.md"
+      }
+    ],
+    "specSources": [
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/spec/contracts/C-LIFECYCLE-0002.yaml",
+        "id": "C-LIFECYCLE-0002",
+        "status": "draft"
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0006.yaml",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "0f0c58122e5477a8c75d05454ccb7907796deceff9e9b882906c6e05e2ce19b2",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/spec/contracts/C-LIFECYCLE-0006.yaml",
+        "id": "C-LIFECYCLE-0006",
+        "status": "draft"
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0007.yaml",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "f8246d015822eafdaa1bd318a9b0a8e2852477e5e66096ec69c2a17207ced733",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/spec/contracts/C-LIFECYCLE-0007.yaml",
+        "id": "C-LIFECYCLE-0007",
+        "status": "draft"
+      },
+      {
+        "path": "spec/contracts/C-AS-FOCUSABLE-0001.yaml",
+        "revision": "0089f8642f4cc9fac90d6b17dafe666f780bb01b",
+        "sha256": "11e699c60d15da3796f003d8df4eee840d57c26f3df5a2af0a061a43ebf0d7f0",
+        "url": "https://github.com/Proto-UI/Proto-UI/blob/0089f8642f4cc9fac90d6b17dafe666f780bb01b/spec/contracts/C-AS-FOCUSABLE-0001.yaml",
+        "id": "C-AS-FOCUSABLE-0001",
+        "status": "draft"
+      }
+    ],
+    "acceptedRepairPullRequest": 1949,
+    "nativeMainMerge": "a723e69084548e470fcef2ab6862324794e2ed27",
+    "criteria": [
+      "C-LIFECYCLE-0002-D",
+      "C-LIFECYCLE-0006-C",
+      "C-LIFECYCLE-0007-A",
+      "C-LIFECYCLE-0007-C",
+      "C-AS-FOCUSABLE-0001-G"
+    ],
+    "draftBoundary": "These contracts remain draft; no lifecycle promotion or wider capability is accepted by this numeric record.",
+    "currentAuthorization": "Current user requested completed original PRs and internal subagent review. Root explicitly delegated this numeric transaction under AGENTS29/pui-dev89-101.",
+    "priorConstraints": "No revival of rejected1884 proposals, no rewrite of original1908/1913 unchanged-ceiling repair conclusions, and no retroactive relabeling of40ea/0089 red reports."
+  },
+  "decision": {
+    "changedEntries": 2,
+    "react": {
+      "old": 182400,
+      "new": 182450,
+      "measured": 182413,
+      "headroom": 37,
+      "previousHeadroom": 31
+    },
+    "wc": {
+      "old": 219000,
+      "new": 219100,
+      "measured": 219062,
+      "headroom": 38,
+      "previousHeadroom": 26
+    },
+    "rationale": "Small50-byte numeric increments restore approximately the previous canonical margin: React observed44-byte growth is covered by50, leaving37 instead of31; WC observed88-byte integrated growth is covered by100, leaving38 instead of26. Vue and the other six ceilings remain unchanged. This is bounded accepted repair cost, not a diagnostic waiver or speculative percentage allowance."
+  },
+  "unchanged": [
+    "All nine entry points",
+    "Blocking strict comparisons and pass/fail behavior",
+    "Bundling/minification/tree shaking/ESM/browser/es2020",
+    "Level9 gzip and exact external boundary",
+    "All implementation code",
+    "All controls and test deadlines",
+    "Seven unrelated numeric limits"
+  ],
+  "candidateChecksAtCreation": {
+    "sourceAndCostReview": "pending independent subagent review",
+    "numericCandidateCanonicalStrict": "not-run; exact new candidate must run original blocking gate",
+    "old0089Strict": "failed and preserved",
+    "old0089WholeTypes": "passed; source reuse requires exact unchanged input assessment"
+  },
+  "rollback": "Revert only this numeric commit to restore182400/219000; preserve Runtime/WC behavior and all canonical red/baseline evidence.",
+  "recordBoundary": "Evidence-backed numeric choice and source-review candidate, not native merge permission or current-candidate passing evidence."
+}

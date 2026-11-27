@@ -31,7 +31,7 @@
 
 ## 可读取原件
 
-[逐文件清单](./evidence/2026-11-24-sprint2-bootstrap-observer/manifest.json)、[结果摘要](./evidence/2026-11-24-sprint2-bootstrap-observer/summary.json)及[全部本轮原始输入、输出、日志、原图](./evidence/2026-11-24-sprint2-bootstrap-observer/execution.tar.xz)随本提交保存。
+[逐文件清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-bootstrap-observer/manifest.json)、[结果摘要](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-bootstrap-observer/summary.json)及[全部本轮原始输入、输出、日志、原图](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-bootstrap-observer/execution.tar.xz)随本提交保存。
 
 归档包括旧 39/40、首次对照工具失败、实际 4/4 对照、新 40/40、各自完整输出与八张本轮原图、原始和候选 fixture、未修改的 driver / endpoint oracle、执行 wrapper 和 spec。每个成员均从 archive 解压读回并匹配 SHA-256。归档 SHA-256：3dc0e565f3c8d1a4f1fc79cb3e9a62b0c46dfb5265fddb51949879e3d4c96cca；2281188 bytes；56 个原始成员加一份内嵌清单。
 

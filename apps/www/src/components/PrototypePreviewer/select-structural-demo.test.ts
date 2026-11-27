@@ -8,7 +8,7 @@ const nodes = (node: DemoChild): DemoNode[] =>
   typeof node === 'string'
     ? []
     : [node, ...(node.kind === 'text' ? [] : (node.children ?? []).flatMap(nodes))];
-it('feeds real grouped parts and mixed Items back into the source-pinned public demo', () => {
+it('feeds real grouped parts and six authored Items back into the source-pinned public demo', () => {
   assertDemoSpec(demo);
   const all = nodes(demo.root).filter((node) => node.kind === 'proto');
   const groups = all.filter((node) => node.prototypeId === 'shadcn-select-group');

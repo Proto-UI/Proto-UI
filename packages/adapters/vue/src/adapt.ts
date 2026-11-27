@@ -1072,18 +1072,23 @@ export function createVueAdapter(runtime: VueRuntime) {
           // out of paint, a11y, and tab order. Prototypes that drive presence
           // directly through `lifecycle.setPresent`, such as Tabs Content, keep
           // unmounting.
-          const detached = !present && overlayPort?.hasPresenceBinding() === true;
+          const retainsChildren = overlayPort?.hasPresenceBinding() === true;
+          const detached = !present && retainsChildren;
           if (!present && !detached) return null;
 
           const slotNodes = ctx.slots.default ? ctx.slots.default() : null;
-          // Without a view there is no template to place the slot into, so the
-          // authored children stand in for it.
-          const rendered = present
-            ? renderTemplateToVue(runtime, renderChildren.value, {
-                slot: slotNodes as any,
-                decoration: renderDecoration,
-              })
-            : slotNodes;
+          // The first presence render precedes initSession's nextTick. Keep
+          // retained authored children until that view actually submits its
+          // first template; rendering the initial null would destroy Item
+          // owners just before entry focus resolves them. A submitted null is
+          // still an explicit empty template, so test the commit version.
+          const rendered =
+            present && (!retainsChildren || commitVersion.value > 0)
+              ? renderTemplateToVue(runtime, renderChildren.value, {
+                  slot: slotNodes as any,
+                  decoration: renderDecoration,
+                })
+              : slotNodes;
 
           const content = runtime.h(
             rootTag,
@@ -1119,7 +1124,12 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rendered as any
           );
-          if (present && overlayPort?.getConfig().portal === true && runtime.Teleport) {
+          // Preserve the same Teleport/VNode owner while an Overlay retains its
+          // detached children. Switching a bare root into a Teleport remounts
+          // those children and retires an entry-focus request already handed
+          // to the selected Item. Disabled Teleport keeps the retained host in
+          // the author tree until this view is present again.
+          if (overlayPort?.getConfig().portal === true && runtime.Teleport) {
             // A selector target is resolved by Vue's renderer document, which
             // may differ from a same-origin iframe author tree. Commit the
             // origin first when needed, then use its actual Document's body.
@@ -1127,7 +1137,9 @@ export function createVueAdapter(runtime: VueRuntime) {
               portalDestination.value ??
               portalOriginRef.value?.ownerDocument.body ??
               rootRef.value?.ownerDocument.body;
-            const portal = target ? runtime.h(runtime.Teleport, { to: target }, [content]) : null;
+            const portal = target
+              ? runtime.h(runtime.Teleport, { to: target, disabled: !present }, [content])
+              : null;
             const children = [
               runtime.h('span', {
                 ref: (el: HTMLElement | null) => {

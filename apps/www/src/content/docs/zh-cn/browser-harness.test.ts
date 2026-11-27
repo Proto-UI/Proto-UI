@@ -591,9 +591,11 @@ describe('shared Runtime selector compatibility boundaries', () => {
     expect(surface).toContain(".getByRole('tab', { name: 'React', exact: true })");
     expect(surface).toContain("await trigger.press('Enter')");
     expect(surface).toContain(
-      "await demoPopup.getByRole('option', { name: 'Ink', exact: true }).click()"
+      "await demoPopup.getByRole('option', { name: 'Banana', exact: true }).click()"
     );
-    expect(surface).toContain("connected: true, text: 'Ink', expanded: 'false', popupHidden: true");
+    expect(surface).toContain(
+      "connected: true, text: 'Banana', expanded: 'false', popupHidden: true"
+    );
     expect(surface).toContain(').toBe(generation)');
     expect(surface).toContain('runtimePreviewEvidenceIssues(await measure(root');
     expect(surface).toContain('timeout: 45000');
@@ -838,9 +840,9 @@ it('keeps public Dropdown readiness on the actual committed preview shell', () =
   }
   expect(source).not.toContain('data-adapter-panel');
   expect(source).toContain(
-    `await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 2)`
+    `await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 1)`
   );
-  expect(source).toContain(`preview.getByRole('button', { name: 'Open menu', exact: true })`);
+  expect(source).toContain(`preview.getByRole('button', { name: 'Open', exact: true })`);
   expect(source).toContain(
     `await choosePreviewRuntime(page, page.locator('.site-header-runtime').first(), runtime)`
   );

@@ -442,7 +442,7 @@ describe.sequential(
       try {
         await page.goto(`${baseUrl}${report.route}`, { waitUntil: 'networkidle' });
         await choosePreviewRuntime(page, page.locator('.site-header-runtime').first(), 'wc');
-        await waitForPreviewRuntime(page, 'wc', '[aria-haspopup="menu"]', 2);
+        await waitForPreviewRuntime(page, 'wc', '[aria-haspopup="menu"]', 1);
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
         // Nine bounded cases, not a cross-product. The boundary width is derived
         // below from the actual shell padding/borders at the selected root font.
@@ -1143,7 +1143,7 @@ describe.sequential('real Liquid Dropdown Content in a bounded scene portal', ()
       ] as const) {
         const tab = tabs.getByRole('tab', { name: label, exact: true });
         await tab.click();
-        await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 2);
+        await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 1);
         await expect.poll(() => tab.getAttribute('aria-selected')).toBe('true');
         await expect
           .poll(() => preview.locator('[data-material-scene="visible-app-canvas"]:visible').count())
@@ -1202,7 +1202,7 @@ describe.sequential('real Liquid Dropdown Content in a bounded scene portal', ()
             matteCorners: true,
             interiorDiffers: true,
           });
-        const trigger = preview.getByRole('button', { name: 'Open menu', exact: true });
+        const trigger = preview.getByRole('button', { name: 'Open', exact: true });
         await trigger.click();
         await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
         const menu = page.getByRole('menu');
@@ -1240,10 +1240,10 @@ describe.sequential('real Liquid Dropdown Content in a bounded scene portal', ()
             });
             const preview = page.locator('[data-previewer-id]').first();
             await choosePreviewRuntime(page, page.locator('.site-header-runtime').first(), runtime);
-            // This public route owns one generic Previewer, not AdapterPanel.
-            // Require its actual committed runtime and both authored menu triggers.
-            await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 2);
-            const trigger = preview.getByRole('button', { name: 'Open menu', exact: true });
+            // Require the main public Previewer's committed runtime and its
+            // authored trigger; disabled-trigger coverage lives in the opaque example.
+            await waitForPreviewRuntime(page, runtime, '[aria-haspopup="menu"]', 1);
+            const trigger = preview.getByRole('button', { name: 'Open', exact: true });
             await page.evaluate(() => {
               (window as any).publicPortalFirstFocus = null;
               document.addEventListener(

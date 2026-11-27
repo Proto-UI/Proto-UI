@@ -1058,7 +1058,7 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       expect(frame.surfaces.map(({ prototype, ref }) => ({ prototype, ref }))).toEqual([
         { prototype: plan.rootPrototypeId, ref: null },
       ]);
-      expect(frame.surfaces[0]?.textContrast?.ratio).toBeCloseTo(21, 8);
+      expect(frame.surfaces[0].textContrast?.ratio).toBeCloseTo(21, 8);
 
       const observe = () =>
         page.evaluate(

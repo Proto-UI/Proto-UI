@@ -4,7 +4,7 @@ This non-normative repair follows the original Sprint 3 image-preview entrance a
 
 ## Authority and implementation
 
-[C-LIFECYCLE-0008-J](../../spec/contracts/C-LIFECYCLE-0008.yaml) requires initial rendering and view effects to be coherent before visual exposure. [C-LIFECYCLE-0002-D](../../spec/contracts/C-LIFECYCLE-0002.yaml) keeps mounted notification after commit and retires queued work when its actual mount epoch is invalidated. [C-HOST-VIEW-ATTACHMENT-0001-B](../../spec/contracts/C-HOST-VIEW-ATTACHMENT-0001.yaml) binds the detached marker to view intent, independently of the compositor barrier retaining an existing physical projection.
+[C-LIFECYCLE-0008-J](../../../../spec/contracts/C-LIFECYCLE-0008.yaml) requires initial rendering and view effects to be coherent before visual exposure. [C-LIFECYCLE-0002-D](../../../../spec/contracts/C-LIFECYCLE-0002.yaml) keeps mounted notification after commit and retires queued work when its actual mount epoch is invalidated. [C-HOST-VIEW-ATTACHMENT-0001-B](../../../../spec/contracts/C-HOST-VIEW-ATTACHMENT-0001.yaml) binds the detached marker to view intent, independently of the compositor barrier retaining an existing physical projection.
 
 The original Portal reveal guard suppressed descendant CSS transitions while an entering Surface had its first style computed. A native DOM control retains zero intermediate frames for the original guard and visibility/content-visibility alternatives. Deferring first style computation with display suppression preserves intermediate opacity and transform frames. Those controls diagnose the rendering boundary; they do not replace the original component gates.
 

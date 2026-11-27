@@ -12,7 +12,7 @@ Only the precise independent-consumer directory moves out of `tsconfig.workspace
 
 ## Type and schema evidence
 
-[Local receipts and logs](evidence/2026-11-23-s7-declarative-types/summary.json) retain command arguments, source hashes and outcomes:
+[Local receipts and logs](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-s7-declarative-types/summary.json) retain command arguments, source hashes and outcomes:
 
 - The strict consumer check passed.
 - A temporary incompatible assignment in `app.tsx` failed with `TS2322` and exit 1.
@@ -26,7 +26,7 @@ The raw compiler logs retain their actual local validation paths. Dependencies w
 
 A clean build at `a0e512fc` recorded `dirty: false`, Node `v24.22.3` and esbuild `0.25.12`. Its HTML SHA256 is `1d94ba803fdfa26ae8290881d0933388bdd118b732bf090ac09b657d5068c74f`; its application bundle is `9044a9d3cd29a12446b7304cdfb6d150385cb8612f8563270514d6fee4f063f0`. The original protocol SHA256 remains `315750430e7debd5023c4e94705e7afa8a10e1b5a3bcecfff4db3a1bee05749c`; the common fixture remains `d1e75981b398a7d2fa0339f338e12c4f317c3972d07be042cacf5015dc34c5ef`. The original browser runner was unchanged.
 
-The prebuilt bytes were transferred to an isolated directory on doesvm and checked by the runner before serving. The replay used Google Chrome for Testing `145.0.7632.6`, executable SHA256 `481fea1516a1f2b76454664272f12cd9dd1f20117b21e1f1498e08bc7f872c00`, and Playwright Core `1.58.2`. [The browser receipt](evidence/2026-11-23-s7-declarative-types/browser-receipt.json) binds the served asset hashes and every terminal outcome.
+The prebuilt bytes were transferred to an isolated directory on doesvm and checked by the runner before serving. The replay used Google Chrome for Testing `145.0.7632.6`, executable SHA256 `481fea1516a1f2b76454664272f12cd9dd1f20117b21e1f1498e08bc7f872c00`, and Playwright Core `1.58.2`. [The browser receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-s7-declarative-types/browser-receipt.json) binds the served asset hashes and every terminal outcome.
 
 | Original condition | Actual result |
 | --- | --- |

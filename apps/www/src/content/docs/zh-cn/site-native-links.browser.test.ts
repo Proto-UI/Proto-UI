@@ -1867,9 +1867,9 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           .locator('.sidebar-pane a[aria-current="page"][data-site-link-enhanced]')
           .first();
         await selected.waitFor({ state: 'visible' });
-        expect((await linkPaint(selected)).tokens).toContain(
-          family === 'brutalist' ? 'bg-canary' : 'bg-accent'
-        );
+        const selectedTokens = (await linkPaint(selected)).tokens;
+        expect(selectedTokens).toContain(family === 'brutalist' ? 'bg-canary' : 'bg-accent');
+        if (family === 'brutalist') expect(selectedTokens).toContain('text-canary-foreground');
         const sidebar = page
           .locator('.sidebar-pane a[data-site-link-enhanced]:not([aria-current="page"]):visible')
           .first();
@@ -1970,7 +1970,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         for (const row of await tocRows.all()) {
           const paint = await linkPaint(row);
           expect(paint.background).toBe('rgba(0, 0, 0, 0)');
-          for (const fill of ['bg-main', 'bg-accent', 'bg-muted'])
+          for (const fill of ['bg-main', 'bg-canary', 'bg-accent', 'bg-muted'])
             expect(paint.tokens).not.toContain(fill);
         }
         // #843 restores one passive geometry mount, painted only by the

@@ -8,9 +8,24 @@ export type HookSourceModule = { file: string; source: ts.SourceFile };
 /** A value declaration reached through an authored module graph. */
 export type HookSourceSymbol = { module: HookSourceModule; declaration: ts.Node };
 
+export type HookSourceMetadataFactory =
+  | 'createContextKey'
+  | 'createAnatomyFamily'
+  | 'cap'
+  | 'moduleDeclaration'
+  | 'declareModule'
+  | 'tw';
+
 export type HookSourceModuleContext = {
+  /** Share successful path observations only inside one synchronous summary query.
+   * Reentrant public module queries still own an independent observation. */
+  withSynchronousIdentityQuery<T>(query: () => T): T;
+  /** Opaque identity of the active synchronous summary observation, if any. */
+  synchronousQueryIdentity(): object | undefined;
   /** Register an immutable parsed source; changed text requires a new SourceFile. */
   registerSource(source: ts.SourceFile): void;
+  /** Advances when a known physical module receives a different SourceFile identity. */
+  sourceRevision(): number;
   /** Return the module identity corresponding to a registered source. */
   moduleForSource(source: ts.SourceFile): HookSourceModule;
   /** Resolve an import specifier to an executable/source module. */
@@ -29,6 +44,12 @@ export type HookSourceModuleContext = {
   isDefinePrototypeReference(node: ts.Node, module: HookSourceModule): boolean;
   /** Prove that an expression denotes the canonical Core defineHook value. */
   isDefineHookReference(node: ts.Node, module: HookSourceModule): boolean;
+  /** Identify a Core metadata constructor; callers still prove its arguments. */
+  isCoreMetadataFactoryReference(
+    node: ts.Node,
+    module: HookSourceModule,
+    name: HookSourceMetadataFactory
+  ): boolean;
 };
 
 type ConfigRecord = { options: ts.CompilerOptions; file: string } | null;
@@ -37,7 +58,17 @@ const CORE_SPECIFIER = '@proto.ui/core';
 const SCRIPT_EXTENSIONS = new Set(['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs']);
 
 function isCoreFactoryName(name: string): boolean {
-  return name === 'defineAsHook' || name === 'definePrototype' || name === 'defineHook';
+  return [
+    'defineAsHook',
+    'definePrototype',
+    'defineHook',
+    'createContextKey',
+    'createAnatomyFamily',
+    'cap',
+    'moduleDeclaration',
+    'declareModule',
+    'tw',
+  ].includes(name);
 }
 
 function unwrap(node: ts.Node): ts.Node {
@@ -1197,22 +1228,43 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   const declarationKey = (symbol: HookSourceSymbol): string =>
     `${sourceKey(symbol.module)}\0${declarationCoordinates(symbol)}`;
   const modules = new Map<string, HookSourceModule>();
+  let sourceRevision = 0;
   const moduleFailures = new Set<string>();
   const configCache = new Map<string, ConfigRecord>();
-  const exportPositiveCache = new Map<string, HookSourceSymbol>();
-  const objectMemberCache = new Map<string, HookSourceSymbol | null>();
+  let symbolFactsByQuery = new WeakMap<
+    Map<string, string>,
+    {
+      exports: Map<string, HookSourceSymbol>;
+      objectMembers: Map<string, HookSourceSymbol | null>;
+    }
+  >();
   const coreStarFactoryNames = new WeakMap<HookSourceSymbol, string>();
 
   // A synchronous public lookup is one filesystem-identity observation. Share
   // duplicate path resolution only inside that lookup, never across calls.
   // Source/AST and parsed-module caches retain their existing separate rules.
   let canonicalQueryCache: Map<string, string> | undefined;
+  let publicQueryDepth = 0;
+  let summaryQuery: { paths: Map<string, string>; depth: number; identity: object } | undefined;
+  const withSynchronousIdentityQuery = <T>(query: () => T): T => {
+    const previous = summaryQuery;
+    summaryQuery = { paths: new Map(), depth: publicQueryDepth, identity: Object.freeze({}) };
+    try {
+      return query();
+    } finally {
+      // This ends before any returned promise settles: no observation crosses
+      // an await, a later summary call, or a separately entered public query.
+      summaryQuery = previous;
+    }
+  };
   const inCanonicalQuery = <T>(lookup: () => T): T => {
     const previous = canonicalQueryCache;
-    canonicalQueryCache = new Map();
+    canonicalQueryCache = summaryQuery?.depth === publicQueryDepth ? summaryQuery.paths : new Map();
+    publicQueryDepth++;
     try {
       return lookup();
     } finally {
+      publicQueryDepth--;
       canonicalQueryCache = previous;
     }
   };
@@ -1232,14 +1284,31 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   };
 
   const clearSymbolCaches = (): void => {
-    exportPositiveCache.clear();
-    objectMemberCache.clear();
+    symbolFactsByQuery = new WeakMap();
+  };
+
+  const symbolFacts = () => {
+    const cached = canonicalQueryCache && symbolFactsByQuery.get(canonicalQueryCache);
+    if (cached) return cached;
+    // Export forwarding and member aliases can cross a logical import whose
+    // physical target changed while the declaring AST remained identical.
+    // Keep those derived facts with the same observation as path resolution;
+    // the immutable lexical index above can still outlive individual queries.
+    const facts = {
+      exports: new Map<string, HookSourceSymbol>(),
+      objectMembers: new Map<string, HookSourceSymbol | null>(),
+    };
+    if (canonicalQueryCache) symbolFactsByQuery.set(canonicalQueryCache, facts);
+    return facts;
   };
 
   const registerSource = (source: ts.SourceFile): HookSourceModule => {
     const file = canonical(source.fileName);
     const previous = modules.get(file);
-    if (previous && previous.source !== source) clearSymbolCaches();
+    if (previous && previous.source !== source) {
+      clearSymbolCaches();
+      sourceRevision += 1;
+    }
     const module = { file, source };
     modules.set(file, module);
     moduleFailures.delete(file);
@@ -1416,6 +1485,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     name: string,
     stack: Set<string>
   ) => HookSourceSymbol | null = (module, name, stack) => {
+    const exportPositiveCache = symbolFacts().exports;
     const key = `${sourceKey(module)}\0${name}`;
     const cached = exportPositiveCache.get(key);
     if (cached) return cached;
@@ -1923,6 +1993,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     seen = new Set<string>(),
     origin?: HookSourceModule
   ): HookSourceSymbol | null {
+    const objectMemberCache = symbolFacts().objectMembers;
     // Old immutable modules remain queryable after a replacement at the same
     // path. Both the declaration and the reading source own their cache facts.
     const cacheKey = `${declarationKey(symbol)}\0${name}\0${origin ? sourceKey(origin) : ''}`;
@@ -2095,7 +2166,10 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     isDefineReference(node, module, new Set(), 'defineHook');
 
   return {
+    withSynchronousIdentityQuery,
+    synchronousQueryIdentity: () => summaryQuery?.identity,
     registerSource: (source) => inCanonicalQuery(() => registerSource(source)),
+    sourceRevision: () => sourceRevision,
     moduleForSource: (source) => inCanonicalQuery(() => moduleForSource(source)),
     resolveModule: (from, specifier) => inCanonicalQuery(() => resolveModule(from, specifier)),
     resolveLocal: (module, name) => inCanonicalQuery(() => resolveLocal(module, name)),
@@ -2108,5 +2182,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
       inCanonicalQuery(() => isDefinePrototypeReference(node, module)),
     isDefineHookReference: (node, module) =>
       inCanonicalQuery(() => isDefineHookReference(node, module)),
+    isCoreMetadataFactoryReference: (node, module, name) =>
+      inCanonicalQuery(() => isDefineReference(node, module, new Set(), name)),
   };
 }

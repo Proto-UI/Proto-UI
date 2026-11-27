@@ -56,6 +56,26 @@ const paletteColor = (theme: 'light' | 'dark', token: keyof typeof THEME.light) 
   return `rgb(${[1, 3, 5].map((offset) => parseInt(value.slice(offset, offset + 2), 16)).join(', ')})`;
 };
 
+async function paletteColorWithAlpha(
+  theme: 'light' | 'dark',
+  token: keyof typeof THEME.light,
+  percent: number
+) {
+  // Let the browser normalize the source's alpha color independently of the
+  // generated token renderer (Chromium may serialize this pair in Oklab).
+  return page.evaluate(
+    ({ color, percent }) => {
+      const reference = document.createElement('span');
+      reference.style.backgroundColor = `color-mix(in oklab, ${color} ${percent}%, transparent)`;
+      document.body.append(reference);
+      const normalized = getComputedStyle(reference).backgroundColor;
+      reference.remove();
+      return normalized;
+    },
+    { color: paletteColor(theme, token), percent }
+  );
+}
+
 async function manifest(status: string, terminal?: ReturnType<typeof assessLiquidStateControls>) {
   if (!evidence) return;
   await mkdir(evidence, { recursive: true });
@@ -194,6 +214,37 @@ async function paint(control: Locator) {
       ring: style.getPropertyValue('--pui-ring-width').trim(),
     };
   });
+}
+
+async function expectCheckboxGlyph(indicator: Locator, width: number, height: number) {
+  const glyph = indicator.locator('svg');
+  await expect.poll(() => glyph.count()).toBe(1);
+  expect(await glyph.getAttribute('aria-hidden')).toBe('true');
+  const viewport = (await glyph.boundingBox())!;
+  const indicatorBox = (await indicator.boundingBox())!;
+  const bounds = await glyph.evaluate((element) => {
+    const svg = element as unknown as SVGSVGElement;
+    const path = svg.querySelector('path')!;
+    const box = path.getBBox();
+    const view = svg.viewBox.baseVal;
+    const stroke = parseFloat(getComputedStyle(path).strokeWidth);
+    return {
+      width: (box.width + stroke) / view.width,
+      height: (box.height + stroke) / view.height,
+      x: (box.x + box.width / 2 - view.x) / view.width,
+      y: (box.y + box.height / 2 - view.y) / view.height,
+    };
+  });
+  expect(bounds.width * viewport.width).toBeCloseTo(width, 1);
+  expect(bounds.height * viewport.height).toBeCloseTo(height, 1);
+  expect(viewport.x + bounds.x * viewport.width).toBeCloseTo(
+    indicatorBox.x + indicatorBox.width / 2,
+    1
+  );
+  expect(viewport.y + bounds.y * viewport.height).toBeCloseTo(
+    indicatorBox.y + indicatorBox.height / 2,
+    1
+  );
 }
 
 // Observe the disabled surface itself, never the earlier enabled shadow delta.
@@ -547,10 +598,14 @@ describe
             expect(value.opacity).toBe('1');
             expect(value.image).toBe('none');
           }
-          expect(checkbox.radius).toBe('6px');
+          expect(checkbox.radius).toBe('4px');
+          // The material host still uses the whole activation border box.
           expect(checkbox.width).toBe('20px');
           expect(checkbox.height).toBe('20px');
-          expect(checkbox.background).toBe(paletteColor(theme, 'background'));
+          // Opaque composites of the illustrated neutral overlay on each family background.
+          expect(checkbox.background).toBe(
+            theme === 'light' ? 'rgb(233, 233, 235)' : 'rgb(51, 51, 53)'
+          );
           expect(checkbox.color).toBe(paletteColor(theme, 'foreground'));
           expect(indicator.width).toBe('16px');
           expect(indicator.height).toBe('16px');
@@ -581,11 +636,22 @@ describe
           expect(textarea.padding).toBe('12px 16px');
           expect(Number.parseFloat(textarea.height)).toBeGreaterThanOrEqual(96);
           expect(separator.height).toBe('1px');
-          expect(separator.background).toBe(paletteColor(theme, 'border'));
+          const separatorAutoColor = await paletteColorWithAlpha(theme, 'foreground', 20);
+          expect(separator.background).toBe(separatorAutoColor);
           expect(separator.border).toBe('0px');
-          expect(
-            await part(runtime, 'indicatorControlled').locator('svg path').getAttribute('d')
-          ).toBe('M5 12h14');
+          await setProps(runtime, 'separator', { material: 'opaque' });
+          await expect
+            .poll(async () => (await paint(part(runtime, 'separator'))).background)
+            .toBe(paletteColor(theme, 'border'));
+          await setProps(runtime, 'separator', { material: 'auto' });
+          await expect
+            .poll(async () => (await paint(part(runtime, 'separator'))).background)
+            .toBe(separatorAutoColor);
+          const mixed = part(runtime, 'checkboxControlled');
+          expect(await mixed.getAttribute('aria-checked')).toBe('mixed');
+          expect((await paint(mixed)).background).toBe(paletteColor(theme, 'primary'));
+          expect((await paint(mixed)).color).toBe(paletteColor(theme, 'primary-foreground'));
+          await expectCheckboxGlyph(mixed.locator('[data-demo-ref="indicatorControlled"]'), 6, 2);
           expect(
             await host(runtime).locator('input,textarea,[contenteditable="true"]').count()
           ).toBe(4);
@@ -604,13 +670,12 @@ describe
           const beforeCheckbox = await paint(checkbox);
           expect(await checkbox.getAttribute('aria-checked')).toBe('false');
           expect(await indicator.locator('svg').count()).toBe(0);
-          await checkbox.click();
+          await checkbox.click({ position: { x: 1, y: 10 } });
           await expect.poll(() => checkbox.getAttribute('aria-checked')).toBe('true');
-          await expect
-            .poll(() => indicator.locator('svg path').getAttribute('d'))
-            .toBe('m20 6-11 11-5-5');
+          await expectCheckboxGlyph(checkbox.locator('[data-demo-ref="indicator"]'), 9, 8);
           expect(await state(runtime, 'indicator', 'checked')).toBe(true);
-          expect((await paint(checkbox)).background).not.toBe(beforeCheckbox.background);
+          expect((await paint(checkbox)).background).toBe(paletteColor(theme, 'primary'));
+          expect((await paint(checkbox)).color).toBe(paletteColor(theme, 'primary-foreground'));
           expect(
             (await requests(runtime, 'checkbox', 'checkedChange')).map((request) => request.detail)
           ).toEqual([{ checked: true, indeterminate: false }]);
@@ -648,9 +713,28 @@ describe
           ).toEqual([{ indeterminate: false }]);
           await setProps(runtime, 'checkboxControlled', { checked: true, indeterminate: false });
           await expect.poll(() => controlled.getAttribute('aria-checked')).toBe('true');
-          await expect
-            .poll(() => part(runtime, 'indicatorControlled').locator('svg path').getAttribute('d'))
-            .toBe('m20 6-11 11-5-5');
+          await expectCheckboxGlyph(
+            controlled.locator('[data-demo-ref="indicatorControlled"]'),
+            9,
+            8
+          );
+          await controlled.blur();
+          await setProps(runtime, 'checkboxControlled', { checked: true, disabled: true });
+          await expect.poll(() => controlled.getAttribute('aria-disabled')).toBe('true');
+          expect(await controlled.getAttribute('aria-checked')).toBe('true');
+          const disabledCheckbox = await paint(controlled);
+          expect(disabledCheckbox.background).toBe(paletteColor(theme, 'muted'));
+          expect(disabledCheckbox.color).toBe(paletteColor(theme, 'muted-foreground'));
+          expect(disabledCheckbox.opacity).toBe('1');
+          expect(hasNoVisibleBoxShadow(disabledCheckbox.shadow)).toBe(true);
+          await expectCheckboxGlyph(
+            controlled.locator('[data-demo-ref="indicatorControlled"]'),
+            9,
+            8
+          );
+          await setProps(runtime, 'checkboxControlled', { disabled: false, material: 'opaque' });
+          await expect.poll(() => controlled.getAttribute('aria-disabled')).toBe('false');
+          expect((await paint(controlled)).background).toBe(paletteColor(theme, 'primary'));
 
           const switchRoot = part(runtime, 'switch');
           const thumb = part(runtime, 'thumb');

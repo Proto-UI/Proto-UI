@@ -10,4 +10,4 @@ No product code, timeout, selection, source fixture or contract changed. The ind
 - Candidate: complete Shadcn file plus Base Calendar selection, 42 passed / 0 failed / 0 skipped, 10.79 seconds.
 - Both run receipts report stable source before and after execution.
 
-[Original failures, complete logs and JSON results](evidence/2026-11-23-shadcn-datepicker-accepted-completion/validation.tar.gz) are retained with [member hashes](evidence/2026-11-23-shadcn-datepicker-accepted-completion/manifest.json). These are source-runtime observations; no new native-browser or assistive technology claim follows from them.
+[Original failures, complete logs and JSON results](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-shadcn-datepicker-accepted-completion/validation.tar.gz) are retained with [member hashes](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-shadcn-datepicker-accepted-completion/manifest.json). These are source-runtime observations; no new native-browser or assistive technology claim follows from them.

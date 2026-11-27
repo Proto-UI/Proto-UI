@@ -38,8 +38,6 @@ export const LEGACY_SCHEDULE_OWNERS = Object.freeze({
 export const PR_ALLOWED = Object.freeze(
   new Set([
     'ci.yml',
-    'compiler-isolated-static-smoke.yml',
-    'compiler-wc-runner-preflight.yml',
     'effect-graph-model.yml',
     'intranet-preview-checks.yml',
     'shadcn-style-source.yml',

@@ -14,7 +14,7 @@ use gpui::{
     FlexWrap, FontFallbacks, GridTemplate, GridTemplateMinSize, Hsla, JustifyContent, Length,
     Overflow, Position, StyleRefinement,
 };
-use proto_ui_style::color::{parse as parse_color, ColorValue};
+use proto_ui_style::color::{parse as parse_color, parse_border_colors, ColorValue};
 use proto_ui_style::length::{evaluate as evaluate_length, Dimension, LengthContext};
 use proto_ui_style::ResolvedStyle;
 
@@ -300,7 +300,18 @@ fn apply(
                 _ => style.border_widths.left = Some(edge),
             }
         }
-        "border-color" => style.border_color = Some(color(value)?),
+        "border-color" => {
+            let edges = parse_border_colors(value).map_err(|_| Unmapped::UnsupportedValue)?;
+            // The pinned GPUI refinement has one border colour. Uniform
+            // shorthands are exact; unequal edges must remain a diagnostic.
+            if edges.iter().any(|edge| *edge != edges[0]) {
+                return Err(Unmapped::UnsupportedValue);
+            }
+            style.border_color = Some(match edges[0] {
+                ColorValue::Rgba(rgba) => to_hsla(rgba),
+                ColorValue::CurrentColor => return Err(Unmapped::NeedsInheritedColor),
+            });
+        }
         "border-radius" => {
             let corner = to_absolute(length(value)?)?;
             style.corner_radii.top_left = Some(corner);

@@ -19,13 +19,13 @@ The existing preview JSX, runtime selections, imports, props and examples are un
 
 ## Review allegation and current enforcement
 
-The quoted claim that an Agent's own review counts as effective acceptance was not located in the current tracked internal records inspected here. That search is not proof about every historical or live GitHub discussion. The current [contributor review contract](../agent-operations/contributor-agents.md#review-as-an-evidence-packet) requires a fresh reviewing context and exact-source evidence. It distinguishes local technical review from a submitted GitHub disposition and rejects a reviewer who is the PR author or a commit contributor. An author self-check supplies validation evidence; it cannot supply the missing independent acceptance.
+The quoted claim that an Agent's own review counts as effective acceptance was not located in the current tracked internal records inspected here. That search is not proof about every historical or live GitHub discussion. The current [contributor review contract](../../../agent-operations/contributor-agents.md#review-as-an-evidence-packet) requires a fresh reviewing context and exact-source evidence. It distinguishes local technical review from a submitted GitHub disposition and rejects a reviewer who is the PR author or a commit contributor. An author self-check supplies validation evidence; it cannot supply the missing independent acceptance.
 
 Three existing admission tests were executed without changing them. They cover explicit review authorization, owner-delegated review and owner-delegated merge, including PR-author and commit-author/committer refusals, unverifiable contributor identity, CI conditions and independently published exact-head review. All three selected tests passed. These controlled tests establish the existing admission logic, not the actual presence of a GitHub approval. No review, merge, ruleset change or acceptance status is created by this documentation record.
 
 ## Validation and limits
 
-Node.js `v24.22.3`, Corepack pnpm `10.32.1`. The [manifest and compressed original logs](evidence/2026-11-24-button-lifecycle-correction/manifest.json) bind the changed documentation and inspected source bytes.
+Node.js `v24.22.3`, Corepack pnpm `10.32.1`. The [manifest and compressed original logs](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-button-lifecycle-correction/manifest.json) bind the changed documentation and inspected source bytes.
 
 | Check | Actual result |
 | --- | --- |

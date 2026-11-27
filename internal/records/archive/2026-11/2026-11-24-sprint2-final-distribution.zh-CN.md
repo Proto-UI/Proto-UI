@@ -1,6 +1,6 @@
 # Sprint 2：最终候选的固定分发、干净消费与生产成本
 
-本批实际执行来源固定为 `5cb80eb937f20982dd7dc8cbc93a90e91d665c31`，在独立干净 checkout `/workspace/scratch/b2027510c911/s2-consumer-final` 上运行。此前 [分发准备记录](./2026-11-24-sprint2-final-consumer-gates.zh-CN.md) 中的最终 registry / packed / cost 待执行项，本次取得了各自的实际终态。完整机器收据见 [receipts.json](./evidence/2026-11-24-sprint2-final-distribution/receipts.json)。
+本批实际执行来源固定为 `5cb80eb937f20982dd7dc8cbc93a90e91d665c31`，在独立干净 checkout `/workspace/scratch/b2027510c911/s2-consumer-final` 上运行。此前 [分发准备记录](./2026-11-24-sprint2-final-consumer-gates.zh-CN.md) 中的最终 registry / packed / cost 待执行项，本次取得了各自的实际终态。完整机器收据见 [receipts.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-final-distribution/receipts.json)。
 
 ## 完成的执行门
 
@@ -69,7 +69,7 @@
 
 ## 可恢复交付
 
-[执行归档](./evidence/2026-11-24-sprint2-final-distribution/execution.tar.xz) 为 `5,379,824` B，SHA-256 `b56374f126f951574cfc250acc694d6ad312f711eeec56991c3aa34a7fcb5665`。[逐成员清单](./evidence/2026-11-24-sprint2-final-distribution/execution.manifest.json) 记录 `4,376` 个成员的 bytes、mode、SHA-256，全部已从压缩包读回核对。
+[执行归档](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-final-distribution/execution.tar.xz) 为 `5,379,824` B，SHA-256 `b56374f126f951574cfc250acc694d6ad312f711eeec56991c3aa34a7fcb5665`。[逐成员清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-final-distribution/execution.manifest.json) 记录 `4,376` 个成员的 bytes、mode、SHA-256，全部已从压缩包读回核对。
 
 归档保存两次执行的原 receipt / logs、固定 Compiler 两份产物、生成源码与 maps、输入 fixtures、manifest / locks、安装 payload hashes、普通消费者轨迹、实际 public tarballs / staging、成本报告与协调器。可重装的 node_modules 和 registry cache 不在归档中；精确省略路径列于 manifest。为使归档可安全移植，2 个原 symlink 不作为可解析的绝对链接写入 tar，而在 `archive-symlinks.json` 保留原路径及目标；普通文件原始 bytes 不变。源码来源继续绑定上述完整 Git SHA。
 

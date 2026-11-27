@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initDocumentationSearchCommands, searchCommandParticipant } from './site-search-commands';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
+import {
+  deferUntilDocsHeaderPrepared,
+  reserveDocsHeaderPreparation,
+} from './docs-header-preparation';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './PrototypePreviewer/projection-theme';
 import type { RuntimeId } from './PrototypePreviewer/runtimes/ids';
@@ -174,6 +178,90 @@ async function expectUsable(fixture: ReturnType<typeof mount>, query: string) {
 }
 
 describe('Docs Search first Dialog materialization recovery', () => {
+  it('waits for the latest Search Dialog and an independent Header lease after opener publication', async () => {
+    const fixture = mount();
+    await failFirst(fixture);
+    const stale = deferred();
+    const latest = deferred();
+    const staleReached = deferred();
+    const latestReached = deferred();
+    const decoration = document.createElement('div');
+    document.body.append(decoration);
+    const run = vi.fn();
+    const background = deferUntilDocsHeaderPrepared(decoration, run);
+    const releaseHeader = reserveDocsHeaderPreparation(document);
+    const failure = new Error('Replacement Dialog failed');
+    fixture.dialogCalls.mockImplementation(async (request) => {
+      if (request.selection.runtimeId === 'vue') {
+        staleReached.resolve();
+        await stale.promise;
+      } else {
+        latestReached.resolve();
+        await latest.promise;
+      }
+      throw failure;
+    });
+    try {
+      changeRuntime('vue');
+      const pending = background.prepare();
+      await staleReached.promise;
+      changeRuntime('vue2');
+      await latestReached.promise;
+      stale.resolve();
+      await vi.waitFor(() => expect(fixture.root.dataset.searchRuntime).toBe('vue2'));
+      releaseHeader();
+      await Promise.resolve();
+      expect(run).not.toHaveBeenCalled();
+      latest.resolve();
+      await pending;
+      expect(run).toHaveBeenCalledOnce();
+      await vi.waitFor(() =>
+        expect(fixture.errors).toHaveBeenCalledWith(
+          '[SiteSearch] Search command projection failed.',
+          failure
+        )
+      );
+    } finally {
+      stale.resolve();
+      latest.resolve();
+      releaseHeader();
+      background.cancel();
+    }
+  });
+
+  it('releases queued documentation work when Search is removed during preparation', async () => {
+    const fixture = mount();
+    await failFirst(fixture);
+    const gate = deferred();
+    const failure = new Error('Removed Dialog did not materialize');
+    fixture.dialogCalls.mockImplementation(async () => {
+      await gate.promise;
+      throw failure;
+    });
+    const run = vi.fn();
+    const background = deferUntilDocsHeaderPrepared(document.body, run);
+    try {
+      changeRuntime('vue');
+      const pending = background.prepare();
+      expect(run).not.toHaveBeenCalled();
+      fixture.root.remove();
+      // This fixture uses a plain owner. The custom element calls the same
+      // destroy hook from its disconnectedCallback.
+      const destruction = fixture.scope.destroy();
+      await pending;
+      expect(run).toHaveBeenCalledOnce();
+      gate.resolve();
+      await destruction;
+      expect(fixture.errors).not.toHaveBeenCalledWith(
+        '[SiteSearch] Search command projection failed.',
+        failure
+      );
+    } finally {
+      gate.resolve();
+      background.cancel();
+    }
+  });
+
   it.each(['shadcn', 'brutalist'] as const)(
     'reopens a usable %s Dialog on the same owner',
     async (family) => {

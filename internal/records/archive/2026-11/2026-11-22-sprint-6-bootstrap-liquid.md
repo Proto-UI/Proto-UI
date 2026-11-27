@@ -20,7 +20,7 @@
 
 第一候选 matched frame-budget [45013193295](https://github.com/Proto-UI/Proto-UI/actions/runs/45013193295) 的五个 release/material 案例为 **1 passed / 4 failed**，未选择的独立 diagnostic 不计通过。同一运行的实际比较 probe 完成：baseline `dc3b184` 与 candidate `9b6448e` 的 workload、browser、lockfile、fixture 匹配；每种工作负载均执行 60 次 fresh press。候选静态/动态 handler→owned material commit p95 分别 **16.32 / 21.09 ms**，28/60 与 34/60 超过 10 ms；event timestamp→commit p95 为 **16.63 / 26.81 ms**。原门限未达到。drag opportunity、rAF、handler→commit、event→commit 和物理 input-to-photon 是不同测量，不能混用。真实物理 120 Hz 显示和输入链路仍未取得。
 
-原始结果压缩保存于 [manifest](evidence/2026-11-22-sprint-6/first-native-and-recovery-manifest.json)，其中列出解压内容和压缩文件各自的 SHA256。实际 artifact ZIP：material `14751322222` / SHA256 `8e4ac7329b202756a94b8962485f97ff8feaa0a96a18d96d195d3e64c320588f`；WC prominent `14750853650` / `2ffbe4dfa2711642839bf72b06c3422ef5217c50caa96373288b3d0d715fc0c3`；frame-budget `14750473577` / `09b7e163e12c44e7557c10565b5fbb4d14ce11ccf99bd07ca4aef889ac356330`。
+原始结果压缩保存于 [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/first-native-and-recovery-manifest.json)，其中列出解压内容和压缩文件各自的 SHA256。实际 artifact ZIP：material `14751322222` / SHA256 `8e4ac7329b202756a94b8962485f97ff8feaa0a96a18d96d195d3e64c320588f`；WC prominent `14750853650` / `2ffbe4dfa2711642839bf72b06c3422ef5217c50caa96373288b3d0d715fc0c3`；frame-budget `14750473577` / `09b7e163e12c44e7557c10565b5fbb4d14ce11ccf99bd07ca4aef889ac356330`。
 
 ### 第三提交的修复归因
 
@@ -141,7 +141,7 @@
 
 一次未固定版本的 `pnpm exec` 解析到 11.25.0，被 engines 拒绝，未运行测试；改用声明的 `corepack pnpm@10.32.1` 后上列同范围通过。环境失败不计为产品失败或成功。
 
-CPU 原始样本：[prefilter](evidence/2026-11-22-sprint-6/prefilter-benchmark.json)、[contrast](evidence/2026-11-22-sprint-6/contrast-benchmark.json)。8 次 warmup、31 对交替样本、同源字节 oracle；生产 buffer reuse、PNG、Image.decode、DOM、GPU 和显示链路均不在该测量中。
+CPU 原始样本：[prefilter](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/prefilter-benchmark.json)、[contrast](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/contrast-benchmark.json)。8 次 warmup、31 对交替样本、同源字节 oracle；生产 buffer reuse、PNG、Image.decode、DOM、GPU 和显示链路均不在该测量中。
 
 | 尺寸       | 原 p50 ms | 候选 p50 ms | 原 p95 ms | 候选 p95 ms |
 | ---------- | --------: | ----------: | --------: | ----------: |
@@ -152,9 +152,9 @@ CPU 原始样本：[prefilter](evidence/2026-11-22-sprint-6/prefilter-benchmark.
 
 最大尺寸 CPU p95 仍超过 8.33 ms；这些结果只支持减少 CPU 预滤镜工作，尚不证明端到端性能目标。
 
-参考来源及帧摘要：[Apple manifest](evidence/2026-11-22-sprint-6/apple-219-reference-manifest.json)、[Bootstrap manifest](evidence/2026-11-22-sprint-6/bootstrap-232-reference-manifest.json)。manifest 中的图片名是审查附件名，官方 URL 与 hash 可核对；未把本地附件当作已发布候选截图。
+参考来源及帧摘要：[Apple manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/apple-219-reference-manifest.json)、[Bootstrap manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/bootstrap-232-reference-manifest.json)。manifest 中的图片名是审查附件名，官方 URL 与 hash 可核对；未把本地附件当作已发布候选截图。
 
-本地原生启动失败：[原始 report](evidence/2026-11-22-sprint-6/local-chromium-environment-failure.json)。当前远端可用设备为虚拟 VGA 显示链路，没有可验证的 120 Hz 面板或物理 input-to-photon 测量设备。原要求保持开放，需真实适用硬件产生独立结果。
+本地原生启动失败：[原始 report](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/local-chromium-environment-failure.json)。当前远端可用设备为虚拟 VGA 显示链路，没有可验证的 120 Hz 面板或物理 input-to-photon 测量设备。原要求保持开放，需真实适用硬件产生独立结果。
 
 两份真实消费者 pin 的检查为只读源码核对，未更换 pin、构建新候选或更改其设计家族；相应 App 运行状态不能由本记录推断。
 
@@ -168,7 +168,7 @@ Bootstrap 第一次独立工作树生成命令退出 137，stdout/stderr 为空�
 
 ## 第四候选的整合源码验证
 
-13 个独立测试文件的整合命令以 pinned pnpm 10.32.1、Vitest 2.1.9、单 worker 执行，454 / 454 通过，耗时 48.99s。它覆盖新增 tone 数学、CPU/GPU 同源 cache、sink/preference、历史/可见折射诊断、prominent plan/metrics，以及 Bootstrap Button/CLI/recipes/motion oracle；[原始报告与 hash](evidence/2026-11-22-sprint-6/fourth-source-validation-manifest.json) 保留。
+13 个独立测试文件的整合命令以 pinned pnpm 10.32.1、Vitest 2.1.9、单 worker 执行，454 / 454 通过，耗时 48.99s。它覆盖新增 tone 数学、CPU/GPU 同源 cache、sink/preference、历史/可见折射诊断、prominent plan/metrics，以及 Bootstrap Button/CLI/recipes/motion oracle；[原始报告与 hash](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-22-sprint-6/fourth-source-validation-manifest.json) 保留。
 
 26 个当前变更文件的 scoped TypeScript 首次准确报告两条 motion duration 类型错误：当前 DOM 声明允许 CSSNumericValue，不能直接写入 number|string 的 JSON trace。修复为 number 原样、其他值保留文本，仍要求实际 animation duration 严格等于数值 100；没有用 parseFloat 把百分比或 auto 转成成功。独立源码审查后同一 scope 再运行退出 0。该结果不代称全工作区类型通过。
 

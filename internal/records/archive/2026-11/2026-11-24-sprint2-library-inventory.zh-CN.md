@@ -4,7 +4,7 @@
 
 ## 分母和状态
 
-[`library-profile-inventory.mjs`](../../scripts/compiler/library-profile-inventory.mjs) 从当前 Git tree 枚举 `packages/prototypes/*/src/**/*.proto.ts` 的每个 tracked 文件，验证实际工作树字节对应其 Git blob，保存 entry / family / bytes / SHA-256 / blob / mode。不固定成某几个消费入口，也不把文件数写死。
+[`library-profile-inventory.mjs`](https://github.com/Proto-UI/Proto-UI/blob/df54e9b7bb8f5cd8a110dfff1ab42980242dea5d/scripts/compiler/library-profile-inventory.mjs) 从当前 Git tree 枚举 `packages/prototypes/*/src/**/*.proto.ts` 的每个 tracked 文件，验证实际工作树字节对应其 Git blob，保存 entry / family / bytes / SHA-256 / blob / mode。不固定成某几个消费入口，也不把文件数写死。
 
 profile 来自实际 `TARGET_PROFILES`：当前六个 implemented profile 全部独立运行 `compileFile`；包括 `react-runtime-v1`，不是将它换成 Vue2 的四个 source profile。另外六个 Qt / Flutter / SSR 公开 profile 按真实 registry 声明生成 `UNIMPLEMENTED` / `profile-declaration-only` 行，并保留 resolver 的拒绝诊断。它们没有被调用私有 emitter 后记成公开成功。
 
@@ -42,7 +42,7 @@ node scripts/compiler/library-profile-inventory.mjs --merge /tmp/library-report.
 
 ## 原 394 × 四 named profiles 已按真实 Git bytes 恢复
 
-原 revision 为 `35195a6e6f1ba6a7d800da0029f2683013abd18b`，实际 tree 为 `de698a62e9ecf41db438e039830eacf5e71cf5aa`。本地 tree 先可枚举全部文件；其中 30 个旧 blob 当时尚缺。仅从已连接 Git origin 取回这些确切对象后，394 份 authored entry 全部实际读回，再生成 [`library-profile-history-35195a6.json`](../compiler/library-profile-history-35195a6.json)。
+原 revision 为 `35195a6e6f1ba6a7d800da0029f2683013abd18b`，实际 tree 为 `de698a62e9ecf41db438e039830eacf5e71cf5aa`。本地 tree 先可枚举全部文件；其中 30 个旧 blob 当时尚缺。仅从已连接 Git origin 取回这些确切对象后，394 份 authored entry 全部实际读回，再生成 [`library-profile-history-35195a6.json`](https://github.com/Proto-UI/Proto-UI/blob/df54e9b7bb8f5cd8a110dfff1ab42980242dea5d/internal/compiler/library-profile-history-35195a6.json)。
 
 原 Base 178、Shadcn 216 和四个原具名 profile 分母均保留，共 1,576 个原 pair。文件清单含真实旧 mode、blob、bytes、SHA-256；成员账本 digest 为 `8ff2977a9c5d101beba1975b999cd87d7a257f4470fa97a86643e58278a7b8f8`。当旧 Git objects 不可用时，执行器明确写 `recovered: false` 与原错误，不编造 hash。
 
@@ -73,7 +73,7 @@ exit 0 只表示本次所选执行预算正常完成且没有 compiler defect / 
 
 小样本之后仅加强了“任何 baseline 行都不得消失”的 ratchet 条件，并重新执行上述三个测试。实际小样本执行器的精确字节按计划中的 SHA 恢复保留，避免给不同脚本版本代填执行。
 
-[完整小样本证据与逐文件哈希](./evidence/2026-11-24-sprint2-library-inventory/validation.json)随本记录保存。完整源码与新定义融合后的全库 sweep 尚未在此记录中执行；必须使用最终确切来源另留结果。
+[完整小样本证据与逐文件哈希](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-library-inventory/validation.json)随本记录保存。完整源码与新定义融合后的全库 sweep 尚未在此记录中执行；必须使用最终确切来源另留结果。
 
 随后还增加了真实工具身份绑定：description 读取 compiler 实际解析的 TypeScript、source-loader 的 TypeScript 和 tsx 的 package / implementation 哈希。直接 `--describe` 已实际观察 TypeScript 5.9.3 与 tsx 4.21.0；正式执行会将各自实际路径、版本和哈希写入 run fingerprint。这是执行元数据增量，没有重标上述小样本的脚本 SHA 或扩大其通过范围。
 
@@ -100,4 +100,4 @@ exit 0 只表示本次所选执行预算正常完成且没有 compiler defect / 
 
 两批总墙钟为 32.055 秒，worker 共 27.906 秒，中位 entry 为 1.734 秒；这里只用于安排后续 checkpoint 和内存。44 个调用早期拒绝，最终树准入更多能力时运行成本也可能变化，不能由这十个入口估定全库通过率或承诺全量耗时。
 
-最终报告仍包含完整 1,011 × 12 = 12,132 行：15 PASS、1 FAIL、44 UNSUPPORTED、6,066 UNIMPLEMENTED、6,006 UNTESTED，`admissionCoverageComplete: false`。恢复没有重跑先前已落盘的 30 行。所有 row、closure、artifact metadata、plan、request、stdout/stderr、process/resource receipts 与本轮命令完整保存为 [138-member archive](./evidence/2026-11-24-sprint2-library-inventory/pilot10/run.tar.gz)，压缩包 SHA-256 `b7382480b34d59f3b10bbd81cefb5f97f44f950d9698c6d77f9dfc2047df7f3e`；[逐成员读回和批次统计](./evidence/2026-11-24-sprint2-library-inventory/pilot10/validation.json)没有代填未执行结果。
+最终报告仍包含完整 1,011 × 12 = 12,132 行：15 PASS、1 FAIL、44 UNSUPPORTED、6,066 UNIMPLEMENTED、6,006 UNTESTED，`admissionCoverageComplete: false`。恢复没有重跑先前已落盘的 30 行。所有 row、closure、artifact metadata、plan、request、stdout/stderr、process/resource receipts 与本轮命令完整保存为 [138-member archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-library-inventory/pilot10/run.tar.gz)，压缩包 SHA-256 `b7382480b34d59f3b10bbd81cefb5f97f44f950d9698c6d77f9dfc2047df7f3e`；[逐成员读回和批次统计](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-library-inventory/pilot10/validation.json)没有代填未执行结果。

@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "localBaseRevision": "124e329cfc3cd710c1f1d267d640f1b97ef2f4c9",
+  "nativeBaseRevision": "5f0844907895a4ae0db506fe6a5d0bf162318329",
+  "scope": "bounded Liquid disclosure paint, focus and real test application fixture",
+  "candidateFiles": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+      "baselineSha256": "29499b9181b1ed0a66d8db61f874ec93ba4a134e5904c374343310aaf8d0d2f0",
+      "candidateSha256": "409989e8102b307577ba7df299d0e50fcdd1d7248777bb92ed85c76c38dae253"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+      "baselineSha256": "06b0c9433f78055fb76d21854a497345fd21b2c198db0da8bc08c6cc7b655b35",
+      "candidateSha256": "8e1dcac567a9b5bc26255f649136c565a08e256694b34eb2319bdbdc16b17134"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+      "baselineSha256": "a784742fd91aa75cbe269ea74054e9cdce9c9455be5828ed28d76019f3f1d443",
+      "candidateSha256": "ddd8d6f7e6dea46368a3f4bfd90bb9751918f1c442a57eabfe67efa1b388f49b"
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "baselineSha256": "4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c",
+      "candidateSha256": "6fa82bac96becd0d64124ba97a280f8a9e8d52630b802696e3175501ef8fbe55"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts",
+      "baselineSha256": "4e5c8ae1f77f0f9f83d37994baea5d1025efd3b616429f74df9aef26b5a61e91",
+      "candidateSha256": "4714fe791b1ed1caaf9a517d384ac834f4a90f11450f3d41e5000c15d160dc1f"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/src/collapsible/trigger.proto.ts",
+      "baselineSha256": "a1014f2a81275b0136f7f4f51e4c9273a730cd8330d98ebad15f64cafb5df29c",
+      "candidateSha256": "b857acb7fd3850cc6a05969e20e30710ef5df0104923efbf3f940714b0b18838"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/test/accordion-material.test.ts",
+      "baselineSha256": "5e6b401466baebfd3b11eeabacd098b735e8fbbe3a3fdbd62ef55ce482c780d8",
+      "candidateSha256": "063715a7d2ef02b7299987c88831d0c75e342b99dabee2dc23b487d9cf118227"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/test/collapsible-material.test.ts",
+      "baselineSha256": "4a1c5f22a69176091d7cdf348cbf7cb260388978abf663d841faafc08204ae0b",
+      "candidateSha256": "723bc4d370226c691788f78d1e12ce39dbbf19ec983d06e59c9c2fa7afc25197"
+    }
+  ],
+  "officialGuardPrefix": {
+    "unchanged": true,
+    "sha256": "e7fa2f6dc19132ace20f68f0d40785e231aba72530a63e2be1d1482725ce3aad"
+  },
+  "native": {
+    "kind": "dirty-tree loopback diagnostic; official Actions acceptance pending",
+    "browser": "156.0.8078.79",
+    "cases": {
+      "passed": 32,
+      "failed": 0
+    },
+    "frameAudit": {
+      "passed": 8,
+      "failed": 0,
+      "frames": 233
+    },
+    "pageErrors": []
+  },
+  "portable": {
+    "currentFourSuites": {
+      "passed": 143,
+      "failed": 0
+    },
+    "fixtureSourceCapture": {
+      "passed": 193,
+      "failed": 0,
+      "overlapsFourSuites": true
+    },
+    "exactBaselineNegative": {
+      "passed": 106,
+      "failed": 4,
+      "expectedFailure": true
+    }
+  },
+  "remaining": {
+    "currentCompleteTypes": "pending types owner final current snapshot",
+    "generatedStyleClosure": "passed baseline and eight-source candidate official generator/check with unchanged committed CLI inputs",
+    "officialActions": "pending parent final integrated exact-head clean jobs",
+    "independentReview": "parent source review complete; formal independent release acceptance remains separate",
+    "visualPublication": "local files only; parent owns external writes"
+  },
+  "artifacts": [
+    {
+      "file": "liquid-blocked-frame-audit-candidate-wc-light-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-wc-light-focus.png",
+      "rawSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "storedSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "rawBytes": 6650,
+      "storedBytes": 6650
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-wc-dark-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-wc-dark-focus.png",
+      "rawSha256": "a77aad6b9026276afb8b6131653fdb5c552692d6dfad30cec8ec1abaf41df5a3",
+      "storedSha256": "a77aad6b9026276afb8b6131653fdb5c552692d6dfad30cec8ec1abaf41df5a3",
+      "rawBytes": 6730,
+      "storedBytes": 6730
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-vue2-light-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-vue2-light-focus.png",
+      "rawSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "storedSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "rawBytes": 6650,
+      "storedBytes": 6650
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-vue2-dark-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-vue2-dark-focus.png",
+      "rawSha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "storedSha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "rawBytes": 6744,
+      "storedBytes": 6744
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-vue-light-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-vue-light-focus.png",
+      "rawSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "storedSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "rawBytes": 6650,
+      "storedBytes": 6650
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-vue-dark-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-vue-dark-focus.png",
+      "rawSha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "storedSha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "rawBytes": 6744,
+      "storedBytes": 6744
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-react-light-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-react-light-focus.png",
+      "rawSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "storedSha256": "428f0fb1efbae06a7445386fc70dba686ac9da8752b7e887a98012502fda55f7",
+      "rawBytes": 6650,
+      "storedBytes": 6650
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate-react-dark-focus.png",
+      "rawFile": "liquid-blocked-frame-audit-candidate-react-dark-focus.png",
+      "rawSha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "storedSha256": "9bca49e87b0f6d784ccc159a1526104c948e121f4333c4c719e0c6f0dba7ff38",
+      "rawBytes": 6744,
+      "storedBytes": 6744
+    },
+    {
+      "file": "liquid-blocked-frame-audit.mts.gz",
+      "rawFile": "liquid-blocked-frame-audit.mts",
+      "rawSha256": "654a643679ea7b287d08b60425e269430cdc090e49fc388e980edf49a7403e4c",
+      "storedSha256": "44af80bbfdffae6141c1438aa3e53bb1f54b8578663a837a199e085445c1fee8",
+      "rawBytes": 15751,
+      "storedBytes": 4792
+    },
+    {
+      "file": "liquid-disclosure-native.mts.gz",
+      "rawFile": "liquid-disclosure-native.mts",
+      "rawSha256": "13114ca3d57f574fa090f46fff4b02f9bbfb9593473682ad66209527b8047d57",
+      "storedSha256": "9d713a6be769908ad2fa5a434387374b255f85c47065b3be3dc0c95df7fc28f3",
+      "rawBytes": 13515,
+      "storedBytes": 4252
+    },
+    {
+      "file": "liquid-blocked-frame-audit-candidate.json.gz",
+      "rawFile": "liquid-blocked-frame-audit-candidate.json",
+      "rawSha256": "28e87be6e16c53e7e8774d845bf168145bd312a59d8ba977adfe5cb64f0af0a9",
+      "storedSha256": "200d82627845920de5c4bc26ca9576e7a0ae42da3571c1ef5484004f7f11f065",
+      "rawBytes": 406364,
+      "storedBytes": 9355
+    },
+    {
+      "file": "liquid-disclosure-owned-candidate.json.gz",
+      "rawFile": "liquid-disclosure-owned-candidate.json",
+      "rawSha256": "09fb55bd7fc155fdacd16a715695fa1627dce45650312cbcad657a83b81ae925",
+      "storedSha256": "cd6adcfbed0d07d9df54e9c2c6ccc5fd7eeea7e73b02ed37b2039db91d1ca621",
+      "rawBytes": 1195869,
+      "storedBytes": 40730
+    },
+    {
+      "file": "liquid-disclosure-serialized-candidate.json.gz",
+      "rawFile": "liquid-disclosure-serialized-candidate.json",
+      "rawSha256": "3ab0a467d513abd1010f7ce0770063e2121b48434731248779f1d69bb3b4c440",
+      "storedSha256": "6d1ebac2f8885616e50f8d59b62e8c80eb1158215b5d3341f3666a9e70fd80b5",
+      "rawBytes": 1983060,
+      "storedBytes": 64519
+    },
+    {
+      "file": "liquid-disclosure-candidate.json.gz",
+      "rawFile": "liquid-disclosure-candidate.json",
+      "rawSha256": "891a27f17082667d4309f8ff06a769fe779eecd5d129496a75cd9572dea86366",
+      "storedSha256": "c9ac6810819912c93cdd7fea4518ef451078b108147f0650ad22c5ad4bf261a4",
+      "rawBytes": 21415,
+      "storedBytes": 1521
+    },
+    {
+      "file": "liquid-blocked-ring-before.json.gz",
+      "rawFile": "liquid-blocked-ring-before.json",
+      "rawSha256": "894b8f9ac176bf0bfda46b9d74da996958eb667777c6c8247ce55c1494574421",
+      "storedSha256": "a82af0fcd0c3ac70d26b14c1e8b85c00c0a264720e3709241fd709e141436cb0",
+      "rawBytes": 28744,
+      "storedBytes": 766
+    },
+    {
+      "file": "liquid-hover-paint-before.json.gz",
+      "rawFile": "liquid-hover-paint-before.json",
+      "rawSha256": "4a3153fa580e68946d13f3423d76f2e932aaaf24362e60f9f20d35697a819805",
+      "storedSha256": "5fdc36b3b4fa46f97f2e869669aab5b55eec73cd0a02c0338910b4a9bab23196",
+      "rawBytes": 95200,
+      "storedBytes": 5090
+    },
+    {
+      "file": "official-liquid-hover-138949906827.log.gz",
+      "rawFile": "official-liquid-hover-138949906827.log",
+      "rawSha256": "686db7002ee39e2b324151c4fb69ce797441a279b110076db62d66ff9703b533",
+      "storedSha256": "36451959ce391f3bae9be3a9349694406b501afda41a80918d6774abbfc41d4b",
+      "rawBytes": 101075,
+      "storedBytes": 14074
+    },
+    {
+      "file": "liquid-disclosure-candidate-unit-recovered.json.gz",
+      "rawFile": "liquid-disclosure-candidate-unit-recovered.json",
+      "rawSha256": "9b93dd6c63a51e3a834f7b07e13a95ad4a6d3f272688bccb6a8efa0426c1c985",
+      "storedSha256": "5b8a9f443a4dc61ce15af728f4be3c5a1ba84c57e6b6fc4a86e8eeeb33c83f38",
+      "rawBytes": 55552,
+      "storedBytes": 5089
+    },
+    {
+      "file": "liquid-hover-fixture-candidate-unit-recovered.json.gz",
+      "rawFile": "liquid-hover-fixture-candidate-unit-recovered.json",
+      "rawSha256": "a5c8f3e6ae6434d43155c7046d2c51d976aaaddddd1d6b13b78104c0d062319a",
+      "storedSha256": "5004748c932727906e0861512a89f5b10ceaf05c69d2c4a2078a4fbc6376a436",
+      "rawBytes": 70794,
+      "storedBytes": 6778
+    },
+    {
+      "file": "liquid-candidate-negative-recovered.json.gz",
+      "rawFile": "liquid-candidate-negative-recovered.json",
+      "rawSha256": "d9c38cc909e1ebe7c015440d3b6df31cde4a35344e363b200163e32d239f41b7",
+      "storedSha256": "4f4a3d6585c219e2436a70784baa4e3350c645e46e6ca8ad48bf10fb5fca66b7",
+      "rawBytes": 46743,
+      "storedBytes": 4878
+    },
+    {
+      "file": "liquid-negative-inputs.json.gz",
+      "rawFile": "liquid-negative-inputs.json",
+      "rawSha256": "4b44394697b17a21034dba1a6b4b47c9e0c8c222f351a373f5ff682cef80d069",
+      "storedSha256": "ee1b705164c6af7256fceb19eac18dd5cc737f26e8177bc817069d65238bb799",
+      "rawBytes": 896,
+      "storedBytes": 477
+    }
+  ],
+  "generatedStyleClosure": {
+    "generator": "node --import tsx scripts/styles/generate-draft-family-style-tokens.ts",
+    "check": "node --import tsx scripts/styles/generate-draft-family-style-tokens.ts --check",
+    "generatorExitCode": 0,
+    "checkExitCode": 0,
+    "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+    "sha256": "ce97445f34b3785af713368638ac77260fa074aba8ed52a36f6ca03654c1b5b1",
+    "baseRevision": "124e329cfc3cd710c1f1d267d640f1b97ef2f4c9",
+    "closureChanges": [
+      "Bootstrap adds one previously omitted authored dark-state token from integrated main",
+      "Liquid replaces three expanded ring tokens with their authored not-focus-visible conditions"
+    ],
+    "toolchain": {
+      "node": "v24.22.3"
+    },
+    "isolatedProof": {
+      "sourceRevision": "124e329cfc3cd710c1f1d267d640f1b97ef2f4c9",
+      "cliInputs": "Every CLI/styles input verified against committed 124e; full exact hashes in clean-cli-closure.tar.gz",
+      "baseline": "Official generator and check exit 0; Bootstrap token already absent from the committed manifest despite being present in committed source",
+      "candidate": "Exactly eight recorded Liquid overlays; official generator and check exit 0",
+      "sha256": "ce97445f34b3785af713368638ac77260fa074aba8ed52a36f6ca03654c1b5b1",
+      "archive": "clean-cli-closure.tar.gz",
+      "archiveSha256": "0d7ba6fed925cd328392210bdc8482082ed6e0be1f254c92e8319defd1a372a0"
+    }
+  }
+}

@@ -16,7 +16,7 @@ Canonical generation ran all four repository generators. The only generated diff
 
 ## Actual working-tree verification
 
-These are executed working-tree observations, including the merged main source, not clean CI for a later commit. Selections overlap and must not be summed as unique coverage. Full stdout, original JSON and command receipts are retained in the [validation archive](evidence/2026-11-24-sprint1-runtime-and-source-repairs/executed-validation.tar.gz); the [manifest](evidence/2026-11-24-sprint1-runtime-and-source-repairs/manifest.json) records byte hashes and all retained failed or incomplete executions.
+These are executed working-tree observations, including the merged main source, not clean CI for a later commit. Selections overlap and must not be summed as unique coverage. Full stdout, original JSON and command receipts are retained in the [validation archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-runtime-and-source-repairs/executed-validation.tar.gz); the [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-runtime-and-source-repairs/manifest.json) records byte hashes and all retained failed or incomplete executions.
 
 | Selection | Actual result |
 | --- | --- |

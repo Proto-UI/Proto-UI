@@ -24,6 +24,6 @@ The original two package-budget policy test files pass all 28 controls after the
 
 A new clean exact-head run of the original strict workflow is still required. Its 9 entries and 2 diagnostics must retain a124 minified/gzip byte counts, minified hashes, and complete input closures. Only these three caps, derived pass values, and source metadata may differ. This record does not claim that pending run passed, and does not replace required formal approval.
 
-Evidence: [manifest](evidence/2026-11-24-sprint4-lifecycle-cost-budget-review/manifest.json) and [original receipts and review](evidence/2026-11-24-sprint4-lifecycle-cost-budget-review/execution.tar.gz). Normal hooks and signed-off commit are preserved in the publication execution receipt.
+Evidence: [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-lifecycle-cost-budget-review/manifest.json) and [original receipts and review](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint4-lifecycle-cost-budget-review/execution.tar.gz). Normal hooks and signed-off commit are preserved in the publication execution receipt.
 
 The first local policy execution retained 22 passes and 6 setup failures caused by /tmp ENOSPC. It is archived unchanged. The same 28 controls were then run with an isolated /var/tmp task directory and the original deadlines; no policy assertion, source entry, or test was changed.

@@ -57,8 +57,11 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   }
   const ownedFocus = !!focusOwner;
   const selection = document.getSelection();
-  const anchor = capture(selection?.anchorNode, selection?.anchorOffset ?? 0);
-  const extent = capture(selection?.focusNode, selection?.focusOffset ?? 0);
+  // Empty document selections have no endpoints to lease. Read the live range
+  // count for every move; a preceding owner's callback can create a new range.
+  const hasRange = !!selection?.rangeCount;
+  const anchor = hasRange ? capture(selection!.anchorNode, selection!.anchorOffset) : null;
+  const extent = hasRange ? capture(selection!.focusNode, selection!.focusOffset) : null;
   // A generated shell can be an ancestor of the retained scope. Only accept
   // such endpoints when its explicit source lease resolves into this scope;
   // an arbitrary ancestor or adjacent preview must not acquire ownership.

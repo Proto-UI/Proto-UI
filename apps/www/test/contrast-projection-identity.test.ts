@@ -2257,8 +2257,17 @@ for (const runtime of runtimes) {
       const readers = pipeline('field');
       const page = pipelinePage(mounted.root);
       const observe = () => readers.anatomyObservation(page, item(runtime, 'field'), 'validation');
+      const recipe =
+        productionDemos[
+          '../src/content/' + authoredSources.field.recipePath.slice('apps/www/src/content/'.length)
+        ];
+      const errorInstance = compileContrastAnatomy(
+        recipe,
+        PROJECTION_FAMILY_MANIFESTS.brutalist.families.field
+      ).instances.find((entry: any) => entry.ref === 'usernameError');
+      expect(errorInstance).toBeDefined();
       const requiredError = (result: any) =>
-        result.expectations.find((entry: any) => entry.path === 'root.children.0.children.3');
+        result.expectations.find((entry: any) => entry.path === errorInstance!.path);
       expect(requiredError(await observe()).required).toBe(false);
       mounted.root.querySelector<HTMLElement>('[data-demo-ref="validate"]')!.click();
       await vi.waitFor(
@@ -2288,7 +2297,7 @@ for (const runtime of runtimes) {
 it('WC Field validity cannot borrow an ambiguous or foreign native editor witness', async () => {
   const mounted = await preview('wc', 'field');
   const restore = controlledMeasurementInputs();
-  const host = mounted.root.querySelector<HTMLElement>('[data-demo-ref="requiredControl"]')!;
+  const host = mounted.root.querySelector<HTMLElement>('[data-demo-ref="usernameControl"]')!;
   const ownerRoot = host.shadowRoot ?? host;
   const editor = [...ownerRoot.children].find(
     (node) => node instanceof HTMLInputElement && node.getAttribute('part') === 'control'
@@ -2342,7 +2351,7 @@ for (const runtime of runtimes) {
       expect(anatomy.observed.primary).not.toBeNull();
       expect(
         anatomy.observed.surfaces.find((part: any) => part.uid === anatomy.observed.primary)?.ref
-      ).toBe('requiredControl');
+      ).toBe('usernameControl');
     } finally {
       restore();
       await mounted.destroy();
@@ -2361,15 +2370,13 @@ for (const runtime of runtimes) {
       const target = readers.primary(page.locator('[data-previewer-id]'), 'radio-group');
       expect(target, 'The original runner omitted the radio-group primary branch.').not.toBeNull();
       const selected = await target.evaluate((element: HTMLElement) => element);
-      expect(selected).toBe(
-        mounted.retained.querySelector('[data-demo-ref="density-comfortable"]')
-      );
+      expect(selected).toBe(mounted.retained.querySelector('[data-demo-ref="hero-comfortable"]'));
       expect(selected).not.toBe(mounted.retained.querySelector('[role="radio"]'));
       expect(selected.getAttribute('role')).toBe('radio');
       expect(selected.getAttribute('aria-checked')).toBe('true');
       expect(selected.getAttribute('tabindex')).toBe('0');
       expect(selected.closest('[role="radiogroup"]')?.getAttribute('aria-label')).toBe(
-        'Density preference'
+        'Display density'
       );
       const identity = await readers.projectionObservation(page, auditCase);
       expect(identity.achieved).toBe(true);
@@ -2380,7 +2387,7 @@ for (const runtime of runtimes) {
       expect(rest.observed.currentLease).toBe(true);
       expect(
         rest.observed.surfaces.find((part: any) => part.uid === rest.observed.primary)?.ref
-      ).toBe('density-comfortable');
+      ).toBe('hero-comfortable');
 
       // Synthetic focus checks observer attribution only. Native Tab/Shift+Tab,
       // hover, focus-visible and paint still belong to all eight audit cases.
@@ -2389,7 +2396,7 @@ for (const runtime of runtimes) {
       expect(focused.achieved).toBe(true);
       expect(
         focused.observed.surfaces.find((part: any) => part.uid === focused.observed.primary)
-      ).toMatchObject({ ref: 'density-comfortable', focused: true, currentLease: true });
+      ).toMatchObject({ ref: 'hero-comfortable', focused: true, currentLease: true });
     } finally {
       restore();
       await mounted.destroy();
@@ -2400,7 +2407,7 @@ for (const runtime of runtimes) {
     const mounted = await preview(runtime, 'radio-group');
     const restore = controlledMeasurementInputs();
     const selected = mounted.retained.querySelector<HTMLElement>(
-      '[data-demo-ref="density-comfortable"]'
+      '[data-demo-ref="hero-comfortable"]'
     )!;
     const duplicate = document.createElement('div');
     const readers = pipeline('radio-group');
@@ -2410,7 +2417,7 @@ for (const runtime of runtimes) {
     try {
       expect((await observe()).achieved).toBe(true);
       for (const [attribute, wrong] of [
-        ['data-demo-ref', 'retired-density-comfortable'],
+        ['data-demo-ref', 'retired-hero-comfortable'],
         ['data-projection-prototype', 'brutalist-button'],
         ['role', 'button'],
         ['aria-checked', 'false'],
@@ -2472,7 +2479,7 @@ for (const runtime of runtimes) {
       expect(enter).toBe(mounted.retained.querySelector('[data-demo-ref="enterBtn"]'));
       expect(enter).not.toBe(mounted.retained.querySelector('[data-demo-ref="transition"]'));
       expect(enter.getAttribute('role')).toBe('button');
-      expect(enter.textContent).toBe('Enter · 进入');
+      expect(enter.textContent).toBe('Enter');
       const identity = await readers.projectionObservation(page, auditCase);
       expect(identity.achieved).toBe(true);
       const rest = await readers.anatomyObservation(page, auditCase, 'rest');
@@ -2573,7 +2580,7 @@ it('Image rest-only applicability retains the actual passive source and historic
     for (const child of node.children ?? []) visit(child);
   };
   visit(recipe.root);
-  expect(instances).toEqual(['fit-contain', 'fit-cover', 'fit-fill', 'decorative', 'error']);
+  expect(instances).toEqual(['hero-frame', 'fit-contain', 'fit-cover', 'fit-fill']);
   const readers = pipeline('image');
   expect(
     readers.primary(
@@ -2598,7 +2605,7 @@ it('Image rest-only applicability retains the actual passive source and historic
 });
 
 for (const runtime of runtimes) {
-  it(`Image static plan/${runtime}: retains all five authored sources, fits and a11y inputs`, async () => {
+  it(`Image static plan/${runtime}: retains all four authored sources, fits and a11y inputs`, async () => {
     const mounted = await preview(runtime, 'image');
     const restore = controlledMeasurementInputs();
     try {
@@ -2611,13 +2618,12 @@ for (const runtime of runtimes) {
       expect(result.achieved, JSON.stringify(result)).toBe(true);
       expect(result.imageApplicability.applicable).toBe(true);
       expect(result.expectedInstances.map((instance: any) => instance.ref)).toEqual([
+        'hero-frame',
         'fit-contain',
         'fit-cover',
         'fit-fill',
-        'decorative',
-        'error',
       ]);
-      expect(result.surfaces).toHaveLength(5);
+      expect(result.surfaces).toHaveLength(4);
       for (const instance of result.expectedInstances) {
         const surface = result.surfaces.find((candidate: any) => candidate.ref === instance.ref);
         expect(surface).toMatchObject({
@@ -2691,7 +2697,7 @@ it('Image static applicability fails closed for interactive, dynamic, changed an
     [
       'changed fit',
       (demo) => {
-        firstImage(demo).props.fit = 'cover';
+        firstImage(demo).props.fit = 'contain';
       },
     ],
     [
@@ -2729,8 +2735,8 @@ it('Image static applicability fails closed for interactive, dynamic, changed an
 });
 
 for (const [family, ref, label] of [
-  ['live-region', 'announcePolite', 'Push polite update · 推送 polite 更新'],
-  ['async-region', 'markBusy', 'Set busy: true · 标记忙碌'],
+  ['live-region', 'checkInbox', 'Check inbox'],
+  ['async-region', 'startRefresh', 'Refresh Activity'],
 ]) {
   for (const runtime of runtimes) {
     it(`auxiliary primary/${family}/${runtime}: binds the authored public control without making its region interactive`, async () => {
@@ -2854,8 +2860,8 @@ for (const runtime of runtimes) {
       expect(target, 'The original runner omitted the Input native primary.').not.toBeNull();
       const editor = await target.evaluate((element: HTMLInputElement) => element);
       expect(editor).toBeInstanceOf(HTMLInputElement);
-      expect(editor.getAttribute('aria-label')).toBe('Name');
-      expect(editor.value).toBe('Guang');
+      expect(editor.getAttribute('aria-label')).toBe('Email');
+      expect(editor.value).toBe('alex@example.com');
       expect(editor.disabled).toBe(false);
       expect(editor.readOnly).toBe(false);
       // Match the real audit entry: select and validate its current subject
@@ -2871,9 +2877,9 @@ for (const runtime of runtimes) {
       expect(inputs).toHaveLength(3);
       expect(inputs.every((surface: any) => surface.target[0].tag === 'INPUT')).toBe(true);
       expect(inputs.map((surface: any) => surface.target[0].value)).toEqual([
-        'Guang',
-        'Unavailable',
-        'Base keeps this focusable.',
+        'alex@example.com',
+        'Disabled field',
+        'https://app.example.com/acme',
       ]);
       const rest = await readers.anatomyObservation(page, auditCase, 'rest');
       expect(rest.achieved, JSON.stringify(rest.failures)).toBe(true);
@@ -2979,7 +2985,7 @@ for (const runtime of runtimes) {
 }
 
 for (const runtime of runtimes) {
-  it(`dropdown pointer identity/${runtime}: binds both real authored variants and their own Shortcuts`, async () => {
+  it(`dropdown pointer identity/${runtime}: binds all real authored variants and their own Shortcuts`, async () => {
     const mounted = await preview(runtime, 'dropdown-menu');
     const restore = controlledMeasurementInputs();
     try {
@@ -3003,6 +3009,7 @@ for (const runtime of runtimes) {
       });
       expect(rows.map((row: any) => [row.ref, row.value, row.pair])).toEqual([
         ['profileAction', 'profile', 'main'],
+        ['logoutAction', 'logout', 'main'],
         ['deleteAction', 'delete', 'destructive'],
       ]);
       for (const row of rows) {
@@ -3031,12 +3038,17 @@ for (const runtime of runtimes) {
         for (const child of node?.children ?? []) visit(child);
       };
       visit(source.root);
+      expect(items.find((node) => node.ref === 'logoutAction')).toMatchObject({
+        ref: 'logoutAction',
+        props: { value: 'logout', textValue: 'Log out' },
+        children: ['Log out', { prototypeId: 'brutalist-dropdown-shortcut', children: ['⇧⌘Q'] }],
+      });
+      expect(items.find((node) => node.props.value === 'logout').props.variant).toBeUndefined();
       expect(items.at(-1)).toMatchObject({
         ref: 'deleteAction',
         props: { value: 'delete', textValue: 'Delete', variant: 'destructive' },
         children: ['Delete'],
       });
-      expect(items.find((node) => node.props.value === 'logout').props.variant).toBeUndefined();
       expect(items.filter((node) => node.props.variant === 'destructive')).toHaveLength(1);
       const anatomy = await readers.anatomyObservation(
         page,

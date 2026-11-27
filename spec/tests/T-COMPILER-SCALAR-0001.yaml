@@ -1,10 +1,15 @@
 id: T-COMPILER-SCALAR-0001
 type: test
 title: Checked scalar admission and independent generated consumers
-status: draft
+status: removed
 since: 0.3.0-alpha.2
+removedSince: 0.4.0
+replacedBy: T-COMPILER-FOUNDATION-0001
 lifecycleRationale: >-
-  These source and generated Rust regressions exercise a bounded private compiler extension. They do not establish complete GPUI native or OS behavior, and the dedicated mounted-native scalar boundary case remains accountable evidence debt.
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
 
 
 cases:
@@ -65,8 +70,7 @@ cases:
 implementations:
   - id: scalar-conversions
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/scalar-conversions.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -75,12 +79,12 @@ implementations:
         T-COMPILER-SCALAR-0001-CASE-RUST,
       ]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/scalar-conversions.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Thirteen cases passed locally, including actual generated Rust execution with Cargo; this is not a GPUI Window execution.
       - The language-support dependency is resolved into a lockfile before testing with --locked; prepared offline runners may set CARGO_NET_OFFLINE.
   - id: scalar-rounding
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/scalar-round.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -89,14 +93,15 @@ implementations:
         T-COMPILER-SCALAR-0001-CASE-RUST,
       ]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/scalar-round.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - The recorded fourteen-case run includes emitted Rust bit comparisons for ties, signed zero and precision boundaries; full native component admission remains separate.
   - id: string-coercion
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/string-coercion.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-SCALAR-0001-CASE-NEGATIVE, T-COMPILER-SCALAR-0001-CASE-WEB-STRING]
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/string-coercion.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Twenty-five cases passed after replacing the stale blanket GPUI rejection with bounded scalar success and explicit opaque/structured negatives; direct Qt/Flutter String rejection remains covered.
   - id: mounted-gpui-scalar-boundaries
     kind: runtime-test
@@ -108,6 +113,7 @@ implementations:
 verifies:
   contracts:
     - id: C-COMPILER-SCALAR-0001
+      until: 0.4.0
       anchors:
         - C-COMPILER-SCALAR-0001-BINDING
         - C-COMPILER-SCALAR-0001-NUMBER
@@ -130,4 +136,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Map source admission, negative boundaries, browser String and actual generated Rust separately from pending mounted GPUI evidence.
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.
 tags: [compiler, scalar, rust, gpui, conformance]

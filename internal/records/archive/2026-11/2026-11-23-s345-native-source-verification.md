@@ -33,6 +33,6 @@ The current run uses a different source-keyed target, copied from that owned tar
 
 ## Evidence and limits
 
-[Raw commands, logs, source manifests and prior failures](./evidence/2026-11-23-s345-native-source-verification/raw-commands-and-results.tar.gz) contain 53 members. The archive SHA-256 is 645056afb9a41bb75f4ae9e5928e49d945b6676bac29a14b5b53fda8653c9e04. Its internal manifest hashes each source byte sequence without formatting it.
+[Raw commands, logs, source manifests and prior failures](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-s345-native-source-verification/raw-commands-and-results.tar.gz) contain 53 members. The archive SHA-256 is 645056afb9a41bb75f4ae9e5928e49d945b6676bac29a14b5b53fda8653c9e04. Its internal manifest hashes each source byte sequence without formatting it.
 
 These are Linux GPUI TestAppContext and source-consumer results. They do not supply macOS window, physical IME, screen-reader, browser image animation, production-site or all-Sprint Ready evidence. Current and historical candidates remain separately identified. The incoming external-scroll phase repair has its own source-bound record and native result.

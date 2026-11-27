@@ -7,8 +7,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
 import {
+  headerOptionTextClipping,
   headerPopupSettled,
   readHeaderPopupPaint,
+  readHeaderPopupTextGeometry,
   popupOptionContrast,
 } from './header-popup-evidence';
 import { measureHeaderPreferenceFocusRing } from './site-header-breakpoint-evidence';
@@ -651,6 +653,13 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 await expect.poll(() => popup.evaluate(headerPopupSettled)).toBe(true);
                 const popupPaint = await popup.evaluate(readHeaderPopupPaint);
                 measurements.push({ stage: 'popup-settled', width, control, paint: popupPaint });
+                const popupText = await popup.evaluate(readHeaderPopupTextGeometry);
+                measurements.push({
+                  stage: 'popup-text-settled',
+                  width,
+                  control,
+                  options: popupText,
+                });
                 expect(popupPaint.opacity).toBe(1);
                 // Rhea intentionally has a translucent public Surface; opacity is
                 // distinct from background alpha. Do not force an opaque page skin.
@@ -686,6 +695,15 @@ describe.sequential('Header public family presentation and labelled compact fiel
                   expect(popupShadow).not.toBe('none');
                 }
                 await capture(`${width}-${control}-popup`);
+                if (appearance === 'family' && control === 'family') {
+                  expect(popupText.length).toBeGreaterThan(0);
+                  expect(popupText.map((option) => option.text)).toContain('Bootstrap 2.3.2');
+                  for (const option of popupText)
+                    expect(
+                      headerOptionTextClipping(option),
+                      `${family}/${runtime}/${theme}/${width}/${control}/${option.text} settled text visibility`
+                    ).toEqual([]);
+                }
                 await page.keyboard.press('Escape');
                 await popup.waitFor({ state: 'hidden' });
                 await page.waitForFunction(
@@ -835,7 +853,8 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 );
                 expect(await locale.count()).toBe(1);
                 // The author name is stable; the selected value is a separate
-                // AX value/text node, never concatenated into the name.
+                // AX value/text node, never concatenated into the name. Both
+                // families hide their decorative chevrons from the AX tree.
                 expect(await locale.ariaSnapshot()).toBe('- combobox "语言": 简体中文');
                 expect(await locale.evaluate((element) => element.localName)).not.toBe('a');
                 expect((await sample(locale)).height).toBeCloseTo(44, 0);

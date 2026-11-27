@@ -48,7 +48,7 @@
 | 完整 release 测试与版本/物料检查 | 完整原跑 23 文件、211/214 passed；3 个失败已修复，受影响两文件 26/26 复验通过。仅未修改且原跑已通过的 219.99 秒 authoring 用例未重复执行；version/assets/manifests 全部通过 |
 | Spec catalog/schema/relations/authoring 与测试映射 | 1271 实体，schema/relations/evidence 与 active T mapping 均 0 issues；authoring 10 个变更输入通过 |
 
-命令与文件摘要保存在[修复证据索引](evidence/2026-11-15-control-label-alpha2.json)中。关键可复现入口为 `packages/compiler/test/control-label-*`、`packages/compiler/test/button-ssr*`、`packages/compiler/test/native-support-migration.test.ts`、Core/Modules/Adapter 的 ControlLabel/A11y 测试，以及官方 `check:types`、`build:packages`、release checks。Native suite 已登记在正式 Runtime test plan 中。
+命令与文件摘要保存在[修复证据索引](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-15-control-label-alpha2.json)中。关键可复现入口为 `packages/compiler/test/control-label-*`、`packages/compiler/test/button-ssr*`、`packages/compiler/test/native-support-migration.test.ts`、Core/Modules/Adapter 的 ControlLabel/A11y 测试，以及官方 `check:types`、`build:packages`、release checks。Native suite 已登记在正式 Runtime test plan 中。
 
 ## 保留的失败与修复过程
 

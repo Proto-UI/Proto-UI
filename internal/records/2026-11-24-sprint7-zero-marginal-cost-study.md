@@ -10,7 +10,7 @@
 
 ## 冻结场景与停止规则
 
-[freeze.json](evidence/2026-11-24-knowledge-value-study/freeze.json)在 2026-11-23 19:40:12.235609 UTC 冻结。任务是普通 React18.3.1 手动水平 Tabs：显式循环、disabled 跳过、Home/End、聚焦与选择分离、Enter／Space／pointer 激活、相互关系、重复操作、fixture 移除和存活的宿主计数。可用路径包括普通要求生成、附带 5 条 Proto 交互事实的生成和 Radix1.1.13 集成。**本任务未准入确定性 Tabs 产物**，因此没有伪造该路径；不同 Button 任务的 #749 结果也不混进这个同任务分母。
+[freeze.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/freeze.json)在 2026-11-23 19:40:12.235609 UTC 冻结。任务是普通 React18.3.1 手动水平 Tabs：显式循环、disabled 跳过、Home/End、聚焦与选择分离、Enter／Space／pointer 激活、相互关系、重复操作、fixture 移除和存活的宿主计数。可用路径包括普通要求生成、附带 5 条 Proto 交互事实的生成和 Radix1.1.13 集成。**本任务未准入确定性 Tabs 产物**，因此没有伪造该路径；不同 Button 任务的 #749 结果也不混进这个同任务分母。
 
 各路径使用相同任务、固定依赖锁、声明的 Agent 配置、工具权限、生产浏览器与独立 oracle。每个初始 Agent 是新的 fork；参与者没有拿到 oracle 或最终参考实现。普通要求路径允许使用普通生态知识与公开文档，所以它不是“模型没有任何知识”的基线。知识路径实际暴露文件的 SHA 为 `b45c258a5f6407aa8943d4dde6bec100a2feca704b68ce334a074fa70461cc16`；固定知识源及其 draft 状态保留。
 
@@ -35,7 +35,7 @@
 
 “0 次失败”只在这些实际完整旅程内成立。22 项断言相关；不把 198 次初始断言通过当作 198 次独立成功，也不从 3 次重复估计稀有故障率。全部行为观察发生在一个 Chromium／React 环境中，跨宿主一致性、native mixing、其他 primitives 与真实 AT 未测。
 
-每份初始生成源码、命令与日志、独立浏览器检查序列、真实 screenshots／DOM／ARIA／trace、每个失败或未执行项都可在 [results.json](evidence/2026-11-24-knowledge-value-study/results.json)的路径中定位。初始运行没有首个行为分歧；本地浏览器启动失败是环境失败，未进入组件行为，不把它列成组件修复。library-2 的外层预览进程超时也独立保留。
+每份初始生成源码、命令与日志、独立浏览器检查序列、真实 screenshots／DOM／ARIA／trace、每个失败或未执行项都可在 [results.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/results.json)的路径中定位。初始运行没有首个行为分歧；本地浏览器启动失败是环境失败，未进入组件行为，不把它列成组件修复。library-2 的外层预览进程超时也独立保留。
 
 维护是事先声明的同一个内容变更：活动 panel 增加普通 `More information` 链接，计数文案改为 `Completed actions: N`。三条路径均只改一份 JSX 源文件；实际代码 diff、再构建、22 项回归和新增内容的源码／DOM 核对均保留。这支持“这一项小修改三条路径都可完成”，不能外推为长期维护成本、版本升级传播或未来兼容保证。
 
@@ -63,7 +63,7 @@ library-1 没有完整的初次交付时间，library-3 没有首条命令时间
 
 知识包一处 criterion 锚点拼写错误在独立后验审查中被发现：`ROLE-CONTENT` 应为 `ROLE-PANEL`。这是本轮实际暴露的一部分，冻结包不修改；只修未来入口，并记录该事实的语义仍受冻结源支持。该发现不是参与者行为失败，也不凭推测声称它造成或没有造成耗时变化。
 
-独立分析没有启动新浏览器或改参与者实现。它核对了 1,401 个原始文件、60 份来源绑定、204 份捕获产物、36 份服务器摘要、12 个 trace CRC 和其中 24 个 HTML／CSS 响应正文。JS 在 trace 中没有正文，绑定依据和限制明确列于 [independent-audit.json](evidence/2026-11-24-knowledge-value-study/independent-audit.json)。
+独立分析没有启动新浏览器或改参与者实现。它核对了 1,401 个原始文件、60 份来源绑定、204 份捕获产物、36 份服务器摘要、12 个 trace CRC 和其中 24 个 HTML／CSS 响应正文。JS 在 trace 中没有正文，绑定依据和限制明确列于 [independent-audit.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-knowledge-value-study/independent-audit.json)。
 
 本轮可以接受的结论是：**即使解释时消去生成与测试的边际费用，这个常见 Tabs 任务也没有显现附带知识的行为或修复收益；判断标准、来源正确性、环境与记录工作仍然存在，但没有被测量为某条路径独有的优势。** 更广泛的价值、稀有失败、长期维护与未来 AI 经济学保持未测，不制造有利或不利的外推。
 

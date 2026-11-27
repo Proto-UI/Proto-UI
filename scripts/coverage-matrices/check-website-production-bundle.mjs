@@ -205,6 +205,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   // Current public WC entry's exact portal, Meta and Shadow profile helpers.
   'packages/adapters/base/src/platform/portal-direction.ts',
   'packages/adapters/web-component/src/focus-scope-targets.ts',
+  // Existing runtime/modules and focus-scope owners share this closed DOM-only leaf.
+  'packages/adapters/web-component/src/native-focus-candidate.ts',
   'packages/adapters/web-component/src/keyed-meta-sources.ts',
   'packages/adapters/web-component/src/portal-conceal.ts',
   'packages/adapters/web-component/src/portal-mount.ts',

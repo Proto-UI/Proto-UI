@@ -131,8 +131,7 @@ implementations:
     exercises: [P-BOOTSTRAP-2-3-2-DIALOG-CONTENT, P-BOOTSTRAP-2-3-2-ALERT-DIALOG]
   - id: presence-native-declaration-and-owner
     kind: module-test
-    status: passing
-    path: packages/compiler/test/native-presence-presentation.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-SNAPSHOT
@@ -140,16 +139,17 @@ implementations:
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/native-presence-presentation.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Ordinary four-Web imports of actual authored asTransition and direct generated host controls use a deterministic DOM-model clock. They do not establish physical browser frames or the original Drawer evidence.
   - id: presence-native-and-runtime-browser
     kind: workspace-check
-    status: planned
-    path: packages/compiler/test/presence-presentation.browser.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE
     notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/presence-presentation.browser.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
       - Sandboxed Chromium must observe the same authored Transition with nominal side selection through Runtime and four native Web imports. Source presence is not an execution receipt; all original Drawer/document acceptance conditions remain independently mapped.
   - id: drawer-authored-presentation
     kind: module-test
@@ -264,3 +264,6 @@ revisions:
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Add independently addressable containing-block, channel timing, final opacity baseline and authored modal source evidence without claiming physical frames.
+  - version: 0.4.0
+    change: revised
+    summary: Retire deleted compiler evidence and retain commit-bound historical sources without changing independent behavior.

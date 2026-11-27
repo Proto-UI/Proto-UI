@@ -33,7 +33,7 @@ The regression expansion also found a separate collector failure: the scanner co
 
 ## Executed evidence
 
-All counts below refer to actual local runs; every listed run has zero pending tests. Raw logs and result JSON, including every failing stage, are in the [evidence manifest](./evidence/2026-11-24-lowered-local-rule-helpers/manifest.json).
+All counts below refer to actual local runs; every listed run has zero pending tests. Raw logs and result JSON, including every failing stage, are in the [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-lowered-local-rule-helpers/manifest.json).
 
 | Stage | Passed | Failed | Meaning |
 | --- | --: | --: | --- |

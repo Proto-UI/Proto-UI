@@ -54,4 +54,4 @@ This patch does not relax browser deadlines, actual cleanup acknowledgements, sa
 
 ## Reproducible archive
 
-[`manifest.json`](./2026-11-23-sprint5-shadow-percentage-boundary/manifest.json) records the SHA-256 and byte size of each raw file and its gzip container. Every container was decompressed and compared byte-for-byte before staging.
+[`manifest.json`](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/2026-11-23-sprint5-shadow-percentage-boundary/manifest.json) records the SHA-256 and byte size of each raw file and its gzip container. Every container was decompressed and compared byte-for-byte before staging.

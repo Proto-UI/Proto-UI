@@ -2155,9 +2155,6 @@ export default defineConfig({
     rehypePlugins: [rehypeEnhancedImage, rehypeScrollableTables],
   },
   vite: {
-    // The browser compiler creates a module Worker whose QuickJS closure has
-    // dynamic imports. Preserve that native module graph in production.
-    worker: { format: 'es' },
     build: {
       rollupOptions: {
         output: {
@@ -2186,12 +2183,6 @@ export default defineConfig({
     ],
     optimizeDeps: {
       exclude: [
-        // The compiler Worker loads this native ESM closure only when its
-        // panel opens. Optimizing it at that point reloads the documentation
-        // page and destroys the in-flight owner; serve the ESM directly.
-        '@jitl/quickjs-wasmfile-release-sync',
-        '@jitl/quickjs-ffi-types',
-        'quickjs-emscripten-core',
         '@proto.ui/core',
         '@proto.ui/runtime',
         '@proto.ui/types',

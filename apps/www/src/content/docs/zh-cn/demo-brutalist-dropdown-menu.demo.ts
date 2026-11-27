@@ -162,6 +162,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-dropdown-item',
+            ref: 'logoutAction',
             props: {
               value: 'logout',
               textValue: 'Log out',
@@ -174,6 +175,17 @@ export default {
                 children: ['⇧⌘Q'],
               },
             ],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-item',
+            ref: 'deleteAction',
+            props: {
+              value: 'delete',
+              textValue: 'Delete',
+              variant: 'destructive',
+            },
+            children: ['Delete'],
           },
         ],
         surfaceStyle: 'w-44',

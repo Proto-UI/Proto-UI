@@ -1,3 +1,8 @@
+import type { BrutalistButtonProps } from '@proto.ui/prototypes-brutalist/button';
+
+const cancelButtonProps = { variant: 'surface', wrap: true } satisfies BrutalistButtonProps;
+const saveButtonProps = { wrap: true } satisfies BrutalistButtonProps;
+
 export default {
   type: 'demo',
   root: {
@@ -89,7 +94,7 @@ export default {
                       {
                         kind: 'proto',
                         prototypeId: 'brutalist-button',
-                        props: { variant: 'neutral', wrap: true },
+                        props: cancelButtonProps,
                         children: ['Cancel'],
                       },
                     ],
@@ -107,7 +112,7 @@ export default {
                       {
                         kind: 'proto',
                         prototypeId: 'brutalist-button',
-                        props: { wrap: true },
+                        props: saveButtonProps,
                         children: ['Save changes'],
                       },
                     ],

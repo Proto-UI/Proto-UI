@@ -10,7 +10,7 @@ The validator now checks those exact route-to-producer pairs against actual modu
 
 ## Executed controls and preserved failure
 
-The [evidence manifest](evidence/2026-11-23-sprint5-material-diagnostics/manifest.json) records the exact candidate source hashes and compressed raw logs. Node 24.22.3 executed all 1,915 bundle validation tests: 1,915 passed, zero failed, cancelled, skipped or todo. The new controls cover exact static/dynamic ownership, invalid/duplicate/missing graph records, dangling edges, chunk-only false ownership, direct/indirect bypasses, unreviewed material and framework imports, copied routes, ordinary-shell imports and the global server-only wall.
+The [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-material-diagnostics/manifest.json) records the exact candidate source hashes and compressed raw logs. Node 24.22.3 executed all 1,915 bundle validation tests: 1,915 passed, zero failed, cancelled, skipped or todo. The new controls cover exact static/dynamic ownership, invalid/duplicate/missing graph records, dangling edges, chunk-only false ownership, direct/indirect bypasses, unreviewed material and framework imports, copied routes, ordinary-shell imports and the global server-only wall.
 
 A separate negative control substituted the original d985 validator, identified by its SHA-256 in the manifest, without changing the same four new positive graph fixtures. All four failed with exit 1, as expected: the original validator treats these exact material diagnostics as ordinary shell roots. This is a source-edge regression control, not proof of an actual emitted production graph.
 

@@ -6,9 +6,9 @@
 
 ## 保留的来源
 
-- [2026-10-06 完整比较](2026-10-06-apple-hig-proto-ui-first-review.md)及其 [158 行结构化记录](2026-10-06-apple-hig-proto-ui-first-review.json)保持原字节、访问日期、文章 hash 和 `25c3d0731e39003d87f541afc5e1a294a9d95568` 源码基线。
-- [2026-10-14 完整条件载体](2026-10-14-finf-followup-source-debt.json)保持原字节。全部 `hig:*` 键、82 条仍需 followup 的 topic、76 条历史不适用决定、原始讨论/回复、历史 source flags 和 GPUI README drift 均保留；PR 合入不替代条件验收。
-- [Issue 冻结源条件](../governance/release-0.3-source-ledger.json)的 `issue.864.001` 至 `issue.864.163` 保留原文及原来的 release/acceptance 状态。新 [158 行索引与补正数据](2026-11-10-apple-hig-source-reconciliation.json)以 URL 连接每个 `hig:*` 和其原 `issue.864.*`，同时绑定完整原行与父级记录的 SHA-256，不能重新按排序分配旧 key。
+- [2026-10-06 完整比较](../../2026-10-06-apple-hig-proto-ui-first-review.md)及其 [158 行结构化记录](../../2026-10-06-apple-hig-proto-ui-first-review.json)保持原字节、访问日期、文章 hash 和 `25c3d0731e39003d87f541afc5e1a294a9d95568` 源码基线。
+- [2026-10-14 完整条件载体](../../2026-10-14-finf-followup-source-debt.json)保持原字节。全部 `hig:*` 键、82 条仍需 followup 的 topic、76 条历史不适用决定、原始讨论/回复、历史 source flags 和 GPUI README drift 均保留；PR 合入不替代条件验收。
+- [Issue 冻结源条件](../../../governance/release-0.3-source-ledger.json)的 `issue.864.001` 至 `issue.864.163` 保留原文及原来的 release/acceptance 状态。新 [158 行索引与补正数据](../../2026-11-10-apple-hig-source-reconciliation.json)以 URL 连接每个 `hig:*` 和其原 `issue.864.*`，同时绑定完整原行与父级记录的 SHA-256，不能重新按排序分配旧 key。
 - 2026-11-10 已读取 #864 的全部 4 条当前评论，以及 [原 PR #869](https://github.com/Proto-UI/Proto-UI/pull/869)的 12 条 conversation comments、12 条 review comments/replies 和 9 个 review。11月6日的 0.4 延后意见保留为历史；当前用户授权本片有界修复，不改写 release disposition。
 
 `K-COMPONENT-INTERACTION-0001`、`K-PROTOTYPE-COMPOSITION-0001`、`D-A11Y-SEMANTIC-DOMAIN-0001`、`C-A11Y-0001` 和 `C-FEEDBACK-MATERIAL-0001` 均为 `draft`。组件主体、上层组合、语义对象、host 投射与 family paint 的边界继续按这些实体及 `spec/README.md` 的生命周期解释。四个 `active` Web Adapter profile 不使其依赖的 draft 语义、Apple native 或 AT 自动获得完整保证。

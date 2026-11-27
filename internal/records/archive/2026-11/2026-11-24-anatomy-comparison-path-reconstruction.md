@@ -39,7 +39,7 @@ The 64-part, 16-subscriber fixture preserves 9,856 current target reads and 307 
 
 The F-to-G-to-F control uses distinct logical bridges with three subscribers. The original and candidate observe the third subscriber's changed order. The unsafe epoch-removed variant misses that callback. Filtered cases in selective baseline/mutation commands are never counted as passes. The unsafe variant is not committed, and the restored three source hashes were rechecked.
 
-New raw reports, logs, exact commands, before/after hashes, execution receipts, and workflow handoffs are in the [fresh evidence archive](evidence/2026-11-24-anatomy-reconstructed-validation.tar.gz). Its manifest binds each member by SHA-256. It contains new executions only; the unavailable original archive has not been recreated from summarized counts.
+New raw reports, logs, exact commands, before/after hashes, execution receipts, and workflow handoffs are in the [fresh evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-anatomy-reconstructed-validation.tar.gz). Its manifest binds each member by SHA-256. It contains new executions only; the unavailable original archive has not been recreated from summarized counts.
 
 ## Remaining acceptance
 

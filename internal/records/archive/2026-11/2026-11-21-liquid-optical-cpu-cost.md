@@ -4,7 +4,7 @@ This record preserves a bounded CPU optimization and its measurements against co
 
 ## Owning sources and scope
 
-The implementation belongs to [`packages/adapters/base/src/material/program.ts`](../../packages/adapters/base/src/material/program.ts). The governing [material contract](../../spec/contracts/C-FEEDBACK-MATERIAL-0001.yaml), [optical test definition](../../spec/tests/T-WEB-LIQUID-OPTICAL-0001.yaml), and [visual sink capability](../../spec/host-caps/HC-FEEDBACK-VISUAL-SINK-0001.yaml) remain draft. Their safety, quality, paint ownership, source admission and revocation requirements still apply. This record does not advance a lifecycle or native acceptance state.
+The implementation belongs to [`packages/adapters/base/src/material/program.ts`](../../../../packages/adapters/base/src/material/program.ts). The governing [material contract](../../../../spec/contracts/C-FEEDBACK-MATERIAL-0001.yaml), [optical test definition](../../../../spec/tests/T-WEB-LIQUID-OPTICAL-0001.yaml), and [visual sink capability](../../../../spec/host-caps/HC-FEEDBACK-VISUAL-SINK-0001.yaml) remain draft. Their safety, quality, paint ownership, source admission and revocation requirements still apply. This record does not advance a lifecycle or native acceptance state.
 
 The candidate changes three internal operations:
 
@@ -22,7 +22,7 @@ Install the repository's declared development dependencies, make the baseline co
 node scripts/analysis/liquid-optical-cpu-benchmark.mjs --out /tmp/proto-ui-liquid-cpu-20261121
 ```
 
-[`scripts/analysis/liquid-optical-cpu-benchmark.mjs`](../../scripts/analysis/liquid-optical-cpu-benchmark.mjs) defaults to the current working directory and the baseline above. `--repo DIRECTORY` and `--base COMMIT` are optional overrides. `--out DIRECTORY` is required and resolves from the invoking working directory. Choose a fresh output directory: the script refuses to overwrite either retained JSON report. It does not fetch a missing baseline or read environment variables.
+[`scripts/analysis/liquid-optical-cpu-benchmark.mjs`](../../../../scripts/analysis/liquid-optical-cpu-benchmark.mjs) defaults to the current working directory and the baseline above. `--repo DIRECTORY` and `--base COMMIT` are optional overrides. `--out DIRECTORY` is required and resolves from the invoking working directory. Choose a fresh output directory: the script refuses to overwrite either retained JSON report. It does not fetch a missing baseline or read environment variables.
 
 The script extracts the actual baseline and candidate numerical functions, then transpiles their TypeScript with esbuild targeting ES2022. The source anchors deliberately fail if a later implementation no longer has the expected shape; such a failure requires updating and reviewing the diagnostic, not silently using a different workload. Source loading, transpilation, lookup-table initialization and fixture construction happen outside the measured interval.
 
@@ -55,9 +55,9 @@ All six JSON files preserve their exact serialized samples and summary values:
 
 | Run | Prefilter report | Contrast report | Provenance |
 | --- | --- | --- | --- |
-| Original measurement | [JSON](evidence/2026-11-21-liquid-optical-cpu/original/prefilter-benchmark.json) | [JSON](evidence/2026-11-21-liquid-optical-cpu/original/contrast-benchmark.json) | Initial numerical comparison; retained unchanged |
-| Scratch script reproduction | [JSON](evidence/2026-11-21-liquid-optical-cpu/scratch-script-reproduction/prefilter-benchmark.json) | [JSON](evidence/2026-11-21-liquid-optical-cpu/scratch-script-reproduction/contrast-benchmark.json) | First reusable extraction script; includes its own script hash |
-| Repository script execution | [JSON](evidence/2026-11-21-liquid-optical-cpu/repository-script/prefilter-benchmark.json) | [JSON](evidence/2026-11-21-liquid-optical-cpu/repository-script/contrast-benchmark.json) | Actual execution of the repository script with environment metadata |
+| Original measurement | [JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-21-liquid-optical-cpu/original/prefilter-benchmark.json) | [JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-21-liquid-optical-cpu/original/contrast-benchmark.json) | Initial numerical comparison; retained unchanged |
+| Scratch script reproduction | [JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-21-liquid-optical-cpu/scratch-script-reproduction/prefilter-benchmark.json) | [JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-21-liquid-optical-cpu/scratch-script-reproduction/contrast-benchmark.json) | First reusable extraction script; includes its own script hash |
+| Repository script execution | [JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-21-liquid-optical-cpu/repository-script/prefilter-benchmark.json) | [JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-21-liquid-optical-cpu/repository-script/contrast-benchmark.json) | Actual execution of the repository script with environment metadata |
 
 ## Original measurements
 

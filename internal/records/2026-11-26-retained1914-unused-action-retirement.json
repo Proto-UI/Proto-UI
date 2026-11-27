@@ -1,0 +1,110 @@
+{
+  "kind": "retained1914-unused-dialog-action-retirement",
+  "date": "2026-11-26",
+  "sourceParent": "5ac7ce9b787b694202c7ab17d1b73a268e0f26a2",
+  "patchSource": "834f4c12c316f69fea237c50c192aafb84f8622e",
+  "patchSha256": "80c87142e38b63b5e315684b54e6618da0d712e1fced26aaea6c20e81ee74d91",
+  "secondReviewSha256": "693756d64c349a022c05c75366c98652e673fbd97c9350f5c488bc491e7b0fac",
+  "files": [
+    {
+      "path": "packages/prototypes/shadcn/src/dialog/action-paint.ts",
+      "deleted": true,
+      "beforeGitBlob": "c2302d52253666708b74d9ebcbc01be0c9ec800b",
+      "afterGitBlob": null,
+      "beforeSha256": "a3e3954897442bc006848adb3e6b54888b9bc045424b913310fd92f0b04e8ee6",
+      "afterSha256": null,
+      "onlyCurrentSourcePathReplacement": false
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/alert-dialog-style-closure.test.ts",
+      "deleted": false,
+      "beforeGitBlob": "d9f4d9c42d8c2dc47fac4a22b588e2a05d4e849a",
+      "afterGitBlob": "b1e8bf00bccd2cfe17ce2bfc6079dfa36d35d2a9",
+      "beforeSha256": "7f6afc367d0d23f7a5ce837a9a17fdf880dca7ea0fc3a19f5d74386098b8ae53",
+      "afterSha256": "d1358e6e477819260d16fd37a4c2311ebf21bebe91a9ac269cb200dafde55f9f",
+      "onlyCurrentSourcePathReplacement": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts",
+      "deleted": false,
+      "beforeGitBlob": "c489d880d3c296af09a85308c4e4db212d8cefb8",
+      "afterGitBlob": "dacf39b76811c387dad36a4d3a180b995ff21f1c",
+      "beforeSha256": "8e0f4f529ca250ad9bc9f2305a7edb4b3f6a1a456c1d4fd6a52053cd9f848d1f",
+      "afterSha256": "67b5cf63c49ff3a88d392060177ef38b018e6e4c80b71ec48d5b7e7a031b19d0",
+      "onlyCurrentSourcePathReplacement": true
+    },
+    {
+      "path": "internal/contracts/overlay/shadcn-alert-dialog.presentation.v0.md",
+      "deleted": false,
+      "beforeGitBlob": "2cc86f678d4f7c154ef8eefbafee07a228ec4d45",
+      "afterGitBlob": "6c7ff8a4828110aad3d380ae85f6ce5fe4f0f081",
+      "beforeSha256": "0e01a90bc231219f127b1902cdc8485bc267aee597e1325c49d5f3b9f3cbd87b",
+      "afterSha256": "6e7fe0d5d0ea96a7b97ff3fabcb16ea7e9121c3ac463527a83aceb2c74e679f4",
+      "onlyCurrentSourcePathReplacement": true
+    }
+  ],
+  "decision": "Remove the unexported Dialog helper with no tracked callers; point three current validation/contract inputs at the actual AlertDialog helper. All source before/after hashes match the independently reviewed four-file patch.",
+  "inventory": {
+    "before": {
+      "files": 16,
+      "observations": 638,
+      "tokens": 184
+    },
+    "after": {
+      "files": 15,
+      "observations": 568,
+      "tokens": 180
+    },
+    "retiredEntry": {
+      "file": "packages/prototypes/shadcn/src/dialog/action-paint.ts",
+      "gitBlob": "c2302d52253666708b74d9ebcbc01be0c9ec800b",
+      "observations": 70,
+      "declarationOnly": 70,
+      "unresolved": {
+        "subject": 65,
+        "intent": 24
+      }
+    },
+    "allRetainedEntriesExactlyEqual": true,
+    "removedTokens": [
+      "dark:bg-input/30",
+      "dark:bg-input/50",
+      "dark:bg-transparent",
+      "dark:border-input"
+    ],
+    "newTokens": [],
+    "currentConsumers": {
+      "profileCount": 9,
+      "schemes": ["light", "dark"],
+      "roles": ["trigger", "cancel", "action"],
+      "phases": ["rest", "hover"],
+      "observedSnapshots": 108,
+      "allSnapshotMissingTokenSetsUnchanged": true,
+      "removedPrefixedTokensAbsentFromAllCurrentSnapshots": true
+    }
+  },
+  "validation": [
+    {
+      "scope": "Author original AlertDialog suites before/after cleanup",
+      "passedBefore": 8,
+      "passedAfter": 8,
+      "mode": "CLI testTimeout=120000, semantic validation only"
+    },
+    {
+      "scope": "Author current-consumer outline profile diagnostic",
+      "passed": 18,
+      "observedSnapshots": 108,
+      "mode": "Real adapter state/token observations, not rendered browser evidence"
+    }
+  ],
+  "limitations": [
+    "Two original suites were run with CLI --testTimeout=120000 for source collection; their source assertions/deadlines were not changed. Initial exact default 5000ms source-closure attempt timed out, before cleanup. Ready before/after source closure durations were about 8.8s/6.3s. This is semantic validation, not a claim of the default-timeout CI gate passing.",
+    "The browser evidence input is corrected, but no rendered browser test was run in this extracted environment.",
+    "The 18-case current-consumer diagnostic is evidence only, excluded from the four-file patch.",
+    "Historical hosted 113 subject misses at the retired entry are not claimed as this candidate reduction: this local scanner now sees 65 subject and 24 intent rejects in 70 declaration-only rows.",
+    "Current consumers retain existing source-proof misses; cleanup does not mark them proven.",
+    "Final integrated coverage matrix and generated source-bound evidence must be regenerated by the coordinating agent from the resulting tree.",
+    "Existing ES2024 esbuild warnings were retained."
+  ],
+  "authorship": "Agent-assisted integration under current-user direction; source patch and second-view evidence retain their exact original binding."
+}

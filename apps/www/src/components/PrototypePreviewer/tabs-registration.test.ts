@@ -18,8 +18,7 @@ function prototypes(node: DemoChild): string[] {
 // Tabs is published for base, shadcn, brutalist, bootstrap-2-3-2, and
 // liquid-glass. All declare initialRuntime="wc". base exposes a three-runtime
 // selector (no vue2); bootstrap and liquid-glass expose a four-runtime selector
-// (including vue2); shadcn renders four separate single-runtime preview blocks
-// (wc, react, vue, vue2); brutalist declares only initialRuntime.
+// (including vue2); shadcn also exposes the four-runtime selector; brutalist declares only initialRuntime.
 // base/shadcn/bootstrap/liquid-glass use `tabs.mdx`; brutalist publishes at
 // `components/tabs.mdx`. base has no manifest entry, so its id set is asserted
 // exactly against the published atom roles; the other four are manifest-bound.

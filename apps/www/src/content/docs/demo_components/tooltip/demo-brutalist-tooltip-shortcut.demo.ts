@@ -21,6 +21,7 @@ export default {
             kind: 'proto',
             prototypeId: 'brutalist-tooltip-content',
             ref: 'brutalistShortcutContent',
+            previewTheme: 'portal',
             props: { side: 'top', align: 'center' },
             children: [
               'Save Changes',

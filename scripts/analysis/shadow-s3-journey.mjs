@@ -17,19 +17,22 @@ export const S3_SWITCH_RECIPE = Object.freeze({
   uncheckedThumbX: 1,
   checkedThumbX: 15,
 });
+// Fixture hosts and controls are authored in the light DOM. Do not search
+// thousands of unrelated demo Shadow trees to rediscover these exact hosts.
+// Their surfaces and the native AX nodes are still inspected independently.
 const component = (page, profile, key) =>
-  page.locator(`${scope} [data-s3-profile="${profile}"] [data-s3-component="${key}"]`);
+  page.locator(`css:light=${scope} [data-s3-profile="${profile}"] [data-s3-component="${key}"]`);
 const settle = (page) => page.waitForTimeout(240);
 async function action(page, key) {
-  await page.locator(`${scope} [data-action="${key}"]`).click();
+  await page.locator(`css:light=${scope} [data-action="${key}"]`).click();
   await settle(page);
 }
 async function option(page, key, value) {
-  await page.locator(`${scope} [data-option="${key}"]`).selectOption(value);
+  await page.locator(`css:light=${scope} [data-option="${key}"]`).selectOption(value);
   await settle(page);
 }
 export async function sampleS3(page) {
-  return page.locator(scope).evaluate((section) =>
+  return page.locator(`css:light=${scope}`).evaluate((section) =>
     Array.from(section.querySelectorAll('[data-s3-profile]')).map((column) => {
       const get = (key) => column.querySelector(`[data-s3-component="${key}"]`);
       const measure = (key) => {
@@ -136,11 +139,11 @@ export function assertS3SwitchGeometry(rows, checked = false) {
 // A matched wrong width must fail even when Light/split/mixed agree. This is
 // test-only fault injection; the public fixture never overrides its geometry.
 export async function runS3SizeControl(page) {
-  await page.waitForSelector(`${scope}[data-ready=true]`);
+  await page.waitForSelector(`css:light=${scope}[data-ready=true]`);
   await settle(page);
   const baseline = await sampleS3(page);
   assertS3SwitchGeometry(baseline);
-  const switches = page.locator(`${scope} [data-s3-component="switch"]`);
+  const switches = page.locator(`css:light=${scope} [data-s3-component="switch"]`);
   const previous = await switches.evaluateAll((roots) =>
     roots.map((root) => {
       const surfaces = [
@@ -203,7 +206,7 @@ async function selected(page, profile, value) {
   assert.equal(
     await component(page, profile, `trigger-${value}`).getAttribute('aria-selected'),
     'true',
-    `${profile}/selected ${value}: ${JSON.stringify(await page.locator(`${scope} [data-s3-profile="${profile}"]`).evaluate((el) => ({ value: el.dataset.value, changes: el.dataset.changes })))}`
+    `${profile}/selected ${value}: ${JSON.stringify(await page.locator(`css:light=${scope} [data-s3-profile="${profile}"]`).evaluate((el) => ({ value: el.dataset.value, changes: el.dataset.changes })))}`
   );
 }
 async function focused(page, profile, key) {
@@ -262,7 +265,7 @@ async function press(page, key) {
 // P-BASE-TABS-{LIST,TRIGGER,CONTENT}, C-LIFECYCLE-0008 and I1.
 // Native Playwright input + actual AX tree; no synthetic routing or focus repair.
 export async function runS3Journey(page, { keepMounted = false } = {}) {
-  await page.waitForSelector(`${scope}[data-ready=true]`);
+  await page.waitForSelector(`css:light=${scope}[data-ready=true]`);
   await settle(page);
   if (keepMounted) await action(page, 'keepMounted');
   let rows = await sampleS3(page);
@@ -276,52 +279,64 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
   const cdp = await page.context().newCDPSession(page);
   try {
     const verifyPanels = async () => {
-      const snapshots = await sampleS3(page),
-        ax = await cdp.send('Accessibility.getFullAXTree');
+      const snapshots = await sampleS3(page);
       const { root } = await cdp.send('DOM.getDocument');
-      let activePanels = 0;
-      for (const row of snapshots)
-        for (const panel of row.panels) {
-          const { nodeId } = await cdp.send('DOM.querySelector', {
-            nodeId: root.nodeId,
-            selector: `${scope} [data-s3-profile="${row.profile}"] [data-s3-component="content-${panel.value}"]`,
-          });
-          const { node } = await cdp.send('DOM.describeNode', { nodeId });
-          const panelAX = ax.nodes.find(
-            (n) => n.backendDOMNodeId === node.backendNodeId && !n.ignored
-          );
-          const active = panel.value === row.value;
-          assert.equal(Boolean(panelAX), active, `${row.profile}/${panel.value}/AX visibility`);
-          assert.equal(
-            panel.display === 'none',
-            !active,
-            `${row.profile}/${panel.value}/actual display`
-          );
-          assert.equal(panel.detached, !keepMounted && !active);
-          if (!active) assert.equal(panel.height, 0);
-          if (active || keepMounted) {
-            assert.equal(panel.controls, panel.id);
-            assert.equal(panel.labelledBy, panel.triggerId);
-          }
-          if (active) {
-            activePanels++;
-            assert.ok(
-              [panelAX].some(
-                (n) =>
-                  n &&
-                  !n.ignored &&
-                  n.role?.value === 'tabpanel' &&
-                  n.name?.value === panel.label &&
-                  n.properties?.some(
-                    (p) =>
-                      p.name === 'labelledby' &&
-                      p.value.relatedNodes?.some((r) => r.idref === panel.triggerId)
-                  )
-              ),
-              `${row.profile}/actual AX labelledby`
+      // Observe every current panel by its actual backend DOM identity. The
+      // surrounding demo matrix has tens of thousands of unrelated AX nodes;
+      // serializing that entire tree is not part of this twelve-panel oracle.
+      const observations = await Promise.all(
+        snapshots.flatMap((row) =>
+          row.panels.map(async (panel) => {
+            const { nodeId } = await cdp.send('DOM.querySelector', {
+              nodeId: root.nodeId,
+              selector: `${scope} [data-s3-profile="${row.profile}"] [data-s3-component="content-${panel.value}"]`,
+            });
+            const { node } = await cdp.send('DOM.describeNode', { nodeId });
+            const ax = await cdp.send('Accessibility.getPartialAXTree', {
+              backendNodeId: node.backendNodeId,
+              fetchRelatives: false,
+            });
+            const panelAX = ax.nodes.find(
+              (entry) => entry.backendDOMNodeId === node.backendNodeId && !entry.ignored
             );
-          }
+            return { row, panel, panelAX };
+          })
+        )
+      );
+      let activePanels = 0;
+      for (const { row, panel, panelAX } of observations) {
+        const active = panel.value === row.value;
+        assert.equal(Boolean(panelAX), active, `${row.profile}/${panel.value}/AX visibility`);
+        assert.equal(
+          panel.display === 'none',
+          !active,
+          `${row.profile}/${panel.value}/actual display`
+        );
+        assert.equal(panel.detached, !keepMounted && !active);
+        if (!active) assert.equal(panel.height, 0);
+        if (active || keepMounted) {
+          assert.equal(panel.controls, panel.id);
+          assert.equal(panel.labelledBy, panel.triggerId);
         }
+        if (active) {
+          activePanels++;
+          assert.ok(
+            [panelAX].some(
+              (n) =>
+                n &&
+                !n.ignored &&
+                n.role?.value === 'tabpanel' &&
+                n.name?.value === panel.label &&
+                n.properties?.some(
+                  (p) =>
+                    p.name === 'labelledby' &&
+                    p.value.relatedNodes?.some((r) => r.idref === panel.triggerId)
+                )
+            ),
+            `${row.profile}/actual AX labelledby`
+          );
+        }
+      }
       assert.equal(activePanels, 3, 'only three current S3 panels in AX (scoped by DOM identity)');
     };
     await verifyPanels();
@@ -435,7 +450,7 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
       assert.equal(row.slotOwned, true);
       assert.equal(
         row.slot,
-        (await page.locator(scope).getAttribute('data-lang')) === 'en'
+        (await page.locator(`css:light=${scope}`).getAttribute('data-lang')) === 'en'
           ? 'Save preferences'
           : '保存设置'
       );
@@ -500,7 +515,7 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
       moved.map((r) => r.counts),
       before.map((r) => r.counts)
     );
-    const handles = await page.locator(`${scope} [data-s3-split]`).elementHandles();
+    const handles = await page.locator(`css:light=${scope} [data-s3-split]`).elementHandles();
     await action(page, 'disconnect');
     for (const handle of handles) {
       assert.equal(await handle.evaluate((el) => el.isConnected), false);

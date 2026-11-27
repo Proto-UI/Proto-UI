@@ -14,7 +14,10 @@ criteria:
       en: Invoke asCheckboxRoot() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
   - id: P-LIQUID-GLASS-CHECKBOX-VISUAL
     text:
-      en: 'Restrained box paint; checked/mixed marks remain non-color supplementary indicators. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+      en: 'Use the six public Apple HIG macOS Checkbox illustrations as the standalone default appearance reference. Their 32 by 32 source-pixel box at @2x establishes a 16 by 16 logical paint target. Preserve the 20 by 20 activation/focus frame and the external Label association. While the material host uses the Root border box for its paint geometry, the fallback and optical paint share that 20 by 20 frame. An independently inset 16 by 16 material surface remains open. The 4-unit corner radius is a family approximation. Checked and mixed retain the consumer primary/primary-foreground pair (blue/white in the family defaults) and differ by glyph. Disabled retains opaque muted/muted-foreground paint, visible marks, blocked activation and no elevation. Focus remains on the Base Root. Default material is auto; explicit opaque and missing-provider fallback retain the complete ordinary paint.'
+  - id: P-LIQUID-GLASS-CHECKBOX-REFERENCE-COLOR
+    text:
+      en: 'The source PNGs declare sRGB. Measured light matte/field encoded RGB are (247,247,247)/(234,234,234). The encoded sRGB black-overlay model gives 1-234/247 = 0.0526. Dark matte/field are (54,43,38)/(74,65,60). The encoded sRGB white-overlay model gives (field-matte)/(255-matte) = (0.0995,0.1038,0.1014). Composite the rounded 5% black and 10% white over the corresponding default family backgrounds in encoded sRGB and round each channel to the nearest byte. The resulting opaque secondary-background role is #e9e9eb over #f5f5f7 and #333335 over #1c1c1e. This approximates the reference neutral fill while providing the opaque pair required by V2. Source blue samples (10,141,255) light and (0,136,255) dark describe artwork only. The six illustrations supply no disabled, hover, focus, hit-target or physical-device measurement.'
   - id: P-LIQUID-GLASS-CHECKBOX-CLOSURE
     text:
       en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
@@ -38,7 +41,24 @@ sources:
   - path: packages/prototypes/liquid-glass/src/checkbox/index.ts
   - path: https://developer.apple.com/design/human-interface-guidelines/materials
     label: Apple HIG Materials design reference only
+  - path: https://developer.apple.com/design/human-interface-guidelines/toggles#Checkboxes
+    label: Apple HIG Checkboxes; website illustration reference, not a physical device measurement
+  - path: https://developer.apple.com/tutorials/images/com.apple.HIG/checkbox-selected@2x.png
+    label: 'Raw PNG SHA256 8e728a205b32471d0d5145c215e8d2e243fd36f8a50ac00e6da8b709b5095655; light checked'
+  - path: https://developer.apple.com/tutorials/images/com.apple.HIG/checkbox-selected~dark@2x.png
+    label: 'Raw PNG SHA256 0cd7dc235981a5da503d38daa0252ebf2b38c3b9fe430c942b6f6d23548ea507; dark checked'
+  - path: https://developer.apple.com/tutorials/images/com.apple.HIG/checkbox-deselected@2x.png
+    label: 'Raw PNG SHA256 c7446d7544206107213d7b7bc7a63021b9fa1af2102b3cd85f0367186f06c5b1; light unchecked'
+  - path: https://developer.apple.com/tutorials/images/com.apple.HIG/checkbox-deselected~dark@2x.png
+    label: 'Raw PNG SHA256 4a45c83efa2ae2bbe0c86d09ebe80644246336de2e7d4e70adb4df8f9c1c3fba; dark unchecked'
+  - path: https://developer.apple.com/tutorials/images/com.apple.HIG/checkbox-mixed@2x.png
+    label: 'Raw PNG SHA256 14abb8ec9da83646e20dbea3fafcaa10c46abecea20560eb0146e30a1e63130c; light mixed'
+  - path: https://developer.apple.com/tutorials/images/com.apple.HIG/checkbox-mixed~dark@2x.png
+    label: 'Raw PNG SHA256 3660839dde5159970da099439222fcd3075455ff38d3c76e36e4f0b0fb4b82f4; dark mixed'
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Calibrated standalone Checkbox paint against the public macOS Checkbox illustrations while retaining the shared material geometry and Base interaction frame.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Liquid Glass Checkbox projection cataloged as a draft family projection over the implemented source slice.

@@ -112,7 +112,9 @@ describe.sequential('actual Brutalist font faces and fallback', () => {
         const dialogPreview = page.locator('[data-previewer-id]').first();
         await selectRuntime(page, dialogPreview, runtime, '[aria-haspopup="dialog"]', 1);
         await dialogPreview.locator('[aria-haspopup="dialog"]').click();
-        const title = page.getByText('Edit profile', { exact: true }).last();
+        const title = page
+          .getByRole('dialog', { name: 'Edit profile', exact: true })
+          .locator('[data-projection-prototype="brutalist-dialog-title"]');
         await title.waitFor({ state: 'visible' });
         const heading = await title.evaluate((el) => {
           const css = getComputedStyle(el);

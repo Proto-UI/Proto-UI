@@ -98,7 +98,7 @@ Button 的五条 Meta 规则都依赖 `variant` prop，不能通过当前 State/
 
 环境：Node 22.23.2、pnpm 10.32.1、macOS、Chromium 152.0.7977.83、1280×900。使用现有公共文档页面及其真实 Proto exports，没有复制组件 DOM、替换 getter、修改业务行为或关闭动画来制造结果。
 
-[观察脚本](./evidence/2026-09-13-rule-meta/browser-observations.mjs)记录 4 个 Button journey、12 个其他控件 journey、6 个 Transition journey；[原始 JSON](./evidence/2026-09-13-rule-meta/observations.json)包含实际 tokens、computed paint 和可见状态标签变化。paint 在宿主 effects 与有限 CSS transitions 完成后读取；状态时序保留原始观测时间。
+[观察脚本](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/browser-observations.mjs)记录 4 个 Button journey、12 个其他控件 journey、6 个 Transition journey；[原始 JSON](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/observations.json)包含实际 tokens、computed paint 和可见状态标签变化。paint 在宿主 effects 与有限 CSS transitions 完成后读取；状态时序保留原始观测时间。
 
 ### Button：主题事实变化后，旧配方仍在
 
@@ -116,10 +116,10 @@ Web Component、React、Vue3、Vue2 的结果一致：
 
 已逐张检查下面四对截图。它们展示同一个深色页面中交互前后的实际填充变化；截图不是另一套页面实现：
 
-- [WC 交互前](./evidence/2026-09-13-rule-meta/wc-dark-before.png) / [交互后](./evidence/2026-09-13-rule-meta/wc-dark-after.png)
-- [React 交互前](./evidence/2026-09-13-rule-meta/react-dark-before.png) / [交互后](./evidence/2026-09-13-rule-meta/react-dark-after.png)
-- [Vue3 交互前](./evidence/2026-09-13-rule-meta/vue-dark-before.png) / [交互后](./evidence/2026-09-13-rule-meta/vue-dark-after.png)
-- [Vue2 交互前](./evidence/2026-09-13-rule-meta/vue2-dark-before.png) / [交互后](./evidence/2026-09-13-rule-meta/vue2-dark-after.png)
+- [WC 交互前](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/wc-dark-before.png) / [交互后](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/wc-dark-after.png)
+- [React 交互前](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/react-dark-before.png) / [交互后](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/react-dark-after.png)
+- [Vue3 交互前](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/vue-dark-before.png) / [交互后](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/vue-dark-after.png)
+- [Vue2 交互前](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/vue2-dark-before.png) / [交互后](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-09-13-rule-meta/vue2-dark-after.png)
 
 交互式浏览器手工操作也复现了 WC 的 `/10 → /20` 差异。Button 页面通过 `prototype-modules.ts` 导入真实 Shadcn Button 源入口。
 

@@ -32,8 +32,22 @@ export default {
             props: { defaultActive: true, disabled: true },
             children: ['Disabled'],
           },
+          {
+            kind: 'box',
+            ref: 'count',
+            attrs: { role: 'status', 'aria-live': 'polite' },
+            children: ['0 activeChange requests'],
+          },
         ],
       },
     ],
+  },
+  setup({ refs, api }) {
+    let requests = 0;
+    api.setProps('bold', {
+      onActiveChange: () => {
+        refs.count.textContent = `${++requests} activeChange requests`;
+      },
+    });
   },
 } satisfies DemoSpec;

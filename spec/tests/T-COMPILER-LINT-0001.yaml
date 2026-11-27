@@ -1,0 +1,161 @@
+id: T-COMPILER-LINT-0001
+type: test
+title: Independent cases for shared compiler lint and source migration
+status: draft
+since: 0.4.0
+lifecycleRationale:
+  zh-CN: >-
+    用例来自诊断及单源合同，预期不由旧 parser、Adapter 结果或现有扫描器决定。 所列完整分析、编辑器/CLI 一致性及迁移清单路线尚无完整可执行证据，保留 missing 和 draft。
+
+
+  en: >-
+    Cases derive from the diagnostic and shared-source contracts rather than the old parser, Adapter results or an existing scanner. Complete analysis, editor/CLI consistency and migration-inventory routes lack complete executable evidence and remain missing under a draft entity.
+
+
+summary: Verify stable diagnostic identity, honest analysis states, semantic rule boundaries and safe shared-source migration.
+cases:
+  - id: T-COMPILER-LINT-0001-CASE-SHARED
+    title: Compiler, editor and CLI consume one analysis result
+    covers: [C-COMPILER-LINT-0001-SHARED-FRONTEND, C-COMPILER-LINT-0001-DIAGNOSTIC-IDENTITY]
+    expectation: >-
+      The same source closure, language/rule versions and target configuration yield the same normalized diagnostic IDs, categories, locations and binding/call-chain context through all three entrypoints. Renaming an import alias preserves its semantic result. Changing an imported helper invalidates the caller's prior cached result; changing only presentation does not select a separate admission policy. A missing implementation has a stable capability key and an actual tracking reference or an explicit tracking-unassigned state, never a fabricated issue URL.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-STATE
+    title: Distinguish invalid, undetermined and legal but unimplemented source
+    covers: [C-COMPILER-LINT-0001-RESULT-STATE, C-COMPILER-LINT-0001-CATEGORIES]
+    expectation: >-
+      An established numeric-condition violation with otherwise complete checks reports sourceValid=false, analysisComplete=true and compilable=false. A fully analyzed legal source with absent selected-target lowering reports true, true and false, plus informational backend-missing. Analysis exhausting its budget before determining validity reports null, false and false; finding a language violation before that exhaustion instead retains false, false and false. Only complete source admission and supported lowering/bindings permit true, true and true. A frontend with no implemented backend never reports that final tuple merely because its diagnostic list is empty.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-PRELUDE
+    title: A restricted TypeScript prelude does not replace Proto checks
+    covers:
+      [
+        C-COMPILER-LINT-0001-PRELUDE,
+        C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY,
+        C-COMPILER-LINT-0001-RESULT-STATE,
+      ]
+    expectation: >-
+      An authoring project with the required primitive interfaces and no undeclared String or Array methods rejects those absent members without loading ambient Node or DOM declarations accidentally. Even where TypeScript accepts a numeric condition, mixed number/string addition or an overlapping-union equality expression, the Proto pass checks the selected language's actual value and operation rules. Missing Proto checks leave analysis incomplete rather than turning the TypeScript result into a valid-source certificate. Readonly annotations or an Int brand do not establish immutable ownership or an integer boundary conversion by themselves.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-BOOL
+    title: Apply the stable boolean-condition rule to resolved domains
+    covers: [C-COMPILER-LINT-0001-RULE-BOOL, C-COMPILER-LINT-0001-DIAGNOSTIC-IDENTITY]
+    expectation: >-
+      A condition whose input is bool and a defined numeric comparison producing bool receive no proto/explicit-bool-condition error. A number used directly as the condition produces that stable rule ID with the VALUES criterion, the exact source span and the resolved number type. The diagnostic requests an intended explicit predicate without automatically substituting n != 0, which would differ for NaN.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-COERCION
+    title: Diagnose implicit conversions without a spelling-only equality ban
+    covers: [C-COMPILER-LINT-0001-RULE-COERCION, C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY]
+    expectation: >-
+      Numeric addition and a language-defined equality operation on compatible numeric operands are accepted by this rule. Mixed number/string addition that depends on implicit conversion produces proto/no-implicit-coercion with both operand types and the governing VALUES criterion. An equality spelling admitted by the selected authoring definition is lowered to its Proto semantics rather than rejected solely for containing == or emitted with JavaScript coercion.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-TEXT
+    title: Enforce explicit text semantics without matching unrelated members
+    covers: [C-COMPILER-LINT-0001-RULE-TEXT, C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY]
+    expectation: >-
+      Explicit scalar traversal and an unrelated record's numeric length field do not produce proto/text-api errors. An undeclared JavaScript text member used to return an isolated UTF-16 surrogate as a Proto String produces the rule with its actual receiver binding and the TEXT criterion. A legal explicit text operation without an implementation is compiler-missing rather than source-invalid; no automatic rewrite changes the scalar/code-unit unit without a verified migration.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-PURITY
+    title: Follow effects through helpers without rejecting valid action writes
+    covers: [C-COMPILER-LINT-0001-RULE-PURITY, C-COMPILER-LINT-0001-SHARED-FRONTEND]
+    expectation: >-
+      A pure derivation reading state and calculating a value is accepted. A transitive helper that writes another state cell produces proto/pure-derivation with the derivation-to-write call chain and PHASES criterion. The same valid state write performed in an action is not rejected by the pure-derivation rule. A renamed helper preserves the analysis result.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-CAPABILITY
+    title: Preserve real capability origin and reject fabricated authority
+    covers: [C-COMPILER-LINT-0001-RULE-CAPABILITY, C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY]
+    expectation: >-
+      A typed helper forwarding an actually declared capability retains its origin. A source assertion preserving that established origin is not forbidden merely for using as. Casting unrelated data to a capability and invoking it as authority produces proto/no-capability-assertion with LANGUAGE or VALUES and the asserted binding/use. Lack of lowering for a real legal capability remains missing implementation and does not trigger this author-error rule.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-NO-INVENTED-RESTRICTION
+    title: Attribute limitations to their actual source instead of inventing bans
+    covers: [C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY, C-COMPILER-LINT-0001-CATEGORIES]
+    expectation: >-
+      A declaration reached through a legal helper, a Context key with defined identity and lifetime, and a style expression allowed by its applicable contract are not rejected solely for lacking a favored syntactic form. A genuinely misspelled API member identifies the violated type or contract; a declared legal member without implementation identifies capability debt. A closure created before a later initialization is distinguished from an actual read before initialization. When analysis cannot establish the relevant path, it reports incomplete analysis rather than asserting a timing violation.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-BOUNDARIES
+    title: Keep extern configuration and runtime availability separate
+    covers: [C-COMPILER-LINT-0001-CATEGORIES, C-COMPILER-LINT-0001-RESULT-STATE]
+    expectation: >-
+      A declared extern lacking the selected target binding reports extern-unbound and compilable=false without claiming that the source violated the language. Changing the target binding configuration invalidates that result. A valid generated program later receiving host-unavailable retains its successful static admission and reports the runtime failure separately. A bound Proto host primitive is not rejected merely because it is not spelled as an extern call.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-AUTOFIX
+    title: Apply only source-bound verified common-source migrations
+    covers: [C-COMPILER-LINT-0001-AUTOFIX, C-COMPILER-LINT-0001-INVENTORY]
+    expectation: >-
+      A mechanical migration with satisfied version/content preconditions edits the registered common source, is idempotent and leaves both Adapter and compiler pointed to the same resulting closure. A changed source digest causes the migration to refuse rather than overwrite a neighboring edit. Counterexamples involving NaN truthiness, mixed equality, supplementary Unicode characters and fabricated capability origins do not receive blind fixes advertised as behavior preserving. An unavailable safe transformation is reported as migration work; neither a compiler-only replacement file nor a silent behavior deletion counts as a completed fix. That unfinished migration remains assigned to upstream until the common source and verified tooling are delivered; declaring that no safe autofix currently exists does not discharge the upstream obligation or transfer a permanent fork to the consumer.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-VERSION
+    title: Version accepted-source restrictions without rewriting capability history
+    covers: [C-COMPILER-LINT-0001-VERSIONING, C-COMPILER-LINT-0001-DIAGNOSTIC-IDENTITY]
+    expectation: >-
+      Narrowing a published rule set's accepted source with a new default error changes its breaking version and records migration impact; the preceding pinned rule set is not silently replaced. Implementing a formerly missing legal operation preserves the rule's semantic identity and its historical missing result rather than claiming that earlier source was invalid. Corrected detection of a previously specified violation records the newly surfaced diagnostic without pretending that the language definition changed.
+
+
+  - id: T-COMPILER-LINT-0001-CASE-INVENTORY
+    title: Preserve complete denominators while ratcheting actually delivered cases
+    covers: [C-COMPILER-LINT-0001-INVENTORY, C-COMPILER-LINT-0001-RATCHET]
+    expectation: >-
+      A source manifest distinguishes component entrypoints from shared helper files and binds their actual content, versions and required targets. Changing a helper invalidates dependent evidence. Adding a legal but unsupported entry increases the full denominator without turning it into a pass or removing it to preserve a percentage. A formerly delivered source/target capability becoming missing fails its regression gate. A documented common-source migration retains before/after mapping and evidence history. A stage's passing subset does not satisfy final acceptance while official or registered consumer entries remain invalid, undetermined, unsupported or unrun.
+
+
+implementations:
+  - id: shared-analysis
+    kind: module-test
+    status: missing
+    required: true
+    consumesCases:
+      - T-COMPILER-LINT-0001-CASE-STATE
+      - T-COMPILER-LINT-0001-CASE-PRELUDE
+      - T-COMPILER-LINT-0001-CASE-BOOL
+      - T-COMPILER-LINT-0001-CASE-COERCION
+      - T-COMPILER-LINT-0001-CASE-TEXT
+      - T-COMPILER-LINT-0001-CASE-PURITY
+      - T-COMPILER-LINT-0001-CASE-CAPABILITY
+      - T-COMPILER-LINT-0001-CASE-NO-INVENTED-RESTRICTION
+      - T-COMPILER-LINT-0001-CASE-BOUNDARIES
+    notes:
+      [
+        Complete semantic analysis and target-admission evidence have not been supplied; a bounded frontend increment must report its covered subset without marking this full route passing.,
+      ]
+  - id: editor-cli-parity
+    kind: workspace-check
+    status: missing
+    required: true
+    consumesCases: [T-COMPILER-LINT-0001-CASE-SHARED, T-COMPILER-LINT-0001-CASE-VERSION]
+    notes:
+      [
+        No complete compiler/CLI/editor parity run or published rule-set transition has been executed.,
+      ]
+  - id: migration-inventory
+    kind: workspace-check
+    status: missing
+    required: true
+    consumesCases: [T-COMPILER-LINT-0001-CASE-AUTOFIX, T-COMPILER-LINT-0001-CASE-INVENTORY]
+    notes:
+      [
+        Verified consumer migrations and a complete source-bound inventory regression run remain missing.,
+      ]
+verifies:
+  contracts: [C-COMPILER-LINT-0001]
+references:
+  decisions: [D-COMPILER-FOUNDATION-0001]
+  contracts: [C-COMPILER-FOUNDATION-0001]
+sources:
+  - path: spec/contracts/C-COMPILER-LINT-0001.yaml
+revisions:
+  - version: 0.4.0
+    change: introduced
+    summary: Add independent diagnostic, rule, migration and denominator cases with absent implementation routes reported honestly.
+tags: [compiler, lint, diagnostics, migration, conformance]

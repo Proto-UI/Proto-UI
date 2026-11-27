@@ -13,7 +13,7 @@ This test-only change verifies that the actual node is an HTMLStyleElement befor
 
 ## Evidence and limits
 
-[The field-whitelisted receipt](evidence/2026-11-24-sprint5-native-scope-type-guard/receipt.json) records exact source hashes, commands, times, titles, counts and retained-original log hashes. Complete device logs remain retained separately; this commit uploads no execution directory or raw device log. The linked hosted failure remains unchanged, and the next exact-head source/browser workflow supplies public CI originals for this successor.
+[The field-whitelisted receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint5-native-scope-type-guard/receipt.json) records exact source hashes, commands, times, titles, counts and retained-original log hashes. Complete device logs remain retained separately; this commit uploads no execution directory or raw device log. The linked hosted failure remains unchanged, and the next exact-head source/browser workflow supplies public CI originals for this successor.
 
 The production source and workflow remain byte-identical to 5006bd06a2cd570583dd4387cb1b3eff81932b38. Its successful production job is reused only for that unchanged product scope, not described as a new build. This record does not claim integration with the newer main branch or formal maintainer approval.
 

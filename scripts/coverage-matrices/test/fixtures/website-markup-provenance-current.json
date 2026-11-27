@@ -1,17 +1,21 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "0b436b388882d73b916ede97c73a1bf304dcf6f6",
-  "scope": "Direct source inventory for the sampled website routes. The Chinese Button install card now uses the stable 0.2.0 CLI and names its supported hosts. This is the only changed body among the 33 direct inputs. The preceding inventory is archived in website-markup-provenance-a8636eb.json. Served content and transitive dependencies require separate evidence.",
+  "revision": "9e2d126d9c72e31a0cc5f129ff4c9dcc5ccaf1de",
+  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1925 integration source commit 9e2d126d9c72e31a0cc5f129ff4c9dcc5ccaf1de. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-8434063.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "4fd03809c049a6a70e774dd6a5402edad258b08e16fdd43648cc6e4159f73460"
+      "sha256": "65369290f4ba40a5f88a9b1bf38005aed3c7a735b471fe91fcba39dd1a9d0889"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "a4ae6efe883bdbbd038167179669e811df6582a13bf77853b7314ea2bbcabde3"
+      "sha256": "f96be6d05a5c95aee447618cecae03dee7661fe98b8fe22ebc80ecf4cdf6f1a4"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-format.ts",
+      "sha256": "f9e89b4a1f6ea31e267de5a2329b262c13ad174fdb8ce5470720cd7337aac81c"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
@@ -23,19 +27,19 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c"
+      "sha256": "d34e9445536da8c56aaca4be078449ecdc05108f93f11e5bd5828f94d5d06629"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
-      "sha256": "b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b"
+      "sha256": "3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25"
+      "sha256": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
-      "sha256": "0d9271cdf2edb564cfbe0441d717a55278026ca18ef96301f77b006d27640c0c"
+      "sha256": "8ee4c63e5b1581afcade0b02ada62710ad3da7538a986471fc176ff0f3582cc7"
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
@@ -51,7 +55,7 @@
     },
     {
       "path": "apps/www/src/components/site-copy-command.ts",
-      "sha256": "a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b"
+      "sha256": "710162afb336fa41ab0975a41caab455b45200be09b351760bc4b7918ab9bff9"
     },
     {
       "path": "apps/www/src/components/site-copy-controller.ts",
@@ -79,7 +83,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177"
+      "sha256": "07dae9498553279b22e69683d42ab8e3e47a1be4161792cebb8ef86dfb9544c6"
     },
     {
       "path": "apps/www/package.json",
@@ -87,7 +91,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+      "sha256": "212e98529f0e2e76831ae8fee37b281f069e61bb737f8462f7b5cfbcc14ce53a"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
@@ -95,7 +99,7 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
-      "sha256": "7d41623f7a7b14674c6e9442980cddddbc251c931a3facd109614c838541270e"
+      "sha256": "202a03164a8a4599d686b502c87f474b381bf453f0ee7ef47b9807da7c81bc0a"
     },
     {
       "path": "apps/www/src/utils/conversionUtils.ts",
@@ -103,15 +107,15 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
-      "sha256": "58dc6a7cda823502e29d4b000d0cc2934b7acf7b8a2ba177be598aa93b471c4e"
+      "sha256": "5870ef290174f759bb5414b0df56e3615335f0d258522cee4cdb150f93f5ac69"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
-      "sha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19"
+      "sha256": "547aa146738b442dfc17c25c01db979ae4711ea9ff226c76dbc56857f32f3a89"
     },
     {
       "path": "apps/www/src/components/docs-header-preparation.ts",
-      "sha256": "545b76fa19b9633d52915c20c8e5ddb7e340dc9a73e43b88b6c790d0a42aa244"
+      "sha256": "a9ec13d22f86a8979b3f9964cb6b8b65ab6022df922e4b21c59a728b473c8c58"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/button/button-usage.ts",
@@ -120,14 +124,6 @@
     {
       "path": "apps/www/src/components/install-command-card-client.ts",
       "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
-    },
-    {
-      "path": "apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro",
-      "sha256": "f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a"
-    },
-    {
-      "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
-      "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",

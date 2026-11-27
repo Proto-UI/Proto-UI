@@ -1,6 +1,6 @@
 # 2026-09-15 Agent 图证软门禁与首批补证
 
-本文是实施与验证记录，不是另一份规范。执行规则见 [Agent evidence](../agent-operations/visual-evidence.md)，操作方法见 [gh 上传教程](../agent-operations/github-evidence-upload.md)。
+本文是实施与验证记录，不是另一份规范。执行规则见 [Agent evidence](../../../agent-operations/visual-evidence.md)，操作方法见 [gh 上传教程](../../../agent-operations/github-evidence-upload.md)。
 
 ## 用户请求转述
 

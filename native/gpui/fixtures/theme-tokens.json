@@ -21,8 +21,8 @@
       "dark": 28
     },
     "liquid-glass": {
-      "light": 25,
-      "dark": 25
+      "light": 26,
+      "dark": 26
     }
   },
   "themes": {
@@ -297,6 +297,7 @@
         "--pui-background": "#f5f5f7",
         "--pui-foreground": "#1d1d1f",
         "--pui-secondary": "#ffffff",
+        "--pui-secondary-background": "#e9e9eb",
         "--pui-secondary-foreground": "#1d1d1f",
         "--pui-accent": "#ffffff",
         "--pui-accent-foreground": "#1d1d1f",
@@ -324,6 +325,7 @@
         "--pui-background": "#1c1c1e",
         "--pui-foreground": "#f5f5f7",
         "--pui-secondary": "#2c2c2e",
+        "--pui-secondary-background": "#333335",
         "--pui-secondary-foreground": "#f5f5f7",
         "--pui-accent": "#2c2c2e",
         "--pui-accent-foreground": "#f5f5f7",

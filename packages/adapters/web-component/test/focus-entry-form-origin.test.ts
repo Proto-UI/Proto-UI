@@ -137,6 +137,9 @@ function slottedRadioEntry(checked: 'assigned' | 'peer') {
 describe('WC entry form-state event origin', () => {
   it('does not sample an unrelated entry for 331 trusted external editor input notifications', async () => {
     const fixture = entry();
+    const button = document.createElement('button');
+    button.style.visibility = 'hidden';
+    fixture.target.append(button);
     const editor = document.createElement('textarea');
     document.body.append(editor);
     await settle();
@@ -160,6 +163,11 @@ describe('WC entry form-state event origin', () => {
     'does not fan out unrelated trusted %s into 21 independent Entry owners',
     async (type) => {
       const fixtures = Array.from({ length: 21 }, () => entry());
+      for (const { target } of fixtures) {
+        const button = document.createElement('button');
+        button.style.visibility = 'hidden';
+        target.append(button);
+      }
       const targets = new Set(fixtures.map(({ target }) => target));
       const editor = document.createElement('textarea');
       document.body.append(editor);

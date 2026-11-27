@@ -418,6 +418,69 @@ async function entered(page: Page) {
           .every((animation) => !animation.pending && animation.playState !== 'running'),
       { content, media }
     );
+  } catch (error) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const facts = await Promise.race([
+        page.evaluate(
+          ({ content, media }) => {
+            const currentContent = document.querySelector('[data-docs-image-content]');
+            const currentMedia = document.querySelector<HTMLImageElement>('.docs-image-full');
+            const source = document.querySelector<HTMLImageElement>(
+              '.whitepaper-figure [data-docs-image-trigger] img'
+            );
+            return {
+              url: location.href,
+              forcedColors: matchMedia('(forced-colors: active)').matches,
+              boundContentConnected: content?.isConnected ?? null,
+              boundContentCurrent: content === currentContent,
+              boundMediaConnected: media?.isConnected ?? null,
+              boundMediaCurrent: media === currentMedia,
+              boundMediaSrc: media?.getAttribute('src') ?? null,
+              boundPhase: content?.getAttribute('data-transition-state') ?? null,
+              currentPhase: currentContent?.getAttribute('data-transition-state') ?? null,
+              currentDetached: currentContent?.hasAttribute('data-pui-view-detached') ?? null,
+              currentAnimations:
+                currentContent?.getAnimations().map((animation) => ({
+                  pending: animation.pending,
+                  state: animation.playState,
+                  currentTime: animation.currentTime,
+                  startTime: animation.startTime,
+                })) ?? null,
+              currentMedia: currentMedia
+                ? {
+                    src: currentMedia.getAttribute('src'),
+                    currentSrc: currentMedia.currentSrc,
+                    complete: currentMedia.complete,
+                    naturalWidth: currentMedia.naturalWidth,
+                  }
+                : null,
+              source: source
+                ? {
+                    currentSrc: source.currentSrc,
+                    complete: source.complete,
+                    naturalWidth: source.naturalWidth,
+                  }
+                : null,
+              active: document.activeElement?.localName,
+            };
+          },
+          { content, media }
+        ),
+        new Promise((resolve) => {
+          timer = setTimeout(() => resolve({ unavailable: '2000ms observation budget' }), 2000);
+        }),
+      ]);
+      console.info('[image entered identity failure]', JSON.stringify(facts));
+    } catch (observationError) {
+      console.info(
+        '[image entered identity failure]',
+        JSON.stringify({ observationError: String(observationError) })
+      );
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+    throw error;
   } finally {
     await content?.dispose();
     await media?.dispose();

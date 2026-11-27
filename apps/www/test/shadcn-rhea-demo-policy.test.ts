@@ -248,6 +248,7 @@ import w3Demo40 from '../src/content/docs/demo_components/radio-group/demo-shadc
 import w3Demo41 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-fieldset.demo';
 import w3Demo42 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-invalid.demo';
 import w3Demo43 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-rtl.demo';
+import emptyRadioGroupDemo from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-empty.demo';
 import w3Demo44 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-choice-card.demo';
 import w3Demo45 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-description.demo';
 import w3Demo46 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-disabled.demo';
@@ -579,6 +580,7 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-radio-group-choice-card', w3Demo38],
   ['demo-shadcn-radio-group-description', w3Demo39],
   ['demo-shadcn-radio-group-disabled', w3Demo40],
+  ['demo-shadcn-radio-group-empty', emptyRadioGroupDemo],
   ['demo-shadcn-radio-group-fieldset', w3Demo41],
   ['demo-shadcn-radio-group-invalid', w3Demo42],
   ['demo-shadcn-radio-group-rtl', w3Demo43],
@@ -860,7 +862,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(340);
+    expect(expected).toHaveLength(341);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

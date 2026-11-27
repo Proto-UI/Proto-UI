@@ -374,7 +374,8 @@ export function siteTypographyParticipant(
       const applyTheme = () => {
         // Typography uses the same selected-family map as ordinary controls,
         // previews and portals; no second system-font override after staging.
-        for (const view of views) applyProjectionThemeSurfaceStyle(view.surface, theme);
+        for (const view of views)
+          applyProjectionThemeSurfaceStyle(view.surface, theme, 'replace-batch');
       };
       const restoreNative = () => {
         if (!views.some((view) => activeViews.get(view.native) === view)) return;

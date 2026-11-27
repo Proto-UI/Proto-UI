@@ -22,7 +22,7 @@ const carrierCondition = (value, inputs, event = 'workflow_dispatch') =>
     event_name: event,
   });
 
-test('supplement remains read-only manual admission and never enlarges the five original jobs', () => {
+test('supplement remains read-only manual admission and never enlarges the remaining original jobs', () => {
   assert.deepEqual(Object.keys(workflow.on), ['workflow_dispatch', 'workflow_call']);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
@@ -30,7 +30,6 @@ test('supplement remains read-only manual admission and never enlarges the five 
   assert.deepEqual(Object.keys(original.jobs).sort(), [
     'base-select-consumers',
     'native-consumers',
-    'production-compiler',
     'release-rehearsal',
     'strict-package-budgets',
   ]);

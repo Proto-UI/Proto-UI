@@ -18,6 +18,6 @@
 
 ## 验证与未完成项
 
-两处 label 替换分别通过逐字节守恒检查。更新既有 expected label 后，调度 policy 原 21 项全部通过、退出码 0；release-source-ledger 原 21 项全部通过、退出码 0；workflow inventory parser 退出码 0。后两项读取的输入未因 expected label 校正而改变。本次没有新增只复述实现的测试。原始 20/21 失败、后续 21/21、完整命令和输入摘要见 [机器证据](evidence/2026-11-17-compiler-macos-runner-recovery.json)。独立静态复核确认了官方 label、两处替换和保持的调度/权限边界；不代表 formal approval。
+两处 label 替换分别通过逐字节守恒检查。更新既有 expected label 后，调度 policy 原 21 项全部通过、退出码 0；release-source-ledger 原 21 项全部通过、退出码 0；workflow inventory parser 退出码 0。后两项读取的输入未因 expected label 校正而改变。本次没有新增只复述实现的测试。原始 20/21 失败、后续 21/21、完整命令和输入摘要见 [机器证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-compiler-macos-runner-recovery.json)。独立静态复核确认了官方 label、两处替换和保持的调度/权限边界；不代表 formal approval。
 
 当前本机不是 macOS，也没有 Rust SDK；本地配置检查不证明 runner 分配、工具链安装、SDK 编译或原生消费者通过。对应准确源码的 macOS job 及其 artifact 仍须实际执行并回读。这里只恢复可审查的配置入口，不关闭 #1488 或整个 Compiler/native 验收。

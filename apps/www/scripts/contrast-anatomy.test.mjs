@@ -477,9 +477,33 @@ const retainedTooltipNative = JSON.parse(
     'utf8'
   )
 );
+const retainedTooltipSources = JSON.parse(
+  readFileSync(
+    new URL('./fixtures/contrast-anatomy-30e-tooltip-sources.json', import.meta.url),
+    'utf8'
+  )
+);
+assert.equal(retainedTooltipSources.sourceCommit, retainedTooltipNative.sourceCommit);
+const retainedTooltipPlan = (async () => {
+  const loadSource = async (identity) => {
+    const source = retainedTooltipSources.sources[identity];
+    assert.equal(createHash('sha256').update(source.content).digest('hex'), source.sha256);
+    const { code } = await transform(source.content, {
+      loader: 'ts',
+      format: 'esm',
+      sourcefile: source.path,
+    });
+    return import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
+  };
+  const [{ default: demo }, { PROJECTION_FAMILY_MANIFESTS: manifests }] = await Promise.all([
+    loadSource('recipe-tooltip'),
+    loadSource('projection-manifest'),
+  ]);
+  return compileContrastAnatomy(demo, manifests.brutalist.families.tooltip);
+})();
 for (const frame of retainedTooltipNative.frames)
   test(`replays recorded 30e Tooltip retained identity: ${frame.name}`, async () => {
-    const plan = await load('tooltip');
+    const plan = await retainedTooltipPlan;
     assert.equal(frame.beforeFingerprintDigest, frame.afterFingerprintDigest);
     const result = compareContrastAnatomy(plan, frame.observed, {
       requirePrimaryOpen: frame.requirePrimaryOpen,
@@ -526,7 +550,8 @@ for (const [name, mutate] of Object.entries({
     assert.equal(part.role, 'tooltip');
     mutate(part, sample);
     assert.equal(
-      compareContrastAnatomy(await load('tooltip'), sample, { requirePrimaryOpen: true }).achieved,
+      compareContrastAnatomy(await retainedTooltipPlan, sample, { requirePrimaryOpen: true })
+        .achieved,
       false,
       name
     );

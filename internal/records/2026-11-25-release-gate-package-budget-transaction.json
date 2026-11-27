@@ -1,0 +1,289 @@
+{
+  "kind": "Standalone bounded numeric candidate for accepted 0.3 behavior; awaiting final-head canonical strict validation and independent review",
+  "transactionBase": "8b44c62992a5a3de560c02165bf650d2fe6f6ec7",
+  "scope": {
+    "allowedMutation": "Only the three named numeric ceiling literals, their explanatory comment, and supporting evidence",
+    "unchanged": "Other six ceilings, entrypoints, full-entry blocking result, bundling/minification/tree-shaking, gzip, external dependencies, build graph, runtime semantics and capability boundaries"
+  },
+  "authority": {
+    "request": "Current authorized 0.3 release-gate repair task",
+    "engineeringPolicy": [
+      ".agents/skills/pui-dev/SKILL.md#decide-package-budget-ceilings",
+      ".agents/skills/pui-package-budget/SKILL.md"
+    ],
+    "priorRoundingDecision": "internal/records/2026-11-25-positioning-scroll-package-budget.json",
+    "acceptedSemantics": [
+      {
+        "capability": "Current Anatomy order snapshots, scoped subscriptions and current owner reads already merged on main",
+        "sources": [
+          "spec/modules/M-ANATOMY-0001.yaml",
+          "spec/contracts/C-ANATOMY-ORDER-0001.yaml",
+          "spec/contracts/C-ANATOMY-ORDER-0002.yaml",
+          "spec/contracts/C-ANATOMY-ORDER-0003.yaml",
+          "spec/contracts/C-ANATOMY-SCOPED-QUERY-0001.yaml"
+        ],
+        "implementation": [
+          "packages/modules/anatomy/src/impl.ts",
+          "packages/modules/collection/src/create.ts"
+        ]
+      },
+      {
+        "capability": "Current material/Presence fallback, including merged PR1859",
+        "sources": ["spec/tests/T-FEEDBACK-PRESENCE-PRESENTATION-0001.yaml"],
+        "implementation": ["packages/modules/feedback/src/create.ts"],
+        "acceptedMain": "710a90df2ea57d9f93d7d09e43ebfb2b7b8e5057"
+      },
+      {
+        "capability": "WC default Meta color-scheme reconciliation before first visible projection; custom source and current-owner guards retained",
+        "sources": ["spec/tests/T-RULE-COLOR-SCHEME-0001.yaml"],
+        "implementation": [
+          "packages/adapters/web-component/src/adapt.ts",
+          "packages/adapters/web-component/src/color-scheme-source.ts",
+          "packages/adapters/web-component/src/portal-mount.ts"
+        ]
+      },
+      {
+        "capability": "Finite existing Thumb RTL/rem projection and strict CSS receipt boundary; no generic calc or unknown-role admission",
+        "sources": [
+          "spec/decisions/D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001.yaml",
+          "internal/records/evidence/2026-11-25-release-gate-shadow-percentage/candidate.json"
+        ],
+        "implementation": [
+          "packages/core/src/spec/feedback/application-role.ts",
+          "packages/adapters/web-component/src/shadow-split-effects.ts"
+        ]
+      },
+      {
+        "capability": "Existing selector validation and full-input lexical parsing with live CSSOM ownership",
+        "sources": ["internal/records/evidence/2026-11-25-release-gate-wc-budget/receipt.json"],
+        "implementation": [
+          "packages/adapters/web-component/src/runtime/modules.ts",
+          "packages/adapters/web-component/src/shadow-style-artifact.ts"
+        ]
+      }
+    ],
+    "reviewStatus": "This authored transaction is not an independent approval or publication authorization"
+  },
+  "canonicalEvidence": [
+    {
+      "label": "Earlier cost used by the already accepted positioning numeric transaction",
+      "head": "47ae41c671c64091ae87d717f3fa61d02c13f355",
+      "run": 45513860306,
+      "job": 138868298533,
+      "artifact": 14977272341,
+      "artifactSha256": "e11dc4c68d0fb622a73ffd31bafd0e9f8cc7d1b8bb7d2e89f5adbb228274a44a",
+      "reportSha256": "dffd5b0d91bfa073439706333827ad12d4cd33858220caebe5ad4c169d405355",
+      "report": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-47ae.json.gz",
+      "originalStrictResult": "failure under the original pre-positioning ceilings; not relabeled passed"
+    },
+    {
+      "label": "Previous integrated official run",
+      "head": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+      "run": 45537881490,
+      "artifact": 14988465670,
+      "artifactSha256": "63904328741e832233f1a19b64dc207d10ce49e5d417499d2d21e2ae8b0d028b",
+      "reportSha256": "9f21c9ca5cb86e15c89032e4cc717cec3f675578d59d25596d3040a179a940a7",
+      "report": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-4d.json.gz",
+      "originalStrictResult": "failure: WC over by209; React and Vue passed"
+    },
+    {
+      "label": "Current integrated accepted-capability measurement",
+      "head": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1",
+      "run": 45552827234,
+      "job": 138997755953,
+      "artifact": 14993624462,
+      "artifactSha256": "9a343dd3f1675795032c0eafa89eb090c2e56cce46d3a3169cc1c2d787e044fd",
+      "logsArtifact": 14993729312,
+      "logsArtifactSha256": "c8032ce3bd4606dcf5afb9092b77cf87877481f6b67db7b045f04a2bb8c82f16",
+      "reportSha256": "47fcdf19c451815a7a9f86bd00ee6b2698b87e10fd6be7ef3cd084110a408b84",
+      "report": "internal/records/evidence/2026-11-25-release-gate-package-budgets/canonical-798.json.gz",
+      "originalStrictResult": "failure: React+62, Vue+120, WC+253; install/build/28controls passed"
+    }
+  ],
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "source": {
+    "head": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1",
+    "tree": "560e1ccc8d73688d93324ea145f608263318e932",
+    "workingTreeClean": true,
+    "measuredSourceMatchesHead": true,
+    "scope": [
+      "packages",
+      "scripts/analysis",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "fileCount": 8039,
+    "fingerprintSha256": "4b1983f50a0302652aed1c9935487bb75740b625796d97f7a31e4136b440be4c",
+    "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stableDuringMeasurement": true,
+    "requireClean": true,
+    "expectedSha": "7987860bf4fde0f5bc679f77893b7b66c66bb8b1"
+  },
+  "entries": [
+    {
+      "entry": "adapter-react root",
+      "oldCeiling": 181800,
+      "proposedCeiling": 181900,
+      "headroomBytes": 38,
+      "earlierAcceptedCost": {
+        "head": "47ae41c671c64091ae87d717f3fa61d02c13f355",
+        "gzipBytes": 181710,
+        "minifiedBytes": 631027,
+        "minifiedSha256": "f1240517244e40324770108f7630a52c4bd5d2ab3010b2f28f6bc0cef30e1089",
+        "originalReportPass": false
+      },
+      "previousCanonical": {
+        "head": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+        "gzipBytes": 181755,
+        "minifiedBytes": 631358,
+        "minifiedSha256": "eae7b6ffc887e015894b0a177743320ee1e3e6b196745597b7dfc77dae441725",
+        "originalReportPass": true
+      },
+      "candidateCanonical": {
+        "gzipBytes": 181862,
+        "minifiedBytes": 630719,
+        "minifiedSha256": "4f9e165d93231acb1d71b0882343313a591b1d6f8011b9910fde53c15111da38",
+        "budget": 181800,
+        "pass": false,
+        "overBudgetBytes": 62
+      },
+      "gzipDeltaFromAcceptedCost": 152,
+      "gzipDeltaFromPreviousCanonical": 107,
+      "closureFingerprint": "d32f861a966208c65d817da99fbda342ded4513711beb2754db40247f84453d4"
+    },
+    {
+      "entry": "adapter-vue root",
+      "oldCeiling": 180600,
+      "proposedCeiling": 180800,
+      "headroomBytes": 80,
+      "earlierAcceptedCost": {
+        "head": "47ae41c671c64091ae87d717f3fa61d02c13f355",
+        "gzipBytes": 180546,
+        "minifiedBytes": 626433,
+        "minifiedSha256": "55f51d20c2a4cde4bfdd028d7081733541fead51a493c81b4378f6b4d0bea1aa",
+        "originalReportPass": false
+      },
+      "previousCanonical": {
+        "head": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+        "gzipBytes": 180592,
+        "minifiedBytes": 626764,
+        "minifiedSha256": "39ee4df4c0380e4e1b05442c2c73f2f59df1d23f52adfa046f6c80b8dca29bd9",
+        "originalReportPass": true
+      },
+      "candidateCanonical": {
+        "gzipBytes": 180720,
+        "minifiedBytes": 626125,
+        "minifiedSha256": "78921be45bf87a060f37c7a79000a2b524e1ec2a34a6c71758557b4a2f9e8e53",
+        "budget": 180600,
+        "pass": false,
+        "overBudgetBytes": 120
+      },
+      "gzipDeltaFromAcceptedCost": 174,
+      "gzipDeltaFromPreviousCanonical": 128,
+      "closureFingerprint": "5f6a154cf925115a11367e42f54662f11ef105c1c0d2c59ac253ebd190485c8b"
+    },
+    {
+      "entry": "adapter-web-component root",
+      "oldCeiling": 218100,
+      "proposedCeiling": 218400,
+      "headroomBytes": 47,
+      "earlierAcceptedCost": {
+        "head": "47ae41c671c64091ae87d717f3fa61d02c13f355",
+        "gzipBytes": 218094,
+        "minifiedBytes": 738757,
+        "minifiedSha256": "65093ac5b28c7f34fab8ea4ebfeae4fa586cf5dd9d22002c9db2388a228ccd4a",
+        "originalReportPass": false
+      },
+      "previousCanonical": {
+        "head": "4d288166d2d5e42ad6d9b7a34e8a8d03bbc94c0c",
+        "gzipBytes": 218309,
+        "minifiedBytes": 739727,
+        "minifiedSha256": "d4859e94aa8511c58be13cf9cd869d70b49e190511ba9747645bc624fa1fad0a",
+        "originalReportPass": false
+      },
+      "candidateCanonical": {
+        "gzipBytes": 218353,
+        "minifiedBytes": 738519,
+        "minifiedSha256": "f71780b421ab55c62308ac4f07e036b446ec74f7235bd3b9a306cba88eca7cb8",
+        "budget": 218100,
+        "pass": false,
+        "overBudgetBytes": 253
+      },
+      "gzipDeltaFromAcceptedCost": 259,
+      "gzipDeltaFromPreviousCanonical": 44,
+      "closureFingerprint": "729a7976073b1e7404be2989bafcae2b869383aa4eb1d755931652209ba3bd60"
+    }
+  ],
+  "attribution": {
+    "fullComparisons": [
+      "internal/records/evidence/2026-11-25-release-gate-package-budgets/comparison-47ae-to-798.json",
+      "internal/records/evidence/2026-11-25-release-gate-package-budgets/comparison-4d-to-798.json"
+    ],
+    "inputMembership": "No added or removed input in any affected Adapter or Runtime root across either canonical comparison; there is no new eager dependency or duplicate Runtime closure",
+    "integratedCost": "The report measures each integrated whole entry. Gzip deltas are not added across modules. Relative to the previous official run, React/Vue minified bytes each shrink by639 and WC by1208, while gzip changes by107/128/44 in the same environment. This is an actual compression result of accepted source changes, not toolchain drift.",
+    "largestChangedRetainedSource": "Anatomy indexing and scoped-order implementation dominates the changed raw closure and reduces retained code; Feedback Presence fallback and WC current-owner/CSSOM checks remain necessary accepted behavior. WC lexical/live-owner deduplication is already included.",
+    "crossCheck": "Clean local124e and canonical798 have identical hashes/sizes/gzip and all full source-closure fingerprints for all nine entries. The local report remains local, not canonical.",
+    "latestCombination": "internal/records/evidence/2026-11-25-release-gate-package-budgets/transaction-input-equality.json"
+  },
+  "alternatives": [
+    {
+      "candidate": "a1 duplicate query checks",
+      "result": "insufficient: React unchanged, Vue -3B, WC -2B; rejected and restored"
+    },
+    {
+      "candidate": "a2 two this-free helpers",
+      "result": "insufficient: React -6B, Vue -24B, WC -10B; rejected and restored"
+    },
+    {
+      "candidate": "a3 four this-free helpers and private module indexes",
+      "result": "still over old limits: React181820, Vue180604, WC218232; rejected rather than broadening implementation risk for tens of bytes",
+      "rawEvidence": "Remote /home/ezra/proto-ui-wc-budget-cb5d-control/integrated-124e329 retains the patch and report; no candidate implementation is included"
+    }
+  ],
+  "marginRationale": "Each affected ceiling is the smallest multiple of100 bytes at or above its measured whole-entry cost, the same finite rounding used by the preceding positioning transaction. Resulting headroom38/80/47 bytes provides no allowance for an unmeasured feature. Any subsequent closure change requires a fresh strict canonical measurement. The already passing six ceilings are unchanged.",
+  "checks": {
+    "canonicalAcceptedCapabilityMeasurement": "failed, preserved above",
+    "measurementControls": "passed28/28, exit0, 0skipped/cancelled/todo; original full command under a short shared source-write pause",
+    "numericOnlySourceCheck": "passed: byte comparison to HEAD with only the3 exact numeric replacements and2 explanatory comment lines",
+    "finalCandidateStrictCanonical": "unrun; root must dispatch the unchanged blocking workflow on the exact committed combination",
+    "independentReview": "pending",
+    "initialLocalFailure": "Initial controls27/28: child returned no JSON, original stderr not retained by that assertion. Diagnostic single-case then uninstrumented full28 passed. Concurrent source mutation is a hypothesis, not an established cause. Both raw failed and later passed logs are retained."
+  },
+  "rollback": "Restore181800/180600/218100 when reverting the accepted combination, or propose lower ceilings from new canonical measurements. Never restore a prior red as a claimed pass."
+}

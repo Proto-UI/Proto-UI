@@ -14,7 +14,7 @@ The diagnostic's own module closure is checked independently. Every route-origin
 
 ## Real-graph replay and controls
 
-The [manifest](evidence/2026-11-23-sprint5-material-diagnostic-replay/manifest.json) binds the exact corrected source/test hashes, local and hosted Node versions, original production identity, compressed graph, raw failing/passing logs and replay script. The graph SHA-256 is `be5da61fbdfefb64c4aff7e76cc865e28201ef74d01d86b8db567852e8f9cad1`. It matches the runner-side hash and is identical before and after independent replay.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-material-diagnostic-replay/manifest.json) binds the exact corrected source/test hashes, local and hosted Node versions, original production identity, compressed graph, raw failing/passing logs and replay script. The graph SHA-256 is `be5da61fbdfefb64c4aff7e76cc865e28201ef74d01d86b8db567852e8f9cad1`. It matches the runner-side hash and is identical before and after independent replay.
 
 | Checker applied to the same original graph | Actual result |
 | --- | --- |

@@ -4,7 +4,7 @@
 
 PR #1714 adds the already reviewed, draft owned-pixels shader declaration, Feedback owner/sink lifetime and a shared WebGL2 host in the Web adapters. The exact candidate `9ecfeef2bfc418c4246ad4bb2f9adc669afa0049` exceeds five whole-entry ceilings. Its original strict failure remains preserved. This standalone change accounts for that measured capability cost; it does not change implementation, a spec lifecycle, the gate policy or CI scheduling.
 
-The [machine-readable transaction](2026-11-23-sprint4-shader-package-budget.json) contains the full source identities, old ceilings, output hashes, toolchain, closure attribution and hashes for the retained raw reports.
+The [machine-readable transaction](../../2026-11-23-sprint4-shader-package-budget.json) contains the full source identities, old ceilings, output hashes, toolchain, closure attribution and hashes for the retained raw reports.
 
 ## Canonical comparison and bounded ceilings
 
@@ -26,7 +26,7 @@ The added Core declaration retains 3,370 minified bytes. Runtime retains the dec
 
 The actual input graphs contain no compiler inputs or duplicate input paths. The equal hashes of unchanged empty Core barrels are not duplicate Runtime or shader implementations. The statically registered host is retained once per adapter entry; allocation still requires a reached shader presentation. The separately measured entries are not summed as one consumer bundle.
 
-The original [baseline](evidence/2026-11-23-sprint4-package-budget/baseline.json.gz), [failed candidate](evidence/2026-11-23-sprint4-package-budget/candidate-before.json.gz) and [per-input attribution](evidence/2026-11-23-sprint4-package-budget/attribution.json.gz) are retained without changing their bytes after decompression. The downloaded candidate ZIP hash was rechecked against GitHub artifact `14755904646`: `3bf1b0d33c94eb3d64806de38cec08eff6be98aad2d99331b8da56e52c14fed3`.
+The original [baseline](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint4-package-budget/baseline.json.gz), [failed candidate](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint4-package-budget/candidate-before.json.gz) and [per-input attribution](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint4-package-budget/attribution.json.gz) are retained without changing their bytes after decompression. The downloaded candidate ZIP hash was rechecked against GitHub artifact `14755904646`: `3bf1b0d33c94eb3d64806de38cec08eff6be98aad2d99331b8da56e52c14fed3`.
 
 ## Validation and remaining acceptance
 

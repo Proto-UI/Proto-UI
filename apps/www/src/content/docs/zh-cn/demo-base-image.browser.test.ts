@@ -258,7 +258,13 @@ describe.sequential('Base Image public consumer browser evidence', () => {
     );
     try {
       await selectImageRuntime(page, previewer, 'vue2');
+      // The shared documentation skeleton names the public props section API.
+      // Keep its concrete field inventory bound to the same real Image demo.
       expect(await page.getByRole('heading', { name: 'API', exact: true }).count()).toBe(1);
+      expect(await page.getByRole('columnheader', { name: '属性', exact: true }).count()).toBe(1);
+      expect(
+        await page.locator('.api-props-table tbody .api-props-table__name code').allTextContents()
+      ).toEqual(['source', 'a11yMode', 'alternativeText', 'fit']);
       expect(await previewer.getAttribute('data-demo-id')).toBe('demo-base-image');
       expect(await physicalImage(previewer, 'fit-cover').getAttribute('alt')).toBe(
         'Mountains and a sun (cover)'

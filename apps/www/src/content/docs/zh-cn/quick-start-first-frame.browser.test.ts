@@ -359,7 +359,11 @@ async function beforeReleaseDeadline<T>(work: Promise<T>, label: string): Promis
     if (timer) clearTimeout(timer);
   }
 }
-async function captureViewport(page: Page, file: string, clip?: { x: number; y: number; width: number; height: number }) {
+async function captureViewport(
+  page: Page,
+  file: string,
+  clip?: { x: number; y: number; width: number; height: number }
+) {
   // Playwright's screenshot convenience method also awaits document.fonts.ready.
   // Chromium's public captureScreenshot captures the real current surface
   // without waiting for the intentionally paused deferred-module document load.
@@ -722,7 +726,9 @@ describe('quick-start first-frame continuity', () => {
               );
               await captureViewport(page, path.join(directory, `${componentPrefix}.png`));
               const init = page.locator('[data-cli-init-output]');
-              const generatedBrowser = init.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
+              const generatedBrowser = init.locator(
+                '[data-standalone-file-browser][data-file-browser-init="1"]'
+              );
               await generatedBrowser.waitFor();
               await init.scrollIntoViewIfNeeded();
               await writeFile(
@@ -772,16 +778,37 @@ describe('quick-start first-frame continuity', () => {
                   .locator('[data-copy-view="ready"] [data-demo-ref="copy-button"]')
                   .waitFor({ state: 'visible' });
                 const capturePosition = await generatedBrowser.evaluate(async (node) => {
-                  const headerBottom = () => Math.max(0, ...[...document.querySelectorAll('header')].map((header) => {
-                    const rect = header.getBoundingClientRect();
-                    return rect.top <= 1 && rect.bottom > 0 ? rect.bottom : 0;
-                  }));
-                  window.scrollBy({ top: node.getBoundingClientRect().top - headerBottom() - 16, behavior: 'instant' });
+                  const headerBottom = () =>
+                    Math.max(
+                      0,
+                      ...[...document.querySelectorAll('header')].map((header) => {
+                        const rect = header.getBoundingClientRect();
+                        return rect.top <= 1 && rect.bottom > 0 ? rect.bottom : 0;
+                      })
+                    );
+                  window.scrollBy({
+                    top: node.getBoundingClientRect().top - headerBottom() - 16,
+                    behavior: 'instant',
+                  });
                   await new Promise(requestAnimationFrame);
                   await new Promise(requestAnimationFrame);
                   const rect = node.getBoundingClientRect();
-                  const clip = { x: Math.max(0, rect.left), y: Math.max(0, rect.top), width: Math.min(innerWidth, rect.right) - Math.max(0, rect.left), height: Math.min(innerHeight, rect.bottom) - Math.max(0, rect.top) };
-                  return { top: rect.top, headerBottom: headerBottom(), bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, clip: { ...clip, x: clip.x + scrollX, y: clip.y + scrollY }, clipCoordinates: 'page', scroll: { x: scrollX, y: scrollY }, partial: clip.width < rect.width || clip.height < rect.height, viewportHeight: innerHeight };
+                  const clip = {
+                    x: Math.max(0, rect.left),
+                    y: Math.max(0, rect.top),
+                    width: Math.min(innerWidth, rect.right) - Math.max(0, rect.left),
+                    height: Math.min(innerHeight, rect.bottom) - Math.max(0, rect.top),
+                  };
+                  return {
+                    top: rect.top,
+                    headerBottom: headerBottom(),
+                    bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+                    clip: { ...clip, x: clip.x + scrollX, y: clip.y + scrollY },
+                    clipCoordinates: 'page',
+                    scroll: { x: scrollX, y: scrollY },
+                    partial: clip.width < rect.width || clip.height < rect.height,
+                    viewportHeight: innerHeight,
+                  };
                 });
                 expect(capturePosition.top).toBeGreaterThanOrEqual(capturePosition.headerBottom);
 
@@ -807,27 +834,69 @@ describe('quick-start first-frame continuity', () => {
                     2
                   )
                 );
-                await writeFile(path.join(directory, `${prefix}-cli-init-${label}-viewport.json`), JSON.stringify({
-                  ...source, url: page.url(), viewport: page.viewportSize(), colorScheme: condition.colorScheme,
-                  file: filePath, sourceSha256: createHash('sha256').update(content ?? '').digest('hex'),
-                  captureKind: 'viewport', capturePosition, stage: 'additional-generated-file-viewport-diagnostic', fullCodeExampleAcceptance: false,
-                }, null, 2));
-                await captureViewport(page, path.join(directory, `${prefix}-cli-init-${label}-viewport.png`));
+                await writeFile(
+                  path.join(directory, `${prefix}-cli-init-${label}-viewport.json`),
+                  JSON.stringify(
+                    {
+                      ...source,
+                      url: page.url(),
+                      viewport: page.viewportSize(),
+                      colorScheme: condition.colorScheme,
+                      file: filePath,
+                      sourceSha256: createHash('sha256')
+                        .update(content ?? '')
+                        .digest('hex'),
+                      captureKind: 'viewport',
+                      capturePosition,
+                      stage: 'additional-generated-file-viewport-diagnostic',
+                      fullCodeExampleAcceptance: false,
+                    },
+                    null,
+                    2
+                  )
+                );
+                await captureViewport(
+                  page,
+                  path.join(directory, `${prefix}-cli-init-${label}-viewport.png`)
+                );
                 // Element screenshots can recenter an oversized element beneath the fixed header.
                 // Capture only the actual visible intersection, alongside the unmodified viewport.
-                await captureViewport(page, path.join(directory, `${prefix}-cli-init-${label}.png`), capturePosition.clip);
+                await captureViewport(
+                  page,
+                  path.join(directory, `${prefix}-cli-init-${label}.png`),
+                  {
+                    x: capturePosition.clip.x - capturePosition.scroll.x,
+                    y: capturePosition.clip.y - capturePosition.scroll.y,
+                    width: capturePosition.clip.width,
+                    height: capturePosition.clip.height,
+                  }
+                );
                 const capturePositionAfter = await generatedBrowser.evaluate((node) => ({
                   top: node.getBoundingClientRect().top,
-                  headerBottom: Math.max(0, ...[...document.querySelectorAll('header')].map((header) => {
-                    const rect = header.getBoundingClientRect();
-                    return rect.top <= 1 && rect.bottom > 0 ? rect.bottom : 0;
-                  })),
+                  headerBottom: Math.max(
+                    0,
+                    ...[...document.querySelectorAll('header')].map((header) => {
+                      const rect = header.getBoundingClientRect();
+                      return rect.top <= 1 && rect.bottom > 0 ? rect.bottom : 0;
+                    })
+                  ),
                 }));
-                await writeFile(path.join(directory, `${prefix}-cli-init-${label}-position-after.json`), JSON.stringify({
-                  ...source, file: filePath, capturePositionAfter, stage: 'after-file-browser-region-capture',
-                }, null, 2));
-                expect(capturePositionAfter.top).toBeGreaterThanOrEqual(capturePositionAfter.headerBottom);
-
+                await writeFile(
+                  path.join(directory, `${prefix}-cli-init-${label}-position-after.json`),
+                  JSON.stringify(
+                    {
+                      ...source,
+                      file: filePath,
+                      capturePositionAfter,
+                      stage: 'after-file-browser-region-capture',
+                    },
+                    null,
+                    2
+                  )
+                );
+                expect(capturePositionAfter.top).toBeGreaterThanOrEqual(
+                  capturePositionAfter.headerBottom
+                );
               }
               const directoryCode = generatedBrowser.locator('[data-code-file-panel]:visible');
               await directoryCode.evaluate((node) => node.scrollIntoView({ block: 'center' }));
@@ -961,15 +1030,23 @@ describe('quick-start first-frame continuity', () => {
             }
             expect(acquired, 'trusted forward Tab reaches the actual Header owner').toBe(true);
           }
-          await page.locator('#quick-start-cli-help[data-code-presentation="docs"] pre').first().waitFor();
+          await page
+            .locator('#quick-start-cli-help[data-code-presentation="docs"] pre')
+            .first()
+            .waitFor();
           await page.evaluate(
             ({ focusOwner, phase }) => {
               const code = document.querySelector(
                 '#quick-start-cli-help[data-code-presentation="docs"] pre'
               ) as HTMLElement;
-              if (!code || code.closest('[data-site-code-surface="frame"]') !==
-                document.querySelector('[data-site-code-surface="frame"]'))
-                throw new Error('Ownership selection must use the first Quick Start help code frame');
+              if (
+                !code ||
+                code.closest('[data-site-code-surface="frame"]') !==
+                  document.querySelector('[data-site-code-surface="frame"]')
+              )
+                throw new Error(
+                  'Ownership selection must use the first Quick Start help code frame'
+                );
               const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
               let text = walker.nextNode()!;
               while (text && !text.textContent?.trim()) text = walker.nextNode()!;
@@ -1055,7 +1132,9 @@ describe('quick-start first-frame continuity', () => {
                           ? document.activeElement?.hasAttribute('data-site-menu-button')
                           : document.activeElement === target,
                       codeSame:
-                        document.querySelector('#quick-start-cli-help[data-code-presentation="docs"] pre') === code,
+                        document.querySelector(
+                          '#quick-start-cli-help[data-code-presentation="docs"] pre'
+                        ) === code,
                       textRetained: text.isConnected && code.contains(text),
                       selectionSame:
                         selection.anchorNode === text &&
@@ -1209,7 +1288,9 @@ describe('quick-start first-frame continuity', () => {
             return {
               initialSelectionNonempty: saved.selected.trim().length > 0,
               codeSame:
-                document.querySelector('#quick-start-cli-help[data-code-presentation="docs"] pre') === saved.code,
+                document.querySelector(
+                  '#quick-start-cli-help[data-code-presentation="docs"] pre'
+                ) === saved.code,
               textRetained: saved.text.isConnected && saved.code.contains(saved.text),
               selectionSame:
                 selection.anchorNode === saved.anchor &&

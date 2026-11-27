@@ -1,0 +1,88 @@
+{
+  "scope": "Focused native diagnostics; these runs do not satisfy the official clean-source release cycle",
+  "changes": [
+    "Bind all authored S3 light-DOM controls with css:light while still observing actual ShadowRoot surfaces",
+    "Query native accessibility nodes by each of the same 12 backend DOM identities instead of serializing the unrelated full demo AX tree",
+    "Keep the shared Astro server in the existing PROTO_UI_BROWSER_TEST=1 mode also used by browser-harness.ts"
+  ],
+  "sourceHashes": {
+    "scripts/analysis/shadow-s3-journey.mjs": "e0c8d68470b28c5896178b4818422a198aba27b6b8ac9372c9161e405694d402",
+    "scripts/test/run-runtime-tests.mjs": "ddbc82408c815c55610cec3b7f917158ac1bafe490965d9c720df9d42940b7e8",
+    "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts": "267f97527acaae9071a9ecb9414f46619ea944f15827215c3e725e2b6c5baece"
+  },
+  "nativeSourceManifest": "native-diagnostics.tar.gz/native-source-manifest.json",
+  "native": {
+    "numTotalTests": 6,
+    "numPassedTests": 6,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "durationsMs": [
+    {
+      "fullName": "S3 complete Tabs and settings native acceptance paths zh-cn: rejects matched wrong Switch geometry and restores the source recipe",
+      "status": "passed",
+      "duration": 22241.482936
+    },
+    {
+      "fullName": "S3 complete Tabs and settings native acceptance paths en: rejects matched wrong Switch geometry and restores the source recipe",
+      "status": "passed",
+      "duration": 23839.163436
+    },
+    {
+      "fullName": "S3 complete Tabs and settings native acceptance paths zh-cn: Light/split/mixed with keepMounted=false",
+      "status": "passed",
+      "duration": 130891.52243699998
+    },
+    {
+      "fullName": "S3 complete Tabs and settings native acceptance paths zh-cn: Light/split/mixed with keepMounted=true",
+      "status": "passed",
+      "duration": 132727.70360200002
+    },
+    {
+      "fullName": "S3 complete Tabs and settings native acceptance paths en: Light/split/mixed with keepMounted=false",
+      "status": "passed",
+      "duration": 130659.10716900002
+    },
+    {
+      "fullName": "S3 complete Tabs and settings native acceptance paths en: Light/split/mixed with keepMounted=true",
+      "status": "passed",
+      "duration": 131868.16832600004
+    }
+  ],
+  "unchanged": {
+    "journeyDeadlineMs": 150000,
+    "geometryDeadlineMs": 60000,
+    "settleMs": 240,
+    "panelsPerObservation": 12,
+    "activePanels": 3,
+    "nativeInput": true,
+    "visibilityRoleNameLabelledByAssertions": true,
+    "geometryNegativeControls": true
+  },
+  "priorIncompleteCandidates": {
+    "partialAXOnly": {
+      "numTotalTests": 6,
+      "numPassedTests": 2,
+      "numFailedTests": 4,
+      "numPendingTests": 0,
+      "success": false
+    },
+    "partialAXAndLightBeforeTestEnvironment": {
+      "numTotalTests": 6,
+      "numPassedTests": 2,
+      "numFailedTests": 4,
+      "numPendingTests": 0,
+      "success": false
+    }
+  },
+  "runnerControls": {
+    "tests": 149,
+    "passed": 149,
+    "failed": 0,
+    "skipped": 0,
+    "exit": 0
+  },
+  "review": "Independent audit checked identity, AX visibility/role/name/labelledby and original journey assertions; both selector bindings compare the same physical objects. Native timing remained red until the intended existing test environment was used. No deadline was extended.",
+  "archiveSha256": "26372d5d4dbfc82e01bc7950802d5e6691e545e798db1e9f4f6637192fc79353"
+}

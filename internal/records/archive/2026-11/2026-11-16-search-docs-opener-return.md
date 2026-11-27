@@ -6,17 +6,17 @@ The original production journey at `11fbc20a238c99caefebd043a3fa52e417d52842` fa
 
 The owning defect was in the website consumer. Docs uses independent controllers for its command and Dialog projections. Replacing the runtime retires the old opener and Dialog controls, while the durable Search session remains open. Focus Scope can restore a captured logical owner only while that owner exists. It does not infer the corresponding opener in a new projection. Search already provided an explicit, guarded current-opener handback for Homepage replacements, but did not arm it for Docs.
 
-The applicable definitions are [Dialog Content](../../spec/prototypes/P-BASE-DIALOG-CONTENT.yaml), [Dialog Close](../../spec/prototypes/P-BASE-DIALOG-CLOSE.yaml), [Focus Scope](../../spec/contracts/C-AS-FOCUS-SCOPE-0002.yaml), and [Focus Target](../../spec/host-caps/HC-FOCUS-TARGET-0001.yaml). Their draft lifecycle and semantics are unchanged. This repair does not change the compiler, public API, package version or release admission.
+The applicable definitions are [Dialog Content](../../../../spec/prototypes/P-BASE-DIALOG-CONTENT.yaml), [Dialog Close](../../../../spec/prototypes/P-BASE-DIALOG-CLOSE.yaml), [Focus Scope](../../../../spec/contracts/C-AS-FOCUS-SCOPE-0002.yaml), and [Focus Target](../../../../spec/host-caps/HC-FOCUS-TARGET-0001.yaml). Their draft lifecycle and semantics are unchanged. This repair does not change the compiler, public API, package version or release admission.
 
 ## Repair
 
-[The durable Search participant](../../apps/www/src/components/site-search-commands.ts) now identifies a replacement by the actual activated Dialog candidate. The command controller's `data-search-generation` marker cannot identify a Dialog replacement reliably, because the controllers commit independently.
+[The durable Search participant](../../../../apps/www/src/components/site-search-commands.ts) now identifies a replacement by the actual activated Dialog candidate. The command controller's `data-search-generation` marker cannot identify a Dialog replacement reliably, because the controllers commit independently.
 
 When a different Dialog candidate activates while Search is open, it arms the existing explicit opener-return bridge. That bridge still waits for real panel presence removal and uses the current live opener's public `focusSelf` action. Its current-owner, session, focus-epoch and newer-intent guards are retained. Disposing an old candidate clears the tracked identity only if it still owns that identity. Participant disposal also clears it. Homepage rollback and remembered focus rules retain their existing scope.
 
 ## Discriminating evidence
 
-The added [public-mode cases](../../apps/www/src/components/site-search-commands.public-mode.test.ts) start the real Docs controllers and dispatch the real runtime-preference event. They require the old opener and input to retire, preserve the query, click the current Close, and assert focus on the actual new opener. Coverage is Shadcn and Brutalist with WC, React, Vue and Vue 2 destinations. Three further cases cover newer focus during closing, owner disposal and an interrupted close.
+The added [public-mode cases](../../../../apps/www/src/components/site-search-commands.public-mode.test.ts) start the real Docs controllers and dispatch the real runtime-preference event. They require the old opener and input to retire, preserve the query, click the current Close, and assert focus on the actual new opener. Coverage is Shadcn and Brutalist with WC, React, Vue and Vue 2 destinations. Three further cases cover newer focus during closing, owner disposal and an interrupted close.
 
 This is a Happy DOM model running the actual compositions. The fixture explicitly focuses Close before `.click()`, because Happy DOM does not supply native pointer focus. The original production trace records the trusted Close focus and click; the model does not count as native-input or visual acceptance.
 

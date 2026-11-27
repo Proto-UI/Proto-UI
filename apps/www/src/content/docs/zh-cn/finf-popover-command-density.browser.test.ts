@@ -288,8 +288,8 @@ async function panelFor(page: Page, trigger: Locator, settlements: unknown[]) {
   if (!id) throw new Error('Trigger must identify its Content.');
   const panel = page.locator(`[id=${JSON.stringify(id)}][role="dialog"]`);
   await panel.waitFor({ state: 'visible' });
-  // Content's open recipe retains pui-enter with fill: both. Visibility (and
-  // reduced motion) does not prove that its initial scale(0.95) has finished.
+  // Content's no-preference recipe retains pui-enter with fill: both; the
+  // reduced-motion policy removes it. Both modes must reach unscaled paint.
   // Observe the native endpoint and two real frames; never finish/cancel motion
   // or let a screenshot advance it before the density and hit assertions.
   const receipt: { panelId: string; latest?: unknown } = { panelId: id };
@@ -301,6 +301,7 @@ async function panelFor(page: Page, trigger: Locator, settlements: unknown[]) {
           const read = () => {
             const rect = element.getBoundingClientRect();
             const css = getComputedStyle(element);
+            const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
             const animations = element.getAnimations({ subtree: true }).map((animation) => ({
               name: 'animationName' in animation ? String(animation.animationName) : null,
               playState: animation.playState,
@@ -311,6 +312,7 @@ async function panelFor(page: Page, trigger: Locator, settlements: unknown[]) {
               rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
               transform: css.transform,
               opacity: css.opacity,
+              reducedMotion,
               animations,
               endpoint:
                 element.isConnected &&
@@ -318,12 +320,13 @@ async function panelFor(page: Page, trigger: Locator, settlements: unknown[]) {
                 rect.height > 0 &&
                 css.opacity === '1' &&
                 (css.transform === 'none' || new DOMMatrixReadOnly(css.transform).isIdentity) &&
-                animations.some(
-                  (animation) =>
-                    animation.name === 'pui-enter' &&
-                    animation.playState === 'finished' &&
-                    !animation.pending
-                ) &&
+                (reducedMotion ||
+                  animations.some(
+                    (animation) =>
+                      animation.name === 'pui-enter' &&
+                      animation.playState === 'finished' &&
+                      !animation.pending
+                  )) &&
                 animations.every(
                   (animation) => !animation.pending && animation.playState === 'finished'
                 ),

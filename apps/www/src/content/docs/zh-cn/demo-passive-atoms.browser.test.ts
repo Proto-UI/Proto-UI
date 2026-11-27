@@ -102,6 +102,10 @@ function installShellRecorder() {
   };
   for (const name of ['runtime:changed', 'previewer:mounted']) {
     document.addEventListener(name, (event) => {
+      // Runtime events bubble from each independent public previewer. The
+      // snapshots above belong to the first authored hero, so peer examples
+      // cannot publish that hero's readiness (or count as its empty owner).
+      if (event.target !== document.querySelector('[data-previewer-id]')) return;
       capture();
       state.events.push({
         name,
@@ -135,6 +139,39 @@ const subjects = [
     (family) => ({ family, atom: 'surface' })
   ),
 ];
+// These are the current authored public heroes. Their content is deliberately
+// explicit so a changed example is reviewed instead of waiting for an obsolete
+// node count through every runtime's readiness budget.
+const textExamples = {
+  base: { roots: 4, title: 'A reusable Text atom', underlined: 'font: mono · tracking: tight' },
+  shadcn: {
+    roots: 10, // Nine Text atoms and the passive Rhea style-scope carrier.
+    title: 'Taxing Laughter: The Joke Tax Chronicles',
+    underlined: 'a brilliant plan',
+  },
+  brutalist: {
+    roots: 5,
+    title: 'Bold Print. Zero Ambiguity.',
+    underlined: 'npx @proto.ui/cli add wc brutalist-text',
+  },
+  'bootstrap-2-3-2': {
+    roots: 5,
+    title: 'Classic Bootstrap 2.3.2 Heading (24.5px / 40px)',
+    underlined: '@proto.ui/prototypes-bootstrap-2-3-2/text',
+  },
+  'liquid-glass': {
+    roots: 4,
+    title: 'Spatial Clarity on Content Canvas',
+    underlined: '@proto.ui/prototypes-liquid-glass/text',
+  },
+} as const;
+const surfaceExamples = {
+  base: { roots: 4, title: 'Outline · rest' },
+  shadcn: { roots: 6, title: 'Workspace Sync' },
+  brutalist: { roots: 5, title: 'Project Overview' },
+  'bootstrap-2-3-2': { roots: 8, title: 'Overview' },
+  'liquid-glass': { roots: 4, title: 'Floating Glass Shell (material="auto")' },
+} as const;
 const cases = subjects.flatMap(({ family, atom }) =>
   (['en', 'zh-cn'] as const).flatMap((locale) =>
     RUNTIMES.map((runtime) => ({
@@ -187,15 +224,8 @@ describe.sequential('Public passive atom documentation previews', () => {
   it.each(cases)(
     '$locale/$family/$atom/$runtime retains public content and passive ownership',
     async ({ family, atom, locale, runtime, route }) => {
-      const expectedAtoms =
-        atom === 'surface' && family === 'bootstrap-2-3-2'
-          ? 10
-          : atom === 'surface' && family === 'liquid-glass'
-            ? 5
-            // Rhea examples add one public style-scope root around the four atoms.
-            : family === 'shadcn'
-              ? 5
-              : 4;
+      const example = atom === 'text' ? textExamples[family] : surfaceExamples[family];
+      const expectedAtoms = example.roots;
       const context = await browser.newContext({
         viewport: { width: 1280, height: 1000 },
         colorScheme: 'light',
@@ -316,7 +346,7 @@ describe.sequential('Public passive atom documentation previews', () => {
         });
         // P-BASE-TEXT-PASSIVE / P-BASE-SURFACE-PASSIVE: a visual sample must not gain input ownership.
         expect(facts).toHaveLength(expectedAtoms);
-        // selectRuntime's shadcn count of 5 includes the Rhea style-scope. That
+        // selectRuntime's Shadcn count includes the Rhea style-scope. That
         // root is an admitted `display: contents` carrier: it has descendant
         // text, no box, and no emitted `data-pui-style`. Paint settles on the
         // following atoms. Indexing facts[0] would read the unsettled scope.
@@ -338,39 +368,47 @@ describe.sequential('Public passive atom documentation previews', () => {
           expect(fact.width).toBeGreaterThan(0);
           expect(fact.height).toBeGreaterThan(0);
         }
+        const sample = (text: string) => {
+          const match = samples.find((fact) => fact.text === text);
+          expect(match, `${family}/${atom} authored sample: ${text}`).toBeDefined();
+          return match!;
+        };
         if (atom === 'text') {
-          expect(samples[0].text).toBe('A reusable Text atom');
+          expect(samples[0].text).toBe(textExamples[family].title);
           if (family !== 'base') {
             expect(samples[0].size).toBeGreaterThan(samples[1].size);
-            expect(samples[3].decoration).toContain('underline');
+            expect(sample(textExamples[family].underlined).decoration).toContain('underline');
           }
         } else {
-          expect(samples[0].text).toBe('Outline · rest');
-          if (family !== 'base') {
-            expect(samples[2].shadow).not.toBe('none');
-            if (family === 'shadcn') {
-              // Ordinary actionProfile:none preserves supplied elevation, not Button motion.
-              expect(samples[3].transform).toBe('none');
-              expect(samples[3].shadow).not.toBe('none');
-            } else expect(samples[3].transform).not.toBe('none');
+          expect(samples[0].text).toContain(surfaceExamples[family].title);
+          if (family === 'shadcn') {
+            expect(sample('Publish Release').shadow).not.toBe('none');
+            expect(sample('Elevated Callout').shadow).not.toBe('none');
+            expect(sample('Elevated Callout').transform).toBe('none');
+          } else if (family === 'brutalist') {
+            expect(sample('Raised Action').shadow).not.toBe('none');
+            expect(sample('Pressed Snap').transform).not.toBe('none');
+          } else if (family === 'liquid-glass') {
+            expect(samples[0].shadow).not.toBe('none');
+            const opaque = sample(
+              'Opaque content card nested with concentric corners (12px outer = 8px inner + 4px padding).'
+            );
+            expect(opaque.background).not.toBe('rgba(0, 0, 0, 0)');
+            expect(sample('Prominent Action').background).not.toBe('rgba(0, 0, 0, 0)');
           }
           if (family === 'bootstrap-2-3-2') {
-            const buttonPaint = (context: 'default' | 'navbar', state: 'rest' | 'focus') => {
-              const sample = samples.find((fact) => fact.ref === `button-${context}-${state}`);
-              if (!sample) throw new Error(`Missing Button ${context}/${state} example`);
-              return {
-                color: sample.color,
-                background: sample.background,
-                radius: sample.radius,
-                shadow: sample.shadow,
-                transform: sample.transform,
-              };
-            };
-            expect(buttonPaint('navbar', 'rest')).toEqual(buttonPaint('default', 'rest'));
-            expect(buttonPaint('navbar', 'focus')).toEqual(buttonPaint('default', 'focus'));
-            expect(buttonPaint('navbar', 'focus').shadow).not.toBe(
-              buttonPaint('navbar', 'rest').shadow
-            );
+            // Current public hero separates navbar facts from Button-profile
+            // paint. The historical cross-context props matrix remains in
+            // prototypes-bootstrap-2-3-2/test/navbar-surface.test.ts and its
+            // real CSS lowering checks; it is not a nonexistent public demo.
+            expect(sample('Overview').color).toBe('rgb(255, 255, 255)');
+            expect(sample('Overview').background).not.toBe(sample('Components').background);
+            expect(sample('Docs').shadow).not.toBe('none');
+            expect(
+              sample('Thumbnail frame using classic Bootstrap 2.3.2 border and subtle lift.').shadow
+            ).not.toBe('none');
+            expect(sample('Primary Action').shadow).not.toBe('none');
+            expect(sample('Pressed Primary').shadow).not.toBe(sample('Primary Action').shadow);
           }
         }
         expect(errors).toEqual([]);

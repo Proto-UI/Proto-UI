@@ -29,6 +29,6 @@ The scoped type repair adds an explicit `ts.Node` annotation only. The retained 
 
 ## Evidence and limits
 
-The [manifest](./evidence/2026-11-24-sprint1-producer-lifetime-and-rule-sites/manifest.json) records the exact final ten source blobs, original command receipts, outcomes, and each archived member's digest. The [raw evidence](./evidence/2026-11-24-sprint1-producer-lifetime-and-rule-sites/raw-evidence.zip) preserves failed baselines as well as passing controls, including the original complete gate failures. The 83-case run overlaps the final 514 cases and is not an additional acceptance total.
+The [manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-producer-lifetime-and-rule-sites/manifest.json) records the exact final ten source blobs, original command receipts, outcomes, and each archived member's digest. The [raw evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-producer-lifetime-and-rule-sites/raw-evidence.zip) preserves failed baselines as well as passing controls, including the original complete gate failures. The 83-case run overlaps the final 514 cases and is not an additional acceptance total.
 
 No native timeout, resource limit, compiler authority assertion, or Ready gate is weakened by this checkpoint. The separate actual Textarea caller intake and browser optimization experiments remain outside this finite commit while their unresolved behavior is investigated.

@@ -20,7 +20,7 @@ The two added cases independently check the pinned focus width/opacity, all thre
 
 The four changed entities passed the actual `validateSpecEntity` schema, and the prototype catalog passed with 1011 declaration files, 1402 static authoring entries and 466 cataloged prototype entities. Its seven bounded-map controls also passed. The added test's metadata now records the executed result and links both Surface and Text; these entities remain draft.
 
-[The manifest](./evidence/2026-11-23-passive-action-profiles/manifest.json) binds the original failure, successful candidate, catalog/schema receipts and source evidence in a byte-verified archive. Later passing-status and reciprocal relation metadata do not change the tested implementation or test source.
+[The manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-passive-action-profiles/manifest.json) binds the original failure, successful candidate, catalog/schema receipts and source evidence in a byte-verified archive. Later passing-status and reciprocal relation metadata do not change the tested implementation or test source.
 
 ## Independent review and remaining gates
 

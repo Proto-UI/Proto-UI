@@ -95,8 +95,8 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
           'items-center',
           'justify-center',
           'border-2',
-          'border-black',
-          part === 'trigger' ? 'bg-primary' : 'bg-secondary-background',
+          'border-foreground',
+          'bg-background',
           'text-sm',
           'font-medium',
           'outline-none',
@@ -136,6 +136,47 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
         expect(css).toContain('line-height: 1.25rem;');
         expect(css).toContain('padding-block: 0.5rem;');
       }
+      const target = nodes[part] as HTMLElement & {
+        getExposes(): { hovered: { get(): boolean }; pressed: { get(): boolean } };
+      };
+      const flat = () => {
+        expect(
+          tokensOf(target).some((token) =>
+            /(?:^|:)(?:shadow|translate|scale)|hit-envelope/.test(token)
+          )
+        ).toBe(false);
+        expect(tokensOf(target)).toEqual(expect.arrayContaining(density));
+      };
+      flat();
+      target.dispatchEvent(new PointerEvent('pointerenter'));
+      await flush();
+      expect(target.getExposes().hovered.get()).toBe(true);
+      expect(target.getExposes().pressed.get()).toBe(false);
+      flat();
+      target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      await flush();
+      expect(target.getExposes().hovered.get()).toBe(true);
+      expect(target.getExposes().pressed.get()).toBe(true);
+      flat();
+      target.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true }));
+      await flush();
+      expect(target.getExposes().pressed.get()).toBe(false);
+      flat();
+      setElementProps(nodes.root, { open: true, disabled: true });
+      await flush();
+      const beforeDisabled = nodes.requests.length;
+      target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      target.click();
+      await flush();
+      expect(target.getExposes().pressed.get()).toBe(false);
+      expect(target.getAttribute('aria-disabled')).toBe('true');
+      // The Trigger is physically outside the panel. Its pointerdown still
+      // reaches the existing outside-dismissal owner; disabled commands must
+      // never add a trigger.press / close.press activation of their own.
+      expect(nodes.requests.slice(beforeDisabled)).toEqual(
+        part === 'trigger' ? [{ open: false, reason: 'outside.press', focusReason: 'pointer' }] : []
+      );
+      flat();
     });
   }
 

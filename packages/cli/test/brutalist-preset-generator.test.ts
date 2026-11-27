@@ -18,9 +18,7 @@ describe('Brutalist preset generator', () => {
         'package.json',
         'scripts/styles/generate-brutalist-style-tokens.ts',
         'scripts/styles/family-style-closure.ts',
-        'packages/cli/src/services/prototype-style-tokens.ts',
-        'packages/cli/src/services/hook-source-summary.ts',
-        'packages/cli/src/services/hook-source-module.ts',
+        'packages/cli/src/services',
         'packages/cli/src/generated/lowered-variant-order.ts',
         'packages/prototypes/brutalist/src',
         'packages/prototypes/base/src',
@@ -38,7 +36,10 @@ describe('Brutalist preset generator', () => {
             path.join(fixture, 'scripts/styles/generate-brutalist-style-tokens.ts'),
             ...args,
           ],
-          { cwd: root, encoding: 'utf8', timeout: 30_000 }
+          // Keep the complete family graph: current full scans take about
+          // 90s. This guards escaped paths and byte-exact generation/checking,
+          // not a CLI latency budget; bound each child without truncating it.
+          { cwd: root, encoding: 'utf8', timeout: 180_000 }
         );
         expect(result.error, result.stderr).toBeUndefined();
         expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(0);
@@ -60,5 +61,5 @@ describe('Brutalist preset generator', () => {
       }
       rmSync(fixture, { recursive: true, force: true });
     }
-  }, 70_000);
+  }, 420_000);
 });

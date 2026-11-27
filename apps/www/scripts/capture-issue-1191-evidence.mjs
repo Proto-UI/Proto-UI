@@ -567,7 +567,6 @@ async function main() {
     'src/components/override/PageFrame.astro',
     'src/components/override/TwoColumnContent.astro',
     '../../packages/modules/focus/src/center.ts',
-    '../../packages/compiler/src/native-adapter-modules.ts',
     'scripts/capture-issue-1191-evidence.mjs',
   ];
   const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();

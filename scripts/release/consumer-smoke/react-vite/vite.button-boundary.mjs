@@ -2,13 +2,16 @@ import { fileURLToPath } from 'node:url';
 
 const input = fileURLToPath(new URL('./button-boundary.html', import.meta.url));
 const prototypeModulePattern =
-  /\/node_modules\/@proto\.ui\/(prototypes-(?:base|shadcn))\/dist\/(.+?)(?:\?.*)?$/;
+  /\/node_modules\/@proto\.ui\/(prototypes-[a-z0-9-]+)\/dist\/(.+?)(?:\?.*)?$/;
+const ALLOWED_BUTTON_PROTOTYPE_PACKAGES = new Set(['prototypes-base', 'prototypes-shadcn']);
 const SHADCN_BUTTON_SHARED_SUPPORT = new Set([
   'style-scope/context.js',
+  'style-scope/ids.js',
   'style-scope/selection.js',
 ]);
 
 export function isButtonFamilyModule({ packageName, path }) {
+  if (!ALLOWED_BUTTON_PROTOTYPE_PACKAGES.has(packageName)) return false;
   if (path.startsWith('button/')) return true;
   return packageName === 'prototypes-shadcn' && SHADCN_BUTTON_SHARED_SUPPORT.has(path);
 }

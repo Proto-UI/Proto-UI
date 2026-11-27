@@ -1,6 +1,6 @@
 # Seven-Sprint integration: compiler types and generated projections
 
-The full CI run [45146424504](https://github.com/Proto-UI/Proto-UI/actions/runs/45146424504) measures the preserved integration source `d0392fb31513b12f55b9e99b1fcf26a6338569c9`. It exposed real integration failures before the affected downstream checks could complete. Their original job logs are retained with [source hashes and focused validation](evidence/2026-11-23-integration-ci-repairs/validation.json).
+The full CI run [45146424504](https://github.com/Proto-UI/Proto-UI/actions/runs/45146424504) measures the preserved integration source `d0392fb31513b12f55b9e99b1fcf26a6338569c9`. It exposed real integration failures before the affected downstream checks could complete. Their original job logs are retained with [source hashes and focused validation](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-integration-ci-repairs/validation.json).
 
 ## Small owning changes
 

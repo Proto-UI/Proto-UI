@@ -16,7 +16,7 @@ The workflow is callable and manually dispatchable only. The existing production
 
 ## Executed local validation
 
-The [recovery and validation record](evidence/2026-11-23-sprint5-continuation/recovery-and-validation.json) binds the restored files, original source manifests and complete retained logs.
+The [recovery and validation record](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-sprint5-continuation/recovery-and-validation.json) binds the restored files, original source manifests and complete retained logs.
 
 - Six selected compiler/browser files account for **74 passing cases**. The first run actually passed four files; the other two failed setup because temporary dependency symlinks pointed outside the source-bound repository. The original rejection is correct and remains recorded. A frozen offline pnpm installation reused 586 packages with zero downloads; only those two affected files reran, passing their 16 and 5 cases.
 - The second driver returned exit 1 because the production-cycle caller was edited during its complete tracked-file stability observation. Its actual two test commands both returned zero. An explicit comparison found precisely that one workflow file changed; all other 12,335 tracked source bytes, including the complete compiler/browser/test inputs, match. The raw failed stability result was not rewritten as success.

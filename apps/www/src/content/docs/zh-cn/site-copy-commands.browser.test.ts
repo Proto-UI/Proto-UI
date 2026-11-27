@@ -60,9 +60,9 @@ async function paint(button: Locator) {
   return button.evaluate((element) => {
     const style = getComputedStyle(element),
       rect = element.getBoundingClientRect(),
-      glyph = element
-        .querySelector('[data-demo-ref^="copy-glyph-"]:not([hidden]) svg')!
-        .getBoundingClientRect();
+      glyphElement = element.querySelector('[data-demo-ref^="copy-glyph-"]:not([hidden]) svg')!,
+      glyph = glyphElement.getBoundingClientRect(),
+      glyphStyle = getComputedStyle(glyphElement);
     const family = element.closest<HTMLElement>('[data-site-copy]')?.dataset.copyFamily;
     const ringColor = style.getPropertyValue('--pui-ring').trim();
     const expectedSpread = family === 'brutalist' ? 4 : 3;
@@ -90,6 +90,7 @@ async function paint(button: Locator) {
         Math.abs(rect.y + rect.height / 2 - glyph.y - glyph.height / 2),
       ],
       glyph: [glyph.width, glyph.height],
+      glyphCss: [glyphStyle.width, glyphStyle.height],
       background: style.backgroundColor,
       shadow: style.boxShadow,
       expectedRingShadow,
@@ -103,6 +104,12 @@ async function paint(button: Locator) {
       focused: document.activeElement === element,
     };
   });
+}
+function expectGlyphSize(facts: Awaited<ReturnType<typeof paint>>, size: number) {
+  expect(facts.glyphCss).toEqual([`${size}px`, `${size}px`]);
+  // Computed CSS owns the exact authored size; translated SVG rectangles may
+  // contain floating-point residue. Keep geometry within 0.0005 CSS px.
+  for (const side of facts.glyph) expect(side).toBeCloseTo(size, 3);
 }
 async function unfocusedPaint(button: Locator) {
   await button.page().mouse.move(0, 0);
@@ -483,7 +490,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
           );
           expect(await source.textContent()).toBe(expected);
           const facts = await paint(button);
-          expect(facts.glyph).toEqual([18, 18]);
+          expectGlyphSize(facts, 18);
           expect(Math.max(...facts.center)).toBeLessThanOrEqual(1);
           await evidence(page, root, `${runtime}-${family}-install`, {
             runtime,
@@ -628,7 +635,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
               expect([baseline.width, baseline.height]).toEqual(
                 family === 'brutalist' ? [40, 40] : compact ? [28, 28] : [32, 32]
               );
-              expect(baseline.glyph).toEqual(compact ? [16, 16] : [18, 18]);
+              expectGlyphSize(baseline, compact ? 16 : 18);
               expect(Math.max(...baseline.center)).toBeLessThanOrEqual(1);
               // Record baseline before any assertion on the first interactive state.
               await evidence(page, root, `${runtime}-${family}-${index}-${theme}-baseline`, {

@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Separator'
-description: '沿用归档 Bootstrap 2.3.2 双边凹刻分隔线风格的水平与垂直分隔组件。'
+description: '使用家族边框色的单像素水平与垂直分隔组件，继承 Base Separator。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -10,7 +10,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Separator 还原归档版本的双边凹刻分隔线（`#eeeeee` 暗边搭配 `#ffffff` 亮边），由 Base Separator 统一管理水平/垂直方向与装饰性无障碍语义。
+Bootstrap 2.3.2 Separator 使用适配明暗主题家族边框色的单像素分隔线，由 Base Separator 统一管理水平/垂直方向与装饰性无障碍语义。这是基于归档分隔线语法与家族调色板的简化扩展。
 
 ## 预览
 
@@ -38,7 +38,7 @@ import { BootstrapSeparatorRoot } from '../proto-ui/components/react';
 <BootstrapSeparatorRoot />
 ```
 
-- **经典凹刻样式**：水平方向渲染 `1px #eeeeee` 顶边与 `1px #ffffff` 底边，垂直方向渲染对应的左右双边凹刻线并沿弹性容器交叉轴自动拉伸（`self-stretch`）。
+- **家族边框样式**：水平方向高 `1px`，垂直方向宽 `1px` 并沿弹性容器交叉轴自动拉伸（`self-stretch`），两种方向均使用家族边框色。
 - **装饰性与语义模式**：默认 `decorative={true}` 对辅助技术隐藏；当分隔线代表真实内容区块边界时，设置 `decorative={false}` 暴露 `role="separator"` 与 `aria-orientation`。
 - **尺寸与布局**：组件无子内容且不占用焦点顺序，不内置外边距，长度与间距由外层容器控制。
 

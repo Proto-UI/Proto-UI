@@ -37,6 +37,23 @@ criteria:
         Draft 候选要求九 token 均有同源 percentage-translation:v1 companion receipt 与精确 operand/transform 声明；动态 entry 另捕获当前 view owner 的 Expose State handle，在发布前核同一个当前 handle、range/semantic metadata、active Expose State Web binding、内部 State ID、唯一候选 CSS 名与 boundary 自有 inline 值及 priority。候选 map metadata 或继承/computed 的同名 CSS 值不能单独构成证据。acquisition 可在 Web binding 激活前校验 declaration，但完整 live 投影一致前两个物理 target 均不得发布。旧 owner/view、撤回 binding、名称冲突、未知拼写及旧/错 recipe 必须在任一 target 改变前原子拒绝，保留原已准入投影。不新增公开状态、override、observer 或 prototype 名 dispatch。按 M 完整 Root 仅变换一次，携带 surface 与 consumer slot，保留命中、布局与嵌套实例各自 percentage source；真实宿主必须覆盖 0/25/50/75/100、多宽度、两个编码方向、静态独立性、途中反向、声明的 transition 撤回/恢复、slot identity、host hit 与 view 撤回/重取。分类、确定性 port 控制或静态终点不替代该证据。consumer CSS 仍为既有 native escape hatch；该 receipt 不宣称仲裁发布后不可区分的外部同值写入。
 
 
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RTL-REM-TRANSLATIONS
+    text:
+      en: >-
+        Complete the existing directional endpoint and preview obligations with exactly five static author tokens: translate-x-[-0.0625rem], translate-x-[calc(2px_-_100%)], translate-x-[calc(8px_-_100%)], translate-x-[calc(-100%_-_2px)] and translate-x-[calc(4px_-_100%)]; and exactly two dynamic author tokens: translate-x-[calc(0.0625rem_+_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)] and translate-x-[calc(-0.0625rem_-_(100%_+_2px_-_0.0625rem)*var(--pui-percentage)/100)]. All seven have canonical root-geometry ownership independent of prototype identity. With W the complete Root transform-reference width and r=0.0625 times the actual root font size, their respective translations are -r, 2px-W, 8px-W, -W-2px, 4px-W, r+(W+2px-r)*p/100 and -r-(W+2px-r)*p/100. The static five do not acquire percentage State; the dynamic two require the unchanged current-owner range, binding, identity, value and lease proof under PERCENTAGE-PROJECTION. All seven require the same-source percentage-translation:v1 companion and exact operand/transform recipe before either target changes. Direction is already encoded and is never mirrored a second time. Near spellings, different offsets, axes, divisors, CSS variables and arbitrary calc remain unresolved. Preserve the existing M whole-Root, slot, hit and lifecycle behavior; native evidence must compare both encoded directions at 0/25/50/75/100, multiple widths and actual 16px/32px root fonts, plus transition reversal and view reacquisition. This bounded coverage repair neither changes the public Thumb behavior nor admits general transform expressions or promotes the draft profile.
+
+
+      zh-CN: >-
+        为已有方向端点与预览义务补齐英文所列五个静态及两个动态精确 author token；七者均为不依赖原型身份的 canonical root-geometry。W 为完整 Root 的 transform 参照宽度，r 为实际根字号的 0.0625 倍，对应位移依次为 -r、2px-W、8px-W、-W-2px、4px-W、r+(W+2px-r)*p/100 及 -r-(W+2px-r)*p/100。五个静态式不获取 percentage State；两个动态式沿用 PERCENTAGE-PROJECTION 的当前 owner range、binding、identity、value 与 lease 证明。七者都在修改任一 target 前要求同源 percentage-translation:v1 companion 和精确 operand/transform recipe。方向已编码，不再镜像一次；近似拼写、其他偏移、轴、除数、CSS 变量与任意 calc 保持 unresolved。保留 M 的完整 Root、slot、命中与生命周期行为；原生证据须在多宽度、实际 16px/32px 根字号下比较两个编码方向与 0/25/50/75/100，并覆盖过渡反向及 view 重取。此有限覆盖修复不改变公开 Thumb 行为，不准入通用 transform 表达式，也不提升 draft profile。
+
+
+    references:
+      prototypes:
+        - id: P-SHADCN-SWITCH-THUMB
+          anchors:
+            - P-SHADCN-SWITCH-THUMB-DIRECTIONAL-ENDPOINTS
+            - P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW
+
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH
     text:
       en: >-
@@ -201,6 +218,9 @@ verifies:
     - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001
       since: 0.3.0-alpha.2
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Complete seven exact RTL and font-relative translations required by the existing public Thumb endpoints and preview, preserving owner proof, same-source recipe checks and every other unresolved expression.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Proposed the finite static and owner-percentage translation draft with exact recipe, current-source and native evidence boundaries; independent admission remains open.

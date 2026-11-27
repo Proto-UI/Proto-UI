@@ -23,6 +23,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-popover-content',
+            ref: 'controlled-content',
             previewTheme: 'portal',
             className: 'w-72',
             children: [

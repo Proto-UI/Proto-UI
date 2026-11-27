@@ -1,0 +1,183 @@
+id: T-COMPILER-AUTHORING-0001
+type: test
+title: Independent traces for the explicit 0.4 authoring inputs
+status: draft
+since: 0.4.0
+lifecycleRationale:
+  zh-CN: >-
+    本用例将作者面映射到已接受的独立语义预期。完整输入文件已提供，但实际 authoring 导出、Adapter 执行、compiler 降低及消费轨迹尚未实现；语法解析不构成实现证据，所有执行路线保留 missing。
+
+
+  en: >-
+    These cases map the authoring surface to accepted independent semantic expectations. Complete input files exist, but actual authoring exports, Adapter execution, compiler lowering and consumer traces remain unimplemented. Parsing is not implementation evidence and every execution route remains missing.
+
+
+summary: Validate authoring phases, readonly props, controlled ownership, typed public projections and Context/owned-async composition without using current implementation as an oracle.
+cases:
+  - id: T-COMPILER-AUTHORING-0001-CASE-BINDINGS
+    title: Entry spelling does not replace binding and reached-body analysis
+    covers: [C-COMPILER-AUTHORING-0001-ENTRY, C-COMPILER-AUTHORING-0001-DERIVE]
+    expectation: >-
+      Rename the definePrototype import, move the pure badgeStyle helper to a normally imported source file and route setup through a legal helper. Resolved declarations, dependencies and outcomes remain equivalent, and every reached helper body belongs to the source closure. No author module or setup is imported or executed by compilation. A transitive state write reached from def.derive is diagnosed as a phase violation with its call chain; merely using a helper, as or an admitted equality spelling is not a violation.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-BADGE
+    title: Readonly prop changes update the complete Badge view and style
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-PROPS,
+        C-COMPILER-AUTHORING-0001-DERIVE,
+        C-COMPILER-AUTHORING-0001-PUBLIC,
+        C-COMPILER-AUTHORING-0001-VIEW,
+      ]
+    expectation: >-
+      Run readonly-badge.proto.ts with label Offline and tone offline, then publish label Connected and tone online. The readonly projections and rendered label become Connected, and the root token set contains the online token as well as the common chip token. No explicit watch or update is supplied. An unknown well-formed tone retains the common chip token; it is not rejected by an invented enum restriction. Repeating pure style evaluation produces no action or effect. Changing the reached badgeStyle helper invalidates the prior source-bound evidence.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-CONTROLLED
+    title: Controlled Toggle publishes requests independently of actual value
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-PROPS,
+        C-COMPILER-AUTHORING-0001-ACTIONS,
+        C-COMPILER-AUTHORING-0001-PUBLIC,
+      ]
+    expectation: >-
+      Create controlled-toggle.proto.ts with active present false and disabled false. Each of two activations before an owner update emits a typed activeChange request for true, while the actual active projection and view remain false/Off. Rejecting either request creates no optimistic actual change. Publishing owner active true changes actual/view to true/On; a subsequent activation requests false and actual remains true until the owner publishes a new value. A disabled activation produces neither a request nor a state change. Reentrant callbacks from publication enter the next action cycle rather than observing a partial segment.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-INIT-MODE
+    title: Initial values and the declared control mode belong to the instance
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-PROPS,
+        C-COMPILER-AUTHORING-0001-INIT,
+        C-COMPILER-AUTHORING-0001-ACTIONS,
+      ]
+    expectation: >-
+      Create the Toggle with active omitted and defaultActive true. Actual starts true; activation commits false and emits the request false. Later defaultActive changes and physical hide/detach/reattach do not rerun the initializer or replace local state. The fixed-instance schema rejects adding active to that instance or omitting active from a controlled instance at the typed input boundary, preserving the prior mode and committed value. Creating a new keyed instance may choose another mode. Terminal disposal retires event connections; an old activation callback cannot mutate a replacement instance.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-ACTION-VIEW
+    title: Typed handles and captures access the current transaction view
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-ACTIONS,
+        C-COMPILER-AUTHORING-0001-DERIVE,
+        C-COMPILER-AUTHORING-0001-PUBLIC,
+      ]
+    expectation: >-
+      A derived value read after run.set in the same action sees the pending write, while an external observer cannot see it before commit. A helper capturing the same state handle reads the same view. The foundation's persistent writable-capture and rollback cases apply equally to setup helpers: a surviving writable capture cannot bypass transactions, while a nonescaping local remains a local. A propagated segment failure discards queued public events and unpublished state. The public API contains typed projections and declared actions, not private string lookup or JSON state mutation.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-CONTEXT
+    title: Logical provider changes preserve the task ownership distinction
+    covers: [C-COMPILER-AUTHORING-0001-CONTEXT, C-COMPILER-AUTHORING-0001-VIEW]
+    expectation: >-
+      Mount the Tabs owner with alpha and its keyed AsyncTabPanel. The panel consumes that exact nominal key through logical ancestry, including a portal. An equal-valued provider replacement retires the old subscription and rebinds the new identity without recreating the retained panel or automatically cancelling its task. A newly created key with the same label is not the same provider key. A standalone panel lacking its required provider reports typed initialization failure rather than guessing a scope. Terminal removal disposes the panel; physical detach alone does not.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-AWAIT
+    title: Ready and pending await results preserve commits and fresh reads
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-TASKS,
+        C-COMPILER-AUTHORING-0001-CONTEXT,
+        C-COMPILER-AUTHORING-0001-EXTERNS,
+      ]
+    expectation: >-
+      Creation explicitly starts the panel task through its declared lifecycle action. The task publishes loading(alpha) before the bound loader result resumes, including when that result was already ready. Captured requested remains alpha. If the owner selects beta during suspension without invoking reload, Context change alone does not cancel the task; the resumed fresh read sees beta and the authored comparison publishes stale(alpha,beta), never alpha content as beta. No view or derivation recomputation starts a task. A source variant using another legal owned await form preserves the same boundaries; support cannot be defined solely by recognizing the spelling task.await.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-TASK-OUTCOMES
+    title: Business failure, supersession, cancellation and disposal stay distinct
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-TASKS,
+        C-COMPILER-AUTHORING-0001-PUBLIC,
+        C-COMPILER-AUTHORING-0001-EXTERNS,
+      ]
+    expectation: >-
+      A loader Result err is handled and commits the typed failed panel projection; it is not task cancellation or an automatic transaction abort. A second explicit reload starts latest and withdraws the first invocation's future submission eligibility, so an old uncancellable result cannot replace the newer panel value. The cancel action commits the authored cancelled projection and cancels the owned invocation; it does not fabricate a loader Result. Scheduler observations distinguish completed, explicitly cancelled, superseded and owner-ended outcomes. Disposal leaves no writable panel and no late result or acknowledgement can target a replacement instance. The foundation's parallel, serial and resumed-failure traces remain mandatory; this latest example does not waive them.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-ADMISSION
+    title: Designed bindings and target declarations are not executable support
+    covers:
+      [
+        C-COMPILER-AUTHORING-0001-ENTRY,
+        C-COMPILER-AUTHORING-0001-VIEW,
+        C-COMPILER-AUTHORING-0001-EXTERNS,
+        C-COMPILER-AUTHORING-0001-MIGRATION,
+      ]
+    expectation: >-
+      Parsing all example files establishes only valid TypeScript syntax. Until the planned authoring declarations and source analysis are implemented, report the corresponding incomplete analysis and missing implementation; do not claim sourceValid=true or compilable=true from parsing or synthetic .d.ts files. When that language analysis is complete but the selected loader binding is absent, extern-unbound still prevents target compilation. A target name in declareExtern or a lowered component AST is not a passing consumer trace. Renderer and child declarations must disappear into real native host structure, never an output template interpreter.
+
+
+  - id: T-COMPILER-AUTHORING-0001-CASE-MIGRATION
+    title: Both execution paths use the verified common migrated source
+    covers: [C-COMPILER-AUTHORING-0001-MIGRATION]
+    expectation: >-
+      Bind each entrypoint and its reached authored helpers to the same content digests for Adapter and compiler, and run the independent Badge, Toggle and Tabs traces on each. Matching incorrect behavior fails. Before a real consumer migration, compare its full governing definition and original behavior; the bounded Toggle/Tabs scenarios do not establish accessibility, anatomy, focus or full family conformance. An old Adapter that does not implement the new authoring surface remains missing work rather than a reason to maintain two source files, change the selected source silently or retire Adapter delivery. Any automatic transformation obeys the lint contract's semantic-preservation and source-precondition requirements; upstream still owns completing the required common-source migration.
+
+
+implementations:
+  - id: shared-authoring-analysis
+    kind: module-test
+    status: missing
+    required: true
+    consumesCases:
+      - T-COMPILER-AUTHORING-0001-CASE-BINDINGS
+      - T-COMPILER-AUTHORING-0001-CASE-ACTION-VIEW
+      - T-COMPILER-AUTHORING-0001-CASE-ADMISSION
+    notes:
+      [
+        The complete designed authoring surface and semantic analysis have no executable implementation evidence.,
+      ]
+  - id: common-source-adapter
+    kind: adapter-test
+    status: missing
+    required: true
+    consumesCases:
+      - T-COMPILER-AUTHORING-0001-CASE-BADGE
+      - T-COMPILER-AUTHORING-0001-CASE-CONTROLLED
+      - T-COMPILER-AUTHORING-0001-CASE-INIT-MODE
+      - T-COMPILER-AUTHORING-0001-CASE-CONTEXT
+      - T-COMPILER-AUTHORING-0001-CASE-AWAIT
+      - T-COMPILER-AUTHORING-0001-CASE-TASK-OUTCOMES
+      - T-COMPILER-AUTHORING-0001-CASE-MIGRATION
+    notes:
+      [
+        Current historical Adapter behavior does not implement or verify this proposed 0.4 input surface.,
+      ]
+  - id: native-source-consumers
+    kind: fixture
+    status: missing
+    required: true
+    consumesCases:
+      - T-COMPILER-AUTHORING-0001-CASE-BADGE
+      - T-COMPILER-AUTHORING-0001-CASE-CONTROLLED
+      - T-COMPILER-AUTHORING-0001-CASE-INIT-MODE
+      - T-COMPILER-AUTHORING-0001-CASE-ACTION-VIEW
+      - T-COMPILER-AUTHORING-0001-CASE-CONTEXT
+      - T-COMPILER-AUTHORING-0001-CASE-AWAIT
+      - T-COMPILER-AUTHORING-0001-CASE-TASK-OUTCOMES
+      - T-COMPILER-AUTHORING-0001-CASE-ADMISSION
+      - T-COMPILER-AUTHORING-0001-CASE-MIGRATION
+    notes:
+      - React and GPUI are the first independent consumers; Vue 2, Vue 3 and Web Components remain in the full destination.
+      - Source examples are design inputs and no native output or execution receipt is supplied by this entity.
+verifies:
+  contracts: [C-COMPILER-AUTHORING-0001]
+references:
+  contracts: [C-COMPILER-FOUNDATION-0001, C-COMPILER-LINT-0001]
+  tests: [T-COMPILER-FOUNDATION-0001, T-COMPILER-LINT-0001]
+sources:
+  - path: internal/compiler/examples/readonly-badge.proto.ts.txt
+  - path: internal/compiler/examples/controlled-toggle.proto.ts.txt
+  - path: internal/compiler/examples/context-owned-async-tabs.proto.ts.txt
+revisions:
+  - version: 0.4.0
+    change: introduced
+    summary: Record independent authoring, ownership and async traces with all Adapter/compiler execution routes missing.
+tags: [compiler, authoring, conformance, controlled, context, async]

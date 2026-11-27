@@ -24,7 +24,7 @@ The complete unfiltered `lowered-hook-coverage.test.ts` then ran **199 cases: 19
 
 More complete row expansion can expose additional unresolved subjects. These counts are diagnostic records, not independently reproduced product bugs. The historical 684-record snapshot is retained but is not claimed as a same-input counterfactual for this current worktree. Assertions following the failed full-inventory expectation, including declaration provenance and shaped attributes, were not reached and are not represented as passing.
 
-All commands used `corepack pnpm@10.32.1 exec vitest run` with the exact files named above, `--no-file-parallelism --maxWorkers=1 --reporter=default --reporter=json`. The [evidence manifest](./evidence/2026-11-24-lowered-setup-escape/manifest.json) retains raw logs, complete result JSON, the parsed received array, and the four exact source/test snapshots and their post-run hashes. This is local worktree evidence, not a final committed-head or native-browser gate.
+All commands used `corepack pnpm@10.32.1 exec vitest run` with the exact files named above, `--no-file-parallelism --maxWorkers=1 --reporter=default --reporter=json`. The [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-lowered-setup-escape/manifest.json) retains raw logs, complete result JSON, the parsed received array, and the four exact source/test snapshots and their post-run hashes. This is local worktree evidence, not a final committed-head or native-browser gate.
 
 ## Continuing work
 

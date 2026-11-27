@@ -1,11 +1,37 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { initProjectedPreviewer } from './projected-previewer-client';
-import { assertDemoSpec, type DemoNode } from './demo-types';
+import {
+  assertDemoSpec,
+  type DemoNode,
+  type DemoRuntimeApi,
+  type DemoSetupContext,
+} from './demo-types';
 import { PROJECTION_FAMILY_MANIFESTS } from './projection-families';
 import { loadPrototype } from './prototype-modules';
 import { getPrototype } from './registry';
 import bootstrap from '../../content/docs/demo-bootstrap-2-3-2-select.demo';
 import glass from '../../content/docs/demo-liquid-glass-select.demo';
+
+const authoredApis = vi.hoisted(() => new Map<string, DemoRuntimeApi>());
+vi.mock('./demo-modules', async (original) => {
+  const actual = await original<typeof import('./demo-modules')>();
+  return {
+    ...actual,
+    async loadDemo(id: string) {
+      const demo = await actual.loadDemo(id);
+      if (!/^demo-(bootstrap-2-3-2|liquid-glass)-select$/.test(id)) return demo;
+      return {
+        ...demo,
+        setup(context: DemoSetupContext) {
+          // Observe the actual authored owner's public API. No identity,
+          // selection, readiness or renderer result is substituted.
+          authoredApis.set(id, context.api);
+          return demo.setup?.(context);
+        },
+      };
+    },
+  };
+});
 
 // Real composed framework owners; only remote runtime loading is replaced with
 // the locked installed version. These checks do not establish native paint.
@@ -35,6 +61,7 @@ afterEach(async () => {
   for (const root of mounted.splice(0)) await (root as any).__previewer__?.destroy();
   document.body.replaceChildren();
   localStorage.clear();
+  authoredApis.clear();
 });
 const runtimes = ['wc', 'react', 'vue', 'vue2'] as const;
 const runtimeLabels = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
@@ -136,8 +163,13 @@ for (const [family, demo] of [
         const content = root.querySelector('[data-projection-content]')!;
         const query = (ref: string) =>
           content.querySelector<HTMLElement>(`[data-demo-ref="${ref}"]`)!;
-        const trigger = query('uncontrolledTrigger');
-        await vi.waitFor(() => expect(trigger.textContent).toContain('Alpha'));
+        const select = query('fruitSelect');
+        const trigger = select.querySelector<HTMLElement>(
+          `[data-projection-prototype="${family}-select-trigger"]`
+        )!;
+        const api = authoredApis.get(`demo-${family}-select`)!;
+        expect(api).toBeDefined();
+        await vi.waitFor(() => expect(trigger.textContent).toContain('Apple'));
         expect(trigger.getAttribute('aria-expanded')).toBe('false');
         trigger.focus();
         trigger.dispatchEvent(
@@ -147,44 +179,63 @@ for (const [family, demo] of [
         const popup = () => document.getElementById(trigger.getAttribute('aria-controls')!)!;
         await vi.waitFor(() => {
           expect(document.activeElement?.getAttribute('role')).toBe('option');
-          expect(document.activeElement?.textContent).toBe('Alpha');
+          expect(document.activeElement?.textContent).toBe('Apple');
         });
         await vi.waitFor(() => expect(popup()?.getAttribute('role')).toBe('listbox'));
         document.activeElement?.dispatchEvent(
           new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })
         );
-        await vi.waitFor(() => expect(document.activeElement?.textContent).toBe('Beta'));
-        expect(trigger.textContent).toContain('Alpha');
+        await vi.waitFor(() => expect(document.activeElement?.textContent).toBe('Banana'));
+        expect(trigger.textContent).toContain('Apple');
         document.activeElement?.dispatchEvent(
           new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
         );
-        await vi.waitFor(() => expect(trigger.textContent).toContain('Beta'));
+        await vi.waitFor(() => expect(trigger.textContent).toContain('Banana'));
         await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'));
         expect(document.activeElement).toBe(trigger);
-        const disabled = query('disabledTrigger');
-        expect(disabled.getAttribute('aria-disabled')).toBe('true');
-        disabled.click();
-        expect(disabled.getAttribute('aria-expanded')).toBe('false');
-        const controlled = query('controlledTrigger');
-        controlled.click();
-        await vi.waitFor(() => expect(controlled.getAttribute('aria-expanded')).toBe('true'));
-        await vi.waitFor(() =>
-          expect(
-            document.getElementById(controlled.getAttribute('aria-controls')!)?.getAttribute('role')
-          ).toBe('listbox')
+        const closingPopup = popup();
+        // A closed state precedes the Portal's two-frame physical retirement.
+        // Begin the next independent owner-input scenario after that retirement.
+        await vi.waitFor(() => expect(closingPopup?.parentElement).not.toBe(document.body));
+        query('resetProduce').click();
+        await vi.waitFor(() => expect(trigger.textContent).toContain('Apple'));
+        api.setProps('fruitSelect', { disabled: true });
+        await vi.waitFor(() => expect(trigger.getAttribute('aria-disabled')).toBe('true'));
+        trigger.click();
+        expect(trigger.getAttribute('aria-expanded')).toBe('false');
+        api.setProps('fruitSelect', { disabled: false });
+        await vi.waitFor(() => expect(trigger.getAttribute('aria-disabled')).toBe('false'));
+
+        // The current public hero accepts edits immediately and offers Reset.
+        // Exercise controlled refusal separately by supplying a real public
+        // owner input, without inventing a removed "Accept selection" UI.
+        const requests = vi.fn();
+        api.setProps('fruitSelect', { onValueChange: requests });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        trigger.click();
+        await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('true'));
+        await vi.waitFor(() => expect(popup().getAttribute('role')).toBe('listbox'));
+        await vi.waitFor(() => {
+          expect(popup().contains(document.activeElement)).toBe(true);
+          expect(document.activeElement?.getAttribute('role')).toBe('option');
+          expect(document.activeElement?.textContent).toBe('Apple');
+          expect(popup().querySelectorAll('[role="option"]')).toHaveLength(6);
+        });
+        const banana = Array.from(popup().querySelectorAll<HTMLElement>('[role="option"]')).find(
+          (item) => item.textContent === 'Banana'
+        )!;
+        banana.dispatchEvent(
+          new PointerEvent('pointerdown', { pointerId: 1, button: 0, bubbles: true })
         );
-        const controlledPopup = document.getElementById(controlled.getAttribute('aria-controls')!)!;
-        const beta = Array.from(
-          controlledPopup.querySelectorAll<HTMLElement>('[role="option"]')
-        ).find((item) => item.textContent === 'Beta')!;
-        beta.click();
-        await vi.waitFor(() =>
-          expect(query('requestStatus').textContent).toContain('Requested Beta')
+        banana.dispatchEvent(
+          new PointerEvent('pointerup', { pointerId: 1, button: 0, bubbles: true })
         );
-        expect(controlled.textContent).toContain('Alpha');
-        query('accept').click();
-        await vi.waitFor(() => expect(controlled.textContent).toContain('Beta'));
-        expect(query('rtlTrigger').textContent).toContain('VeryLongUnbrokenOptionLabels');
+        banana.dispatchEvent(new MouseEvent('click', { detail: 1, button: 0, bubbles: true }));
+        await vi.waitFor(() => expect(requests).toHaveBeenCalledOnce());
+        expect(requests.mock.calls[0][0]).toMatchObject({ value: 'banana' });
+        expect(trigger.textContent).toContain('Apple');
+        api.setProps('fruitSelect', { value: 'banana' });
+        await vi.waitFor(() => expect(trigger.textContent).toContain('Banana'));
         const initial = expectRuntimeToolbar(root, family, runtime);
         const next = runtime === 'react' ? 'vue' : 'react';
         const nextTab = [...initial.tabs].find((tab) => tab.textContent === runtimeLabels[next])!;

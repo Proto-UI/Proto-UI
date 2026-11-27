@@ -1,6 +1,6 @@
 # Full Base coverage for the new projection families
 
-Historical checkpoint. The current cross-family inventory is [the active matrix](../coverage-matrices/prototype-coverage-matrix.md), under [#870](https://github.com/Proto-UI/Proto-UI/issues/870) and the retained #792 implementation owner. The 20-family/53-part figures below describe the original checkpoint; pinned main now has 22 Base families/55 P identities. The original requested coverage and unfinished work are retained rather than silently dropped.
+Historical checkpoint. The current cross-family inventory is [the active matrix](../../../coverage-matrices/prototype-coverage-matrix.md), under [#870](https://github.com/Proto-UI/Proto-UI/issues/870) and the retained #792 implementation owner. The 20-family/53-part figures below describe the original checkpoint; pinned main now has 22 Base families/55 P identities. The original requested coverage and unfinished work are retained rather than silently dropped.
 
 Date: 2026-10-03. Non-normative task inventory for #792. Baseline `f7edface`.
 

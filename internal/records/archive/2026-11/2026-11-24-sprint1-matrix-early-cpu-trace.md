@@ -58,6 +58,6 @@ The parent agent independently read the four-file diff, the complete browser set
 
 ## Carrier
 
-[Manifest](evidence/2026-11-24-sprint1-matrix-early-cpu-trace/manifest.json) and [raw evidence](evidence/2026-11-24-sprint1-matrix-early-cpu-trace/raw-evidence.zip) retain the complete 6ccb ZIP, independently derived readback, before/final helper sources, actual red/green reports and logs, the type-check iteration, type-erasure comparison, commands and exact source snapshot. The carrier identifies a dirty shared checkout plus the exact changed file hashes; it is not a native pass of the new diagnostic.
+[Manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-matrix-early-cpu-trace/manifest.json) and [raw evidence](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-matrix-early-cpu-trace/raw-evidence.zip) retain the complete 6ccb ZIP, independently derived readback, before/final helper sources, actual red/green reports and logs, the type-check iteration, type-erasure comparison, commands and exact source snapshot. The carrier identifies a dirty shared checkout plus the exact changed file hashes; it is not a native pass of the new diagnostic.
 
 The next reading must reconcile any actually retained profile samples with their explicit clocks and partial/truncation status. No sampled stack, root cause, product repair, complete 60-second initialization or #1178 closure is asserted here.

@@ -1,4 +1,6 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, expect, it, vi } from 'vitest';
+import type { Window as HappyDOMWindow } from 'happy-dom';
+import { retainHappyDomMutationCallbacks } from '../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
   selectRoot,
@@ -21,6 +23,12 @@ for (const p of [
   selectItemText,
 ])
   AdaptToWebComponent(p as any);
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
+
 afterEach(() => {
   document.body.replaceChildren();
   document.documentElement.removeAttribute('data-theme');
@@ -82,6 +90,10 @@ it('repaints a live portal through the logical scope without replacing caller op
     }
   }
   document.documentElement.dataset.theme = 'dark';
+  // Happy DOM delivers MutationObserver records through its own Window tasks.
+  // Drain that real notification before advancing the adapter's fake clock;
+  // advancing the fake clock alone can exhaust waitFor before delivery.
+  await (window as unknown as HappyDOMWindow).happyDOM.waitUntilComplete();
   await settle();
   await vi.waitFor(() => expect(tokens(surface)).toContain('ring-foreground/10'));
   expect(tokens(surface)).not.toMatch(/(?:^|\s)ring-foreground\/5(?:\s|$)/);

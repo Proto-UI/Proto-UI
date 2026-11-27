@@ -26,7 +26,7 @@ Upstream already contains its separately recorded Sprint 3 numeric transaction: 
 
 Original source whitespace checks pass. Full compiler, website, types, package and native acceptance on the resulting clean commit remains to be executed. Existing failures and physical/platform acceptance conditions are not closed by a successful Git merge.
 
-Evidence: [main-reconciliation-evidence.tar.gz](evidence/2026-11-23-main-824-reconciliation/main-reconciliation-evidence.tar.gz), SHA-256 01f7e090a7e17484926bab833d97abcfc3bd2b891ba5d90b8625a9d050ad8226, 1494300 bytes, 591 individually verified payload files plus the manifest.
+Evidence: [main-reconciliation-evidence.tar.gz](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-main-824-reconciliation/main-reconciliation-evidence.tar.gz), SHA-256 01f7e090a7e17484926bab833d97abcfc3bd2b891ba5d90b8625a9d050ad8226, 1494300 bytes, 591 individually verified payload files plus the manifest.
 
 ## Original commit-hook formatting
 
@@ -34,4 +34,4 @@ The unchanged repository pre-commit hook completed successfully and formatted 16
 
 The generated coverage JSON's data is unchanged. All 186 frozen historical files, the six protected current source files and the nine reviewed conflict resolutions retain their already recorded identities.
 
-The executable comparison, complete inputs and results are in [original-hook-format-equivalence.tar.gz](evidence/2026-11-23-main-824-reconciliation/original-hook-format-equivalence.tar.gz), SHA-256 1cc365620e04a2e4a49364dd784cb26efe98c22b5240a47f85d6d9c4f166962d, 1424101 bytes.
+The executable comparison, complete inputs and results are in [original-hook-format-equivalence.tar.gz](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-main-824-reconciliation/original-hook-format-equivalence.tar.gz), SHA-256 1cc365620e04a2e4a49364dd784cb26efe98c22b5240a47f85d6d9c4f166962d, 1424101 bytes.

@@ -122,6 +122,19 @@ for (const [family, projection] of [
         await settleVue2();
         expect(refs.root.getExposes().value.get()).toBe('beta');
         expect(document.activeElement).toBe(refs.trigger.$el);
+
+        // Descendants remain logical instances while Content retires its
+        // physical view. Reconnecting that Portal must republish every ready
+        // descendant, including the unselected option that does not rerender
+        // in response to entry focus.
+        refs.trigger.$el.click();
+        await settleVue2();
+        await settleVue2();
+        const reopened = document.getElementById(refs.trigger.$el.getAttribute('aria-controls'))!;
+        expect(reopened.querySelectorAll('[role="option"]')).toHaveLength(2);
+        expect(refs.alpha.$el.getAttribute('aria-selected')).toBe('false');
+        expect(refs.beta.$el.getAttribute('aria-selected')).toBe('true');
+        expect(document.activeElement).toBe(refs.beta.$el);
       } finally {
         vm.$destroy();
         host.remove();

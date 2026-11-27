@@ -34,6 +34,6 @@ Using the import loader avoids the unavailable CLI IPC wrapper; it does not repl
 
 ## Evidence
 
-The original local errors, before/write/after generator outputs, original and corrected selected-case outputs, commands, unchanged original test source, candidate diff and independent review are retained in [the evidence archive](evidence/2026-11-24-gpui-fixture-reconciliation/validation.tar.gz). Its manifest hashes each member.
+The original local errors, before/write/after generator outputs, original and corrected selected-case outputs, commands, unchanged original test source, candidate diff and independent review are retained in [the evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-gpui-fixture-reconciliation/validation.tar.gz). Its manifest hashes each member.
 
 The reviewed source bindings are `27316eae2f01aa30e22fb7a07db6ef7128f8bb22f28c486cf015a8ebd723be43` for the style snapshot, `def2b0ffccf4b45073a98742b1f9a80384ac4d789b3988626ba3ff6a0ed05bb7` for the Checkbox snapshot, and `8d303cb2f16248a5c8a3f67b4be635d24ee723021c4d4aceb696f3c955e9a339` for the test file. The independent review SHA-256 is `7b001915dd6956aad33a32285d2691bf2f3e2e397804c01e72addde7a6e70883`.

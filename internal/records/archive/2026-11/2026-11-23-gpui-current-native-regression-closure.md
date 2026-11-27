@@ -38,6 +38,6 @@ Normal repository Prettier preserved the reviewed ControlLabel bytes and TypeScr
 
 ## Reviewable evidence and limits
 
-[Executed validation archive](evidence/2026-11-23-gpui-current-native-regression-closure/executed-validation.tar.gz), SHA-256 9fc40f0c3727d62be157553361e7b42aaa8af1dce53be6cc68c46ce45b5420aa, contains a per-file manifest and original red/green logs. Manifest source hashes bind the executed uncommitted candidate; normal commit and hook results are recorded separately after this record is authored.
+[Executed validation archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-gpui-current-native-regression-closure/executed-validation.tar.gz), SHA-256 9fc40f0c3727d62be157553361e7b42aaa8af1dce53be6cc68c46ce45b5420aa, contains a per-file manifest and original red/green logs. Manifest source hashes bind the executed uncommitted candidate; normal commit and hook results are recorded separately after this record is authored.
 
 These results establish the listed Linux native framework controls. They do not claim a new macOS run, physical OS input delivery, formal GitHub approval, or success of unrelated browser and package-budget lanes. Hosted validation remains necessary on the published commit.

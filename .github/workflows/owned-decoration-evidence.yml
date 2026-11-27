@@ -21,7 +21,7 @@ jobs:
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
       - name: Check bounded activation
-        run: node node_modules/vitest/vitest.mjs run packages/modules/feedback/test/owned-decoration-activation.test.ts packages/modules/rule/test/owned-decoration-address.test.ts packages/adapters/web-component/test/owned-decoration.integration.test.ts packages/compiler/test/owned-decoration-rejection.test.ts
+        run: node node_modules/vitest/vitest.mjs run packages/modules/feedback/test/owned-decoration-activation.test.ts packages/modules/rule/test/owned-decoration-address.test.ts packages/adapters/web-component/test/owned-decoration.integration.test.ts
       - name: Capture exact-head native keyboard, pointer and accessibility evidence
         env:
           EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

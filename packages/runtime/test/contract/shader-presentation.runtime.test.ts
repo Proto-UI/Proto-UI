@@ -6,9 +6,9 @@ import {
   type ShaderPresentationFrame,
   type FeedbackPort,
 } from '@proto.ui/module-feedback';
-import prototype from '../../../compiler/test/fixtures/shader-presentation-owner.proto';
-import staticPrototype from '../../../compiler/test/fixtures/shader-static-data-owner.proto';
-import scenePrototype from '../../../compiler/test/fixtures/shader-scene-owner.proto';
+import prototype from '../fixtures/shader-presentation-owner.proto';
+import staticPrototype from '../fixtures/shader-static-data-owner.proto';
+import scenePrototype from '../fixtures/shader-scene-owner.proto';
 
 function fixture(input = prototype, visible = true) {
   let props = { visible };
@@ -46,7 +46,7 @@ function fixture(input = prototype, visible = true) {
 }
 
 it.each([prototype, staticPrototype, scenePrototype])(
-  '$name exact compiler input traverses real Runtime setup and repeatable view lifetimes without DOM',
+  '$name authored input traverses real Runtime setup and repeatable view lifetimes without DOM',
   async (input) => {
     expect(typeof window).toBe('undefined');
     expect(typeof document).toBe('undefined');

@@ -24,7 +24,7 @@ React 初始化改为独立的 0 / 1 / 3 module bundles，各在新进程、新 
 
 ## 本地实际验证
 
-详细收据见 [receipts.json](./evidence/2026-11-24-sprint2-final-consumer-gates/receipts.json)。
+详细收据见 [receipts.json](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-final-consumer-gates/receipts.json)。
 
 | 验证 | 实际结果与范围 |
 | --- | --- |
@@ -38,7 +38,7 @@ React 初始化改为独立的 0 / 1 / 3 module bundles，各在新进程、新 
 
 packed 脚本预检中自己的两次真实失败也保留：第一次误把输出 profile string 当作对象；修正后第二次暴露 `emitReact` 的独立旧版本声明。修复后才取得上述预期版本拒绝。零组件预检的依赖是已有精确 package payload 的新目录副本，**不是新 registry 安装证据**。归档保留 copied package hashes，未把工具校准写成 #1458 的完整分发成功。
 
-[49 成员归档](./evidence/2026-11-24-sprint2-final-consumer-gates/preparation.tar.gz) 大小 105,271 B，SHA-256 `522c163639f55cd46c178d0015a54bd801f5b16b6598006cfbd1909551712f97`；[逐成员清单](./evidence/2026-11-24-sprint2-final-consumer-gates/preparation.manifest.json) 的 bytes、mode、SHA-256 均已解压读回核对。可重装的 `node_modules` / registry cache 未放入归档。完整 final registry / cost execution 字段仍为 false。
+[49 成员归档](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-final-consumer-gates/preparation.tar.gz) 大小 105,271 B，SHA-256 `522c163639f55cd46c178d0015a54bd801f5b16b6598006cfbd1909551712f97`；[逐成员清单](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint2-final-consumer-gates/preparation.manifest.json) 的 bytes、mode、SHA-256 均已解压读回核对。可重装的 `node_modules` / registry cache 未放入归档。完整 final registry / cost execution 字段仍为 false。
 
 ## 最终来源冻结后的一次执行集合
 

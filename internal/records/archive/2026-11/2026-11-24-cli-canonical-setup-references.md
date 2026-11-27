@@ -77,7 +77,7 @@ Base's remaining 17 consist of 12 configured setups that also have ordinary invo
 
 ## Evidence binding and reproduction
 
-The complete raw results, source hashes, retained observations, classification, comparison recipe, wrapper, focused type configuration and independent review are in [`source-inventory-evidence.tar.gz`](evidence/2026-11-24-cli-setup-references/source-inventory-evidence.tar.gz). The archive contains 43 files, is 2,244,884 bytes, and has SHA-256 `7150cf3af81ddfacb41bf04a770df0d0aede4f5e34741de8f3a1ca1b70dacb8c`.
+The complete raw results, source hashes, retained observations, classification, comparison recipe, wrapper, focused type configuration and independent review are in [`source-inventory-evidence.tar.gz`](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-cli-setup-references/source-inventory-evidence.tar.gz). The archive contains 43 files, is 2,244,884 bytes, and has SHA-256 `7150cf3af81ddfacb41bf04a770df0d0aede4f5e34741de8f3a1ca1b70dacb8c`.
 
 | Candidate file | SHA-256 |
 | --- | --- |

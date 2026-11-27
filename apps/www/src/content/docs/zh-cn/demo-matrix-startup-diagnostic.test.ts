@@ -543,7 +543,7 @@ it.each([
       (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'openMatrixRoute'
     )!;
     const { page } = fixture();
-    page.evaluate.mockResolvedValue({ delivered: 1, registered: 1 });
+    page.evaluate.mockResolvedValue({ delivered: 7, registered: 7 });
     const waitFor = vi.fn(async () => {});
     Object.assign(page, { locator: () => ({ first: () => ({ waitFor }) }) });
     const context = { newPage: async () => page, close: vi.fn(async () => {}) };
@@ -586,6 +586,7 @@ it.each([
       waitUntil: 'networkidle',
     });
     expect(waitFor).toHaveBeenCalledWith({ state: 'visible' });
+    expect(page.evaluate).toHaveBeenCalledOnce();
     expect(readDiagnostic.mock.calls.map((call) => (call as unknown[]).slice(1))).toEqual([
       ['route-open', 'started'],
       ['route-open', 'passed'],

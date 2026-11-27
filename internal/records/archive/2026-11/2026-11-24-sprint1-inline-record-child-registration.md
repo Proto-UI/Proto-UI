@@ -13,7 +13,7 @@ The first focused run contained a fixture URL failure and is retained as that ou
 
 ## Scope and provenance
 
-[The receipt](evidence/2026-11-24-sprint1-inline-record-child-registration/receipt.json) contains the exact source identities, actual failure titles, counts, command selections, timestamps and original-result hashes. It publishes only these reviewed fields; complete device originals remain retained separately.
+[The receipt](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-24-sprint1-inline-record-child-registration/receipt.json) contains the exact source identities, actual failure titles, counts, command selections, timestamps and original-result hashes. It publishes only these reviewed fields; complete device originals remain retained separately.
 
 This is an independently reviewable source-summary repair. It does not claim that the original blind=[] coverage gate now passes: the historical 198/199 result remains open. It does not prove Matrix startup performance, arbitrary caller preservation, or the unimplemented observer/analyzer candidates. The unrelated Web Component getter working change is excluded from this commit.
 

@@ -6,7 +6,7 @@ A retained external viewport can be a later sibling of its compiled owner. GPUI 
 
 The tail canvas remains present. Its callback now reads the current builtin-projection flag at execution time, stores the boolean so the RefCell borrow ends, and performs the tail observation only for the builtin viewport. External observations retain the existing paint callback after all prepaint. This also preserves legal binding replacement between render and callback.
 
-This implements the existing draft [end-follow pause contract](../../spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml); it does not change its lifecycle or authorize raw/clamped input as reader arrival.
+This implements the existing draft [end-follow pause contract](../../../../spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml); it does not change its lifecycle or authorize raw/clamped input as reader arrival.
 
 ## Actual source and regression
 
@@ -43,7 +43,7 @@ The green batch also ran the full ordinary target and original default SDK check
 
 ## Preserved evidence
 
-[Execution archive](evidence/2026-11-23-gpui-sibling-scroll-clamping/executed-validation.tar.gz) contains both raw runs, their drivers/receipts and the precise source before/after patches.
+[Execution archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-gpui-sibling-scroll-clamping/executed-validation.tar.gz) contains both raw runs, their drivers/receipts and the precise source before/after patches.
 
 - Archive SHA-256: b93a868f54f20bca7bcdc1821a724048fec751be00c99eb476031c87378ecff4.
 - Red reader log SHA-256: ec044fcdb2fb3f2d8cb71bb4e2c0c491da8dadfa5a4f5e893e224c3a256f1299.

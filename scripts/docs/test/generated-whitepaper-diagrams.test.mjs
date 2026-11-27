@@ -19,8 +19,8 @@ const desktopSha256 = {
   'conditional-consistency.en': '5d24f0d566cbcfb8bba47c43336e12afe7424137424294182bfffe81bf827e1a',
   'conditional-consistency.zh-cn':
     '9eaaf1b5c7f69ca6fe8cdbe6808d43695b1115830d83b003849c7ba15a529fb7',
-  'evolution-feedback.en': 'fded12e4488af8c90b51149337328e5255301216d86c89b1222372d5bf1fec65',
-  'evolution-feedback.zh-cn': '9a5b24b9b6f49247b83e132693ee279a328f6e610dfb2ee15e862b1e236783cb',
+  'evolution-feedback.en': 'f1e5ba376b02f75430ba0efd0f4779bf7687eacc3d0c59b02ce3902f5ea04041',
+  'evolution-feedback.zh-cn': '81dcdabdbed66da7c7042b5584f48726e4b6cfa706911832a1ce91bcfcd78f9b',
   'switch-activation.en': '3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232',
   'switch-activation.zh-cn': '11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4',
 };
@@ -127,6 +127,8 @@ for (const locale of ['en', 'zh-cn']) {
       const root = svg.match(/^<svg\b[^>]*>/)?.[0];
       assert.ok(root);
       assert.match(root, /role="img" aria-labelledby="title" aria-describedby="description"/);
+      // Marker paint must inherit the same theme variables as the diagram wires.
+      assert.match(svg, /<g class="evo-root">\s*<defs>[\s\S]*?<marker id="evo-arrow-sm"/);
       assert.ok(root.includes(`xml:lang="${locale}"`));
       for (const id of ['title', 'description']) {
         assert.equal([...svg.matchAll(new RegExp(`\\bid="${id}"`, 'g'))].length, 1, id);
@@ -218,32 +220,41 @@ test('handwritten font subsets cover visible labels and retain content hashes', 
 
 // Proposed visual-label guard. Real article/Dialog renders still decide readability.
 for (const locale of ['en', 'zh-cn']) {
-  test(`Evolution visible labels retain the fixed canvas and readable hierarchy (${locale})`, async () => {
+  test(`Evolution visible labels retain the fixed canvas and larger type (${locale})`, async () => {
     const svg = await readFile(
       new URL(`whitepaper-evolution-feedback.${locale}.svg`, diagrams),
       'utf8'
     );
     assert.match(svg, /viewBox="0 0 960 928"/);
+    const alternatives = svg.slice(
+      svg.indexOf('<g data-alternatives="diagnoses">'),
+      svg.indexOf('<path data-relation="revision-loop"')
+    );
+    assert.match(
+      alternatives,
+      /<rect x="80" y="496" width="856" height="376"[^>]+class="evo-zone"/
+    );
+    assert.doesNotMatch(alternatives, /<path\b/, 'the diagnoses are alternatives, not stages');
+    assert.match(
+      svg,
+      /data-relation="revision-loop" data-from="diagnoses" data-to="work" d="M80 684 /
+    );
     const sizes = [...svg.matchAll(/<text\b[^>]*font-size="([0-9.]+)"/g)].map((m) => Number(m[1]));
     assert.ok(sizes.length > 0);
     assert.ok(
-      sizes.every((size) => size >= 11),
-      'visible labels at least 11 SVG units'
-    );
-    assert.ok(
-      sizes.some((size) => size >= 28),
-      'heading typography at least 28 SVG units'
+      sizes.every((size) => size >= 36),
+      'visible labels at least 36 SVG units'
     );
     for (const label of locale === 'en'
       ? [
-          'Practice, evidence, and explicit revision',
+          'Three concurrent lines of work',
           'Practice provides evidence',
           'Which layer needs revision?',
           'Implementation drift',
           'Host capability gap',
           'Omission or overfitting',
-          'Fundamental counterexample',
-          'Revise the relevant layer explicitly and test again',
+          'Relation challenged',
+          'Revise explicitly, then test again.',
         ]
       : [
           '三条主线并行推进',
@@ -253,7 +264,7 @@ for (const locale of ['en', 'zh-cn']) {
           'Host 能力缺口',
           '义务遗漏或过拟合',
           '基础关系出现反例',
-          '明确修正对应层，再次检验。',
+          '明确修正，再次检验。',
         ]) {
       assert.ok(svg.includes(label), label);
     }
@@ -279,14 +290,18 @@ for (const locale of ['en', 'zh-cn']) {
     const sizes = [...svg.matchAll(/<text\b[^>]*font-size="([0-9.]+)"/g)].map((match) =>
       Number(match[1])
     );
-    assert.ok(sizes.length > 0 && sizes.every((size) => size >= 10));
-    assert.ok(sizes.some((size) => size >= 22));
+    assert.ok(sizes.length > 0 && sizes.every((size) => size >= 26));
 
     const lanes = ['theory-kernel', 'prototype-libraries', 'translation-layer'];
     for (const [index, lane] of lanes.entries()) {
       const group = svg.match(new RegExp(`<g data-node="${lane}"[^>]*>([\\s\\S]*?)<\\/g>`))?.[1];
       assert.ok(group, lane);
-      assert.ok(group.includes(`<rect x="${34 + 155 * index}" y="130" width="136" height="92"`));
+      const [x, width] = [
+        [32, 140],
+        [188, 140],
+        [342, 144],
+      ][index];
+      assert.ok(group.includes(`<rect x="${x}" y="108" width="${width}" height="116"`));
     }
     assert.deepEqual(
       [...svg.matchAll(/data-node="([^"]+)"/g)].map((match) => match[1]),
@@ -306,12 +321,12 @@ for (const locale of ['en', 'zh-cn']) {
       const group = svg.match(
         new RegExp(`<g data-diagnosis="${diagnosis}"[^>]*>([\\s\\S]*?)<\\/g>`)
       )?.[1];
-      assert.ok(group?.includes(`<rect x="48" y="${476 + 104 * index}" width="416" height="90"`));
+      assert.ok(group?.includes(`<rect x="44" y="${488 + 100 * index}" width="428" height="92"`));
       assert.doesNotMatch(group, /<path\b/);
     }
     const alternatives = svg.slice(
       svg.indexOf('<g data-alternatives="diagnoses">'),
-      svg.lastIndexOf('</g>')
+      svg.indexOf('<path data-relation="revision-loop"')
     );
     assert.doesNotMatch(alternatives, /<path\b/, 'no edges sequence the diagnosis cards');
     const edges = [
@@ -319,42 +334,44 @@ for (const locale of ['en', 'zh-cn']) {
         /<path data-relation="([^"]+)" data-from="([^"]+)" data-to="([^"]+)" d="([^"]+)"/g
       ),
     ].map((match) => match.slice(1));
-    assert.equal([...svg.matchAll(/<path\b[^>]*class="evo-wire(?:-dash)?"/g)].length, edges.length);
+    assert.equal([...svg.matchAll(/<path\b[^>]*class="evo-wire"/g)].length, edges.length);
     assert.deepEqual(
       edges.map(([relation, from, to]) => [relation, from, to]),
       [
-        ['revision-loop', 'diagnoses', 'work'],
-        ['revision-return', 'diagnoses', lanes[0]],
-        ['revision-return', 'diagnoses', lanes[1]],
         ['work-exchange', lanes[0], lanes[1]],
         ['work-exchange', lanes[1], lanes[0]],
         ['work-exchange', lanes[1], lanes[2]],
         ['work-exchange', lanes[2], lanes[1]],
-        ['practice-input', lanes[0], 'practice-evidence'],
-        ['practice-input', lanes[2], 'practice-evidence'],
+        ...lanes.map((lane) => ['practice-input', lane, 'practice-evidence']),
         ['evidence-entry', 'work', 'practice-evidence'],
         ['diagnose', 'practice-evidence', 'diagnoses'],
+        ['revision-loop', 'diagnoses', 'work'],
+        ...lanes.map((lane) => ['revision-return', 'diagnoses', lane]),
       ]
+    );
+    assert.deepEqual(
+      edges.filter(([relation]) => relation === 'revision-return').map((edge) => edge[3]),
+      ['M102 94 V105', 'M258 94 V105', 'M414 94 V105']
     );
     // Card contents carry condition and action. No path connects one diagnosis to another.
     for (const label of locale === 'en'
       ? [
           'Three concurrent lines of work',
-          'ALTERNATIVE DIAGNOSES',
+          'Alternative diagnoses, not stages',
           'Implementation drift',
           'Fix implementation',
           'Host capability gap',
           'Improve translation',
           'Omission or overfitting',
-          'Revise Prototype',
-          'Fundamental counterexample',
-          'Revisit theory',
-          'Revise explicitly, then test again.',
-          'Implementation behavior never silently becomes a rule.',
+          'Revise the Prototype',
+          'Relation challenged',
+          'Revisit the theory',
+          'Revise, then test again.',
+          'No silent rule changes.',
         ]
       : [
           '三条主线并行推进',
-          '并行归因（非先后阶段）',
+          '不同归因，并非先后阶段',
           '实现偏差',
           '修正实现',
           'Host 能力缺口',
@@ -364,7 +381,7 @@ for (const locale of ['en', 'zh-cn']) {
           '基础关系出现反例',
           '重审理论',
           '明确修正，再次检验。',
-          '实现结果不会静默成为新标准。',
+          '实现结果不静默成为标准。',
         ]) {
       assert.ok(svg.includes(label), label);
     }

@@ -6,7 +6,7 @@
 
 原生成的 `to-end` 完成路径先发布 `requestStatus=applied`，再无条件写入 `followState=following`。通知同步交付时，合法的 applied watcher 可以在同一物理 view 请求 reveal；该 reveal 已把目标移入视口并使 state 变为 paused，外层旧请求的尾写却把这个较晚决定覆盖成 following。另一个入口是 `scrollFacts` 内的 following watcher：它可以请求 reveal，或者安排新的 pending end work；旧的 applied 尾写同样可能覆盖较新的 pending 状态。
 
-依据是 [C-SCROLL-END-FOLLOW-0001](../../spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml) 的 FACTS、RESUME、APPEND、REFLOW，以及 [Scroll Surface Host Capability](../../spec/host-caps/HC-SCROLL-SURFACE-0001.yaml) 的 end-follow/reveal 规则。现行 Runtime 的 `packages/modules/scroll/src/web/create-web-scroll-host.ts` 在 publish 前确定 completion state/status；`packages/modules/scroll/src/impl.ts` 的 `applySnapshot` 先发布 state，并用 snapshotEpoch 阻止较旧 snapshot 在重入后继续覆盖状态。catalog 没有单独命名 applied-watcher nested-reveal 顺序；最终 paused 的判断是从现有 atEnd/follow policy 与 Runtime 行为得到的推论。本增量没有新增或激活合同。
+依据是 [C-SCROLL-END-FOLLOW-0001](../../../../spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml) 的 FACTS、RESUME、APPEND、REFLOW，以及 [Scroll Surface Host Capability](../../../../spec/host-caps/HC-SCROLL-SURFACE-0001.yaml) 的 end-follow/reveal 规则。现行 Runtime 的 `packages/modules/scroll/src/web/create-web-scroll-host.ts` 在 publish 前确定 completion state/status；`packages/modules/scroll/src/impl.ts` 的 `applySnapshot` 先发布 state，并用 snapshotEpoch 阻止较旧 snapshot 在重入后继续覆盖状态。catalog 没有单独命名 applied-watcher nested-reveal 顺序；最终 paused 的判断是从现有 atEnd/follow policy 与 Runtime 行为得到的推论。本增量没有新增或激活合同。
 
 不能仅删除原尾部 following 写入：matching axis 的显式 to-end 在 reader contact 仍有效时，也必须保留明确 resume；普通 `scrollFacts` 会因 contact 选择 paused。也不能仅把尾部两个写入互换：following watcher 已可能在 `scrollFacts` 内执行，第二个 following 写入仍会覆盖它。
 
@@ -58,7 +58,7 @@ Parser 给 watcher 的 event `state-event:string`；`||` 右支使用左条件�
 
 ## 原始材料
 
-本增量的可读结果见 [evidence summary](./evidence/2026-11-17-scroll-to-end-summary.json)。完整 raw log、Vitest JSON、实际 before/after receipts、原失败与修复后生成图、各次 fixture 和 source snapshot 保存在 [raw evidence archive](./evidence/2026-11-17-scroll-to-end-raw-evidence.tar.gz)；[member manifest](./evidence/2026-11-17-scroll-to-end-raw-evidence-manifest.json) 逐文件绑定散列。原 v4 记录和证据继续由 [前一记录](./2026-11-17-compiler-scroll-recovery.zh-CN.md) 引用，本增量不重复发布该大包。
+本增量的可读结果见 [evidence summary](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-scroll-to-end-summary.json)。完整 raw log、Vitest JSON、实际 before/after receipts、原失败与修复后生成图、各次 fixture 和 source snapshot 保存在 [raw evidence archive](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-scroll-to-end-raw-evidence.tar.gz)；[member manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-scroll-to-end-raw-evidence-manifest.json) 逐文件绑定散列。原 v4 记录和证据继续由 [前一记录](./2026-11-17-compiler-scroll-recovery.zh-CN.md) 引用，本增量不重复发布该大包。
 
 ## 当前组合分支的实际验证
 
@@ -66,4 +66,4 @@ root 将两个精确产品补丁按 hunk 合入已发布的 `9520b5adb6618bd558c
 
 最终整合输入在格式检查通过后实际执行五个文件：**73/73，0 skipped、0 unhandled、exit0，41.387 秒**。组成是 host/support 25、position consumer 12、既有 reveal consumer 28、新 to-end consumer 4、新 to-end strict graph 4。457 个明确枚举的 compiler/core/helper/config 输入在执行前后完全一致；新增证据记录后再次检查这些输入仍匹配。它们不是推导的完整动态依赖闭包，也没有把隔离七轮的数量相加为本次成绩。
 
-原始命令、起止时间、完整 before/after hashes、原始 JSON/log 字节，以及两个独立工程复核记录保存在 [整合证据](./evidence/2026-11-17-scroll-to-end-integration.json)。root 同时独立重读并核对隔离 archive 的全部 378 个成员与七轮原始 artifact 引用。DCO 的错误 trailer 与第十六笔成功补救继续由[独立记录](./2026-11-17-scroll-dco-remediation.zh-CN.md)保留；本次产品回归不替代最终 CI、原生矩阵或正式批准。
+原始命令、起止时间、完整 before/after hashes、原始 JSON/log 字节，以及两个独立工程复核记录保存在 [整合证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-17-scroll-to-end-integration.json)。root 同时独立重读并核对隔离 archive 的全部 378 个成员与七轮原始 artifact 引用。DCO 的错误 trailer 与第十六笔成功补救继续由[独立记录](./2026-11-17-scroll-dco-remediation.zh-CN.md)保留；本次产品回归不替代最终 CI、原生矩阵或正式批准。

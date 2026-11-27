@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
 import {
   RUNTIMES,
-  choosePreviewRuntime,
+  selectRuntime,
   launchBrowser,
   openRoute,
   startServer,
@@ -19,43 +19,28 @@ const SELECT_RUNTIMES = RUNTIMES;
 
 const SELECT_ROUTE = '/en/ui-libraries/brutalist/components/select/';
 
-/** The demo preselects `paper`, whose authored label is `Paper`. */
-const AUTHORED_LABEL = 'Paper';
+// The public controlled example still starts with a real selected value before
+// its popup has ever opened. The hero now demonstrates an empty placeholder.
+const SELECT_DEMO_ID = 'demo-brutalist-select-input';
+const AUTHORED_LABEL = 'Japan Standard Time (JST)';
+const FIRST_LABEL = 'Eastern Standard Time (EST)';
+const LAST_LABEL = 'New Zealand Standard Time (NZST)';
+const REGISTERED_ITEM_COUNT = 12;
 
-/** Root, trigger, value, the closed content, and its two authored items. */
-const MOUNTED_ROOT_COUNT = 6;
+/** Root, trigger, value, closed content, twelve authored Items and Reset Button. */
+const MOUNTED_ROOT_COUNT = 17;
 
 /**
- * The shared `selectRuntime` waits on an exact prototype-root count, which is
- * one of the things this file measures, so readiness here waits only for the
- * trigger. Reusing the shared helper would turn every assertion below into a
- * timeout that says nothing about the label.
+ * Observe the real committed runtime and its one Trigger. The authored demo's
+ * full Prototype and collection counts remain assertions below, not readiness
+ * conditions that could turn a missing label into an unexplained timeout.
  */
 async function showRuntime(
   page: Page,
   previewer: Locator,
   runtime: (typeof RUNTIMES)[number]
 ): Promise<void> {
-  await choosePreviewRuntime(page, previewer, runtime);
-  await page.waitForFunction(
-    (selected) => {
-      const root = document.querySelector('[data-previewer-id]');
-      const scope = root?.querySelector<HTMLElement>('[data-projection-scope]');
-      const content = scope?.querySelector<HTMLElement>('[data-projection-content]');
-      if (
-        !content ||
-        scope?.dataset.projectionRuntime !== selected ||
-        scope.dataset.projectionState !== 'ready'
-      ) {
-        return false;
-      }
-      return Array.from(content.querySelectorAll('*')).some(
-        (element) => element.getAttribute('role') === 'combobox'
-      );
-    },
-    runtime,
-    { timeout: 20_000 }
-  );
+  await selectRuntime(page, previewer, runtime, '[role="combobox"]', 1);
   await page.waitForTimeout(300);
 }
 
@@ -79,6 +64,7 @@ async function retainObservation(page: Page, runtime: string, stage: string, obs
         runtime,
         stage,
         route: SELECT_ROUTE,
+        demoId: SELECT_DEMO_ID,
         browser: browser.version(),
         observed,
         outcome: 'observation-only; the corresponding Vitest result records assertion acceptance',
@@ -99,9 +85,9 @@ type ClosedSelect = {
   everOpened: boolean;
 };
 
-async function readClosedSelect(page: Page): Promise<ClosedSelect> {
-  return page.evaluate(() => {
-    const host = document.querySelector('[data-previewer-id] [data-projection-content]');
+async function readClosedSelect(previewer: Locator): Promise<ClosedSelect> {
+  return previewer.evaluate((root) => {
+    const host = root.querySelector('[data-projection-content]') ?? root.querySelector('.host');
     if (!host) throw new Error('The Select demo must render projected content.');
     const boundaries = host.querySelectorAll(
       '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
@@ -148,16 +134,17 @@ afterAll(async () => {
 
 describe.sequential('Select first paint with the popup never opened', () => {
   it('shows the authored label in every runtime', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
+    const { context, page } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
       width: 1440,
       height: 900,
     });
+    const previewer = page.locator(`[data-demo-id="${SELECT_DEMO_ID}"]`);
 
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
-        const closed = await readClosedSelect(page);
+        const closed = await readClosedSelect(previewer);
         await retainObservation(page, runtime, 'never-opened-label', closed);
 
         // Nothing in this case may open the popup; the defect it guards only
@@ -177,22 +164,23 @@ describe.sequential('Select first paint with the popup never opened', () => {
   }, 180_000);
 
   it('keeps the closed content mounted and marked detached in every runtime', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
+    const { context, page } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
       width: 1440,
       height: 900,
     });
+    const previewer = page.locator(`[data-demo-id="${SELECT_DEMO_ID}"]`);
 
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
-        const closed = await readClosedSelect(page);
+        const closed = await readClosedSelect(previewer);
         await retainObservation(page, runtime, 'closed-mounted-content', closed);
 
         expect(closed.detachedHosts, `${runtime}/detached`).toBeGreaterThan(0);
-        // Two authored options. Without them registered the label above can
-        // only come from a cache, so this is what makes that case meaningful.
-        expect(closed.registeredItems, `${runtime}/registered`).toBe(2);
+        // Every authored option registers while the view remains closed; the
+        // first rendered label must agree with that real collection.
+        expect(closed.registeredItems, `${runtime}/registered`).toBe(REGISTERED_ITEM_COUNT);
         expect(closed.mountedRoots, `${runtime}/mounted-roots`).toBe(MOUNTED_ROOT_COUNT);
       }
     } finally {
@@ -203,21 +191,23 @@ describe.sequential('Select first paint with the popup never opened', () => {
 
 describe.sequential('React Select retained native entry focus', () => {
   it('observes selected entry and native End/Home without committing selection', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
+    const { context, page } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
       width: 1440,
       height: 900,
     });
+    const previewer = page.locator(`[data-demo-id="${SELECT_DEMO_ID}"]`);
 
     try {
       await previewer.scrollIntoViewIfNeeded();
       await showRuntime(page, previewer, 'react');
-      const trigger = previewer.locator('[data-projection-content] [role="combobox"]');
+      const trigger = previewer.locator('.host [role="combobox"]');
       await trigger.click();
       const controlledId = await trigger.getAttribute('aria-controls');
       if (!controlledId) throw new Error('The open Select must identify its option surface.');
       const content = page.locator(`[id=${JSON.stringify(controlledId)}]`);
-      const paper = content.getByRole('option', { name: AUTHORED_LABEL, exact: true });
-      const ink = content.getByRole('option', { name: 'Ink', exact: true });
+      const selected = content.getByRole('option', { name: AUTHORED_LABEL, exact: true });
+      const first = content.getByRole('option', { name: FIRST_LABEL, exact: true });
+      const last = content.getByRole('option', { name: LAST_LABEL, exact: true });
       const readFocus = (option: Locator) =>
         option.evaluate((element) => ({
           nativeFocused: element.ownerDocument.activeElement === element,
@@ -227,54 +217,67 @@ describe.sequential('React Select retained native entry focus', () => {
       // Only the component requests entry focus. Reading both DOM focus and
       // the public fact projection catches focus applied behind a closed gate.
       await expect
-        .poll(() => readFocus(paper), { message: 'react/selected-entry' })
+        .poll(() => readFocus(selected), { message: 'react/selected-entry' })
         .toEqual({
           nativeFocused: true,
           observedFocused: true,
         });
       await retainObservation(page, 'react', 'selected-entry', {
-        paper: await readFocus(paper),
-        ink: await readFocus(ink),
+        focus: {
+          selected: await readFocus(selected),
+          first: await readFocus(first),
+          last: await readFocus(last),
+        },
         selected: {
-          paper: await paper.getAttribute('aria-selected'),
-          ink: await ink.getAttribute('aria-selected'),
+          selected: await selected.getAttribute('aria-selected'),
+          first: await first.getAttribute('aria-selected'),
+          last: await last.getAttribute('aria-selected'),
         },
       });
       // Use page input: locator.press() would focus the option first and mask
       // a missing native entry event by injecting the fact navigation needs.
       await page.keyboard.press('End');
       await expect
-        .poll(() => readFocus(ink), { message: 'react/End' })
+        .poll(() => readFocus(last), { message: 'react/End' })
         .toEqual({
           nativeFocused: true,
           observedFocused: true,
         });
       await retainObservation(page, 'react', 'native-End', {
-        paper: await readFocus(paper),
-        ink: await readFocus(ink),
+        focus: {
+          selected: await readFocus(selected),
+          first: await readFocus(first),
+          last: await readFocus(last),
+        },
         selected: {
-          paper: await paper.getAttribute('aria-selected'),
-          ink: await ink.getAttribute('aria-selected'),
+          selected: await selected.getAttribute('aria-selected'),
+          first: await first.getAttribute('aria-selected'),
+          last: await last.getAttribute('aria-selected'),
         },
       });
       // Home must move from a non-first member; an ignored Home cannot pass.
       await page.keyboard.press('Home');
       await expect
-        .poll(() => readFocus(paper), { message: 'react/Home' })
+        .poll(() => readFocus(first), { message: 'react/Home' })
         .toEqual({
           nativeFocused: true,
           observedFocused: true,
         });
       await retainObservation(page, 'react', 'native-Home', {
-        paper: await readFocus(paper),
-        ink: await readFocus(ink),
+        focus: {
+          selected: await readFocus(selected),
+          first: await readFocus(first),
+          last: await readFocus(last),
+        },
         selected: {
-          paper: await paper.getAttribute('aria-selected'),
-          ink: await ink.getAttribute('aria-selected'),
+          selected: await selected.getAttribute('aria-selected'),
+          first: await first.getAttribute('aria-selected'),
+          last: await last.getAttribute('aria-selected'),
         },
       });
-      expect(await paper.getAttribute('aria-selected')).toBe('true');
-      expect(await ink.getAttribute('aria-selected')).toBe('false');
+      expect(await selected.getAttribute('aria-selected')).toBe('true');
+      expect(await first.getAttribute('aria-selected')).toBe('false');
+      expect(await last.getAttribute('aria-selected')).toBe('false');
     } finally {
       await context.close();
     }

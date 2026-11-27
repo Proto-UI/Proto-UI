@@ -1,0 +1,107 @@
+import { Activity, StrictMode, useSyncExternalStore } from 'react';
+import { createPortal, flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { ITEM_ZONE, KeyedTaskOwner, type KeyedTaskOwnerProps } from './KeyedTaskOwner';
+import { enqueue, loadHistory } from './keyed-loader';
+
+const logical = document.getElementById('app')!;
+const physical = document.getElementById('panel-surface')!;
+const root = createRoot(logical);
+const target = document.createElement('div');
+const slots = ['left', 'right'].map(name => {
+  const slot = document.createElement('div');
+  slot.id = `physical-${name}`;
+  slot.style.minHeight = '4rem';
+  physical.append(slot);
+  return slot;
+});
+slots[0].append(target);
+
+const zones = { original: ITEM_ZONE.createProvider('left'), replacement: ITEM_ZONE.createProvider('left') };
+type Zone = keyof typeof zones;
+let active: Zone = 'original';
+let props: KeyedTaskOwnerProps = {};
+let hidden = false;
+let ownerKey = 0;
+const seen: Element[] = [];
+
+function Witness({ zone }: { zone: Zone }) {
+  const cell = zones[zone];
+  const value = useSyncExternalStore(cell.subscribe, cell.getSnapshot);
+  return <output id={`zone-${zone}`}>{value}</output>;
+}
+
+function render(): void {
+  flushSync(() => root.render(
+    <StrictMode>
+      <Witness zone="original" /><Witness zone="replacement" />
+      <div id="logical-provider" data-zone={active}>
+        <ITEM_ZONE.Provider value={zones[active]}>
+          {createPortal(
+            <Activity mode={hidden ? 'hidden' : 'visible'}><KeyedTaskOwner key={ownerKey} {...props} /></Activity>,
+            target
+          )}
+        </ITEM_ZONE.Provider>
+      </div>
+    </StrictMode>
+  ));
+}
+
+// IDs refer to the browser's actual Element objects, independent of keys and labels.
+function elementId(node: Element): number {
+  const previous = seen.indexOf(node);
+  return previous < 0 ? seen.push(node) - 1 : previous;
+}
+
+function snapshot() {
+  const view = target.firstElementChild;
+  return {
+    owner: view ? elementId(view) : null,
+    activeZone: logical.querySelector('#logical-provider')?.getAttribute('data-zone'),
+    originalZone: logical.querySelector('#zone-original')?.textContent,
+    replacementZone: logical.querySelector('#zone-replacement')?.textContent,
+    physicalSlot: target.parentElement?.id ?? null,
+    rows: Array.from(view?.children ?? [], child => ({
+      node: elementId(child), tag: child.localName, text: child.textContent,
+      connected: child.isConnected, visible: child.getClientRects().length > 0,
+      top: child.getBoundingClientRect().top,
+    })),
+  };
+}
+
+function sample() { return { view: snapshot(), network: loadHistory() }; }
+let replacement: { value: string; before: ReturnType<typeof sample>; after: ReturnType<typeof sample> } | null = null;
+
+const trace = {
+  enqueue,
+  history: loadHistory,
+  mount: render,
+  replaceParentAfterReturn(id: string, path: string) {
+    enqueue(id, path, false, {
+      onReturn(value) {
+        const before = sample();
+        ownerKey++;
+        active = 'replacement';
+        render();
+        replacement = { value, before, after: sample() };
+      },
+    });
+  },
+  replacement: () => replacement,
+  retainedText(id: number) { return seen[id].textContent; },
+  order(first: string, second: string) { props = { first, second }; render(); },
+  replaceZone() { active = 'replacement'; render(); },
+  publish(zone: Zone, value: string) { zones[zone].publish(value); },
+  hide(value: boolean) { hidden = value; render(); },
+  detach() { target.remove(); },
+  attachOnRight() { slots[1].append(target); },
+  location(id: number) {
+    const node = seen[id];
+    if (!node) throw new Error(`No observed element has id ${id}`);
+    return { connected: node.isConnected, inTarget: target.contains(node) };
+  },
+  snapshot,
+};
+
+declare global { interface Window { keyedLifetime: typeof trace } }
+window.keyedLifetime = trace;

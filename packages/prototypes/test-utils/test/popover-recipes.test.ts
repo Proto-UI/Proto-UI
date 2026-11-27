@@ -15,7 +15,7 @@ describe('Popover bounded surface recipes', () => {
     ],
     [
       'brutalist',
-      ['w-72', 'rounded-base', 'gap-4', 'border-2'],
+      ['w-72', 'rounded-base', 'gap-4', 'border-2', 'shadow-[3px_3px_0_0_var(--pui-foreground)]'],
       ['w-80', 'rounded-none', 'shadow-[4px_4px_0_0_var(--pui-foreground)]'],
     ],
   ] as const) {
@@ -29,8 +29,16 @@ describe('Popover bounded surface recipes', () => {
       );
       for (const token of required) expect(tokens).toContain(token);
       for (const token of forbidden) expect(tokens).not.toContain(token);
-      if (family === 'brutalist')
-        expect(tokens.some((token) => String(token).startsWith('shadow-'))).toBe(false);
+      if (family === 'brutalist') {
+        // D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 names Popover as an anchored
+        // panel: its 3px foreground shadow has no action-control displacement.
+        expect(tokens.some((token) => /(?:^|:)(?:translate|scale)-/.test(String(token)))).toBe(
+          false
+        );
+        expect(tokens.filter((token) => String(token).startsWith('shadow-'))).toEqual([
+          'shadow-[3px_3px_0_0_var(--pui-foreground)]',
+        ]);
+      }
       expect(tokens).toEqual(
         expect.arrayContaining([
           'max-w-[var(--proto-ui-available-width)]',

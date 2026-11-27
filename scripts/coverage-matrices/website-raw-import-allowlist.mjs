@@ -1,14 +1,12 @@
 import { builtinModules } from 'node:module';
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
-import { BROWSER_COMPILER_IMPORT_ALLOWLIST } from './browser-compiler-imports.mjs';
 import { LIBRARY_CARD_IMPORT_ALLOWLIST } from './library-card-imports.mjs';
 
 export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
-  ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
@@ -379,6 +377,12 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       sourceSha256: '3f4d16509a55b811796454428b796f3a52c81503da5b267b97a9f6746d023c18',
       specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
     }),
+  // Exact authored Dialog recipe: the single public Button edge is type-only.
+  // Full importer bytes remain required; no controller acceptance is promoted.
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts': Object.freeze({
+    sourceSha256: '1bd0efedba96fd34fb151874eb988ac371a16586875b95a6aa2b07f0dee9a360',
+    specifiers: Object.freeze(['@proto.ui/prototypes-brutalist/button']),
+  }),
   'apps/www/src/content/docs/demo-bootstrap-2-3-2-dialog.demo.ts': Object.freeze({
     sourceSha256: 'bed828050a2f4b8157678f4d903eade26184762b97c42dd181c7e2fdcd836668',
     specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2/surface']),
@@ -443,7 +447,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: 'e46446b1bfcfd4b3874017bf0e72ab111901cbc089bf835286265801db745541',
+    sourceSha256: 'ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -764,7 +768,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'b441db9889421b028ba5cf1422ca78db1f203bdcb5ed1419d1425fcdc38db41f',
+    sourceSha256: '13adc1a8fbbc2ef61dc40c4c11d7c96c8c3e276373596b53f8bdc95e9baa2b00',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',

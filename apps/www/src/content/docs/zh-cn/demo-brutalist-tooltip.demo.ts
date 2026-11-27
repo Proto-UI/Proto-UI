@@ -1,7 +1,7 @@
 const triggerClass =
   'inline-flex items-center justify-center rounded-base border-2 border-foreground bg-main px-4 py-2 font-sans text-sm font-medium text-main-foreground cursor-pointer';
 
-const tooltip = (label: string, content: string) => ({
+const tooltip = (ref: string, label: string, content: string) => ({
   kind: 'proto' as const,
   prototypeId: 'brutalist-tooltip-root',
   children: [
@@ -14,6 +14,8 @@ const tooltip = (label: string, content: string) => ({
     {
       kind: 'proto' as const,
       prototypeId: 'brutalist-tooltip-content',
+      ref: `${ref}Content`,
+      previewTheme: 'portal' as const,
       props: { side: 'top', align: 'center' },
       children: [content],
     },
@@ -32,8 +34,8 @@ export default {
         props: { openDelay: 500, closeDelay: 100, skipDelay: 300 },
         className: 'flex flex-wrap items-center justify-center gap-4',
         children: [
-          tooltip('Account', 'View account settings'),
-          tooltip('Notifications', 'Manage notification preferences'),
+          tooltip('account', 'Account', 'View account settings'),
+          tooltip('notifications', 'Notifications', 'Manage notification preferences'),
         ],
       },
     ],

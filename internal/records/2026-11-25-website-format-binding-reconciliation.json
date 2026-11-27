@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "website-format-only-binding-reconciliation",
+  "date": "2026-11-25",
+  "sourceContext": {
+    "reviewedParent": "28958b402bfb116c135377fe01e23a94ea7b2a7b",
+    "reason": "The merged candidate retains the parent Header/Search preparation scheduling. Normal Prettier line reflow changed the complete source bytes after that parent review.",
+    "binding": "Exact current source bytes, identified independently by both SHA-256 and Git blob below. No final candidate commit or native acceptance is inferred from this record."
+  },
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/components/site-search-commands.ts",
+      "previousSha256": "7d255f171bcf8d2ac8f5de89f559bfa1bdb6e36509e938a56ad1f6720b257c17",
+      "sha256": "823ca66014cea54fe1678e244fa0cf8ff6f85395b80644548288230c89c5a35d",
+      "previousGitBlob": "88f310b4cc406ae04c5924d186dbc430ba364bb0",
+      "gitBlob": "e3429c324ecb9aae4934f077cb51d6784df6a889",
+      "owners": ["www.search.dialog", "www.search.input-results", "www.search.launcher"],
+      "delta": "Collapse the existing preparation runtime ternary from three lines to one. Its operands, condition, precedence and publication/disposal ownership are unchanged.",
+      "rawImportSpecifiers": [
+        "@proto.ui/module-expose-state",
+        "../../../../packages/prototypes/lucide/src/icons/search",
+        "../../../../packages/prototypes/lucide/src/icons/arrow-right",
+        "../../../../packages/prototypes/lucide/src/icons/x"
+      ]
+    },
+    {
+      "path": "apps/www/src/components/site-typography-client.ts",
+      "previousSha256": "bc20c8d2bd5afa816fa76f03fe588057000b1fb1f6d05f20e00722e9a582ef49",
+      "sha256": "ecfad806298ef695834f4b046e39bc5f5c179978441ca369a43a61653eacc111",
+      "previousGitBlob": "d13661820f66ea6299e545fc0b9f208fcccdf4a2",
+      "gitBlob": "13a038549ad4c3ff4c6dc66a1921569de26e5403",
+      "owners": ["www.content.typography-presentation"],
+      "delta": "Collapse the existing three-family committed-value disjunction from three lines to one. The ternary, family set and documentation preparation behavior are unchanged."
+    }
+  ],
+  "verification": {
+    "preimages": "Both complete parent source bodies were fetched by the pinned revision; their raw SHA-256 values match the parent checker/matrix bindings and their Git blob identities.",
+    "currentBytes": "Apply only the two stated whitespace reflows to those preimages. The independently reconstructed full source hashes and Git blobs exactly match the current candidate values supplied by its executor.",
+    "lineEndings": "The reviewed bodies use LF, so the raw importer hash and line-ending-normalized matrix hash coincide.",
+    "importsChanged": false,
+    "productSourceEditedByThisPatch": false,
+    "checkerImportFingerprintChanges": 1,
+    "matrixSourceFingerprintChanges": 2,
+    "ownerSetsChanged": false,
+    "rowStatesChanged": false,
+    "historicalRecordsChanged": false,
+    "nativeOrRuntimeTestsRunForThisRecord": false,
+    "remaining": "Run the existing coverage-matrix checker against the integrated candidate. Existing native, focus, keyboard, four-runtime, lifecycle and release evidence requirements remain with their existing owners."
+  }
+}

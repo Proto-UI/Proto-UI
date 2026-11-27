@@ -32,7 +32,7 @@
 
 ## 可恢复证据
 
-[机器证据](evidence/2026-11-18-expose-projection-refresh-regressions.json) 保存源码／测试 manifest、精确命令、workdir、环境、逐次输入哈希、真实结果、记账更正，以及带逐成员 SHA-256 的 **30 成员 ZIP**。归档包含红绿日志与原始 JSON、scoped types 原始报告、两版 runner、旧／新产品输入、候选测试、可应用补丁和两份独立审查报告。
+[机器证据](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-18-expose-projection-refresh-regressions.json) 保存源码／测试 manifest、精确命令、workdir、环境、逐次输入哈希、真实结果、记账更正，以及带逐成员 SHA-256 的 **30 成员 ZIP**。归档包含红绿日志与原始 JSON、scoped types 原始报告、两版 runner、旧／新产品输入、候选测试、可应用补丁和两份独立审查报告。
 
 测试补丁 `public-regression-tests.patch` 为 **7279 bytes**，SHA-256 `ef3ab68224c7d908a35f5739ad1711437d82f6beca50279a58eeb7e90e709796`。字节定义是归档收据所列 Git 命令的原始 stdout：固定 base、两个测试路径、完整 blob ID、Myers diff、三行上下文、固定 `a/` 与 `b/` 前缀，关闭 external diff/textconv/rename/color，没有输出后处理。已在独立临时 index 上验证可应用到精确 0f base，并通过当前测试树的反向检查。
 

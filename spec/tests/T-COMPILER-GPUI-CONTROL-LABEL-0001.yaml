@@ -1,9 +1,16 @@
 id: T-COMPILER-GPUI-CONTROL-LABEL-0001
 type: test
 title: Actual Base Button and Label execute compiled native association ownership
-status: draft
+status: removed
 since: 0.3.0-alpha.2
-lifecycleRationale: Source and generated native consumer gates are executable; operating-system accessibility delivery and independent platform review remain separate evidence requirements.
+removedSince: 0.4.0
+replacedBy: T-COMPILER-FOUNDATION-0001
+lifecycleRationale: >-
+  Retired for the new 0.4 compiler by the maintainer-selected foundation decision.
+  This identity and prior criteria remain historical; old implementation, source
+  admission, artifacts and results impose no compatibility or correctness
+  obligation on the new language. The replacement has no executed evidence yet.
+
 cases:
   - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-SOURCE
     title: Complete official prototypes compile through generic atoms
@@ -30,14 +37,14 @@ cases:
 implementations:
   - id: checked-native-label-source
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/gpui-control-label.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-SOURCE]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/gpui-control-label.test.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: generated-official-native-controls
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-control-label/consumer.rs
+    status: missing
     required: true
     consumesCases:
       [
@@ -45,10 +52,11 @@ implementations:
         T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT,
         T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/test/fixtures/gpui-control-label/consumer.rs (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
   - id: native-label-request-leases
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/src/gpui-native-control-label.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -56,12 +64,19 @@ implementations:
         T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT,
         T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL,
       ]
+    notes:
+      - "Retired with the old compiler at the 0.4 foundation: packages/compiler/src/gpui-native-control-label.ts (historical source 67fd94f58372cf35fa929f24ef731416b5817e31). Earlier results are historical only; independent replacement evidence is missing."
 verifies:
   contracts:
     - C-CONTROL-LABEL-0001
   hostCaps:
     - HC-CONTROL-LABEL-0001
 sources:
-  - path: packages/compiler/test/fixtures/gpui-control-label/produce.mjs
-  - path: internal/compiler/gpui-control-label.md
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/packages/compiler/test/fixtures/gpui-control-label/produce.mjs
+  - path: https://github.com/Proto-UI/Proto-UI/blob/67fd94f58372cf35fa929f24ef731416b5817e31/internal/compiler/gpui-control-label.md
 tags: [compiler, gpui, label, native-input, accessibility, lifecycle]
+
+revisions:
+  - version: 0.4.0
+    change: removed
+    summary: Retire the old compiler-specific identity; preserve history and use the independent foundation.

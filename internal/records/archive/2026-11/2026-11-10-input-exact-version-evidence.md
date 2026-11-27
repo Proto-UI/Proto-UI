@@ -30,9 +30,9 @@ Main 预留三个现有 Input browser suite 和新 helper；#1160 owner `SolMore
 
 原始 #812 图保存在 [2ea0499f 目录](../../docs/evidence/input-exact-version/2ea0499f/)。保留了不合格的滚动/裁切尝试，没有以较晚的 stable capture 删除旧失败。特别是 React CDP 图片仍裁掉 preview 顶部，不能据其声称完整 framing 接受。Chinese receipt 中的 Vue2 isolated/main-realm 观察是工具 realm 差异，不是另一套 Playwright 失败的已证实根因。
 
-![历史 2ea0499f WC 初始四个 Base Input，Chinese 页面、light；不是当前候选](../../docs/evidence/input-exact-version/2ea0499f/zh-cn-wc-initial.png)
+![历史 2ea0499f WC 初始四个 Base Input，Chinese 页面、light；不是当前候选](../../../../docs/evidence/input-exact-version/2ea0499f/zh-cn-wc-initial.png)
 
-![历史 2ea0499f Vue2 编辑与只读焦点结果；不是 final 2dd4 或当前候选](../../docs/evidence/input-exact-version/2ea0499f/zh-cn-vue2-edited-readonly-focus-cdp.png)
+![历史 2ea0499f Vue2 编辑与只读焦点结果；不是 final 2dd4 或当前候选](../../../../docs/evidence/input-exact-version/2ea0499f/zh-cn-vue2-edited-readonly-focus-cdp.png)
 
 #885 的四份历史 Read 表示在 [1699b70 目录](../../docs/evidence/input-exact-version/1699b70/)。本地保留不等于已上传；发布必须由 Main 检查图片内容、说明、实际可读 URL 和源版本后完成。
 

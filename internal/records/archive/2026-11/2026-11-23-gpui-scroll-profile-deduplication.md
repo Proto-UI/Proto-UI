@@ -22,7 +22,7 @@ The existing public compiler, GPUI lifecycle, capability, legal-axis and rejecti
 - `packages/compiler/test/gpui-event-notification.test.ts`
 - `packages/compiler/test/gpui-capabilities.test.ts`
 
-The run used Node 24.22.3 and pnpm 10.32.1, Vitest with one worker, and both the default and JSON reporters. Exact argv, timestamps, raw output and source hashes are retained in the [evidence manifest](evidence/2026-11-23-gpui-scroll-profile-deduplication/manifest.json). Source hashes matched before and after the test. Prettier and file-scoped `git diff --check` both exited zero.
+The run used Node 24.22.3 and pnpm 10.32.1, Vitest with one worker, and both the default and JSON reporters. Exact argv, timestamps, raw output and source hashes are retained in the [evidence manifest](https://github.com/Proto-UI/Proto-UI/blob/cae25ae39f926e9556ec40fe2c7ed46a2025091f/internal/records/evidence/2026-11-23-gpui-scroll-profile-deduplication/manifest.json). Source hashes matched before and after the test. Prettier and file-scoped `git diff --check` both exited zero.
 
 No test or assertion was changed to obtain this result. This source validation does not claim new Cargo, browser, macOS, physical accessibility, or hosted acceptance.
 

@@ -27,4 +27,4 @@ The prepared numeric source passed all nine strict comparisons and 28 policy/pro
 
 Only four literals and explanatory/supporting evidence change. Entry points, minification, tree shaking, gzip, external dependencies, diagnostic profiles, Finf expiry, clean-source identity and strict failure behavior are preserved. Rollback of this commit restores the four old ceilings and their observed failures without reverting product code.
 
-The [complete transaction record](2026-11-23-sprint3-package-budget.json) contains the exact revisions, tools, hashes, old and proposed values, source commits, original CI links and raw archives.
+The [complete transaction record](../../2026-11-23-sprint3-package-budget.json) contains the exact revisions, tools, hashes, old and proposed values, source commits, original CI links and raw archives.

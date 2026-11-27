@@ -236,6 +236,16 @@ describe('feedback.semantic-merge.v0', () => {
     expect(r.tokens).toEqual(['border-l-2', 'border-black', 'border-t-2']);
   });
 
+  it('merges conflicting cursor utilities last-wins without erasing scoped variants', () => {
+    expect(mergeTwTokensV0(['cursor-pointer', 'cursor-not-allowed']).tokens).toEqual([
+      'cursor-not-allowed',
+    ]);
+    expect(
+      mergeTwTokensV0(['cursor-pointer', 'data-[disabled]:cursor-not-allowed', 'cursor-default'])
+        .tokens
+    ).toEqual(['cursor-default', 'data-[disabled]:cursor-not-allowed']);
+  });
+
   it('empty input -> empty output', () => {
     const r = mergeTwTokensV0([]);
     expect(r.tokens).toEqual([]);

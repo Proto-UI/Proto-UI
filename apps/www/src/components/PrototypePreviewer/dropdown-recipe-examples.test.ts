@@ -48,7 +48,7 @@ describe('bounded public Shadcn Dropdown recipes', () => {
       const source = readFileSync(getDemoSourcePath(id), 'utf8');
       const scopeImport = "import { withShadcnRheaDemo } from './shadcn-demo-style';\n";
       expect(source.startsWith(scopeImport)).toBe(true);
-      const authoredSource = source.slice(scopeImport.length);
+      const authoredSource = source.slice(scopeImport.length).trimStart();
       if (id === 'demo-shadcn-dropdown-inset') {
         // The inset recipe toggles the real prop through the existing APIs.
         expect(authoredSource).toMatch(/^import type \{ DemoSpec \}/);
@@ -102,7 +102,8 @@ describe('bounded public Shadcn Dropdown recipes', () => {
     }, 20_000);
   }
 
-  it('preserves WithDestructive ordering with grouped actions and destructive Delete', async () => {
+  it('preserves grouped command ordering and the single authored destructive item', async () => {
+    // The public Rhea example groups three ordinary commands separately from Delete.
     const all = nodes((await recipe(recipeIds[0])).root);
     const content = all.find((node) => node.prototypeId === 'shadcn-dropdown-content')!;
     expect(content.children!.map((node) => (node as ProtoNode).prototypeId)).toEqual([
@@ -129,6 +130,8 @@ describe('bounded public Shadcn Dropdown recipes', () => {
       'default',
       'destructive',
     ]);
+    expect(items.filter((node) => node.props?.disabled)).toEqual([]);
+    expect(items[3].props?.disabled).toBeUndefined();
     for (const item of items) expect(item.props?.disabled ?? false).toBe(false);
   });
 
@@ -160,7 +163,7 @@ describe('bounded public Shadcn Dropdown recipes', () => {
   });
 
   for (const locale of ['en', 'zh-cn']) {
-    it(`${locale}: retains My Account, separate previews, readable sources and evidence boundaries`, async () => {
+    it(`${locale}: retains My Account, separate readable examples and the public API`, async () => {
       const oldId = 'demo-shadcn-dropdown-menu';
       const old = await recipe(oldId);
       expect(nodes(old.root).some((node) => node.children?.includes('My Account'))).toBe(true);
@@ -174,8 +177,10 @@ describe('bounded public Shadcn Dropdown recipes', () => {
         expect(readFileSync(sourcePath, 'utf8')).toMatch(/export default/);
       }
       expect(docs).toContain('variant="destructive"');
-      expect(docs).toContain('inset');
+      expect(docs).toMatch(/name: 'inset', type: 'boolean'/);
       expect(docs).toContain('Base');
+      expect(docs).toContain('Rhea');
+      expect(docs).toContain('<ApiPropsTable');
     });
   }
 });
@@ -270,11 +275,29 @@ describe('Dropdown recipe WC source-host rendering', () => {
         expect(icon.querySelector('path, rect, circle, line, polyline, polygon')).not.toBeNull();
       }
       if (id === recipeIds[0]) {
+        // P-BASE-DROPDOWN-MENU-ITEM-DISABLED: focusable, no select or close.
+        // Supply disabled through the real public API, then restore the same
+        // authored destructive Item; the current page has no duplicate row.
+        const disabled = refs.delete;
+        api.setProps('delete', { disabled: true });
+        await vi.waitFor(() => expect(disabled.getAttribute('aria-disabled')).toBe('true'));
         // Observe the initial open-entry focus before requesting a later focus.
         await vi.waitFor(() => expect(document.activeElement).toBe(items[0]));
         const selected = vi.fn();
+        disabled.addEventListener('select', selected);
+        api.call('delete', 'focusSelf', { reason: 'keyboard' });
+        await vi.waitFor(() => expect(document.activeElement).toBe(disabled));
+        for (const type of ['keydown', 'keyup'])
+          disabled.dispatchEvent(
+            new KeyboardEvent(type, { key: 'Enter', bubbles: true, cancelable: true })
+          );
+        expect(selected).not.toHaveBeenCalled();
+        expect(open()).toBe(true);
+        // Enabled destructive is the positive control for the same activation path.
         const enabled = refs.delete;
-        enabled.addEventListener('select', selected);
+        expect(enabled).toBe(disabled);
+        api.setProps('delete', { disabled: false });
+        await vi.waitFor(() => expect(enabled.getAttribute('aria-disabled')).toBe('false'));
         api.call('delete', 'focusSelf', { reason: 'keyboard' });
         await vi.waitFor(() => expect(document.activeElement).toBe(enabled));
         for (const type of ['keydown', 'keyup'])
