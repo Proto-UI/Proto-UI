@@ -494,7 +494,7 @@ try {
         failures.push(...flow.issues);
         if (item.viewport.width === 1440 && flow.columns.length !== 4)
           failures.push('Expected four painted columns at 1440px');
-        if (item.viewport.width === 1440 && flow.enhancedExpected) {
+        if (facts.wideMedia || (item.viewport.width === 1440 && flow.enhancedExpected)) {
           const rowGap = flow.columns[0]?.adjacentGaps[0]?.gap;
           if (
             rowGap === undefined ||
@@ -503,7 +503,7 @@ try {
             !(flow.bottomSpread <= 2 * rowGap)
           )
             failures.push(
-              `Four-column tail spread ${flow.bottomSpread}px must fit two measured row gaps of ${rowGap}px`
+              `${flow.columns.length}-column tail spread ${flow.bottomSpread}px must fit two measured row gaps of ${rowGap}px`
             );
         }
       }

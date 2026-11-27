@@ -4,6 +4,7 @@ import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import type { DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import { createHomepageShowcase } from './homepage-showcase';
+import { HOMEPAGE_GALLERY_IDS } from './homepage-layout-evidence';
 import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 
 // Real prototypes require the same generated host layout rules as the website.
@@ -148,25 +149,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       const view = await mount(family);
       await settle();
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
-      expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
-        'controls',
-        'shortcuts',
-        'milestones',
-        'workspace-analytics',
-        'workspace-command',
-        'ecosystem',
-        'preferences',
-        'workspace-progress',
-        'protocol',
-        'hover',
-        'editor',
-        'workspace-help',
-        'highlights',
-        'overlays',
-        'spark',
-        'choices',
-        'throughput',
-      ]);
+      expect(cards.map((card) => card.dataset.galleryDemo)).toEqual(HOMEPAGE_GALLERY_IDS);
       const analytics = cards.find((card) => card.dataset.galleryDemo === 'workspace-analytics')!;
       expect(analytics.dataset.galleryBody).toBe('edge-media');
       expect(analytics.querySelector('.home-gallery__media')).not.toBeNull();

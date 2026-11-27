@@ -318,7 +318,6 @@ export function createHomepageGalleryParts(
     );
   };
 
-  // Column 1 Top: Title-less high-density UI Elements showcase (shadcn Luma focal card)
   const controls = card(
     zh ? '按钮与选择' : 'Buttons & selection',
     '',
@@ -416,7 +415,6 @@ export function createHomepageGalleryParts(
     { emphasis: 'accent', headless: true }
   );
 
-  // Column 1 Middle: 2x2 interactive ToggleGroup mini-cards (unselectable + real hover & click)
   const shortcutGroups: ReadonlyArray<{
     id: string;
     title: string;
@@ -540,7 +538,6 @@ export function createHomepageGalleryParts(
     }
   );
 
-  // Column 4 Top: Centered high-contrast geometric protocol QR + HoverCard
   const hover = card(
     zh ? '悬浮资料' : 'Profile preview',
     '',
@@ -591,7 +588,6 @@ export function createHomepageGalleryParts(
     { density: 'compact', emphasis: 'quiet', headless: true }
   );
 
-  // Column 4 Middle: Text Editor with Tabs + Toggles + Textarea
   const editor = card(
     zh ? '文本编辑' : 'Text editor',
     zh ? '写下来，再换个角度看。' : 'Write it down. See it take shape.',
@@ -649,7 +645,6 @@ export function createHomepageGalleryParts(
     { emphasis: 'standard' }
   );
 
-  // Column 5 Top: Centered minimal Release / Dialog + Dropdown card
   const dialog = p(
     part('dialog'),
     [
@@ -761,7 +756,6 @@ export function createHomepageGalleryParts(
     { emphasis: 'standard', headless: true }
   );
 
-  // Column 5 Middle: Compact KPI + Edge-to-Edge Area Sparkline card
   const sparkViews = [
     { metric: zh ? '4 套框架' : '4 Runtimes', badge: 'WC · React · Vue' },
     { metric: zh ? '4 套风格' : '4 Styles', badge: 'Shadcn · Brutalist' },
@@ -811,7 +805,6 @@ export function createHomepageGalleryParts(
     }
   );
 
-  // Column 5 Bottom: Rich Notifications checklist with descriptions
   const choices = card(
     zh ? '通知选项' : 'Notifications',
     zh ? '选择希望在演示中开启的提醒类型。' : 'Choose which alerts you want to receive.',
@@ -843,7 +836,6 @@ export function createHomepageGalleryParts(
     { emphasis: 'quiet' }
   );
 
-  // Column 1 Bottom: Release milestones with real Progress bars (balanced bottom horizon)
   const milestoneTile = (
     eyebrow: string,
     figure: string,
@@ -905,7 +897,6 @@ export function createHomepageGalleryParts(
     { density: 'compact', emphasis: 'quiet' }
   );
 
-  // Column 2 Bottom: Adapter parity rows with compact 4-bar indicators
   const parityRows: ReadonlyArray<{ title: string; detail: string; ref: string }> = [
     {
       title: 'Web Components',
@@ -953,7 +944,6 @@ export function createHomepageGalleryParts(
     { density: 'compact', emphasis: 'quiet' }
   );
 
-  // Column 3 Bottom: Quick setup form snippet (balanced bottom horizon)
   const initialTarget = 'react / vue / web-components';
   const initialCommand = 'npx @proto.ui/cli@latest init';
   const protocol = card(
@@ -997,7 +987,6 @@ export function createHomepageGalleryParts(
     { density: 'compact', emphasis: 'quiet' }
   );
 
-  // Column 5 Bottom: Component matrix histogram (balanced bottom horizon)
   const throughput = card(
     zh ? '原型矩阵' : 'Component matrix',
     zh ? '跨设计语言与交互协议的覆盖密度。' : 'Coverage across design languages and protocols.',
@@ -1044,7 +1033,6 @@ export function createHomepageGalleryParts(
     { density: 'compact', emphasis: 'quiet' }
   );
 
-  // Column 4 Bottom: Architecture highlights (balances Col 4 into the shared bottom fade horizon)
   const highlightRows: ReadonlyArray<{
     glyph: HomepageGalleryIcon;
     title: string;
@@ -1105,20 +1093,12 @@ export function createHomepageGalleryParts(
     card,
     analytics: composition.analytics,
     columns(form: DemoNode, analyticsCard: DemoNode = composition.analytics): DemoNode[] {
-      // Each column starts with the run that stays together in both compositions.
-      // Its following siblings can flow independently without moving live controls.
       return [
-        box('home-gallery__column', [controls, shortcuts]),
-        milestones,
-        box('home-gallery__column', [analyticsCard]),
-        composition.command,
-        ecosystem,
-        box('home-gallery__column', [form, composition.progress, protocol]),
-        box('home-gallery__column', [hover]),
-        editor,
-        composition.help,
-        highlights,
-        box('home-gallery__column', [overlays, spark, choices, throughput]),
+        box('home-gallery__column', [controls, shortcuts, milestones]),
+        box('home-gallery__column', [analyticsCard, form, protocol]),
+        box('home-gallery__column', [ecosystem, composition.progress, throughput]),
+        box('home-gallery__column', [hover, editor, composition.help, spark]),
+        box('home-gallery__column', [composition.command, highlights, overlays, choices]),
       ];
     },
     setup(context: DemoSetupContext) {

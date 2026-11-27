@@ -69,9 +69,27 @@ describe('homepage evidence observers', () => {
     desktop.flowDisplay = 'flex';
     desktop.flowReadingFlow = 'flex-visual';
     const positions = desktop.cards.map((card) => ({ rect: card.rect, fragments: card.fragments }));
-    const paintedOrder = [0, 1, 3, 11, 2, 4, 5, 12, 6, 7, 8, 9, 10, 13, 14, 15, 16];
-    paintedOrder.forEach((sourceIndex, index) =>
-      Object.assign(desktop.cards[sourceIndex]!, positions[index])
+    const paintedOrder = [
+      'controls',
+      'shortcuts',
+      'workspace-analytics',
+      'workspace-help',
+      'milestones',
+      'workspace-command',
+      'ecosystem',
+      'highlights',
+      'preferences',
+      'workspace-progress',
+      'protocol',
+      'hover',
+      'editor',
+      'overlays',
+      'spark',
+      'choices',
+      'throughput',
+    ];
+    paintedOrder.forEach((id, index) =>
+      Object.assign(desktop.cards.find((card) => card.id === id)!, positions[index])
     );
     for (const scene of [
       fixture(1856, 2048, [3, 3, 3, 4, 4]),
@@ -119,7 +137,7 @@ describe('homepage evidence observers', () => {
       'outer gallery columns differ from gallery content edges'
     );
     expect(galleryFlowEvidence(scene).issues).toContain(
-      'throughput: gallery card or fragment outside gallery content'
+      'choices: gallery card or fragment outside gallery content'
     );
   });
   it('ends the gallery at the lowest card or its trailing margin', () => {

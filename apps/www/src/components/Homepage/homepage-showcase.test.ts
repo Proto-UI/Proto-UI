@@ -10,6 +10,7 @@ import {
   createProjectionComposition,
 } from '../PrototypePreviewer/projection-composition';
 import { createHomepageShowcase, HOMEPAGE_SHOWCASE_ID } from './homepage-showcase';
+import { HOMEPAGE_GALLERY_IDS } from './homepage-layout-evidence';
 import { PREVIEW_SURFACE_ID } from './homepage-live-preview';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/registry';
 
@@ -231,25 +232,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       for (const child of node.children ?? []) visit(child, cardId);
     };
     visit(root);
-    expect(cards.map((card) => card.id)).toEqual([
-      'controls',
-      'shortcuts',
-      'milestones',
-      'workspace-analytics',
-      'workspace-command',
-      'ecosystem',
-      'preferences',
-      'workspace-progress',
-      'protocol',
-      'hover',
-      'editor',
-      'workspace-help',
-      'highlights',
-      'overlays',
-      'spark',
-      'choices',
-      'throughput',
-    ]);
+    expect(cards.map((card) => card.id)).toEqual(HOMEPAGE_GALLERY_IDS);
     expect(new Set(cards.map((card) => card.density))).toEqual(new Set(['regular', 'compact']));
     expect(new Set(cards.map((card) => card.emphasis))).toEqual(
       new Set(['quiet', 'standard', 'accent'])

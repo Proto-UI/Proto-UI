@@ -1,10 +1,10 @@
 /** Passive geometry evidence only. Never writes to the rendered page. */
 export const WIDE_GALLERY_COLUMNS = [
   ['controls', 'shortcuts', 'milestones'],
-  ['workspace-analytics', 'workspace-command', 'ecosystem'],
-  ['preferences', 'workspace-progress', 'protocol'],
-  ['hover', 'editor', 'workspace-help', 'highlights'],
-  ['overlays', 'spark', 'choices', 'throughput'],
+  ['workspace-analytics', 'preferences', 'protocol'],
+  ['ecosystem', 'workspace-progress', 'throughput'],
+  ['hover', 'editor', 'workspace-help', 'spark'],
+  ['workspace-command', 'highlights', 'overlays', 'choices'],
 ] as const;
 export const HOMEPAGE_GALLERY_IDS = WIDE_GALLERY_COLUMNS.flat();
 const FOUR_GALLERY_COLUMNS = [

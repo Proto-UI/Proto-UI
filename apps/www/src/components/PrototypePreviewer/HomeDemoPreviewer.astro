@@ -626,25 +626,35 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
           flex-direction: column;
           reading-flow: flex-visual;
         }
-        .home-demo-previewer :global(.home-gallery__column) {
-          display: flow-root;
-          break-inside: avoid;
-        }
-        .home-demo-previewer :global(.home-gallery__column:has(> [data-gallery-demo='controls'])),
-        .home-demo-previewer
-          :global(.home-gallery__column:has(> [data-gallery-demo='workspace-analytics'])),
+        .home-demo-previewer :global([data-gallery-demo='controls']),
+        .home-demo-previewer :global([data-gallery-demo='shortcuts']),
+        .home-demo-previewer :global([data-gallery-demo='workspace-analytics']),
         .home-demo-previewer :global([data-gallery-demo='workspace-help']) {
-          order: -2;
+          order: -3;
         }
         .home-demo-previewer :global([data-gallery-demo='milestones']),
-        .home-demo-previewer :global([data-gallery-demo='workspace-command']),
+        .home-demo-previewer :global([data-gallery-demo='workspace-command']) {
+          order: -2;
+        }
         .home-demo-previewer :global([data-gallery-demo='ecosystem']),
         .home-demo-previewer :global([data-gallery-demo='highlights']) {
           order: -1;
         }
+        .home-demo-previewer :global([data-gallery-demo='protocol']),
+        .home-demo-previewer :global([data-gallery-demo='hover']),
+        .home-demo-previewer :global([data-gallery-demo='editor']),
+        .home-demo-previewer :global([data-gallery-demo='overlays']) {
+          order: 1;
+        }
+        .home-demo-previewer :global([data-gallery-demo='spark']),
+        .home-demo-previewer :global([data-gallery-demo='choices']) {
+          order: 2;
+        }
+        .home-demo-previewer :global([data-gallery-demo='throughput']) {
+          order: 3;
+        }
         .home-demo-previewer :global([data-gallery-demo='milestones']),
-        .home-demo-previewer
-          :global(.home-gallery__column:has(> [data-gallery-demo='preferences'])),
+        .home-demo-previewer :global([data-gallery-demo='preferences']),
         .home-demo-previewer :global([data-gallery-demo='editor']) {
           break-before: column;
         }

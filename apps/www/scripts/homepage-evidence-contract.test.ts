@@ -584,25 +584,7 @@ test('actual candidate task driver saves edits, restores a dirty draft, then sav
       locator: locate,
       async evaluateAll(callback: (nodes: Element[]) => unknown) {
         return callback(
-          [
-            'controls',
-            'shortcuts',
-            'milestones',
-            'workspace-analytics',
-            'workspace-command',
-            'ecosystem',
-            'preferences',
-            'workspace-progress',
-            'protocol',
-            'hover',
-            'editor',
-            'workspace-help',
-            'highlights',
-            'overlays',
-            'spark',
-            'choices',
-            'throughput',
-          ].map((id) => {
+          HOMEPAGE_GALLERY_IDS.map((id) => {
             const el = previewWindow.document.createElement('div');
             el.setAttribute('data-gallery-demo', id);
             return el as unknown as Element;
