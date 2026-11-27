@@ -32,6 +32,7 @@ Run commands from the repository root:
 - English docs live under `src/content/docs/en/`.
 - Chinese docs live under `src/content/docs/zh-cn/`.
 - Prototype demos are registered through `src/components/PrototypePreviewer/`.
+- Startup browser evidence records the range around the selected Runtime control's contents as `height` and the vertical extent of its text fragments as `textHeight`. At ordinary widths the label must fit on one line with both ends inside the control.
 - The default Shadcn, Brutalist and Bootstrap Popover recipes include their outside-focus Button as a `P-BASE-BUTTON` auxiliary. The strict content closure covers that dismissal destination as well as the Popover parts.
 - Current-article reveal follows the nearest actual scroll viewport through native slots and shadow hosts when the retained Sidebar tree moves into public Content. The nav remains the route boundary; the viewport may enclose it. Document scrolling and focus remain untouched, and input on that viewport yields the bounded reveal request.
 - Sidebar unit controls cover light DOM and real shadow-host ancestry with injected geometry. The existing `homepage-dogfood.browser.test.ts` carrier owns native slot-assignment coverage with real CSS, wheel input and viewport handback; the unit host's missing `assignedSlot` accessor is never replaced with a fabricated answer.
