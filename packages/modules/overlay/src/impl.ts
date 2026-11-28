@@ -1,3 +1,4 @@
+import { runAllSteps as completeOverlayResourceWork } from '@proto.ui/core/internal';
 import { OverlayTargetAlignment } from './target-alignment-binding';
 import { OverlaySizeMatch } from './size-match-binding';
 import { joinEscapeScope, ownsEscapeSample } from './escape-coordinator';
@@ -148,22 +149,6 @@ function revokeHostResource(lease: HostResourceLease): void {
   const release = lease.release;
   lease.release = null;
   release?.();
-}
-
-function completeOverlayResourceWork(steps: readonly (() => void)[]): void {
-  let failed = false;
-  let firstError: unknown;
-  for (const step of steps) {
-    try {
-      step();
-    } catch (error) {
-      if (!failed) {
-        failed = true;
-        firstError = error;
-      }
-    }
-  }
-  if (failed) throw firstError;
 }
 
 type ReconciliationRequest = {

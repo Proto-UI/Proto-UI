@@ -509,25 +509,39 @@ export function siteTypographyParticipant(
           scope: batch,
           activate() {
             if (disposed) throw new Error('[SiteTypography] Cannot activate a disposed batch.');
-            preserveSelection(document, () => {
-              for (const view of views) {
-                if (!view.native.isConnected) continue;
-                const previous = activeViews.get(view.native);
-                const content = sourceNodes(view.native);
-                view.slot.append(...content);
-                // Leave a retired carrier under its own hidden batch, not in
-                // native semantic content. It has no source nodes to duplicate.
-                if (previous && previous !== view) {
-                  previous.home.append(previous.carrier);
+            // Publication rollback may already have restored this exact owner
+            // before the controller reactivates its retained composite. Moving
+            // the same source again disturbs native selection and forces layout.
+            const pending = views.filter(
+              (view) =>
+                view.native.isConnected &&
+                (activeViews.get(view.native) !== view ||
+                  view.native.childNodes.length !== 1 ||
+                  view.native.firstChild !== view.carrier ||
+                  view.native.dataset.typographyOwner !== ownerId ||
+                  view.native.dataset.typographyRuntime !== runtime ||
+                  view.native.dataset.typographyFamily !== family ||
+                  view.native.dataset.typographyGeneration !== String(request.generation))
+            );
+            if (pending.length)
+              preserveSelection(document, () => {
+                for (const view of pending) {
+                  const previous = activeViews.get(view.native);
+                  const content = sourceNodes(view.native);
+                  view.slot.append(...content);
+                  // Leave a retired carrier under its own hidden batch, not in
+                  // native semantic content. It has no source nodes to duplicate.
+                  if (previous && previous !== view) {
+                    previous.home.append(previous.carrier);
+                  }
+                  view.native.append(view.carrier);
+                  activeViews.set(view.native, view);
+                  view.native.dataset.typographyOwner = ownerId;
+                  view.native.dataset.typographyRuntime = runtime;
+                  view.native.dataset.typographyFamily = family;
+                  view.native.dataset.typographyGeneration = String(request.generation);
                 }
-                view.native.append(view.carrier);
-                activeViews.set(view.native, view);
-                view.native.dataset.typographyOwner = ownerId;
-                view.native.dataset.typographyRuntime = runtime;
-                view.native.dataset.typographyFamily = family;
-                view.native.dataset.typographyGeneration = String(request.generation);
-              }
-            });
+              });
             committed = selected;
             committedCompact = isCompact;
             committedHeroViewport = heroScale;

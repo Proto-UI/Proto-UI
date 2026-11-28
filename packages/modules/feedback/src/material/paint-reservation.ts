@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import {
   cap,
   type MaterialPaintReservation,
@@ -358,16 +359,6 @@ export class MaterialPaintReservationRegistry {
       entry.subscriptions = [];
     }
     this.declarations.clear();
-    let failure: unknown;
-    let failed = false;
-    for (const release of cleanup) {
-      try {
-        release();
-      } catch (error) {
-        if (!failed) failure = error;
-        failed = true;
-      }
-    }
-    if (failed) throw failure;
+    runAllSteps(cleanup);
   }
 }

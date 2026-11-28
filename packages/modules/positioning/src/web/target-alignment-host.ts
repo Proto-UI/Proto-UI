@@ -2,6 +2,7 @@ import { ownStyles } from './owned-style-lease';
 import { observeRootSpace } from './root-space-observer';
 import {
   createBorderBoxSizeLease,
+  type BorderBoxSizeResult,
   hasBorderBoxInlineClipping,
   layoutInlineStart,
   measureBorderBoxInlineGutter,
@@ -156,6 +157,21 @@ export function createTargetAlignmentLease(
       sizeLease?.abort(reason);
       report({ status: 'unavailable', reason });
     };
+    const reportSizeFailure = (
+      result: Extract<BorderBoxSizeResult, { kind: 'pending' | 'unavailable' }>
+    ) => {
+      if (result.kind === 'pending') report({ status: 'pending-target', reason: 'missing-target' });
+      else if (result.reason === 'detached-target')
+        report({ status: 'pending-target', reason: 'detached-target' });
+      else report({ status: 'unavailable', reason: result.reason });
+    };
+    const prepareSize = () => {
+      if (!sizeLease) return true;
+      const result = sizeLease.prepare();
+      if (result.kind === 'prepared') return true;
+      reportSizeFailure(result);
+      return false;
+    };
     restore = () => {
       owned.restore();
       sizeLease?.restore();
@@ -182,9 +198,39 @@ export function createTargetAlignmentLease(
       frame.isConnected &&
       keys.every((key) => targets[key].isConnected && targets[key].ownerDocument === doc) &&
       sizeTargets.every((target) => target.isConnected && target.ownerDocument === doc);
+    const viewportPending = () => {
+      const root = doc.documentElement;
+      const rootWidth = root.clientWidth,
+        rootHeight = root.clientHeight;
+      const width = rootWidth > 0 ? rootWidth : view.innerWidth;
+      const height = rootHeight > 0 ? rootHeight : view.innerHeight;
+      const c = descriptor.constraints;
+      // The numerical plan deliberately preserves a tiny viewport's derived
+      // negative maximum. It is not a CSS length or a lost style claim. Keep
+      // this current lease pending until there is a positive usable block span.
+      // Invalid dimensions/constraints still reach the normal rejection path.
+      return (
+        Number.isFinite(width) &&
+        Number.isFinite(height) &&
+        width >= 0 &&
+        height >= 0 &&
+        Number.isFinite(c.margin * 2) &&
+        c.margin >= 0 &&
+        Number.isFinite(c.minimumTargetSpanCount) &&
+        c.minimumTargetSpanCount > 0 &&
+        c.boundary === 'layout-viewport' &&
+        c.inlineOverflow === 'preserve-start' &&
+        typeof c.expandOnScroll === 'boolean' &&
+        (width === 0 || height <= c.margin * 2)
+      );
+    };
     const readPlan = (): TargetAlignmentPlan | null => {
       if (!live() || !connected()) {
         if (live()) report({ status: 'pending-target', reason: 'detached-target' });
+        return null;
+      }
+      if (viewportPending()) {
+        report({ status: 'pending-target', reason: 'missing-target' });
         return null;
       }
       const reference = targets.blockReference.getBoundingClientRect();
@@ -309,6 +355,20 @@ export function createTargetAlignmentLease(
       let stable = false;
       let nextReferenceBox: readonly number[] = [];
       try {
+        const unavailable = sizeLease?.checkAvailability();
+        if (unavailable) {
+          reportSizeFailure(unavailable);
+          return;
+        }
+        if (!owned.isCurrent()) {
+          ownershipLost = true;
+          rejectAdmission('ownership-lost');
+          return;
+        }
+        if (viewportPending()) {
+          report({ status: 'pending-target', reason: 'missing-target' });
+          return;
+        }
         const reference = targets.blockReference.getBoundingClientRect();
         nextReferenceBox = [reference.left, reference.top, reference.width, reference.height];
         const referenceChanged =
@@ -327,17 +387,7 @@ export function createTargetAlignmentLease(
           '--proto-ui-anchor-height': `${targets.blockReference.offsetHeight}px`,
         }))
           if (!write(name, value)) return;
-        if (sizeLease) {
-          const sized = sizeLease.prepare();
-          if (sized.kind !== 'prepared') {
-            if (sized.kind === 'pending')
-              report({ status: 'pending-target', reason: 'missing-target' });
-            else if (sized.reason === 'detached-target')
-              report({ status: 'pending-target', reason: 'detached-target' });
-            else report({ status: 'unavailable', reason: sized.reason });
-            return;
-          }
-        }
+        if (!prepareSize()) return;
         // Inline constraints can reflow preceding rows. Never use pre-width block metrics.
         let candidate = readPlan();
         if (!candidate) return;
@@ -349,17 +399,7 @@ export function createTargetAlignmentLease(
             [candidate.inline.edge === 'left' ? 'right' : 'left']: '',
           }))
             if (!write(name, value)) return;
-          if (sizeLease) {
-            const sized = sizeLease.prepare();
-            if (sized.kind !== 'prepared') {
-              if (sized.kind === 'pending')
-                report({ status: 'pending-target', reason: 'missing-target' });
-              else if (sized.reason === 'detached-target')
-                report({ status: 'pending-target', reason: 'detached-target' });
-              else report({ status: 'unavailable', reason: sized.reason });
-              return;
-            }
-          }
+          if (!prepareSize()) return;
           const constrained = readPlan();
           if (!constrained) return;
           plan = constrained;
@@ -389,26 +429,14 @@ export function createTargetAlignmentLease(
             // solve pass; it cannot silently admit a plan for an earlier size.
             const sized = sizeLease?.verify();
             if (sized?.kind === 'reference-changed') {
-              const prepared = sizeLease!.prepare();
-              if (prepared.kind !== 'prepared') {
-                if (prepared.kind === 'pending')
-                  report({ status: 'pending-target', reason: 'missing-target' });
-                else if (prepared.reason === 'detached-target')
-                  report({ status: 'pending-target', reason: 'detached-target' });
-                else report({ status: 'unavailable', reason: prepared.reason });
-                return;
-              }
+              if (!prepareSize()) return;
               const resized = readPlan();
               if (!resized) return;
               candidate = resized;
               continue;
             }
             if (sized?.kind === 'unavailable' || sized?.kind === 'pending') {
-              if (sized.kind === 'pending')
-                report({ status: 'pending-target', reason: 'missing-target' });
-              else if (sized.reason === 'detached-target')
-                report({ status: 'pending-target', reason: 'detached-target' });
-              else report({ status: 'unavailable', reason: sized.reason });
+              reportSizeFailure(sized);
               return;
             }
             for (const target of sizeTargets) {
@@ -446,7 +474,7 @@ export function createTargetAlignmentLease(
       }
     };
     const onScroll = () => {
-      if (!live() || writing || ownershipLost || !plan) return;
+      if (!live() || writing || ownershipLost || !plan || viewportPending()) return;
       const actualScroll = targets.scrollport.scrollTop;
       const result = reduceScrollExpansion({
         enabled: expand,

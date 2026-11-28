@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { revealHeaderPreferences } from './site-header-browser';
+import { assertClosedHeaderState } from '../../../../scripts/mobile-interaction-evidence-contract';
 import { observeContentsWheel } from './contents-wheel-evidence';
 import {
   prepareUtilityFamilyReadObservation,
@@ -2548,17 +2549,34 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         // app DOM or force a hidden Select to obtain its focus-ring capture.
         stage = `${runtime}-closed`;
         await page.keyboard.press('Escape');
+        const closeDeadline = performance.now() + 1000;
         const menu = page.locator(
           '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
         );
-        await expect.poll(() => menu.getAttribute('aria-expanded')).toBe('false');
-        const preferences = header.locator('[data-site-header-preferences]');
-        // Closing makes the retained exit surface inert immediately; removal
-        // follows the admitted Header transition. Both obligations still apply.
-        expect(await preferences.evaluate((node) => !!node.closest('[hidden], [inert]'))).toBe(
-          true
-        );
-        await expect.poll(() => preferences.isVisible(), { timeout: 1000 }).toBe(false);
+        const closed = await header.evaluate((root) => {
+          const menus = root.querySelectorAll<HTMLElement>(
+            '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+          );
+          const panels = root.querySelectorAll<HTMLElement>('[data-site-header-panel]');
+          return {
+            menuCount: menus.length,
+            panelCount: panels.length,
+            expanded: menus[0]?.getAttribute('aria-expanded') ?? null,
+            hidden: panels[0]?.hidden ?? false,
+            inert: panels[0]?.inert ?? false,
+            menuFocused: menus[0] === document.activeElement,
+          };
+        });
+        records.push({ stage: `${stage}-immediate`, facts: closed });
+        assertClosedHeaderState(closed);
+        // The existing public leave phase stays inert while painted. Its
+        // physical hide shares the original close budget with the first read.
+        const remainingCloseMs = closeDeadline - performance.now();
+        expect(remainingCloseMs).toBeGreaterThan(0);
+        await header
+          .locator('[data-site-header-panel]')
+          .waitFor({ state: 'hidden', timeout: remainingCloseMs });
+        expect(await header.locator('[data-site-header-preferences]').isVisible()).toBe(false);
         expect((await header.boundingBox())!.height).toBeLessThanOrEqual(64);
         await page.setViewportSize({ width: 320, height: 300 });
         await menu.focus();

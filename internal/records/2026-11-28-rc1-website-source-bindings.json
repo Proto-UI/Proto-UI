@@ -1,0 +1,107 @@
+{
+  "kind": "source-only-reviewed-binding-renewal",
+  "date": "2026-11-28",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "reviewedCandidate": {
+    "commit": "d858406214482b9700e60ca425ef4e9ed8219da8",
+    "tree": "82cb2b8301fa80ada44f33fd0cf90b326665bc05",
+    "localSourceEquivalent": "998991ea5033257e161863ded3b910e4ce6732fb"
+  },
+  "trigger": {
+    "runId": 46161223435,
+    "jobId": 141028837410,
+    "issues": 8,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/46161223435/job/141028837410"
+  },
+  "rows": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
+      "reviewed": {
+        "commit": "82fcc48ccced0b4742d728dbc311468007949010",
+        "blob": "7650005acc4d69bc960e5bfd872ad647ac790794",
+        "sha256": "2402bbbce5176ba5b786780352322711aa3f33f33389e435a100604bb6080a74"
+      },
+      "currentSha256": "7e981a899d86d365dcb202b33b7cd90b3018d5c96ebee7669dd2fcbe38cdcc00",
+      "currentBlob": "f17db5b89d9f2e8fa65bdf3c075f82d5f11bf580",
+      "owners": "`www.demo.demo-matrix`",
+      "diffLines": 53,
+      "oldLines": 227,
+      "currentLines": 236,
+      "importDeclarationsIdentical": true,
+      "importDeclarationCount": 2,
+      "review": "Changes only diagnostic error text from a stale literal60000ms to the actual unchanged timeout/deadline difference. The native initialization and case budgets, polling and activation procedure are unchanged."
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "reviewed": {
+        "commit": "82fcc48ccced0b4742d728dbc311468007949010",
+        "blob": "7283d029e71470d51a56843810b0bf9426718bf4",
+        "sha256": "c20f9feb33efc247708eeaba3aecbb22405539245860ca140e6aecb64391727e"
+      },
+      "currentSha256": "2dea5284cd8c5067116b3ca604e48de48e0b7743ab34f935dff81c032b5c8147",
+      "currentBlob": "2e29d3c1a5a8ebfcb9d6f9282e3bd07a8decc612",
+      "owners": "`www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle`",
+      "diffLines": 120,
+      "oldLines": 1129,
+      "currentLines": 1155,
+      "importDeclarationsIdentical": true,
+      "importDeclarationCount": 21,
+      "review": "Retains the failed prepared Search Dialog separately, seals all failed portals and disposes that modal before retained-focus unlock; passive roots retain deferred cleanup plus flush-on-destroy. Failed terminal wrappers leave layout before retained Typography/source Selection restoration, while preparing generations keep their layout. Retained Typography reactivation and synchronous disposal fallback preserve existing source ownership."
+    },
+    {
+      "path": "apps/www/src/components/site-search-commands.ts",
+      "reviewed": {
+        "commit": "fc369f6ff93993c308f9362eccaa3bdad682f23f",
+        "blob": "cddc12e9ba5bb37a30ff7a854da09c4681e5f91f",
+        "sha256": "ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b"
+      },
+      "currentSha256": "ae4733a1ce26a4287119c560ba3dd8bf1454d6a8a2eb8af25a25926e19f946b8",
+      "currentBlob": "3df0bc793bc241fe8a19ea4eeadcb89c543b6674",
+      "owners": "`www.search.dialog`, `www.search.input-results`, `www.search.launcher`",
+      "diffLines": 69,
+      "oldLines": 922,
+      "currentLines": 928,
+      "importDeclarationsIdentical": true,
+      "importDeclarationCount": 17,
+      "review": "Captures owned Homepage Dialog focus once before external portals become inert and before the deferred lock. Existing active/current/owner/generation/open-session guards remain; unlock resets the capture marker and disposal clears retained focus. All static and dynamic import declarations are byte-identical to the reviewed body, including the type-only ExposeState and three exact Lucide icons."
+    },
+    {
+      "path": "apps/www/src/components/site-typography.ts",
+      "reviewed": {
+        "commit": "fc369f6ff93993c308f9362eccaa3bdad682f23f",
+        "blob": "8f0bd38eb52ffaa7ecf14ecc02a98b1de4f8e457",
+        "sha256": "efa045ac360cb01c468b2153315f36d9ecfa4af550f706cb3fb06c64a31c559b"
+      },
+      "currentSha256": "95e3b925c7cbe349723bed3e381d649842a9af7b73a7fb0fa36ee80833e1e75a",
+      "currentBlob": "a4e1a97cf663461ce6222ffbdfaed09af3c7c09a",
+      "owners": "`www.content.typography-presentation`",
+      "diffLines": 62,
+      "oldLines": 553,
+      "currentLines": 567,
+      "importDeclarationsIdentical": true,
+      "importDeclarationCount": 10,
+      "review": "Skips repeat source movement only when the current carrier, native child layout and every owner/runtime/family/generation attribute already match. Disconnected or changed physical/source owners still take the existing activation path and preserve native Selection. No import changes."
+    }
+  ],
+  "searchImporterGuard": {
+    "path": "apps/www/src/components/site-search-commands.ts",
+    "before": "ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b",
+    "after": "ae4733a1ce26a4287119c560ba3dd8bf1454d6a8a2eb8af25a25926e19f946b8",
+    "specifiersUnchanged": [
+      "@proto.ui/module-expose-state",
+      "../../../../packages/prototypes/lucide/src/icons/search",
+      "../../../../packages/prototypes/lucide/src/icons/arrow-right",
+      "../../../../packages/prototypes/lucide/src/icons/x"
+    ]
+  },
+  "retained": {
+    "allMatrixRowsUnchanged": true,
+    "allSourceOwnerSetsUnchanged": true,
+    "otherSourceBindingsUnchanged": true,
+    "importEdgesAdded": 0,
+    "allowlistScopeExpanded": false,
+    "frozenGitHubSourceLedgerChanged": false,
+    "evidenceDisposition": "Existing source, lifecycle, native, assistive-technology, runtime and full-release debt remains with its original owners and evidence sources. This renewal records the reviewed bodies only."
+  }
+}

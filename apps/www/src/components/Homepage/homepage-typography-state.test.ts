@@ -432,6 +432,141 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     expect(preparation.count).toBe(preparations + 1);
   }, 20_000);
 
+  it('retires failed layout and restores retained hosts before preserving typography selection on rollback', async () => {
+    let faulted = false;
+    const generationsAtTypographyRestore: string[][] = [];
+    const layoutsAtTypographyRestore: Array<Array<{ generation: string; display: string }>> = [];
+    preparation.next = async (candidate) => ({
+      ...candidate,
+      activate() {
+        if (faulted) {
+          generationsAtTypographyRestore.push(
+            [
+              ...document.querySelectorAll<HTMLElement>(
+                '[data-projection-generation-state="active"]'
+              ),
+            ].map((host) => host.dataset.projectionGenerationHost!)
+          );
+          layoutsAtTypographyRestore.push(
+            [...document.querySelectorAll<HTMLElement>('[data-projection-generation-host]')].map(
+              (host) => ({
+                generation: host.dataset.projectionGenerationHost!,
+                display: getComputedStyle(host).display,
+              })
+            )
+          );
+        }
+        candidate.activate();
+      },
+    });
+    handle = initHomepageRuntime(document.querySelector('[data-homepage-runtime]')!)!;
+    await waitForHomepageStartup();
+    const originalSurface = surface();
+    const before = handle.getSnapshot();
+    const requested = deferred<{ promise: Promise<projectionScope.ProjectionScopeSnapshot> }>();
+    const request = homepageController!.request;
+    vi.spyOn(homepageController!, 'request').mockImplementationOnce((...args) => {
+      const promise = request(...args);
+      requested.resolve({ promise });
+      return promise;
+    });
+    const applyFamily = siteFamily.applySiteLibraryFamily;
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(siteFamily, 'applySiteLibraryFamily').mockImplementation((document, family) => {
+      applyFamily(document, family);
+      if (family === 'brutalist') {
+        faulted = true;
+        throw new Error('injected page publication failure');
+      }
+    });
+    select('family', 'brutalist');
+    await expect((await requested.promise).promise).rejects.toThrow(
+      'injected page publication failure'
+    );
+    await expect
+      .poll(
+        () => document.querySelector<HTMLElement>('[data-homepage-runtime]')!.dataset.runtimeState
+      )
+      .toBe('error');
+    expect(generationsAtTypographyRestore.length).toBeGreaterThan(0);
+    expect(
+      generationsAtTypographyRestore.every(
+        (generations) =>
+          generations.length > 0 &&
+          generations.every((generation) => generation === String(before.generation))
+      )
+    ).toBe(true);
+    expect(
+      layoutsAtTypographyRestore.some((hosts) =>
+        hosts.some(({ generation }) => generation !== String(before.generation))
+      )
+    ).toBe(true);
+    expect(
+      layoutsAtTypographyRestore.every((hosts) =>
+        hosts.every(({ generation, display }) =>
+          generation === String(before.generation) ? display !== 'none' : display === 'none'
+        )
+      )
+    ).toBe(true);
+    expect(surface()).toBe(originalSurface);
+    expect(handle.getSnapshot()).toEqual(before);
+  }, 20_000);
+
+  it('still restores retained source before failed batch disposal when retained interaction activation throws', async () => {
+    let faulted = false;
+    let retainedControlWrapped = false;
+    const materialize = materialization.materializeProjectionCandidate;
+    vi.spyOn(materialization, 'materializeProjectionCandidate').mockImplementation(
+      async (request, options) => {
+        const candidate = await materialize(request, options);
+        if (request.generation !== 1 || retainedControlWrapped) return candidate;
+        retainedControlWrapped = true;
+        return {
+          ...candidate,
+          activate() {
+            if (faulted) throw new Error('injected retained interactive activation failure');
+            candidate.activate();
+          },
+        };
+      }
+    );
+    const before = await editGallery();
+    const originalSurface = surface();
+    const requested = deferred<{ promise: Promise<projectionScope.ProjectionScopeSnapshot> }>();
+    const request = homepageController!.request;
+    vi.spyOn(homepageController!, 'request').mockImplementationOnce((...args) => {
+      const promise = request(...args);
+      requested.resolve({ promise });
+      return promise;
+    });
+    const sourceAtFailedDisposal: Element[] = [];
+    preparation.next = async (candidate) => ({
+      ...candidate,
+      dispose() {
+        sourceAtFailedDisposal.push(surface());
+        return candidate.dispose();
+      },
+    });
+    const applyFamily = siteFamily.applySiteLibraryFamily;
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(siteFamily, 'applySiteLibraryFamily').mockImplementation((document, family) => {
+      applyFamily(document, family);
+      if (family === 'brutalist') {
+        faulted = true;
+        throw new Error('injected page publication failure');
+      }
+    });
+    select('family', 'brutalist');
+    await expect((await requested.promise).promise).rejects.toThrow(
+      'injected page publication failure'
+    );
+    await expect.poll(() => sourceAtFailedDisposal.length).toBe(1);
+    expect(sourceAtFailedDisposal[0]).toBe(originalSurface);
+    expect(surface()).toBe(originalSurface);
+    expect(document.querySelector('h1')!.textContent).toBe('Stable original source');
+    expect(handle!.getSnapshot()).toEqual(before.snapshot);
+  }, 20_000);
+
   it('a source added during a failed publication joins the retained generation', async () => {
     const before = await editGallery();
     const held = holdNext();
