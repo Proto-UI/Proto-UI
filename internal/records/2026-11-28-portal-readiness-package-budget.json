@@ -1,0 +1,124 @@
+{
+  "acceptedCapability": "React & Vue portal subtree focus readiness and visibility gating (#2002 commit 42950867f, #2005 commit 82fcc48cc)",
+  "redCiReference": {
+    "head": "43fa70c42841f903b6ebc2ae13e5a6201b6e8584",
+    "run": 46064929629,
+    "artifact": 15229439990,
+    "reportSha256": "bb6823c9495b7d9123060ce14ab02b77df2508f4d496763b140dcc701e60eb47",
+    "environment": {
+      "node": "v24.22.3",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "note": "CI Run 46064929629 on main 43fa70c42 (post-#2002) failed strict whole-entry budgets only on adapter-react root (182,793 > 182,550) and adapter-vue root (181,642 > 181,400)."
+  },
+  "candidate": {
+    "head": "82fcc48ccced0b4742d728dbc311468007949010",
+    "tree": "e68f1176e42bcbfa427050a587fd1c455615f31b",
+    "sourceFingerprintSha256": "8ebd5f26421e0b7b20591931cc1ae3d2b952744d63a744e8a31781192b65275c",
+    "reportSha256": "2bd91e4dd042f7f08fac9d16c836cedcfa0369b75fde9ace2380ccfa1439fabe",
+    "measurementScope": "local-linux-x64-equivalent-to-canonical-ci",
+    "canonicalCiStatus": "pending-post-merge-ci-dispatch",
+    "environment": {
+      "node": "v24.22.1",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "environmentEquivalence": {
+      "identicalUnchangedEntries": [
+        "lucide/icons/x",
+        "lucide root",
+        "core root",
+        "runtime root",
+        "adapter-web-component root",
+        "prototypes-base/button",
+        "prototypes-shadcn/button"
+      ],
+      "verified": "All seven unchanged whole-entry outputs match canonical CI run 46064929629 bit-for-bit in both minifiedSha256 and gzipBytes under identical zlib (1.3.2.1-motley-285e94b), esbuild (0.25.12), linux/x64, and externalSha256."
+    }
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "transactionBase": "82fcc48ccced0b4742d728dbc311468007949010",
+  "bundleInputDeltaSinceCandidate": [],
+  "entries": [
+    {
+      "entry": "adapter-react root",
+      "oldCeiling": 182550,
+      "redCiRun": {
+        "minifiedBytes": 631115,
+        "minifiedSha256": "e16bc0ab158928fc5160a298f60a1b1bf5c09dc502e59fecda08b495e77e9f3c",
+        "gzipBytes": 182793,
+        "pass": false
+      },
+      "after": {
+        "minifiedBytes": 631314,
+        "minifiedSha256": "9181632c4f836464d0942c2b21132032426442555d410e4d135153a2562269e0",
+        "gzipBytes": 182851,
+        "pass": false
+      },
+      "gzipDeltaFromRedCi": 58,
+      "gzipOverOldCeiling": 301,
+      "newCeiling": 182950,
+      "headroom": 99,
+      "changedInputsSinceRedCi": [
+        {
+          "path": "packages/adapters/react/src/adapt.ts",
+          "oldSourceSha256": "68761c4a6488f82c3e0063b783965e589df8e54dfd60abf56178b75cc8392d0c",
+          "newSourceSha256": "3f2df842cbbc90b414476cb79f26ac459bfbcf1bd520fb5b8d10560491b2edff",
+          "oldRetainedBytes": 15896,
+          "newRetainedBytes": 16095
+        }
+      ],
+      "redCiClosure": "ddf5b3568dc6ce6e5ef8f48bd2bf0f7ad2436e64a5f6e44248257b1baa281f9b",
+      "afterClosure": "6ca1bc875a381426d9dcdcc9593d579df66eb3d88f49e54264dd168e771fc4e5",
+      "addedOrRemovedInputs": []
+    },
+    {
+      "entry": "adapter-vue root",
+      "oldCeiling": 181400,
+      "redCiRun": {
+        "minifiedBytes": 626479,
+        "minifiedSha256": "fe5ca2b6255b2b29b3a29ec64793278be0b242b15c7172111f49dbea8c5e85d1",
+        "gzipBytes": 181642,
+        "pass": false
+      },
+      "after": {
+        "minifiedBytes": 626742,
+        "minifiedSha256": "5eff2d5aa9ea9cdc278854c5b2d5f378749c67e99b3468f0c930d28202232f98",
+        "gzipBytes": 181716,
+        "pass": false
+      },
+      "gzipDeltaFromRedCi": 74,
+      "gzipOverOldCeiling": 316,
+      "newCeiling": 181800,
+      "headroom": 84,
+      "changedInputsSinceRedCi": [
+        {
+          "path": "packages/adapters/vue/src/adapt.ts",
+          "oldSourceSha256": "eee54a95657776e902611a1455f69aa138dd07d2d85ea7d58631a88089d06881",
+          "newSourceSha256": "9230c952af0523aed14f4fcaae286706e408fc4a611b905e48793ac85aace118",
+          "oldRetainedBytes": 13371,
+          "newRetainedBytes": 13634
+        }
+      ],
+      "redCiClosure": "bbc1041be14a68b4ebc8d4f32be6d92460d4e5fe4c88c4b735f6942aee9ec780",
+      "afterClosure": "bb56bd28644a2a2d4cefffc90458c3cb10a9a8f9f594adb54b51ee669f22710b",
+      "addedOrRemovedInputs": []
+    }
+  ],
+  "rationale": "Input membership is unchanged across both adapter roots (353/250 for adapter-react root, 352/249 for adapter-vue root; zero added or removed modules, zero duplicate runtime copies). Growth comes solely from the accepted React and Vue portal subtree readiness registration (#2002) and style-reveal subtree wake + visibility focus gating (#2005) in packages/adapters/{react,vue}/src/adapt.ts. Each ceiling adds bounded <0.06% headroom (99 B / 84 B) rounded to a 50/100 B boundary. All seven other whole-entry ceilings remain unchanged and passing.",
+  "rollback": "Restore the prior two ceilings (182,550 / 181,400) if reverting the React and Vue portal subtree readiness and visibility focus-gate slices or after canonical measurements support lower limits."
+}
