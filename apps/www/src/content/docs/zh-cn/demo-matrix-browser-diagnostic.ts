@@ -11,6 +11,8 @@ const TRACE_CHUNK_LIMIT = 256;
 // The 6ccb receipt hit the chunk cap with timeline events before any profile
 // facts were retained. Keep one early CPU-only window; never restart it.
 const TRACE_CATEGORIES = ['disabled-by-default-v8.cpu_profiler'];
+const TIMELINE_CATEGORIES = ['devtools.timeline', 'toplevel'];
+const TIMELINE_CHUNK_BYTES = 64 * 1024;
 
 async function bounded<T>(work: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -51,7 +53,11 @@ const publicUrl = (value: unknown) => {
 
 /** Only timing, process/thread names and script-frame/profile facts survive.
  * Never retain arbitrary trace arguments, source text, screenshots or request payloads. */
-function traceEvent(value: unknown, truncated: () => void): ObjectValue | undefined {
+function traceEvent(
+  value: unknown,
+  truncated: () => void,
+  timelineOnly = false
+): ObjectValue | undefined {
   const source = object(value);
   if (!source) return;
   const result: ObjectValue = {};
@@ -87,6 +93,27 @@ function traceEvent(value: unknown, truncated: () => void): ObjectValue | undefi
   const keptArgs: ObjectValue = {};
   if (source.ph === 'M' && ['thread_name', 'process_name'].includes(String(source.name)))
     keptArgs.name = text(args.name);
+  if (timelineOnly) {
+    // Duration fields above preserve both complete slices and begin/end pairs.
+    // Counts explain layout scope without retaining DOM text, script stacks,
+    // URLs, CPU samples, heap facts, screenshots or arbitrary trace arguments.
+    const counts = (input: ObjectValue) => {
+      const kept: ObjectValue = {};
+      for (const key of ['dirtyObjects', 'totalObjects', 'elementCount'])
+        if (finite(input[key])) kept[key] = input[key];
+      if (typeof input.partialLayout === 'boolean') kept.partialLayout = input.partialLayout;
+      return kept;
+    };
+    Object.assign(keptArgs, counts(args));
+    for (const key of ['beginData', 'endData', 'data']) {
+      const input = object(args[key]);
+      if (!input) continue;
+      const kept = counts(input);
+      if (Object.keys(kept).length) keptArgs[key] = kept;
+    }
+    if (Object.keys(keptArgs).length) result.args = keptArgs;
+    return result;
+  }
   const data = object(args.data);
   if (data) {
     const kept: ObjectValue = {};
@@ -133,11 +160,18 @@ export async function startMatrixBrowserDiagnostic(
     sourceSha: string;
     caseName: string;
     phase(): string;
+    traceMode?: 'cpu' | 'timeline';
   }
 ) {
   if (!options.enabled) return { finish: async () => {} };
+  const timelineOnly = options.traceMode === 'timeline';
+  const categories = timelineOnly ? TIMELINE_CATEGORIES : TRACE_CATEGORIES;
   const startedAt = Date.now();
-  const directory = join(options.directory, 'demo-matrix', 'browser-diagnostic');
+  const directory = join(
+    options.directory,
+    'demo-matrix',
+    timelineOnly ? 'browser-timeline' : 'browser-diagnostic'
+  );
   let finished = false;
   let finishReason: string | null = null;
   let finishPromise: Promise<void> | undefined;
@@ -156,7 +190,7 @@ export async function startMatrixBrowserDiagnostic(
   let writes: Promise<void> = Promise.resolve();
   const detachWork = new WeakMap<CDPSession, Promise<void>>();
   const cpu = {
-    state: 'starting',
+    state: timelineOnly ? 'disabled-for-timeline' : 'starting',
     sampleCount: 0,
     error: null as string | null,
     detachState: 'not-requested',
@@ -164,6 +198,9 @@ export async function startMatrixBrowserDiagnostic(
     unit: 'cumulative CPU seconds across every thread of each process since its start',
     attribution: 'process id/type only; neither JavaScript-only time nor a function diagnosis',
   };
+  let timelineEvents: ObjectValue[] = [];
+  let timelinePayload: ObjectValue | undefined;
+  let timelineBytes = 0;
   const trace = {
     state: 'starting',
     stopReason: null as 'checkpoint' | 'owner-finish' | 'diagnostic-deadline' | null,
@@ -195,6 +232,7 @@ export async function startMatrixBrowserDiagnostic(
     phase: options.phase(),
     diagnosticOnly: true,
     samplingIsNotPerformanceAcceptance: true,
+    traceMode: timelineOnly ? 'timeline' : 'cpu',
   });
   const persist = (name: string, value: unknown, compact = false) => {
     const data = JSON.stringify(value, null, compact ? undefined : 2);
@@ -216,13 +254,19 @@ export async function startMatrixBrowserDiagnostic(
       trace: {
         ...trace,
         requestedWindowMs: TRACE_WINDOW_MS,
-        windowOrigin: 'trace start acknowledgement; early stop does not end the CPU/network owner',
+        windowOrigin: timelineOnly
+          ? 'trace start acknowledgement; early stop does not end the original case'
+          : 'trace start acknowledgement; early stop does not end the CPU/network owner',
         bufferLimitBytes: TRACE_LIMIT_BYTES,
         outputEventLimitBytes: TRACE_LIMIT_BYTES,
         outputChunkLimit: TRACE_CHUNK_LIMIT,
-        categories: TRACE_CATEGORIES,
-        argumentProjection:
-          'timing, thread/process names, script frames and CPU profile facts only',
+        outputChunkTargetBytes: timelineOnly ? TIMELINE_CHUNK_BYTES : undefined,
+        categories,
+        bufferedEvents: timelineEvents.length,
+        bufferedBytes: timelineBytes,
+        argumentProjection: timelineOnly
+          ? 'timing, thread/process names and numeric layout/style counts only'
+          : 'timing, thread/process names, script frames and CPU profile facts only',
         clock:
           'event ts/dur use Chromium monotonic microseconds; receipt clocks use host wall time',
         flush: 'dataCollected is delivered when stopped; partial output is not a complete window',
@@ -247,9 +291,53 @@ export async function startMatrixBrowserDiagnostic(
     detachWork.set(session, work);
     return work;
   };
+  const flushTimeline = () => {
+    if (timelineEvents.length) {
+      trace.retainedBytes += timelineBytes;
+      persist(`trace-${String(++trace.chunks).padStart(4, '0')}.json`, timelinePayload, true);
+    }
+    timelineEvents = [];
+    timelinePayload = undefined;
+    timelineBytes = 0;
+  };
+  const beginTimelineChunk = () => {
+    timelinePayload = {
+      ...header(),
+      partialUntilTerminalReceipt: true,
+      traceEvents: timelineEvents,
+    };
+    timelineBytes = Buffer.byteLength(JSON.stringify(timelinePayload));
+  };
   const dataCollected = (event: { value: unknown[] }) => {
     if (!traceAccepting || !Array.isArray(event.value)) return;
     trace.receivedEvents += event.value.length;
+    if (timelineOnly) {
+      // Pack many small CDP deliveries under the existing byte/chunk ceilings.
+      // A callback batch is not a new 64KiB evidence chunk.
+      for (const value of event.value) {
+        if (trace.outputTruncated) break;
+        const entry = traceEvent(value, () => (trace.projectionTruncated = true), true);
+        if (!entry) continue;
+        const bytes = Buffer.byteLength(JSON.stringify(entry));
+        if (timelineEvents.length && timelineBytes + bytes + 1 > TIMELINE_CHUNK_BYTES)
+          flushTimeline();
+        if (trace.chunks >= TRACE_CHUNK_LIMIT) {
+          trace.outputTruncated = true;
+          break;
+        }
+        if (!timelinePayload) beginTimelineChunk();
+        const added = bytes + (timelineEvents.length ? 1 : 0);
+        if (trace.retainedBytes + timelineBytes + added > TRACE_LIMIT_BYTES) {
+          trace.outputTruncated = true;
+          break;
+        }
+        timelineEvents.push(entry);
+        timelineBytes += added;
+        trace.retainedEvents++;
+      }
+      snapshot();
+      return;
+    }
     if (trace.chunks >= TRACE_CHUNK_LIMIT) trace.outputTruncated = true;
     const events: ObjectValue[] = [];
     const payload = { ...header(), partialUntilTerminalReceipt: true, traceEvents: events };
@@ -320,6 +408,7 @@ export async function startMatrixBrowserDiagnostic(
       });
       traceAccepting = false;
       removeTraceListeners();
+      flushTimeline();
       trace.state =
         trace.completeAt && trace.stopAcknowledgedAt
           ? 'complete'
@@ -388,9 +477,9 @@ export async function startMatrixBrowserDiagnostic(
       traceConfig: {
         recordMode: 'recordContinuously',
         traceBufferSizeInKb: TRACE_LIMIT_BYTES / 1024,
-        includedCategories: TRACE_CATEGORIES,
+        includedCategories: categories,
         excludedCategories: ['*'],
-        enableSampling: true,
+        enableSampling: !timelineOnly,
       },
     });
     if (finished || traceRetired) {
@@ -404,12 +493,14 @@ export async function startMatrixBrowserDiagnostic(
   };
   snapshot();
   await Promise.all([
-    bounded(setupCpu(), 'Process CPU setup').catch((error) => {
-      cpuRetired = true;
-      cpu.state = 'unavailable';
-      cpu.error = String(error);
-      void detach(cpuSession);
-    }),
+    timelineOnly
+      ? Promise.resolve()
+      : bounded(setupCpu(), 'Process CPU setup').catch((error) => {
+          cpuRetired = true;
+          cpu.state = 'unavailable';
+          cpu.error = String(error);
+          void detach(cpuSession);
+        }),
     bounded(setupTrace(), 'Browser tracing setup').catch((error) => {
       traceRetired = true;
       traceAccepting = false;
@@ -432,7 +523,8 @@ export async function startMatrixBrowserDiagnostic(
       // An early stop may still own its bounded flush/detach. Share that work
       // before writing the owner's terminal receipt; never stop or restart twice.
       await Promise.all([cpuWork, finishTrace(reason)]);
-      if (cpu.state !== 'unavailable') cpu.state = cpu.sampleCount ? 'captured' : 'unavailable';
+      if (!timelineOnly && cpu.state !== 'unavailable')
+        cpu.state = cpu.sampleCount ? 'captured' : 'unavailable';
       await Promise.all([detach(cpuSession), detach(traceSession)]);
       snapshot();
       await bounded(writes, 'Browser diagnostic writes').catch((error) =>

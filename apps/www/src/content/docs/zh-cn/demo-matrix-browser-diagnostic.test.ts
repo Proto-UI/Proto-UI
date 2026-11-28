@@ -60,6 +60,262 @@ const held = <T>() => {
   return { promise, resolve };
 };
 
+describe('explicit timeline-only Matrix diagnosis', () => {
+  const timelineLocation = (file: string) => join(directory, 'demo-matrix/browser-timeline', file);
+  const timelineResult = async () =>
+    JSON.parse(await readFile(timelineLocation('status.json'), 'utf8'));
+  const timelineFixture = () => {
+    const f = fixture();
+    f.create.mockReset().mockResolvedValue(f.trace);
+    return f;
+  };
+
+  it('uses one timeline-only session, preserves layout durations, and never samples CPU', async () => {
+    vi.useFakeTimers();
+    const f = timelineFixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      traceMode: 'timeline',
+    });
+    f.trace.emit('Tracing.dataCollected', {
+      value: [
+        {
+          name: 'thread_name',
+          cat: '__metadata',
+          ph: 'M',
+          pid: 11,
+          tid: 13,
+          args: { name: 'CrRendererMain' },
+        },
+        {
+          name: 'Layout',
+          cat: 'devtools.timeline',
+          ph: 'X',
+          pid: 11,
+          tid: 13,
+          ts: 100,
+          dur: 40,
+          tts: 90,
+          tdur: 31,
+          args: {
+            beginData: {
+              dirtyObjects: 3,
+              totalObjects: 47,
+              partialLayout: false,
+              secret: 'SYNTHETIC_SECRET',
+            },
+            data: { elementCount: 9, source: 'SYNTHETIC_SOURCE' },
+            elementCount: 12,
+            private: 'SYNTHETIC_PRIVATE',
+          },
+        },
+      ],
+    });
+    await vi.advanceTimersByTimeAsync(20_000);
+    await handle.finish();
+    expect(f.create).toHaveBeenCalledTimes(1);
+    expect(f.trace.send.mock.calls.map(([method]) => method)).toEqual([
+      'Tracing.start',
+      'Tracing.end',
+    ]);
+    const status = await timelineResult();
+    expect(status).toMatchObject({
+      diagnosticOnly: true,
+      traceMode: 'timeline',
+      cpu: { state: 'disabled-for-timeline', sampleCount: 0 },
+      trace: {
+        state: 'complete',
+        requestedWindowMs: 20_000,
+        categories: ['devtools.timeline', 'toplevel'],
+        outputTruncated: false,
+        retainedEvents: 2,
+        chunks: 1,
+        bufferedEvents: 0,
+        bufferedBytes: 0,
+      },
+    });
+    expect(f.cpu.send).not.toHaveBeenCalled();
+    expect(f.trace.send).toHaveBeenCalledWith(
+      'Tracing.start',
+      expect.objectContaining({
+        traceConfig: expect.objectContaining({
+          includedCategories: ['devtools.timeline', 'toplevel'],
+          excludedCategories: ['*'],
+          enableSampling: false,
+          traceBufferSizeInKb: 16_384,
+        }),
+      })
+    );
+    const raw = await readFile(timelineLocation('trace-0001.json'), 'utf8');
+    expect(raw).not.toContain('SYNTHETIC_');
+    expect(JSON.parse(raw).traceEvents[1]).toMatchObject({
+      name: 'Layout',
+      ts: 100,
+      dur: 40,
+      tts: 90,
+      tdur: 31,
+      args: {
+        beginData: { dirtyObjects: 3, totalObjects: 47, partialLayout: false },
+        data: { elementCount: 9 },
+        elementCount: 12,
+      },
+    });
+    expect(status.trace.retainedBytes).toBe(Buffer.byteLength(raw));
+    expect(await readdir(join(directory, 'demo-matrix'))).toEqual(['browser-timeline']);
+    expect(f.trace.detach).toHaveBeenCalledTimes(1);
+    expect(f.trace.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('packs small timeline-only deliveries without treating 300 callback batches as the chunk cap', async () => {
+    vi.useFakeTimers();
+    const f = timelineFixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      traceMode: 'timeline',
+    });
+    for (let i = 0; i < 300; i++)
+      f.trace.emit('Tracing.dataCollected', {
+        value: [
+          {
+            name: 'ThreadControllerImpl::RunTask',
+            cat: 'toplevel',
+            ph: 'X',
+            pid: 11,
+            tid: 13,
+            ts: i * 10,
+            dur: 5,
+          },
+        ],
+      });
+    await handle.finish();
+    expect(f.create).toHaveBeenCalledTimes(1);
+    const status = await timelineResult();
+    expect(status.trace).toMatchObject({
+      retainedEvents: 300,
+      receivedEvents: 300,
+      chunks: 1,
+      outputTruncated: false,
+      bufferedEvents: 0,
+      bufferedBytes: 0,
+    });
+    const raw = await readFile(timelineLocation('trace-0001.json'), 'utf8');
+    expect(JSON.parse(raw).traceEvents).toHaveLength(300);
+    expect(status.trace.retainedBytes).toBe(Buffer.byteLength(raw));
+  });
+
+  it('keeps the original 2s timeline-only flush limit and rejects late completion/events', async () => {
+    vi.useFakeTimers();
+    const f = timelineFixture();
+    f.trace.send.mockImplementation(async (method) =>
+      method === 'Tracing.end' ? new Promise<never>(() => {}) : {}
+    );
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      traceMode: 'timeline',
+    });
+    f.trace.emit('Tracing.dataCollected', {
+      value: [
+        { name: 'UpdateLayoutTree', cat: 'devtools.timeline', ph: 'B', pid: 11, tid: 13, ts: 100 },
+        {
+          name: 'UpdateLayoutTree',
+          cat: 'devtools.timeline',
+          ph: 'E',
+          pid: 11,
+          tid: 13,
+          ts: 140,
+          args: { elementCount: 50 },
+        },
+      ],
+    });
+    await vi.advanceTimersByTimeAsync(20_000);
+    let completed = false;
+    const finish = handle.finish().then(() => {
+      completed = true;
+    });
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(completed).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await finish;
+    expect(await timelineResult()).toMatchObject({
+      commandLimitMs: 2_000,
+      ownerLimitMs: 180_000,
+      cpu: { state: 'disabled-for-timeline', sampleCount: 0 },
+      trace: {
+        state: 'partial',
+        completeAt: null,
+        retainedEvents: 2,
+        chunks: 1,
+        outputTruncated: false,
+        bufferedEvents: 0,
+        bufferedBytes: 0,
+        error: expect.stringContaining('2000ms'),
+      },
+    });
+    const raw = await readFile(timelineLocation('trace-0001.json'), 'utf8');
+    expect(
+      JSON.parse(raw).traceEvents.map(({ ph, ts }: { ph: string; ts: number }) => [ph, ts])
+    ).toEqual([
+      ['B', 100],
+      ['E', 140],
+    ]);
+    const terminal = await readFile(timelineLocation('status.json'), 'utf8');
+    f.trace.emit('Tracing.dataCollected', { value: [{ name: 'LATE' }] });
+    f.trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
+    await vi.advanceTimersByTimeAsync(180_000);
+    expect(await readFile(timelineLocation('status.json'), 'utf8')).toBe(terminal);
+    expect(f.trace.eventNames()).toEqual([]);
+    expect(f.trace.detach).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('keeps the original 16MiB/256-chunk timeline-only cap and marks a complete but truncated recording', async () => {
+    vi.useFakeTimers();
+    const f = timelineFixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      traceMode: 'timeline',
+    });
+    f.trace.emit('Tracing.dataCollected', {
+      value: Array.from({ length: 60_000 }, (_, i) => ({
+        name: `Layout-${i}`.padEnd(256, 'x'),
+        cat: 'devtools.timeline',
+        ph: 'X',
+        pid: 11,
+        tid: 13,
+        ts: i * 10,
+        dur: 5,
+        tts: i * 9,
+        tdur: 4,
+        args: { beginData: { dirtyObjects: 3, totalObjects: 4756, partialLayout: false } },
+      })),
+    });
+    await handle.finish();
+    const status = await timelineResult();
+    expect(status.trace).toMatchObject({
+      state: 'complete',
+      receivedEvents: 60_000,
+      outputTruncated: true,
+      bufferedEvents: 0,
+      bufferedBytes: 0,
+      bufferLimitBytes: 16 * 1024 * 1024,
+      outputEventLimitBytes: 16 * 1024 * 1024,
+      outputChunkLimit: 256,
+    });
+    expect(status.trace.retainedEvents).toBeLessThan(60_000);
+    expect(status.trace.chunks).toBeLessThanOrEqual(256);
+    expect(status.trace.retainedBytes).toBeLessThanOrEqual(16 * 1024 * 1024);
+    const files = (await readdir(join(directory, 'demo-matrix/browser-timeline'))).filter((name) =>
+      name.startsWith('trace-')
+    );
+    const sizes = await Promise.all(
+      files.map(async (name) => (await stat(timelineLocation(name))).size)
+    );
+    expect(files).toHaveLength(status.trace.chunks);
+    expect(sizes.reduce((sum, size) => sum + size, 0)).toBe(status.trace.retainedBytes);
+  });
+});
+
 describe('explicit owned-browser Matrix diagnosis', () => {
   it('does not contact a browser, install timers or write files without explicit enablement', async () => {
     vi.useFakeTimers();

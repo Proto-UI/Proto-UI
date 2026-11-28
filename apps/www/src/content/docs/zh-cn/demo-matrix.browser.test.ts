@@ -13,6 +13,7 @@ import {
 } from './demo-matrix-observation';
 
 import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
+import { startMatrixBrowserDiagnostic } from './demo-matrix-browser-diagnostic';
 import { collectMatrixAccessibilityFacts } from './demo-matrix-accessibility';
 import { waitForMatrixInitialization } from './demo-matrix-activation';
 
@@ -61,6 +62,7 @@ type MatrixDiagnosticState = {
   sequence: number;
   pageErrors: Array<{ name: string; message: string; stack: string | null; at: string }>;
   startupDiagnostic?: Awaited<ReturnType<typeof startMatrixStartupDiagnostic>>;
+  timelineDiagnostic?: Awaited<ReturnType<typeof startMatrixBrowserDiagnostic>>;
 };
 const matrixDiagnostics = new WeakMap<Page, MatrixDiagnosticState>();
 const diagnosticSourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
@@ -161,6 +163,25 @@ async function observeMatrixWait(
 ): Promise<void> {
   await persistReadinessDiagnostic(page, phase, 'started');
   try {
+    const state = matrixDiagnostics.get(page);
+    const directory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+    if (
+      phase === 'inited-count' &&
+      process.env.PROTO_UI_MATRIX_LAYOUT_TIMELINE === '1' &&
+      directory &&
+      state?.caseName.endsWith('mounts every demo in every official Web adapter')
+    ) {
+      // Diagnostic branch only: the original route, viewport and activation
+      // remain unchanged. No page evaluation or profiler accompanies setup.
+      state.timelineDiagnostic = await startMatrixBrowserDiagnostic(browser, {
+        enabled: true,
+        traceMode: 'timeline',
+        directory,
+        sourceSha: diagnosticSourceSha,
+        caseName: state.caseName,
+        phase: () => state.phase,
+      });
+    }
     await wait();
   } catch (error) {
     await persistReadinessDiagnostic(page, phase, 'failed', error);
@@ -499,6 +520,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await reactBroadcast;
     } finally {
       await persistReadinessDiagnostic(page, 'case-finally', 'observed');
+      await matrixDiagnostics.get(page)?.timelineDiagnostic?.finish();
       await matrixDiagnostics.get(page)?.startupDiagnostic?.finish();
       await context.close();
     }

@@ -14,9 +14,10 @@ on:
         required: false
         default: false
       scope:
-        description: Existing repair controls, Sprint 1, Contents wheel, or complete Website markup/Matrix evidence
+        description: Existing repair controls, Sprint 1, Contents wheel, complete Website markup/Matrix evidence, or one Matrix timeline diagnostic
         type: choice
-        options: [repair, sprint1, contents-wheel, website-markup, website-matrix]
+        options:
+          [repair, sprint1, contents-wheel, website-markup, website-matrix, website-matrix-timeline]
         default: repair
   workflow_call:
     inputs:
@@ -33,7 +34,7 @@ concurrency:
 
 jobs:
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'website-markup' && inputs.scope != 'website-matrix')) && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'website-markup' && inputs.scope != 'website-matrix' && inputs.scope != 'website-matrix-timeline')) && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -386,6 +387,255 @@ jobs:
         with:
           name: website-matrix-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/website-matrix
+          if-no-files-found: error
+          retention-days: 30
+
+  website-matrix-timeline:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'website-matrix-timeline' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PROTO_UI_MATRIX_STARTUP_PROFILE: '0'
+      PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '0'
+      PROTO_UI_MATRIX_ENTRY_COST: '0'
+      PROTO_UI_MATRIX_TRACE_BEFORE_INIT: '0'
+      PROTO_UI_MATRIX_TRACE_LATE: '0'
+      PROTO_UI_MATRIX_ANATOMY_NOTIFICATIONS: '0'
+      PROTO_UI_MATRIX_LAYOUT_TIMELINE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 4
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind f595 product bytes and preserve the complete diagnostic-only source delta
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/website-matrix-timeline"
+          git rev-parse HEAD > "$RUNNER_TEMP/website-matrix-timeline/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/website-matrix-timeline/source-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/website-matrix-timeline/status-before.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/website-matrix-timeline/status-before.txt"
+          git diff --exit-code f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD -- \
+            apps packages package.json pnpm-lock.yaml vitest.config.ts scripts/test/run-runtime-tests.mjs scripts/test/runtime-process-tree.mjs scripts/test/runtime-test-plan.mjs \
+            ':(exclude)apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts' \
+            ':(exclude)apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.ts' \
+            ':(exclude)apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts' \
+            > "$RUNNER_TEMP/website-matrix-timeline/product-diff.patch"
+          git diff --binary f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD > "$RUNNER_TEMP/website-matrix-timeline/complete-diagnostic-source.patch"
+          git diff --binary f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD -- \
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts \
+            > "$RUNNER_TEMP/website-matrix-timeline/test-instrumentation.patch"
+          sha256sum .github/workflows/browser-suite-repair-evidence.yml pnpm-lock.yaml package.json vitest.config.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts \
+            scripts/test/runtime-test-plan.mjs \
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/browser-harness.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.ts \
+            scripts/test/run-runtime-tests.mjs scripts/test/runtime-process-tree.mjs \
+            > "$RUNNER_TEMP/website-matrix-timeline/source-inputs.sha256"
+      - name: Install the same frozen Node 24 dependency graph
+        run: |
+          set -euo pipefail
+          node -e 'if (process.versions.node.split(".")[0] !== "24") process.exit(1)'
+          node --version > "$RUNNER_TEMP/website-matrix-timeline/node-version.txt"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/website-matrix-timeline/install.log"
+          corepack pnpm@10.32.1 --version > "$RUNNER_TEMP/website-matrix-timeline/pnpm-version.txt"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Prepare the same official CJK font input as full CI
+        timeout-minutes: 3
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/website-matrix-timeline/fonts
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Require the timeline-only envelope and bind the original harness browser selection
+        run: |
+          node --import tsx --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { chromeExecutable } from './apps/www/src/content/docs/zh-cn/browser-harness.ts';
+          const flags = Object.fromEntries(Object.entries(process.env).filter(([key]) => key.startsWith('PROTO_UI_MATRIX_')));
+          assert.equal(Object.keys(flags).length, 7);
+          assert.equal(flags.PROTO_UI_MATRIX_LAYOUT_TIMELINE, '1');
+          assert.ok(Object.entries(flags).every(([key, value]) => value === (key === 'PROTO_UI_MATRIX_LAYOUT_TIMELINE' ? '1' : '0')));
+          const executable = await chromeExecutable();
+          assert.equal(executable, process.env.CHROME_PATH);
+          const version = execFileSync(executable, ['--version'], { encoding: 'utf8' }).trim();
+          assert.match(version, /\b158\./);
+          writeFileSync(process.env.RUNNER_TEMP + '/website-matrix-timeline/environment.json', JSON.stringify({
+            node: process.version, executable, version, flags,
+            executableSha256: createHash('sha256').update(readFileSync(executable)).digest('hex'),
+            note: 'The original harness selects this browser. Only the first original case adds one bounded timeline; no browser or page is opened by this preparation.',
+          }, null, 2) + '\n');
+          JS
+      - name: Diagnose only the first original Matrix case with one 20s timeline; three cases are not selected
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/website-matrix-timeline
+        run: |
+          set -euo pipefail
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s \
+            node scripts/test/run-runtime-tests.mjs \
+              apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+              --testNamePattern='mounts every demo in every official Web adapter$' \
+              --no-file-parallelism --maxWorkers=1 --minWorkers=1 \
+              --reporter=default --reporter=json \
+              --outputFile="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json" \
+              2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
+          results=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${results[0]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/command-exit-code.txt"
+          printf '%s\n' "${results[1]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/log-exit-code.txt"
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/completed-at.txt"
+          if [ "${results[0]}" -ne 0 ]; then exit "${results[0]}"; fi
+          exit "${results[1]}"
+      - name: Preserve exact Matrix terminal source even after an original failure
+        if: always()
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > "$RUNNER_TEMP/website-matrix-timeline/source-sha-after.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/website-matrix-timeline/status-after.txt"
+          sha256sum -c "$RUNNER_TEMP/website-matrix-timeline/source-inputs.sha256" > "$RUNNER_TEMP/website-matrix-timeline/source-inputs-after.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/website-matrix-timeline/status-after.txt"
+      - name: Reconcile one selected case, three unselected cases and the bounded non-V8 recording
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const directory = path.join(process.env.RUNNER_TEMP, 'website-matrix-timeline');
+          const read = (name) => readFileSync(path.join(directory, name), 'utf8');
+          const titles = [
+            'mounts every demo in every official Web adapter',
+            'keeps the matrix readable at 320px',
+            'keeps the matrix readable at 390px',
+            'moves focus into the Base Dialog content in every runtime',
+          ];
+          const result = { source: process.env.CANDIDATE_SHA, diagnosticOnly: true, fullMatrixAcceptance: false,
+            selectedTitle: titles[0], notSelectedTitles: titles.slice(1), diagnosticCaptureValid: false };
+          try {
+            const report = JSON.parse(read('vitest.json'));
+            result.tests = report.testResults.flatMap((suite) => suite.assertionResults);
+            result.environment = JSON.parse(read('environment.json'));
+            assert.equal(report.numTotalTests, 4);
+            assert.equal(report.numPassedTests + report.numFailedTests, 1);
+            assert.equal(report.numPendingTests, 3);
+            assert.equal(report.numTodoTests, 0);
+            assert.equal(report.testResults.length, 1);
+            assert.equal(path.resolve(report.testResults[0].name), path.resolve('apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts'));
+            assert.deepEqual(result.tests.map((test) => test.title).sort(), [...titles].sort());
+            const selected = result.tests.filter((test) => test.title === titles[0]);
+            assert.equal(selected.length, 1);
+            assert.ok(['passed', 'failed'].includes(selected[0].status));
+            assert.ok(result.tests.filter((test) => test.title !== titles[0]).every((test) => test.status === 'pending'));
+            result.nativeOutcome = selected[0].status;
+            result.nativeExitCode = Number(read('command-exit-code.txt').trim());
+            assert.equal(result.nativeExitCode, selected[0].status === 'passed' ? 0 : 1);
+            assert.equal(report.success, selected[0].status === 'passed');
+            assert.equal(read('log-exit-code.txt').trim(), '0');
+            assert.match(result.environment.node, /^v24\./);
+            assert.match(result.environment.version, /\b158\./);
+            assert.equal(result.environment.executable, process.env.CHROME_PATH);
+            const flags = result.environment.flags;
+            assert.equal(Object.keys(flags).length, 7);
+            assert.equal(flags.PROTO_UI_MATRIX_LAYOUT_TIMELINE, '1');
+            assert.ok(Object.entries(flags).every(([key, value]) => value === (key === 'PROTO_UI_MATRIX_LAYOUT_TIMELINE' ? '1' : '0')));
+            assert.equal(read('product-diff.patch'), '');
+            assert.ok(read('complete-diagnostic-source.patch').length > 0);
+            assert.ok(read('test-instrumentation.patch').length > 0);
+            for (const name of ['source-sha.txt', 'source-sha-after.txt']) assert.equal(read(name).trim(), result.source);
+            for (const name of ['status-before.txt', 'status-after.txt']) assert.equal(read(name), '');
+            const verifiedInputs = read('source-inputs-after.txt').trim().split('\n');
+            assert.equal(verifiedInputs.length, 14);
+            assert.ok(verifiedInputs.every((line) => line.endsWith(': OK')));
+            const files = readdirSync(directory, { recursive: true });
+            assert.ok(files.every((file) => !/(?:^|\/)(?:startup-profile|browser-diagnostic|entry-cost|anatomy-notifications)(?:\/|$)|\.cpuprofile$/.test(file)));
+            const status = JSON.parse(read('demo-matrix/browser-timeline/status.json'));
+            result.timeline = status;
+            assert.equal(status.sourceSha, result.source);
+            assert.ok(status.caseName.endsWith(titles[0]));
+            assert.equal(status.traceMode, 'timeline');
+            assert.equal(status.diagnosticOnly, true);
+            assert.equal(status.finished, true);
+            assert.equal(status.commandLimitMs, 2000);
+            assert.equal(status.ownerLimitMs, 180000);
+            assert.equal(status.cpu.state, 'disabled-for-timeline');
+            assert.equal(status.cpu.sampleCount, 0);
+            const trace = status.trace;
+            assert.deepEqual(trace.categories, ['devtools.timeline', 'toplevel']);
+            assert.equal(trace.requestedWindowMs, 20000);
+            assert.equal(trace.bufferLimitBytes, 16 * 1024 * 1024);
+            assert.equal(trace.outputEventLimitBytes, 16 * 1024 * 1024);
+            assert.equal(trace.outputChunkLimit, 256);
+            assert.equal(trace.state, 'complete');
+            assert.equal(trace.stopReason, 'checkpoint');
+            const clocks = ['startAcknowledgedAt', 'stopRequestedAt', 'stopAcknowledgedAt', 'completeAt'].map((key) => Date.parse(trace[key]));
+            assert.ok(clocks.every(Number.isFinite));
+            assert.ok(clocks[1] >= clocks[0] && clocks[2] >= clocks[1] && clocks[3] >= clocks[1]);
+            result.requestedWindowMs = trace.requestedWindowMs;
+            result.observedTraceRequestWindowMs = clocks[1] - clocks[0];
+            assert.equal(trace.dataLossOccurred, false);
+            assert.equal(trace.outputTruncated, false);
+            assert.equal(trace.projectionTruncated, false);
+            assert.equal(trace.bufferedEvents, 0);
+            assert.equal(trace.bufferedBytes, 0);
+            const chunks = files.filter((file) => /^demo-matrix\/browser-timeline\/trace-\d+\.json$/.test(file)).sort();
+            assert.equal(chunks.length, trace.chunks);
+            assert.ok(chunks.length > 0 && chunks.length <= 256);
+            let bytes = 0;
+            const events = chunks.flatMap((file) => {
+              const raw = read(file);
+              bytes += Buffer.byteLength(raw);
+              const chunk = JSON.parse(raw);
+              assert.equal(chunk.sourceSha, result.source);
+              assert.equal(chunk.traceMode, 'timeline');
+              return chunk.traceEvents;
+            });
+            assert.equal(bytes, trace.retainedBytes);
+            assert.ok(bytes <= 16 * 1024 * 1024);
+            assert.equal(events.length, trace.retainedEvents);
+            assert.equal(events.length, trace.receivedEvents);
+            assert.ok(events.every((event) => !/Profile|Heap/.test(event.name ?? '') && !/cpu_profiler|memory-infra/.test(event.cat ?? '')));
+            const counts = {};
+            for (const event of events) counts[event.name] = (counts[event.name] ?? 0) + 1;
+            result.eventCounts = counts;
+            assert.ok(counts.Layout > 0 && counts.UpdateLayoutTree > 0);
+            assert.ok(Object.keys(counts).some((name) => name.includes('RunTask')));
+            const durations = events.filter((event) => ['X', 'B', 'E'].includes(event.ph));
+            assert.ok(durations.length > 0);
+            assert.ok(durations.every((event) => Number.isFinite(event.ts) && (event.ph !== 'X' || (Number.isFinite(event.dur) && event.dur >= 0))));
+            assert.ok(events.some((event) => event.ph === 'M' && event.name === 'thread_name' && event.args?.name === 'CrRendererMain'));
+            result.durationEvents = durations.length;
+            result.paintEventsObserved = counts.Paint ?? 0;
+            result.diagnosticCaptureValid = true;
+          } catch (error) { result.error = String(error); process.exitCode = 1; }
+          writeFileSync(path.join(directory, 'timeline-case-results.json'), JSON.stringify(result, null, 2) + '\n');
+          JS
+      - name: Retain the diagnostic delta, selected/unselected outcomes and complete bounded timeline
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-matrix-timeline-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/website-matrix-timeline
           if-no-files-found: error
           retention-days: 30
 
