@@ -12,6 +12,11 @@ import { parseArgs } from 'node:util';
 import type { Locator, Page } from 'playwright-core';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import { verifyRevision } from './homepage-evidence-contract';
+import {
+  assertClosedHeaderState,
+  assertNaturalOneLineCode,
+  readCodeReadingGeometry,
+} from './mobile-interaction-evidence-contract';
 
 const { values } = parseArgs({
   options: {
@@ -452,21 +457,9 @@ try {
             const shortCopy = shortShell.locator('[data-copy] [data-demo-ref="copy-button"]');
             await shortCopy.waitFor({ state: 'visible' });
             await shortShell.scrollIntoViewIfNeeded();
-            const shortFacts = await shortSource.evaluate((e) => ({
-              height: e.clientHeight,
-              fullHeight: e.scrollHeight,
-              lineHeight: parseFloat(getComputedStyle(e.querySelector('pre') ?? e).lineHeight),
-              text: e.querySelector('code')?.getAttribute('data-raw-code'),
-              documentOverflow: document.documentElement.scrollWidth - innerWidth,
-            }));
-            assert.ok(
-              shortFacts.text && shortFacts.text.split('\n').length === 1,
-              'The real short example is one install command'
-            );
-            assert.ok(
-              shortFacts.height > 0 && shortFacts.height <= shortFacts.lineHeight + 1,
-              'Short code keeps its natural one-line height'
-            );
+            const shortFacts = await shortSource.evaluate(readCodeReadingGeometry);
+            entry.shortCode = { ...shortFacts, text: shortFacts.raw };
+            assertNaturalOneLineCode(shortFacts, kind, 'Short code');
             assert.ok(shortFacts.documentOverflow <= 1);
             entry.shortSourceFraming = await page.evaluate(() => ({
               header: document.querySelector('header')?.getBoundingClientRect().toJSON(),
@@ -491,11 +484,12 @@ try {
                   ?.querySelector('[data-demo-ref="copy-button"]')
                   ?.getAttribute('data-copy-state') === 'success'
             );
-            assert.equal(
-              await page.evaluate(() => navigator.clipboard.readText()),
-              shortFacts.text
-            );
-            entry.shortCode = { ...shortFacts, copy: 'Exact one-line command copied' };
+            assert.equal(await page.evaluate(() => navigator.clipboard.readText()), shortFacts.raw);
+            entry.shortCode = {
+              ...shortFacts,
+              text: shortFacts.raw,
+              copy: 'Exact one-line command copied',
+            };
           }
 
           assert.deepEqual(errors, []);
@@ -608,6 +602,35 @@ try {
       });
       await save();
     };
+    const closeHeaderWithEscape = async (stage: string) => {
+      await page.keyboard.press('Escape');
+      const deadline = performance.now() + 1000;
+      const immediate = await header.evaluate((root) => {
+        const menus = root.querySelectorAll<HTMLElement>('[data-site-menu-button]');
+        const panels = root.querySelectorAll<HTMLElement>('[data-site-header-panel]');
+        return {
+          menuCount: menus.length,
+          panelCount: panels.length,
+          expanded: menus[0]?.getAttribute('aria-expanded') ?? null,
+          hidden: panels[0]?.hidden ?? false,
+          inert: panels[0]?.inert ?? false,
+          menuFocused: menus[0] === document.activeElement,
+        };
+      });
+      observations.push({
+        stage: `${stage}-immediate`,
+        at: new Date().toISOString(),
+        ...immediate,
+      });
+      assertClosedHeaderState(immediate);
+      // Closing keeps the public leave animation, but it cannot accept input.
+      // Physical removal shares the original 1s close budget; capture I/O does
+      // not postpone the deadline or add another waiting period.
+      const remaining = deadline - performance.now();
+      assert.ok(remaining > 0, 'Header close remains inside the original 1000ms budget');
+      await panel.waitFor({ state: 'hidden', timeout: remaining });
+      await capture(stage);
+    };
     try {
       await page.goto(`${base}${route}`, { waitUntil: 'networkidle' });
       await header.locator('site-search[data-search-view="ready"]').waitFor();
@@ -646,8 +669,7 @@ try {
         }
         assert.equal(await menu.getAttribute('aria-expanded'), 'true');
         await capture(`${reopenKey}-before-escape`);
-        await page.keyboard.press('Escape');
-        await capture(`${reopenKey}-after-escape`);
+        await closeHeaderWithEscape(`${reopenKey}-after-escape`);
         assert.equal(await menu.getAttribute('aria-expanded'), 'false');
         assert.equal(await panel.isVisible(), false);
         assert.ok(await menu.evaluate((element) => element === document.activeElement));
@@ -672,8 +694,7 @@ try {
       assert.equal(await runtime.getAttribute('aria-expanded'), 'false');
       assert.equal(await menu.getAttribute('aria-expanded'), 'true');
       assert.ok(await runtime.evaluate((element) => element === document.activeElement));
-      await page.keyboard.press('Escape');
-      await capture('nested-select-second-escape');
+      await closeHeaderWithEscape('nested-select-second-escape');
       assert.equal(await menu.getAttribute('aria-expanded'), 'false');
       assert.equal(await panel.isVisible(), false);
       assert.ok(await menu.evaluate((element) => element === document.activeElement));
@@ -832,23 +853,7 @@ try {
           const copy = shell.locator('[data-copy] [data-demo-ref="copy-button"]');
           await copy.waitFor({ state: 'visible' });
           await shell.scrollIntoViewIfNeeded();
-          const facts = await source.evaluate((e) => ({
-            owner: e.localName,
-            containsSource: e.matches('pre') || !!e.querySelector('pre'),
-            sourceHeight: (e.querySelector('pre') ?? e).getBoundingClientRect().height,
-            sourceWidth: (e.querySelector('pre') ?? e).getBoundingClientRect().width,
-            overflowX: getComputedStyle(e).overflowX,
-            overflowY: getComputedStyle(e).overflowY,
-            height: e.clientHeight,
-            fullHeight: e.scrollHeight,
-            width: e.clientWidth,
-            fullWidth: e.scrollWidth,
-            lineHeight: parseFloat(getComputedStyle(e.querySelector('pre') ?? e).lineHeight),
-            rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
-            viewportHeight: innerHeight,
-            raw: e.querySelector('code')?.getAttribute('data-raw-code'),
-            documentOverflow: document.documentElement.scrollWidth - innerWidth,
-          }));
+          const facts = await source.evaluate(readCodeReadingGeometry);
           entry[`code-${sourceKind}`] = facts;
           entry[`code-${sourceKind}-layout`] = await page.evaluate(() => ({
             header: document.querySelector('header')?.getBoundingClientRect().toJSON(),
@@ -868,8 +873,7 @@ try {
           await observe(`code-${sourceKind}-layout`);
           assert.ok(facts.containsSource, 'The reading viewport contains the actual source pre');
           assert.ok(
-            facts.fullHeight + 1 >= facts.sourceHeight &&
-              facts.fullWidth + 1 >= facts.sourceWidth,
+            facts.fullHeight + 1 >= facts.sourceHeight && facts.fullWidth + 1 >= facts.sourceWidth,
             'The complete source remains within the reachable scroll extent'
           );
           assert.ok(
@@ -883,11 +887,7 @@ try {
               facts.height <= Math.min(36 * facts.rootFontSize, 0.65 * facts.viewportHeight) + 1,
             'Enlarged source fits its independent viewport'
           );
-          if (sourceKind === 'short')
-            assert.ok(
-              facts.height <= facts.lineHeight + 1,
-              'Enlarged short source still has natural one-line height'
-            );
+          if (sourceKind === 'short') assertNaturalOneLineCode(facts, kind, 'Enlarged short code');
           entry.stage = `code-${sourceKind}-keyboard-scroll`;
           await source.focus();
           assert.ok(

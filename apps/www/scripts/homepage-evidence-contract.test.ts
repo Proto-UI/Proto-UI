@@ -9,6 +9,11 @@ import { parse } from 'yaml';
 import { Window } from 'happy-dom';
 import { HOMEPAGE_GALLERY_IDS } from '../src/components/Homepage/homepage-layout-evidence';
 import {
+  assertClosedHeaderState,
+  assertNaturalOneLineCode,
+  readCodeReadingGeometry,
+} from './mobile-interaction-evidence-contract';
+import {
   HOMEPAGE_BASELINE,
   HOMEPAGE_KEYBOARD_TRANSITION,
   HOMEPAGE_POINTER_RUNTIME_SEQUENCE,
@@ -56,6 +61,149 @@ test('candidate layout failures distinguish overflow, missing samples and serif 
       [390, 844],
     ]
   );
+});
+
+const oneLineCode = (rootFontSize: number): ReturnType<typeof readCodeReadingGeometry> => ({
+  owner: 'wc-site-code-scroll-viewport',
+  containsSource: true,
+  sourceHeight: 3.25 * rootFontSize,
+  sourceWidth: 548,
+  sourceContentHeight: 1.5 * rootFontSize,
+  paddingTop: 0.875 * rootFontSize,
+  paddingBottom: 0.875 * rootFontSize,
+  codeHeight: 1.5 * rootFontSize,
+  lineHeights: [1.5 * rootFontSize],
+  overflowX: 'auto',
+  overflowY: 'auto',
+  height: 3.25 * rootFontSize,
+  fullHeight: 3.25 * rootFontSize,
+  width: 207,
+  fullWidth: 548,
+  lineHeight: 1.5 * rootFontSize,
+  rootFontSize,
+  viewportHeight: 640,
+  raw: 'npx @proto.ui/cli@latest --help',
+  documentOverflow: 0,
+});
+
+test('mobile short-code geometry keeps one content line and independent authored padding at 100% and 200%', () => {
+  for (const rootFontSize of [16, 32]) {
+    const facts = oneLineCode(rootFontSize);
+    assert.ok(facts.height > facts.lineHeight + 1, 'Preserve the old wrong-plane red comparison');
+    assert.doesNotThrow(() => assertNaturalOneLineCode(facts, 'candidate', 'Short source'));
+  }
+});
+
+test('mobile short-code geometry rejects blank height, clipping, wrapped or missing actual lines', () => {
+  const facts = oneLineCode(32);
+  for (const patch of [
+    { sourceContentHeight: 50, height: 106, fullHeight: 106 },
+    { height: 106, fullHeight: 106 },
+    { height: 102 },
+    { fullHeight: 106 },
+    { codeHeight: 96 },
+    { lineHeights: [96] },
+    { lineHeights: [] },
+    { lineHeights: [48, 48] },
+    { raw: 'first\nsecond' },
+    { raw: null },
+  ]) {
+    assert.throws(() =>
+      assertNaturalOneLineCode({ ...facts, ...patch }, 'candidate', 'Short source')
+    );
+  }
+});
+
+test('mobile short-code padding cannot disappear or move to one side while content remains one line', () => {
+  const facts = oneLineCode(32);
+  assert.throws(
+    () =>
+      assertNaturalOneLineCode(
+        { ...facts, paddingTop: 56, paddingBottom: 0 },
+        'candidate',
+        'Short source'
+      ),
+    /authored 0.875rem/
+  );
+  const noPadding = {
+    ...facts,
+    height: 48,
+    fullHeight: 48,
+    sourceHeight: 48,
+    paddingTop: 0,
+    paddingBottom: 0,
+  };
+  assert.throws(
+    () => assertNaturalOneLineCode(noPadding, 'candidate', 'Short source'),
+    /authored 0.875rem/
+  );
+  assert.doesNotThrow(() => assertNaturalOneLineCode(noPadding, 'baseline', 'Historical source'));
+});
+
+test('the serialized mobile source reader observes content and padding separately', () => {
+  const window = new Window();
+  const document = window.document;
+  document.documentElement.style.fontSize = '32px';
+  document.body.innerHTML =
+    '<div id="viewport"><pre style="padding:28px 32px;line-height:48px"><code data-raw-code="command"><span class="line">command</span></code></pre></div>';
+  const viewport = document.querySelector('#viewport')!;
+  const source = viewport.querySelector('pre')!;
+  const code = source.querySelector('code')!;
+  const line = source.querySelector('.line')!;
+  // Injected geometry isolates the reader; this is not native-browser layout evidence.
+  for (const [element, height] of [
+    [source, 104],
+    [code, 48],
+    [line, 48],
+  ] as const) {
+    element.getBoundingClientRect = () => ({ height, width: 548 }) as DOMRect;
+  }
+  for (const [element, properties] of [
+    [source, { clientHeight: 104 }],
+    [viewport, { clientHeight: 104, scrollHeight: 104, clientWidth: 207, scrollWidth: 548 }],
+  ] as const) {
+    for (const [name, value] of Object.entries(properties))
+      Object.defineProperty(element, name, { value });
+  }
+  const serialized = String(readCodeReadingGeometry);
+  assert.doesNotMatch(serialized, /\b__name\s*\(/);
+  const read = runInNewContext(`(${serialized})`, {
+    document,
+    getComputedStyle: window.getComputedStyle.bind(window),
+    innerHeight: 640,
+    innerWidth: 320,
+  });
+  const facts = read(viewport) as ReturnType<typeof readCodeReadingGeometry>;
+  assert.equal(facts.height, 104);
+  assert.equal(facts.sourceContentHeight, 48);
+  assert.equal(facts.codeHeight, 48);
+  assert.equal(facts.paddingTop, 28);
+  assert.equal(facts.paddingBottom, 28);
+  assert.doesNotThrow(() => assertNaturalOneLineCode(facts, 'candidate', 'Actual sampled owner'));
+  window.happyDOM.abort();
+});
+
+test('Header close accepts a painted inert leave phase and rejects a live or wrong owner', () => {
+  const closed = {
+    menuCount: 1,
+    panelCount: 1,
+    expanded: 'false',
+    hidden: false,
+    inert: true,
+    menuFocused: true,
+  };
+  assert.doesNotThrow(() => assertClosedHeaderState(closed));
+  assert.doesNotThrow(() => assertClosedHeaderState({ ...closed, hidden: true, inert: false }));
+  for (const patch of [
+    { expanded: 'true' },
+    { inert: false },
+    { menuFocused: false },
+    { menuCount: 0 },
+    { menuCount: 2 },
+    { panelCount: 0 },
+    { panelCount: 2 },
+  ])
+    assert.throws(() => assertClosedHeaderState({ ...closed, ...patch }));
 });
 
 test('pointer coverage reaches all four runtimes before strict non-first keyboard navigation', () => {
