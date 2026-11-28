@@ -87,9 +87,10 @@ for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
         'rounded-[var(--pui-radius-4xl)]',
         'border',
         'bg-clip-padding',
-        'transition-all',
+        'transition-[color,background-color,border-color,box-shadow,transform,opacity]',
       ])
         expect(tokens.has(token)).toBe(true);
+      expect(tokens.has('transition-all')).toBe(false);
       expect(tokens.has('rounded-lg')).toBe(false);
       expect(tokens.has('rounded-[var(--pui-radius-2xl)]')).toBe(false);
       expect(tokens.has('ring-3')).toBe(facts.focusVisible);

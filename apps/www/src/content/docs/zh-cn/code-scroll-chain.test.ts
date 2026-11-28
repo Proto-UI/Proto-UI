@@ -88,16 +88,25 @@ function reformatted(input: string) {
 }
 
 it('allows vertical document chaining without changing native code overflow or horizontal containment', () => {
-  const block = css.match(/\.proto-previewer__code\s*\{([^}]+)\}/)![1];
+  // The native scroller owns its overflow in the block that declares it; the
+  // collapsed preview clips separately instead of becoming a second scroller.
+  const block = [...css.matchAll(/(?:^|\n)\s*\.proto-previewer__code\s*\{([^}]+)\}/g)]
+    .map((match) => match[1])
+    .find((body) => body.includes('overscroll-behavior-x'))!;
   for (const token of [
     'overscroll-behavior-x: contain;',
     'overscroll-behavior-y: auto;',
     'overflow: auto;',
     'white-space: pre;',
-    'max-height: 4.5rem;',
+    'max-height: none;',
   ])
     expect(block).toContain(token);
   expect(block).not.toMatch(/overscroll-behavior\s*:/);
+  const collapsed = css.match(
+    /\[data-code-expanded='false'\] \.proto-previewer__code\s*\{([^}]+)\}/
+  )![1];
+  expect(collapsed).toContain('max-height: 6rem;');
+  expect(collapsed).toContain('overflow: hidden;');
 });
 it('keeps the original reverse input and independently asserts internal, boundary and horizontal native scrolling', () => {
   const tokens = [

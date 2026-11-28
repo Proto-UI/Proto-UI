@@ -8,3 +8,5 @@ registerHeaderSelectElevationSuite({
   families: ['brutalist'],
   includeStartupAndResize: false,
 });
+
+export {};

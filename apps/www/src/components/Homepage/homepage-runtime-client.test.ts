@@ -451,7 +451,15 @@ describe('Homepage page-owned runtime', () => {
     const unbind = vi.fn();
     const bindButton = vi.fn(() => unbind);
     let active = true;
-    const disclosure = { bindButton, toggle, close: vi.fn(), enhance: vi.fn(), destroy: vi.fn() };
+    const disclosure = {
+      bindButton,
+      bindTransition: vi.fn(() => vi.fn()),
+      isOpen: vi.fn(() => false),
+      toggle,
+      close: vi.fn(),
+      enhance: vi.fn(),
+      destroy: vi.fn(),
+    };
     for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
       const content = createHomepageContent(
         {

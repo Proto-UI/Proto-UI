@@ -129,7 +129,7 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       let published = false;
       let settleTarget: boolean | null = null;
       let lastSurfacePhase: 'closed' | 'entering' | 'entered' | 'leaving' = initialSurfaceState;
-      let lastSurfaceDuration = timing.enterDuration;
+      let lastSurfaceDuration: number = timing.enterDuration;
       const listeners = new Set<() => void>();
       const syncSurface = (phase: SiteHeaderTransitionPhase) => {
         if (!live || !api || (!published && !getSiteHeaderDisclosure(header))) return;
