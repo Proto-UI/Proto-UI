@@ -160,6 +160,17 @@ async function observeMatrixWait(
   phase: string,
   wait: () => Promise<unknown>
 ): Promise<void> {
+  if (
+    phase === 'inited-count' &&
+    process.env.PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC === '1' &&
+    process.env.PROTO_UI_MATRIX_TRACE_BEFORE_INIT === '1'
+  ) {
+    try {
+      await matrixDiagnostics.get(page)?.startupDiagnostic?.preparePhaseTrace(phase);
+    } catch (error) {
+      console.error('[matrix-before-init-trace]', String(error));
+    }
+  }
   await persistReadinessDiagnostic(page, phase, 'started');
   matrixDiagnostics.get(page)?.startupDiagnostic?.phaseStarted(phase);
   try {
@@ -217,9 +228,12 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
       // This suite launches and exclusively owns the Browser. Browser-wide
       // tracing/counters require their own opt-in in addition to page profiling.
       ownedBrowser: process.env.PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC === '1' ? browser : undefined,
-      ...(process.env.PROTO_UI_MATRIX_TRACE_LATE === '1'
-        ? { traceTiming: { afterPhase: 'inited-count' as const, delayMs: 60_000 } }
-        : {}),
+      ...(process.env.PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC === '1' &&
+      process.env.PROTO_UI_MATRIX_TRACE_BEFORE_INIT === '1'
+        ? { prepareTraceBeforePhase: 'inited-count' as const }
+        : process.env.PROTO_UI_MATRIX_TRACE_LATE === '1'
+          ? { traceTiming: { afterPhase: 'inited-count' as const, delayMs: 60_000 } }
+          : {}),
     });
   }
   await persistReadinessDiagnostic(page, 'route-open', 'started');

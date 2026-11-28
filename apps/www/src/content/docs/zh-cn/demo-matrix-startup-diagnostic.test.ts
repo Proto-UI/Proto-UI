@@ -86,55 +86,63 @@ async function result(file = 'status.json') {
 }
 
 describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
-  it('forwards the initialization boundary to the delayed browser trace without a second page profiler', async () => {
-    vi.useFakeTimers();
-    const startedAt = Date.now();
-    let phase = 'route-open';
-    const { page, context } = fixture();
-    const cpu = { send: vi.fn(async () => ({ processInfo: [] })), detach: vi.fn(async () => {}) };
-    const trace = Object.assign(new EventEmitter(), {
-      send: vi.fn(async (method: string) => {
-        if (method === 'Tracing.end')
-          trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
-        return {};
-      }),
-      detach: vi.fn(async () => {}),
-    });
-    const browser = {
-      newBrowserCDPSession: vi.fn().mockResolvedValueOnce(cpu).mockResolvedValueOnce(trace),
-    };
-    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, {
-      ...options(),
-      phase: () => phase,
-      ownedBrowser: browser as unknown as Browser,
-      traceTiming: { afterPhase: 'inited-count', delayMs: 60_000 },
-    });
-    await vi.advanceTimersByTimeAsync(10_000);
-    phase = 'inited-count';
-    handle.phaseStarted(phase);
-    await vi.advanceTimersByTimeAsync(59_999);
-    expect(trace.send).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(1);
-    expect(trace.send.mock.calls.map(([method]) => method)).toEqual(['Tracing.start']);
-    await vi.advanceTimersByTimeAsync(20_000);
-    await handle.finish();
-    expect(context.newCDPSession).not.toHaveBeenCalled();
-    const facts = JSON.parse(
-      await readFile(join(directory, 'demo-matrix/browser-diagnostic/status.json'), 'utf8')
-    );
-    expect(facts.trace).toMatchObject({
-      phaseStartedAt: new Date(startedAt + 10_000).toISOString(),
-      startRequestedAt: new Date(startedAt + 70_000).toISOString(),
-      stopRequestedAt: new Date(startedAt + 90_000).toISOString(),
-      state: 'complete',
-    });
-    expect(page.evaluate).not.toHaveBeenCalled();
-    expect(page.goto).not.toHaveBeenCalled();
-    expect(page.route).not.toHaveBeenCalled();
-    expect(page.waitForFunction).not.toHaveBeenCalled();
-    expect(page.eventNames()).toEqual([]);
-    expect(vi.getTimerCount()).toBe(0);
-  });
+  it.each(['delayed', 'before'] as const)(
+    'forwards the initialization boundary to the %s browser trace without a second page profiler',
+    async (mode) => {
+      vi.useFakeTimers();
+      const startedAt = Date.now();
+      let phase = 'route-open';
+      const { page, context } = fixture();
+      const cpu = { send: vi.fn(async () => ({ processInfo: [] })), detach: vi.fn(async () => {}) };
+      const trace = Object.assign(new EventEmitter(), {
+        send: vi.fn(async (method: string) => {
+          if (method === 'Tracing.end')
+            trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
+          return {};
+        }),
+        detach: vi.fn(async () => {}),
+      });
+      const browser = {
+        newBrowserCDPSession: vi.fn().mockResolvedValueOnce(cpu).mockResolvedValueOnce(trace),
+      };
+      const handle = await startMatrixStartupDiagnostic(page as unknown as Page, {
+        ...options(),
+        phase: () => phase,
+        ownedBrowser: browser as unknown as Browser,
+        ...(mode === 'before'
+          ? { prepareTraceBeforePhase: 'inited-count' as const }
+          : { traceTiming: { afterPhase: 'inited-count' as const, delayMs: 60_000 } }),
+      });
+      await vi.advanceTimersByTimeAsync(10_000);
+      if (mode === 'before') await handle.preparePhaseTrace('inited-count');
+      phase = 'inited-count';
+      handle.phaseStarted(phase);
+      if (mode === 'delayed') {
+        await vi.advanceTimersByTimeAsync(59_999);
+        expect(trace.send).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1);
+      }
+      expect(trace.send.mock.calls.map(([method]) => method)).toEqual(['Tracing.start']);
+      await vi.advanceTimersByTimeAsync(20_000);
+      await handle.finish();
+      expect(context.newCDPSession).not.toHaveBeenCalled();
+      const facts = JSON.parse(
+        await readFile(join(directory, 'demo-matrix/browser-diagnostic/status.json'), 'utf8')
+      );
+      expect(facts.trace).toMatchObject({
+        phaseStartedAt: new Date(startedAt + 10_000).toISOString(),
+        startRequestedAt: new Date(startedAt + (mode === 'before' ? 10_000 : 70_000)).toISOString(),
+        stopRequestedAt: new Date(startedAt + (mode === 'before' ? 30_000 : 90_000)).toISOString(),
+        state: 'complete',
+      });
+      expect(page.evaluate).not.toHaveBeenCalled();
+      expect(page.goto).not.toHaveBeenCalled();
+      expect(page.route).not.toHaveBeenCalled();
+      expect(page.waitForFunction).not.toHaveBeenCalled();
+      expect(page.eventNames()).toEqual([]);
+      expect(vi.getTimerCount()).toBe(0);
+    }
+  );
 
   it('is inert by default without CDP, listeners, timers or artifacts', async () => {
     const { page, context } = fixture();
@@ -596,9 +604,25 @@ it.each([
     name: 'mounts every demo in every official Web adapter',
     expected: 1,
   },
+  {
+    flag: '1',
+    browserFlag: '1',
+    beforeFlag: '1',
+    lateFlag: '1',
+    evidence: '/evidence',
+    name: 'mounts every demo in every official Web adapter',
+    expected: 1,
+  },
+  {
+    flag: '1',
+    beforeFlag: '1',
+    evidence: '/evidence',
+    name: 'mounts every demo in every official Web adapter',
+    expected: 1,
+  },
 ])(
   'actual route opens unchanged with startup profile gate $flag/$name/$evidence',
-  async ({ flag, browserFlag, lateFlag, evidence, name, expected }) => {
+  async ({ flag, browserFlag, lateFlag, beforeFlag, evidence, name, expected }) => {
     const source = ts.createSourceFile(
       'matrix.ts',
       readFileSync(new URL('./demo-matrix.browser.test.ts', import.meta.url), 'utf8'),
@@ -634,6 +658,7 @@ it.each([
             PROTO_UI_MATRIX_STARTUP_PROFILE: flag,
             PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: browserFlag,
             PROTO_UI_MATRIX_TRACE_LATE: lateFlag,
+            PROTO_UI_MATRIX_TRACE_BEFORE_INIT: beforeFlag,
             PROTO_UI_RUNTIME_EVIDENCE_DIR: evidence,
           },
         },
@@ -651,7 +676,15 @@ it.each([
       });
       expect(
         ((start.mock.calls[0] as unknown[])[1] as { traceTiming?: unknown }).traceTiming
-      ).toEqual(lateFlag === '1' ? { afterPhase: 'inited-count', delayMs: 60_000 } : undefined);
+      ).toEqual(
+        lateFlag === '1' && !(browserFlag === '1' && beforeFlag === '1')
+          ? { afterPhase: 'inited-count', delayMs: 60_000 }
+          : undefined
+      );
+      expect(
+        ((start.mock.calls[0] as unknown[])[1] as { prepareTraceBeforePhase?: unknown })
+          .prepareTraceBeforePhase
+      ).toBe(browserFlag === '1' && beforeFlag === '1' ? 'inited-count' : undefined);
     }
     expect(page.goto).toHaveBeenCalledWith('http://127.0.0.1:4321/zh-cn/internal/demo-matrix/', {
       waitUntil: 'networkidle',
@@ -665,57 +698,85 @@ it.each([
   }
 );
 
-it('signals the exact original initialization boundary without awaiting a diagnostic or replacing the original error', async () => {
-  const source = ts.createSourceFile(
-    'matrix.ts',
-    readFileSync(new URL('./demo-matrix.browser.test.ts', import.meta.url), 'utf8'),
-    ts.ScriptTarget.Latest,
-    true
-  );
-  const observe = source.statements.find(
-    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'observeMatrixWait'
-  )!;
-  const page = {};
-  const events: string[] = [];
-  const original = new Error('original initialization failure');
-  const matrixDiagnostics = new WeakMap([
-    [
-      page,
-      {
-        startupDiagnostic: {
-          phaseStarted(phase: string) {
-            events.push(`signal:${phase}`);
-            return new Promise<never>(() => {});
+it.each(['disabled', 'prepared', 'preparation-failed'] as const)(
+  'signals the original initialization boundary with %s tracing and preserves the original error',
+  async (mode) => {
+    const source = ts.createSourceFile(
+      'matrix.ts',
+      readFileSync(new URL('./demo-matrix.browser.test.ts', import.meta.url), 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    const observe = source.statements.find(
+      (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'observeMatrixWait'
+    )!;
+    const page = {};
+    const events: string[] = [];
+    const original = new Error('original initialization failure');
+    let prepared!: () => void;
+    let preparationFailed!: (error: Error) => void;
+    const preparation = new Promise<void>((resolve, reject) => {
+      prepared = resolve;
+      preparationFailed = reject;
+    });
+    const matrixDiagnostics = new WeakMap([
+      [
+        page,
+        {
+          startupDiagnostic: {
+            preparePhaseTrace(phase: string) {
+              events.push(`prepare:${phase}`);
+              return preparation;
+            },
+            phaseStarted(phase: string) {
+              events.push(`signal:${phase}`);
+              return new Promise<never>(() => {});
+            },
           },
         },
-      },
-    ],
-  ]);
-  const run = vm.runInNewContext(
-    transformSync(`${observe.getText(source)}\nobserveMatrixWait;`, {
-      loader: 'ts',
-      target: 'es2022',
-    }).code,
-    {
-      matrixDiagnostics,
-      persistReadinessDiagnostic: async (_page: unknown, phase: string, outcome: string) => {
-        events.push(`${outcome}:${phase}`);
-      },
+      ],
+    ]);
+    const run = vm.runInNewContext(
+      transformSync(`${observe.getText(source)}\nobserveMatrixWait;`, {
+        loader: 'ts',
+        target: 'es2022',
+      }).code,
+      {
+        matrixDiagnostics,
+        process: {
+          env: {
+            PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1',
+            PROTO_UI_MATRIX_TRACE_BEFORE_INIT: mode === 'disabled' ? '0' : '1',
+          },
+        },
+        console: { error: vi.fn() },
+        persistReadinessDiagnostic: async (_page: unknown, phase: string, outcome: string) => {
+          events.push(`${outcome}:${phase}`);
+        },
+      }
+    );
+    const outcome = expect(
+      run(page, 'inited-count', async () => {
+        events.push('original-wait');
+        throw original;
+      })
+    ).rejects.toBe(original);
+    if (mode !== 'disabled') {
+      await Promise.resolve();
+      expect(events).toEqual(['prepare:inited-count']);
+      if (mode === 'prepared') prepared();
+      else preparationFailed(new Error('injected diagnostic setup failure'));
     }
-  );
-  await expect(
-    run(page, 'inited-count', async () => {
-      events.push('original-wait');
-      throw original;
-    })
-  ).rejects.toBe(original);
-  expect(events).toEqual([
-    'started:inited-count',
-    'signal:inited-count',
-    'original-wait',
-    'failed:inited-count',
-  ]);
-});
+    await outcome;
+    expect(events).toEqual([
+      ...(mode === 'disabled' ? [] : ['prepare:inited-count']),
+      'started:inited-count',
+      'signal:inited-count',
+      'original-wait',
+      'failed:inited-count',
+    ]);
+  }
+);
 
 it('rejects incomplete demo module delivery and records route-open failure without a passed phase', async () => {
   const source = ts.createSourceFile(

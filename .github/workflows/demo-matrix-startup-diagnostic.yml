@@ -54,7 +54,7 @@ jobs:
         env:
           PROTO_UI_MATRIX_STARTUP_PROFILE: '1'
           PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1'
-          PROTO_UI_MATRIX_TRACE_LATE: '1'
+          PROTO_UI_MATRIX_TRACE_BEFORE_INIT: '1'
           PROTO_UI_MATRIX_ENTRY_COST: '1'
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/demo-matrix-startup
         run: |

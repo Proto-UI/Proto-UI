@@ -136,18 +136,26 @@ export async function startMatrixBrowserDiagnostic(
     caseName: string;
     phase(): string;
     traceTiming?: MatrixTraceTiming;
+    prepareTraceBeforePhase?: 'inited-count';
   }
 ) {
   if (!options.enabled)
-    return { finish: async () => {}, phaseStarted: (_phase: string, _at?: number) => {} };
+    return {
+      finish: async () => {},
+      phaseStarted: (_phase: string, _at?: number) => {},
+      preparePhaseTrace: async (_phase: string) => {},
+    };
   const startedAt = Date.now();
   const traceTiming = options.traceTiming;
+  const beforePhase = options.prepareTraceBeforePhase;
+  const deferredTrace = traceTiming !== undefined || beforePhase !== undefined;
   const validTiming =
-    traceTiming === undefined ||
-    (traceTiming?.afterPhase === 'inited-count' &&
-      Number.isSafeInteger(traceTiming.delayMs) &&
-      traceTiming.delayMs >= 0 &&
-      traceTiming.delayMs <= OWNER_LIMIT_MS - TRACE_WINDOW_MS);
+    (beforePhase === undefined || (beforePhase === 'inited-count' && traceTiming === undefined)) &&
+    (traceTiming === undefined ||
+      (traceTiming?.afterPhase === 'inited-count' &&
+        Number.isSafeInteger(traceTiming.delayMs) &&
+        traceTiming.delayMs >= 0 &&
+        traceTiming.delayMs <= OWNER_LIMIT_MS - TRACE_WINDOW_MS));
   const directory = join(options.directory, 'demo-matrix', 'browser-diagnostic');
   let finished = false;
   let finishReason: string | null = null;
@@ -156,7 +164,9 @@ export async function startMatrixBrowserDiagnostic(
   let cpuTimer: ReturnType<typeof setTimeout> | undefined;
   let traceTimer: ReturnType<typeof setTimeout> | undefined;
   let traceStartTimer: ReturnType<typeof setTimeout> | undefined;
+  let traceStopPromise: Promise<unknown> | undefined;
   let traceFinishPromise: Promise<void> | undefined;
+  let tracePreparation: Promise<void> | undefined;
   let cpuWork: Promise<void> | undefined;
   let cpuSession: CDPSession | undefined;
   let traceSession: CDPSession | undefined;
@@ -164,7 +174,6 @@ export async function startMatrixBrowserDiagnostic(
   let traceRetired = false;
   let traceAccepting = false;
   let traceStartRequested = false;
-  let traceStopRequested = false;
   let writes: Promise<void> = Promise.resolve();
   const detachWork = new WeakMap<CDPSession, Promise<void>>();
   const cpu = {
@@ -177,9 +186,11 @@ export async function startMatrixBrowserDiagnostic(
     attribution: 'process id/type only; neither JavaScript-only time nor a function diagnosis',
   };
   const trace = {
-    state: traceTiming === undefined ? 'starting' : 'waiting-for-phase',
+    state: deferredTrace ? 'waiting-for-phase' : 'starting',
     stopReason: null as 'checkpoint' | 'owner-finish' | 'diagnostic-deadline' | null,
-    requestedTiming: traceTiming ?? null,
+    requestedTiming: beforePhase ? { beforePhase } : (traceTiming ?? null),
+    preparationPhase: null as string | null,
+    preparationRequestedAt: null as string | null,
     phaseStartedAt: null as string | null,
     phaseObservedAt: null as string | null,
     scheduledStartAt: null as string | null,
@@ -316,11 +327,11 @@ export async function startMatrixBrowserDiagnostic(
     traceSession?.off('Tracing.bufferUsage', bufferUsage);
     traceSession?.off('Tracing.tracingComplete', tracingComplete);
   };
-  const endTrace = async () => {
-    if (!traceSession || !traceStartRequested || traceStopRequested) return;
-    traceStopRequested = true;
+  const endTrace = () => {
+    if (traceStopPromise) return traceStopPromise;
+    if (!traceSession || !traceStartRequested) return Promise.resolve();
     trace.stopRequestedAt = new Date().toISOString();
-    await bounded(
+    return (traceStopPromise = bounded(
       Promise.all([
         traceSession.send('Tracing.end').then(() => {
           if (!traceAccepting) return;
@@ -329,7 +340,7 @@ export async function startMatrixBrowserDiagnostic(
         traceComplete,
       ]),
       'Browser tracing stop/flush'
-    );
+    ));
   };
   const finishTrace = (reason: 'checkpoint' | 'owner-finish' | 'diagnostic-deadline') =>
     (traceFinishPromise ??= (async () => {
@@ -444,10 +455,10 @@ export async function startMatrixBrowserDiagnostic(
   const phaseStarted = (phase: string, at = Date.now()) => {
     if (
       finished ||
-      traceRetired ||
-      !traceTiming ||
+      !validTiming ||
+      (!beforePhase && traceRetired) ||
       trace.phaseStartedAt !== null ||
-      phase !== traceTiming.afterPhase ||
+      phase !== (beforePhase ?? traceTiming?.afterPhase) ||
       options.phase() !== phase
     )
       return;
@@ -460,6 +471,11 @@ export async function startMatrixBrowserDiagnostic(
     }
     trace.phaseStartedAt = new Date(at).toISOString();
     trace.phaseObservedAt = new Date().toISOString();
+    if (beforePhase) {
+      snapshot();
+      return;
+    }
+    if (!traceTiming) return;
     trace.scheduledStartAt = new Date(at + traceTiming.delayMs).toISOString();
     trace.state = 'waiting-for-delay';
     traceStartTimer = setTimeout(
@@ -479,6 +495,14 @@ export async function startMatrixBrowserDiagnostic(
     );
     snapshot();
   };
+  const preparePhaseTrace = (phase: string): Promise<void> => {
+    if (finished || traceRetired || !validTiming || phase !== beforePhase) return Promise.resolve();
+    if (tracePreparation) return tracePreparation;
+    trace.preparationPhase = options.phase();
+    trace.preparationRequestedAt = new Date().toISOString();
+    snapshot();
+    return (tracePreparation = beginTrace());
+  };
   snapshot();
   await Promise.all([
     bounded(setupCpu(), 'Process CPU setup').catch((error) => {
@@ -487,7 +511,7 @@ export async function startMatrixBrowserDiagnostic(
       cpu.error = String(error);
       void detach(cpuSession);
     }),
-    traceTiming === undefined ? beginTrace() : Promise.resolve(),
+    deferredTrace ? Promise.resolve() : beginTrace(),
   ]);
   snapshot();
   const finish = (reason: 'owner-finish' | 'diagnostic-deadline') =>
@@ -512,5 +536,5 @@ export async function startMatrixBrowserDiagnostic(
     () => void finish('diagnostic-deadline'),
     Math.max(0, OWNER_LIMIT_MS - (Date.now() - startedAt))
   );
-  return { finish: () => finish('owner-finish'), phaseStarted };
+  return { finish: () => finish('owner-finish'), phaseStarted, preparePhaseTrace };
 }

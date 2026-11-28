@@ -61,6 +61,131 @@ const held = <T>() => {
 };
 
 describe('explicit owned-browser Matrix diagnosis', () => {
+  it('prepares tracing before the exact initialization boundary and still stops after one 20-second window', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    let phase = 'route-open';
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      phase: () => phase,
+      prepareTraceBeforePhase: 'inited-count',
+    });
+    const prematureCalls = f.trace.send.mock.calls.length;
+    if (prematureCalls) await handle.finish();
+    expect(prematureCalls).toBe(0);
+    await handle.preparePhaseTrace('route-open');
+    expect(f.trace.send).not.toHaveBeenCalled();
+    await handle.preparePhaseTrace('inited-count');
+    expect(f.trace.send.mock.calls.map(([method]) => method)).toEqual(['Tracing.start']);
+    phase = 'inited-count';
+    handle.phaseStarted(phase);
+    await handle.preparePhaseTrace('inited-count');
+    await vi.advanceTimersByTimeAsync(20_000);
+    await handle.finish();
+    expect((await result()).trace).toMatchObject({
+      requestedTiming: { beforePhase: 'inited-count' },
+      preparationPhase: 'route-open',
+      preparationRequestedAt: expect.any(String),
+      phaseStartedAt: expect.any(String),
+      state: 'complete',
+      stopReason: 'checkpoint',
+      requestedWindowMs: 20_000,
+    });
+    expect(f.trace.send.mock.calls.map(([method]) => method)).toEqual([
+      'Tracing.start',
+      'Tracing.end',
+    ]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('returns from pre-phase trace setup at the original 2-second bound without accepting a late acknowledgement', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const heldStart = held<Record<string, never>>();
+    f.trace.send.mockImplementation(async (method) => {
+      if (method === 'Tracing.start') return heldStart.promise;
+      if (method === 'Tracing.end')
+        f.trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
+      return {};
+    });
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      prepareTraceBeforePhase: 'inited-count',
+    });
+    let prepared = false;
+    const preparing = handle.preparePhaseTrace('inited-count').then(() => {
+      prepared = true;
+    });
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(prepared).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await preparing;
+    expect(prepared).toBe(true);
+    handle.phaseStarted('inited-count');
+    heldStart.resolve({});
+    await vi.advanceTimersByTimeAsync(0);
+    let finished = false;
+    const finishing = handle.finish().then(() => (finished = true));
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(finished).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await finishing;
+    expect((await result()).trace).toMatchObject({
+      state: 'unavailable',
+      setupError: expect.stringContaining('2000ms'),
+      startAcknowledgedAt: null,
+      phaseStartedAt: expect.any(String),
+    });
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.start')).toHaveLength(
+      1
+    );
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.end')).toHaveLength(1);
+    expect(f.trace.detach).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('does not prepare tracing after owner retirement or when both timing modes are requested', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      prepareTraceBeforePhase: 'inited-count',
+      traceTiming: { afterPhase: 'inited-count', delayMs: 60_000 },
+    });
+    await handle.preparePhaseTrace('inited-count');
+    handle.phaseStarted('inited-count');
+    await handle.finish();
+    await handle.preparePhaseTrace('inited-count');
+    await vi.advanceTimersByTimeAsync(70_000);
+    expect(f.create).toHaveBeenCalledTimes(1);
+    expect((await result()).trace).toMatchObject({
+      state: 'unavailable',
+      setupError: expect.stringContaining('Invalid delayed trace timing'),
+    });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('retires a valid prepared-phase owner before its boundary without creating a trace session', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      prepareTraceBeforePhase: 'inited-count',
+    });
+    await handle.finish();
+    await handle.preparePhaseTrace('inited-count');
+    handle.phaseStarted('inited-count');
+    await vi.advanceTimersByTimeAsync(70_000);
+    expect(f.create).toHaveBeenCalledTimes(1);
+    expect(f.trace.send).not.toHaveBeenCalled();
+    expect((await result()).trace).toMatchObject({
+      state: 'unavailable',
+      startRequestedAt: null,
+      phaseStartedAt: null,
+    });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('does not contact a browser, install timers or write files without explicit enablement', async () => {
     vi.useFakeTimers();
     const f = fixture();

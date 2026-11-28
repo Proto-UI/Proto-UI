@@ -14,7 +14,11 @@ const PROFILE_WINDOW_MS = 180_000;
 const PROFILE_CHUNK_MS = 20_000;
 const COMMAND_LIMIT_MS = 2_000;
 const ROW_LIMIT = 200;
-const inert = { finish: async () => {}, phaseStarted: (_phase: string, _at?: number) => {} };
+const inert = {
+  finish: async () => {},
+  phaseStarted: (_phase: string, _at?: number) => {},
+  preparePhaseTrace: async (_phase: string) => {},
+};
 
 async function bounded<T>(pending: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -46,6 +50,7 @@ export async function startMatrixStartupDiagnostic(
     phase(): string;
     ownedBrowser?: Browser;
     traceTiming?: MatrixTraceTiming;
+    prepareTraceBeforePhase?: 'inited-count';
   }
 ) {
   if (!options.enabled) return inert;
@@ -360,8 +365,15 @@ export async function startMatrixStartupDiagnostic(
   );
   heartbeat = setInterval(snapshot, 5_000);
   if (setupCompleted) scheduleChunk();
+  // Resolve the independent CPU owner during diagnostic setup, so the later
+  // pre-initialization trace call has only its original single 2s setup bound.
+  const preparedBrowser = options.prepareTraceBeforePhase ? await browserDiagnostic : undefined;
   return {
     finish: () => finish('owner-finish'),
+    preparePhaseTrace(phase: string) {
+      if (finished) return Promise.resolve();
+      return preparedBrowser?.preparePhaseTrace(phase) ?? Promise.resolve();
+    },
     phaseStarted(phase: string) {
       const at = Date.now();
       if (finished) return;
