@@ -7,7 +7,11 @@ import { describe, expect, it } from 'vitest';
 import { settleFamilyQueryBatch } from './family-query-observer';
 import { installDocsCallTimingObserver } from '../../../../test/helpers/docs-query-timing.mjs';
 import { createQueryDispatchTrace } from './query-dispatch-trace.mjs';
-import { traceSearchGetter, searchRevealMatchesViewport } from './site-search-evidence';
+import {
+  readDocsAdapterRoleNow,
+  traceSearchGetter,
+  searchRevealMatchesViewport,
+} from './site-search-evidence';
 import path from 'node:path';
 import type { SearchGetterSample } from './site-search-evidence';
 import {
@@ -65,20 +69,25 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
         } | null = null;
         try {
           await expect
-            .poll(() => {
-              const call = ++roleCalls;
-              return traceSearchGetter(roleGetters, () => {
-                const request = roleTiming.runOriginalQuery(call, () =>
-                  selector.getAttribute('role')
-                );
-                try {
-                  roleRequests.push({ call, request });
-                } catch {
-                  roleObserverError = true;
-                }
-                return request;
-              });
-            })
+            .poll(
+              () => {
+                const call = ++roleCalls;
+                return traceSearchGetter(roleGetters, () => {
+                  // Keep the original deadline around the same real control's DOM
+                  // read, including RPC time, without cold locator-engine injection.
+                  const request = roleTiming.runOriginalQuery(call, () =>
+                    page.evaluate(readDocsAdapterRoleNow)
+                  );
+                  try {
+                    roleRequests.push({ call, request });
+                  } catch {
+                    roleObserverError = true;
+                  }
+                  return request;
+                });
+              },
+              { timeout: 1000 }
+            )
             .toBe('combobox');
           rolePassed = true;
         } finally {
@@ -101,6 +110,7 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
                 source,
                 family,
                 width,
+                roleRead: 'native-dom',
                 frozenAt: roleVerdict.frozenAt,
                 passed: rolePassed,
                 calls: roleCalls,
@@ -161,6 +171,7 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
                   source,
                   family,
                   width,
+                  roleRead: 'native-dom',
                   verdict,
                   nodeTimeOrigin: performance.timeOrigin,
                   startedMs,
@@ -312,7 +323,14 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
             await writeFile(
               path.join(evidenceDirectory, `docs-call-timing-${family}-${width}.json`),
               JSON.stringify(
-                { source, family, width, contextClosed, observation: roleTiming.snapshot() },
+                {
+                  source,
+                  family,
+                  width,
+                  contextClosed,
+                  roleRead: 'native-dom',
+                  observation: roleTiming.snapshot(),
+                },
                 null,
                 2
               )

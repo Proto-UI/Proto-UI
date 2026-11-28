@@ -160,6 +160,102 @@ it('preserves the full Shadcn reference year range and identifies the other fami
 });
 
 describe('Rhea Calendar caption composition', () => {
+  it.each([
+    { runtime: 'react', input: 'pointer' },
+    { runtime: 'react', input: 'keyboard' },
+    { runtime: 'vue', input: 'keyboard' },
+  ] as const)(
+    '$runtime preserves initial selected-option focus through the real caption ($input)',
+    async ({ runtime, input }) => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      const original = createCalendarDemo('shadcn', { captionLocale: 'zh-CN' });
+      let api!: DemoRuntimeApi;
+      const view = await renderDemo({
+        runtime,
+        host,
+        demo: {
+          ...original,
+          root: {
+            kind: 'proto',
+            prototypeId: 'shadcn-style-scope',
+            props: { styleProfile: 'rhea' },
+            children: [original.root],
+          },
+          setup(context) {
+            api = context.api;
+            return original.setup?.(context);
+          },
+        },
+      });
+      cleanup.push(() => view.destroy());
+      const year = String(new Date().getFullYear());
+      const previousYear = String(Number(year) - 1);
+      const readMonth = () => (api.getExposes('calendar')?.month as { get(): string }).get();
+      api.call('calendar', 'requestMonth', `${year}-10`);
+      await expect.poll(readMonth).toBe(`${year}-10`);
+      const press = (element: Element, key: string, type = 'keydown') =>
+        element.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true, cancelable: true }));
+      const fields = input === 'pointer' ? (['year'] as const) : (['month', 'year'] as const);
+      for (const field of fields) {
+        const trigger = host.querySelector<HTMLElement>(`[data-demo-ref="${field}-trigger"]`)!;
+        const current = field === 'month' ? '10月' : year;
+        const next = field === 'month' ? '11月' : previousYear;
+        const listbox = () => document.getElementById(trigger.getAttribute('aria-controls')!);
+        const options = () => Array.from(listbox()?.querySelectorAll('[role="option"]') ?? []);
+        const option = (label: string) =>
+          options().find((item) => item.textContent?.trim() === label);
+        await expect.poll(() => trigger.textContent?.trim()).toBe(current);
+
+        // HappyDOM receives synthetic Trigger input; the real demo, adapters,
+        // Select and Focus owners must acquire the selected Item themselves.
+        // Like the browser journey, wait for attachment before starting its
+        // independent 1,000 ms focus obligation. Keep the full 101-year list.
+        // Native scrolling, paint and trusted input remain browser-only evidence.
+        trigger.focus();
+        if (input === 'pointer') trigger.click();
+        else press(trigger, 'ArrowDown');
+        await expect.poll(() => options().length > 0, { timeout: 5_000 }).toBe(true);
+        await expect
+          .poll(
+            () => ({
+              open: trigger.getAttribute('aria-expanded'),
+              count: options().length,
+              focused: document.activeElement === option(current),
+            }),
+            { timeout: 1_000 }
+          )
+          .toEqual({ open: 'true', count: field === 'month' ? 12 : 101, focused: true });
+        expect(option(current)?.getAttribute('aria-selected')).toBe('true');
+        press(option(current)!, field === 'month' ? 'ArrowDown' : 'ArrowUp');
+        await expect
+          .poll(() => document.activeElement === option(next), { timeout: 1_000 })
+          .toBe(true);
+        const selected = option(next)!;
+        press(selected, 'Enter');
+        press(selected, 'Enter', 'keyup');
+        await expect
+          .poll(
+            () => ({
+              open: trigger.getAttribute('aria-expanded'),
+              focused: document.activeElement === trigger,
+              value: trigger.textContent?.trim(),
+            }),
+            { timeout: 1_000 }
+          )
+          .toEqual({ open: 'false', focused: true, value: next });
+        await expect
+          .poll(readMonth)
+          .toBe(
+            field === 'month'
+              ? `${year}-11`
+              : `${previousYear}-${input === 'pointer' ? '10' : '11'}`
+          );
+      }
+    },
+    30_000
+  );
+
   it('uses the required public popup parts and preserves both complete option collections', () => {
     const nodes = protoNodes(createCalendarDemo('shadcn').root);
     for (const field of ['month', 'year']) {

@@ -269,8 +269,9 @@ const surface = (frame: ContrastFrame, ref: string) => {
   return found;
 };
 
-// Instrument DOM models the published reader/RuntimeBox/retained-child boundary,
-// including inline controlled panels. It does not render a shipped component.
+// Instrument DOM models the active preview generation and published
+// reader/RuntimeBox/retained-child boundary, including inline controlled panels.
+// It does not render a shipped component.
 const readerSubjectFixture = (
   markup: string,
   expected: ContrastProjectionExpectation,
@@ -282,6 +283,7 @@ const readerSubjectFixture = (
     <article id="selected" data-previewer-id="selected-calibration"
       data-demo-id="${expected.recipeId}" data-runtimes='${expected.serializedRuntimes}'
       data-projection-component="${expected.family}" data-projection-state="ready" ${coordinates}>
+      <div data-panel="preview"><div class="host"><div data-projection-generation-state="active" ${coordinates}>
       <section data-projection-scope="selected-calibration" data-projection-state="ready" ${coordinates}>
         <div data-pui-root data-projection-prototype="instrument-reader-root" data-demo-ref="reader-root" ${lease}>
           <div data-projection-control="runtime">
@@ -313,6 +315,7 @@ const readerSubjectFixture = (
             data-projection-prototype="instrument-reader-panel" ${lease}></section>
         </div>
       </section>
+      </div></div></div>
     </article>
     <div id="reader-popup" data-demo-ref="reader-popup" ${lease}>
       <div data-pui-root data-demo-ref="reader-popup-child" ${lease}>Reader portal child</div>

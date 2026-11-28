@@ -8,6 +8,7 @@ import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harn
 import { revealHeaderPreferences } from './site-header-browser';
 import {
   headerOptionTextClipping,
+  headerPreferencePaintSettled,
   headerPopupSettled,
   readHeaderPopupPaint,
   readHeaderPopupTextGeometry,
@@ -379,15 +380,7 @@ async function choose(page: Page, control: 'runtime' | 'family', label: string) 
 }
 async function sample(select: Locator) {
   await expect
-    .poll(() =>
-      select.evaluate((element) =>
-        element
-          .getAnimations({ subtree: true })
-          .every(
-            (animation) => animation.playState === 'finished' || animation.playState === 'idle'
-          )
-      )
-    )
+    .poll(() => select.evaluate(headerPreferencePaintSettled), { timeout: 1000 })
     .toBe(true);
   return select.evaluate((element) => {
     const rect = element.getBoundingClientRect();
@@ -585,6 +578,7 @@ export function registerHeaderSelectElevationSuite(options: {
                 for (const control of ['runtime', 'family'] as const) {
                   const select = trigger(page, control);
                   const rest = await sample(select);
+                  measurements.push({ stage: 'rest-first-sample', width, control, paint: rest });
                   expect(rest.hit).toBe(true);
                   expect(rest.height).toBeCloseTo(44, 0);
                   expect(rest.border).toBe(family === 'brutalist' ? '2px' : '1px');

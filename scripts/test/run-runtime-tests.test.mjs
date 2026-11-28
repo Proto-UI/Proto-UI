@@ -1107,6 +1107,13 @@ describe('native navigation precondition evidence', () => {
       const preferences = {
         count: async () => (compact ? 1 : 0),
         isVisible: async () => false,
+        evaluate: async (read) =>
+          read({
+            closest(selector) {
+              assert.equal(selector, '[data-site-header-compact-context]');
+              return compact ? {} : null;
+            },
+          }),
         async waitFor(options) {
           assert.equal(options.state, 'visible');
           order.push('preferences-visible');

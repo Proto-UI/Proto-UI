@@ -484,6 +484,7 @@ for (const file of [
   './fixtures/browser-suite-costs-44876125495.json',
   './fixtures/browser-suite-costs-45029016292.json',
   './fixtures/browser-suite-costs-45537881490.json',
+  './fixtures/browser-suite-costs-46120142554.json',
 ]) {
   const evidence = validateBrowserCostEvidence(
     JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
@@ -515,7 +516,15 @@ const estimatedSuiteReserves = {
   // well within the 900s CI cap; keep planning reserves aligned with 46064929629
   // shard-16 observations where provenance (~250s), sprint2, toast-position, and
   // focus-intent-retries exceeded the old 0s/120s fallbacks when stacked.
-  'apps/www/src/content/docs/zh-cn/header-select-elevation-brutalist.browser.test.ts': 400,
+  // Run 46120142554 shard 7 completed seven of eight cases in 381.388s;
+  // each took 53.562–56.031s before the 900s worker cap interrupted the last.
+  // Eight times the observed maximum is 448.247s: reserve 450s for planning,
+  // not an invented terminal-file observation or a native acceptance result.
+  'apps/www/src/content/docs/zh-cn/header-select-elevation-brutalist.browser.test.ts': 450,
+  // The same run's shard 11 completed five parity cases in 107.913s before
+  // its final case was interrupted. A six-case mean projection is 129.496s.
+  // Keep this explicit 130s planning reserve separate from measured costs.
+  'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts': 130,
   'apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts': 260,
   'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts': 240,
   'apps/www/src/content/docs/zh-cn/demo-shadcn-toast-position.browser.test.ts': 220,
