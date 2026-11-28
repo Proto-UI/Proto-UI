@@ -689,3 +689,230 @@ it('restores native control focus when runtime switch activation blurs the outgo
   await c.dispose();
   candidates.length = 0;
 }, 15000);
+
+describe('Header menu and panel asTransition lifecycle', () => {
+  for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
+    for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+      it(`${family}/${runtime}: drives menu icon and panel presence through real asTransition phases`, async () => {
+        const { header, panel, content } = fixture();
+        const button = document.createElement('button');
+        header.append(button);
+        const disclosure = initSiteHeaderDisclosure(header);
+        disclosure.bindButton(button);
+        disclosure.enhance();
+        const participant = headerSurfaceParticipant(header)!;
+        const first = {
+          generation: 1,
+          selection: { runtimeId: runtime, projectionFamilyId: family },
+        };
+        const candidate = await participant.materialize(first);
+        candidates.push(candidate);
+        candidate.activate();
+        participant.prepareCommit(first).publish();
+        try {
+          const surface = content.closest<HTMLElement>('.site-header-popup-surface')!;
+          expect(header.dataset.siteMenuTransition).toBe('closed');
+          expect(panel.hidden).toBe(true);
+          expect(panel.inert).toBe(false);
+          expect(surface.getAttribute('data-pui-style')).toContain('surface-fade');
+          await vi.waitFor(() =>
+            expect(surface.getAttribute('data-pui-style')).toContain('opacity-0')
+          );
+
+          disclosure.toggle();
+          await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entering'));
+          expect(header.dataset.siteMenuOpen).toBe('true');
+          expect(panel.hidden).toBe(false);
+          expect(panel.inert).toBe(false);
+          await vi.waitFor(() =>
+            expect(surface.getAttribute('data-pui-style')).toContain('opacity-100')
+          );
+
+          await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entered'), {
+            timeout: 2000,
+          });
+          expect(panel.hidden).toBe(false);
+
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+          );
+          expect(document.activeElement).toBe(button);
+          expect(header.dataset.siteMenuOpen).toBe('false');
+          expect(button.getAttribute('aria-expanded')).toBe('false');
+          expect(header.dataset.siteMenuTransition).toBe('leaving');
+          expect(panel.hidden).toBe(false);
+          expect(panel.inert).toBe(true);
+          await vi.waitFor(() =>
+            expect(surface.getAttribute('data-pui-style')).toContain('opacity-0')
+          );
+
+          await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('closed'), {
+            timeout: 2000,
+          });
+          expect(panel.hidden).toBe(true);
+          expect(panel.inert).toBe(false);
+        } finally {
+          disclosure.destroy();
+          await candidate.dispose();
+          candidates.splice(candidates.indexOf(candidate), 1);
+        }
+      }, 15000);
+    }
+  }
+
+  it('reverses mid-flight enter and leave transitions cleanly without stranding hidden or inert state', async () => {
+    const { header, panel } = fixture();
+    const button = document.createElement('button');
+    header.append(button);
+    const disclosure = initSiteHeaderDisclosure(header);
+    disclosure.bindButton(button);
+    disclosure.enhance();
+    const participant = headerSurfaceParticipant(header)!;
+    const req = {
+      generation: 1,
+      selection: { runtimeId: 'wc' as const, projectionFamilyId: 'shadcn' as const },
+    };
+    const candidate = await participant.materialize(req);
+    candidates.push(candidate);
+    candidate.activate();
+    participant.prepareCommit(req).publish();
+    try {
+      // Interrupt entering -> leaving
+      disclosure.toggle();
+      expect(header.dataset.siteMenuTransition).toBe('entering');
+      disclosure.toggle();
+      expect(header.dataset.siteMenuOpen).toBe('false');
+      expect(header.dataset.siteMenuTransition).toBe('leaving');
+      expect(panel.hidden).toBe(false);
+      expect(panel.inert).toBe(true);
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('closed'), {
+        timeout: 2000,
+      });
+      expect(panel.hidden).toBe(true);
+      expect(panel.inert).toBe(false);
+
+      // Interrupt leaving -> entering
+      disclosure.toggle();
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entered'), {
+        timeout: 2000,
+      });
+      disclosure.close();
+      expect(header.dataset.siteMenuTransition).toBe('leaving');
+      expect(panel.inert).toBe(true);
+      disclosure.toggle();
+      expect(header.dataset.siteMenuOpen).toBe('true');
+      expect(header.dataset.siteMenuTransition).toBe('entering');
+      expect(panel.hidden).toBe(false);
+      expect(panel.inert).toBe(false);
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entered'), {
+        timeout: 2000,
+      });
+      expect(panel.hidden).toBe(false);
+      expect(panel.inert).toBe(false);
+    } finally {
+      disclosure.destroy();
+      await candidate.dispose();
+      candidates.splice(candidates.indexOf(candidate), 1);
+    }
+  }, 15000);
+
+  it('collapses asTransition waits under prefers-reduced-motion: reduce and settles immediately on popstate', async () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query: string) =>
+        Object.assign(new EventTarget(), {
+          matches: query.includes('prefers-reduced-motion: reduce'),
+          media: query,
+        }) as MediaQueryList
+    );
+    const { header, panel } = fixture();
+    const button = document.createElement('button');
+    header.append(button);
+    const disclosure = initSiteHeaderDisclosure(header);
+    disclosure.bindButton(button);
+    disclosure.enhance();
+    const participant = headerSurfaceParticipant(header)!;
+    const req = {
+      generation: 1,
+      selection: { runtimeId: 'wc' as const, projectionFamilyId: 'shadcn' as const },
+    };
+    const candidate = await participant.materialize(req);
+    candidates.push(candidate);
+    candidate.activate();
+    participant.prepareCommit(req).publish();
+    try {
+      const started = performance.now();
+      disclosure.toggle();
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entered'), {
+        timeout: 500,
+      });
+      disclosure.close();
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('closed'), {
+        timeout: 500,
+      });
+      expect(panel.hidden).toBe(true);
+      expect(performance.now() - started).toBeLessThan(120);
+
+      // Re-open and verify popstate settles synchronously.
+      disclosure.toggle();
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entered'), {
+        timeout: 500,
+      });
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(header.dataset.siteMenuTransition).toBe('closed');
+      expect(panel.hidden).toBe(true);
+      expect(panel.inert).toBe(false);
+    } finally {
+      disclosure.destroy();
+      await candidate.dispose();
+      candidates.splice(candidates.indexOf(candidate), 1);
+    }
+  }, 15000);
+
+  it('preserves settled entered state across family/runtime swaps and restores previous transition on rollback', async () => {
+    const { header, panel } = fixture();
+    const button = document.createElement('button');
+    header.append(button);
+    const disclosure = initSiteHeaderDisclosure(header);
+    disclosure.bindButton(button);
+    disclosure.enhance();
+    const participant = headerSurfaceParticipant(header)!;
+    const first = {
+      generation: 1,
+      selection: { runtimeId: 'wc' as const, projectionFamilyId: 'shadcn' as const },
+    };
+    const second = {
+      generation: 2,
+      selection: { runtimeId: 'react' as const, projectionFamilyId: 'brutalist' as const },
+    };
+    const a = await participant.materialize(first);
+    candidates.push(a);
+    a.activate();
+    participant.prepareCommit(first).publish();
+    try {
+      disclosure.toggle();
+      await vi.waitFor(() => expect(header.dataset.siteMenuTransition).toBe('entered'), {
+        timeout: 2000,
+      });
+      expect(header.style.getPropertyValue('--site-header-menu-enter-duration')).toBe('180ms');
+
+      const b = await participant.materialize(second);
+      candidates.push(b);
+      const publication = participant.prepareCommit(second);
+      b.activate();
+      publication.publish();
+      expect(header.dataset.siteMenuTransition).toBe('entered');
+      expect(header.style.getPropertyValue('--site-header-menu-enter-duration')).toBe('130ms');
+      expect(panel.hidden).toBe(false);
+
+      publication.rollback();
+      expect(header.dataset.siteMenuTransition).toBe('entered');
+      expect(header.style.getPropertyValue('--site-header-menu-enter-duration')).toBe('180ms');
+      await b.dispose();
+      candidates.splice(candidates.indexOf(b), 1);
+    } finally {
+      disclosure.destroy();
+      await a.dispose();
+      candidates.splice(candidates.indexOf(a), 1);
+    }
+  }, 15000);
+});

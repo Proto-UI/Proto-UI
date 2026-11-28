@@ -456,3 +456,21 @@ it('bounds the Header panel by the Header box so one measured viewport cannot pl
   };
   panelContract(css);
 });
+
+it('drives both the menu toggle icon and popup surface animations from asTransition phases with reduced-motion safety', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(css).toContain(
+    ".site-header[data-site-menu-transition='entering'] .site-header-menu-icon::before"
+  );
+  expect(css).toContain(
+    ".site-header[data-site-menu-transition='leaving'] .site-header-menu-icon::before"
+  );
+  expect(css).toContain(".site-header[data-site-menu-ready][data-site-menu-transition='entering']");
+  expect(css).toContain(
+    ".site-header[data-site-menu-ready][data-site-menu-transition='leaving'] .site-header-panel"
+  );
+  expect(css).toContain('pointer-events: none;');
+  expect(css).toContain('@starting-style');
+  const reducedMotion = cssBlocks(css, '@media (prefers-reduced-motion: reduce)').join('\n');
+  expect(reducedMotion).toContain('transition-duration: 0ms !important');
+});

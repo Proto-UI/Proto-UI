@@ -1,8 +1,21 @@
 /** Application-owned navigation disclosure. Button owns command activation;
  * the website owns navigation visibility, ARIA relationships and return focus. */
 import { closeSiteSelects } from './site-select-dismissal';
+export type SiteHeaderTransitionPhase = 'closed' | 'preparing' | 'entering' | 'entered' | 'leaving';
+
+export interface SiteHeaderTransition {
+  available(): boolean;
+  phase(): SiteHeaderTransitionPhase;
+  isPresent(): boolean;
+  timing: Readonly<{ enterDuration: number; leaveDuration: number }>;
+  setOpen(open: boolean, immediate?: boolean): void;
+  subscribe(listener: () => void): () => void;
+}
+
 export interface SiteHeaderDisclosure {
   bindButton(button: HTMLElement): () => void;
+  bindTransition(transition: SiteHeaderTransition): () => void;
+  isOpen(): boolean;
   enhance(): void;
   toggle(): void;
   close(restoreFocus?: boolean): void;
@@ -12,7 +25,37 @@ export interface SiteHeaderDisclosure {
 const SITE_HEADER_OPEN_EVENT = 'site-header:disclosure-open';
 const SITE_CONTENTS_OPEN_EVENT = 'site-contents:open';
 const disclosures = new WeakMap<HTMLElement, SiteHeaderDisclosure>();
+type PendingHeaderTransition = {
+  transition: SiteHeaderTransition;
+  unbindActive?: () => void;
+};
+const pendingTransitions = new WeakMap<HTMLElement, PendingHeaderTransition>();
 const contentsNavigations = new WeakMap<HTMLElement, SiteContentsNavigation>();
+
+export function getSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosure | undefined {
+  return disclosures.get(root);
+}
+
+/** Attach a projection-owned asTransition presentation to a Header disclosure
+ * regardless of whether surface publication or disclosure init runs first. */
+export function bindSiteHeaderTransition(
+  root: HTMLElement,
+  transition: SiteHeaderTransition
+): () => void {
+  const existing = disclosures.get(root);
+  if (existing) return existing.bindTransition(transition);
+  const previous = pendingTransitions.get(root);
+  const entry: PendingHeaderTransition = { transition };
+  pendingTransitions.set(root, entry);
+  return () => {
+    entry.unbindActive?.();
+    entry.unbindActive = undefined;
+    if (pendingTransitions.get(root) === entry) {
+      if (previous?.transition.available()) pendingTransitions.set(root, previous);
+      else pendingTransitions.delete(root);
+    }
+  };
+}
 const FOCUSABLE = 'a[href], button, [role="button"], [role="combobox"], [tabindex="0"]';
 const PORTAL_HEADER_HEIGHT = '--docs-preview-header-height';
 const portalHeaderMeasurements = new WeakMap<
@@ -125,6 +168,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   let pendingPosition: { frame: number; button: HTMLElement; lease: ButtonLease } | null = null;
   let enhanced = false;
   let open = false;
+  let transition: SiteHeaderTransition | undefined;
+  let unsubscribeTransition: (() => void) | undefined;
   const nativePanel = panel?.localName === 'details' ? (panel as HTMLDetailsElement) : null;
   let destroyed = false;
   // Docs offsets follow the actual header, including font enlargement and
@@ -271,6 +316,19 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (panel?.id && button.getAttribute('aria-controls') !== panel.id)
       button.setAttribute('aria-controls', panel.id);
   };
+  const syncTransitionProperties = () => {
+    if (transition) {
+      const enter = `${transition.timing.enterDuration}ms`;
+      const leave = `${transition.timing.leaveDuration}ms`;
+      if (root.style.getPropertyValue('--site-header-menu-enter-duration') !== enter)
+        root.style.setProperty('--site-header-menu-enter-duration', enter);
+      if (root.style.getPropertyValue('--site-header-menu-leave-duration') !== leave)
+        root.style.setProperty('--site-header-menu-leave-duration', leave);
+    } else {
+      root.style.removeProperty('--site-header-menu-enter-duration');
+      root.style.removeProperty('--site-header-menu-leave-duration');
+    }
+  };
   const sync = () => {
     const focused = document.activeElement as HTMLElement | null;
     const focusInPreferences = !!focused && !!preferences?.contains(focused);
@@ -282,17 +340,28 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       compactLayout &&
       preferences?.parentElement !== compactContext &&
       (focusInPreferences || ownsSelectPopup(focused))
-    )
+    ) {
       open = true;
+      transition?.setOpen(true);
+    }
     const expanded = String(open);
     if (root.dataset.siteMenuOpen !== expanded) root.dataset.siteMenuOpen = expanded;
+    if (enhanced && transition?.available()) {
+      const phase = transition.phase();
+      if (root.dataset.siteMenuTransition !== phase) root.dataset.siteMenuTransition = phase;
+    } else if (root.hasAttribute('data-site-menu-transition')) {
+      root.removeAttribute('data-site-menu-transition');
+    }
     root.toggleAttribute('data-site-menu-ready', enhanced);
-    const hidePanel = enhanced && !open;
+    const transitionPresent = enhanced && !!transition?.available() && transition.isPresent();
+    const hidePanel = enhanced && !open && !transitionPresent;
+    const leavingPanel = enhanced && !open && transitionPresent;
     const hideNavigation = !isCompact || hidePanel;
     if (desktopNavigation && desktopNavigation.hidden !== isCompact)
       desktopNavigation.hidden = isCompact;
     if (navigation && navigation.hidden !== hideNavigation) navigation.hidden = hideNavigation;
     if (panel && panel.hidden !== hidePanel) panel.hidden = hidePanel;
+    if (panel && panel.inert !== leavingPanel) panel.inert = leavingPanel;
     if (settings && settings.hidden !== hidePanel) settings.hidden = hidePanel;
     if (enhanced) movePreferences(compactLayout);
     if (
@@ -305,13 +374,21 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     for (const button of buttons) syncButton(button);
     measureLayout();
   };
-  const close = (restoreFocus = false) => {
-    if (!open || destroyed) return;
+  const close = (restoreFocus = false, immediate = false) => {
+    if (destroyed) return;
+    if (!open) {
+      if (immediate && transition?.available() && transition.isPresent()) {
+        transition.setOpen(false, true);
+        sync();
+      }
+      return;
+    }
     const focused = document.activeElement;
     const hidingFocus = !!focused && (!!panel?.contains(focused) || ownsSelectPopup(focused));
     if (panel) closeSiteSelects(panel, 'parent.dismiss');
     open = false;
     cancelPosition();
+    transition?.setOpen(false, immediate);
     sync();
     if (restoreFocus || hidingFocus) activeButton()?.focus({ preventScroll: true });
   };
@@ -403,7 +480,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       : undefined;
     const wasOpen = open;
     closeSiteSelects(root, 'history');
-    close(!!trigger);
+    close(!!trigger, true);
     if (!wasOpen && trigger?.isConnected && !trigger.closest('[hidden], [inert]'))
       trigger.focus({ preventScroll: true });
   };
@@ -415,6 +492,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
+    unsubscribeTransition?.();
+    unsubscribeTransition = undefined;
+    transition = undefined;
+    syncTransitionProperties();
     cancelPosition();
     for (const [button, lease] of buttonLeases) {
       lease.observer?.disconnect();
@@ -460,11 +541,15 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     buttons.clear();
     if (navigation) navigation.hidden = false;
     if (desktopNavigation) desktopNavigation.hidden = false;
-    if (panel) panel.hidden = false;
+    if (panel) {
+      panel.hidden = false;
+      panel.inert = false;
+    }
     if (nativePanel) nativePanel.open = open;
     if (settings) settings.hidden = false;
     root.removeAttribute('data-site-menu-ready');
     root.removeAttribute('data-site-menu-open');
+    root.removeAttribute('data-site-menu-transition');
     disclosures.delete(root);
   };
   const handle: SiteHeaderDisclosure = {
@@ -530,8 +615,39 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
         geometryObserver?.unobserve(button);
       };
     },
+    bindTransition(next) {
+      if (destroyed) return () => {};
+      const previous = transition;
+      unsubscribeTransition?.();
+      transition = next;
+      syncTransitionProperties();
+      unsubscribeTransition = next.subscribe(() => {
+        if (!destroyed && transition === next) sync();
+      });
+      if (enhanced) next.setOpen(open, true);
+      sync();
+      return () => {
+        if (transition !== next) return;
+        unsubscribeTransition?.();
+        unsubscribeTransition = undefined;
+        transition = previous?.available() ? previous : undefined;
+        syncTransitionProperties();
+        if (transition) {
+          const restored = transition;
+          unsubscribeTransition = restored.subscribe(() => {
+            if (!destroyed && transition === restored) sync();
+          });
+          if (enhanced) restored.setOpen(open, true);
+        }
+        if (!destroyed) sync();
+      };
+    },
+    isOpen() {
+      return open;
+    },
     enhance() {
       if (destroyed) return;
+      const wasEnhanced = enhanced;
       const summaryFocused =
         !enhanced && !!nativePanel?.querySelector('summary')?.contains(document.activeElement);
       if (!enhanced && nativePanel) {
@@ -541,6 +657,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
         nativePanel.open = true;
       }
       enhanced = true;
+      if (!wasEnhanced) transition?.setOpen(open, true);
       sync();
       if (summaryFocused) activeButton()?.focus({ preventScroll: true });
     },
@@ -551,6 +668,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
         return;
       }
       open = true;
+      transition?.setOpen(true);
       sync();
       if (open) {
         document.dispatchEvent(new CustomEvent(SITE_HEADER_OPEN_EVENT));
@@ -564,7 +682,9 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
         });
       }
     },
-    close,
+    close(restoreFocus = false) {
+      close(restoreFocus);
+    },
     destroy,
   };
   compact?.addEventListener('change', onBreakpoint);
@@ -577,6 +697,11 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   document.addEventListener('astro:before-swap', destroy);
   panel?.addEventListener('click', onNavigation);
   disclosures.set(root, handle);
+  const pending = pendingTransitions.get(root);
+  if (pending && pending.transition.available()) {
+    pendingTransitions.delete(root);
+    pending.unbindActive = handle.bindTransition(pending.transition);
+  }
   return handle;
 }
 
