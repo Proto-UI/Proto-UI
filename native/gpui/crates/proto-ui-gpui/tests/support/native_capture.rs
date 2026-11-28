@@ -411,7 +411,13 @@ unsafe fn start(target: Target, pending: Pending<PreparedCapture>) -> Result<(),
             let _: () = msg_send![configuration.0, setCapturesAudio: false];
             let _: () = msg_send![configuration.0, setIncludeChildWindows: false];
             let _: () = msg_send![configuration.0, setIgnoreShadowsSingleWindow: true];
-            finish(&pending, Ok(PreparedCapture { filter, configuration }));
+            finish(
+                &pending,
+                Ok(PreparedCapture {
+                    filter,
+                    configuration,
+                }),
+            );
         }
     });
     let _: () = msg_send![class!(SCShareableContent), getCurrentProcessShareableContentWithCompletionHandler: &*content_ready];
@@ -446,15 +452,8 @@ pub async fn capture(
             .timer(Duration::from_millis(20))
             .await;
     };
-    let stream = native_stream::capture(
-        target,
-        prepared,
-        frames.requested_at,
-        deadline,
-        path,
-        cx,
-    )
-    .await?;
+    let stream =
+        native_stream::capture(target, prepared, frames.requested_at, deadline, path, cx).await?;
     let captured = stream.captured?;
     // Retain original failed pixels and their counts as well as successful
     // evidence. Only this waiter writes files; late/duplicate callbacks still

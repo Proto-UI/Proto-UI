@@ -29,7 +29,10 @@ fn current(now: Instant) -> FrameAdmission {
 fn first_complete_current_native_frame_is_admitted_once() {
     let now = Instant::now();
     let mut gate = current(now);
-    assert_eq!(gate.observe(7, metadata(), 300, now), Admission::FirstComplete);
+    assert_eq!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
     assert_eq!(gate.observe(7, metadata(), 301, now), Admission::Retired);
 }
 
@@ -40,9 +43,15 @@ fn started_idle_blank_suspended_stopped_and_unknown_frames_do_not_admit_pixels()
     for status in [None, Some(1), Some(2), Some(3), Some(4), Some(5), Some(99)] {
         let mut frame = metadata();
         frame.status = status;
-        assert!(matches!(gate.observe(7, frame, 300, now), Admission::Observe(_)));
+        assert!(matches!(
+            gate.observe(7, frame, 300, now),
+            Admission::Observe(_)
+        ));
     }
-    assert_eq!(gate.observe(7, metadata(), 300, now), Admission::FirstComplete);
+    assert_eq!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
 }
 
 #[test]
@@ -53,9 +62,15 @@ fn invalid_or_unready_buffers_do_not_admit_pixels() {
         let mut frame = metadata();
         frame.valid = valid;
         frame.ready = ready;
-        assert!(matches!(gate.observe(7, frame, 300, now), Admission::Observe(_)));
+        assert!(matches!(
+            gate.observe(7, frame, 300, now),
+            Admission::Observe(_)
+        ));
     }
-    assert_eq!(gate.observe(7, metadata(), 300, now), Admission::FirstComplete);
+    assert_eq!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
 }
 
 #[test]
@@ -65,9 +80,15 @@ fn absent_previous_phase_and_future_display_times_cannot_be_current_pixels() {
     for display_time in [None, Some(0), Some(99), Some(301)] {
         let mut frame = metadata();
         frame.display_time = display_time;
-        assert!(matches!(gate.observe(7, frame, 300, now), Admission::Observe(_)));
+        assert!(matches!(
+            gate.observe(7, frame, 300, now),
+            Admission::Observe(_)
+        ));
     }
-    assert_eq!(gate.observe(7, metadata(), 300, now), Admission::FirstComplete);
+    assert_eq!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
 }
 
 #[test]
@@ -75,14 +96,20 @@ fn missing_phase_clock_never_qualifies_a_frame() {
     let now = Instant::now();
     let mut gate = FrameAdmission::new(0, 300, 332, now + Duration::from_secs(5));
     assert!(gate.bind_stream(7));
-    assert!(matches!(gate.observe(7, metadata(), 300, now), Admission::Observe(_)));
+    assert!(matches!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::Observe(_)
+    ));
 }
 
 #[test]
 fn a_foreign_stream_is_terminal_even_if_its_dimensions_and_pixels_would_match() {
     let now = Instant::now();
     let mut gate = current(now);
-    assert!(matches!(gate.observe(8, metadata(), 300, now), Admission::Fail(_)));
+    assert!(matches!(
+        gate.observe(8, metadata(), 300, now),
+        Admission::Fail(_)
+    ));
     assert_eq!(gate.observe(7, metadata(), 300, now), Admission::Retired);
 }
 
@@ -99,7 +126,10 @@ fn a_missing_or_replaced_stream_binding_is_not_accepted() {
     assert!(!gate.bind_stream(0));
     assert!(gate.bind_stream(7));
     assert!(!gate.bind_stream(8));
-    assert_eq!(gate.observe(7, metadata(), 300, now), Admission::FirstComplete);
+    assert_eq!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
 }
 
 #[test]
@@ -110,7 +140,10 @@ fn complete_frame_dimension_failure_cannot_be_replaced_by_a_later_correct_frame(
         let mut frame = metadata();
         frame.width = width;
         frame.height = height;
-        assert!(matches!(gate.observe(7, frame, 300, now), Admission::Fail(_)));
+        assert!(matches!(
+            gate.observe(7, frame, 300, now),
+            Admission::Fail(_)
+        ));
         assert_eq!(gate.observe(7, metadata(), 300, now), Admission::Retired);
     }
 }
@@ -142,14 +175,20 @@ fn cancellation_retires_old_phase_without_admitting_its_late_callback() {
     assert_eq!(old.observe(7, metadata(), 500, now), Admission::Retired);
     let mut current_frame = metadata();
     current_frame.display_time = Some(450);
-    assert_eq!(next.observe(8, current_frame, 500, now), Admission::FirstComplete);
+    assert_eq!(
+        next.observe(8, current_frame, 500, now),
+        Admission::FirstComplete
+    );
 }
 
 #[test]
 fn first_complete_black_frame_fails_original_pixel_oracle_and_cannot_be_replaced() {
     let now = Instant::now();
     let mut gate = current(now);
-    assert_eq!(gate.observe(7, metadata(), 300, now), Admission::FirstComplete);
+    assert_eq!(
+        gate.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
     let mut black = vec![0; 300 * 332 * 4];
     for pixel in black.chunks_exact_mut(4) {
         pixel[3] = 255;

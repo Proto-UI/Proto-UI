@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, Weak};
 use std::time::{Duration, Instant};
 
-use block2::RcBlock;
+use block2::{Block, RcBlock};
 use gpui::AsyncApp;
 use objc2::runtime::{AnyClass, AnyObject, AnyProtocol, ClassBuilder, Sel};
 use objc2::{class, msg_send, sel};
@@ -355,8 +355,9 @@ fn output_class() -> Result<&'static AnyClass, String> {
     static CLASS: OnceLock<Result<&'static AnyClass, String>> = OnceLock::new();
     CLASS
         .get_or_init(|| {
-            let mut class = ClassBuilder::new("ProtoUIEvidenceWindowStreamOutput", class!(NSObject))
-                .ok_or("could not allocate the owned stream output class")?;
+            let mut class =
+                ClassBuilder::new("ProtoUIEvidenceWindowStreamOutput", class!(NSObject))
+                    .ok_or("could not allocate the owned stream output class")?;
             for name in ["SCStreamOutput", "SCStreamDelegate"] {
                 class.add_protocol(
                     AnyProtocol::get(name).ok_or("native stream protocol unavailable")?,
@@ -478,7 +479,7 @@ impl Resources {
                     }
                     finish(&owner.stopped, result);
                 });
-                dispatch_async(queue, (&*drained as *const _).cast());
+                dispatch_async(queue, (&*drained as *const Block<dyn Fn()>).cast());
             }
         });
         unsafe {
@@ -528,7 +529,9 @@ unsafe fn open(
         return Err("could not create the native stream output".into());
     }
     let stream: *mut AnyObject = msg_send![class!(SCStream), alloc];
-    let stream = ObjcOwned(msg_send![stream, initWithFilter: prepared.filter.0 configuration: prepared.configuration.0 delegate: output.0]);
+    let stream = ObjcOwned(
+        msg_send![stream, initWithFilter: prepared.filter.0 configuration: prepared.configuration.0 delegate: output.0],
+    );
     if stream.0.is_null() {
         return Err("could not create the owned window stream".into());
     }
