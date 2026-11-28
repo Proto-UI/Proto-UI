@@ -107,6 +107,15 @@ test('native stop removes output, fences its serial queue and rejects late phase
   assert.match(stream, /owner.stop_gate.complete_start\(\)/);
   assert.match(stream, /self.stop_gate.request\(\)/);
   assert.match(stream, /owner.stop_gate.complete_stop\(\)/);
+  const nativeErrors = stream.slice(
+    stream.indexOf('unsafe extern "C" fn stopped_with_error'),
+    stream.indexOf('fn output_class')
+  );
+  assert.doesNotMatch(nativeErrors, /shared.retired/);
+  assert.match(stream, /match failure.seal\(\)/);
+  assert.ok(
+    stream.indexOf('match failure.seal()') < stream.indexOf('finish(&owner.stopped, result)')
+  );
   assert.match(capture, /frames.passed\(\) && stream.resource_error.is_none\(\)/);
   assert.match(capture, /if let Some\(error\) = stream.resource_error/);
 });

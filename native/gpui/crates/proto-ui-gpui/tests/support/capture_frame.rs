@@ -54,6 +54,33 @@ impl StopGate {
     }
 }
 
+/// Pixel admission retires before native stream cleanup finishes. Resource
+/// errors stay open until the stop/output fence seals this independent state.
+#[derive(Default)]
+pub struct ResourceFailure {
+    sealed: bool,
+    first: Option<String>,
+}
+
+impl ResourceFailure {
+    pub fn record(&mut self, error: String) -> bool {
+        if self.sealed || self.first.is_some() {
+            return false;
+        }
+        self.first = Some(error);
+        true
+    }
+
+    pub fn seal(&mut self) -> Option<String> {
+        self.sealed = true;
+        self.first.clone()
+    }
+
+    pub fn error(&self) -> Option<&String> {
+        self.first.as_ref()
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Metadata {
     pub valid: bool,

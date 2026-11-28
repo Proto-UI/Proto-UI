@@ -5,7 +5,7 @@ mod capture_pixels;
 #[path = "support/capture_state.rs"]
 mod capture_state;
 
-use capture_frame::{Admission, FrameAdmission, Metadata, StopGate};
+use capture_frame::{Admission, FrameAdmission, Metadata, ResourceFailure, StopGate};
 use std::time::{Duration, Instant};
 
 fn metadata() -> Metadata {
@@ -181,9 +181,39 @@ fn first_complete_black_frame_fails_original_pixel_oracle_and_cannot_be_replaced
 }
 
 #[test]
-fn failed_or_timed_out_stop_cannot_be_replaced_by_a_late_success() {
+fn stop_error_after_pixel_retirement_or_timeout_cannot_be_replaced_by_success() {
     let now = Instant::now();
     let deadline = now + Duration::from_secs(5);
+    let mut pixels = current(now);
+    assert_eq!(
+        pixels.observe(7, metadata(), 300, now),
+        Admission::FirstComplete
+    );
+    pixels.retire();
+    let mut resource = ResourceFailure::default();
+    assert!(resource.record("same-stream delegate stop error 17".into()));
+    assert!(!resource.record("a later error cannot replace the first".into()));
+    // Native stop, output removal and queue drain can all succeed after the
+    // delegate failure; sealing must still make that cleanup result fail.
+    let fenced = match resource.seal() {
+        Some(error) => Err(error),
+        None => Ok(()),
+    };
+    let mut stopped = capture_state::CaptureState::new(deadline);
+    assert!(stopped.complete(fenced, now));
+    assert!(!stopped.complete(Ok(()), now));
+    assert_eq!(
+        stopped.take(now).unwrap().unwrap_err(),
+        "same-stream delegate stop error 17"
+    );
+    assert_eq!(
+        resource.error().map(String::as_str),
+        Some("same-stream delegate stop error 17")
+    );
+    let mut completed_phase = ResourceFailure::default();
+    assert_eq!(completed_phase.seal(), None);
+    assert!(!completed_phase.record("late old-phase delegate error".into()));
+    assert_eq!(completed_phase.error(), None);
     let mut failed = capture_state::CaptureState::<()>::new(deadline);
     assert!(failed.complete(Err("native stop failed".into()), now));
     assert!(!failed.complete(Ok(()), now));

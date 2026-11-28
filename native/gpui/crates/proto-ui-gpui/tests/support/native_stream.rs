@@ -16,7 +16,7 @@ use objc2::{class, msg_send, sel};
 
 #[path = "capture_frame.rs"]
 mod capture_frame;
-use capture_frame::{Admission, FrameAdmission, Metadata, StopGate};
+use capture_frame::{Admission, FrameAdmission, Metadata, ResourceFailure, StopGate};
 
 use super::{
     captured_image, encode_png, finish, phase_clock, write_fresh, CaptureState, Captured, CfOwned,
@@ -96,14 +96,14 @@ struct Shared {
     admission: Mutex<FrameAdmission>,
     captured: Pending<Captured>,
     retired: AtomicBool,
-    failure: Mutex<Option<String>>,
+    failure: Mutex<ResourceFailure>,
     journal: Mutex<Journal>,
 }
 
 impl Shared {
     fn fail(&self, error: String) {
         if let Ok(mut failure) = self.failure.lock() {
-            failure.get_or_insert_with(|| error.clone());
+            failure.record(error.clone());
         }
         self.retired.store(true, Ordering::Release);
         finish(&self.captured, Err(error));
@@ -336,17 +336,18 @@ unsafe extern "C" fn stopped_with_error(
     error: *mut AnyObject,
 ) {
     if let Some(shared) = lookup(output) {
-        if !shared.retired.load(Ordering::Acquire) {
-            let owns_stream = shared
-                .admission
-                .lock()
-                .is_ok_and(|admission| admission.owns_stream(stream as usize));
-            if !owns_stream {
-                shared.fail("native error came from a different stream".into());
-                return;
-            }
-            shared.fail(native_error("owned window stream stopped", error));
+        // Pixel retirement is not resource completion. A delegate error from
+        // this stream during stop must remain a failure even after its first
+        // image was accepted. The exact registry/fence retires this channel.
+        let owns_stream = shared
+            .admission
+            .lock()
+            .is_ok_and(|admission| admission.owns_stream(stream as usize));
+        if !owns_stream {
+            shared.fail("native error came from a different stream".into());
+            return;
         }
+        shared.fail(native_error("owned window stream stopped", error));
     }
 }
 
@@ -463,6 +464,18 @@ impl Resources {
                             Err("exact native output registration could not be retired".into());
                     }
                     owner.queue_drained.store(true, Ordering::Release);
+                    let resource_result = owner
+                        .shared
+                        .failure
+                        .lock()
+                        .map_err(|_| "native resource error state poisoned".to_owned())
+                        .and_then(|mut failure| match failure.seal() {
+                            Some(error) => Err(error),
+                            None => Ok(()),
+                        });
+                    if result.is_ok() {
+                        result = resource_result;
+                    }
                     finish(&owner.stopped, result);
                 });
                 dispatch_async(queue, (&*drained as *const _).cast());
@@ -500,7 +513,7 @@ unsafe fn open(
         )),
         captured: Arc::new(Mutex::new(CaptureState::new(deadline))),
         retired: AtomicBool::new(false),
-        failure: Mutex::new(None),
+        failure: Mutex::new(ResourceFailure::default()),
         journal: Mutex::new(Journal::default()),
     });
     let queue = Queue(dispatch_queue_create(
@@ -635,7 +648,7 @@ pub(super) async fn capture(
                 .failure
                 .lock()
                 .ok()
-                .and_then(|failure| failure.clone())
+                .and_then(|failure| failure.error().cloned())
         })
         .or_else(|| stopped.err());
     let frames = std::mem::take(
