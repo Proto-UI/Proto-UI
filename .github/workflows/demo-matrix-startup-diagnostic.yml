@@ -53,6 +53,7 @@ jobs:
         env:
           PROTO_UI_MATRIX_STARTUP_PROFILE: '1'
           PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1'
+          PROTO_UI_MATRIX_TRACE_INIT: '1'
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/demo-matrix-startup
         run: |
           set -euo pipefail

@@ -9,7 +9,7 @@ const TRACE_WINDOW_MS = 20_000;
 const TRACE_LIMIT_BYTES = 16 * 1024 * 1024;
 const TRACE_CHUNK_LIMIT = 256;
 // The 6ccb receipt hit the chunk cap with timeline events before any profile
-// facts were retained. Keep one early CPU-only window; never restart it.
+// facts were retained. Keep one bounded CPU-only window; never restart it.
 const TRACE_CATEGORIES = ['disabled-by-default-v8.cpu_profiler'];
 
 async function bounded<T>(work: Promise<T>, label: string): Promise<T> {
@@ -133,6 +133,7 @@ export async function startMatrixBrowserDiagnostic(
     sourceSha: string;
     caseName: string;
     phase(): string;
+    traceStartPhase?: 'inited-count';
   }
 ) {
   if (!options.enabled) return { finish: async () => {} };
@@ -144,6 +145,8 @@ export async function startMatrixBrowserDiagnostic(
   let deadline: ReturnType<typeof setTimeout> | undefined;
   let cpuTimer: ReturnType<typeof setTimeout> | undefined;
   let traceTimer: ReturnType<typeof setTimeout> | undefined;
+  let tracePhaseTimer: ReturnType<typeof setTimeout> | undefined;
+  let traceSetupWork: Promise<void> | undefined;
   let traceFinishPromise: Promise<void> | undefined;
   let cpuWork: Promise<void> | undefined;
   let cpuSession: CDPSession | undefined;
@@ -215,6 +218,7 @@ export async function startMatrixBrowserDiagnostic(
       cpu: { ...cpu },
       trace: {
         ...trace,
+        requestedStartPhase: options.traceStartPhase ?? 'immediate',
         requestedWindowMs: TRACE_WINDOW_MS,
         windowOrigin: 'trace start acknowledgement; early stop does not end the CPU/network owner',
         bufferLimitBytes: TRACE_LIMIT_BYTES,
@@ -402,6 +406,25 @@ export async function startMatrixBrowserDiagnostic(
     traceTimer = setTimeout(() => void finishTrace('checkpoint'), TRACE_WINDOW_MS);
     snapshot();
   };
+  const beginTrace = () =>
+    (traceSetupWork ??= bounded(setupTrace(), 'Browser tracing setup').catch((error) => {
+      traceRetired = true;
+      traceAccepting = false;
+      trace.state = 'unavailable';
+      trace.setupError = String(error);
+      trace.error ??= trace.setupError;
+      removeTraceListeners();
+      void detach(traceSession);
+    }));
+  const awaitTracePhase = () => {
+    if (finished || traceRetired) return;
+    if (!options.traceStartPhase || options.phase() === options.traceStartPhase) {
+      void beginTrace();
+      return;
+    }
+    trace.state = 'waiting-for-phase';
+    tracePhaseTimer = setTimeout(awaitTracePhase, 50);
+  };
   snapshot();
   await Promise.all([
     bounded(setupCpu(), 'Process CPU setup').catch((error) => {
@@ -410,15 +433,7 @@ export async function startMatrixBrowserDiagnostic(
       cpu.error = String(error);
       void detach(cpuSession);
     }),
-    bounded(setupTrace(), 'Browser tracing setup').catch((error) => {
-      traceRetired = true;
-      traceAccepting = false;
-      trace.state = 'unavailable';
-      trace.setupError = String(error);
-      trace.error ??= trace.setupError;
-      removeTraceListeners();
-      void detach(traceSession);
-    }),
+    options.traceStartPhase ? Promise.resolve(awaitTracePhase()) : beginTrace(),
   ]);
   snapshot();
   const finish = (reason: 'owner-finish' | 'diagnostic-deadline') =>
@@ -429,9 +444,10 @@ export async function startMatrixBrowserDiagnostic(
       traceRetired = true;
       clearTimeout(deadline);
       clearTimeout(cpuTimer);
+      clearTimeout(tracePhaseTimer);
       // An early stop may still own its bounded flush/detach. Share that work
       // before writing the owner's terminal receipt; never stop or restart twice.
-      await Promise.all([cpuWork, finishTrace(reason)]);
+      await Promise.all([cpuWork, traceSetupWork, finishTrace(reason)]);
       if (cpu.state !== 'unavailable') cpu.state = cpu.sampleCount ? 'captured' : 'unavailable';
       await Promise.all([detach(cpuSession), detach(traceSession)]);
       snapshot();

@@ -205,6 +205,7 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
       caseName: state.caseName,
       origin: new URL(baseUrl).origin,
       phase: () => state.phase,
+      traceStartPhase: process.env.PROTO_UI_MATRIX_TRACE_INIT === '1' ? 'inited-count' : undefined,
       // This suite launches and exclusively owns the Browser. Browser-wide
       // tracing/counters require their own opt-in in addition to page profiling.
       ownedBrowser: process.env.PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC === '1' ? browser : undefined,

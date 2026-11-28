@@ -61,6 +61,77 @@ const held = <T>() => {
 };
 
 describe('explicit owned-browser Matrix diagnosis', () => {
+  it('can keep one bounded trace for the initialization phase while CPU sampling starts immediately', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    let phase = 'route-open';
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      phase: () => phase,
+      traceStartPhase: 'inited-count',
+    });
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(f.cpu.send).toHaveBeenCalledTimes(2);
+    expect(f.trace.send).not.toHaveBeenCalled();
+    phase = 'inited-count';
+    await vi.advanceTimersByTimeAsync(50);
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.start')).toHaveLength(
+      1
+    );
+    await vi.advanceTimersByTimeAsync(20_000);
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.end')).toHaveLength(1);
+    phase = 'route-open';
+    await vi.advanceTimersByTimeAsync(1_000);
+    phase = 'inited-count';
+    await vi.advanceTimersByTimeAsync(1_000);
+    await handle.finish();
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.start')).toHaveLength(
+      1
+    );
+    expect((await result()).trace).toMatchObject({
+      requestedStartPhase: 'inited-count',
+      requestedWindowMs: 20_000,
+      state: 'complete',
+    });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('retires a trace waiting for a phase without acquiring a later browser session', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    let phase = 'route-open';
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      phase: () => phase,
+      traceStartPhase: 'inited-count',
+    });
+    await handle.finish();
+    phase = 'inited-count';
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(f.create).toHaveBeenCalledTimes(1);
+    expect(f.trace.send).not.toHaveBeenCalled();
+    expect((await result()).trace.state).toBe('unavailable');
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('keeps the owner deadline when the requested trace phase never arrives', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, {
+      ...options(),
+      phase: () => 'route-open',
+      traceStartPhase: 'inited-count',
+    });
+    await vi.advanceTimersByTimeAsync(180_000);
+    await handle.finish();
+    const receipt = await result();
+    expect(receipt.finishReason).toBe('diagnostic-deadline');
+    expect(receipt.ownerLimitMs).toBe(180_000);
+    expect(receipt.trace.state).toBe('unavailable');
+    expect(f.trace.send).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('does not contact a browser, install timers or write files without explicit enablement', async () => {
     vi.useFakeTimers();
     const f = fixture();

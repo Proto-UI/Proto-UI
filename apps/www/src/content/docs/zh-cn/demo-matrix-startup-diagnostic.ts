@@ -42,6 +42,7 @@ export async function startMatrixStartupDiagnostic(
     origin: string;
     phase(): string;
     ownedBrowser?: Browser;
+    traceStartPhase?: 'inited-count';
   }
 ) {
   if (!options.enabled) return inert;
