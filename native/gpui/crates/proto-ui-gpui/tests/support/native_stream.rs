@@ -364,7 +364,8 @@ fn output_class() -> Result<&'static AnyClass, String> {
             let mut class =
                 ClassBuilder::new("ProtoUIEvidenceWindowStreamOutput", class!(NSObject))
                     .ok_or("could not allocate the owned stream output class")?;
-            let base = AnyProtocol::get("NSObject").ok_or("native NSObject protocol unavailable")?;
+            let base =
+                AnyProtocol::get("NSObject").ok_or("native NSObject protocol unavailable")?;
             // SAFETY: each SDK @protocol expression returns a process-lifetime
             // protocol object, not an owned or borrowed instance. The linked
             // translation unit uses this runner's actual SDK declarations.
