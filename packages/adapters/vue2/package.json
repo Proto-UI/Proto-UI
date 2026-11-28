@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/adapter-vue2",
-  "version": "0.3.0",
+  "version": "0.3.0-rc.1",
   "type": "module",
   "dependencies": {
     "@proto.ui/core": "workspace:*",

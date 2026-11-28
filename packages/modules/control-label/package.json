@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/module-control-label",
-  "version": "0.3.0",
+  "version": "0.3.0-rc.1",
   "private": false,
   "type": "module",
   "sideEffects": false,
