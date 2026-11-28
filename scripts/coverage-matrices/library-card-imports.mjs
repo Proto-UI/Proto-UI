@@ -4,7 +4,15 @@
 // owned by www.build.style-generation through startup-prerender-imports.mjs.
 // Source/edge reconciliation at main 248f8270d is recorded in
 // internal/records/2026-11-24-main-website-boundary-repair.json.
+import { SYNCHRONOUS_STEPS_SOURCE_CLOSURE } from './synchronous-steps-imports.mjs';
+
 export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
+  // Exact compatibility re-export for the existing all-step teardown owner.
+  'packages/adapters/base/src/host/synchronous-steps.ts': Object.freeze({
+    sourceSha256: 'ebfcf79bfb3d09c1644edb81b32e876796f84c75f8831c631b7fcfd3a63262de',
+    companionSources: SYNCHRONOUS_STEPS_SOURCE_CLOSURE,
+    specifiers: Object.freeze(['@proto.ui/core/internal']),
+  }),
   'packages/adapters/base/src/material/geometry-watch.ts': Object.freeze({
     sourceSha256: '258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966',
     specifiers: Object.freeze(['./paint-mutations']),
@@ -29,7 +37,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '6ad0b1c37967d3ac6aff3de80fc9492f99b727887fd1987e0f013e819931f2fe',
     companionSource: Object.freeze({
       path: 'packages/adapters/base/src/host/synchronous-steps.ts',
-      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+      sha256: 'ebfcf79bfb3d09c1644edb81b32e876796f84c75f8831c631b7fcfd3a63262de',
     }),
     specifiers: Object.freeze([
       '../host/synchronous-steps',
@@ -73,7 +81,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '6ff1e20429691dcfcff2be4685ceb685321df7e0156e6c8dada2c4c1d05aed1d',
     companionSource: Object.freeze({
       path: 'packages/adapters/base/src/host/synchronous-steps.ts',
-      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+      sha256: 'ebfcf79bfb3d09c1644edb81b32e876796f84c75f8831c631b7fcfd3a63262de',
     }),
     specifiers: Object.freeze([
       '../host/synchronous-steps',

@@ -2030,7 +2030,7 @@
     {
       "source": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
       "owningMatrixRow": "`www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface`",
-      "sourceSha256": "ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024"
+      "sourceSha256": "f91f375d3d0b8a0f8e104df7de04a6477f8815d6a4cb228dd587c4fcf7df1d83"
     },
     {
       "source": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",

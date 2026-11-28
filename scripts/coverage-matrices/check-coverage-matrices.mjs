@@ -8498,6 +8498,14 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir
   const companion = allowance.companionSource;
   if (companion && !reviewedWebsiteImportSourceMatches(rootDir, companion.path, companion.sha256))
     return false;
+  // Every member is required in addition to the existing singular companion.
+  // A source-bound private re-export cannot substitute a different implementation.
+  if (
+    allowance.companionSources?.some(
+      (source) => !reviewedWebsiteImportSourceMatches(rootDir, source.path, source.sha256)
+    )
+  )
+    return false;
 
   if (
     guardedImport.category === 'vite-ignored-dynamic-import' &&
