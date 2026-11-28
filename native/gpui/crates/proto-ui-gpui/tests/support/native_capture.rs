@@ -20,6 +20,9 @@ use objc2_foundation::{NSOperatingSystemVersion, NSPoint, NSRect, NSSize};
 mod capture_state;
 use capture_state::CaptureState;
 
+#[path = "native_stream.rs"]
+mod native_stream;
+
 #[path = "capture_pixels.rs"]
 pub mod capture_pixels;
 use capture_pixels::{Rect, Report};
@@ -196,6 +199,8 @@ pub struct FrameWitness {
     pub callbacks: usize,
     pub visible: bool,
     pub error: Option<String>,
+    /// Mach absolute time before the current phase requests its normal frame.
+    pub requested_at: u64,
 }
 
 impl FrameWitness {
@@ -204,15 +209,29 @@ impl FrameWitness {
     }
 }
 
-type Pending = Arc<Mutex<CaptureState<Captured>>>;
+type Pending<T> = Arc<Mutex<CaptureState<T>>>;
 
-fn finish(pending: &Pending, result: Result<Captured, String>) {
+struct PreparedCapture {
+    filter: ObjcOwned,
+    configuration: ObjcOwned,
+}
+
+extern "C" {
+    fn mach_absolute_time() -> u64;
+}
+
+pub fn phase_clock() -> u64 {
+    // The native SCStreamFrameInfoDisplayTime uses this same host clock.
+    unsafe { mach_absolute_time() }
+}
+
+fn finish<T>(pending: &Pending<T>, result: Result<T, String>) {
     if let Ok(mut state) = pending.lock() {
         state.complete(result, Instant::now());
     }
 }
 
-fn is_pending(pending: &Pending) -> bool {
+fn is_pending<T>(pending: &Pending<T>) -> bool {
     pending
         .lock()
         .is_ok_and(|state| state.pending(Instant::now()))
@@ -321,7 +340,7 @@ unsafe fn captured_image(image: *const c_void, target: Target) -> Result<Capture
 /// Starts only the consent-free, current-process content query. The callback
 /// selects the exact AppKit window ID and independently verifies its owner and
 /// point dimensions. Nothing else is captured or logged.
-unsafe fn start(target: Target, pending: Pending) -> Result<(), String> {
+unsafe fn start(target: Target, pending: Pending<PreparedCapture>) -> Result<(), String> {
     let info: *mut AnyObject = msg_send![class!(NSProcessInfo), processInfo];
     let version: NSOperatingSystemVersion = msg_send![info, operatingSystemVersion];
     if version.majorVersion < 14 || (version.majorVersion == 14 && version.minorVersion < 4) {
@@ -342,8 +361,9 @@ unsafe fn start(target: Target, pending: Pending) -> Result<(), String> {
             );
             return;
         }
-        // SAFETY: ScreenCaptureKit owns these objects for this callback. No
-        // AppKit view is touched here and no pointer escapes this callback.
+        // SAFETY: ScreenCaptureKit owns the queried objects for this callback.
+        // No AppKit view is touched and no borrowed window pointer escapes;
+        // only our owned filter/configuration cross to the stream waiter.
         unsafe {
             let windows: *mut AnyObject = msg_send![content, windows];
             let count: usize = msg_send![windows, count];
@@ -391,29 +411,7 @@ unsafe fn start(target: Target, pending: Pending) -> Result<(), String> {
             let _: () = msg_send![configuration.0, setCapturesAudio: false];
             let _: () = msg_send![configuration.0, setIncludeChildWindows: false];
             let _: () = msg_send![configuration.0, setIgnoreShadowsSingleWindow: true];
-            let filter_ptr = filter.0;
-            let configuration_ptr = configuration.0;
-            let result_pending = Arc::clone(&pending);
-            let image_ready = RcBlock::new(move |image: *const c_void, error: *mut AnyObject| {
-                // Own both inputs for the copied completion block's entire
-                // lifetime, including timeout/late-result disposal. Do not
-                // rely on undocumented argument retention by the manager.
-                let _keep_alive = (&filter, &configuration);
-                if !is_pending(&result_pending) {
-                    return;
-                }
-                let result = if error.is_null() {
-                    // The CGImage is borrowed for this invocation. Encode and
-                    // copy its bytes before ScreenCaptureKit releases it.
-                    captured_image(image, target)
-                } else {
-                    Err("exact-window screenshot failed".into())
-                };
-                finish(&result_pending, result);
-            });
-            // ScreenCaptureKit copies the asynchronous completion block;
-            // that block explicitly owns the filter and configuration.
-            let _: () = msg_send![class!(SCScreenshotManager), captureImageWithFilter: filter_ptr configuration: configuration_ptr completionHandler: &*image_ready];
+            finish(&pending, Ok(PreparedCapture { filter, configuration }));
         }
     });
     let _: () = msg_send![class!(SCShareableContent), getCurrentProcessShareableContentWithCompletionHandler: &*content_ready];
@@ -426,15 +424,16 @@ pub async fn capture(
     frames: FrameWitness,
     cx: &AsyncApp,
 ) -> Result<Report, String> {
-    let pending = Arc::new(Mutex::new(CaptureState::new(
-        Instant::now() + Duration::from_secs(5),
-    )));
+    // Query, stream start, first complete frame, stop and output-queue drain
+    // share the original capture deadline. No stage receives a fresh 5 s.
+    let deadline = Instant::now() + Duration::from_secs(5);
+    let pending = Arc::new(Mutex::new(CaptureState::new(deadline)));
     // SAFETY: framework access is guarded by availability; target is a value
     // snapshot of our live test window, not an arbitrary externally supplied ID.
     unsafe {
         start(target, Arc::clone(&pending))?;
     }
-    let captured = loop {
+    let prepared = loop {
         let ready = pending
             .lock()
             .map_err(|_| "capture state poisoned")?
@@ -447,6 +446,16 @@ pub async fn capture(
             .timer(Duration::from_millis(20))
             .await;
     };
+    let stream = native_stream::capture(
+        target,
+        prepared,
+        frames.requested_at,
+        deadline,
+        path,
+        cx,
+    )
+    .await?;
+    let captured = stream.captured?;
     // Retain original failed pixels and their counts as well as successful
     // evidence. Only this waiter writes files; late/duplicate callbacks still
     // cannot create or replace any artifact.
@@ -459,9 +468,10 @@ pub async fn capture(
     let evidence = match &captured.pixels {
         Ok(report) => serde_json::json!({
             "rule": "two-label-content-v1",
-            "passed": report.passed() && frames.passed(),
+            "passed": report.passed() && frames.passed() && stream.resource_error.is_none(),
             "pixelGatePassed": report.passed(),
             "platformFrames": { "callbacks": frames.callbacks, "visible": frames.visible, "error": frames.error },
+            "nativeStream": stream.receipt,
             "windowId": target.window_id,
             "processId": target.process_id,
             "width": target.width,
@@ -484,6 +494,7 @@ pub async fn capture(
         Err(error) => serde_json::json!({
             "rule": "two-label-content-v1", "passed": false, "error": error,
             "platformFrames": { "callbacks": frames.callbacks, "visible": frames.visible, "error": frames.error },
+            "nativeStream": stream.receipt,
             "windowId": target.window_id, "processId": target.process_id,
         }),
     };
@@ -497,6 +508,9 @@ pub async fn capture(
     }
     if !report.passed() {
         return Err(format!("two-label content pixel gate failed: {report:?}"));
+    }
+    if let Some(error) = stream.resource_error {
+        return Err(error);
     }
     Ok(report)
 }

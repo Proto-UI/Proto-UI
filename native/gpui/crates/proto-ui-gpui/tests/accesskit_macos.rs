@@ -447,6 +447,7 @@ mod macos {
         /// draw/present invocation. This is not a GPU fence: the subsequent
         /// ScreenCaptureKit pixel gate is the final evidence of visible text.
         async fn capture_frames(&self, cx: &mut AsyncApp) -> super::native_capture::FrameWitness {
+            let requested_at = super::native_capture::phase_clock();
             let callbacks = Rc::new(Cell::new(0usize));
             let retired = Rc::new(Cell::new(false));
             let _retire_on_drop = RetireFrameCallbacks(retired.clone());
@@ -492,6 +493,7 @@ mod macos {
                 callbacks: callbacks.get(),
                 visible,
                 error,
+                requested_at,
             }
         }
 
