@@ -8,6 +8,23 @@ import { indexUnit, type BodyDeclarations, type UnitDeclarations } from './valid
 import type { Declarations } from './validation/value.ts';
 
 export { ComponentIRDiagnostic, unsupportedHostName } from './validation/diagnostic.ts';
+export {
+  GeneratedVerificationError,
+  verifyGenerated,
+  type GeneratedFinding,
+  type GeneratedFindingKind,
+  type GeneratedVerification,
+} from './validation/generated.ts';
+import { GeneratedVerificationError, verifyGenerated } from './validation/generated.ts';
+
+export interface ValidateOptions {
+  /**
+   * Run the read-only Stage 1 structural verification for generated compositions.
+   * A control with no observable consequence on any path rejects the unit; other
+   * findings are available from verifyGenerated. Off by default.
+   */
+  readonly verifyGenerated?: boolean;
+}
 
 export interface ReachedExtern {
   readonly extern: ExternIR;
@@ -90,7 +107,7 @@ function checkBody(
 }
 
 /** Admit the entire linked wire and identify the target bindings required by its public roots. */
-export function validateComponent(ir: ComponentIR): readonly ReachedExtern[] {
+export function validateComponent(ir: ComponentIR, options: ValidateOptions = {}): readonly ReachedExtern[] {
   const unit = indexUnit(ir);
   const graph = new Map<string, References>();
   const reached = new Map<string, ReachedExtern>();
@@ -111,5 +128,9 @@ export function validateComponent(ir: ComponentIR): readonly ReachedExtern[] {
       cycle.path);
   }
   if (missing) throw missing;
+  if (options.verifyGenerated) {
+    const verification = verifyGenerated(ir);
+    if (verification.rejected) throw new GeneratedVerificationError(verification.findings);
+  }
   return [...reached.values()];
 }

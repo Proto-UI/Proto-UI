@@ -127,7 +127,7 @@ test('language, rule and binding configuration changes invalidate prior evidence
   const prior = f.verify();
   for (const configuration of [
     { ...f.configuration, languageVersion: '0.5' },
-    { ...f.configuration, ruleSetVersion: '0.4.0-draft.2' },
+    { ...f.configuration, ruleSetVersion: `${f.configuration.ruleSetVersion}.changed` },
     { ...f.configuration, settings: { paths: {}, bindings: { window: 'different-host' } } },
   ]) {
     const report = f.verify({

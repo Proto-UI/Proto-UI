@@ -8,6 +8,15 @@ import {
   createProtoProgram,
   getProtoSourceClosure,
 } from './program.ts';
+import { AUTHORING_DECLARATIONS } from './input-profile.ts';
+import {
+  COMPOSITE_VALUE_RULE,
+  PERSISTENT_CAPTURE_RULE,
+  compositeOperand,
+  mutatedMember,
+  persistentCaptureWrite,
+  persistentScope,
+} from './value-semantics.ts';
 import { PROTO_TARGETS } from './types.ts';
 import type {
   ProtoAnalysis,
@@ -32,6 +41,11 @@ export const PROTO_RULES = Object.freeze({
   'proto/no-capability-assertion': {
     criterion: [foundation('LANGUAGE'), foundation('VALUES')],
     coverage: 'missing',
+  },
+  'proto/persistent-capture-state': { criterion: [foundation('CAPTURES')], coverage: 'partial' },
+  'proto/composite-value-semantics': {
+    criterion: [foundation('VALUES'), foundation('EQUALITY')],
+    coverage: 'partial',
   },
 } as const);
 
@@ -136,6 +150,20 @@ function stringReceiver(type: ts.Type, checker: ts.TypeChecker): boolean {
       (declaration) => declaration.getSourceFile().fileName === PRELUDE_PATH
     ) === true
   );
+}
+
+// Handles (state, props, keys, actions...) carry the authoring Identity brand and
+// compare by identity, which JavaScript === already provides on both paths.
+function authoringHandle(type: ts.Type, checker: ts.TypeChecker): boolean {
+  return checker
+    .getPropertiesOfType(type)
+    .some(
+      (property) =>
+        String(property.escapedName).startsWith('__@kind@') &&
+        property.declarations?.some(
+          (declaration) => declaration.getSourceFile().fileName === AUTHORING_DECLARATIONS
+        ) === true
+    );
 }
 
 function memberName(
@@ -287,6 +315,28 @@ export function analyzeProtoProgram(
   };
 
   const visit = (node: ts.Node) => {
+    if (mutatedMember(node)) {
+      invalid(
+        'PUI_COMPOSITE_MUTATION',
+        COMPOSITE_VALUE_RULE.ruleId,
+        [...COMPOSITE_VALUE_RULE.criterion],
+        'Composite values are immutable. Construct a new value and write it to declared state instead of changing a member or element.',
+        node
+      );
+    }
+    if (ts.isVariableStatement(node) && node.declarationList.flags & ts.NodeFlags.Let) {
+      const scope = persistentScope(node);
+      const write = scope && persistentCaptureWrite(checker, node, scope);
+      if (write) {
+        invalid(
+          'PUI_PERSISTENT_CAPTURE',
+          PERSISTENT_CAPTURE_RULE.ruleId,
+          [...PERSISTENT_CAPTURE_RULE.criterion],
+          'This binding outlives the writing invocation and is visible to later invocations. Declare it as Proto state and write it through run.set or task.set.',
+          write
+        );
+      }
+    }
     if (ts.isIfStatement(node) || ts.isWhileStatement(node) || ts.isDoStatement(node))
       booleanCondition(node.expression);
     else if (ts.isForStatement(node) && node.condition) booleanCondition(node.condition);
@@ -378,7 +428,22 @@ export function analyzeProtoProgram(
         // Equality is a Proto value operation, not a spelling-based ban on ==.
         // Mixed/structural domain admission needs its own implemented proof;
         // TypeScript's no-overlap heuristic is not that language definition.
-        if (
+        const composite =
+          compositeOperand(checker.getTypeAtLocation(node.left), (type) =>
+            authoringHandle(type, checker)
+          ) &&
+          compositeOperand(checker.getTypeAtLocation(node.right), (type) =>
+            authoringHandle(type, checker)
+          );
+        if (composite) {
+          invalid(
+            'PUI_COMPOSITE_OPERATOR_EQUALITY',
+            COMPOSITE_VALUE_RULE.ruleId,
+            [...COMPOSITE_VALUE_RULE.criterion],
+            'Operator equality on a record, list, Presence or Result compares identity when the same source runs as JavaScript. Use equals(left, right) for structural comparison.',
+            node
+          );
+        } else if (
           !(
             left.size === 1 &&
             right.size === 1 &&

@@ -274,3 +274,87 @@ for (const annotation of ['', ': number']) {
     assert.equal(await p.render(p.produce(), 'ordinary-conditional.ts'), '<span>first</span>');
   });
 }
+
+const pairSource = (comparison) => `
+  import { definePrototype, equals } from '@proto.ui/core/authoring';
+  type Pair = { left: string; right: string };
+  function describe(same: boolean): string {
+    if (same) return 'same';
+    return 'different';
+  }
+  export default definePrototype({ name: 'pair-equality', setup(def) {
+    const props = def.props.define({ a: { type: 'string', default: 'x' }, b: { type: 'string', default: 'x' } });
+    const first = def.state.define<Pair>('first', { initialize: read => ({ left: read.get(props.a), right: 'r' }) });
+    const second = def.state.define<Pair>('second', { initialize: read => ({ left: read.get(props.b), right: 'r' }) });
+    const label = def.derive('label', read => describe(${comparison}));
+    return view => view.el('span', {}, [view.get(label)]);
+  } });`;
+
+test('composite values compare through equals, not operator identity', async (t) => {
+  const p = await project(t);
+  await p.write('entry.ts', pairSource('equals(read.get(first), read.get(second))'));
+  const compiled = p.produce();
+  assert.equal(await p.render(compiled, 'same.ts', { a: 'x', b: 'x' }), '<span>same</span>');
+  assert.equal(await p.render(compiled, 'different.ts', { a: 'x', b: 'y' }), '<span>different</span>');
+
+  await p.write('entry.ts', pairSource('read.get(first) === read.get(second)'));
+  const rejected = p.produce();
+  assert.equal(rejected.status, 'unavailable');
+  assert.deepEqual(
+    rejected.diagnostics.map(({ code, ruleId, category }) => ({ code, ruleId, category })),
+    [{ code: 'PUI_COMPOSITE_OPERATOR_EQUALITY', ruleId: 'proto/composite-value-semantics', category: 'source-invalid' }]
+  );
+});
+
+test('assigning to a member of a composite value is source-invalid', async (t) => {
+  const p = await project(t);
+  await p.write('entry.ts', `
+    import { definePrototype } from '@proto.ui/core/authoring';
+    type Pair = { left: string; right: string };
+    export default definePrototype({ name: 'pair-mutation', setup(def) {
+      const pair = def.state.define<Pair>('pair', { initialize: () => ({ left: 'l', right: 'r' }) });
+      const touch = def.action('touch', (run) => {
+        const next = { left: 'changed', right: run.get(pair).right };
+        next.left = 'again';
+        run.set(pair, next);
+      });
+      def.expose.action('touch', touch);
+      return view => view.el('span', {}, ['pair']);
+    } });`);
+  const rejected = p.produce();
+  assert.equal(rejected.status, 'unavailable');
+  assert.deepEqual(
+    rejected.diagnostics.map(({ code, ruleId }) => ({ code, ruleId })),
+    [{ code: 'PUI_COMPOSITE_MUTATION', ruleId: 'proto/composite-value-semantics' }]
+  );
+});
+
+test('a setup binding written by a later invocation must be declared state', async (t) => {
+  const p = await project(t);
+  await p.write('entry.ts', `
+    import { definePrototype } from '@proto.ui/core/authoring';
+    export default definePrototype({ name: 'hidden-counter', setup(def) {
+      let count = 0;
+      const bump = def.action('bump', () => { count = count + 1; });
+      def.expose.action('bump', bump);
+      return view => view.el('span', {}, ['counter']);
+    } });`);
+  const rejected = p.produce();
+  assert.equal(rejected.status, 'unavailable');
+  assert.deepEqual(
+    rejected.diagnostics.map(({ code, ruleId, category }) => ({ code, ruleId, category })),
+    [{ code: 'PUI_PERSISTENT_CAPTURE', ruleId: 'proto/persistent-capture-state', category: 'source-invalid' }]
+  );
+
+  await p.write('entry.ts', `
+    import { definePrototype } from '@proto.ui/core/authoring';
+    export default definePrototype({ name: 'local-counter', setup(def) {
+      const count = def.state.define<number>('count', { initialize: () => 0 });
+      const bump = def.action('bump', (run) => { let next = run.get(count); next = next + 1; run.set(count, next); });
+      def.expose.action('bump', bump);
+      return view => view.el('span', {}, ['counter']);
+    } });`);
+  const local = p.produce();
+  assert.equal(local.status, 'unavailable');
+  assert.ok(local.diagnostics.every((item) => item.category === 'compiler-missing'), JSON.stringify(local.diagnostics));
+});

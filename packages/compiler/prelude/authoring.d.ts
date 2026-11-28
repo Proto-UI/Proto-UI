@@ -42,6 +42,8 @@ export type Result<Value, Failure> =
 
 export interface StyleTokens extends Identity<'style-tokens'> {}
 export declare function tw(tokens: string): StyleTokens;
+/** Structural equality for records, presence, tagged values and other Proto values (C-COMPILER-FOUNDATION-0001-EQUALITY). */
+export declare function equals<Value>(left: Value, right: Value): boolean;
 
 export interface PropHandle<Value> extends TypedHandle<'prop', Value> {}
 export interface DerivedHandle<Value> extends TypedHandle<'derived', Value> {}

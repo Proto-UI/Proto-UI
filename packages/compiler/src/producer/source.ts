@@ -1,5 +1,6 @@
 import path from 'node:path';
 import ts from 'typescript';
+import type { ValueRule } from '../frontend/value-semantics.ts';
 import { AUTHORING_DECLARATIONS } from '../frontend/input-profile.ts';
 import { PRELUDE_PATH } from '../frontend/program.ts';
 import type { ProtoDiagnostic } from '../frontend/types.ts';
@@ -20,8 +21,11 @@ export interface SourceContext {
   intrinsic(node: ts.Expression, exportedName: string): boolean;
   method(call: ts.CallExpression, owner: string, method: string): boolean;
   missing(node: ts.Node, capability: string, message: string): never;
-  invalid(node: ts.Node, code: string, message: string): never;
+  invalid(node: ts.Node, code: string, message: string, rule?: SourceRule): never;
 }
+
+/** A language rule other than the generic producer admission rule. */
+export type SourceRule = ValueRule;
 
 export class SourceIssue extends Error {
   readonly diagnostic: ProtoDiagnostic;
@@ -112,8 +116,10 @@ export function createSourceContext(program: ts.Program, entry: ts.SourceFile): 
       return ts.isInterfaceDeclaration(signature.parent) && signature.parent.name.text === owner &&
         ts.isIdentifier(signature.name) && signature.name.text === method;
     },
-    invalid(node, code, message) {
-      throw new SourceIssue({ code, ruleId: 'proto/source-producer', criterion: ['C-COMPILER-FOUNDATION-0001-LANGUAGE'], category: 'source-invalid', severity: 'error', message, location: sourceLocation(node) });
+    invalid(node, code, message, rule) {
+      const ruleId = rule?.ruleId ?? 'proto/source-producer';
+      const criterion = rule ? [...rule.criterion] : ['C-COMPILER-FOUNDATION-0001-LANGUAGE'];
+      throw new SourceIssue({ code, ruleId, criterion, category: 'source-invalid', severity: 'error', message, location: sourceLocation(node) });
     },
   };
   return context;

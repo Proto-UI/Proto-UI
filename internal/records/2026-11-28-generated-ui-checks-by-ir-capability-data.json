@@ -1,0 +1,61 @@
+{
+  "kind": "generated-ui-checks-by-ir-capability-data",
+  "record": "internal/records/2026-11-28-generated-ui-checks-by-ir-capability.zh-CN.md",
+  "retrievedAt": "2026-11-28",
+  "evoGenUIBench": {
+    "source": "https://arxiv.org/abs/2608.29387",
+    "venue": "EMNLP 2026 (per arXiv comments field)",
+    "nonPassingCalls": 2750,
+    "mechanisms": [
+      {
+        "name": "affordanceBinding",
+        "count": 460,
+        "roadmap": [
+          "stage 1 dead-control and unobserved-branch (root elements, implemented)",
+          "stage 2 cross-component closure"
+        ]
+      },
+      {
+        "name": "derivedStatePropagation",
+        "count": 586,
+        "roadmap": [
+          "stage 1 snapshot-read and dead-store hints (implemented)"
+        ]
+      },
+      {
+        "name": "externalStateGrounding",
+        "count": 289,
+        "roadmap": [
+          "stage 3 outcome type (partial)",
+          "stage 4 typed display regions (partial)"
+        ]
+      },
+      {
+        "name": "informationArchitecture",
+        "count": 859,
+        "roadmap": []
+      },
+      {
+        "name": "requirementDecomposition",
+        "count": 410,
+        "roadmap": []
+      },
+      {
+        "name": "domainRepresentation",
+        "count": 146,
+        "roadmap": []
+      }
+    ]
+  },
+  "interaction2Code": {
+    "source": "https://arxiv.org/abs/2411.03292",
+    "venue": "ASE 2025",
+    "mostFrequentFailures": [
+      "No interaction",
+      "Partial implementation",
+      "Interactive element missing",
+      "Wrong function"
+    ],
+    "roadmap": "'No interaction' maps to stage 1 (root elements) and stage 2; the others compare against a reference design and are outside the roadmap"
+  }
+}

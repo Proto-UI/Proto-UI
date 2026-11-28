@@ -26,31 +26,31 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-LANGUAGE
     text:
       zh-CN: >-
-        Proto 是以合法 TypeScript 语法书写的独立语言，不承诺接受任意 TypeScript 或完整 ECMAScript。 复用 TypeScript 的解析、符号绑定、模块解析与类型信息，补充 Proto 自己的阶段、效果、所有权和目标检查；不另造并行 TS 类型系统。 语义按解析后的绑定身份决定，类型断言不能创造能力来源、静态可求值性或目标支持。编译不导入或执行作者模块，也不以 Proxy 试运行代替分支分析。
+        Proto 是以合法 TypeScript 语法书写的独立语言，不承诺接受任意 TypeScript 或完整 ECMAScript。 复用 TypeScript 的解析、符号绑定、模块解析与类型信息，在 TypeScript checker 之上补充 Proto 自己的阶段、效果、来源、值域、所有权和目标检查，不重新实现 TypeScript 的类型检查；当 Proto 检查比 TypeScript 的接受范围更严时，以 Proto 结果为准。 语义按解析后的绑定身份决定，类型断言不能创造能力来源、静态可求值性或目标支持。编译不导入或执行作者模块，也不以 Proxy 试运行代替分支分析。
 
 
       en: >-
-        Proto is an independent language using valid TypeScript syntax, not a promise to accept arbitrary TypeScript or all ECMAScript. Reuse TypeScript parsing, symbols, module resolution and type information, adding Proto phase, effect, ownership and target checks rather than another TS type system. Semantics follows resolved binding identity; assertions cannot establish capability origin, static evaluability or target support. Compilation neither imports nor executes author modules and does not replace branch analysis with Proxy trial execution.
+        Proto is an independent language using valid TypeScript syntax, not a promise to accept arbitrary TypeScript or all ECMAScript. Reuse TypeScript parsing, symbols, module resolution and type information, adding Proto phase, effect, provenance, value-domain, ownership and target checks on top of the TypeScript checker rather than re-implementing TypeScript type checking. Where a Proto check is stricter than TypeScript's acceptance, the Proto result governs. Semantics follows resolved binding identity; assertions cannot establish capability origin, static evaluability or target support. Compilation neither imports nor executes author modules and does not replace branch analysis with Proxy trial execution.
 
 
   - id: C-COMPILER-FOUNDATION-0001-VALUES
     text:
       zh-CN: >-
-        普通 number 是 IEEE 754 binary64；整数索引、长度和 SDK 边界使用显式检查的整数类型，越界、非整数或无法表示的转换给出类型化失败，不截断猜测。 运算没有隐式类型 coercion，条件必须是 bool。record/list 等复合状态采用不可变值语义，允许写时复制和结构共享；身份仅由显式有类型 handle 表达。 相等与变化判断依照声明的值或 handle 身份语义，不借目标对象地址决定。TypeScript 的 as 或 readonly 不构成运行时值域、不可变性或所有权证明。
+        普通 number 是 IEEE 754 binary64；整数索引、长度和 SDK 边界使用显式检查的整数类型，越界、非整数或无法表示的转换给出类型化失败，不截断猜测。 运算没有隐式类型 coercion，条件必须是 bool。record/list 等复合状态采用不可变值语义，允许写时复制和结构共享；更新通过构造新值完成，对复合值的成员或元素赋值属于源无效；身份仅由显式有类型 handle 表达。 相等与变化判断依照声明的值或 handle 身份语义，不借目标对象地址决定。TypeScript 的 as 或 readonly 不构成运行时值域、不可变性或所有权证明。
 
 
       en: >-
-        Ordinary number is IEEE 754 binary64. Integer indices, lengths and SDK boundaries use explicitly checked integer types; out-of-range, nonintegral or unrepresentable conversion produces typed failure rather than guessed truncation. Operations have no implicit coercion and conditions require bool. Composite state such as records/lists has immutable value semantics, permitting copy-on-write and structural sharing; identity is expressed only by explicit typed handles. Equality and change detection follow declared value or handle-identity semantics rather than target object addresses. TypeScript as and readonly do not prove runtime domains, immutability or ownership.
+        Ordinary number is IEEE 754 binary64. Integer indices, lengths and SDK boundaries use explicitly checked integer types; out-of-range, nonintegral or unrepresentable conversion produces typed failure rather than guessed truncation. Operations have no implicit coercion and conditions require bool. Composite state such as records/lists has immutable value semantics, permitting copy-on-write and structural sharing; updates construct new values, and assigning to a member or element of a composite value is source-invalid; identity is expressed only by explicit typed handles. Equality and change detection follow declared value or handle-identity semantics rather than target object addresses. TypeScript as and readonly do not prove runtime domains, immutability or ownership.
 
 
   - id: C-COMPILER-FOUNDATION-0001-EQUALITY
     text:
       zh-CN: >-
-        语言数值相等遵循 IEEE 比较：正零与负零相等，NaN 与包括自身在内的数值均不相等；这不启用类型 coercion。 响应变化抑制使用另一种明确的值同一性：两个 NaN 视为相同，正零与负零不同。不得因数值相等而漏掉符号零变化及其可观察派生结果。 可比较的 record/list/Option/Result 以对应比较规则递归比较结构和值；handle 比较其显式身份，不能用结构共享或宿主对象地址替代。 保守失效仍可多做纯重算，不能把相等比较、变化抑制或额外重算变成额外的可观察效果。
+        语言数值相等遵循 IEEE 比较：正零与负零相等，NaN 与包括自身在内的数值均不相等；这不启用类型 coercion。 响应变化抑制使用另一种明确的值同一性：两个 NaN 视为相同，正零与负零不同。不得因数值相等而漏掉符号零变化及其可观察派生结果。 可比较的 record/list/Option/Result 以对应比较规则递归比较结构和值；handle 比较其显式身份，不能用结构共享或宿主对象地址替代。 运算符相等（===、!== 及被接受的 ==）用于 bool、number、text 和 handle；复合值的结构比较使用作者界面的显式结构相等操作，对复合值使用运算符相等属于源无效，因为同一份源由 Adapter 执行时会比较对象身份。 保守失效仍可多做纯重算，不能把相等比较、变化抑制或额外重算变成额外的可观察效果。
 
 
       en: >-
-        Language numeric equality uses IEEE comparison: positive and negative zero compare equal, while NaN compares unequal to every number including itself, without enabling coercion. Reactive change suppression uses separate value sameness: two NaNs are the same and positive and negative zero differ. Numeric equality cannot hide a signed-zero change or its observable derived result. Equatable records, lists, Options and Results compare structure and values recursively with the corresponding rule; handles compare explicit identity, not storage sharing or host object addresses. Conservative invalidation may still perform extra pure recomputation, without turning comparison, suppression or recomputation into additional observable effects.
+        Language numeric equality uses IEEE comparison: positive and negative zero compare equal, while NaN compares unequal to every number including itself, without enabling coercion. Reactive change suppression uses separate value sameness: two NaNs are the same and positive and negative zero differ. Numeric equality cannot hide a signed-zero change or its observable derived result. Equatable records, lists, Options and Results compare structure and values recursively with the corresponding rule; handles compare explicit identity, not storage sharing or host object addresses. Operator equality (===, !== and admitted ==) applies to bool, number, text and handles; composite values compare through the authoring surface's explicit structural equality operation, and operator equality on a composite value is source-invalid because the same source executed by the Adapter would compare object identity. Conservative invalidation may still perform extra pure recomputation, without turning comparison, suppression or recomputation into additional observable effects.
 
 
   - id: C-COMPILER-FOUNDATION-0001-TEXT
@@ -106,11 +106,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-CAPTURES
     text:
       zh-CN: >-
-        闭包降低为已编译函数及显式有类型环境。不可变捕获保留创建时的值；可变局部绑定由共享的绑定位置承载，同一实例内捕获该绑定的多个闭包共享它，实例之间不串用。 状态与 Context 能力保留其明确身份和生命周期，不能通过 JSON、未知值或源文本隐藏捕获。 异步状态机保存局部值与绑定环境；无需复制完整 JS 对象模型或构建一台 JS VM。 每个可达 helper 的函数体须传递编译或显式声明 extern；仅有 .d.ts 声明不能冒充可执行实现。 跨同步段存活且可被其他回调或派生读取的可写捕获位置属于有归属的事务状态：写入参与提交或回滚，读取进入响应依赖。 不允许借闭包留下绕过事务的隐形持久可变状态；未逃逸的段内临时变量仍是普通局部值。
+        闭包降低为已编译函数及显式有类型环境。不可变捕获保留创建时的值；同一同步段内捕获同一可变局部的多个闭包共享一个绑定位置。 状态与 Context 能力保留其明确身份和生命周期，不能通过 JSON、未知值或源文本隐藏捕获。 异步状态机跨 await 保存本次调用自己的局部值与绑定环境；无需复制完整 JS 对象模型或构建一台 JS VM。 每个可达 helper 的函数体须传递编译或显式声明 extern；仅有 .d.ts 声明不能冒充可执行实现。 跨同步段存活、且对其他闭包、派生或后续调用可见的可变数据必须声明为 Proto state；以可写捕获绑定承担这一角色属于源无效，迁移方式是改为显式 state 声明。 因此闭包不能留下隐形持久可变状态，Adapter 执行与编译都只对已声明 state 做事务处理；属于单次 action 或 task 调用的局部绑定仍是普通局部值。
 
 
       en: >-
-        Closures lower to compiled functions and explicit typed environments. Immutable captures retain their creation-time values; mutable local bindings use shared binding locations, shared by closures capturing that binding within an instance and isolated between instances. State and Context capabilities retain explicit identity and lifetime rather than hiding captures in JSON, unknown values or source text. Async state machines retain local values and binding environments without a complete JS object model or a JS VM. Every reached helper body is transitively compiled or explicitly declared extern; a declaration-only .d.ts signature is not an executable implementation. Writable captured locations that survive a segment and are observable by another callback or derivation are owned transactional state: writes commit or roll back and reads contribute reactive dependencies. Closures cannot create hidden persistent mutable state outside transactions; nonescaping segment-local temporaries remain ordinary local values.
+        Closures lower to compiled functions and explicit typed environments. Immutable captures retain their creation-time values. Within one synchronous segment, closures capturing the same mutable local observe one binding location. State and Context capabilities retain explicit identity and lifetime rather than hiding captures in JSON, unknown values or source text. Async state machines retain the local values and binding environments of their own invocation across awaits without a complete JS object model or a JS VM. Every reached helper body is transitively compiled or explicitly declared extern; a declaration-only .d.ts signature is not an executable implementation. Mutable data that outlives a synchronous segment and is visible to another closure, derivation or later invocation must be declared Proto state; using a writable captured binding for that role is source-invalid, migrated by replacing it with an explicit state declaration. Closures therefore cannot create hidden persistent mutable state, and both Adapter execution and compilation transact only declared state. Bindings local to one action or task invocation remain ordinary local values.
 
 
   - id: C-COMPILER-FOUNDATION-0001-DEPENDENCIES
@@ -136,11 +136,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-TRANSACTIONS
     text:
       zh-CN: >-
-        一个同步执行段是本地事务：状态写入进入待发布写集，读取先见本段写集再见已发布值。 派生值也读取同一视图，相关写入后不得返回旧缓存。正常到达提交边界才发布写集；外部观察者看不到半完成状态。 未提交写入不触发观察者或绘制；提交后统一使受影响输出失效，宿主绘制可以合并，但不得改变约定的效果次序。 同一同步 UI 执行域内触及多个 Proto 实例的写入属于同一原子提交；跨执行域的通信作为消息在目标域产生新动作。 显式 snapshot 可冻结当时的值；普通读取不能被优化成永久保留的旧快照。
+        一个同步执行段是本地事务；含 await 或明确提交边界的动作由多个段组成，原子性按段成立。状态写入进入待发布写集，读取先见本段写集再见已发布值。 派生值也读取同一视图，相关写入后不得返回旧缓存。正常到达提交边界才发布写集；外部观察者看不到半完成状态。 未提交写入不触发观察者或绘制；提交后统一使受影响输出失效，宿主绘制可以合并，但不得改变约定的效果次序。 同一同步 UI 执行域内触及多个 Proto 实例的写入属于同一原子提交；跨执行域的通信作为消息在目标域产生新动作。 显式 snapshot 可冻结当时的值；普通读取不能被优化成永久保留的旧快照。
 
 
       en: >-
-        A synchronous execution segment is a local transaction: writes enter an unpublished write set and reads consult that set before committed values. Derived values use the same view and cannot return stale caches after relevant writes. The write set publishes only at successful commit boundaries; external observers do not see partial state. Uncommitted writes do not notify observers or render. Commit invalidates affected output together; host rendering may coalesce without changing specified effect order. Writes touching multiple Proto instances within one synchronous UI execution domain share one atomic commit; cross-domain messages create new actions in the destination domain. An explicit snapshot may retain values from its capture point; ordinary reads cannot be optimized into a permanently retained old snapshot.
+        A synchronous execution segment is a local transaction; an action containing an await or an explicit commit boundary consists of several segments, each atomic on its own. writes enter an unpublished write set and reads consult that set before committed values. Derived values use the same view and cannot return stale caches after relevant writes. The write set publishes only at successful commit boundaries; external observers do not see partial state. Uncommitted writes do not notify observers or render. Commit invalidates affected output together; host rendering may coalesce without changing specified effect order. Writes touching multiple Proto instances within one synchronous UI execution domain share one atomic commit; cross-domain messages create new actions in the destination domain. An explicit snapshot may retain values from its capture point; ordinary reads cannot be optimized into a permanently retained old snapshot.
 
 
   - id: C-COMPILER-FOUNDATION-0001-FAILURE
@@ -166,21 +166,21 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-ASYNC
     text:
       zh-CN: >-
-        首期支持有实例或明确作用域归属的异步任务。每个 await 都是逻辑提交边界；完成结果经调度器在新同步段恢复，即使结果已经 ready 也必须保持相同的可观察提交与顺序。 恢复后的失败只丢弃恢复段，不能回滚 await 前已发布状态。局部捕获值按语言规则保留，重新读取 state/Context 则看到恢复段的当前值。 所属实例或作用域结束后撤销任务提交资格；可取消的外部操作被取消，不可取消的迟到结果不得写入已销毁实例。 任务不得跨 await 持有可写事务引用；恢复必须获得新段的工作视图，不能向已经提交的写集继续写入。 并发采用显式 latest、parallel 或 serial 策略：latest 撤销被替代任务的后续提交资格，parallel 保持独立任务，serial 依序启动；重试和跨段补偿由明确的应用行为表达，不由编译器猜测。
+        首期支持有实例或明确作用域归属的异步任务。每个 await 都是逻辑提交边界；完成结果经调度器在新同步段恢复，即使结果已经 ready 也必须保持相同的可观察提交与顺序。 恢复后的失败只丢弃恢复段，不能回滚 await 前已发布状态。局部捕获值按语言规则保留，重新读取 state/Context 则看到恢复段的当前值。 所属实例或作用域结束后撤销任务提交资格；可取消的外部操作被取消，不可取消的迟到结果不得写入已销毁实例。 任务不得跨 await 持有可写事务引用；state handle 与绑定身份可以跨 await 保留，但恢复后必须通过新段的工作视图读写，不能向已经提交的写集继续写入。 并发采用显式 latest、parallel 或 serial 策略：latest 撤销被替代任务的后续提交资格，parallel 保持独立任务，serial 依序启动；重试和跨段补偿由明确的应用行为表达，不由编译器猜测。
 
 
       en: >-
-        The first implementation includes async tasks owned by an instance or explicit scope. Every await is a logical commit boundary; completion resumes through the scheduler in a new segment, preserving the same observable commits and order even when the result is already ready. A resumed failure discards only that segment, not pre-await published state. Captured locals retain their language-defined values; fresh state/Context reads observe the resumed segment's current values. Ending the owner withdraws submission eligibility, cancels cancellable external work and prevents uncancellable late results from writing to disposed instances. Tasks cannot retain writable transaction references across await; resumption obtains a new segment view rather than continuing writes into a committed write set. An explicit latest, parallel or serial policy governs concurrency: latest withdraws superseded tasks' future submission eligibility, parallel keeps independent tasks, and serial starts them in order. Retries and cross-segment compensation remain explicit application behavior rather than compiler guesses.
+        The first implementation includes async tasks owned by an instance or explicit scope. Every await is a logical commit boundary; completion resumes through the scheduler in a new segment, preserving the same observable commits and order even when the result is already ready. A resumed failure discards only that segment, not pre-await published state. Captured locals retain their language-defined values; fresh state/Context reads observe the resumed segment's current values. Ending the owner withdraws submission eligibility, cancels cancellable external work and prevents uncancellable late results from writing to disposed instances. Tasks cannot retain writable transaction references across await. State handles and binding identities may be retained, but after resumption every read and write goes through the new segment view rather than continuing into a committed write set. An explicit latest, parallel or serial policy governs concurrency: latest withdraws superseded tasks' future submission eligibility, parallel keeps independent tasks, and serial starts them in order. Retries and cross-segment compensation remain explicit application behavior rather than compiler guesses.
 
 
   - id: C-COMPILER-FOUNDATION-0001-EFFECTS
     text:
       zh-CN: >-
-        原语和 extern 必须区分纯计算、本地读写、宿主观察、提交后命令和受输入时机约束的宿主响应。 宿主观察说明其读取已提交宿主状态；提交后命令在本地提交后执行；preventDefault 等输入响应须在宿主回调有效期内完成，不能统一拖到下一微任务或帧。 不可推迟、对外生效且需要立即结果的调用须具有明确提交边界。效果分类与调用顺序进入行为 IR，不由目标语言默认行为补齐。 包括嵌套宿主回调在内，输入期限响应同步读取事件事实与回调进入时的已发布状态，并只操作该次输入的受限响应能力。 这条路径不得 await、写 Proto 状态或调用任意宿主命令；相应状态动作遵守排队重入规则，不能把同步取消默认行为延迟到该动作执行时。
+        原语和 extern 必须区分纯计算、本地读写、宿主观察、提交后命令和受输入时机约束的宿主响应。 宿主观察说明其读取已提交宿主状态；提交后命令在本地提交后执行；preventDefault 等输入响应须在宿主回调有效期内完成，不能统一拖到下一微任务或帧。 不可推迟、对外生效且需要立即结果的调用须具有明确提交边界：边界前的写入作为一个段发布，随后执行该调用，其余工作构成新段，与 await 相同；之后的未处理失败只丢弃新段。使该边界在源码中可见的作者写法尚未定义。效果分类与调用顺序进入行为 IR，不由目标语言默认行为补齐。 包括嵌套宿主回调在内，输入期限响应同步读取事件事实与回调进入时的已发布状态，并只操作该次输入的受限响应能力。 这条路径不得 await、写 Proto 状态或调用任意宿主命令；相应状态动作遵守排队重入规则，不能把同步取消默认行为延迟到该动作执行时。
 
 
       en: >-
-        Primitives and externs distinguish pure computation, local access, host observation, post-commit commands and input-deadline host responses. Observations identify committed host state, commands run after local commit, and responses such as preventDefault complete within the host callback's valid interval rather than uniformly waiting for another microtask or frame. An immediate externally effective call requiring a synchronous result has an explicit commit boundary. Effect classification and call order belong to behavior IR, not target-language defaults. Including nested host callbacks, an input-deadline response synchronously reads event facts and the committed state at callback entry, using only that input's restricted response capability. This path cannot await, write Proto state or invoke arbitrary host commands. The corresponding state action follows queued-reentry rules without delaying synchronous default-action cancellation until that action runs.
+        Primitives and externs distinguish pure computation, local access, host observation, post-commit commands and input-deadline host responses. Observations identify committed host state, commands run after local commit, and responses such as preventDefault complete within the host callback's valid interval rather than uniformly waiting for another microtask or frame. An immediate externally effective call requiring a synchronous result has an explicit commit boundary: writes before it publish as one segment, the call runs, and the remaining work forms a new segment, as at an await; a later unhandled failure discards only the new segment. The authoring form that makes this boundary visible in source is not yet defined. Effect classification and call order belong to behavior IR, not target-language defaults. Including nested host callbacks, an input-deadline response synchronously reads event facts and the committed state at callback entry, using only that input's restricted response capability. This path cannot await, write Proto state or invoke arbitrary host commands. The corresponding state action follows queued-reentry rules without delaying synchronous default-action cancellation until that action runs.
 
 
   - id: C-COMPILER-FOUNDATION-0001-VIEW-COMMIT
@@ -226,11 +226,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-PUBLIC
     text:
       zh-CN: >-
-        仅显式公开的 props、状态投影与动作形成宿主接口，使用稳定的语义名称和具体类型；位置编号、字符串查找和通用 JSON 不作为默认组件 API。 对外状态投影只读，改变状态通过已声明动作和约束。确有动态数据边界时可以声明相应数据类型，但不能把内部状态整体擦成 Json。
+        仅显式公开的 props、状态投影、动作与事件形成宿主接口，使用稳定的语义名称和具体类型；位置编号、字符串查找和通用 JSON 不作为默认组件 API。 对外状态投影只读，改变状态通过已声明动作和约束。确有动态数据边界时可以声明相应数据类型，但不能把内部状态整体擦成 Json。
 
 
       en: >-
-        Only explicitly public props, state projections and actions form the host interface, using stable semantic names and concrete types rather than positional numbering, string lookup or universal JSON. Public state projections are readonly; changes go through declared actions and constraints. Explicit dynamic data boundaries may use appropriate data types without erasing all internal state to Json.
+        Only explicitly public props, state projections, actions and events form the host interface, using stable semantic names and concrete types rather than positional numbering, string lookup or universal JSON. Public state projections are readonly; changes go through declared actions and constraints. Explicit dynamic data boundaries may use appropriate data types without erasing all internal state to Json.
 
 
   - id: C-COMPILER-FOUNDATION-0001-STYLE
@@ -256,11 +256,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-SUPPORT
     text:
       zh-CN: >-
-        调度、事务、异步、资源管理和宿主操作所需支持作为真实模块或 crate 存在，组件只使用可达闭包中的能力。 支持代码不解释原型声明或编译 IR，不复制完整框架，也不把运行时源码倾倒进每个组件。 静态可消除的管理成本应消除；有事务、异步或资源语义的程序可以承担实现这些语义所必需的成本，不用删除语义换取零开销名义。
+        调度、事务、异步、资源管理和宿主操作所需支持作为真实模块或 crate 存在，组件只使用可达闭包中的能力。 编译产物的支持代码不解释原型声明或编译 IR（Adapter 执行同一份源属于 SOURCE-COMPATIBILITY 规定的另一条路径），不复制完整框架，也不把运行时源码倾倒进每个组件。 静态可消除的管理成本应消除；有事务、异步或资源语义的程序可以承担实现这些语义所必需的成本，不用删除语义换取零开销名义。
 
 
       en: >-
-        Necessary scheduling, transaction, async, resource and host support resides in real modules or crates and is selected from the reached capability closure. Support does not interpret prototype declarations or compiler IR, duplicate a framework or dump runtime source into each component. Eliminate statically unnecessary management costs; programs with transaction, async or resource semantics may pay their necessary implementation costs rather than deleting semantics to claim zero overhead.
+        Necessary scheduling, transaction, async, resource and host support resides in real modules or crates and is selected from the reached capability closure. Support for compiled output does not interpret prototype declarations or compiler IR (Adapter execution of the same source is the separate path governed by SOURCE-COMPATIBILITY), duplicate a framework or dump runtime source into each component. Eliminate statically unnecessary management costs; programs with transaction, async or resource semantics may pay their necessary implementation costs rather than deleting semantics to claim zero overhead.
 
 
   - id: C-COMPILER-FOUNDATION-0001-DIAGNOSTICS
@@ -286,11 +286,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-SOURCE-COMPATIBILITY
     text:
       zh-CN: >-
-        官方及登记消费方的原型使用同一份符合所选 Proto 语言版本的作者源及传递 helper 闭包，供 Adapter 执行和所选目标编译；验收绑定实际入口、模块解析配置与逐文件内容摘要。 需要迁移时统一修改这份源，上游为登记消费方提供经验证的迁移工具；迁移后不得另写只给 compiler 的原型、替换有问题的 helper 或在编译前隐式改写消费方文件。 明确声明的宿主原语和 extern 可以有目标实现，但不能用它们包裹整个原型以绕过降低。Adapter 能执行任意 JS 不构成该源合法的证明，也不冻结旧 API 或旧源字节。 两条路径分别满足独立规范轨迹，再对可比较行为做差分；相互一致不豁免共同错误。合法而未实现的源计入完整能力分母，由实现承担，不改报作者错误。
+        官方及登记消费方的原型使用同一份符合所选 Proto 语言版本的作者源及传递 helper 闭包，供 Adapter 执行和所选目标编译；验收绑定实际入口、模块解析配置与逐文件内容摘要。 需要迁移时统一修改这份源，上游为登记消费方提供经验证的迁移工具；迁移后不得另写只给 compiler 的原型、替换有问题的 helper 或在编译前隐式改写消费方文件。 明确声明的宿主原语和 extern 可以有目标实现，但不能用它们包裹整个原型以绕过降低。Adapter 能执行任意 JS 不构成该源合法的证明，也不冻结旧 API 或旧源字节。 每个源合法的构造在原样源码配合 Adapter 运行时库作为 JavaScript 执行时必须具有相同含义；Proto 语义与 JavaScript 执行不同之处，语言要求显式作者操作或声明的 state，否则该构造属于源无效。 两条路径分别满足独立规范轨迹，再对可比较行为做差分；相互一致不豁免共同错误。合法而未实现的源计入完整能力分母，由实现承担，不改报作者错误。
 
 
       en: >-
-        Official and registered consumer prototypes use the same authored source and transitive helper closure conforming to the selected Proto language version for Adapter execution and selected-target compilation; acceptance binds actual entrypoints, module-resolution configuration and per-file content digests. A necessary migration changes that common source, with verified upstream migration tooling for registered consumers. Afterwards there is no compiler-only prototype, substituted helper or implicit pre-compilation rewrite of consumer files. Declared host primitives and externs may have target implementations, but cannot wrap a whole prototype to bypass lowering. Adapter-executable JavaScript alone does not prove Proto validity or freeze legacy APIs or source bytes. Both paths satisfy independent normative traces before their comparable behavior is checked differentially; agreement does not excuse shared defects. Legal unimplemented source remains implementation work in the full capability denominator, never an author error.
+        Official and registered consumer prototypes use the same authored source and transitive helper closure conforming to the selected Proto language version for Adapter execution and selected-target compilation; acceptance binds actual entrypoints, module-resolution configuration and per-file content digests. A necessary migration changes that common source, with verified upstream migration tooling for registered consumers. Afterwards there is no compiler-only prototype, substituted helper or implicit pre-compilation rewrite of consumer files. Declared host primitives and externs may have target implementations, but cannot wrap a whole prototype to bypass lowering. Adapter-executable JavaScript alone does not prove Proto validity or freeze legacy APIs or source bytes. Every source-valid construct has the same meaning when the unchanged source runs as JavaScript with the Adapter's runtime library; where Proto semantics differ from JavaScript execution, the language requires an explicit authoring operation or declared state, or makes the construct source-invalid. Both paths satisfy independent normative traces before their comparable behavior is checked differentially; agreement does not excuse shared defects. Legal unimplemented source remains implementation work in the full capability denominator, never an author error.
 
 
   - id: C-COMPILER-FOUNDATION-0001-MEASUREMENT
@@ -322,4 +322,12 @@ revisions:
   - version: 0.4.0
     change: revised
     summary: Require one migrated authored source closure for Adapter and compiler execution, independently checked behavior and explicit missing capability accounting.
+  - version: 0.4.0
+    change: revised
+    breaking: true
+    summary: Require declared state for mutable data that outlives a segment instead of transactional writable captures, so Adapter execution and compilation can share one source; clarify that Proto checks extend rather than re-implement the TypeScript checker, that atomicity is per segment at explicit commit boundaries, and that state handles may cross await while segment views may not.
+  - version: 0.4.0
+    change: revised
+    breaking: true
+    summary: State that every source-valid construct means the same when the unchanged source runs under the Adapter; make composite operator equality and member or element assignment on composite values source-invalid, with structural comparison through an explicit authoring operation; list public events in PUBLIC and scope SUPPORT's no-interpretation rule to compiled output.
 tags: [compiler, language, foundation, reactivity, transaction, async, context, native-source]
