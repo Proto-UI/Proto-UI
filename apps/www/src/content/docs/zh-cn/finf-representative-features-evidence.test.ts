@@ -173,6 +173,7 @@ function mockedCase(
   const run = execute(`${statements(['captureFailureDiagnostics', 'runCase'])}; runCase;`, {
     browser,
     output: '/test-only',
+    focusDiagnostics: false,
     path,
     createHash,
     writeFile: async (file: string, value: string) => {
@@ -639,11 +640,74 @@ describe('Finf representative evidence harness, no native browser', () => {
     });
   });
 
-  it('records each original Calendar locator read without changing the poll budget or value', async () => {
+  it('reads the current Calendar attribute rather than a previously observed close sample', () => {
+    const fixture = calendarCloseProbeFixture();
+    expect(fixture.probe.readExpanded()).toBe('true');
+    fixture.time(20);
+    fixture.key();
+    fixture.time(37);
+    fixture.mutate(['true'], 'false');
+    expect(fixture.probe.readExpanded()).toBe('false');
+    fixture.mutate(['false'], 'true');
+    expect(fixture.probe.readExpanded()).toBe('true');
+    expect(fixture.probe.stop(fixture.element)).toMatchObject({ closedAt: 37, expanded: 'true' });
+  });
+
+  it.each([
+    'detached',
+    'replaced',
+    'duplicate',
+    'implicit-select',
+    'implicit-input',
+    'role',
+    'name',
+    'labelled-by',
+    'hidden',
+    'inert',
+    'aria-hidden',
+    'display-none',
+    'visibility-hidden',
+    'owner-id',
+    'owner-demo',
+    'reparented',
+  ])('rejects a closed Calendar attribute on a %s subject', (fault) => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.mutate(['true'], 'false');
+    if (fault === 'detached') fixture.element.remove();
+    if (fault === 'replaced') fixture.element.replaceWith(fixture.element.cloneNode(true));
+    if (fault === 'duplicate') fixture.parent.append(fixture.element.cloneNode(true));
+    if (fault === 'implicit-select' || fault === 'implicit-input') {
+      const duplicate = fixture.window.document.createElement(
+        fault === 'implicit-select' ? 'select' : 'input'
+      );
+      duplicate.setAttribute('aria-label', 'Month');
+      if (fault === 'implicit-input') duplicate.setAttribute('list', 'month-options');
+      fixture.parent.append(duplicate);
+    }
+    if (fault === 'role') fixture.element.setAttribute('role', 'button');
+    if (fault === 'name') fixture.element.setAttribute('aria-label', 'Year');
+    if (fault === 'labelled-by') fixture.element.setAttribute('aria-labelledby', 'other-name');
+    if (fault === 'hidden') fixture.parent.setAttribute('hidden', '');
+    if (fault === 'inert') fixture.parent.setAttribute('inert', '');
+    if (fault === 'aria-hidden') fixture.parent.setAttribute('aria-hidden', 'true');
+    if (fault === 'display-none') fixture.parent.style.display = 'none';
+    if (fault === 'visibility-hidden') fixture.parent.style.visibility = 'hidden';
+    if (fault === 'owner-id') fixture.parent.setAttribute('data-previewer-id', 'replacement');
+    if (fault === 'owner-demo') fixture.parent.setAttribute('data-demo-id', 'replacement');
+    if (fault === 'reparented') {
+      const replacement = fixture.parent.cloneNode(false);
+      fixture.parent.after(replacement);
+      replacement.append(fixture.element);
+    }
+    expect(fixture.probe.readExpanded()).toBeNull();
+    fixture.probe.stop();
+  });
+
+  it('records each live Calendar probe read without changing the poll budget or value', async () => {
     let now = 100;
     const currentElement = { dispose: vi.fn(async () => {}) };
     const getterError = new Error('selector unavailable', { cause: new Error('protocol busy') });
-    const getAttribute = vi
+    const readExpanded = vi
       .fn()
       .mockImplementationOnce(async () => {
         now = 150;
@@ -658,13 +722,15 @@ describe('Finf representative evidence harness, no native browser', () => {
         return 'false';
       });
     const probe = {
-      evaluate: vi.fn(async (read, current) => read({ stop: () => ({ current }) }, current)),
+      evaluate: vi.fn(async (read, current) =>
+        read({ readExpanded, stop: () => ({ current }) }, current)
+      ),
       dispose: vi.fn(async () => {}),
     };
     const trigger = {
       evaluateHandle: vi.fn(async () => probe),
       elementHandle: vi.fn(async () => currentElement),
-      getAttribute,
+      getAttribute: vi.fn(),
     };
     const capture = vi.fn(async () => {});
     const poll = vi.fn((read: () => Promise<unknown>) => ({
@@ -690,7 +756,8 @@ describe('Finf representative evidence harness, no native browser', () => {
     );
     expect(poll).toHaveBeenCalledOnce();
     expect(poll.mock.calls[0]).toHaveLength(1);
-    expect(getAttribute.mock.calls).toEqual(Array.from({ length: 3 }, () => ['aria-expanded']));
+    expect(readExpanded.mock.calls).toEqual([[], [], []]);
+    expect(trigger.getAttribute).not.toHaveBeenCalled();
     const observation = (capture.mock.calls as unknown as Array<[string, any]>)[0][1];
     expect(observation.assertionPassed).toBe(true);
     expect(observation.nodeTrace).toMatchObject({
@@ -719,10 +786,17 @@ describe('Finf representative evidence harness, no native browser', () => {
     const capture = vi.fn(async () => {});
     const probe = {
       evaluate: vi.fn(async (read, current) => {
-        now = 1500;
-        finish('false');
-        await Promise.resolve();
-        return read({ stop: () => ({ expanded: 'false' }) }, current);
+        return read(
+          {
+            readExpanded: () => pending,
+            stop: () => {
+              now = 1500;
+              finish('false');
+              return { expanded: 'false' };
+            },
+          },
+          current
+        );
       }),
       dispose: vi.fn(async () => {}),
     };
@@ -1353,7 +1427,7 @@ function runtimeFixture(shell: 'fixed-family' | 'generic', runtime: Runtime = 'r
   const demo = `<div class="pui-runtime-preview-surface" data-demo-ref="__website_runtime_preview_surface__" data-pui-root><${tag} data-pui-root data-demo-ref="form"><input></${tag}></div>`;
   document.body.innerHTML =
     shell === 'fixed-family'
-      ? `<section data-previewer-id="test" data-projection-mode="fixed-family"><div class="host"><div data-projection-generation-state="active"><div data-projection-scope data-projection-state="ready" data-projection-runtime="${runtime}" aria-busy="false"><div data-projection-control="runtime" data-runtime-tabs><div role="tablist">${tabs}</div></div><div data-projection-content>${demo}</div></div></div></div></section>`
+      ? `<section data-previewer-id="test" data-projection-mode="fixed-family"><div class="host" data-projection-owner="test"><div data-projection-generation-state="active"><div data-projection-scope="test" data-projection-state="ready" data-projection-runtime="${runtime}" aria-busy="false"><div data-projection-owner="test" data-projection-control="runtime" data-runtime-tabs><div role="tablist">${tabs}</div></div><div data-projection-owner="test" data-projection-content>${demo}</div></div></div></div></section>`
       : `<section data-previewer-id="test"><div data-runtime-tabs-mount><div data-runtime-tabs-root aria-busy="false"><div role="tablist">${tabs}</div><div role="tabpanel"><div class="host">${demo}</div></div></div></div></section>`;
   const root = document.querySelector('[data-previewer-id]')!;
   const host = root.querySelector('.host')!;
@@ -1407,6 +1481,60 @@ describe.each(['fixed-family', 'generic'] as const)(
         fixture.window.happyDOM.abort();
       }
     );
+
+    it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+      'keeps %s readiness on the demo host when code Copy owns another projection scope',
+      (runtime) => {
+        const fixture = runtimeFixture(shell, runtime);
+        const copy = fixture.document.createElement('aside');
+        copy.innerHTML = `<div data-projection-scope="website-copy" data-projection-state="ready" data-projection-runtime="${runtime}"><div data-projection-content data-projection-owner="website-copy"><button data-pui-root>Copy</button></div></div>`;
+        fixture.root.append(copy);
+        expect(fixture.root.querySelectorAll('[data-projection-scope]')).toHaveLength(
+          shell === 'fixed-family' ? 2 : 1
+        );
+        expect(fixture.observe()).toMatchObject({
+          ready: true,
+          shell,
+          framework: runtime,
+          targetCount: 1,
+          surfaceCount: 1,
+        });
+        fixture.window.happyDOM.abort();
+      }
+    );
+
+    if (shell === 'fixed-family') {
+      it.each(['.host', '[data-projection-scope]', '[data-projection-content]'])(
+        'rejects a duplicate %s inside the runtime host boundary',
+        (selector) => {
+          const fixture = runtimeFixture(shell);
+          const element = fixture.root.querySelector(selector)!;
+          element.after(element.cloneNode(true));
+          expect(fixture.observe().ready).toBe(false);
+          fixture.window.happyDOM.abort();
+        }
+      );
+
+      it.each([
+        ['.host', 'data-projection-owner'],
+        ['[data-projection-scope]', 'data-projection-scope'],
+        ['[data-projection-control="runtime"]', 'data-projection-owner'],
+        ['[data-projection-content]', 'data-projection-owner'],
+      ])('rejects another owner on %s', (selector, attribute) => {
+        const fixture = runtimeFixture(shell);
+        fixture.root.querySelector(selector)!.setAttribute(attribute, 'website-copy');
+        expect(fixture.observe().ready).toBe(false);
+        fixture.window.happyDOM.abort();
+      });
+
+      it('rejects a matching scope moved outside its host', () => {
+        const fixture = runtimeFixture(shell);
+        const scope = fixture.root.querySelector('[data-projection-scope]')!;
+        fixture.host.after(scope);
+        expect(fixture.observe().ready).toBe(false);
+        fixture.window.happyDOM.abort();
+      });
+    }
 
     it('uses the matching real Tabs shell and accessible labels, without legacy Select fallback', async () => {
       const fixture = runtimeFixture(shell);

@@ -1,5 +1,6 @@
 import { getElementProps } from '@proto.ui/adapter-web-component';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { readFileSync } from 'node:fs';
 import { URL as NodeURL } from 'node:url';
 import { initSiteNativeControls } from './site-native-controls';
@@ -10,6 +11,11 @@ vi.mock('./PrototypePreviewer/projection-theme', () => ({
   }),
 }));
 const releases: Array<() => void> = [];
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 const settle = async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
   for (let index = 0; index < 12; index++) await Promise.resolve();

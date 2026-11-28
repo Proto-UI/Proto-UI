@@ -43,6 +43,15 @@ const output =
 const revision = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
 const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}']).toString().trim();
 const requestedGroup = process.env.PUI_FINF_FEATURE_GROUP;
+const focusDiagnostics = process.env.PUI_FINF_FOCUS_DIAGNOSTICS === '1';
+type FocusReadDiagnostic = {
+  startedAt: number;
+  settledAt: number | null;
+  status: 'pending' | 'resolved' | 'rejected';
+  observation?: unknown;
+  error?: string;
+};
+const focusReadsByPage = new WeakMap<Page, FocusReadDiagnostic[]>();
 let browser: Browser;
 let baseUrl = '';
 
@@ -208,6 +217,28 @@ async function settledPaint(locator: Locator) {
 
 function createCalendarCloseProbe(element: Element, key: string) {
   const document = element.ownerDocument;
+  const owner = element.closest('[data-previewer-id]');
+  const ownerId = owner?.getAttribute('data-previewer-id');
+  const demoId = owner?.getAttribute('data-demo-id');
+  const label = element.getAttribute('aria-label');
+  const exposed = (candidate: Element) => {
+    for (let current: Element | null = candidate; current; current = current.parentElement) {
+      if (
+        current.hasAttribute('hidden') ||
+        current.hasAttribute('inert') ||
+        current.getAttribute('aria-hidden') === 'true'
+      )
+        return false;
+      const style = document.defaultView?.getComputedStyle(current);
+      if (
+        style?.display === 'none' ||
+        style?.visibility === 'hidden' ||
+        style?.visibility === 'collapse'
+      )
+        return false;
+    }
+    return true;
+  };
   const inspectSubject = (subject: Element | null, includeStyle = false) => {
     if (!subject) return null;
     const ancestors = [];
@@ -284,6 +315,39 @@ function createCalendarCloseProbe(element: Element, key: string) {
   });
   document.addEventListener('keydown', onKey, true);
   return {
+    readExpanded() {
+      // The role/name locator bound this physical Trigger before input. Read
+      // its current attribute inside the unchanged poll deadline, without a
+      // fresh accessibility-tree traversal for every protocol round trip.
+      // A cached close sample, detached/replaced owner, ambiguous subject or
+      // a changed accessible name cannot satisfy this observation.
+      if (
+        !element.isConnected ||
+        !owner?.isConnected ||
+        element.closest('[data-previewer-id]') !== owner ||
+        owner.getAttribute('data-previewer-id') !== ownerId ||
+        owner.getAttribute('data-demo-id') !== demoId ||
+        !label
+      )
+        return null;
+      const candidates = Array.from(
+        owner.querySelectorAll('[role="combobox"], select, input[list]')
+      ).filter(exposed);
+      // Calendar caption names are explicit aria-labels. Refuse an unexpected
+      // naming source instead of guessing a computed name or missing a duplicate.
+      if (
+        candidates.some(
+          (candidate) =>
+            !candidate.getAttribute('aria-label') || candidate.hasAttribute('aria-labelledby')
+        )
+      )
+        return null;
+      const current = candidates.filter(
+        (candidate) => candidate.getAttribute('aria-label') === label
+      );
+      if (current.length !== 1 || current[0] !== element) return null;
+      return element.getAttribute('aria-expanded');
+    },
     stop(currentElement: Element | null = null) {
       observer.disconnect();
       document.removeEventListener('keydown', onKey, true);
@@ -361,7 +425,7 @@ async function closeCalendarPopup(
         };
         reads.push(read);
         try {
-          const value = await trigger.getAttribute('aria-expanded');
+          const value = await probe.evaluate((current) => current.readExpanded());
           read.value = value;
           read.status = 'resolved';
           return value;
@@ -701,6 +765,58 @@ async function installPopoverNegativeControl(panel: Locator, control: string | u
 }
 
 async function hasFocus(locator: Locator) {
+  if (focusDiagnostics) {
+    const read: FocusReadDiagnostic = {
+      startedAt: performance.now(),
+      settledAt: null,
+      status: 'pending',
+    };
+    focusReadsByPage.get(locator.page())?.push(read);
+    try {
+      const observation = await locator.evaluate((element) => {
+        const describe = (subject: Element | null) =>
+          subject
+            ? {
+                tag: subject.tagName,
+                text: subject.textContent?.trim().slice(0, 80),
+                connected: subject.isConnected,
+                attributes: Object.fromEntries(
+                  Array.from(subject.attributes, (attribute) => [attribute.name, attribute.value])
+                ),
+              }
+            : null;
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        const activeSubject = active;
+        let focused = false;
+        while (active) {
+          if (element === active || element.contains(active)) {
+            focused = true;
+            break;
+          }
+          const root = active.getRootNode();
+          active = root instanceof ShadowRoot ? root.host : null;
+        }
+        return {
+          focused,
+          observedAt: performance.now(),
+          timeOrigin: performance.timeOrigin,
+          expected: describe(element),
+          active: describe(activeSubject),
+          listbox: describe(element.closest('[role="listbox"]')),
+        };
+      });
+      read.status = 'resolved';
+      read.observation = observation;
+      return observation.focused;
+    } catch (error) {
+      read.status = 'rejected';
+      read.error = String(error);
+      throw error;
+    } finally {
+      read.settledAt = performance.now();
+    }
+  }
   return locator.evaluate((element) => {
     let active = document.activeElement;
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
@@ -719,7 +835,7 @@ async function runtimeControls(previewer: Locator) {
   const fixed = (await previewer.getAttribute('data-projection-mode')) === 'fixed-family';
   return previewer.locator(
     fixed
-      ? '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
+      ? '.host [data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
       : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
   );
 }
@@ -738,19 +854,23 @@ function inspectRuntime(
 ) {
   const { runtime, label, readySelector, count } = request;
   const fixed = root.dataset.projectionMode === 'fixed-family';
-  const scopes = root.querySelectorAll<HTMLElement>('[data-projection-scope]');
-  const scope = scopes.length === 1 ? scopes[0] : null;
   const hosts = root.querySelectorAll<HTMLElement>('.host');
   const host = hosts.length === 1 ? hosts[0] : null;
-  const controls = root.querySelectorAll<HTMLElement>(
-    fixed
-      ? '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
-      : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
-  );
+  // The code Copy command owns a separate projection outside the demo host.
+  // Only this host's unique projection may establish its runtime readiness.
+  const scopes = host?.querySelectorAll<HTMLElement>('[data-projection-scope]') ?? [];
+  const scope = scopes.length === 1 ? scopes[0] : null;
+  const controls =
+    (fixed ? scope : root)?.querySelectorAll<HTMLElement>(
+      fixed
+        ? '[data-projection-control="runtime"][data-runtime-tabs]'
+        : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
+    ) ?? [];
   const control = controls.length === 1 ? controls[0] : null;
   const selected = control?.querySelectorAll<HTMLElement>('[role="tab"][aria-selected="true"]');
   const tab = selected?.length === 1 ? selected[0] : null;
-  const content = fixed ? scope?.querySelector<HTMLElement>('[data-projection-content]') : host;
+  const contents = scope?.querySelectorAll<HTMLElement>('[data-projection-content]') ?? [];
+  const content = fixed ? (contents.length === 1 ? contents[0] : null) : host;
   const committed = fixed
     ? scope?.dataset.projectionRuntime
     : (
@@ -792,6 +912,15 @@ function inspectRuntime(
   if (!host || !content || controls.length !== 1) problems.push('missing-or-ambiguous-shell');
   if (fixed && (scopes.length !== 1 || scope?.dataset.projectionState !== 'ready'))
     problems.push('projection-not-ready');
+  if (
+    fixed &&
+    (!root.dataset.previewerId ||
+      host?.dataset.projectionOwner !== root.dataset.previewerId ||
+      scope?.dataset.projectionScope !== root.dataset.previewerId ||
+      control?.dataset.projectionOwner !== root.dataset.previewerId ||
+      content?.dataset.projectionOwner !== root.dataset.previewerId)
+  )
+    problems.push('wrong-projection-owner');
   if (!fixed && scopes.length) problems.push('unexpected-fixed-scope');
   if (committed !== runtime) problems.push('runtime-not-committed');
   if (!tab || tab.textContent?.trim() !== label || (!fixed && tab.dataset.runtimeTab !== runtime))
@@ -886,6 +1015,49 @@ async function captureFailureDiagnostics(
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
   const files: Record<string, string> = {};
   const errors: string[] = [];
+  if (focusDiagnostics) {
+    try {
+      const observation = await previewer.evaluate((root) => {
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        return {
+          observedAt: performance.now(),
+          active: active?.outerHTML ?? null,
+          controls: Array.from(root.querySelectorAll('[role="combobox"]'), (trigger) => {
+            const contentId = trigger.getAttribute('aria-controls');
+            const content = contentId ? document.getElementById(contentId) : null;
+            return {
+              trigger: trigger.outerHTML,
+              contentId,
+              content: content?.outerHTML ?? null,
+              style: content
+                ? {
+                    visibility: getComputedStyle(content).visibility,
+                    display: getComputedStyle(content).display,
+                  }
+                : null,
+              scroll: content
+                ? Array.from(content.querySelectorAll('*'))
+                    .filter((element) => element.scrollHeight > element.clientHeight + 1)
+                    .map((element) => ({
+                      tag: element.tagName,
+                      role: element.getAttribute('role'),
+                      scrollTop: element.scrollTop,
+                      scrollHeight: element.scrollHeight,
+                      clientHeight: element.clientHeight,
+                    }))
+                : [],
+            };
+          }),
+        };
+      });
+      const file = `${id}-failed-focus.json`;
+      await writeJson(file, observation);
+      files.focus = file;
+    } catch (error) {
+      errors.push(`focus: ${String(error)}`);
+    }
+  }
   for (const [kind, collect] of [
     ['dom', () => previewer.evaluate((root) => root.outerHTML)],
     ['aria', () => previewer.ariaSnapshot()],
@@ -914,6 +1086,8 @@ async function runCase(testCase: Case) {
     timezoneId: 'UTC',
   });
   const page = await context.newPage();
+  const focusReads: FocusReadDiagnostic[] = [];
+  if (focusDiagnostics) focusReadsByPage.set(page, focusReads);
   page.setDefaultTimeout(15_000);
   const demoId =
     testCase.component === 'drawer'
@@ -1075,6 +1249,15 @@ async function runCase(testCase: Case) {
       screenshots,
       captureErrors,
       failureDiagnostics,
+      ...(focusDiagnostics
+        ? {
+            focusReadDiagnostics: {
+              clock: 'Node performance.now; page observation clock remains separate',
+              timeOrigin: performance.timeOrigin,
+              reads: focusReads.map((read) => ({ ...read })),
+            },
+          }
+        : {}),
       pageErrors,
       blockedRequests,
       acceptance:
