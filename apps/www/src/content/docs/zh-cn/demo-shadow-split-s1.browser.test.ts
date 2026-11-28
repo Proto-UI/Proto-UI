@@ -4,7 +4,7 @@ import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 
-const ROUTE = '/zh-cn/internal/demo-matrix/';
+const ROUTE = '/zh-cn/internal/shadow-split/';
 const S1 = '[data-shadow-s1]';
 const PROFILES = ['light', 'split'] as const;
 // P-BRUTALIST-BADGE-TONES maps accent/info/danger to canary/sky/coral.
@@ -139,7 +139,7 @@ describe.sequential('S1 public Shadow split browser paths', () => {
           ).toBe(null);
         }
         expect((await read(page)).map((row) => row.generation)).toEqual([1, 1]);
-      }, `/${locale}/internal/demo-matrix/`);
+      }, `/${locale}/internal/shadow-split/`);
     }, 90_000);
   }
 

@@ -634,6 +634,25 @@ export function createVueAdapter(runtime: VueRuntime) {
         // Reconcile once the host component has received a parent update.
         runtime.onUpdated?.(notifyPropsChange);
 
+        const notifyCommittedPortalSubtree = (readyTarget: HTMLElement | null) => {
+          const committedEpoch = portalEpoch;
+          if (
+            readyTarget &&
+            readyTarget.isConnected &&
+            committedEpoch &&
+            committedEpoch.host === readyTarget &&
+            readyTarget.parentNode === committedEpoch.destination
+          ) {
+            notifyPortalSubtreeReadiness(
+              readyTarget,
+              () =>
+                rootRef.value === readyTarget &&
+                portalEpoch === committedEpoch &&
+                readyTarget.parentNode === committedEpoch.destination
+            );
+          }
+        };
+
         runtime.watch(
           () => commitVersion.value,
           async () => {
@@ -738,22 +757,20 @@ export function createVueAdapter(runtime: VueRuntime) {
                 rootRef.value === readyTarget
               ) {
                 notifyFocusTargetReady();
-                const committedEpoch = portalEpoch;
-                if (
-                  committedEpoch &&
-                  committedEpoch.host === readyTarget &&
-                  readyTarget.parentNode === committedEpoch.destination
-                ) {
-                  notifyPortalSubtreeReadiness(
-                    readyTarget,
-                    () =>
-                      rootRef.value === readyTarget &&
-                      portalEpoch === committedEpoch &&
-                      readyTarget.parentNode === committedEpoch.destination
-                  );
-                }
+                notifyCommittedPortalSubtree(readyTarget);
               }
             });
+          },
+          { flush: 'post' }
+        );
+
+        runtime.watch(
+          hostTokens,
+          () => {
+            const target = rootRef.value;
+            if (!viewReady || !shouldExist.value || !target?.isConnected) return;
+            notifyFocusTargetReady();
+            notifyCommittedPortalSubtree(target);
           },
           { flush: 'post' }
         );
@@ -812,7 +829,10 @@ export function createVueAdapter(runtime: VueRuntime) {
                 eventGate.isEnabled() &&
                 rootRef.value === rootEl &&
                 rootEl.isConnected &&
-                !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+                !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
+                !rootEl.closest(`[${PUI_VIEW_PENDING_ATTR}]`) &&
+                rootEl.ownerDocument?.defaultView?.getComputedStyle?.(rootEl)?.visibility !==
+                  'hidden',
               subscribe: (listener) => {
                 focusTargetReadyListeners.add(listener);
                 return () => focusTargetReadyListeners.delete(listener);
@@ -943,7 +963,8 @@ export function createVueAdapter(runtime: VueRuntime) {
               viewReady &&
               portalIsCommitted() &&
               !viewDisposed &&
-              !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+              !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
+              !rootRef.value?.closest(`[${PUI_VIEW_PENDING_ATTR}]`),
             isEntryAcquisitionReady: (target) => {
               releaseRequestedTargetReady?.();
               releaseRequestedTargetReady = undefined;

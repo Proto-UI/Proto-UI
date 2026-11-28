@@ -36,7 +36,10 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
           w.prop('fade').eq(false),
           w.meta('preference.reducedMotion').eq('no-preference')
         ),
-      intent: (i) => i.feedback.style.use(tw('transition-all')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('transition-[color,background-color,border-color,box-shadow,transform,opacity]')
+        ),
     });
     def.rule({
       when: (w) =>

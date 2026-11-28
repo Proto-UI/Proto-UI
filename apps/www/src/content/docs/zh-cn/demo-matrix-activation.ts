@@ -121,7 +121,7 @@ export async function activateMatrixPreviews({
         continue;
       }
       if (!inViewport(root)) {
-        root.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
+        root.scrollIntoView({ behavior: 'instant', block: 'start', inline: 'nearest' });
         receipt.scrolls++;
         if (!inViewport(root))
           throw new Error(
@@ -190,10 +190,11 @@ export async function activateMatrixPreviews({
  * The outer timer also fails a blocked renderer; a late reply cannot renew it. */
 export async function waitForMatrixInitialization(
   page: Pick<Page, 'evaluate' | 'waitForFunction'>,
-  runtimeCount: number
+  runtimeCount: number,
+  timeoutMs = 60_000
 ): Promise<void> {
   const startedAt = Date.now();
-  const deadline = startedAt + 60_000;
+  const deadline = startedAt + timeoutMs;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const work = (async () => {
     const receipt = await page.evaluate(activateMatrixPreviews, { startedAt, deadline });
