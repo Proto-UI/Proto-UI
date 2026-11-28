@@ -1412,6 +1412,114 @@ describe('Popover same-phase capture and controls, no native browser', () => {
   });
 });
 
+describe('Calendar optional native focus trace, DOM fixture only', () => {
+  function fixture(error?: Error) {
+    const window = new Window();
+    const document = window.document;
+    document.body.innerHTML =
+      '<section data-previewer-id="calendar"><div role="combobox" aria-label="Month" aria-controls="month-options" tabindex="0">10月</div></section><div role="listbox" id="month-options"><div role="option" aria-selected="true" tabindex="0">10月</div></div><button id="foreign">Foreign</button>';
+    const root = document.querySelector('[data-previewer-id]')!;
+    const option = document.querySelector('[role="option"]') as unknown as HTMLElement;
+    const original = window.HTMLElement.prototype.focus;
+    const nativeFocus = vi.fn(function (this: HTMLElement, ...args: unknown[]) {
+      if (error) throw error;
+      return Reflect.apply(original, this, args);
+    });
+    window.HTMLElement.prototype.focus = nativeFocus;
+    const createProbe = execute(
+      `${statements(['createCalendarFocusEventProbe'])}; createCalendarFocusEventProbe;`,
+      {
+        HTMLElement: window.HTMLElement,
+        Element: window.Element,
+        MutationObserver: window.MutationObserver,
+        performance: { now: () => 123, timeOrigin: 100_000 },
+      }
+    );
+    const probe = createProbe(root);
+    return {
+      window,
+      document,
+      option,
+      nativeFocus,
+      probe,
+      close() {
+        probe.stop();
+        window.HTMLElement.prototype.focus = original;
+        window.happyDOM.abort();
+      },
+    };
+  }
+
+  it('passes the same native focus target and options through and restores the original function', () => {
+    const f = fixture();
+    try {
+      const options = { preventScroll: true };
+      f.option.focus(options);
+      expect(f.nativeFocus).toHaveBeenCalledOnce();
+      expect(f.nativeFocus).toHaveBeenCalledWith(options);
+      expect(f.nativeFocus.mock.contexts[0]).toBe(f.option);
+      expect(f.document.activeElement).toBe(f.option);
+      const trace = f.probe.stop();
+      expect(
+        trace.events
+          .filter((event: any) => event.kind.startsWith('native-focus-'))
+          .map((event: any) => event.kind)
+      ).toEqual(['native-focus-call', 'native-focus-return']);
+      expect(trace.events.some((event: any) => event.kind === 'focusin')).toBe(true);
+      expect(f.window.HTMLElement.prototype.focus).toBe(f.nativeFocus);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('rethrows the exact native focus error and records no successful return', () => {
+    const error = new Error('native focus failed');
+    const f = fixture(error);
+    try {
+      let caught;
+      try {
+        f.option.focus();
+      } catch (value) {
+        caught = value;
+      }
+      expect(caught).toBe(error);
+      const trace = f.probe.stop();
+      expect(trace.events.map((event: any) => event.kind)).toEqual([
+        'native-focus-call',
+        'native-focus-throw',
+      ]);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('caps diagnostic records without suppressing any native focus calls', () => {
+    const f = fixture();
+    try {
+      for (let index = 0; index < 300; index += 1) f.option.focus();
+      const trace = f.probe.stop();
+      expect(f.nativeFocus).toHaveBeenCalledTimes(300);
+      expect(trace.events).toHaveLength(256);
+      expect(trace.dropped).toBeGreaterThan(0);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('does not attribute an unrelated target to the Calendar owner', () => {
+    const f = fixture();
+    try {
+      const foreign = f.document.getElementById('foreign')!;
+      foreign.focus();
+      expect(f.document.activeElement).toBe(foreign);
+      expect(f.nativeFocus).toHaveBeenCalledOnce();
+      expect(f.probe.stop().events).toEqual([]);
+    } finally {
+      f.close();
+    }
+  });
+});
+
 type Runtime = 'wc' | 'react' | 'vue' | 'vue2';
 function runtimeFixture(shell: 'fixed-family' | 'generic', runtime: Runtime = 'react') {
   const window = new Window();

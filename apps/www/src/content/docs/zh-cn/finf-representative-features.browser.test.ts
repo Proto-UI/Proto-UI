@@ -764,6 +764,148 @@ async function installPopoverNegativeControl(panel: Locator, control: string | u
   }, control);
 }
 
+// Diagnostic-only call-through: preserve each native focus invocation and input.
+function createCalendarFocusEventProbe(root: Element) {
+  const document = root.ownerDocument;
+  const events: Array<Record<string, unknown>> = [];
+  let dropped = 0;
+  const describe = (element: Element | null) => {
+    if (!element) return null;
+    const attributes = [
+      'role',
+      'aria-label',
+      'aria-expanded',
+      'aria-selected',
+      'tabindex',
+      'data-demo-ref',
+      'data-pui-view-pending',
+      'data-pui-view-detached',
+      'data-pui-view-revealing',
+      'data-transition-state',
+      'data-focused',
+    ];
+    return {
+      tag: element.tagName,
+      text: element.textContent?.trim().slice(0, 80),
+      connected: element.isConnected,
+      attributes: Object.fromEntries(
+        attributes
+          .filter((key) => element.hasAttribute(key))
+          .map((key) => [key, element.getAttribute(key)])
+      ),
+    };
+  };
+  const relevant = (element: Element) => {
+    if (
+      root.contains(element) &&
+      ['combobox', 'gridcell'].includes(element.getAttribute('role') ?? '')
+    )
+      return true;
+    const listbox = element.closest('[role="listbox"]');
+    return (
+      !!listbox?.id &&
+      Array.from(root.querySelectorAll('[role="combobox"]')).some(
+        (trigger) => trigger.getAttribute('aria-controls') === listbox.id
+      )
+    );
+  };
+  const record = (kind: string, element: Element, detail: Record<string, unknown> = {}) => {
+    if (events.length >= 256) {
+      dropped += 1;
+      return;
+    }
+    const ancestors: Array<ReturnType<typeof describe>> = [];
+    for (
+      let parent = element.parentElement;
+      parent && ancestors.length < 6;
+      parent = parent.parentElement
+    ) {
+      if (
+        parent.matches(
+          '[data-pui-view-pending], [data-pui-view-detached], [data-pui-view-revealing], [role="listbox"]'
+        )
+      )
+        ancestors.push(describe(parent));
+    }
+    events.push({
+      kind,
+      at: performance.now(),
+      subject: describe(element),
+      active: describe(document.activeElement),
+      ancestors,
+      ...detail,
+    });
+  };
+  const nativeFocus = HTMLElement.prototype.focus;
+  function observedFocus(this: HTMLElement, options?: FocusOptions) {
+    const tracked = relevant(this);
+    if (tracked) record('native-focus-call', this, { preventScroll: options?.preventScroll });
+    try {
+      const result = Reflect.apply(nativeFocus, this, arguments);
+      if (tracked) record('native-focus-return', this);
+      return result;
+    } catch (error) {
+      if (tracked) record('native-focus-throw', this, { error: String(error) });
+      throw error;
+    }
+  }
+  HTMLElement.prototype.focus = observedFocus;
+  const onEvent = (event: Event) => {
+    const element = event.target instanceof Element ? event.target : null;
+    const subject = element?.closest('[role="combobox"], [role="option"], [role="gridcell"]');
+    if (subject && relevant(subject))
+      record(event.type, subject, {
+        isTrusted: event.isTrusted,
+        key: 'key' in event ? event.key : undefined,
+      });
+  };
+  const names = ['keydown', 'pointerdown', 'click', 'focusin', 'focusout'];
+  for (const name of names) document.addEventListener(name, onEvent, true);
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      const target = mutation.target;
+      if (!(target instanceof Element) || !relevant(target)) continue;
+      if (
+        target.getAttribute('role') === 'option' &&
+        target.getAttribute('aria-selected') !== 'true'
+      )
+        continue;
+      record('attribute-delivery', target, {
+        attribute: mutation.attributeName,
+        previous: mutation.oldValue,
+        current: mutation.attributeName ? target.getAttribute(mutation.attributeName) : null,
+      });
+    }
+  });
+  observer.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeOldValue: true,
+    attributeFilter: [
+      'aria-expanded',
+      'aria-selected',
+      'data-focused',
+      'data-pui-view-pending',
+      'data-pui-view-detached',
+      'data-pui-view-revealing',
+      'data-transition-state',
+    ],
+  });
+  return {
+    stop() {
+      observer.disconnect();
+      for (const name of names) document.removeEventListener(name, onEvent, true);
+      if (HTMLElement.prototype.focus === observedFocus) HTMLElement.prototype.focus = nativeFocus;
+      return {
+        clock: 'page performance.now; mutation timestamps are observer delivery, not mutation time',
+        timeOrigin: performance.timeOrigin,
+        events,
+        dropped,
+      };
+    },
+  };
+}
+
 async function hasFocus(locator: Locator) {
   if (focusDiagnostics) {
     const read: FocusReadDiagnostic = {
@@ -1087,6 +1229,7 @@ async function runCase(testCase: Case) {
   });
   const page = await context.newPage();
   const focusReads: FocusReadDiagnostic[] = [];
+  let focusEventProbe: JSHandle<ReturnType<typeof createCalendarFocusEventProbe>> | null = null;
   if (focusDiagnostics) focusReadsByPage.set(page, focusReads);
   page.setDefaultTimeout(15_000);
   const demoId =
@@ -1196,6 +1339,8 @@ async function runCase(testCase: Case) {
     expect(response?.status()).toBe(200);
     expect(await previewer.count()).toBe(1);
     await previewer.waitFor({ state: 'visible' });
+    if (focusDiagnostics && testCase.component === 'calendar')
+      focusEventProbe = await previewer.evaluateHandle(createCalendarFocusEventProbe);
     await testCase.run({ page, previewer, family: testCase.family, capture });
     expect(pageErrors).toEqual([]);
   } catch (error) {
@@ -1218,6 +1363,14 @@ async function runCase(testCase: Case) {
         font: getComputedStyle(document.body).font,
       }))
       .catch(() => null);
+    const focusEventTrace = focusEventProbe
+      ? await focusEventProbe
+          .evaluate((probe) => probe.stop())
+          .catch((error) => ({ error: String(error) }))
+      : null;
+    await focusEventProbe
+      ?.dispose()
+      .catch((error) => captureErrors.push(`focus trace cleanup: ${String(error)}`));
     await writeJson(`${testCase.id}.json`, {
       revision,
       tree,
@@ -1251,6 +1404,7 @@ async function runCase(testCase: Case) {
       failureDiagnostics,
       ...(focusDiagnostics
         ? {
+            focusEventTrace,
             focusReadDiagnostics: {
               clock: 'Node performance.now; page observation clock remains separate',
               timeOrigin: performance.timeOrigin,
