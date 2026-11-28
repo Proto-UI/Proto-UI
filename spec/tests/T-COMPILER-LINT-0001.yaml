@@ -82,6 +82,13 @@ cases:
       A setup-level let reassigned by one action and read by a later callback produces proto/persistent-capture-state with the CAPTURES criterion, the binding and both closures, and sourceValid=false. Replacing it with def.state removes the diagnostic. A task body's own local kept across its awaits and a mutable local shared by helpers within one segment produce no diagnostic. Renaming the binding or moving the writer into an imported helper preserves the result.
 
 
+  - id: T-COMPILER-LINT-0001-CASE-COMPOSITE-VALUE
+    title: Compare composite values explicitly and keep them immutable
+    covers: [C-COMPILER-LINT-0001-RULE-COMPOSITE-VALUE, C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY]
+    expectation: >-
+      equals on two record states compiles and yields structural results; === on numbers, text and two handles is not reported by this rule. === between two record values produces proto/composite-value-semantics with the EQUALITY criterion and sourceValid=false, as does assigning to a member of a locally constructed record with the VALUES criterion. A readonly-typed record member assignment may instead be reported by TypeScript; both remain source-invalid.
+
+
   - id: T-COMPILER-LINT-0001-CASE-NO-INVENTED-RESTRICTION
     title: Attribute limitations to their actual source instead of inventing bans
     covers: [C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY, C-COMPILER-LINT-0001-CATEGORIES]
@@ -131,11 +138,22 @@ implementations:
       - T-COMPILER-LINT-0001-CASE-PURITY
       - T-COMPILER-LINT-0001-CASE-CAPABILITY
       - T-COMPILER-LINT-0001-CASE-PERSISTENT-CAPTURE
+      - T-COMPILER-LINT-0001-CASE-COMPOSITE-VALUE
       - T-COMPILER-LINT-0001-CASE-NO-INVENTED-RESTRICTION
       - T-COMPILER-LINT-0001-CASE-BOUNDARIES
     notes:
       [
         Complete semantic analysis and target-admission evidence have not been supplied; a bounded frontend increment must report its covered subset without marking this full route passing.,
+      ]
+  - id: producer-value-rules
+    kind: module-test
+    status: active
+    path: packages/compiler/test/producer.node-test.mjs
+    required: false
+    consumesCases: [T-COMPILER-LINT-0001-CASE-PERSISTENT-CAPTURE, T-COMPILER-LINT-0001-CASE-COMPOSITE-VALUE]
+    notes:
+      [
+        Exercises setup-level persistent captures, record operator equality, equals on records and member assignment through the shared frontend and producer; helper moves, module-level bindings, rename stability and handle equality remain unexercised.,
       ]
   - id: editor-cli-parity
     kind: workspace-check
@@ -168,5 +186,5 @@ revisions:
     summary: Add independent diagnostic, rule, migration and denominator cases with absent implementation routes reported honestly.
   - version: 0.4.0
     change: revised
-    summary: Add the persistent-capture case for proto/persistent-capture-state.
+    summary: Add the persistent-capture case for proto/persistent-capture-state and the composite-value case for proto/composite-value-semantics.
 tags: [compiler, lint, diagnostics, migration, conformance]

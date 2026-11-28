@@ -36,7 +36,7 @@ cases:
         C-COMPILER-FOUNDATION-0001-RESULTS,
       ]
     expectation: >-
-      Binary64 calculations retain their specified values; fractional, out-of-range and unrepresentable integer-boundary inputs fail instead of truncating. A number cannot act as a bool or become text through implicit coercion. A captured list/record state value remains unchanged after a later state replacement; sharing its storage does not create observable mutable aliasing. Explicit handles retain identity. Omitted props and business none remain distinguishable where declared. Language numeric equality considers positive and negative zero equal and NaN unequal to itself. Reactive sameness treats repeated NaN as unchanged, but replacing positive zero with negative zero invalidates a reciprocal derivation from positive infinity to negative infinity. These respective comparison rules recurse through equatable composite values without relying on shared storage identity.
+      Binary64 calculations retain their specified values; fractional, out-of-range and unrepresentable integer-boundary inputs fail instead of truncating. A number cannot act as a bool or become text through implicit coercion. A captured list/record state value remains unchanged after a later state replacement; sharing its storage does not create observable mutable aliasing. Explicit handles retain identity. Omitted props and business none remain distinguishable where declared. Language numeric equality considers positive and negative zero equal and NaN unequal to itself. Reactive sameness treats repeated NaN as unchanged, but replacing positive zero with negative zero invalidates a reciprocal derivation from positive infinity to negative infinity. These respective comparison rules recurse through equatable composite values compared with the explicit structural equality operation, without relying on shared storage identity; operator equality on two records and assignment to a record member are rejected as source-invalid.
 
 
   - id: T-COMPILER-FOUNDATION-0001-CASE-TEXT
@@ -326,4 +326,8 @@ revisions:
     change: revised
     breaking: true
     summary: Replace the transactional writable-capture expectation with a source-invalid case and a declared-state rollback case, matching the revised CAPTURES criterion.
+  - version: 0.4.0
+    change: revised
+    breaking: true
+    summary: Compare composite values through the explicit structural equality operation and reject composite operator equality and member assignment.
 tags: [compiler, language, foundation, conformance, transaction, async, context]

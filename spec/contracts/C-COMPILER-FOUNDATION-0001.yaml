@@ -36,21 +36,21 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-VALUES
     text:
       zh-CN: >-
-        普通 number 是 IEEE 754 binary64；整数索引、长度和 SDK 边界使用显式检查的整数类型，越界、非整数或无法表示的转换给出类型化失败，不截断猜测。 运算没有隐式类型 coercion，条件必须是 bool。record/list 等复合状态采用不可变值语义，允许写时复制和结构共享；身份仅由显式有类型 handle 表达。 相等与变化判断依照声明的值或 handle 身份语义，不借目标对象地址决定。TypeScript 的 as 或 readonly 不构成运行时值域、不可变性或所有权证明。
+        普通 number 是 IEEE 754 binary64；整数索引、长度和 SDK 边界使用显式检查的整数类型，越界、非整数或无法表示的转换给出类型化失败，不截断猜测。 运算没有隐式类型 coercion，条件必须是 bool。record/list 等复合状态采用不可变值语义，允许写时复制和结构共享；更新通过构造新值完成，对复合值的成员或元素赋值属于源无效；身份仅由显式有类型 handle 表达。 相等与变化判断依照声明的值或 handle 身份语义，不借目标对象地址决定。TypeScript 的 as 或 readonly 不构成运行时值域、不可变性或所有权证明。
 
 
       en: >-
-        Ordinary number is IEEE 754 binary64. Integer indices, lengths and SDK boundaries use explicitly checked integer types; out-of-range, nonintegral or unrepresentable conversion produces typed failure rather than guessed truncation. Operations have no implicit coercion and conditions require bool. Composite state such as records/lists has immutable value semantics, permitting copy-on-write and structural sharing; identity is expressed only by explicit typed handles. Equality and change detection follow declared value or handle-identity semantics rather than target object addresses. TypeScript as and readonly do not prove runtime domains, immutability or ownership.
+        Ordinary number is IEEE 754 binary64. Integer indices, lengths and SDK boundaries use explicitly checked integer types; out-of-range, nonintegral or unrepresentable conversion produces typed failure rather than guessed truncation. Operations have no implicit coercion and conditions require bool. Composite state such as records/lists has immutable value semantics, permitting copy-on-write and structural sharing; updates construct new values, and assigning to a member or element of a composite value is source-invalid; identity is expressed only by explicit typed handles. Equality and change detection follow declared value or handle-identity semantics rather than target object addresses. TypeScript as and readonly do not prove runtime domains, immutability or ownership.
 
 
   - id: C-COMPILER-FOUNDATION-0001-EQUALITY
     text:
       zh-CN: >-
-        语言数值相等遵循 IEEE 比较：正零与负零相等，NaN 与包括自身在内的数值均不相等；这不启用类型 coercion。 响应变化抑制使用另一种明确的值同一性：两个 NaN 视为相同，正零与负零不同。不得因数值相等而漏掉符号零变化及其可观察派生结果。 可比较的 record/list/Option/Result 以对应比较规则递归比较结构和值；handle 比较其显式身份，不能用结构共享或宿主对象地址替代。 保守失效仍可多做纯重算，不能把相等比较、变化抑制或额外重算变成额外的可观察效果。
+        语言数值相等遵循 IEEE 比较：正零与负零相等，NaN 与包括自身在内的数值均不相等；这不启用类型 coercion。 响应变化抑制使用另一种明确的值同一性：两个 NaN 视为相同，正零与负零不同。不得因数值相等而漏掉符号零变化及其可观察派生结果。 可比较的 record/list/Option/Result 以对应比较规则递归比较结构和值；handle 比较其显式身份，不能用结构共享或宿主对象地址替代。 运算符相等（===、!== 及被接受的 ==）用于 bool、number、text 和 handle；复合值的结构比较使用作者界面的显式结构相等操作，对复合值使用运算符相等属于源无效，因为同一份源由 Adapter 执行时会比较对象身份。 保守失效仍可多做纯重算，不能把相等比较、变化抑制或额外重算变成额外的可观察效果。
 
 
       en: >-
-        Language numeric equality uses IEEE comparison: positive and negative zero compare equal, while NaN compares unequal to every number including itself, without enabling coercion. Reactive change suppression uses separate value sameness: two NaNs are the same and positive and negative zero differ. Numeric equality cannot hide a signed-zero change or its observable derived result. Equatable records, lists, Options and Results compare structure and values recursively with the corresponding rule; handles compare explicit identity, not storage sharing or host object addresses. Conservative invalidation may still perform extra pure recomputation, without turning comparison, suppression or recomputation into additional observable effects.
+        Language numeric equality uses IEEE comparison: positive and negative zero compare equal, while NaN compares unequal to every number including itself, without enabling coercion. Reactive change suppression uses separate value sameness: two NaNs are the same and positive and negative zero differ. Numeric equality cannot hide a signed-zero change or its observable derived result. Equatable records, lists, Options and Results compare structure and values recursively with the corresponding rule; handles compare explicit identity, not storage sharing or host object addresses. Operator equality (===, !== and admitted ==) applies to bool, number, text and handles; composite values compare through the authoring surface's explicit structural equality operation, and operator equality on a composite value is source-invalid because the same source executed by the Adapter would compare object identity. Conservative invalidation may still perform extra pure recomputation, without turning comparison, suppression or recomputation into additional observable effects.
 
 
   - id: C-COMPILER-FOUNDATION-0001-TEXT
@@ -226,11 +226,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-PUBLIC
     text:
       zh-CN: >-
-        仅显式公开的 props、状态投影与动作形成宿主接口，使用稳定的语义名称和具体类型；位置编号、字符串查找和通用 JSON 不作为默认组件 API。 对外状态投影只读，改变状态通过已声明动作和约束。确有动态数据边界时可以声明相应数据类型，但不能把内部状态整体擦成 Json。
+        仅显式公开的 props、状态投影、动作与事件形成宿主接口，使用稳定的语义名称和具体类型；位置编号、字符串查找和通用 JSON 不作为默认组件 API。 对外状态投影只读，改变状态通过已声明动作和约束。确有动态数据边界时可以声明相应数据类型，但不能把内部状态整体擦成 Json。
 
 
       en: >-
-        Only explicitly public props, state projections and actions form the host interface, using stable semantic names and concrete types rather than positional numbering, string lookup or universal JSON. Public state projections are readonly; changes go through declared actions and constraints. Explicit dynamic data boundaries may use appropriate data types without erasing all internal state to Json.
+        Only explicitly public props, state projections, actions and events form the host interface, using stable semantic names and concrete types rather than positional numbering, string lookup or universal JSON. Public state projections are readonly; changes go through declared actions and constraints. Explicit dynamic data boundaries may use appropriate data types without erasing all internal state to Json.
 
 
   - id: C-COMPILER-FOUNDATION-0001-STYLE
@@ -256,11 +256,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-SUPPORT
     text:
       zh-CN: >-
-        调度、事务、异步、资源管理和宿主操作所需支持作为真实模块或 crate 存在，组件只使用可达闭包中的能力。 支持代码不解释原型声明或编译 IR，不复制完整框架，也不把运行时源码倾倒进每个组件。 静态可消除的管理成本应消除；有事务、异步或资源语义的程序可以承担实现这些语义所必需的成本，不用删除语义换取零开销名义。
+        调度、事务、异步、资源管理和宿主操作所需支持作为真实模块或 crate 存在，组件只使用可达闭包中的能力。 编译产物的支持代码不解释原型声明或编译 IR（Adapter 执行同一份源属于 SOURCE-COMPATIBILITY 规定的另一条路径），不复制完整框架，也不把运行时源码倾倒进每个组件。 静态可消除的管理成本应消除；有事务、异步或资源语义的程序可以承担实现这些语义所必需的成本，不用删除语义换取零开销名义。
 
 
       en: >-
-        Necessary scheduling, transaction, async, resource and host support resides in real modules or crates and is selected from the reached capability closure. Support does not interpret prototype declarations or compiler IR, duplicate a framework or dump runtime source into each component. Eliminate statically unnecessary management costs; programs with transaction, async or resource semantics may pay their necessary implementation costs rather than deleting semantics to claim zero overhead.
+        Necessary scheduling, transaction, async, resource and host support resides in real modules or crates and is selected from the reached capability closure. Support for compiled output does not interpret prototype declarations or compiler IR (Adapter execution of the same source is the separate path governed by SOURCE-COMPATIBILITY), duplicate a framework or dump runtime source into each component. Eliminate statically unnecessary management costs; programs with transaction, async or resource semantics may pay their necessary implementation costs rather than deleting semantics to claim zero overhead.
 
 
   - id: C-COMPILER-FOUNDATION-0001-DIAGNOSTICS
@@ -286,11 +286,11 @@ criteria:
   - id: C-COMPILER-FOUNDATION-0001-SOURCE-COMPATIBILITY
     text:
       zh-CN: >-
-        官方及登记消费方的原型使用同一份符合所选 Proto 语言版本的作者源及传递 helper 闭包，供 Adapter 执行和所选目标编译；验收绑定实际入口、模块解析配置与逐文件内容摘要。 需要迁移时统一修改这份源，上游为登记消费方提供经验证的迁移工具；迁移后不得另写只给 compiler 的原型、替换有问题的 helper 或在编译前隐式改写消费方文件。 明确声明的宿主原语和 extern 可以有目标实现，但不能用它们包裹整个原型以绕过降低。Adapter 能执行任意 JS 不构成该源合法的证明，也不冻结旧 API 或旧源字节。 两条路径分别满足独立规范轨迹，再对可比较行为做差分；相互一致不豁免共同错误。合法而未实现的源计入完整能力分母，由实现承担，不改报作者错误。
+        官方及登记消费方的原型使用同一份符合所选 Proto 语言版本的作者源及传递 helper 闭包，供 Adapter 执行和所选目标编译；验收绑定实际入口、模块解析配置与逐文件内容摘要。 需要迁移时统一修改这份源，上游为登记消费方提供经验证的迁移工具；迁移后不得另写只给 compiler 的原型、替换有问题的 helper 或在编译前隐式改写消费方文件。 明确声明的宿主原语和 extern 可以有目标实现，但不能用它们包裹整个原型以绕过降低。Adapter 能执行任意 JS 不构成该源合法的证明，也不冻结旧 API 或旧源字节。 每个源合法的构造在原样源码配合 Adapter 运行时库作为 JavaScript 执行时必须具有相同含义；Proto 语义与 JavaScript 执行不同之处，语言要求显式作者操作或声明的 state，否则该构造属于源无效。 两条路径分别满足独立规范轨迹，再对可比较行为做差分；相互一致不豁免共同错误。合法而未实现的源计入完整能力分母，由实现承担，不改报作者错误。
 
 
       en: >-
-        Official and registered consumer prototypes use the same authored source and transitive helper closure conforming to the selected Proto language version for Adapter execution and selected-target compilation; acceptance binds actual entrypoints, module-resolution configuration and per-file content digests. A necessary migration changes that common source, with verified upstream migration tooling for registered consumers. Afterwards there is no compiler-only prototype, substituted helper or implicit pre-compilation rewrite of consumer files. Declared host primitives and externs may have target implementations, but cannot wrap a whole prototype to bypass lowering. Adapter-executable JavaScript alone does not prove Proto validity or freeze legacy APIs or source bytes. Both paths satisfy independent normative traces before their comparable behavior is checked differentially; agreement does not excuse shared defects. Legal unimplemented source remains implementation work in the full capability denominator, never an author error.
+        Official and registered consumer prototypes use the same authored source and transitive helper closure conforming to the selected Proto language version for Adapter execution and selected-target compilation; acceptance binds actual entrypoints, module-resolution configuration and per-file content digests. A necessary migration changes that common source, with verified upstream migration tooling for registered consumers. Afterwards there is no compiler-only prototype, substituted helper or implicit pre-compilation rewrite of consumer files. Declared host primitives and externs may have target implementations, but cannot wrap a whole prototype to bypass lowering. Adapter-executable JavaScript alone does not prove Proto validity or freeze legacy APIs or source bytes. Every source-valid construct has the same meaning when the unchanged source runs as JavaScript with the Adapter's runtime library; where Proto semantics differ from JavaScript execution, the language requires an explicit authoring operation or declared state, or makes the construct source-invalid. Both paths satisfy independent normative traces before their comparable behavior is checked differentially; agreement does not excuse shared defects. Legal unimplemented source remains implementation work in the full capability denominator, never an author error.
 
 
   - id: C-COMPILER-FOUNDATION-0001-MEASUREMENT
@@ -326,4 +326,8 @@ revisions:
     change: revised
     breaking: true
     summary: Require declared state for mutable data that outlives a segment instead of transactional writable captures, so Adapter execution and compilation can share one source; clarify that Proto checks extend rather than re-implement the TypeScript checker, that atomicity is per segment at explicit commit boundaries, and that state handles may cross await while segment views may not.
+  - version: 0.4.0
+    change: revised
+    breaking: true
+    summary: State that every source-valid construct means the same when the unchanged source runs under the Adapter; make composite operator equality and member or element assignment on composite values source-invalid, with structural comparison through an explicit authoring operation; list public events in PUBLIC and scope SUPPORT's no-interpretation rule to compiled output.
 tags: [compiler, language, foundation, reactivity, transaction, async, context, native-source]

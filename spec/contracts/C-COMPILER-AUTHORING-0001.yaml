@@ -40,7 +40,7 @@ criteria:
 
   - id: C-COMPILER-AUTHORING-0001-DERIVE
     text: >-
-      def.derive(name, read => value) declares a readonly derived handle. read.get handles props, state, other derived values and consumed Context under the current consistent view. Reads through helpers contribute dependencies; conservative invalidation may repeat pure computation without introducing actions, host commands or task starts. Derived reads within an action observe that segment's pending writes. A literal String is a well-formed Proto String; text operations, conversions, comparisons and assertions retain their foundation rules, with no blanket prohibition on all as or == spellings.
+      def.derive(name, read => value) declares a readonly derived handle. read.get handles props, state, other derived values and consumed Context under the current consistent view. Reads through helpers contribute dependencies; conservative invalidation may repeat pure computation without introducing actions, host commands or task starts. Derived reads within an action observe that segment's pending writes. A string literal must be well-formed Unicode, so a literal containing an unpaired surrogate escape is source-invalid; text operations, conversions, comparisons and assertions retain their foundation rules, with no blanket prohibition on all as or == spellings. equals(left, right) from @proto.ui/core/authoring is the explicit structural comparison for records, lists, Presence and Result values; operator equality remains the spelling for bool, number, text and handles.
 
 
   - id: C-COMPILER-AUTHORING-0001-ACTIONS
@@ -92,4 +92,7 @@ revisions:
   - version: 0.4.0
     change: introduced
     summary: Select explicit authoring spellings and complete design inputs for the accepted foundation while retaining missing implementation evidence.
+  - version: 0.4.0
+    change: revised
+    summary: Add equals(left, right) as the explicit structural comparison for composite values, and state that string literals with unpaired surrogates are source-invalid rather than asserting every literal is well-formed.
 tags: [compiler, authoring, language, migration, controlled, context, async]
