@@ -9,6 +9,7 @@ import {
   objectMembers, operand, sourceFunction, sourceLiteral, sourceName, type LinkedType, type Member, type SourceFunction,
 } from './component-syntax.ts';
 import { componentView } from './component-view.ts';
+import { PERSISTENT_CAPTURE_RULE, persistentCaptureWrite } from './value-semantics.ts';
 import type { SourceLinks } from './links.ts';
 import type { SourceContext } from './source.ts';
 
@@ -220,6 +221,14 @@ class ComponentProducer {
           }
         }
         if (ts.isStringLiteralLike(expression)) continue;
+      }
+      if (ts.isVariableStatement(statement)) {
+        const write = persistentCaptureWrite(source.checker, statement, fn);
+        if (write) {
+          return source.invalid(write, 'PUI_PERSISTENT_CAPTURE',
+            'This setup binding outlives the writing invocation and is visible to later invocations. Declare it with def.state and write it through run.set or task.set.',
+            PERSISTENT_CAPTURE_RULE);
+        }
       }
       return source.missing(statement, 'setup-statement', 'This reached setup statement needs its execution, ownership and control path represented.');
     }

@@ -8,6 +8,7 @@ import {
   createProtoProgram,
   getProtoSourceClosure,
 } from './program.ts';
+import { AUTHORING_DECLARATIONS } from './input-profile.ts';
 import { PROTO_TARGETS } from './types.ts';
 import type {
   ProtoAnalysis,
@@ -32,6 +33,11 @@ export const PROTO_RULES = Object.freeze({
   'proto/no-capability-assertion': {
     criterion: [foundation('LANGUAGE'), foundation('VALUES')],
     coverage: 'missing',
+  },
+  'proto/persistent-capture-state': { criterion: [foundation('CAPTURES')], coverage: 'partial' },
+  'proto/composite-value-semantics': {
+    criterion: [foundation('VALUES'), foundation('EQUALITY')],
+    coverage: 'partial',
   },
 } as const);
 
@@ -136,6 +142,20 @@ function stringReceiver(type: ts.Type, checker: ts.TypeChecker): boolean {
       (declaration) => declaration.getSourceFile().fileName === PRELUDE_PATH
     ) === true
   );
+}
+
+// Handles (state, props, keys, actions...) carry the authoring Identity brand and
+// compare by identity, which JavaScript === already provides on both paths.
+function authoringHandle(type: ts.Type, checker: ts.TypeChecker): boolean {
+  return checker
+    .getPropertiesOfType(type)
+    .some(
+      (property) =>
+        String(property.escapedName).startsWith('__@kind@') &&
+        property.declarations?.some(
+          (declaration) => declaration.getSourceFile().fileName === AUTHORING_DECLARATIONS
+        ) === true
+    );
 }
 
 function memberName(
@@ -378,7 +398,22 @@ export function analyzeProtoProgram(
         // Equality is a Proto value operation, not a spelling-based ban on ==.
         // Mixed/structural domain admission needs its own implemented proof;
         // TypeScript's no-overlap heuristic is not that language definition.
-        if (
+        const composite =
+          left.size === 1 &&
+          right.size === 1 &&
+          left.has('object') &&
+          right.has('object') &&
+          !authoringHandle(checker.getTypeAtLocation(node.left), checker) &&
+          !authoringHandle(checker.getTypeAtLocation(node.right), checker);
+        if (composite) {
+          invalid(
+            'PUI_COMPOSITE_OPERATOR_EQUALITY',
+            'proto/composite-value-semantics',
+            [foundation('VALUES'), foundation('EQUALITY')],
+            'Operator equality on a record, list, Presence or Result compares identity when the same source runs as JavaScript. Use equals(left, right) for structural comparison.',
+            node
+          );
+        } else if (
           !(
             left.size === 1 &&
             right.size === 1 &&

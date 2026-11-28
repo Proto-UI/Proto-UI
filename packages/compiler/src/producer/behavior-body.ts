@@ -2,6 +2,7 @@ import ts from 'typescript';
 import type { Behavior, Binding, DataRef, ExternIR, Value, ValueType } from '../targets/component-ir.ts';
 import { BehaviorFlow, knownText, type Condition, type MatchTest, type Operand, type SwitchDispatch, type TagTest } from './behavior-flow.ts';
 import { memberValue, objectMembers } from './component-syntax.ts';
+import { COMPOSITE_VALUE_RULE, PERSISTENT_CAPTURE_RULE, enclosingFunction, isAssignmentOperator, isCompositeKind, isSetupFunction } from './value-semantics.ts';
 import {
   behaviorValueType, checkParameters, literalValue, moduleConstant, moduleLiteral, numberLiteral, requireArity, requireDomain,
   staticCallee, staticReference, unparenthesize,
@@ -575,6 +576,7 @@ export class BehaviorBody {
 
   private binary(node: ts.BinaryExpression): Operand {
     const operator = node.operatorToken.kind;
+    if (isAssignmentOperator(operator)) this.checkAssignment(node);
     const inequality = operator === ts.SyntaxKind.ExclamationEqualsEqualsToken || operator === ts.SyntaxKind.ExclamationEqualsToken;
     const equality = inequality || operator === ts.SyntaxKind.EqualsEqualsEqualsToken || operator === ts.SyntaxKind.EqualsEqualsToken;
     if (!equality && operator !== ts.SyntaxKind.PlusToken && operator !== ts.SyntaxKind.AsteriskToken) {
@@ -592,6 +594,11 @@ export class BehaviorBody {
     if (equality) {
       requireDomain(this.source, node.right, right.type, left.type);
       if (left.type === 'unit') return this.source.missing(node, 'producer/equality', 'Unit equality needs a defined comparison domain.');
+      if (isCompositeKind(this.source.data.get(left.type)?.kind)) {
+        return this.source.invalid(node, 'PUI_COMPOSITE_OPERATOR_EQUALITY',
+          'Operator equality on a record, presence or tagged value compares identity when the same source runs as JavaScript. Use equals(left, right) for structural comparison.',
+          COMPOSITE_VALUE_RULE);
+      }
       op = 'equal';
       type = 'bool';
     } else if (operator === ts.SyntaxKind.PlusToken && left.type === 'text' && right.type === 'text') {
@@ -605,6 +612,35 @@ export class BehaviorBody {
     }
     const value: Value = { kind: 'binary', op, left: this.flow.value(left), right: this.flow.value(right) };
     return { type, value: inequality ? { kind: 'not', value } : value };
+  }
+
+  private checkAssignment(node: ts.BinaryExpression): void {
+    const target = unparenthesize(node.left);
+    if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
+      this.source.invalid(node, 'PUI_COMPOSITE_MUTATION',
+        'Composite values are immutable. Construct a new value and write it to declared state instead of assigning to a member or element.',
+        COMPOSITE_VALUE_RULE);
+    }
+    if (!ts.isIdentifier(target)) return;
+    const declaration = this.source.symbol(target).valueDeclaration;
+    if (!declaration || !ts.isVariableDeclaration(declaration)) return;
+    const owner = enclosingFunction(declaration);
+    if (enclosingFunction(node) === owner) return;
+    if (owner === undefined || isSetupFunction(owner)) {
+      this.source.invalid(node, 'PUI_PERSISTENT_CAPTURE',
+        `Binding ${target.text} outlives this invocation and is written from another closure. Declare it with def.state and write it through run.set or task.set.`,
+        PERSISTENT_CAPTURE_RULE);
+    }
+  }
+
+  private equals(node: ts.CallExpression): Operand {
+    requireArity(this.source, node, 2);
+    const first = this.widen(this.expression(node.arguments[0]!));
+    const left = immediate(node.arguments[1]!) ? first : this.flow.retain(node.arguments[0]!, first);
+    const right = this.widen(this.expression(node.arguments[1]!));
+    requireDomain(this.source, node.arguments[1]!, right.type, left.type);
+    if (left.type === 'unit') return this.source.missing(node, 'producer/equality', 'Unit equality needs a defined comparison domain.');
+    return { type: 'bool', value: { kind: 'binary', op: 'equal', left: this.flow.value(left), right: this.flow.value(right) } };
   }
 
   private actualArguments(call: ts.CallExpression, offset: number, params: readonly ValueType[]): Value[] {
@@ -715,6 +751,7 @@ export class BehaviorBody {
     if (!staticCallee(this.source, callee)) {
       return this.source.missing(callee, 'producer/call-receiver', 'This call needs a checked callable and receiver evaluation.');
     }
+    if (this.source.intrinsic(callee, 'equals')) return this.equals(node);
     if (this.source.intrinsic(callee, 'tw')) {
       requireArity(this.source, node, 1);
       const symbol = this.source.symbol(callee);
