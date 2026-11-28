@@ -7,6 +7,7 @@ import {
   installSearchStartupTrace,
   searchReadinessWasOnTime,
   readSearchDisabledNow,
+  readDocsAdapterRoleNow,
   readSearchReadyWithinBudget,
   traceSearchGetter,
   type SearchGetterSample,
@@ -856,6 +857,91 @@ it('retains absence, disabled and unique-element semantics in the immediate DOM 
   expect(read).toThrow('Search open command must be unique');
   expect(querySelectorAll).toHaveBeenCalledWith(
     'site-search [data-projection-generation-state="active"] [data-open-modal]'
+  );
+});
+
+describe('Docs adapter native role sampling', () => {
+  function harness() {
+    let role: string | null = 'combobox';
+    const nodes: Record<'header' | 'owner' | 'trigger', Array<{ isConnected: boolean }>> = {
+      header: [],
+      owner: [],
+      trigger: [],
+    };
+    const header = { isConnected: true, querySelectorAll: vi.fn(() => nodes.owner) };
+    const owner = {
+      isConnected: true,
+      closest: vi.fn((): unknown => header),
+      querySelectorAll: vi.fn(() => nodes.trigger),
+    };
+    const trigger = {
+      isConnected: true,
+      closest: vi.fn((selector: string): unknown =>
+        selector === '[data-adapter-select]' ? owner : header
+      ),
+      getAttribute: vi.fn((name: string) => (name === 'role' ? role : null)),
+    };
+    nodes.header.push(header);
+    nodes.owner.push(owner);
+    nodes.trigger.push(trigger);
+    const querySelectorAll = vi.fn(() => nodes.header);
+    const read = runInNewContext(`(${readDocsAdapterRoleNow.toString()})`, {
+      document: { querySelectorAll },
+    });
+    return {
+      header,
+      owner,
+      trigger,
+      nodes,
+      querySelectorAll,
+      read,
+      role: (value: string | null) => (role = value),
+    };
+  }
+
+  it('transports one immediate native read with the exact authored owner chain', () => {
+    const h = harness();
+    expect(h.read()).toBe('combobox');
+    expect(h.querySelectorAll).toHaveBeenCalledWith('[data-docs-site-header]');
+    expect(h.header.querySelectorAll).toHaveBeenCalledWith('[data-adapter-select]');
+    expect(h.owner.querySelectorAll).toHaveBeenCalledWith('[data-site-select-trigger]');
+    expect(h.trigger.getAttribute).toHaveBeenCalledTimes(1);
+    expect(h.trigger.getAttribute).toHaveBeenCalledWith('role');
+    h.role(null);
+    expect(h.read()).toBeNull();
+    h.role('button');
+    expect(h.read()).toBe('button');
+    expect(readDocsAdapterRoleNow.toString()).not.toMatch(/\b__name\s*\(/);
+  });
+
+  it.each(['header', 'owner', 'trigger'] as const)('rejects duplicate %s ownership', (part) => {
+    const h = harness();
+    h.nodes[part].push({ ...h[part] });
+    expect(h.read).toThrow(/must be unique/);
+    expect(h.trigger.getAttribute).not.toHaveBeenCalled();
+  });
+
+  it.each(['header', 'owner', 'trigger'] as const)(
+    'keeps missing and disconnected %s unavailable',
+    (part) => {
+      const h = harness();
+      h[part].isConnected = false;
+      expect(h.read()).toBeNull();
+      h[part].isConnected = true;
+      h.nodes[part].length = 0;
+      expect(h.read()).toBeNull();
+      expect(h.trigger.getAttribute).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['owner', 'trigger'] as const)(
+    'rejects a foreign nearest %s even if its trigger claims readiness',
+    (part) => {
+      const h = harness();
+      h[part].closest.mockReturnValue(null);
+      expect(h.read()).toBeNull();
+      expect(h.trigger.getAttribute).not.toHaveBeenCalled();
+    }
   );
 });
 
