@@ -95,7 +95,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/scheduled-search/runtime
       PUI_SEARCH_SCHEDULE_DIAGNOSTICS: '1'
     steps:
       - name: Prepare evidence retention before setup
@@ -150,6 +149,8 @@ jobs:
           FONT_EVIDENCE_DIR: ${{ runner.temp }}/scheduled-search/fonts
         run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
       - name: Execute the original six cases without changing any deadline
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/scheduled-search/runtime
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=10s 600s \
