@@ -156,6 +156,7 @@ function mockedCase(
     setDefaultTimeout: vi.fn(),
     on: vi.fn(),
     clock: { setFixedTime: vi.fn() },
+    addInitScript: vi.fn(),
     goto: vi.fn(async () => {
       if (options.navigationFailure) throw options.navigationFailure;
       return { status: () => 200 };
@@ -170,32 +171,35 @@ function mockedCase(
   };
   const context = { newPage: vi.fn(async () => page), route: vi.fn(), close: vi.fn() };
   const browser = { newContext: vi.fn(async () => context), version: () => 'browser fixture only' };
-  const run = execute(`${statements(['captureFailureDiagnostics', 'runCase'])}; runCase;`, {
-    browser,
-    output: '/test-only',
-    focusDiagnostics: false,
-    path,
-    createHash,
-    writeFile: async (file: string, value: string) => {
-      diagnosticFiles.set(file, value);
-    },
-    readFile: async (file: string) =>
-      options.imageBytes ? options.imageBytes(file) : Buffer.from('not-a-real-screenshot'),
-    revision: 'a'.repeat(40),
-    tree: 'b'.repeat(40),
-    baseUrl: 'http://127.0.0.1:9999',
-    HOST_CLOCK: '2026-10-10T12:00:00Z',
-    RUNTIME_LABELS: { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' },
-    routeFor: manifest.routeFor,
-    references: () => ({ comparison: 'pending' }),
-    process: { env: { PUI_FINF_PRESET_CHECK: 'failure' } },
-    writeJson: async (file: string, value: unknown) => {
-      receipts.set(file, value);
-    },
-    expect,
-    URL,
-    Error,
-  }) as (testCase: unknown) => Promise<void>;
+  const run = execute(
+    `${statements(['installFixedHostDate', 'captureFailureDiagnostics', 'runCase'])}; runCase;`,
+    {
+      browser,
+      output: '/test-only',
+      focusDiagnostics: false,
+      path,
+      createHash,
+      writeFile: async (file: string, value: string) => {
+        diagnosticFiles.set(file, value);
+      },
+      readFile: async (file: string) =>
+        options.imageBytes ? options.imageBytes(file) : Buffer.from('not-a-real-screenshot'),
+      revision: 'a'.repeat(40),
+      tree: 'b'.repeat(40),
+      baseUrl: 'http://127.0.0.1:9999',
+      HOST_CLOCK: '2026-10-10T12:00:00Z',
+      RUNTIME_LABELS: { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' },
+      routeFor: manifest.routeFor,
+      references: () => ({ comparison: 'pending' }),
+      process: { env: { PUI_FINF_PRESET_CHECK: 'failure' } },
+      writeJson: async (file: string, value: unknown) => {
+        receipts.set(file, value);
+      },
+      expect,
+      URL,
+      Error,
+    }
+  ) as (testCase: unknown) => Promise<void>;
   const testCase = {
     id: `shadcn-${options.component ?? 'form'}`,
     group: options.component === 'popover' ? 'disclosure-overlays' : 'forms',
@@ -211,6 +215,100 @@ function mockedCase(
 }
 
 describe('Finf representative evidence harness, no native browser', () => {
+  it('installs the fixed civil date before navigation without replacing native clocks', async () => {
+    const fixture = mockedCase();
+    await fixture.run();
+    expect(fixture.page.clock.setFixedTime).not.toHaveBeenCalled();
+    expect(fixture.page.addInitScript).toHaveBeenCalledOnce();
+    expect(fixture.page.addInitScript.mock.invocationCallOrder[0]).toBeLessThan(
+      fixture.page.goto.mock.invocationCallOrder[0]!
+    );
+    const [install, date] = fixture.page.addInitScript.mock.calls[0]!;
+    expect(date).toBe('2026-10-10T12:00:00Z');
+    const context = vm.createContext({});
+    vm.runInContext(`(${install.toString()})(${JSON.stringify(date)})`, context);
+    expect(vm.runInContext('new Date().toISOString()', context)).toBe('2026-10-10T12:00:00.000Z');
+  });
+
+  it('fixes no-argument Date construction and calls while preserving explicit dates and subclasses', () => {
+    const fixed = Date.parse('2026-10-10T12:00:00Z');
+    const context = vm.createContext({});
+    vm.runInContext('globalThis.NativeDate = Date', context);
+    vm.runInContext(
+      transformSync(
+        `${statements(['installFixedHostDate'])}; installFixedHostDate('2026-10-10T12:00:00Z');`,
+        { loader: 'ts' }
+      ).code,
+      context
+    );
+    expect(vm.runInContext('Date.now()', context)).toBe(fixed);
+    expect(vm.runInContext('new Date().getTime()', context)).toBe(fixed);
+    expect(vm.runInContext('Date()', context)).toBe(new Date(fixed).toString());
+    expect(vm.runInContext('Date(0)', context)).toBe(new Date(fixed).toString());
+    expect(vm.runInContext('new Date(0).getTime()', context)).toBe(0);
+    expect(vm.runInContext('new Date(2024, 1, 29).getTime()', context)).toBe(
+      new Date(2024, 1, 29).getTime()
+    );
+    expect(vm.runInContext('new Date("2024-01-02T03:04:05Z").toISOString()', context)).toBe(
+      '2024-01-02T03:04:05.000Z'
+    );
+    expect(vm.runInContext('Number.isNaN(new Date(undefined).getTime())', context)).toBe(true);
+    expect(
+      vm.runInContext(
+        'Date.parse === NativeDate.parse && Date.UTC === NativeDate.UTC && Date.prototype === NativeDate.prototype',
+        context
+      )
+    ).toBe(true);
+    expect(
+      vm.runInContext(
+        'class ChildDate extends Date {}; const value = new ChildDate(); value instanceof ChildDate && value instanceof Date && value.getTime() === Date.now()',
+        context
+      )
+    ).toBe(true);
+  });
+
+  it('preserves timer, animation frame, performance and locale identities', () => {
+    const native = {
+      setTimeout: vi.fn(),
+      clearTimeout: vi.fn(),
+      setInterval: vi.fn(),
+      clearInterval: vi.fn(),
+      requestAnimationFrame: vi.fn(),
+      cancelAnimationFrame: vi.fn(),
+      requestIdleCallback: vi.fn(),
+      cancelIdleCallback: vi.fn(),
+      performance: { now: vi.fn(() => 41), timeOrigin: 123 },
+      Intl,
+    };
+    const context = vm.createContext({ ...native });
+    vm.runInContext(
+      transformSync(
+        `${statements(['installFixedHostDate'])}; installFixedHostDate('2026-10-10T12:00:00Z');`,
+        { loader: 'ts' }
+      ).code,
+      context
+    );
+    for (const [name, original] of Object.entries(native)) expect(context[name]).toBe(original);
+    expect(context.performance.now()).toBe(41);
+    expect(context.Intl.DateTimeFormat).toBe(Intl.DateTimeFormat);
+    for (const value of Object.values(native))
+      if (typeof value === 'function') expect(value).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid host date without replacing Date', () => {
+    const context = vm.createContext({});
+    vm.runInContext('globalThis.NativeDate = Date', context);
+    expect(() =>
+      vm.runInContext(
+        transformSync(`${statements(['installFixedHostDate'])}; installFixedHostDate('invalid');`, {
+          loader: 'ts',
+        }).code,
+        context
+      )
+    ).toThrow('Invalid host date: invalid');
+    expect(vm.runInContext('Date === NativeDate', context)).toBe(true);
+  });
+
   it('registers the existing suite with one official owner and the original five representative groups plus four reservation cases and separately owned suites', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
     expect(manifest.cases).toHaveLength(42);
@@ -1501,6 +1599,35 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
       expect(f.nativeFocus).toHaveBeenCalledTimes(300);
       expect(trace.events).toHaveLength(256);
       expect(trace.dropped).toBeGreaterThan(0);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('retains actual input and focus after hydration exhausts the attribute record capacity', async () => {
+    const f = fixture();
+    try {
+      for (let index = 0; index < 300; index += 1)
+        f.option.setAttribute('data-focused', `before-${index}`);
+      await f.window.happyDOM.waitUntilComplete();
+      f.option.dispatchEvent(
+        new f.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+      );
+      f.option.focus();
+      for (let index = 0; index < 300; index += 1)
+        f.option.setAttribute('data-focused', `after-${index}`);
+      await f.window.happyDOM.waitUntilComplete();
+      const trace = f.probe.stop();
+      expect(f.nativeFocus).toHaveBeenCalledOnce();
+      expect(f.document.activeElement).toBe(f.option);
+      expect(trace.events).toHaveLength(256);
+      expect(trace.dropped).toBeGreaterThan(0);
+      expect(
+        trace.events
+          .filter((event: any) => event.kind !== 'attribute-delivery')
+          .map((event: any) => event.kind)
+      ).toEqual(['keydown', 'native-focus-call', 'focusin', 'native-focus-return']);
+      expect(trace.events.some((event: any) => event.current === 'after-299')).toBe(true);
     } finally {
       f.close();
     }

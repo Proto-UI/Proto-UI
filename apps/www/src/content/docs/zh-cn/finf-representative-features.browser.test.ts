@@ -30,6 +30,22 @@ const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2:
 const popoverTriggerName = (family: Family) =>
   family === 'bootstrap-2-3-2' ? 'Click to toggle popover' : 'Open popover';
 const HOST_CLOCK = '2026-10-10T12:00:00Z';
+function installFixedHostDate(isoDate: string) {
+  const NativeDate = globalThis.Date;
+  const timestamp = NativeDate.parse(isoDate);
+  if (!Number.isFinite(timestamp)) throw new Error(`Invalid host date: ${isoDate}`);
+  const now = () => timestamp;
+  // Freeze the calendar's civil date only. Playwright's Clock also replaces rAF,
+  // performance and timers, serializing frame callbacks through its timer queue.
+  // Native interaction and animation deadlines must keep their native scheduling.
+  globalThis.Date = new Proxy(NativeDate, {
+    apply: () => new NativeDate(timestamp).toString(),
+    construct: (target, args, newTarget) =>
+      Reflect.construct(target, args.length ? args : [timestamp], newTarget),
+    get: (target, property, receiver) =>
+      property === 'now' ? now : Reflect.get(target, property, receiver),
+  });
+}
 const RECORDS = {
   form: 'internal/records/2026-10-10-finf-form-upstream-paint.md',
   calendar: 'internal/records/2026-10-10-calendar-five-state-reference-correction.md',
@@ -812,7 +828,11 @@ function createCalendarFocusEventProbe(root: Element) {
   const record = (kind: string, element: Element, detail: Record<string, unknown> = {}) => {
     if (events.length >= 256) {
       dropped += 1;
-      return;
+      // Hydration can fill the buffer before the journey's first input. Prefer
+      // evicting an older attribute delivery so actual input/focus stays visible.
+      const attribute = events.findIndex((event) => event.kind === 'attribute-delivery');
+      if (attribute < 0) return;
+      events.splice(attribute, 1);
     }
     const ancestors: Array<ReturnType<typeof describe>> = [];
     for (
@@ -1333,8 +1353,8 @@ async function runCase(testCase: Case) {
     return request.continue();
   });
   try {
-    // Locale and fixed clock belong to this host fixture, never to the prototype.
-    await page.clock.setFixedTime(HOST_CLOCK);
+    // Locale and fixed civil date belong to this host fixture, never to the prototype.
+    await page.addInitScript(installFixedHostDate, HOST_CLOCK);
     const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
     expect(await previewer.count()).toBe(1);
