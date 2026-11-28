@@ -161,6 +161,7 @@ async function observeMatrixWait(
   wait: () => Promise<unknown>
 ): Promise<void> {
   await persistReadinessDiagnostic(page, phase, 'started');
+  matrixDiagnostics.get(page)?.startupDiagnostic?.phaseStarted(phase);
   try {
     await wait();
   } catch (error) {
@@ -216,6 +217,9 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
       // This suite launches and exclusively owns the Browser. Browser-wide
       // tracing/counters require their own opt-in in addition to page profiling.
       ownedBrowser: process.env.PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC === '1' ? browser : undefined,
+      ...(process.env.PROTO_UI_MATRIX_TRACE_LATE === '1'
+        ? { traceTiming: { afterPhase: 'inited-count' as const, delayMs: 60_000 } }
+        : {}),
     });
   }
   await persistReadinessDiagnostic(page, 'route-open', 'started');

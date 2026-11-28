@@ -1,17 +1,20 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Browser, CDPSession, Page, Request, Response } from 'playwright-core';
-import { startMatrixBrowserDiagnostic } from './demo-matrix-browser-diagnostic';
+import {
+  startMatrixBrowserDiagnostic,
+  type MatrixTraceTiming,
+} from './demo-matrix-browser-diagnostic';
 
-// The original case still owns its 180s deadline. Its existing finally stops
-// capture earlier; this cap must not truncate navigation plus the 60s init wait.
+// Initialization and the case retain their original acceptance deadlines.
+// This independent diagnostic owner remains capped at 180s from setup.
 const PROFILE_WINDOW_MS = 180_000;
 // A blocked renderer can prevent the final stop from returning any profile.
 // Retain earlier bounded chunks without ending the owner's diagnostic window.
 const PROFILE_CHUNK_MS = 20_000;
 const COMMAND_LIMIT_MS = 2_000;
 const ROW_LIMIT = 200;
-const inert = { finish: async () => {} };
+const inert = { finish: async () => {}, phaseStarted: (_phase: string, _at?: number) => {} };
 
 async function bounded<T>(pending: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -42,6 +45,7 @@ export async function startMatrixStartupDiagnostic(
     origin: string;
     phase(): string;
     ownedBrowser?: Browser;
+    traceTiming?: MatrixTraceTiming;
   }
 ) {
   if (!options.enabled) return inert;
@@ -356,5 +360,14 @@ export async function startMatrixStartupDiagnostic(
   );
   heartbeat = setInterval(snapshot, 5_000);
   if (setupCompleted) scheduleChunk();
-  return { finish: () => finish('owner-finish') };
+  return {
+    finish: () => finish('owner-finish'),
+    phaseStarted(phase: string) {
+      const at = Date.now();
+      if (finished) return;
+      void browserDiagnostic.then((diagnostic) => {
+        if (!finished) diagnostic.phaseStarted(phase, at);
+      });
+    },
+  };
 }

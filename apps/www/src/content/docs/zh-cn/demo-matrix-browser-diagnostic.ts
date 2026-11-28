@@ -9,8 +9,10 @@ const TRACE_WINDOW_MS = 20_000;
 const TRACE_LIMIT_BYTES = 16 * 1024 * 1024;
 const TRACE_CHUNK_LIMIT = 256;
 // The 6ccb receipt hit the chunk cap with timeline events before any profile
-// facts were retained. Keep one early CPU-only window; never restart it.
+// facts were retained. Keep one CPU-only window; never restart it.
 const TRACE_CATEGORIES = ['disabled-by-default-v8.cpu_profiler'];
+
+export type MatrixTraceTiming = { afterPhase: 'inited-count'; delayMs: number };
 
 async function bounded<T>(work: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -133,10 +135,19 @@ export async function startMatrixBrowserDiagnostic(
     sourceSha: string;
     caseName: string;
     phase(): string;
+    traceTiming?: MatrixTraceTiming;
   }
 ) {
-  if (!options.enabled) return { finish: async () => {} };
+  if (!options.enabled)
+    return { finish: async () => {}, phaseStarted: (_phase: string, _at?: number) => {} };
   const startedAt = Date.now();
+  const traceTiming = options.traceTiming;
+  const validTiming =
+    traceTiming === undefined ||
+    (traceTiming?.afterPhase === 'inited-count' &&
+      Number.isSafeInteger(traceTiming.delayMs) &&
+      traceTiming.delayMs >= 0 &&
+      traceTiming.delayMs <= OWNER_LIMIT_MS - TRACE_WINDOW_MS);
   const directory = join(options.directory, 'demo-matrix', 'browser-diagnostic');
   let finished = false;
   let finishReason: string | null = null;
@@ -144,6 +155,7 @@ export async function startMatrixBrowserDiagnostic(
   let deadline: ReturnType<typeof setTimeout> | undefined;
   let cpuTimer: ReturnType<typeof setTimeout> | undefined;
   let traceTimer: ReturnType<typeof setTimeout> | undefined;
+  let traceStartTimer: ReturnType<typeof setTimeout> | undefined;
   let traceFinishPromise: Promise<void> | undefined;
   let cpuWork: Promise<void> | undefined;
   let cpuSession: CDPSession | undefined;
@@ -165,8 +177,13 @@ export async function startMatrixBrowserDiagnostic(
     attribution: 'process id/type only; neither JavaScript-only time nor a function diagnosis',
   };
   const trace = {
-    state: 'starting',
+    state: traceTiming === undefined ? 'starting' : 'waiting-for-phase',
     stopReason: null as 'checkpoint' | 'owner-finish' | 'diagnostic-deadline' | null,
+    requestedTiming: traceTiming ?? null,
+    phaseStartedAt: null as string | null,
+    phaseObservedAt: null as string | null,
+    scheduledStartAt: null as string | null,
+    startRequestedAt: null as string | null,
     startAcknowledgedAt: null as string | null,
     stopRequestedAt: null as string | null,
     stopAcknowledgedAt: null as string | null,
@@ -184,6 +201,11 @@ export async function startMatrixBrowserDiagnostic(
     projectionTruncated: false,
     bufferUsage: null as ObjectValue | null,
   };
+  if (!validTiming) {
+    traceRetired = true;
+    trace.state = 'unavailable';
+    trace.setupError = trace.error = 'Invalid delayed trace timing';
+  }
   let completeTrace: () => void = () => {};
   const traceComplete = new Promise<void>((resolve) => (completeTrace = resolve));
   const header = () => ({
@@ -314,6 +336,7 @@ export async function startMatrixBrowserDiagnostic(
       traceRetired = true;
       trace.stopReason = reason;
       clearTimeout(traceTimer);
+      clearTimeout(traceStartTimer);
       await endTrace().catch((error) => {
         trace.stopError = String(error);
         trace.error ??= trace.stopError;
@@ -382,6 +405,7 @@ export async function startMatrixBrowserDiagnostic(
     traceSession.on('Tracing.bufferUsage', bufferUsage);
     traceSession.on('Tracing.tracingComplete', tracingComplete);
     traceStartRequested = true;
+    trace.startRequestedAt = new Date().toISOString();
     await traceSession.send('Tracing.start', {
       transferMode: 'ReportEvents',
       bufferUsageReportingInterval: CPU_INTERVAL_MS,
@@ -402,6 +426,59 @@ export async function startMatrixBrowserDiagnostic(
     traceTimer = setTimeout(() => void finishTrace('checkpoint'), TRACE_WINDOW_MS);
     snapshot();
   };
+  const beginTrace = async () => {
+    if (finished || traceRetired) return;
+    trace.state = 'starting';
+    await bounded(setupTrace(), 'Browser tracing setup').catch((error) => {
+      if (finished || traceRetired) return;
+      traceRetired = true;
+      traceAccepting = false;
+      trace.state = 'unavailable';
+      trace.setupError = String(error);
+      trace.error ??= trace.setupError;
+      removeTraceListeners();
+      void detach(traceSession);
+    });
+    if (!finished) snapshot();
+  };
+  const phaseStarted = (phase: string, at = Date.now()) => {
+    if (
+      finished ||
+      traceRetired ||
+      !traceTiming ||
+      trace.phaseStartedAt !== null ||
+      phase !== traceTiming.afterPhase ||
+      options.phase() !== phase
+    )
+      return;
+    if (!Number.isFinite(at) || at < startedAt || at > Date.now()) {
+      traceRetired = true;
+      trace.state = 'unavailable';
+      trace.setupError = trace.error = 'Invalid initialization phase clock';
+      snapshot();
+      return;
+    }
+    trace.phaseStartedAt = new Date(at).toISOString();
+    trace.phaseObservedAt = new Date().toISOString();
+    trace.scheduledStartAt = new Date(at + traceTiming.delayMs).toISOString();
+    trace.state = 'waiting-for-delay';
+    traceStartTimer = setTimeout(
+      () => {
+        if (finished || traceRetired || Date.now() - startedAt >= OWNER_LIMIT_MS) return;
+        if (options.phase() !== traceTiming.afterPhase) {
+          traceRetired = true;
+          trace.state = 'unavailable';
+          trace.setupError = trace.error =
+            'The owner left the requested phase before delayed tracing';
+          snapshot();
+          return;
+        }
+        void beginTrace();
+      },
+      Math.max(0, at + traceTiming.delayMs - Date.now())
+    );
+    snapshot();
+  };
   snapshot();
   await Promise.all([
     bounded(setupCpu(), 'Process CPU setup').catch((error) => {
@@ -410,15 +487,7 @@ export async function startMatrixBrowserDiagnostic(
       cpu.error = String(error);
       void detach(cpuSession);
     }),
-    bounded(setupTrace(), 'Browser tracing setup').catch((error) => {
-      traceRetired = true;
-      traceAccepting = false;
-      trace.state = 'unavailable';
-      trace.setupError = String(error);
-      trace.error ??= trace.setupError;
-      removeTraceListeners();
-      void detach(traceSession);
-    }),
+    traceTiming === undefined ? beginTrace() : Promise.resolve(),
   ]);
   snapshot();
   const finish = (reason: 'owner-finish' | 'diagnostic-deadline') =>
@@ -443,5 +512,5 @@ export async function startMatrixBrowserDiagnostic(
     () => void finish('diagnostic-deadline'),
     Math.max(0, OWNER_LIMIT_MS - (Date.now() - startedAt))
   );
-  return { finish: () => finish('owner-finish') };
+  return { finish: () => finish('owner-finish'), phaseStarted };
 }
