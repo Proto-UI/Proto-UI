@@ -444,11 +444,20 @@ export function createStyleGenerationOwner() {
 
 async function spawnServer(
   readyRoutes: readonly string[],
-  generation: ReturnType<typeof createStyleGenerationOwner>
+  generation: ReturnType<typeof createStyleGenerationOwner>,
+  mobilePreparedInputs?: { receiptFile: string; expectedRevision: string }
 ): Promise<string> {
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
-  await generation.run(executable);
+  if (mobilePreparedInputs) {
+    // Other evidence jobs copy the historical harness closure without Mobile
+    // scripts. Acquire this purpose-bound verifier only for the explicit opt-in.
+    const verifier = new URL('../../../../scripts/mobile-prepared-inputs.mjs', import.meta.url);
+    const { verifyMobileInputs } = await import(/* @vite-ignore */ verifier.href);
+    await verifyMobileInputs({ root: process.cwd(), ...mobilePreparedInputs });
+  } else {
+    await generation.run(executable);
+  }
   if (generation.stopped) throw new Error('Documentation server startup was cancelled.');
   devServer = spawn(
     executable,
@@ -486,11 +495,16 @@ async function spawnServer(
   return url;
 }
 
-export async function startServer(readyRouteOrRoutes: string | readonly string[]): Promise<string> {
+export async function startServer(
+  readyRouteOrRoutes: string | readonly string[],
+  mobilePreparedInputs?: { receiptFile: string; expectedRevision: string }
+): Promise<string> {
   const readyRoutes =
     typeof readyRouteOrRoutes === 'string' ? [readyRouteOrRoutes] : readyRouteOrRoutes;
   const externalBaseUrl = process.env.PROTO_UI_BROWSER_BASE_URL?.replace(/\/$/, '');
   if (externalBaseUrl) {
+    if (mobilePreparedInputs)
+      throw new Error('Prepared Mobile inputs require an owned source server.');
     for (const readyRoute of readyRoutes) await waitForServer(`${externalBaseUrl}${readyRoute}`);
     return externalBaseUrl;
   }
@@ -504,7 +518,7 @@ export async function startServer(readyRouteOrRoutes: string | readonly string[]
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await spawnServer(readyRoutes, generation);
+      return await spawnServer(readyRoutes, generation, mobilePreparedInputs);
     } catch (error) {
       if (generation.stopped) throw error;
       lastError = error;
@@ -565,12 +579,17 @@ async function stopDevServer(): Promise<void> {
   }
 }
 
-export async function launchBrowser(): Promise<Browser> {
+export async function launchBrowser(
+  options: { captureOwnsSignals?: boolean } = {}
+): Promise<Browser> {
   return chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
     chromiumSandbox: true,
     args: ['--disable-dev-shm-usage'],
+    ...(options.captureOwnsSignals
+      ? { handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false }
+      : {}),
   });
 }
 

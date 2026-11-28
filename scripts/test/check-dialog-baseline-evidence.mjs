@@ -17,11 +17,15 @@ export const PROBE_HASHES = {
 // Current input binding is deliberately NOT historical calibration. This full
 // closure may produce a new paired artifact, but verifyExpectedBaseline below
 // must continue rejecting it until its actual evidence is independently reviewed.
+// Mobile's optional preparation/signal owner changes this current harness input;
+// its fingerprint is not a renewal of the historical calibration above.
+// The Dialog probe body already exists unchanged on main; its previous current
+// fingerprint was stale. No native assertion or historical oracle changes here.
 export const CURRENT_PROBE_HASHES = {
   'subject/apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts':
-    '50f13884d5081c13d126f06c5297a6b98c1c185ea2f8b5e0af46187bacd35b0e',
+    'fcf6733180958e32de62f89d5101799ff3d335839bd5bc3ee0e2fa4fb7abb651',
   'subject/apps/www/src/content/docs/zh-cn/browser-harness.ts':
-    '3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6',
+    '772d33b1f04ece0db636a4cf2c77cb1a080a1747837f8177b227b7d4bdabab95',
   'subject/scripts/test/server-readiness.mjs':
     '4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda',
 };
