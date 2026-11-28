@@ -1,0 +1,38 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={['docs-steps', className]} data-docs-steps>
+  <slot />
+</div>
+
+<style is:global>
+  .docs-steps {
+    counter-reset: docs-step;
+    position: relative;
+    margin-block: 1.5rem 2rem;
+    padding-inline-start: 2rem;
+    border-inline-start: 1px solid color-mix(in oklab, var(--color-border) 75%, transparent);
+  }
+
+  [data-site-library-family='brutalist'] .docs-steps {
+    border-inline-start: 2px solid var(--site-brutalist-border, #000);
+  }
+
+  [data-site-library-family='bootstrap-2-3-2'] .docs-steps {
+    border-inline-start: 1px solid var(--site-bootstrap-border, #ddd);
+  }
+
+  .docs-steps > .docs-step + .docs-step {
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    .docs-steps {
+      padding-inline-start: 1.5rem;
+    }
+  }
+</style>

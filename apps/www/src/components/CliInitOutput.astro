@@ -1,10 +1,26 @@
 ---
 import output from '../generated/cli-init.generated.json';
 import StaticCodeBlock from './StaticCodeBlock.astro';
-import CodeFileBrowser from './CodeFileBrowser.astro';
+import CodePanel from './PrototypePreviewer/CodePanel.astro';
+
 const zh = Astro.url.pathname.startsWith('/zh-cn/');
-const files = output.entries.filter((entry) => entry.kind === 'file');
+const rawFiles = output.entries.filter((entry) => entry.kind === 'file');
+const initialPath = 'proto-ui/config.json';
+const files = [
+  ...rawFiles.filter((file) => file.path === initialPath),
+  ...rawFiles.filter((file) => file.path !== initialPath),
+];
+const emptyDirectories = output.entries
+  .filter(
+    (entry) =>
+      entry.kind === 'directory' &&
+      !output.entries.some(
+        (other) => other.path !== entry.path && other.path.startsWith(`${entry.path}/`)
+      )
+  )
+  .map((entry) => entry.path);
 const sourceCommand = 'node apps/www/scripts/generate-cli-init-docs.mjs';
+const shortName = (filePath: string) => filePath.split('/').at(-1) ?? filePath;
 ---
 
 <section data-cli-init-output data-cli-version={output.cli.version}>
@@ -15,13 +31,81 @@ const sourceCommand = 'node apps/www/scripts/generate-cli-init-docs.mjs';
         : `The following paths and file contents are generated during this site build by running the repository CLI ${output.cli.version}, not a verified stable 0.2.0 output. Empty directories mean init has not added components yet.`
     }
   </p>
-  <div data-cli-generated-files>
-    <CodeFileBrowser id="cli-init-generated" standalone
-      files={files.map((file) => ({ name: file.path, code: file.content!, lang: file.path.endsWith('.json') ? 'json' : 'css' }))}
-      directories={output.entries.filter((entry) => entry.kind === 'directory').map((entry) => entry.path)}
-      initialFile="proto-ui/config.json" label={zh ? 'CLI 生成的文件' : 'CLI generated files'}
-      filesLabel={zh ? '文件' : 'Files'} copyLabel={zh ? '复制' : 'Copy'} emptyLabel={zh ? '空目录' : 'empty'} />
+
+  <div class="cli-init-files" data-cli-generated-files data-cli-init-tabs>
+    <div class="cli-init-files__strip" data-code-toolbar>
+      <nav
+        class="cli-init-files__tabs"
+        aria-label={zh ? 'CLI 生成的文件' : 'CLI generated files'}
+        data-cli-file-tabs
+      >
+        {
+          files.map((file, index) => (
+            <a
+              id={`cli-init-generated-file-tab-${index}`}
+              href={`#cli-init-generated-file-panel-${index}`}
+              data-cli-file-tab
+              data-cli-file-path={file.path}
+              data-code-file-path={file.path}
+              aria-controls={`cli-init-generated-file-panel-${index}`}
+              data-cli-file-selected={index === 0 ? 'true' : undefined}
+              title={file.path}
+            >
+              {shortName(file.path)}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    {
+      files.map((file, index) => {
+        const lineCount = (file.content ?? '').split('\n').length;
+        return (
+          <section
+            id={`cli-init-generated-file-panel-${index}`}
+            class="cli-init-files__panel"
+            role="region"
+            data-cli-file-panel
+            data-cli-file-path={file.path}
+            aria-labelledby={`cli-init-generated-file-tab-${index}`}
+            hidden={index !== 0}
+          >
+            <CodePanel
+              id={`cli-init-generated-code-${index}`}
+              fileIndex={index}
+              panelRole="region"
+              framed={true}
+              collapsible={lineCount > 24}
+              title={file.path}
+              scrollableTitle
+              presentation="docs"
+              scrollLimit={lineCount > 300 ? 'file' : 'unbounded'}
+              lineNumbers={true}
+              copyLabel={`${zh ? '复制' : 'Copy'} ${file.path}`}
+              code={file.content}
+              lang={file.path.endsWith('.json') ? 'json' : 'css'}
+            />
+          </section>
+        );
+      })
+    }
+
+    {
+      emptyDirectories.length > 0 && (
+        <p class="cli-init-files__empty-dirs" data-cli-empty-dirs>
+          <span>{zh ? '同时创建的空目录：' : 'Empty directories created: '}</span>
+          {emptyDirectories.map((dir, index) => (
+            <>
+              <code data-code-directory-path={dir}>{dir}/</code>
+              {index < emptyDirectories.length - 1 && (zh ? '、' : ', ')}
+            </>
+          ))}
+        </p>
+      )
+    }
   </div>
+
   <details data-cli-provenance>
     <summary>{zh ? '构建来源与复现' : 'Build provenance and reproduction'}</summary>
     <p>
@@ -41,9 +125,81 @@ const sourceCommand = 'node apps/www/scripts/generate-cli-init-docs.mjs';
     <p>CLI {output.cli.version} · SHA-256 {output.cli.sourceTreeHash}</p>
   </details>
 </section>
+
+<noscript
+  set:html={'<style>@layer base { [data-cli-init-tabs] [data-cli-file-panel][hidden] { display:block!important; } } [data-cli-init-tabs] [data-cli-file-panel] { margin-block:1rem; }</style>'}
+/>
+
+<script>
+  import { initCliInitTabs } from './cli-init-tabs-client';
+
+  initCliInitTabs(document);
+  document.addEventListener('astro:page-load', () => {
+    initCliInitTabs(document);
+  });
+</script>
+
 <style>
-  [data-cli-generated-files] {
+  .cli-init-files {
     margin-block: 1rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .cli-init-files__strip {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .cli-init-files__strip::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .cli-init-files__tabs {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+  }
+  .cli-init-files__tabs a {
+    flex: none;
+    border: 0;
+    border-radius: 0.375rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.625rem;
+    background: transparent;
+    color: var(--color-muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .cli-init-files__tabs a[aria-selected='true'] {
+    color: var(--color-foreground);
+    font-weight: 500;
+  }
+  .cli-init-files__panel {
+    margin-top: 0.5rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .cli-init-files__panel[hidden] {
+    display: none;
+  }
+  .cli-init-files__panel > :global(figure) {
+    margin: 0;
+  }
+  .cli-init-files__empty-dirs {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
   }
   summary {
     cursor: pointer;

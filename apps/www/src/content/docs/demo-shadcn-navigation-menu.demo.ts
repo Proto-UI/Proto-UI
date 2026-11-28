@@ -1,5 +1,5 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
-import type { DemoSpec, DemoNode } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoChild, DemoSpec, DemoNode } from '@/components/PrototypePreviewer/demo-types';
 
 function linkCard(href: string, title: string, description: string, current = false): DemoNode {
   return {
@@ -30,7 +30,7 @@ function linkCard(href: string, title: string, description: string, current = fa
   };
 }
 
-function triggerLabel(label: string) {
+function triggerLabel(label: string): DemoChild[] {
   return [label, { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 12 } }];
 }
 

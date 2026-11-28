@@ -51,7 +51,7 @@ export default definePrototype<FamilyTabsTriggerProps, TabsTriggerExposes>({
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'inline-flex flex-none items-center justify-center gap-2 border border-transparent px-3.5 py-1.5 text-sm font-medium text-muted-foreground select-none outline-none cursor-pointer transition-[color,box-shadow,background-color] duration-150'
+            'inline-flex flex-none items-center justify-center gap-2 whitespace-nowrap border border-transparent px-3.5 py-1.5 text-sm font-medium text-muted-foreground select-none outline-none cursor-pointer transition-[color,box-shadow,background-color] duration-150'
           )
         ),
     });

@@ -21,7 +21,7 @@ export default definePrototype<CommandDialogContentProps, CommandDialogContentEx
     // P-BRUTALIST-COMMAND-DIALOG-GEOMETRY: direct recipe, never p6 followed by p0.
     def.feedback.style.use(
       tw(
-        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] grid min-w-0 w-full max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden gap-4 rounded-none border-0 bg-background text-foreground font-sans font-medium p-0 shadow-[4px_4px_0_0_#000] outline-none duration-200'
+        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] grid min-w-0 w-full max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden gap-4 rounded-none border-0 bg-background text-foreground font-sans font-medium p-0 shadow-[4px_4px_0_0_#000] outline-none transition-none duration-200'
       )
     );
     // P-BRUTALIST-COMMAND-DIALOG-MOTION: safe unknown/reduced preference has no CSS motion.

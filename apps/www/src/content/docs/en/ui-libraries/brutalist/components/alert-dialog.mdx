@@ -19,7 +19,7 @@ Brutalist AlertDialog interrupts the user for critical or destructive confirmati
 
 ## Installation
 
-Currently available from workspace source (`@proto.ui/prototypes-brutalist`); not yet included in the 0.2.0 stable release.
+Available starting in `0.3.0-rc.1` and later releases (`@proto.ui/prototypes-brutalist`).
 
 ## Usage
 
@@ -120,8 +120,16 @@ Control dialog visibility with `open`, `openChange`, and `action`.
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
-    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
+    {
+      name: 'openChange (event)',
+      type: '{ open: boolean; reason: string | null; focusReason: string | null }',
+      default: '—',
+    },
+    {
+      name: 'openAlertDialog / close / toggle (methods)',
+      type: '(reason?: string) => void',
+      default: '—',
+    },
   ]}
 />
 

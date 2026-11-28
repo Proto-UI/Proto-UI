@@ -8,6 +8,11 @@ import * as brutalist from '@proto.ui/prototypes-brutalist/tabs';
 import * as bootstrap from '@proto.ui/prototypes-bootstrap-2-3-2/tabs';
 import * as liquid from '@proto.ui/prototypes-liquid-glass/tabs';
 import type { ProjectionFamilyId } from './projection-families';
+import {
+  applyProjectionThemeSurfaceStyle,
+  clearProjectionThemeSurfaceStyle,
+  watchProjectionThemeSurfaceStyle,
+} from './projection-theme';
 import type { RuntimeId } from './runtimes/ids';
 
 const families = { shadcn, brutalist, 'bootstrap-2-3-2': bootstrap, 'liquid-glass': liquid };
@@ -63,7 +68,14 @@ export function createRuntimeTabs(options: {
   });
   const root = element('root', rootProps(value));
   root.dataset.runtimeTabsRoot = '';
-  const list = element('list', { variant: 'line', a11yLabel: 'Runtime', loop: true });
+  const list = element('list', {
+    variant: family === 'shadcn' ? 'line' : 'default',
+    a11yLabel: 'Runtime',
+    loop: true,
+  });
+  list.style.maxWidth = '100%';
+  list.style.overflowX = 'auto';
+  list.style.scrollbarWidth = 'none';
   root.append(list);
   const panels = new Map<RuntimeId, HTMLElement>();
   const triggers = new Map<RuntimeId, RuntimeTab>();
@@ -92,6 +104,12 @@ export function createRuntimeTabs(options: {
   };
   root.addEventListener('valueChange', change);
   mount.replaceChildren(root);
+  const stopTheme =
+    family === 'shadcn'
+      ? () => {}
+      : watchProjectionThemeSurfaceStyle(family, mount, (theme) => {
+          applyProjectionThemeSurfaceStyle(root, theme);
+        });
   return {
     root,
     /** Only the local valueChange caller may carry this lease into its switch. */
@@ -220,6 +238,8 @@ export function createRuntimeTabs(options: {
       if (disposed) return;
       pendingFocus?.lease.cancel();
       disposed = true;
+      stopTheme();
+      clearProjectionThemeSurfaceStyle(root);
       root.removeEventListener('valueChange', change);
       // Return the now-empty preview shell before disconnecting all Tabs atoms.
       mount.after(panel);

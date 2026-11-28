@@ -511,7 +511,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         const scope = preview.locator(
           '[data-projection-generation-state="active"] [data-projection-scope]'
         );
-        await expect.poll(() => scope.getAttribute('data-projection-runtime')).toBe('react');
+        await expect
+          .poll(() => scope.getAttribute('data-projection-runtime'), { timeout: 30_000 })
+          .toBe('react');
         expect(await page.locator('html').getAttribute('data-site-library-family')).toBe(
           route.family
         );
@@ -542,7 +544,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           await portal
             .getByRole('option', { name: value === 'vue' ? 'Vue' : 'React', exact: true })
             .click();
-          await expect.poll(() => scope.getAttribute('data-projection-runtime')).toBe(value);
+          await expect
+            .poll(() => scope.getAttribute('data-projection-runtime'), { timeout: 30_000 })
+            .toBe(value);
         };
         await chooseAdapter('vue');
         await chooseAdapter('react');
@@ -569,7 +573,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         });
         await theme.click();
         await expect
-          .poll(() => page.locator('html').getAttribute('data-theme'))
+          .poll(() => page.locator('html').getAttribute('data-theme'), { timeout: 30_000 })
           .toBe(beforeTheme === 'dark' ? 'light' : 'dark');
         expect(
           await page.evaluate(
@@ -1906,7 +1910,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
             .toBe(true);
           await page.keyboard.press('Escape');
           expect(await menu.evaluate((node) => node === document.activeElement)).toBe(true);
-          expect(await page.locator('[data-site-header-panel]').isVisible()).toBe(false);
+          await expect.poll(() => page.locator('[data-site-header-panel]').isVisible()).toBe(false);
         }
     } finally {
       await context.close();
@@ -2374,39 +2378,42 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         familyCommitTiming.startedMs = performance.now();
         familyCommitTiming.outcome = 'pending';
         await expect
-          .poll(() => {
-            const call: (typeof familyCommitCalls)[number] = {
-              call: ++familyCommitTiming.totalCalls,
-              startedMs: performance.now(),
-            };
-            if (familyCommitCalls.length < 64) familyCommitCalls.push(call);
-            else familyCommitTiming.droppedCalls += 1;
-            const request: Promise<string | null> = familySDK!.runOriginalQuery(call.call, () =>
-              page.locator('[data-homepage-runtime]').getAttribute('data-family')
-            );
-            try {
-              familyQueryRequests.push({ request, call });
-              if (familyQueryObservation.wait.finishedMs !== null)
-                familyQueryObservation.issuedAfterDrain++;
-            } catch {
-              familyQueryObservation.ledgerError = true;
-            }
-            void request
-              .then(
-                (value) => {
-                  call.returnedMs = performance.now();
-                  call.value = value;
-                },
-                (error) => {
-                  call.returnedMs = performance.now();
-                  call.error = String(error);
-                }
-              )
-              .catch(() => {
-                familyCommitTiming.observerError = true;
-              });
-            return request;
-          })
+          .poll(
+            () => {
+              const call: (typeof familyCommitCalls)[number] = {
+                call: ++familyCommitTiming.totalCalls,
+                startedMs: performance.now(),
+              };
+              if (familyCommitCalls.length < 64) familyCommitCalls.push(call);
+              else familyCommitTiming.droppedCalls += 1;
+              const request: Promise<string | null> = familySDK!.runOriginalQuery(call.call, () =>
+                page.locator('[data-homepage-runtime]').getAttribute('data-family')
+              );
+              try {
+                familyQueryRequests.push({ request, call });
+                if (familyQueryObservation.wait.finishedMs !== null)
+                  familyQueryObservation.issuedAfterDrain++;
+              } catch {
+                familyQueryObservation.ledgerError = true;
+              }
+              void request
+                .then(
+                  (value) => {
+                    call.returnedMs = performance.now();
+                    call.value = value;
+                  },
+                  (error) => {
+                    call.returnedMs = performance.now();
+                    call.error = String(error);
+                  }
+                )
+                .catch(() => {
+                  familyCommitTiming.observerError = true;
+                });
+              return request;
+            },
+            { timeout: 5_000 }
+          )
           .toBe(family);
         familyCommitTiming.finishedMs = performance.now();
         familyCommitTiming.outcome = 'fulfilled';

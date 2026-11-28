@@ -19,7 +19,7 @@ Navigation Menu 用于构建包含可展开内容面板和原生目标链接的�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/navigation-menu` 导入组件原型并配合目标宿主 Adapter 使用：
+将于 `0.3.0-rc.1` 及后续版本中提供。可直接从 `@proto.ui/prototypes-shadcn/navigation-menu` 导入组件原型并配合目标宿主 Adapter 使用：
 
 ```ts
 import {
@@ -124,7 +124,11 @@ NavigationMenuRoot (navigation)
     { name: 'a11yLabel', type: 'string', default: "''" },
     { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
     { name: 'valueChange（事件）', type: '{ value: string; reason: string }', default: '—' },
-    { name: 'requestValue（方法）', type: '(value: string, reason?: string) => boolean', default: '—' },
+    {
+      name: 'requestValue（方法）',
+      type: '(value: string, reason?: string) => boolean',
+      default: '—',
+    },
     { name: 'close（方法）', type: '() => void', default: '—' },
   ]}
 />
@@ -178,7 +182,11 @@ NavigationMenuRoot (navigation)
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
     { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
-    { name: 'navigate（事件）', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    {
+      name: 'navigate（事件）',
+      type: '{ href: string; target: string; rel: string; modified: boolean }',
+      default: '—',
+    },
     { name: 'select（事件）', type: '{ value: string; menuValue: string }', default: '—' },
   ]}
 />

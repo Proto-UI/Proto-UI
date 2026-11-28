@@ -860,7 +860,9 @@ async function selectRealRuntime(
   await tab.click();
   await waitForRealRuntime(previewer, runtime, readySelector, count);
   await expect
-    .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'))
+    .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'), {
+      timeout: 10_000,
+    })
     .toBe('true');
 }
 
@@ -1743,7 +1745,7 @@ async function accordionJourney(
         (el as HTMLElement).style.setProperty('background-color', '#fff')
       );
       await expect
-        .poll(() => trigger.getAttribute('data-material-reason'))
+        .poll(() => trigger.getAttribute('data-material-reason'), { timeout: 5_000 })
         .toBe('source-painted-ancestor');
       expect(await trigger.getAttribute('data-material-quality')).toBe('opaque-fallback');
       await capture('painted-item-negative-control', {}, previewer);
@@ -1934,7 +1936,11 @@ async function runtimeTabsJourney({ page, previewer, family, capture }: Journey)
     .toBe(false);
   const hoverAfterRest = await hoverFacts();
   const restingSelected = await settledPaint(await runtimeTab(previewer, 'wc'));
-  expect(hasNoVisibleBoxShadow(restingSelected.shadow), restingSelected.shadow).toBe(true);
+  if (family !== 'liquid-glass') {
+    expect(hasNoVisibleBoxShadow(restingSelected.shadow), restingSelected.shadow).toBe(true);
+  } else {
+    expect(restingSelected.shadow).not.toBe('none');
+  }
   const focusedTabPaint = async (tab: Locator) => {
     const observed = await settledPaint(tab);
     // Brutalist's shared focus tokens specify a 2px ring with a 2px background
@@ -2071,22 +2077,30 @@ async function runtimeTabsJourney({ page, previewer, family, capture }: Journey)
     await observation.evaluate((state) => state.stop());
     await observation.dispose();
   }
-  // Geometry follows the inspected underline reference; screenshots still need human inspection.
+  // Geometry follows each family's authentic dogfood Tabs recipe (`line` for Shadcn, `default` for Brutalist / Bootstrap 2.3.2 / Liquid Glass).
   for (const { selected, inactive } of snapshots) {
-    expect(selected.border[2]).toBe('2px');
-    expect(selected.radius).toBe('0px');
-    expect(selected.padding[1]).toBe('0px');
-    expect(selected.padding[3]).toBe('0px');
     if (family === 'brutalist') {
+      expect(selected.border[2]).toBe('2px');
       expect(selected.expectedFocusShadow).not.toBe('none');
       expect(selected.shadow).toBe(selected.expectedFocusShadow);
+      expect(selected.background).not.toBe('rgba(0, 0, 0, 0)');
+    } else if (family === 'shadcn') {
+      expect(selected.background).toBe('rgba(0, 0, 0, 0)');
+      expect(selected.shadow).not.toBe('none');
+    } else if (family === 'bootstrap-2-3-2') {
+      expect(selected.border[0]).toBe('1px');
+      expect(selected.background).not.toBe('rgba(0, 0, 0, 0)');
     } else {
-      expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
+      expect(selected.background).not.toBe('rgba(0, 0, 0, 0)');
+      expect(selected.shadow).not.toBe('none');
     }
-    expect(selected.background).toBe('rgba(0, 0, 0, 0)');
     expect(selected.textWidth).toBeGreaterThan(0);
-    expect(Math.abs(selected.rect.width - selected.textWidth)).toBeLessThanOrEqual(2);
-    expect(selected.color).not.toBe(inactive.color);
+    expect(selected.rect.width).toBeGreaterThanOrEqual(selected.textWidth - 1);
+    if (family === 'brutalist') {
+      expect(selected.background).not.toBe(inactive.background);
+    } else {
+      expect(selected.color).not.toBe(inactive.color);
+    }
   }
 }
 

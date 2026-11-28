@@ -34,7 +34,7 @@ const evidenceDirectory = path.join(
 );
 const routeFor = (family: 'shadcn' | 'brutalist') =>
   `/zh-cn/ui-libraries/${family}/${family === 'brutalist' ? 'components/' : ''}button/`;
-const emptySearchQuery = 'qzxvjkphnwmrgqztvxknqjpl';
+const emptySearchQuery = '"qzxvjkphnwmrgqztvxknqjpl"';
 
 /** The browser-side runtime publication deadline. The request epoch is the
  * anchor and the page's own observer timestamp decides readiness, exactly

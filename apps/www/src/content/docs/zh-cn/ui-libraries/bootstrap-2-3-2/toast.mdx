@@ -19,7 +19,7 @@ Toast 以经典 Bootstrap 2.3.2 `.alert` 视觉样式呈现简短的非阻塞通
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/toast` 导入组件原型并使用对应宿主 Adapter 适配。
+将于 `0.3.0-rc.1` 及后续版本中提供。可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/toast` 导入组件原型并使用对应宿主 Adapter 适配。
 
 ```ts
 import {
@@ -41,7 +41,9 @@ import {
   <Bootstrap232ToastRoot defaultOpen={false} duration={5000}>
     <Bootstrap232ToastClose>×</Bootstrap232ToastClose>
     <Bootstrap232ToastTitle>Event has been created</Bootstrap232ToastTitle>
-    <Bootstrap232ToastDescription>Sunday, December 03, 2023 at 9:00 AM</Bootstrap232ToastDescription>
+    <Bootstrap232ToastDescription>
+      Sunday, December 03, 2023 at 9:00 AM
+    </Bootstrap232ToastDescription>
     <Bootstrap232ToastAction a11yLabel="Undo event creation">Undo</Bootstrap232ToastAction>
   </Bootstrap232ToastRoot>
 </Bootstrap232ToastViewport>
@@ -123,4 +125,7 @@ import {
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BOOTSTRAP-2-3-2-TOAST.yaml', 'P-BASE-TOAST.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOAST.yaml', 'P-BASE-TOAST.yaml']}
+/>

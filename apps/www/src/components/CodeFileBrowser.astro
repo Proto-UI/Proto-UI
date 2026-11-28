@@ -30,12 +30,15 @@ const nodes = codeFileNodes(
 );
 const active = initialFile === undefined ? 0 : files.findIndex((file) => file.name === initialFile);
 if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
+const maxLineCount = Math.max(...files.map((file) => file.code.split('\n').length));
+const compact = !standalone && files.length <= 3 && maxLineCount <= 12;
 ---
 
 <section
   class="code-file-browser"
   data-code-file-browser
   data-standalone-file-browser={standalone ? '' : undefined}
+  data-compact-file-browser={compact ? '' : undefined}
   data-site-code-surface="frame"
   aria-label={label}
 >
@@ -123,12 +126,20 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
   .code-file-browser {
     --code-file-browser-height: 24rem;
     --code-file-tree-height: 10rem;
+    --code-file-browser-divider: color-mix(in oklab, var(--color-border) 60%, transparent);
     display: grid;
     grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr);
     height: var(--code-file-browser-height);
     min-height: 0;
     min-width: 0;
     max-width: 100%;
+  }
+  .code-file-browser[data-compact-file-browser] {
+    --code-file-browser-height: 13.5rem;
+  }
+  :global([data-site-library-family='brutalist']) .code-file-browser,
+  :global([data-site-library-family='bootstrap-2-3-2']) .code-file-browser {
+    --code-file-browser-divider: var(--color-border);
   }
   .code-file-browser__files,
   .code-file-browser__source {
@@ -139,7 +150,7 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
     display: flex;
     flex-direction: column;
     padding: 0;
-    border-inline-end: 1px solid var(--color-border);
+    border-inline-end: 1px solid var(--code-file-browser-divider);
   }
   .code-file-browser__label {
     color: color-mix(in oklab, var(--color-foreground) 70%, transparent);
@@ -147,7 +158,7 @@ if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
     align-items: center;
     min-height: 3rem;
     padding: 0.5rem 1rem;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--code-file-browser-divider);
     font-size: 0.875rem;
     font-weight: 500;
     flex: none;

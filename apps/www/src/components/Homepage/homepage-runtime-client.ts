@@ -491,8 +491,10 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       candidates: MaterializedProjectionCandidate[];
       component: SharedBaseFamilyId;
       typography: MaterializedProjectionCandidate;
+      rolledBack: boolean;
     }
   >();
+  const pendingRollbacks = new Set<() => Promise<void>>();
   const status = root.querySelector<HTMLElement>('[data-homepage-runtime-status]');
   const setStatus = (
     state: 'loading' | 'ready' | 'error',
@@ -639,7 +641,12 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         await Promise.allSettled(candidates.map((candidate) => candidate.dispose()));
         throw failure.reason;
       }
-      staged.set(request.generation, { candidates, component, typography: preparedTypography! });
+      staged.set(request.generation, {
+        candidates,
+        component,
+        typography: preparedTypography!,
+        rolledBack: false,
+      });
       let disposed = false;
       return {
         activate() {
@@ -651,7 +658,47 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         async dispose() {
           if (disposed) return;
           disposed = true;
+          const entry = staged.get(request.generation);
           staged.delete(request.generation);
+          if (entry?.rolledBack && !destroyed) {
+            // The retained generation has already reactivated and hidden/inerted
+            // these failed staging hosts. Seal external portals immediately and
+            // release framework roots one per macrotask so late-publication
+            // recovery returns control promptly without leaking any candidate.
+            for (const candidate of candidates) candidate.sealExternalPortals?.();
+            let index = 0;
+            let activeDisposal: Promise<unknown> | undefined;
+            let flushPromise: Promise<void> | undefined;
+            const flushRemaining = (): Promise<void> => {
+              if (flushPromise) return flushPromise;
+              const remaining = candidates.slice(index);
+              index = candidates.length;
+              flushPromise = Promise.allSettled([
+                ...(activeDisposal ? [activeDisposal] : []),
+                ...remaining.map((candidate) => candidate.dispose()),
+              ]).then(() => {
+                pendingRollbacks.delete(flushRemaining);
+              });
+              return flushPromise;
+            };
+            pendingRollbacks.add(flushRemaining);
+            const drainNext = () => {
+              if (flushPromise || index >= candidates.length) {
+                pendingRollbacks.delete(flushRemaining);
+                return;
+              }
+              const nextCandidate = candidates[index++]!;
+              const current = Promise.resolve(nextCandidate.dispose()).catch(() => undefined);
+              activeDisposal = current;
+              void current.finally(() => {
+                if (activeDisposal === current) activeDisposal = undefined;
+                if (!flushPromise && index < candidates.length) setTimeout(drainNext, 0);
+                else pendingRollbacks.delete(flushRemaining);
+              });
+            };
+            setTimeout(drainNext, 0);
+            return;
+          }
           const results = await Promise.allSettled(
             candidates.map((candidate) => candidate.dispose())
           );
@@ -734,6 +781,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           }
         },
         rollback() {
+          prepared.rolledBack = true;
           // The committed generation keeps the typography owner it actually
           // holds now. A published generation replaced that owner with its
           // own candidate; a generation that never published never did.
@@ -979,6 +1027,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       activeCandidates = [];
       activeTypography = undefined;
       await controller.destroy();
+      await Promise.allSettled(Array.from(pendingRollbacks, (flush) => flush()));
       await demo?.destroy();
       await typographyRefresh;
       staged.clear();

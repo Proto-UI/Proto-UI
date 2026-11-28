@@ -235,8 +235,8 @@ async function manager(page: Page, name: 'npm' | 'pnpm') {
       document.querySelector<HTMLElement>('[data-install-command-card]')?.dataset
         .installCommandInit === '1'
   );
-  const button = card.getByRole('button', { name, exact: true });
-  await button.focus();
+  const tab = card.getByRole('tab', { name, exact: true });
+  await tab.focus();
   await page.keyboard.press('Enter');
   await expect.poll(() => card.getAttribute('data-active-manager'), { timeout: 10_000 }).toBe(name);
   const panel = card.locator(`[data-command-panel="${name}"]`);
@@ -417,10 +417,6 @@ describe.sequential('current-source release documentation reading', () => {
               await panel.waitFor({ state: 'visible' });
               const samples = [];
               for (const [index, file] of baseButtonFiles[runtime]!.entries()) {
-                const treeItem = panel.locator(
-                  `[data-code-tree-path=${JSON.stringify(file.name)}][role="treeitem"]`
-                );
-                await treeItem.click();
                 const shell = panel.locator(
                   `[data-code-file-panel][data-code-file-index="${index}"]`
                 );

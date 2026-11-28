@@ -1,9 +1,10 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, type RunHandle, tw } from '@proto.ui/core';
 import {
   asNavigationMenuItem,
   type NavigationMenuItemProps,
   type NavigationMenuItemExposes,
 } from '@proto.ui/prototypes-base/navigation-menu';
+import { BOOTSTRAP_NAVIGATION_CONTENT_PAINT } from './content.proto';
 
 export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExposes>({
   name: 'bootstrap-2-3-2-navigation-menu-item',
@@ -13,6 +14,26 @@ export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExpose
     const disabled = behavior.getState!('disabled')!;
     const focused = behavior.getState!('focused')!;
     const focusVisible = behavior.getState!('focusVisible')!;
+    const content = def.state.bool('navigationContentPaint', false);
+    const syncContent = (run: RunHandle<NavigationMenuItemProps>) =>
+      content.set(
+        run.context.tryRead(BOOTSTRAP_NAVIGATION_CONTENT_PAINT)?.content === true,
+        'reason: owned Bootstrap Navigation Content boundary'
+      );
+    def.context.trySubscribe(BOOTSTRAP_NAVIGATION_CONTENT_PAINT, syncContent);
+    def.lifecycle.onCreated(syncContent);
+    def.lifecycle.onMounted(syncContent);
+    def.lifecycle.onUpdated(syncContent);
+    const hovered = def.state.bool('hovered', false);
+    def.event.on('pointer.enter', () => {
+      if (!disabled.get()) hovered.set(true, 'reason: pointer entered bootstrap nav item');
+    });
+    def.event.on('pointer.leave', () => {
+      hovered.set(false, 'reason: pointer left bootstrap nav item');
+    });
+    def.event.on('pointer.cancel', () => {
+      hovered.set(false, 'reason: pointer cancelled on bootstrap nav item');
+    });
     def.feedback.style.use(
       tw(
         'block min-w-0 px-[20px] py-[3px] text-[14px] font-normal leading-[20px] text-foreground whitespace-nowrap cursor-pointer select-none outline-none'
@@ -27,7 +48,14 @@ export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExpose
       intent: (i) => i.feedback.style.use(tw('ring-2 ring-inset ring-ring')),
     });
     def.rule({
-      when: (w) => w.all(w.state(disabled).eq(false), w.state(focused).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(disabled).eq(false),
+          w.any(
+            w.state(focused).eq(true),
+            w.all(w.state(content).eq(false), w.state(hovered).eq(true))
+          )
+        ),
       intent: (i) =>
         i.feedback.style.use(tw('bg-[linear-gradient(#08c,#0077b3)] text-primary-foreground')),
     });

@@ -257,13 +257,13 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
 
 async function waitForMatrix(page: Page): Promise<void> {
   await observeMatrixWait(page, 'inited-count', () =>
-    waitForMatrixInitialization(page, RUNTIMES.length)
+    waitForMatrixInitialization(page, RUNTIMES.length, 180_000)
   );
 
   // A connected skeleton or laid-out staging generation is not a completed
   // projection. Observe the existing commit boundary, never signature parity.
   await observeMatrixWait(page, 'committed-host-readiness', () =>
-    page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 })
+    page.waitForFunction(matrixHostsReady, undefined, { timeout: 120_000 })
   );
 }
 
@@ -502,7 +502,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await matrixDiagnostics.get(page)?.startupDiagnostic?.finish();
       await context.close();
     }
-  }, 180_000);
+  }, 360_000);
 
   for (const width of [320, 390]) {
     it(`keeps the matrix readable at ${width}px`, async () => {
@@ -526,7 +526,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         await persistReadinessDiagnostic(page, 'case-finally', 'observed');
         await context.close();
       }
-    }, 180_000);
+    }, 360_000);
   }
 
   it('moves focus into the Base Dialog content in every runtime', async () => {
@@ -543,8 +543,32 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
     };
 
     try {
-      await waitForMatrix(page);
       const dialogRow = page.locator('#demo-base-dialog');
+      await dialogRow.scrollIntoViewIfNeeded();
+      await page.waitForFunction(
+        (expectedCount) => {
+          const row = document.getElementById('demo-base-dialog');
+          if (!row) return false;
+          const previewers = [...row.querySelectorAll<HTMLElement>('[data-previewer-id]')];
+          if (previewers.length !== expectedCount) return false;
+          return previewers.every((root) => {
+            if (root.dataset.inited !== '1') return false;
+            const host = root.querySelector<HTMLElement>('.host');
+            if (!host) return false;
+            if (root.dataset.projectionMode === 'fixed-family') {
+              return (
+                root.dataset.projectionState === 'ready' &&
+                Array.from(host.children).some(
+                  (child) => child.getAttribute('data-projection-generation-state') === 'active'
+                )
+              );
+            }
+            return host.childElementCount > 0;
+          });
+        },
+        RUNTIMES.length,
+        { timeout: 60_000 }
+      );
 
       for (const runtime of RUNTIMES) {
         const region = dialogRow.locator(

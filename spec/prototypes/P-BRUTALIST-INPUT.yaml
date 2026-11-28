@@ -16,7 +16,7 @@ criteria:
       en: Render null and apply feedback to the one Base host-owned single-line input. Use flex h-10 w-full rounded-base border-2 border-border bg-secondary-background px-3 py-2 text-sm font-sans font-medium text-foreground and selection:bg-main selection:text-main-foreground. Preserve 2.5rem height, 0.75rem horizontal and 0.5rem vertical padding, 0.875rem font with 1.25rem line height; never replace these relative values with default pixel results. Existing Neo theme maps upstream font-base to weight 500 and supplies DM Sans. No hard shadow or motion is introduced.
   - id: P-BRUTALIST-INPUT-STATES
     text:
-      en: Inherited focusVisible alone adds outline-none ring-2 ring-black ring-offset-2. Inherited disabled adds cursor-not-allowed opacity-50, without a second disabled owner. Preserve native readOnly and the same physical editor over repeated updates. The black focus ring follows this Input source, not a theme-ring substitution.
+      en: 'Inherited focusVisible adds outline-none forced-colors-focus-outline ring-2 ring-offset-2 ring-offset-background with mutually exclusive color-scheme ring rules: light mode keeps literal ring-black (#000000) following this Input source even under customized --ring, while dark mode switches exclusively to ring-ring (#f5f5f5) to preserve dark-surface contrast without cascade collision. Inherited readOnly adds bg-muted and disabled adds cursor-not-allowed opacity-50, without a second state owner. Preserve native readOnly and the same physical editor over repeated updates.'
   - id: P-BRUTALIST-INPUT-ENTRIES
     text:
       en: Export the standalone projection through the package root and input subpath, register brutalist-input in CLI and brutalist-input-root in the real website preview. Demos must instantiate this prototype rather than FieldControl or a page-local native substitute.
@@ -41,6 +41,7 @@ dependsOn:
     [
       C-AS-HOOK-0001,
       C-HOST-SURFACE-PROJECTION-0001,
+      C-RULE-COLOR-SCHEME-0001,
       C-RULE-INTENT-FEEDBACK-STYLE-0001,
       C-PROTOTYPE-STYLE-CLOSURE-0001,
       C-FEEDBACK-STYLE-0004,
@@ -52,6 +53,9 @@ relates:
 verifies:
   tests: [T-BRUTALIST-INPUT-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Specify mutually exclusive light ring-black and dark ring-ring focus rules plus readOnly bg-muted styling to prevent dark-mode cascade collision while preserving literal light #000000 ring.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the missing standalone Neo plain-text Input projection with pinned source and explicit remaining parity/evidence gaps.

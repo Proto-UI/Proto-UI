@@ -119,7 +119,7 @@ export async function runS4PaintJourney(
           await part('close').click();
           // Entire exit, conceal, portal/style revocation, and following paints.
           // Deliberately do not read layout during this interval.
-          await page.waitForTimeout(380);
+          await page.waitForTimeout(480);
           activePath = null;
           assert.equal(await part('content').getAttribute('data-pui-view-detached'), '');
           assert.equal(

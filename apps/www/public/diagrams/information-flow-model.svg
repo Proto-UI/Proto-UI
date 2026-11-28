@@ -1,10 +1,4 @@
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 600 760"
-  role="img"
-  aria-labelledby="information-flow-title information-flow-description"
-  preserveAspectRatio="xMidYMid meet"
->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760" width="600" height="760" role="img" aria-labelledby="information-flow-title information-flow-description" preserveAspectRatio="xMidYMid meet">
   <title id="information-flow-title">Proto UI information flow model</title>
   <desc id="information-flow-description">
     Event carries information from User to Component, while feedback returns from Component to User.
@@ -12,247 +6,128 @@
     Context connects Other Component and Component in both directions. State, lifecycle, and meta
     are internal Component dimensions rather than information channels.
   </desc>
-
   <defs>
-    <linearGradient id="diagram-background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0b1220" />
-      <stop offset="1" stop-color="#111827" />
-    </linearGradient>
-
-    <marker
-      id="event-arrow"
-      viewBox="0 0 4 4"
-      markerWidth="4"
-      markerHeight="4"
-      refX="3.4"
-      refY="2"
-      orient="auto-start-reverse"
-      markerUnits="strokeWidth"
-    >
-      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#67e8f9" />
-    </marker>
-    <marker
-      id="feedback-arrow"
-      viewBox="0 0 4 4"
-      markerWidth="4"
-      markerHeight="4"
-      refX="3.4"
-      refY="2"
-      orient="auto-start-reverse"
-      markerUnits="strokeWidth"
-    >
-      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#f0abfc" />
-    </marker>
-    <marker
-      id="props-arrow"
-      viewBox="0 0 4 4"
-      markerWidth="4"
-      markerHeight="4"
-      refX="3.4"
-      refY="2"
-      orient="auto-start-reverse"
-      markerUnits="strokeWidth"
-    >
-      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#86efac" />
-    </marker>
-    <marker
-      id="expose-arrow"
-      viewBox="0 0 4 4"
-      markerWidth="4"
-      markerHeight="4"
-      refX="3.4"
-      refY="2"
-      orient="auto-start-reverse"
-      markerUnits="strokeWidth"
-    >
-      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#fdba74" />
-    </marker>
-    <marker
-      id="context-arrow"
-      viewBox="0 0 4 4"
-      markerWidth="4"
-      markerHeight="4"
-      refX="3.4"
-      refY="2"
-      orient="auto-start-reverse"
-      markerUnits="strokeWidth"
-    >
-      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#c4b5fd" />
-    </marker>
-
     <style>
-      .actor-label,
-      .component-label,
-      .dimension-label,
-      .dimension-heading {
-        font-family:
-          ui-sans-serif,
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          sans-serif;
+      :root {
+        --diagram-ink: #1e1e1e;
+        --diagram-muted: #5c6670;
+        --diagram-blue: #1971c2;
+        --diagram-green: #237a35;
+        --diagram-amber: #ad6500;
+        --diagram-purple: #6741d9;
+        --diagram-red: #c92a2a;
       }
-
-      .actor-label,
-      .component-label {
-        fill: #f8fafc;
-        font-size: 26px;
-        font-weight: 700;
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --diagram-ink: #e5e5e5;
+          --diagram-muted: #a1abb5;
+          --diagram-blue: #74c0fc;
+          --diagram-green: #8ce99a;
+          --diagram-amber: #ffc078;
+          --diagram-purple: #b197fc;
+          --diagram-red: #ff8787;
+        }
       }
-
-      .channel-label {
-        font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-        font-size: 21px;
-        font-weight: 700;
+      text {
+        font-family: "Excalifont", "Xiaolai", "Kalam", "STKaiti", "KaiTi", "Bradley Hand", cursive, sans-serif;
+        fill: var(--diagram-ink);
+        font-weight: 400;
       }
-
-      .dimension-heading {
-        fill: #bfdbfe;
-        font-size: 20px;
-        font-weight: 650;
-        letter-spacing: 0.02em;
-      }
-
-      .dimension-label {
-        fill: #eff6ff;
-        font-size: 24px;
-        font-weight: 650;
-      }
-
-      .flow-line {
+      .actor-label { font-size: 26px; }
+      .component-label { font-size: 28px; }
+      .channel-label { font-size: 20px; }
+      .dimension-heading { font-size: 19px; fill: var(--diagram-muted); }
+      .dimension-label { font-size: 23px; fill: var(--diagram-blue); }
+      .hand-stroke {
         fill: none;
+        stroke: var(--diagram-ink);
+        stroke-width: 1.7;
         stroke-linecap: round;
-        stroke-width: 3;
-        vector-effect: non-scaling-stroke;
+        stroke-linejoin: round;
       }
-
-      @media (max-width: 400px) {
-        .actor-label {
-          font-size: 29px;
-        }
-
-        .component-label,
-        .channel-label {
-          font-size: 30px;
-        }
-
-        .dimension-heading {
-          font-size: 28px;
-        }
-
-        .dimension-label {
-          font-size: 29px;
-        }
-      }
+      .hand-echo { opacity: 0.42; stroke-width: 1; }
+      .hand-dash { stroke-dasharray: 7 6; }
+      .stroke-blue { stroke: var(--diagram-blue); }
+      .stroke-green { stroke: var(--diagram-green); }
+      .stroke-amber { stroke: var(--diagram-amber); }
+      .stroke-purple { stroke: var(--diagram-purple); }
+      .stroke-red { stroke: var(--diagram-red); }
+      .stroke-muted { stroke: var(--diagram-muted); }
+      .ink-blue { fill: var(--diagram-blue); }
+      .ink-green { fill: var(--diagram-green); }
+      .ink-amber { fill: var(--diagram-amber); }
+      .ink-purple { fill: var(--diagram-purple); }
+      .ink-red { fill: var(--diagram-red); }
     </style>
+    <marker id="hand-arrow-blue" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M2 1.5 Q6 4.2 10 6 Q6 7.8 1.5 10.5" fill="none" stroke="var(--diagram-blue)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="hand-arrow-red" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M2 1.5 Q6 4.2 10 6 Q6 7.8 1.5 10.5" fill="none" stroke="var(--diagram-red)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="hand-arrow-green" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M2 1.5 Q6 4.2 10 6 Q6 7.8 1.5 10.5" fill="none" stroke="var(--diagram-green)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="hand-arrow-amber" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M2 1.5 Q6 4.2 10 6 Q6 7.8 1.5 10.5" fill="none" stroke="var(--diagram-amber)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="hand-arrow-purple" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M2 1.5 Q6 4.2 10 6 Q6 7.8 1.5 10.5" fill="none" stroke="var(--diagram-purple)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
   </defs>
 
-  <rect
-    x="8"
-    y="8"
-    width="584"
-    height="744"
-    rx="28"
-    fill="url(#diagram-background)"
-    stroke="#334155"
-    stroke-width="2"
-    vector-effect="non-scaling-stroke"
-  />
+  <!-- User box -->
+  <path d="M44 74 C92 72 146 75 186 73 Q198 73 197 86 C199 138 196 186 198 228 Q198 240 185 239 C138 241 88 238 45 240 Q33 240 34 227 C32 178 35 128 33 87 Q33 74 44 74" class="hand-stroke stroke-blue"/>
+  <path d="M46 76 C94 75 144 77 185 75 M195 88 C197 136 194 184 196 227 M184 237 C136 239 89 236 46 238 M36 225 C34 176 37 128 35 88" class="hand-stroke hand-echo stroke-blue"/>
+  <text x="115" y="165" text-anchor="middle" class="actor-label">User</text>
 
-  <g aria-label="User">
-    <rect x="32" y="68" width="166" height="134" rx="20" fill="#172033" stroke="#475569" />
-    <rect x="32" y="68" width="7" height="134" rx="3.5" fill="#38bdf8" />
-    <text class="actor-label" x="115" y="144" text-anchor="middle">User</text>
-  </g>
+  <!-- Maker box -->
+  <path d="M44 294 C92 292 146 295 186 293 Q198 293 197 306 C199 358 196 406 198 448 Q198 460 185 459 C138 461 88 458 45 460 Q33 460 34 447 C32 398 35 348 33 307 Q33 294 44 294" class="hand-stroke stroke-green"/>
+  <path d="M46 296 C94 295 144 297 185 295 M195 308 C197 356 194 404 196 447 M184 457 C136 459 89 456 46 458 M36 445 C34 396 37 348 35 308" class="hand-stroke hand-echo stroke-green"/>
+  <text x="115" y="385" text-anchor="middle" class="actor-label">Maker</text>
 
-  <g aria-label="Maker">
-    <rect x="32" y="286" width="166" height="134" rx="20" fill="#172033" stroke="#475569" />
-    <rect x="32" y="286" width="7" height="134" rx="3.5" fill="#4ade80" />
-    <text class="actor-label" x="115" y="362" text-anchor="middle">Maker</text>
-  </g>
+  <!-- Other Component box -->
+  <path d="M44 514 C92 512 146 515 186 513 Q198 513 197 526 C199 578 196 626 198 668 Q198 680 185 679 C138 681 88 678 45 680 Q33 680 34 667 C32 618 35 568 33 527 Q33 514 44 514" class="hand-stroke stroke-purple"/>
+  <path d="M46 516 C94 515 144 517 185 515 M195 528 C197 576 194 624 196 667 M184 677 C136 679 89 676 46 678 M36 665 C34 616 37 568 35 528" class="hand-stroke hand-echo stroke-purple"/>
+  <text x="115" y="590" text-anchor="middle" class="actor-label">Other</text>
+  <text x="115" y="622" text-anchor="middle" class="actor-label">Component</text>
 
-  <g aria-label="Other Component">
-    <rect x="32" y="514" width="166" height="156" rx="20" fill="#172033" stroke="#475569" />
-    <rect x="32" y="514" width="7" height="156" rx="3.5" fill="#a78bfa" />
-    <text class="actor-label" x="115" y="583" text-anchor="middle">
-      <tspan x="115" dy="0">Other</tspan>
-      <tspan x="115" dy="31">Component</tspan>
-    </text>
-  </g>
+  <!-- Component main enclosure -->
+  <path d="M366 64 C422 61 486 65 552 63 Q568 63 566 80 C570 280 564 490 567 678 Q567 694 550 692 C486 695 422 690 368 693 Q352 693 354 676 C350 486 356 278 353 81 Q353 64 366 64" class="hand-stroke"/>
+  <path d="M368 67 C424 64 486 67 551 65 M564 81 C567 282 562 490 565 677 M549 690 C486 692 424 688 369 690 M356 675 C352 486 358 278 355 82" class="hand-stroke hand-echo"/>
+  <text x="460" y="118" text-anchor="middle" class="component-label">Component</text>
+  <path d="M374 142 C432 140 492 143 546 141" class="hand-stroke stroke-muted"/>
 
-  <g aria-label="Component and its internal dimensions">
-    <rect
-      x="386"
-      y="68"
-      width="182"
-      height="602"
-      rx="24"
-      fill="#10233d"
-      stroke="#60a5fa"
-      stroke-width="2"
-      vector-effect="non-scaling-stroke"
-    />
-    <text class="component-label" x="477" y="116" text-anchor="middle">Component</text>
-    <path
-      d="M 410 142 H 544"
-      fill="none"
-      stroke="#3b82f6"
-      stroke-width="1.5"
-      vector-effect="non-scaling-stroke"
-    />
-    <text class="dimension-heading" x="477" y="188" text-anchor="middle">
-      <tspan x="477" dy="0">Internal</tspan>
-      <tspan x="477" dy="26">dimensions</tspan>
-    </text>
+  <text x="460" y="182" text-anchor="middle" class="dimension-heading">Internal</text>
+  <text x="460" y="206" text-anchor="middle" class="dimension-heading">dimensions</text>
 
-    <g aria-label="state">
-      <rect x="412" y="252" width="130" height="72" rx="18" fill="#1e3a5f" stroke="#3b82f6" />
-      <text class="dimension-label" x="477" y="297" text-anchor="middle">state</text>
-    </g>
-    <g aria-label="lifecycle">
-      <rect x="412" y="356" width="130" height="72" rx="18" fill="#1e3a5f" stroke="#3b82f6" />
-      <text class="dimension-label" x="477" y="401" text-anchor="middle">lifecycle</text>
-    </g>
-    <g aria-label="meta">
-      <rect x="412" y="460" width="130" height="72" rx="18" fill="#1e3a5f" stroke="#3b82f6" />
-      <text class="dimension-label" x="477" y="505" text-anchor="middle">meta</text>
-    </g>
-  </g>
+  <!-- state -->
+  <path d="M388 236 C432 234 488 237 532 235 Q542 235 541 246 C542 276 540 302 541 324 Q541 334 530 333 C486 335 432 332 389 334 Q379 334 380 323 C378 294 381 268 379 247 Q379 236 388 236" class="hand-stroke stroke-blue hand-dash"/>
+  <text x="460" y="293" text-anchor="middle" class="dimension-label">state</text>
 
-  <g aria-label="event from User to Component">
-    <text class="channel-label" x="292" y="98" text-anchor="middle" fill="#67e8f9">event</text>
-    <path class="flow-line" d="M 214 116 H 370" stroke="#67e8f9" marker-end="url(#event-arrow)" />
-  </g>
+  <!-- lifecycle -->
+  <path d="M388 376 C432 374 488 377 532 375 Q542 375 541 386 C542 416 540 442 541 464 Q541 474 530 473 C486 475 432 472 389 474 Q379 474 380 463 C378 434 381 408 379 387 Q379 376 388 376" class="hand-stroke stroke-blue hand-dash"/>
+  <text x="460" y="433" text-anchor="middle" class="dimension-label">lifecycle</text>
 
-  <g aria-label="feedback from Component to User">
-    <path
-      class="flow-line"
-      d="M 370 160 H 214"
-      stroke="#f0abfc"
-      marker-end="url(#feedback-arrow)"
-    />
-    <text class="channel-label" x="292" y="188" text-anchor="middle" fill="#f0abfc">feedback</text>
-  </g>
+  <!-- meta -->
+  <path d="M388 516 C432 514 488 517 532 515 Q542 515 541 526 C542 556 540 582 541 604 Q541 614 530 613 C486 615 432 612 389 614 Q379 614 380 603 C378 574 381 548 379 527 Q379 516 388 516" class="hand-stroke stroke-blue hand-dash"/>
+  <text x="460" y="573" text-anchor="middle" class="dimension-label">meta</text>
 
-  <g aria-label="props from Maker to Component">
-    <text class="channel-label" x="292" y="316" text-anchor="middle" fill="#86efac">props</text>
-    <path class="flow-line" d="M 214 334 H 370" stroke="#86efac" marker-end="url(#props-arrow)" />
-  </g>
+  <!-- Event & Feedback arrows -->
+  <path d="M204 128 C252 125 298 130 344 128" class="hand-stroke stroke-blue" marker-end="url(#hand-arrow-blue)"/>
+  <text x="275" y="114" text-anchor="middle" class="channel-label ink-blue">event</text>
 
-  <g aria-label="expose from Component to Maker">
-    <path class="flow-line" d="M 370 378 H 214" stroke="#fdba74" marker-end="url(#expose-arrow)" />
-    <text class="channel-label" x="292" y="406" text-anchor="middle" fill="#fdba74">expose</text>
-  </g>
+  <path d="M348 184 C298 187 252 182 206 184" class="hand-stroke stroke-red" marker-end="url(#hand-arrow-red)"/>
+  <text x="275" y="212" text-anchor="middle" class="channel-label ink-red">feedback</text>
 
-  <g aria-label="context between Other Component and Component">
-    <text class="channel-label" x="292" y="570" text-anchor="middle" fill="#c4b5fd">context</text>
-    <path
-      class="flow-line"
-      d="M 214 594 H 370"
-      stroke="#c4b5fd"
-      marker-start="url(#context-arrow)"
-      marker-end="url(#context-arrow)"
-    />
-  </g>
+  <!-- Props & Expose arrows -->
+  <path d="M204 348 C252 345 298 350 344 348" class="hand-stroke stroke-green" marker-end="url(#hand-arrow-green)"/>
+  <text x="275" y="334" text-anchor="middle" class="channel-label ink-green">props</text>
+
+  <path d="M348 404 C298 407 252 402 206 404" class="hand-stroke stroke-amber" marker-end="url(#hand-arrow-amber)"/>
+  <text x="275" y="432" text-anchor="middle" class="channel-label ink-amber">expose</text>
+
+  <!-- Context bidirectional arrow -->
+  <path d="M208 596 C254 593 298 599 344 596" class="hand-stroke stroke-purple" marker-start="url(#hand-arrow-purple)" marker-end="url(#hand-arrow-purple)"/>
+  <text x="275" y="578" text-anchor="middle" class="channel-label ink-purple">context</text>
 </svg>

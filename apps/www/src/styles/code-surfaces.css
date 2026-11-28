@@ -3,14 +3,14 @@
  * Native CodeExample tab controls are an explicitly unmigrated legacy recipe. */
 @layer code-surfaces {
   :root {
-    --docs-code-background: var(--color-muted);
+    --docs-code-background: var(--color-code, var(--color-muted));
     --docs-code-foreground: var(--color-foreground);
     --docs-code-border: var(--color-border);
     --docs-code-radius: var(--pui-radius-xl);
     --docs-code-font: var(--font-mono);
     --docs-code-size: 0.8125rem;
     --docs-code-line-height: 1.5rem;
-    --docs-code-padding: 0.75rem;
+    --docs-code-padding: 0.875rem;
     --docs-code-toolbar-height: 2.75rem;
     --docs-code-copy-size: 2rem;
     --docs-code-copy-glyph: 18px;
@@ -133,38 +133,160 @@
 
   [data-code-inner] {
     container: code-panel / inline-size;
-    padding: min(var(--docs-code-padding), 12px);
+    padding: 0;
+  }
+  .proto-previewer__code {
+    counter-reset: code-line;
+  }
+  .proto-previewer__code > code {
+    display: grid;
+    min-width: max-content;
+    counter-reset: code-line;
+  }
+  .proto-previewer__code .line {
+    display: block;
+    position: relative;
+    padding-inline: 0;
+    border-radius: 0;
+  }
+  [data-code-line-numbers='true'] .proto-previewer__code .line::before {
+    counter-increment: code-line;
+    content: counter(code-line);
+    display: inline-block;
+    width: 2rem;
+    margin-inline-end: 1.25rem;
+    text-align: right;
+    color: var(
+      --color-code-number,
+      color-mix(in oklab, var(--color-muted-foreground) 65%, transparent)
+    );
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    pointer-events: none;
+  }
+  [data-code-line-numbers='false'] .proto-previewer__code .line::before {
+    display: none;
+  }
+  .proto-previewer__code .line[data-highlighted-line] {
+    background: var(
+      --color-code-highlight,
+      color-mix(in oklab, var(--color-foreground) 6%, transparent)
+    );
+    box-shadow: inset 2px 0 0
+      color-mix(in oklab, var(--color-code-number, var(--color-muted-foreground)) 70%, transparent);
+    border-radius: 0;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+  }
+  [data-theme='dark'] .proto-previewer__code .line[data-highlighted-line] {
+    background: var(
+      --color-code-highlight,
+      color-mix(in oklab, var(--color-foreground) 10%, transparent)
+    );
+  }
+  [data-site-library-family='brutalist'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, var(--site-brutalist-main, #facc15) 26%, transparent);
+    box-shadow: inset 3px 0 0 var(--site-brutalist-border, #000);
+    border-radius: 0;
+  }
+  [data-site-library-family='bootstrap-2-3-2'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, #08c 11%, transparent);
+    box-shadow: inset 2px 0 0 #08c;
+  }
+  [data-site-library-family='liquid-glass'] .proto-previewer__code .line[data-highlighted-line] {
+    background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-primary);
+  }
+  [data-code-line-numbers='true'] .proto-previewer__code .line[data-highlighted-line]::before {
+    color: var(--color-foreground);
+    font-weight: 500;
+  }
+  /* Code viewports use dogfood ScrollArea; Tab strips and captions hide native OS bars. */
+  .expressive-code pre,
+  .proto-previewer__code,
+  .install-command-card__body,
+  .code-file-browser__tree-scroll,
+  [data-code-scroll-viewport],
+  [data-code-title-scroll],
+  .code-example__strip,
+  [data-code-example-tablist],
+  .install-command-card__managers,
+  [data-install-command-tablist],
+  .proto-previewer__runtime-tabs,
+  .proto-previewer__runtime-fallback,
+  .pui-runtime-tabs-control,
+  [data-runtime-tabs-root] [role='tablist'],
+  [data-runtime-tabs] [role='tablist'] {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .expressive-code pre::-webkit-scrollbar,
+  .proto-previewer__code::-webkit-scrollbar,
+  .install-command-card__body::-webkit-scrollbar,
+  .code-file-browser__tree-scroll::-webkit-scrollbar,
+  [data-code-scroll-viewport]::-webkit-scrollbar,
+  [data-code-title-scroll]::-webkit-scrollbar,
+  .code-example__strip::-webkit-scrollbar,
+  [data-code-example-tablist]::-webkit-scrollbar,
+  .install-command-card__managers::-webkit-scrollbar,
+  [data-install-command-tablist]::-webkit-scrollbar,
+  .proto-previewer__runtime-tabs::-webkit-scrollbar,
+  .proto-previewer__runtime-fallback::-webkit-scrollbar,
+  .pui-runtime-tabs-control::-webkit-scrollbar,
+  [data-runtime-tabs-root] [role='tablist']::-webkit-scrollbar,
+  [data-runtime-tabs] [role='tablist']::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  [data-code-scroll-root],
+  [data-code-scroll-anatomy],
+  [data-code-scroll-ready] [data-code-scroll-viewport] {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+  }
+  [data-code-scroll-ready] [data-code-scroll-viewport] {
+    height: auto;
+    overflow: auto;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+  }
+  [data-code-scroll-ready][data-code-scroll-limit='unbounded'] [data-code-scroll-viewport] {
+    max-height: none;
   }
   .proto-previewer__code {
     margin: 0;
     min-width: 0;
     max-width: 100%;
+    padding: 0.875rem 1rem;
     /* Horizontal code panning stays local; vertical wheel/touch input must
      * reach the document when this native scroller has no remaining range. */
     overscroll-behavior-x: contain;
     overscroll-behavior-y: auto;
-    max-height: 4.5rem;
+    max-height: none;
     overflow: auto;
     white-space: pre;
     padding-inline-end: 2.75rem;
   }
   [data-code-expanded='false'] .proto-previewer__code {
+    max-height: 6rem;
     overflow: hidden;
   }
   [data-code-expanded='true'] .proto-previewer__code {
-    /* A readable window into long examples, bounded by the current viewport. */
-    max-height: min(36rem, 65svh);
+    max-height: none;
   }
   /* Enlarged text in a genuinely narrow source container needs its width for
      code, not decorative numbers or an overlay reservation on every line.
      The existing Copy owner gets a real control row only at this pressure size. */
   @container code-panel (max-width: 14rem) {
+    .proto-previewer__code .line::before {
+      display: none;
+    }
     .proto-previewer__code {
       /* Keep a real native-selection edge gutter, not the Copy-width reserve. */
       padding-inline: 16px;
-    }
-    [data-code-expanded='true'] .proto-previewer__code {
-      max-height: min(36rem, 65svh, max(6rem, calc(100svh - var(--header-height, 4rem) - 4rem)));
     }
   }
   [data-code-expanded='false'] [data-code-content] {

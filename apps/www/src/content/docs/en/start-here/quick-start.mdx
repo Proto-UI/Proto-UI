@@ -7,6 +7,8 @@ import StaticCodeBlock from '@/components/StaticCodeBlock.astro';
 import CliInitOutput from '@/components/CliInitOutput.astro';
 import DocStageNotice from '@/components/DocStageNotice.astro';
 import CodeExample from '@/components/CodeExample.astro';
+import Steps from '@/components/Steps.astro';
+import Step from '@/components/Step.astro';
 import { Aside } from '@astrojs/starlight/components';
 
 export const buttonHostFiles = /** @type {const} */ ({
@@ -14,33 +16,41 @@ export const buttonHostFiles = /** @type {const} */ ({
     {
       name: 'src/App.tsx',
       lang: 'tsx',
+      highlightLines: '1,4',
       code: `import { ShadcnButton } from '../proto-ui/components/react';
 
 export function App() {
-  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
+  return <ShadcnButton variant="outline">Proto UI</ShadcnButton>;
 }`,
     },
   ],
   vue: [
-    { name: 'src/App.vue', lang: 'vue', code: `<script setup lang="ts">
+    {
+      name: 'src/App.vue',
+      lang: 'vue',
+      highlightLines: '2,6',
+      code: `<script setup lang="ts">
 import { ShadcnButton } from '../proto-ui/components/vue';
 </script>
 
 <template>
-  <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>
-</template>` },
+  <ShadcnButton variant="outline">Proto UI</ShadcnButton>
+</template>`,
+    },
   ],
   wc: [
     {
       name: 'src/main.ts',
       lang: 'typescript',
+      highlightLines: '1-2',
       code: `import './styles/proto-ui-style.css';
 import '../proto-ui/components/wc';`,
     },
     {
       name: 'index.html',
       lang: 'html',
-      code: `<proto-ui-shadcn-button variant="outline">Proto UI 0.2.0</proto-ui-shadcn-button>
+      highlightLines: '1',
+      code: `<proto-ui-shadcn-button variant="outline">Proto UI</proto-ui-shadcn-button>
 <script type="module" src="/src/main.ts"></script>`,
     },
   ],
@@ -57,7 +67,7 @@ export const pendingButtonHosts = /** @type {const} */ ([
     'id': 'vue2',
     'label': 'Vue 2',
     'message':
-      'WIP for this stable quick-start guide. The official Vue 2 Adapter targets Vue >=2.6.0 <2.7 and is available from the 0.3 prerelease line. The stable 0.2.0 CLI does not support vue2, so this tab does not provide an @latest install command.',
+      'The official Vue 2 Adapter targets Vue >=2.6.0 <2.7 and will be delivered via CLI starting in 0.3.0-rc.1 and later releases (available in workspace source).',
   },
   {
     'id': 'gpui',
@@ -98,7 +108,9 @@ Run these commands from an existing React, Vue, or Web Components application. T
 
 The CLI installs the selected Adapter and Prototype packages at its own exact version. With the current `@latest` release, all public `@proto.ui/*` dependencies added by this flow resolve to `0.2.0`, so release trains are not mixed.
 
-## Run the CLI
+<Steps>
+
+<Step title="Run the CLI" id="run-cli">
 
 You can invoke the CLI with `npx`; a global installation is not required:
 
@@ -111,9 +123,11 @@ You can invoke the CLI with `npx`; a global installation is not required:
   copyLabel="Copy CLI help command"
 />
 
-Using the explicit `@latest` tag makes the stable channel policy visible. For a permanently reproducible installation or CI workflow, replace it with `@0.2.0`.
+Using the explicit `@latest` tag makes the stable channel policy visible. For a permanently reproducible pinned version or CI workflow, replace it with `@0.2.0`; new 0.3 capabilities will be available starting in `0.3.0-rc.1` and later releases.
 
-## Initialize your project
+</Step>
+
+<Step title="Initialize your project" id="init-project">
 
 From the application root, run:
 
@@ -137,17 +151,18 @@ Accepting the defaults creates the local Proto UI workspace and the Shadcn style
 
 The CLI manages generated files; do not edit them by hand. Use `--prototypes brutalist` when initializing a project that should use the Brutalist preset, or `--no-styles` when the application will provide the complete semantic token surface itself.
 
-For the 0.3 source candidate in PR #872, `--no-styles` disables generation. The current New York Shadcn Switch default has no expanded hit ring or positioned-box prerequisite: it can mount and toggle without application CSS, but that does not satisfy its visual contract. Styled applications must load the complete theme and structural token rules; semantic variables alone are insufficient, and the Adapter does not inject a substitute theme or component recipe. This describes the source candidate, not the currently documented stable `@latest` 0.2.0 release. Base Switch also remains usable without application-provided theme/token CSS; applications using `--no-styles` supply their complete styling closure themselves.
+</Step>
 
-## Import the styles once
+<Step title="Import the styles once" id="import-styles">
 
 Import the generated stylesheet from the application entry:
 
 <StaticCodeBlock
   code={"import './styles/proto-ui-style.css';"}
-  title="Style import"
+  title="src/main.ts"
   icon="file-code"
   lang="typescript"
+  highlightLines="1"
   copyLabel="Copy Style import"
 />
 
@@ -162,20 +177,20 @@ If the application does not use named CSS cascade layers, keep the single import
   title="src/app.css"
   icon="file-code"
   lang="css"
+  highlightLines="2,5"
   copyLabel="Copy src/app.css"
 />
 
-Import `app.css` once from the application entry instead of importing those stylesheets separately. The generated entry places its theme defaults in the `theme` layer, so values declared by later named consumer layers—or by unlayered consumer CSS—remain authoritative. The complete relationship is `theme defaults < reset/base < proto-ui < explicit consumer layers`. For Tailwind, preserve its `theme < base < components < utilities` order while inserting `proto-ui` after `base` and before the application's component and utility layers in the earliest order statement.
+Import `app.css` once from the application entry instead of importing those stylesheets separately. The complete relationship is `theme defaults < reset/base < proto-ui < explicit consumer layers`. For Tailwind, preserve its `theme < base < components < utilities` order while inserting `proto-ui` after `base` and before `components` and `utilities`.
 
-Layer order is fixed when a named layer first appears. A generated `@layer theme, proto-ui;` declaration can reserve only those two slots when that entry loads first; it cannot repair an order that earlier stylesheets already established. The host order statement above remains necessary whenever the application introduces named reset or consumer layers.
+</Step>
 
-## Add and import a component
+<Step title="Add and import a component" id="add-component">
 
-Choose your application’s host. React, Vue, and Web Components have stable examples; WIP tabs explain the remaining integration work.
-
-Run the command from your project root, then add the example to the matching application files.
+Choose your application’s host, run the install command from your project root, and add the single-file snippet to your application:
 
 <CodeExample
+  layout="steps"
   files={buttonHostFiles}
   commands={buttonHostCommands}
   pendingHosts={pendingButtonHosts}
@@ -194,15 +209,17 @@ Run the command from your project root, then add the example to the matching app
   label="Shadcn Button host examples and WIP availability"
 />
 
-The command installs the matching Adapter and `@proto.ui/prototypes-shadcn@0.2.0`, then generates the host entry under `proto-ui/components/`. Vue projects use `vue` in the same command. The relative imports are intentional: applications do not share one path-alias setup or directory depth. Generated facades preserve the Prototype's declared props, event listeners, and ref/expose surface.
+The command installs the matching Adapter and `@proto.ui/prototypes-shadcn`, then generates the host entry under `proto-ui/components/`. Generated facades preserve the Prototype's declared props, event listeners, and ref/expose surface.
 
-## Check your first integration
+</Step>
 
-Start the application. You should see an outline Button labeled “Proto UI 0.2.0”. Check that styles load, then try focusing it with Tab and activating it with Enter or Space. If an import fails, check the generated directory and relative path; if styling is missing, check that the application entry imports the generated stylesheet.
+<Step title="Check your first integration" id="verify-integration">
 
-Once this works, use the component documentation to connect business state and events.
+Start the application. You should see an outline Button labeled “Proto UI”. Check that styles load, then try focusing it with Tab and activating it with Enter or Space. If an import fails, check the generated directory and relative path; if styling is missing, check that the application entry imports the generated stylesheet.
 
-## Continue one component at a time
+</Step>
+
+<Step title="Continue one component at a time" id="add-more">
 
 <StaticCodeBlock
   code={
@@ -220,13 +237,18 @@ The generated host entry accumulates exports, so the application can keep import
   code={
     "import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';"
   }
-  title="Component imports"
+  title="src/App.tsx"
   icon="file-code"
   lang="tsx"
+  highlightLines="1"
   copyLabel="Copy Component imports"
 />
 
 To generate without installing missing packages, add `--no-install`. The CLI will print exact install commands, but the generated entry will not build until those dependencies are present.
+
+</Step>
+
+</Steps>
 
 ## Current boundaries
 

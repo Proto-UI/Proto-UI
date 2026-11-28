@@ -15,10 +15,29 @@ const { title, body } = Astro.props;
 <style>
   .doc-stage-notice {
     margin: 1rem 0 1.5rem;
-    padding: 1rem 1.1rem;
+    padding: 0.9375rem 1.125rem;
+    border-radius: var(--pui-radius-xl, 0.875rem);
+    border: 1px solid color-mix(in oklab, var(--color-border) 72%, transparent);
+    background: color-mix(in oklab, var(--color-muted) 65%, var(--color-background));
+  }
+
+  :global([data-site-library-family='brutalist']) .doc-stage-notice {
+    border: 2px solid var(--site-brutalist-border, #000);
+    border-radius: var(--site-brutalist-radius, 0);
+    background: var(--site-brutalist-secondary-background, #fff);
+    box-shadow: 3px 3px 0 var(--site-brutalist-border, #000);
+  }
+
+  :global([data-site-library-family='bootstrap-2-3-2']) .doc-stage-notice {
+    border: 1px solid var(--site-bootstrap-border, #d4d4d4);
+    border-radius: 4px;
+    background: var(--site-bootstrap-muted, #f5f5f5);
+  }
+
+  :global([data-site-library-family='liquid-glass']) .doc-stage-notice {
+    border: 1px solid color-mix(in oklab, var(--color-border) 55%, transparent);
     border-radius: 1rem;
-    border: 1px solid color-mix(in oklch, var(--color-border) 70%, var(--color-foreground) 30%);
-    background: var(--color-muted);
+    background: color-mix(in oklab, var(--color-muted) 70%, transparent);
   }
 
   .doc-stage-notice__title,

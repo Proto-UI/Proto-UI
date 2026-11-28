@@ -1,5 +1,9 @@
 import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import {
+  notifyPortalSubtreeReadiness,
+  registerPortalViewReadiness,
+} from './platform/portal-readiness';
+import {
   collectWebOwnedDecorationTargets,
   createWebOwnedDecorationStage,
   type WebOwnedDecorationStage,
@@ -343,7 +347,19 @@ export function createVueAdapter(runtime: VueRuntime) {
             lastPortalProjection.parent !== host.parentNode
           ) {
             lastPortalProjection = { host, parent: host.parentNode };
-            notifyWebPortalProjection(host);
+            notifyPortalSubtreeReadiness(
+              host,
+              () =>
+                rootRef.value === host &&
+                portalEpoch === committedEpoch &&
+                host.parentNode === committedEpoch.destination
+            );
+            if (
+              rootRef.value === host &&
+              portalEpoch === committedEpoch &&
+              host.parentNode === committedEpoch.destination
+            )
+              notifyWebPortalProjection(host);
           }
         };
         const offPortalDestination = subscribeWebPortalDestinations(refreshPortalDestination);
@@ -618,6 +634,25 @@ export function createVueAdapter(runtime: VueRuntime) {
         // Reconcile once the host component has received a parent update.
         runtime.onUpdated?.(notifyPropsChange);
 
+        const notifyCommittedPortalSubtree = (readyTarget: HTMLElement | null) => {
+          const committedEpoch = portalEpoch;
+          if (
+            readyTarget &&
+            readyTarget.isConnected &&
+            committedEpoch &&
+            committedEpoch.host === readyTarget &&
+            readyTarget.parentNode === committedEpoch.destination
+          ) {
+            notifyPortalSubtreeReadiness(
+              readyTarget,
+              () =>
+                rootRef.value === readyTarget &&
+                portalEpoch === committedEpoch &&
+                readyTarget.parentNode === committedEpoch.destination
+            );
+          }
+        };
+
         runtime.watch(
           () => commitVersion.value,
           async () => {
@@ -720,9 +755,22 @@ export function createVueAdapter(runtime: VueRuntime) {
                 generation === commitGeneration &&
                 gate === eventGateRef.value &&
                 rootRef.value === readyTarget
-              )
+              ) {
                 notifyFocusTargetReady();
+                notifyCommittedPortalSubtree(readyTarget);
+              }
             });
+          },
+          { flush: 'post' }
+        );
+
+        runtime.watch(
+          hostTokens,
+          () => {
+            const target = rootRef.value;
+            if (!viewReady || !shouldExist.value || !target?.isConnected) return;
+            notifyFocusTargetReady();
+            notifyCommittedPortalSubtree(target);
           },
           { flush: 'post' }
         );
@@ -781,7 +829,10 @@ export function createVueAdapter(runtime: VueRuntime) {
                 eventGate.isEnabled() &&
                 rootRef.value === rootEl &&
                 rootEl.isConnected &&
-                !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+                !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
+                !rootEl.closest(`[${PUI_VIEW_PENDING_ATTR}]`) &&
+                rootEl.ownerDocument?.defaultView?.getComputedStyle?.(rootEl)?.visibility !==
+                  'hidden',
               subscribe: (listener) => {
                 focusTargetReadyListeners.add(listener);
                 return () => focusTargetReadyListeners.delete(listener);
@@ -789,6 +840,16 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             { deferPublication: true }
           );
+          const releasePortalReadiness = registerPortalViewReadiness(rootEl, () => {
+            if (
+              !viewDisposed &&
+              viewGeneration === physicalGeneration &&
+              boundRoot === rootEl &&
+              eventGateRef.value === eventGate &&
+              rootRef.value === rootEl
+            )
+              notifyFocusTargetReady();
+          });
           const disposeView = () => {
             if (viewDisposed) return;
             viewDisposed = true;
@@ -798,6 +859,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               decorationView = null;
             }
             const releases = [
+              releasePortalReadiness,
               () => {
                 if (
                   ownedVisualStyle !== null &&
@@ -901,7 +963,8 @@ export function createVueAdapter(runtime: VueRuntime) {
               viewReady &&
               portalIsCommitted() &&
               !viewDisposed &&
-              !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+              !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
+              !rootRef.value?.closest(`[${PUI_VIEW_PENDING_ATTR}]`),
             isEntryAcquisitionReady: (target) => {
               releaseRequestedTargetReady?.();
               releaseRequestedTargetReady = undefined;

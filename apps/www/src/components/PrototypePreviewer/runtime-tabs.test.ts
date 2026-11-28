@@ -60,22 +60,28 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] 
       expect(p.shell.textContent?.match(/One real runtime host/g)).toHaveLength(1);
       expect(p.shell.querySelectorAll('[role=tabpanel]:not([hidden])')).toHaveLength(1);
       const tablist = p.shell.querySelector<HTMLElement>('[role=tablist]')!;
-      expect(styleContains(tablist, 'bg-transparent')).toBe(true);
-      expect(styleContains(triggers[1]!, 'bg-transparent')).toBe(true);
-      expect(styleContains(triggers[1]!, 'text-foreground')).toBe(true);
+      expect(tablist.style.maxWidth).toBe('100%');
+      expect(tablist.style.overflowX).toBe('auto');
       if (family === 'shadcn') {
+        expect(styleContains(tablist, 'bg-transparent')).toBe(true);
+        expect(styleContains(triggers[1]!, 'bg-transparent')).toBe(true);
+        expect(styleContains(triggers[1]!, 'text-foreground')).toBe(true);
         const decoration = triggers[1]!.querySelector<HTMLElement>('[data-pui-owned-decoration]');
         expect(decoration).not.toBeNull();
         expect(styleContains(decoration!, 'opacity-100')).toBe(true);
         expect(styleContains(decoration!, 'bg-foreground')).toBe(true);
+      } else if (family === 'brutalist') {
+        expect(styleContains(tablist, 'border-black')).toBe(true);
+        expect(styleContains(triggers[1]!, 'bg-main')).toBe(true);
+        expect(styleContains(triggers[1]!, 'border-black')).toBe(true);
+      } else if (family === 'bootstrap-2-3-2') {
+        expect(styleContains(tablist, 'border-[#ddd]')).toBe(true);
+        expect(styleContains(triggers[1]!, 'bg-white')).toBe(true);
+        expect(styleContains(triggers[1]!, 'border-[#ddd]')).toBe(true);
       } else {
-        expect(styleContains(triggers[1]!, 'border-b-2')).toBe(true);
-        expect(
-          styleContains(
-            triggers[1]!,
-            family === 'brutalist' ? 'border-foreground' : 'border-primary'
-          )
-        ).toBe(true);
+        expect(styleContains(tablist, 'rounded-full')).toBe(true);
+        expect(styleContains(triggers[1]!, 'bg-background')).toBe(true);
+        expect(styleContains(triggers[1]!, 'rounded-full')).toBe(true);
       }
       p.tabs.dispose();
       triggers[2]!.click();

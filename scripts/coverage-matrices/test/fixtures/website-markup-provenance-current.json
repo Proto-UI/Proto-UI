@@ -7,11 +7,11 @@
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "65369290f4ba40a5f88a9b1bf38005aed3c7a735b471fe91fcba39dd1a9d0889"
+      "sha256": "eacb228e0ee96af988daabd80232da70457b8ebef9d291adcd4785db036c43ef"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "f96be6d05a5c95aee447618cecae03dee7661fe98b8fe22ebc80ecf4cdf6f1a4"
+      "sha256": "ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-format.ts",
@@ -19,7 +19,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
-      "sha256": "34eaea1715c148b12d9fcae18358463ad74eb0fc74f9cf75b419a11f4544f142"
+      "sha256": "3519d261a6de1d01ffeebb8002a419d8ac38e2ced2a09fc90204b882f3960a0b"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-themes.mjs",
@@ -27,15 +27,15 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "d34e9445536da8c56aaca4be078449ecdc05108f93f11e5bd5828f94d5d06629"
+      "sha256": "eacaa47d1b065f686a1917832530252498615b1af1bc94ce06ca8b29ebc9747f"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
-      "sha256": "3d872af075760e384e9f98f438ff95f062dd8c388a83847f4222f3d015d2bf1a"
+      "sha256": "749d000b6e52c6b86f33ac6a7ab36b3b759a1f3bd9da4ad09d46c8f77781792c"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "b3a8bb8c0b06600f0f19bd2c178a374e68af09806aaefadbd6ac3a277ffe4f51"
+      "sha256": "d85fae0d9413d0e863c87e6a9ee0e2caece45d61ca3af9dd607f21b77f82431b"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
@@ -43,7 +43,7 @@
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
-      "sha256": "05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7"
+      "sha256": "027c3e56da086a9affd423aa43aa9278a9c01807a513d237efbbe426db1fb253"
     },
     {
       "path": "apps/www/src/components/SiteCopyBootstrap.astro",
@@ -75,11 +75,11 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
-      "sha256": "ef13d6a667bbbe8b48ea3f6599732681b88c14a5a7afb26c738219990b9d4bd1"
+      "sha256": "4a96e4958e49ae5e2d6268d1b4832318b36757bc7bac0bb2369b8e9377fc3578"
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "97c7ff7c0d5b7f72e42a6b41d7b9f33dfe2095505d6758474d31d7eb11580575"
+      "sha256": "3c0a17d9d3851cddc1dbbe7dd093c8edb407e13ec6ed5973c764df5ade4cdad0"
     },
     {
       "path": "apps/www/astro.config.mjs",
@@ -107,7 +107,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
-      "sha256": "5870ef290174f759bb5414b0df56e3615335f0d258522cee4cdb150f93f5ac69"
+      "sha256": "50ee8b707a1e3c84ebbedc2f79ed45cb89f04ef40613dd40f3092e4d3046b24e"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
@@ -123,7 +123,7 @@
     },
     {
       "path": "apps/www/src/components/install-command-card-client.ts",
-      "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
+      "sha256": "3fa1ee7d45176e12e0f6837cb3d6c6c8edc0b8e401ca911bddd448e3be4df610"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro",
@@ -131,7 +131,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
-      "sha256": "ab62bf88b33cbb13cf52d0b1dc6a1d0b201cfbd6591f394565f751999542606e"
+      "sha256": "a3e0bda829aea1d1e2c95be4a20a54731d2bf8d9253c0a8cde95390c10d3a96b"
     }
   ]
 }

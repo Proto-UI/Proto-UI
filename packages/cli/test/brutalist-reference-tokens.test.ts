@@ -28,11 +28,13 @@ describe('source-aligned Brutalist style closure', () => {
     expect(css).toContain('transition-property: none;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     // The Input family publishes its focus-visible ring through the Base
-    // Input projection's state handles, so the preset manifest must keep the
-    // focus-visible ring utility and the literal ring color it paints.
-    expect(BRUTALIST_STYLE_TOKENS).toContain('data-[focus-visible]:ring-black');
+    // Input projection's state handles, and splits light/dark ring colors via
+    // colorScheme meta rules (`ring-black` in light, `ring-ring` in dark).
+    expect(BRUTALIST_STYLE_TOKENS).toContain('data-[focus-visible]:ring-2');
+    expect(BRUTALIST_STYLE_TOKENS).toContain('ring-black');
+    expect(BRUTALIST_STYLE_TOKENS).toContain('ring-ring');
     expect(css).toContain(
-      ':where([data-pui-style~="data-[focus-visible]:ring-black"])[data-focus-visible]'
+      ':where([data-pui-style~="data-[focus-visible]:ring-2"])[data-focus-visible]'
     );
     expect(css).toContain('--pui-ring-color: #000000;');
     const reduced = renderProtoStyleTokenCss(['transition-transform']).split(

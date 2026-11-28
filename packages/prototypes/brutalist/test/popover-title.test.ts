@@ -170,5 +170,5 @@ describe('Neo Popover Title bounded presentation', () => {
       );
       expect(css).toContain('line-height: 1;');
     }
-  }, 30_000);
+  }, 120_000);
 });

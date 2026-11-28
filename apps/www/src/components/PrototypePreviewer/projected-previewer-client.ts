@@ -29,6 +29,7 @@ import {
   watchProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import { isRuntimeId, type RuntimeId } from './runtimes/ids';
+import { deferUntilDocsHeaderPrepared } from '../docs-header-preparation';
 
 export type ProjectedPreviewerOptions = Readonly<{
   root: HTMLElement;
@@ -178,12 +179,15 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     return promise;
   };
 
+  let pendingAdapterRuntimeId: RuntimeId | null = null;
+
   const requestRuntime = (
     runtimeId: RuntimeId,
     requestOptions: Readonly<{ broadcast?: boolean; restoreFocus?: boolean }> = {}
   ): Promise<ProjectionScopeSnapshot> => {
     if (destroyed) return Promise.resolve(controller.getSnapshot());
     if (!runtimeList.includes(runtimeId)) return Promise.resolve(controller.getSnapshot());
+    pendingAdapterRuntimeId = null;
     if (runtimeId === desiredRuntimeId && controller.getSnapshot().phase !== 'idle') {
       return Promise.resolve(controller.getSnapshot());
     }
@@ -479,19 +483,26 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     },
   });
 
+  const deferredAdapterSwitch = deferUntilDocsHeaderPrepared(root, () => {
+    const runtimeId = pendingAdapterRuntimeId;
+    pendingAdapterRuntimeId = null;
+    if (!runtimeId || destroyed || runtimeId === desiredRuntimeId) return;
+    return requestRuntime(runtimeId);
+  });
+
   const onAdapterChange = (event: Event): void => {
     const detail = (event as CustomEvent<AdapterPreferenceDetail>).detail;
     const runtimeId = detail?.adapter;
-    if (
-      detail?.source === root ||
-      !isRuntimeId(runtimeId) ||
-      !runtimeList.includes(runtimeId) ||
-      runtimeId === desiredRuntimeId
-    ) {
+    if (!isRuntimeId(runtimeId) || !runtimeList.includes(runtimeId)) {
+      return;
+    }
+    if (detail?.source === root || runtimeId === desiredRuntimeId) {
+      pendingAdapterRuntimeId = null;
       return;
     }
     sealOutgoingPortals();
-    void requestRuntime(runtimeId);
+    pendingAdapterRuntimeId = runtimeId;
+    void deferredAdapterSwitch.prepare();
   };
   root.ownerDocument.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
 
@@ -499,6 +510,8 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     if (destroyPromise) return destroyPromise;
     destroyPromise = (async () => {
       destroyed = true;
+      pendingAdapterRuntimeId = null;
+      deferredAdapterSwitch.cancel();
       startupOwner.abort();
       requestEpoch += 1;
       stopThemeWatcher?.();

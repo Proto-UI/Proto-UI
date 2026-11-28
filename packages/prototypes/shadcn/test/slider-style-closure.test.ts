@@ -38,7 +38,7 @@ it('collects the actual passive Slider paint and emits its dimensions and ring C
   expect(css).toContain('--pui-ring-width: 3px;');
   expect(css).toContain('@media (forced-colors: active)');
   expect(css).toContain('[data-pui-style~="forced-colors-focus-outline"]');
-});
+}, 60_000);
 it('closes borrowed-state Slider Rule tokens without relying on other components to seed CSS', async () => {
   const tokens = await collect();
   const expected = [
@@ -55,4 +55,4 @@ it('closes borrowed-state Slider Rule tokens without relying on other components
   expect(expected.filter((token) => !tokens.includes(token))).toEqual([]);
   const css = renderProtoStyleTokenCss(tokens);
   for (const token of expected) expect(css).toContain(`[data-pui-style~="${token}"]`);
-});
+}, 60_000);

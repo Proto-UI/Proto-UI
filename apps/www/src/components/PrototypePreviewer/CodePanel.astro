@@ -13,13 +13,14 @@ import {
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const defaultSiteControls = siteControlTags(siteFamily);
 const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
-import { highlightCode, type CodeLang } from './code-highlight';
+import { highlightCode, type CodeLang, type HighlightLinesInput } from './code-highlight';
 
-export type { CodeLang } from './code-highlight';
+export type { CodeLang, HighlightLinesInput } from './code-highlight';
 
 interface Props {
   code: string | undefined;
   lang?: CodeLang;
+  highlightLines?: HighlightLinesInput;
   id?: string;
   labelledBy?: string;
   hidden?: boolean;
@@ -43,6 +44,7 @@ interface Props {
 const {
   code,
   lang = 'tsx',
+  highlightLines,
   id,
   labelledBy,
   hidden,
@@ -58,7 +60,7 @@ const {
   titleIcon,
   lineNumbers = true,
   presentation,
-  scrollLimit,
+  scrollLimit = 'unbounded',
   panelRole = 'tabpanel',
 } = Astro.props;
 const effectiveControlFamily = resolvePreviewControlFamily(Astro.url.pathname, controlFamily);
@@ -66,7 +68,7 @@ const Button =
   effectiveControlFamily === siteFamily
     ? defaultSiteControls.Button
     : previewButtonTag(effectiveControlFamily);
-const highlighted = await highlightCode(code, lang);
+const highlighted = await highlightCode(code, lang, { highlightLines });
 ---
 
 <SiteCopyBootstrap />
@@ -78,7 +80,7 @@ const highlighted = await highlightCode(code, lang);
   role={labelledBy ? panelRole : undefined}
   aria-labelledby={labelledBy}
   hidden={hidden}
-  data-code-file-panel={labelledBy ? '' : undefined}
+  data-code-file-panel={labelledBy || fileIndex !== undefined ? '' : undefined}
   data-code-file-index={fileIndex}
   data-code-shell
   data-code-presentation={presentation}
@@ -123,18 +125,12 @@ const highlighted = await highlightCode(code, lang);
       )
     }
 
-    {
-      scrollLimit ? (
-        <CodeScrollArea
-          limit={scrollLimit}
-          label={title ?? (isChinese ? '示例代码' : 'Example source')}
-        >
-          <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
-        </CodeScrollArea>
-      ) : (
-        <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
-      )
-    }
+    <CodeScrollArea
+      limit={scrollLimit}
+      label={title ?? (isChinese ? '示例代码' : 'Example source')}
+    >
+      <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
+    </CodeScrollArea>
 
     {
       collapsible && (
@@ -194,9 +190,13 @@ const highlighted = await highlightCode(code, lang);
 <style is:global>
   /* The static pre remains the scroll and focus owner if the browser does not
      upgrade the Shadcn anatomy. A ready viewport is the only scroll owner. */
+  [data-code-scroll-root][data-code-scroll-limit='preview']:not([data-code-scroll-ready])
+    .proto-previewer__code {
+    max-height: min(36rem, 65svh);
+  }
   [data-code-scroll-root][data-code-scroll-limit='file']:not([data-code-scroll-ready])
     .proto-previewer__code {
-    max-height: 28rem;
+    max-height: min(44rem, 75svh);
   }
   [data-code-scroll-root],
   [data-code-scroll-anatomy],
@@ -211,17 +211,38 @@ const highlighted = await highlightCode(code, lang);
     overscroll-behavior-x: contain;
     overscroll-behavior-y: auto;
   }
-  [data-code-scroll-ready][data-code-scroll-limit='file'] [data-code-scroll-viewport] {
-    max-height: 28rem;
-  }
   [data-code-scroll-ready][data-code-scroll-limit='preview'] [data-code-scroll-viewport] {
     max-height: min(36rem, 65svh);
+  }
+  [data-code-scroll-ready][data-code-scroll-limit='file'] [data-code-scroll-viewport] {
+    max-height: min(44rem, 75svh);
+  }
+  [data-code-scroll-ready][data-code-scroll-limit='unbounded'] [data-code-scroll-viewport] {
+    max-height: none;
   }
   [data-code-expanded='false']
     [data-code-scroll-ready][data-code-scroll-limit='preview']
     [data-code-scroll-viewport] {
-    max-height: 4.5rem;
+    max-height: 6rem;
     overflow: hidden !important;
+  }
+  [data-code-expanded='false']
+    [data-code-scroll-ready]:is(
+      [data-code-scroll-limit='file'],
+      [data-code-scroll-limit='unbounded']
+    )
+    [data-code-scroll-viewport] {
+    max-height: 11rem;
+    overflow: hidden !important;
+  }
+  [data-code-expanded='false']
+    [data-code-scroll-root]:not([data-code-scroll-ready]):is(
+      [data-code-scroll-limit='file'],
+      [data-code-scroll-limit='unbounded']
+    )
+    .proto-previewer__code {
+    max-height: 11rem;
+    overflow: hidden;
   }
   [data-code-expanded='false'] [data-code-scroll-ready] [data-code-scroll-viewport] {
     overflow: hidden !important;
@@ -248,17 +269,10 @@ const highlighted = await highlightCode(code, lang);
   .code-panel__collapse-bar {
     display: flex;
     justify-content: center;
-    padding: 0.5rem 0.75rem 0.25rem;
+    padding: 0.25rem 0.75rem 0.75rem;
   }
   .code-panel__collapse-bar[hidden] {
     display: none;
-  }
-  @container code-panel (max-width: 14rem) {
-    [data-code-expanded='true']
-      [data-code-scroll-ready][data-code-scroll-limit='preview']
-      [data-code-scroll-viewport] {
-      max-height: min(36rem, 65svh, max(6rem, calc(100svh - var(--header-height, 4rem) - 4rem)));
-    }
   }
   [data-code-scroll-ready] [data-code-scroll-viewport] .proto-previewer__code {
     box-sizing: border-box;
@@ -269,7 +283,7 @@ const highlighted = await highlightCode(code, lang);
     overflow: visible;
   }
   [data-code-expanded='false'] [data-code-scroll-ready] [data-code-scroll-viewport] {
-    mask-image: linear-gradient(to bottom, black, transparent);
+    mask-image: linear-gradient(to bottom, black 35%, transparent);
   }
   [data-code-expanded='false'] [data-code-scroll-ready] [data-code-content] {
     mask-image: none;
@@ -281,19 +295,31 @@ const highlighted = await highlightCode(code, lang);
   .code-panel__title {
     display: flex;
     align-items: center;
-    min-height: 3rem;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid var(--color-border);
-    font-size: 0.875rem;
+    min-height: 2.75rem;
+    padding: 0.375rem 0.75rem 0.375rem 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-border) 50%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: color-mix(in oklab, var(--color-foreground) 85%, transparent);
     gap: 0.5rem;
     overflow-wrap: anywhere;
+  }
+  .code-panel__title > svg {
+    flex: none;
+    color: var(--color-muted-foreground);
+  }
+  [data-site-library-family='brutalist'] .code-panel__title,
+  [data-site-library-family='bootstrap-2-3-2'] .code-panel__title {
+    border-bottom-color: var(--color-border);
+    color: var(--color-foreground);
   }
   /* Required source reserves a real column for Copy, outside the scroll viewport. */
   [data-code-collapsible='false']:not(:has([data-code-file-header])) [data-code-inner] {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+    align-items: center;
     column-gap: 0.5rem;
+    padding-inline-end: 0.5rem;
   }
   [data-code-collapsible='false']
     [data-code-inner]
@@ -309,7 +335,7 @@ const highlighted = await highlightCode(code, lang);
   }
   [data-code-collapsible='false'] .proto-previewer__code {
     max-height: none;
-    padding-inline-end: 0;
+    padding-inline-end: 1rem;
   }
   .code-panel__title > [data-code-file-title] {
     min-width: 0;
@@ -329,11 +355,7 @@ const highlighted = await highlightCode(code, lang);
     flex: none;
   }
   [data-code-file-header] + [data-code-inner] {
-    padding-inline: 0;
-  }
-  [data-code-file-header] ~ [data-code-inner] .proto-previewer__code {
-    font-size: 0.875rem;
-    line-height: 1.3125rem;
+    padding: 0;
   }
   [data-code-file-header] ~ [data-code-inner] .proto-previewer__code > code {
     display: grid;
@@ -341,18 +363,17 @@ const highlighted = await highlightCode(code, lang);
   }
   [data-code-file-header] ~ [data-code-inner] .proto-previewer__code .line {
     display: block;
-    padding-block: 1px;
+    padding-block: 0;
   }
   [data-code-presentation='docs'] [data-code-file-header] {
-    min-height: 2.625rem;
+    min-height: 2.75rem;
     padding-block: 0.375rem;
   }
   [data-code-presentation='docs'] [data-code-inner] {
-    padding: 0.875rem 1rem;
+    padding: 0;
   }
   [data-code-presentation='docs'] [data-code-inner] .proto-previewer__code {
-    font-size: 0.875rem;
-    line-height: 1.53125rem;
+    padding: 0.875rem 1rem;
   }
   [data-code-presentation='docs'] [data-code-inner] .proto-previewer__code .line {
     padding-block: 0;

@@ -125,6 +125,11 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
                   width: '100%',
                   height: '100%',
                   pointerEvents: 'none',
+                  ...(purpose === 'code' &&
+                  family === 'shadcn' &&
+                  root.dataset.siteCodeSurface === 'frame'
+                    ? { backgroundColor: 'var(--pui-code)', borderColor: 'transparent' }
+                    : {}),
                 },
                 props: {
                   variant:
@@ -143,7 +148,12 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
                       : root.dataset.siteCodeSurface === 'toolbar'
                         ? 'none'
                         : 'default',
-                  border: root.dataset.siteCodeSurface === 'toolbar' ? 'bottom' : 'all',
+                  border:
+                    root.dataset.siteCodeSurface === 'toolbar'
+                      ? 'bottom'
+                      : purpose === 'code' && family === 'shadcn'
+                        ? 'none'
+                        : 'all',
                   elevation: 'none',
                 },
               },

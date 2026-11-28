@@ -1688,7 +1688,13 @@ describe('Website projection composition', () => {
       componentId: 'button',
       childDemo: {
         type: 'demo',
-        root: { kind: 'proto', prototypeId: 'shadcn-button', ref: 'content-button' },
+        root: {
+          kind: 'box',
+          children: [
+            { kind: 'proto', prototypeId: 'shadcn-button', ref: 'content-button' },
+            { kind: 'proto', prototypeId: 'lucide-plus-icon' },
+          ],
+        },
       },
       controls: controls(),
       controlIds: [],

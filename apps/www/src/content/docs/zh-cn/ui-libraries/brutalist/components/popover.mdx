@@ -19,7 +19,7 @@ Popover 在触发元素附近展示带有硬边阴影与 2px 黑框的 Brutalist
 
 ## 安装
 
-Brutalist Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-brutalist/popover` 导入原型并使用对应框架适配器：
+Brutalist Popover 目前在工作区源码中提供，将于 `0.3.0-rc.1` 及后续版本中提供 CLI。可直接从 `@proto.ui/prototypes-brutalist/popover` 导入原型并使用对应框架适配器：
 
 ```ts
 import {
@@ -116,7 +116,11 @@ BrutalistPopoverRoot
     { name: 'sideOffset (Content)', type: 'number', default: '4' },
     { name: 'alignOffset (Content)', type: 'number', default: '0' },
     { name: 'collisionPadding (Content)', type: 'number', default: '8' },
-    { name: 'presentation (Trigger / Content)', type: "'default' | 'navigation'", default: "'default'" },
+    {
+      name: 'presentation (Trigger / Content)',
+      type: "'default' | 'navigation'",
+      default: "'default'",
+    },
     { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
   ]}
 />

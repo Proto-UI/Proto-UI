@@ -1,15 +1,20 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { createContextKey, definePrototype, tw } from '@proto.ui/core';
 import {
   asNavigationMenuContent,
   type NavigationMenuContentProps,
   type NavigationMenuContentExposes,
 } from '@proto.ui/prototypes-base/navigation-menu';
 
+export const BOOTSTRAP_NAVIGATION_CONTENT_PAINT = createContextKey<{ content: boolean }>(
+  'bootstrap-2-3-2-navigation-content-paint'
+);
+
 export default definePrototype<NavigationMenuContentProps, NavigationMenuContentExposes>({
   name: 'bootstrap-2-3-2-navigation-menu-content',
   modules: asNavigationMenuContent.modules,
   setup(def) {
     const behavior = asNavigationMenuContent();
+    def.context.provide(BOOTSTRAP_NAVIGATION_CONTENT_PAINT, { content: true });
     def.props.setDefaults({ sideOffset: 2 });
     def.feedback.style.use(
       tw(

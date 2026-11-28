@@ -526,6 +526,11 @@ const staticUtilities: Record<string, string[]> = {
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
+  'transition-[color,background-color,border-color,box-shadow,transform,opacity]': [
+    'transition-property: color, background-color, border-color, box-shadow, transform, opacity;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
   'transition-opacity': [
     'transition-property: opacity;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',

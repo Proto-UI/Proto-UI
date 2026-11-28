@@ -1,6 +1,10 @@
 import type { RuntimeId } from './runtimes/ids';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
+import {
+  deferUntilDocsHeaderPrepared,
+  hasPendingDocsHeaderPreparation,
+} from '../docs-header-preparation';
 type PreviewerRoot = HTMLElement & { __previewer__?: { destroy(): unknown } };
 type Client = typeof import('./previewer-client');
 type Matrix = HTMLElement & {
@@ -101,7 +105,27 @@ export function initPreviewerBootstrap(
     root.dataset.mounting = '1';
     try {
       const { initPreviewer } = await loadClient();
-      if (root.dataset.lazy !== 'true') await waitEagerTurn(entry.owner.signal);
+      if (root.dataset.lazy !== 'true') {
+        if (hasPendingDocsHeaderPreparation(document)) {
+          await new Promise<void>((resolve, reject) => {
+            if (entry.owner.signal.aborted) {
+              reject(entry.owner.signal.reason);
+              return;
+            }
+            const deferred = deferUntilDocsHeaderPrepared(root, () => {
+              entry.owner.signal.removeEventListener('abort', onAbort);
+              resolve();
+            });
+            const onAbort = () => {
+              deferred.cancel();
+              reject(entry.owner.signal.reason);
+            };
+            entry.owner.signal.addEventListener('abort', onAbort, { once: true });
+            void deferred.prepare();
+          });
+        }
+        await waitEagerTurn(entry.owner.signal);
+      }
       if (
         disposed ||
         entry.owner.signal.aborted ||

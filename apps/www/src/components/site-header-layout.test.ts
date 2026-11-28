@@ -278,7 +278,7 @@ it('spaces unframed text separately from framed controls without changing compac
   const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
   const nav = css.match(/\.site-header-navigation\s*\{([^}]+)\}/)![1];
   expect(nav).toContain('gap: var(--site-header-navigation-gap)');
-  expect(nav).toContain('calc(var(--site-header-brand-navigation-gap) - 0.25rem)');
+  expect(nav).toContain('calc(var(--site-header-brand-navigation-gap) - 0.5rem)');
   expect(css).toContain('--site-header-navigation-gap: 1.5rem');
   const framed = css.match(
     /\[data-site-library-family='brutalist'\] \.site-header\s*\{([^}]+)\}/
@@ -455,4 +455,22 @@ it('bounds the Header panel by the Header box so one measured viewport cannot pl
     expect(compact).not.toMatch(/width:\s*var\(--site-header-panel-max-width/);
   };
   panelContract(css);
+});
+
+it('drives both the menu toggle icon and popup surface animations from asTransition phases with reduced-motion safety', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(css).toContain(
+    ".site-header[data-site-menu-transition='entering'] .site-header-menu-icon::before"
+  );
+  expect(css).toContain(
+    ".site-header[data-site-menu-transition='leaving'] .site-header-menu-icon::before"
+  );
+  expect(css).toContain(".site-header[data-site-menu-ready][data-site-menu-transition='entering']");
+  expect(css).toContain(
+    ".site-header[data-site-menu-ready][data-site-menu-transition='leaving'] .site-header-panel"
+  );
+  expect(css).toContain('pointer-events: none;');
+  expect(css).toContain('@starting-style');
+  const reducedMotion = cssBlocks(css, '@media (prefers-reduced-motion: reduce)').join('\n');
+  expect(reducedMotion).toContain('transition-duration: 0ms !important');
 });

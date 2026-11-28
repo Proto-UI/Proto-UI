@@ -2,6 +2,8 @@
 import * as drawer from '@proto.ui/prototypes-shadcn/drawer';
 import { shadcnButton } from '@proto.ui/prototypes-shadcn/button';
 import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import minusIcon from '../../../lucide/src/icons/minus';
+import plusIcon from '../../../lucide/src/icons/plus';
 import { registerPrototype } from '../../../../../apps/www/src/components/PrototypePreviewer/registry';
 import { renderDemo } from '../../../../../apps/www/src/components/PrototypePreviewer/demo-renderer';
 import type { DemoSpec } from '../../../../../apps/www/src/components/PrototypePreviewer/demo-types';
@@ -17,6 +19,8 @@ export async function createPublicDrawerEntryFixture(
   // action, so the renderer needs that prototype registered alongside the
   // drawer family; omitting it leaves the demo unbuildable before entry.
   registerPrototype('shadcn-button', shadcnButton as any);
+  registerPrototype(minusIcon.name, minusIcon as any);
+  registerPrototype(plusIcon.name, plusIcon as any);
   for (const value of Object.values(drawer)) {
     if (value && typeof value === 'object' && 'name' in value)
       registerPrototype(value.name as string, value as any);

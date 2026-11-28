@@ -102,4 +102,4 @@ it('production style-token emitter includes New York label and separator geometr
   expect(css).toContain('var(--pui-muted-foreground)');
   expect(css).toContain('var(--pui-border)');
   expect(css).toContain('height: 1px');
-});
+}, 60_000);

@@ -440,9 +440,17 @@ it.each(tooltipCases)(
           };
         })
       ).toEqual({ focused: true, disabled: false, focusSelf: 'function' });
+      await node(page, 'content').waitFor({ state: 'visible' });
+      let contentId: string | null = null;
+      await expect
+        .poll(async () => {
+          contentId = await node(page, 'content').getAttribute('id');
+          return contentId;
+        })
+        .toBeTruthy();
       await expect
         .poll(async () => node(page, 'trigger').getAttribute('aria-describedby'))
-        .toBe(await node(page, 'content').getAttribute('id'));
+        .toBe(contentId);
       await page.keyboard.press('Escape');
       await expect
         .poll(() => page.evaluate(() => window.repairFixture.exposes('root').open.get()))

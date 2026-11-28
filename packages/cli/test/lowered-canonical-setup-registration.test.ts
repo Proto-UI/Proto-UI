@@ -185,21 +185,28 @@ describe('canonical setup references in the source Rule inventory', () => {
     expect(inventory.evaluated.flatMap((row) => row.unresolved)).toEqual([]);
   });
 
-  it('retains every actual Base Dialog Rule through its configured and first native calls', async () => {
-    const file = path.join(REPO_ROOT, 'packages/prototypes/base/src/dialog/content.proto.ts');
-    const source = await readFile(file, 'utf8');
-    const sites = scanRuleStateReadsWithSites(source, file);
-    const inventory = scanRuleStateReadInventory([file]);
-    expect(sites.sites.length).toBeGreaterThan(0);
-    expect(new Set(inventory.evaluated.map((row) => row.rule.start))).toEqual(
-      new Set(sites.sites.map((site) => site.call.getStart()))
-    );
-    expect(inventory.evaluated.flatMap((row) => row.unresolved)).toEqual([]);
-    // The shipped presence rule compares only against false. Both lowering
-    // paths leave an all-negative condition on the runtime plan, so its site
-    // must remain inventoried without claiming a lowered hook usage.
-    expect(inventory.evaluated.flatMap((row) => row.usages)).toEqual([]);
-  });
+  it.each([
+    ['Dialog', 'dialog'],
+    ['Context Menu', 'context-menu'],
+    ['Dropdown', 'dropdown'],
+  ])(
+    'retains every actual Base %s Rule through its configured and first native calls',
+    async (_, family) => {
+      const file = path.join(REPO_ROOT, `packages/prototypes/base/src/${family}/content.proto.ts`);
+      const source = await readFile(file, 'utf8');
+      const sites = scanRuleStateReadsWithSites(source, file);
+      const inventory = scanRuleStateReadInventory([file]);
+      expect(sites.sites.length).toBeGreaterThan(0);
+      expect(new Set(inventory.evaluated.map((row) => row.rule.start))).toEqual(
+        new Set(sites.sites.map((site) => site.call.getStart()))
+      );
+      expect(inventory.evaluated.flatMap((row) => row.unresolved)).toEqual([]);
+      // The shipped presence rule compares only against false. Both lowering
+      // paths leave an all-negative condition on the runtime plan, so its site
+      // must remain inventoried without claiming a lowered hook usage.
+      expect(inventory.evaluated.flatMap((row) => row.usages)).toEqual([]);
+    }
+  );
 
   it('withholds positive lowering capability after closing only setup references', async () => {
     const file = path.join(REPO_ROOT, 'packages/prototypes/base/src/dialog/content.proto.ts');

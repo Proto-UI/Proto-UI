@@ -27,6 +27,7 @@ import { initProjectedPreviewer } from './projected-previewer-client';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 import { describeLazyChunkFailure, isLazyChunkFailure } from './lazy-chunk-recovery';
 import { PREVIEW_ERROR_MARKER, PREVIEW_RECOVERY_ATTRIBUTE } from './preview-error-surface';
+import { deferUntilDocsHeaderPrepared } from '../docs-header-preparation';
 
 export { demoModuleCount, warmDemoModules } from './demo-modules';
 
@@ -530,6 +531,14 @@ export function initPreviewer(options: PreviewerOptions) {
     nativeSelect.addEventListener('change', onSelectChange);
   }
 
+  let pendingAdapterSwitch: { id: string; expectedVersion: number } | null = null;
+  const deferredAdapterSwitch = deferUntilDocsHeaderPrepared(root, () => {
+    const pending = pendingAdapterSwitch;
+    pendingAdapterSwitch = null;
+    if (!pending || destroyed || version !== pending.expectedVersion) return;
+    return switchTo(pending.id);
+  });
+
   const onAdapterChange = (event: Event) => {
     const request = runtimeBroadcastRequests.get(event);
     if (request && !request.isCurrent()) return;
@@ -539,8 +548,12 @@ export function initPreviewer(options: PreviewerOptions) {
     writeSelectValue(id);
     if (version !== receivingVersion || (request && !request.isCurrent())) return;
     // The source already started this exact request; peers enter once here.
-    if (request?.source === root) return;
-    void switchTo(id);
+    if (request?.source === root) {
+      pendingAdapterSwitch = null;
+      return;
+    }
+    pendingAdapterSwitch = { id, expectedVersion: receivingVersion };
+    void deferredAdapterSwitch.prepare();
   };
   document.addEventListener('proto-adapter:change', onAdapterChange);
 
@@ -564,6 +577,8 @@ export function initPreviewer(options: PreviewerOptions) {
       if (destroyPromise) return destroyPromise;
       destroyed = true;
       version++;
+      pendingAdapterSwitch = null;
+      deferredAdapterSwitch.cancel();
       activeFocusLease?.cancel();
       activeFocusLease = null;
       stopThemeWatcher?.();

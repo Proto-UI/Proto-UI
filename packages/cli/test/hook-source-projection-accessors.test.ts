@@ -222,14 +222,15 @@ return { ...r };`)
       expect.arrayContaining([
         'data-[focus-visible]:outline-none',
         'data-[focus-visible]:ring-2',
-        'data-[focus-visible]:ring-black',
         'data-[focus-visible]:ring-offset-2',
+        'ring-black',
+        'ring-ring',
         'data-[disabled]:cursor-not-allowed',
         'data-[disabled]:opacity-50',
       ])
     );
-    const css = renderProtoStyleTokenCss(['data-[focus-visible]:ring-black']);
-    expect(css).toContain('[data-pui-style~="data-[focus-visible]:ring-black"]');
+    const css = renderProtoStyleTokenCss(['data-[focus-visible]:ring-2', 'ring-black']);
+    expect(css).toContain('[data-pui-style~="data-[focus-visible]:ring-2"]');
     expect(css).toContain('--pui-ring-color: #000000;');
   });
 

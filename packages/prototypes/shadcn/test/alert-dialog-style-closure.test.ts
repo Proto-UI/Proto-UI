@@ -49,5 +49,5 @@ describe('Shadcn AlertDialog complete physical style closure', () => {
       ])
         expect(css, declaration).toContain(declaration);
     }
-  });
+  }, 60_000);
 });

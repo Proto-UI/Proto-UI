@@ -15,7 +15,7 @@ import brutalistSurface from '@proto.ui/prototypes-brutalist/surface';
 import shadcnText from '@proto.ui/prototypes-shadcn/text';
 import brutalistText from '@proto.ui/prototypes-brutalist/text';
 import './documentation-image-zoom.css';
-export const IMAGE_ZOOM_DURATION = 220;
+export const IMAGE_ZOOM_DURATION = 420;
 
 export type PreviewFamily = 'shadcn' | 'brutalist';
 export type PreviewControl = HTMLElement & {

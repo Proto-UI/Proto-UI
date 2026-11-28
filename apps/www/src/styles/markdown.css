@@ -91,11 +91,41 @@
   }
 
   main[data-pagefind-body] .sl-heading-wrapper {
-    @apply flex items-end mt-10 gap-2;
+    @apply flex items-center mt-10 gap-2;
   }
 
   main[data-pagefind-body] .sl-heading-wrapper a {
-    @apply mb-0.5;
+    @apply mb-0;
+    color: var(--color-muted-foreground);
+    opacity: 0;
+    transition:
+      opacity 140ms ease,
+      color 140ms ease;
+  }
+
+  main[data-pagefind-body] .sl-heading-wrapper:hover a,
+  main[data-pagefind-body] .sl-heading-wrapper:focus-within a,
+  main[data-pagefind-body] .sl-heading-wrapper a:focus-visible {
+    opacity: 0.85;
+  }
+
+  main[data-pagefind-body] .sl-heading-wrapper a:hover {
+    color: var(--color-foreground);
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    main[data-pagefind-body] .sl-heading-wrapper a {
+      opacity: 0.45;
+    }
+  }
+
+  /* Keep native disclosure triangles inline with Typography-wrapped <summary> text. */
+  main[data-pagefind-body]
+    details
+    > summary
+    :is([data-site-typography-carrier], [data-typography-prototype], [data-site-typography-slot]) {
+    display: inline;
   }
 
   main[data-pagefind-body] h3 {
@@ -166,10 +196,22 @@
   .docs-table-scroll {
     max-width: 100%;
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-foreground) 20%, transparent) transparent;
+  }
+  .docs-table-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .docs-table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .docs-table-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-foreground) 20%, transparent);
+    border-radius: 9999px;
   }
 
   main[data-pagefind-body] table {
-    @apply mt-6 w-full text-sm border border-border rounded-lg overflow-hidden bg-background;
+    @apply mt-6 w-full text-sm bg-background;
     display: table;
     border-collapse: separate;
     border-spacing: 0;
@@ -179,13 +221,21 @@
   }
 
   main[data-pagefind-body] table tr {
-    @apply even:bg-muted/40 m-0 border-b border-border p-0 last:border-b-0;
+    @apply m-0 p-0 transition-colors;
+  }
+  main[data-pagefind-body] table tbody tr:hover {
+    background: color-mix(in oklab, var(--color-muted) 40%, transparent);
   }
   main[data-pagefind-body] table th {
-    @apply px-4 py-1.5 text-left font-semibold bg-muted/60 text-foreground [&[align=center]]:text-center [&[align=right]]:text-right;
+    @apply px-4 py-2.5 text-left font-medium text-muted-foreground [&[align=center]]:text-center [&[align=right]]:text-right;
+    border-bottom: 1px solid var(--color-border);
   }
   main[data-pagefind-body] table td {
     @apply px-4 py-3 align-top text-foreground;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-border) 60%, transparent);
+  }
+  main[data-pagefind-body] table tbody tr:last-child td {
+    border-bottom: 0;
   }
   /* These five channel names are identifiers. Preserve each short token in
      the whitepaper's own table; its existing scroll wrapper owns any overflow. */
@@ -194,21 +244,41 @@
     overflow-wrap: normal;
     word-break: normal;
   }
-  /* Light mode: subtle inner grid lines for readability */
-  main[data-pagefind-body] table th,
-  main[data-pagefind-body] table td {
-    @apply border-b border-border/60;
+  /* Brutalist keeps its bold 2px architectural grid; Bootstrap keeps classic bordered cells. */
+  [data-site-library-family='brutalist'] main[data-pagefind-body] table {
+    border: 2px solid var(--site-brutalist-border, #000);
+    border-radius: 0;
   }
-  main[data-pagefind-body] table tr:last-child td {
-    @apply border-b-0;
+  [data-site-library-family='brutalist'] main[data-pagefind-body] table th {
+    background: var(--site-brutalist-muted);
+    color: var(--site-brutalist-foreground);
+    font-weight: 700;
+    border-bottom: 2px solid var(--site-brutalist-border, #000);
   }
-  main[data-pagefind-body] table td + td,
-  main[data-pagefind-body] table th + th {
-    @apply border-l border-border/60;
+  [data-site-library-family='brutalist'] main[data-pagefind-body] table td + td,
+  [data-site-library-family='brutalist'] main[data-pagefind-body] table th + th {
+    border-left: 1px solid var(--site-brutalist-border, #000);
   }
-  [data-theme='dark'] main[data-pagefind-body] table th,
-  [data-theme='dark'] main[data-pagefind-body] table td {
-    @apply border-transparent;
+  [data-site-library-family='bootstrap-2-3-2'] main[data-pagefind-body] table {
+    border: 1px solid var(--site-bootstrap-border, #ddd);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  [data-site-library-family='bootstrap-2-3-2'] main[data-pagefind-body] table th {
+    background: var(--site-bootstrap-muted, #f5f5f5);
+    color: var(--site-bootstrap-foreground);
+    font-weight: 700;
+  }
+  [data-site-library-family='bootstrap-2-3-2']
+    main[data-pagefind-body]
+    table
+    tbody
+    tr:nth-child(odd) {
+    background: color-mix(in oklab, var(--site-bootstrap-muted, #f9f9f9) 65%, transparent);
+  }
+  [data-site-library-family='bootstrap-2-3-2'] main[data-pagefind-body] table td + td,
+  [data-site-library-family='bootstrap-2-3-2'] main[data-pagefind-body] table th + th {
+    border-left: 1px solid var(--site-bootstrap-border, #ddd);
   }
 
   /* Match the native fallback box to the enhanced pagination Surface. */
@@ -220,13 +290,19 @@
   main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]) {
     @apply inline-flex items-center justify-center whitespace-normal text-sm font-medium transition-colors;
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-    @apply min-h-9 rounded-md gap-1.5 px-3 py-1 shadow-none;
+    @apply min-h-9 rounded-lg gap-1.5 px-3 py-1 shadow-none;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40;
-    @apply border border-border;
+    @apply border-0;
     @apply min-w-0 w-fit;
     flex: 0 1 auto;
     max-width: calc(50% - 0.25rem);
     margin-bottom: 1px;
+  }
+  [data-site-library-family='bootstrap-2-3-2']
+    :is(footer, main[data-pagefind-body] footer)
+    .pagination-links
+    a:not([data-site-link-enhanced]) {
+    @apply border border-border rounded-[4px];
   }
   footer .pagination-links a:not([data-site-link-enhanced]):only-child,
   main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]):only-child {

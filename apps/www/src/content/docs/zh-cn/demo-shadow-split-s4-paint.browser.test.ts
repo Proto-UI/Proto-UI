@@ -7,7 +7,7 @@ import { runS4PaintJourney } from '../../../../../../scripts/analysis/shadow-s4-
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
-  baseUrl = await startServer('/zh-cn/internal/demo-matrix/');
+  baseUrl = await startServer('/zh-cn/internal/shadow-split/');
   browser = await launchBrowser();
 }, 150_000);
 afterAll(async () => {
@@ -41,7 +41,7 @@ it('S4: compositor never repaints a closed Dialog after settings changes', async
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   try {
-    await page.goto(`${baseUrl}/zh-cn/internal/demo-matrix/#shadow-split-s4`);
+    await page.goto(`${baseUrl}/zh-cn/internal/shadow-split/#shadow-split-s4`);
     const result = await runS4PaintJourney(page);
     expect(result.paths).toBe(24);
     expect(errors).toEqual([]);

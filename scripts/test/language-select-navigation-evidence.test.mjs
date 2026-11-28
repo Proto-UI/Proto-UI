@@ -349,7 +349,7 @@ function assertWorkflow(candidate) {
   const job = candidate.jobs['native-language-navigation'];
   assert.ok(job);
   assert.equal(job['runs-on'], 'ubuntu-24.04');
-  assert.equal(job['timeout-minutes'], 20);
+  assert.equal(job['timeout-minutes'], 25);
   assert.equal(job.env.PROTO_UI_EXPECTED_HEAD, expectedHead);
   assert.doesNotMatch(
     JSON.stringify(job.env),
@@ -379,7 +379,7 @@ function assertWorkflow(candidate) {
     buildIndex >= 0 && executeIndex > buildIndex,
     'Build must precede the dedicated production suite'
   );
-  assert.equal(job.steps[buildIndex]['timeout-minutes'], 5);
+  assert.equal(job.steps[buildIndex]['timeout-minutes'], 10);
   const execute = job.steps[executeIndex];
   assert.equal(execute['timeout-minutes'], 10);
   assert.match(execute.env.PROTO_UI_BROWSER_BASE_URL, /^http:\/\/127\.0\.0\.1:\d+\/?$/);
@@ -555,7 +555,7 @@ for (const [name, mutate] of [
   [
     'job budget expansion',
     (job) => {
-      job['timeout-minutes'] = 21;
+      job['timeout-minutes'] = 26;
     },
   ],
   [
