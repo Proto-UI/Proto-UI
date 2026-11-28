@@ -1,7 +1,7 @@
 // Negative evidence for the event fixture gate. Two claims are under test:
 // a stale fixture must fail the check, and the drift guard on the module's
 // private copy of the vocabulary must actually fire. Both are run through the
-// CLI the repository runs, so neither can pass while the gate is broken.
+// generator entry point the repository runs, so neither can pass while the gate is broken.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -14,13 +14,18 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const SCRIPT = path.join(ROOT, 'scripts/gpui/generate-event-fixture.mts');
 const FIXTURE = path.join(ROOT, 'native/gpui/fixtures/event-types.json');
 const IMPL = path.join(ROOT, 'packages/modules/event/src/impl.ts');
-const TSX = path.join(ROOT, 'node_modules/.bin/tsx');
 
 function runCheck(fixture = FIXTURE, impl = IMPL) {
-  return spawnSync(TSX, [SCRIPT, '--check', '--fixture', fixture, '--impl', impl], {
-    cwd: ROOT,
-    encoding: 'utf8',
-  });
+  // The generator owns this contract, not tsx's CLI IPC server. Node's tsx
+  // loader runs the same entry point in environments without local sockets.
+  return spawnSync(
+    process.execPath,
+    ['--import', 'tsx', SCRIPT, '--check', '--fixture', fixture, '--impl', impl],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }
+  );
 }
 
 test('the committed fixture is current', () => {
@@ -92,7 +97,10 @@ process.stdout.write(JSON.stringify(keys));
 `
   );
 
-  const result = spawnSync(TSX, [probe], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx', probe], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.deepEqual(JSON.parse(result.stdout), ['Enter', 'Escape', 'F6']);
 });
@@ -138,7 +146,10 @@ process.stdout.write(JSON.stringify(keys));
 `
   );
 
-  const result = spawnSync(TSX, [probe], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx', probe], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.deepEqual(JSON.parse(result.stdout), ['ArrowLeft', 'End', 'Enter', 'Escape', 'Home']);
 });
@@ -188,7 +199,10 @@ process.stdout.write(JSON.stringify(keys));
 `
   );
 
-  const result = spawnSync(TSX, [probe], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx', probe], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.deepEqual(JSON.parse(result.stdout), [
     'ArrowDown',

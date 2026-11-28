@@ -1,6 +1,6 @@
 // Negative evidence for the style fixture gate: a stale fixture must fail the
 // check, not merely be expected to. The check is run as the repository runs
-// it, through its CLI, so the test cannot pass while the gate is broken.
+// it, through its generator entry point, so the test cannot pass while the gate is broken.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -13,13 +13,18 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const SCRIPT = path.join(ROOT, 'scripts/gpui/generate-style-fixture.mts');
 const FIXTURE = path.join(ROOT, 'native/gpui/fixtures/style-tokens.json');
 const THEME = path.join(ROOT, 'native/gpui/fixtures/theme-tokens.json');
-const TSX = path.join(ROOT, 'node_modules/.bin/tsx');
 
 function runCheck(fixture, theme = THEME) {
-  return spawnSync(TSX, [SCRIPT, '--check', '--fixture', fixture, '--theme-fixture', theme], {
-    cwd: ROOT,
-    encoding: 'utf8',
-  });
+  // The generator owns this contract, not tsx's CLI IPC server. Node's tsx
+  // loader runs the same entry point in environments without local sockets.
+  return spawnSync(
+    process.execPath,
+    ['--import', 'tsx', SCRIPT, '--check', '--fixture', fixture, '--theme-fixture', theme],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }
+  );
 }
 
 test('the committed fixtures are current', () => {
