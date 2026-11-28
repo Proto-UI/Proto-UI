@@ -38,6 +38,7 @@
       "default": "./src/producer/index.ts"
     },
     "./targets/ir": "./src/targets/component-ir.ts",
+    "./targets/validate": "./src/targets/validate.ts",
     "./targets/react": "./src/targets/react.ts",
     "./targets/gpui": "./src/targets/gpui.ts",
     "./support/react": "./src/support/react/index.ts",
