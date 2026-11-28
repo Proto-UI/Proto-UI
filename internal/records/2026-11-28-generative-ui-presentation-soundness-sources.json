@@ -124,39 +124,31 @@
     }
   ],
   "specAdequacy": {
-    "purpose": "Map each external failure category to the theorem in section 4 of the record. A real failure that fits neither 'covered' nor an explicit out-of-scope reason indicates a specification gap: change the theorem, not add a rule.",
+    "purpose": "Map each external failure category to the guarantee and hints in the record. A real failure that fits neither a covered entry nor an explicit out-of-scope reason indicates a specification gap.",
     "theoremClauses": {
-      "1": "activatable element has an observable consequence or is shown unavailable",
-      "2": "displayed non-text value with model-authored literal provenance carries attribution",
-      "3": "displayed value derived through a snapshot of a mutable source is marked not-latest",
-      "4": "value of a scheduler-outcome type comes from a real scheduler outcome"
+      "closure": "Every rendered button reaches an observable consequence on some reachable path, or is compiled as disabled when no path does (guaranteed, rewrites IR)",
+      "outcome": "Task-outcome values come only from the scheduler (deferred until an unforgeable outcome type exists)"
     },
     "evoGenUIBench": [
       {
         "mechanism": "affordanceBinding",
         "count": 460,
         "status": "covered",
-        "clauses": [
-          "1"
-        ]
+        "by": "closure"
       },
       {
         "mechanism": "derivedStatePropagation",
         "count": 586,
-        "status": "covered",
-        "clauses": [
-          "3"
-        ]
+        "status": "hint-only",
+        "by": "snapshot",
+        "reason": "Diagnostic without guarantee or rewrite"
       },
       {
         "mechanism": "externalStateGrounding",
         "count": 289,
-        "status": "partial",
-        "clauses": [
-          "2",
-          "4"
-        ],
-        "reason": "Covers displayed values contradicting extern lineage; an incorrect tool call itself is outside the theorem"
+        "status": "deferred-partial",
+        "by": "outcome",
+        "reason": "Needs the outcome type; only part of the category concerns displayed outcomes"
       },
       {
         "mechanism": "informationArchitecture",
@@ -177,11 +169,6 @@
         "reason": "Needs an intent specification"
       }
     ],
-    "evoGenUIBenchCoveredUpperBound": {
-      "failures": 1335,
-      "of": 2750,
-      "share": 0.4855
-    },
     "interaction2Code": [
       {
         "type": "a Interactive element missing",
@@ -191,9 +178,7 @@
       {
         "type": "b No interaction",
         "status": "covered",
-        "clauses": [
-          "1"
-        ]
+        "by": "closure"
       },
       {
         "type": "c Wrong interactive element",
@@ -235,6 +220,26 @@
         "status": "out-of-scope",
         "reason": "Intent"
       }
-    ]
+    ],
+    "hints": {
+      "snapshot": "View reads a value captured from mutable prop/state/Context at initialization (diagnostic only, no rewrite)"
+    },
+    "evoGenUIBenchShares": {
+      "guaranteedNow": {
+        "failures": 460,
+        "of": 2750,
+        "share": 0.1673
+      },
+      "upperBoundWithOutcome": {
+        "failures": 749,
+        "of": 2750,
+        "share": 0.2724,
+        "note": "Counts the partial externalStateGrounding category in full; a theoretical upper bound"
+      },
+      "supersededFigure": {
+        "share": 0.4855,
+        "note": "Previous draft: counted partial categories in full and included withdrawn literal/snapshot clauses"
+      }
+    }
   }
 }
