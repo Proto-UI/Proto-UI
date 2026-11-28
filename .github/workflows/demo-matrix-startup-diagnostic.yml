@@ -79,7 +79,7 @@ jobs:
     if: ${{ inputs.docs_selector_comparison == true }}
     runs-on: ubuntu-24.04
     # Two original ten-minute diagnostic commands, plus isolated setup.
-    # Neither the original 180s case nor its 60s initialization oracle changes.
+    # The case and initialization deadlines remain those in the browser suite.
     timeout-minutes: 25
     env:
       PROTO_UI_MATRIX_STARTUP_PROFILE: '1'

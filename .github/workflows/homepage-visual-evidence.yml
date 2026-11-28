@@ -262,6 +262,12 @@ jobs:
         include:
           - name: native-links
             suite: site-native-links
+            pattern: '^native links with app-owned Proto visual surfaces'
+          # Exhaustive complement: reading/layout journeys keep the same per-case
+          # assertions and a separate, unchanged 600s process/server lifetime.
+          - name: native-links-reading
+            suite: site-native-links
+            pattern: '^(?!native links with app-owned Proto visual surfaces)'
           # Dedicated owner: apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts
           - name: brutalist-action-motion
             suite: brutalist-action-motion
@@ -326,12 +332,17 @@ jobs:
         env:
           SUITE: ${{ matrix.suite }}
           CONTRACT: ${{ matrix.contract }}
+          TEST_PATTERN: ${{ matrix.pattern }}
           PROTO_UI_CODE_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/code-surfaces
         run: |
           set -euo pipefail
           FILE="apps/www/src/content/docs/zh-cn/${SUITE}.browser.test.ts"
           test -f "$FILE"
           files=("$FILE")
+          filters=()
+          if [[ -n "$TEST_PATTERN" ]]; then
+            filters+=(--testNamePattern "$TEST_PATTERN")
+          fi
           if [[ -n "$CONTRACT" ]]; then
             CONTRACT_FILE="apps/www/src/content/docs/zh-cn/${CONTRACT}.test.ts"
             test -f "$CONTRACT_FILE"
@@ -341,7 +352,7 @@ jobs:
             git rev-parse HEAD
             echo "Selected suite: $FILE"
             timeout --signal=TERM --kill-after=10s 600s \
-              corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}"
+              corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}" "${filters[@]}"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/isolated-regressions.log"
       - name: Save the verified composition font package
         if: ${{ !cancelled() && steps.prepare-isolated-fonts.outcome == 'success' && matrix.name == 'homepage-composition' && steps.isolated-font-cache.outputs.cache-hit != 'true' }}

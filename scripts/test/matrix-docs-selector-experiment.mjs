@@ -4,8 +4,11 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 export const columnsPath = 'apps/www/src/components/override/TwoColumnContent.astro';
+export const matrixTestPath = 'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts';
+const matrixCaseName = 'mounts every demo in every official Web adapter';
 export const originalSelector = "body:has(.docs-reading-columns[data-layout='docs'])";
 // The repeated attribute preserves the original :has(.class[data-layout])
 // specificity (0,2,1) without changing the marker's matching set.
@@ -64,10 +67,50 @@ export function createSubjectDirectory(directory, subject) {
   return target;
 }
 
+export function readMatrixBudgets(source) {
+  const file = ts.createSourceFile(matrixTestPath, source, ts.ScriptTarget.Latest, true);
+  assert.equal(
+    file.parseDiagnostics.length,
+    0,
+    'The Matrix source must parse before recording budgets'
+  );
+  const initialization = [];
+  const representative = [];
+  const visit = (node) => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      if (node.expression.text === 'waitForMatrixInitialization') initialization.push(node);
+      if (
+        node.expression.text === 'it' &&
+        node.arguments[0] &&
+        ts.isStringLiteral(node.arguments[0]) &&
+        node.arguments[0].text === matrixCaseName
+      )
+        representative.push(node);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  const budget = (calls, label) => {
+    assert.equal(calls.length, 1, `Expected one actual ${label} call`);
+    const argument = calls[0].arguments[2];
+    assert(argument && ts.isNumericLiteral(argument), `${label} budget must be an explicit number`);
+    const value = Number(argument.text);
+    assert(
+      Number.isSafeInteger(value) && value > 0,
+      `${label} budget must be positive milliseconds`
+    );
+    return value;
+  };
+  return {
+    initializationBudgetMs: budget(initialization, 'Matrix initialization'),
+    originalCaseDeadlineMs: budget(representative, 'representative Matrix case'),
+  };
+}
+
 export function validateObservation(source, report, exitText, phases) {
   const selected = report.testResults
     .flatMap((file) => file.assertionResults)
-    .filter((item) => item.title === 'mounts every demo in every official Web adapter');
+    .filter((item) => item.title === matrixCaseName);
   assert.equal(selected.length, 1, 'Expected exactly one original selected case');
   const test = selected[0];
   assert(['passed', 'failed'].includes(test.status), 'The selected case did not execute');
@@ -106,7 +149,7 @@ function sourceRecord(subject) {
   assert.equal(staged, '', 'No staged source changes are allowed in an evidence checkout');
   const immutable = [
     'pnpm-lock.yaml',
-    'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
+    matrixTestPath,
     'apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts',
     'apps/www/src/content/docs/zh-cn/browser-harness.ts',
     'apps/www/src/content/docs/zh-cn/internal/demo-matrix.mdx',
@@ -132,9 +175,8 @@ function sourceRecord(subject) {
       subject === 'direct'
         ? 'Replace only the two document-wide Toast selector conditions.'
         : 'Retain both original body:has selector conditions.',
-    caseName: 'mounts every demo in every official Web adapter',
-    initializationBudgetMs: 60_000,
-    originalCaseDeadlineMs: 180_000,
+    caseName: matrixCaseName,
+    ...readMatrixBudgets(readFileSync(matrixTestPath, 'utf8')),
     cacheBoundary:
       'Each subject launches a fresh browser. Vite/filesystem caches may be warm in the second run; original complete module delivery still precedes the initialization clock.',
   };

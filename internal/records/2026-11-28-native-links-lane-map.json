@@ -1,0 +1,124 @@
+{
+  "kind": "native-links-exhaustive-lane-map",
+  "failure": {
+    "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/46147940144/job/140998966204",
+    "artifact": "https://github.com/Proto-UI/Proto-UI/actions/runs/46147940144/artifacts/15266321148",
+    "source": "008b052b410cf20192e0f226778969448f44282c",
+    "exit": 124,
+    "processLimitSeconds": 600,
+    "observations": "182 JSON records continue through reading TOC until aggregate lane timeout. No assertion-failure artifacts. Completion of individual cases is not certified by these captures."
+  },
+  "candidate": {
+    "testFile": "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+    "testSha256": "7368cd6a17fb9d42b753470c5a9de1e0d7e068087540d6390691674c731a41ac",
+    "testSourceChanged": false,
+    "processLimitSecondsPerLane": 600,
+    "perCaseLimitsChanged": false,
+    "assertionsChanged": false,
+    "fullNativeReplay": "pending"
+  },
+  "collection": {
+    "full": 21,
+    "native-links": 18,
+    "native-links-reading": 3,
+    "disjoint": true,
+    "exhaustive": true,
+    "method": "Actual vitest list collection with each workflow testNamePattern, compared by exact full test name."
+  },
+  "lanes": [
+    {
+      "name": "native-links",
+      "pattern": "^native links with app-owned Proto visual surfaces"
+    },
+    {
+      "name": "native-links-reading",
+      "pattern": "^(?!native links with app-owned Proto visual surfaces)"
+    }
+  ],
+  "cases": [
+    {
+      "name": "native links with app-owned Proto visual surfaces > preserves real link targets and uniform social visuals through all runtime/family transitions",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Enter/new-tab/modifier/middle/context-menu semantics native and does not activate on Space",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > records the documentation menu with four same-family social links and native focus",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > projects a same-event CSSOM theme edit by the next frame after native focus",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Bootstrap pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Shadcn pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Brutalist pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Bootstrap desktop pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Shadcn enlarged RTL pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Brutalist enlarged RTL pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps Bootstrap enlarged RTL pagination height stable through native link enhancement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps native pagination focus visible with scripts disabled and forced colors",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > preserves real pagination selection endpoints and arrow layout through family replacement",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps all social destinations available without JavaScript",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > renders docs navigation through the same Prototype while preserving native targets and caption projection",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > opens the actual narrow-screen contents drawer and keeps long pagination labels within the page",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > keeps docs native destinations, current truth, heading navigation and keyboard focus without JavaScript",
+      "lane": "native-links"
+    },
+    {
+      "name": "native links with app-owned Proto visual surfaces > reveals the current article in only the sidebar scroll owner and yields to manual scrolling",
+      "lane": "native-links"
+    },
+    {
+      "name": "keeps compact Sidebar typography across root text, viewport and enhancement",
+      "lane": "native-links-reading"
+    },
+    {
+      "name": "keeps reading TOC native row boxes, depth padding and multiline growth through enhancement",
+      "lane": "native-links-reading"
+    },
+    {
+      "name": "records the English shell labels, destinations and native activation ownership",
+      "lane": "native-links-reading"
+    }
+  ]
+}
