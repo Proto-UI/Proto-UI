@@ -20,11 +20,19 @@ export async function revealHeaderPreferences(page: Page): Promise<boolean> {
   const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
   if (!(await preferences.count())) return false;
   await page.waitForFunction(hasCommittedHeaderPreferencesDock);
-  if (await preferences.isVisible()) return false;
+  const visible = await preferences.isVisible();
+  const compact = await preferences.evaluate(
+    (element) => !!element.closest('[data-site-header-compact-context]')
+  );
+  // A closing compact panel remains painted while its exit transition runs,
+  // but is already inert. Visibility alone must not suppress the real click
+  // that reopens it. The committed dock and disclosure state own that choice.
+  if (visible && !compact) return false;
   const menu = page.locator(
     '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"], [data-docs-site-header] [data-site-menu-button]'
   );
-  if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
+  const needsOpen = (await menu.getAttribute('aria-expanded')) !== 'true';
+  if (needsOpen) await menu.click();
   await preferences.waitFor({ state: 'visible' });
-  return true;
+  return !visible || needsOpen;
 }

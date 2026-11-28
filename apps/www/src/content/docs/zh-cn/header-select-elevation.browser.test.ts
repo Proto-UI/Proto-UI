@@ -585,6 +585,7 @@ export function registerHeaderSelectElevationSuite(options: {
                 for (const control of ['runtime', 'family'] as const) {
                   const select = trigger(page, control);
                   const rest = await sample(select);
+                  measurements.push({ stage: 'rest-first-sample', width, control, paint: rest });
                   expect(rest.hit).toBe(true);
                   expect(rest.height).toBeCloseTo(44, 0);
                   expect(rest.border).toBe(family === 'brutalist' ? '2px' : '1px');
