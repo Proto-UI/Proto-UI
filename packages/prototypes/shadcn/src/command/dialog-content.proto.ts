@@ -48,7 +48,7 @@ export default definePrototype<CommandDialogContentProps, CommandDialogContentEx
     const { open } = dialog.stateHandles;
     def.feedback.style.use(
       tw(
-        'fixed left-[var(--proto-ui-available-region-center-x,50%)] grid min-w-0 w-full -translate-x-1/2 overflow-hidden p-0 outline-none'
+        'fixed left-[var(--proto-ui-available-region-center-x,50%)] grid min-w-0 w-full -translate-x-1/2 overflow-hidden p-0 outline-none transition-none'
       )
     );
     // P-SHADCN-COMMAND-DIALOG-PROFILE, P-SHADCN-COMMAND-DIALOG-GEOMETRY

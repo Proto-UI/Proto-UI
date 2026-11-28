@@ -969,6 +969,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'tracking-wide',
   'tracking-wider',
   'tracking-widest',
+  'transition-[color,background-color,border-color,box-shadow,transform,opacity]',
   'transition-[color,border-color]',
   'transition-[color,box-shadow,background-color]',
   'transition-[color,box-shadow]',

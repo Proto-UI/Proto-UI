@@ -7,7 +7,7 @@ import { runS5Journey } from '../../../../../../scripts/analysis/shadow-s5-journ
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
-  baseUrl = await startServer('/zh-cn/internal/demo-matrix/');
+  baseUrl = await startServer('/zh-cn/internal/shadow-split/');
   browser = await launchBrowser();
 }, 150_000);
 afterAll(async () => {
@@ -25,7 +25,7 @@ describe.sequential('S5 native editor acceptance paths', () => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(e.message));
       try {
-        await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s5`);
+        await page.goto(`${baseUrl}/${locale}/internal/shadow-split/#shadow-split-s5`);
         const scene = page.locator('[data-shadow-s5]');
         // S5 needs its twelve native editors, independently of the full Matrix gate.
         // Start all waits together so readiness retains one 60-second deadline.
@@ -44,7 +44,9 @@ describe.sequential('S5 native editor acceptance paths', () => {
             )
           );
         } catch (cause) {
-          const previewErrors = await scene.locator('pre, [data-preview-recovery]').allTextContents();
+          const previewErrors = await scene
+            .locator('pre, [data-preview-recovery]')
+            .allTextContents();
           throw new Error(
             `S5 native editor readiness failed. Page errors: ${JSON.stringify(errors)}. ` +
               `Scene errors: ${JSON.stringify(previewErrors)}`,

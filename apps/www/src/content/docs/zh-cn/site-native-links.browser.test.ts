@@ -3181,8 +3181,11 @@ it('records the English shell labels, destinations and native activation ownersh
     for (const width of [1280, 1920] as const) {
       await page.setViewportSize({ width, height: 1000 });
       for (const rootSize of [16, 24] as const) {
-        await page.evaluate((size) => {
+        await page.evaluate(async (size) => {
           document.documentElement.style.fontSize = `${size}px`;
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
         }, rootSize);
         expect(
           await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)

@@ -831,7 +831,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
               eventGate.isEnabled() &&
               rootRef.current === rootEl &&
               rootEl.isConnected &&
-              !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+              !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
+              !rootEl.closest(`[${PUI_VIEW_PENDING_ATTR}]`) &&
+              rootEl.ownerDocument?.defaultView?.getComputedStyle?.(rootEl)?.visibility !==
+                'hidden',
             subscribe: (listener) => {
               focusTargetReadyListenersRef.current.add(listener);
               return () => focusTargetReadyListenersRef.current.delete(listener);
@@ -971,7 +974,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             projectionReadyRef.current &&
             portalIsCommitted() &&
             !viewDisposed &&
-            !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+            !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
+            !rootRef.current?.closest(`[${PUI_VIEW_PENDING_ATTR}]`),
           // Entry does not own descendant facts. Wait for the actual target's
           // event owner without gating the shared physical target getter.
           isEntryAcquisitionReady: (target) => {
@@ -1121,6 +1125,25 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       }, []);
 
       runtime.useLayoutEffect(() => {
+        const notifyCommittedPortalSubtree = () => {
+          const readyHost = rootRef.current;
+          if (
+            readyHost &&
+            readyHost.isConnected &&
+            portalProjectionRef.current?.host === readyHost &&
+            portalMountRef.current?.parentNode === portalProjectionRef.current.destination
+          ) {
+            const projection = portalProjectionRef.current;
+            notifyPortalSubtreeReadiness(
+              readyHost,
+              () =>
+                rootRef.current === readyHost &&
+                portalProjectionRef.current === projection &&
+                portalMountRef.current?.parentNode === projection.destination
+            );
+          }
+        };
+
         const pending = pendingCommitRef.current;
         if (pending) {
           // An earlier layout effect can enqueue a Runtime commit after this
@@ -1197,6 +1220,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             if (!pendingCommitRef.current) {
               eventGateRef.current?.enable();
               notifyFocusTargetReady();
+              notifyCommittedPortalSubtree();
             }
             return;
           }
@@ -1205,7 +1229,13 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         }
 
         const requiredStyleRevision = pendingRevealStyleRevisionRef.current;
-        if (requiredStyleRevision === null) return;
+        if (requiredStyleRevision === null) {
+          if (viewReadyRef.current && !pendingCommitRef.current) {
+            notifyFocusTargetReady();
+            notifyCommittedPortalSubtree();
+          }
+          return;
+        }
         if (
           hostStyleRevision < requiredStyleRevision ||
           hostStyleRevision !== hostTokenRevisionRef.current
@@ -1239,22 +1269,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         }
         eventGateRef.current?.enable();
         notifyFocusTargetReady();
-        const readyHost = rootRef.current;
-        if (
-          readyHost &&
-          readyHost.isConnected &&
-          portalProjectionRef.current?.host === readyHost &&
-          portalMountRef.current?.parentNode === portalProjectionRef.current.destination
-        ) {
-          const projection = portalProjectionRef.current;
-          notifyPortalSubtreeReadiness(
-            readyHost,
-            () =>
-              rootRef.current === readyHost &&
-              portalProjectionRef.current === projection &&
-              portalMountRef.current?.parentNode === projection.destination
-          );
-        }
+        notifyCommittedPortalSubtree();
       }, [renderCommit.version, hostStyleRevision]);
 
       // A renderer can replace the host element after the Proto commit that

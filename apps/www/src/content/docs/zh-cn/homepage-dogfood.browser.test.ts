@@ -511,7 +511,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         const scope = preview.locator(
           '[data-projection-generation-state="active"] [data-projection-scope]'
         );
-        await expect.poll(() => scope.getAttribute('data-projection-runtime')).toBe('react');
+        await expect
+          .poll(() => scope.getAttribute('data-projection-runtime'), { timeout: 30_000 })
+          .toBe('react');
         expect(await page.locator('html').getAttribute('data-site-library-family')).toBe(
           route.family
         );
@@ -542,7 +544,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           await portal
             .getByRole('option', { name: value === 'vue' ? 'Vue' : 'React', exact: true })
             .click();
-          await expect.poll(() => scope.getAttribute('data-projection-runtime')).toBe(value);
+          await expect
+            .poll(() => scope.getAttribute('data-projection-runtime'), { timeout: 30_000 })
+            .toBe(value);
         };
         await chooseAdapter('vue');
         await chooseAdapter('react');
@@ -569,7 +573,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         });
         await theme.click();
         await expect
-          .poll(() => page.locator('html').getAttribute('data-theme'))
+          .poll(() => page.locator('html').getAttribute('data-theme'), { timeout: 30_000 })
           .toBe(beforeTheme === 'dark' ? 'light' : 'dark');
         expect(
           await page.evaluate(

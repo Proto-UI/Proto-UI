@@ -78,6 +78,8 @@ export const READY_ROUTES = Object.freeze([
   '/zh-cn/',
   '/zh-cn/start-here/quick-start/',
   '/zh-cn/internal/demo-matrix/',
+  '/zh-cn/internal/shadow-split/',
+  '/en/internal/shadow-split/',
   '/zh-cn/ui-libraries/shadcn/select/',
   '/zh-cn/ui-libraries/shadcn/scroll-area/',
   '/zh-cn/ui-libraries/brutalist/components/checkbox/',
@@ -191,6 +193,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/header-select-elevation-brutalist.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts',
@@ -508,6 +511,16 @@ const estimatedSuiteReserves = {
   // complete companion. Its local native run took 280.9s; reserve 300s here.
   // This is a planning estimate, not an invented historical CI observation.
   'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts': 300,
+  // Split Brutalist journeys out of header-select-elevation so each worker stays
+  // well within the 900s CI cap; keep planning reserves aligned with 46064929629
+  // shard-16 observations where provenance (~250s), sprint2, toast-position, and
+  // focus-intent-retries exceeded the old 0s/120s fallbacks when stacked.
+  'apps/www/src/content/docs/zh-cn/header-select-elevation-brutalist.browser.test.ts': 400,
+  'apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts': 260,
+  'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts': 240,
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-toast-position.browser.test.ts': 220,
+  'packages/adapters/base/test/focus-intent-retries.browser.test.ts': 130,
+  'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts': 360,
 };
 export const DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS = 120;
 

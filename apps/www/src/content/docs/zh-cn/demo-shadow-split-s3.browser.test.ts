@@ -10,7 +10,7 @@ import {
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
-  baseUrl = await startServer('/zh-cn/internal/demo-matrix/');
+  baseUrl = await startServer('/zh-cn/internal/shadow-split/');
   browser = await launchBrowser();
 }, 150_000);
 afterAll(async () => {
@@ -29,7 +29,7 @@ describe.sequential('S3 complete Tabs and settings native acceptance paths', () 
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       try {
-        await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s3`);
+        await page.goto(`${baseUrl}/${locale}/internal/shadow-split/#shadow-split-s3`);
         const control = await runS3SizeControl(page);
         console.log('S3 source-geometry calibration', JSON.stringify({ locale, ...control }));
         expect(errors).toEqual([]);
@@ -49,7 +49,7 @@ describe.sequential('S3 complete Tabs and settings native acceptance paths', () 
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
         try {
-          await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s3`);
+          await page.goto(`${baseUrl}/${locale}/internal/shadow-split/#shadow-split-s3`);
           // Matrix cells are lazy and are not this Tabs acceptance. The old
           // whole-page host predicate waited 60s for fixed-family projections
           // that are outside the section. The journey's ready flag is the gate.

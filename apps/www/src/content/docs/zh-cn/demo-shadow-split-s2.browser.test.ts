@@ -8,7 +8,7 @@ const profiles = ['light', 'split', 'mixed'];
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
-  baseUrl = await startServer('/zh-cn/internal/demo-matrix/');
+  baseUrl = await startServer('/zh-cn/internal/shadow-split/');
   browser = await launchBrowser();
 }, 150_000);
 afterAll(async () => {
@@ -119,7 +119,7 @@ async function visit(run: (page: Page) => Promise<void>, locale = 'zh-cn') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   try {
-    await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/`);
+    await page.goto(`${baseUrl}/${locale}/internal/shadow-split/`);
     await page.waitForSelector(`${S2}[data-ready="true"]`);
     await page.locator(S2).scrollIntoViewIfNeeded();
     await settle(page);

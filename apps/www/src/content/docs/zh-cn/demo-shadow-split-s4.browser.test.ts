@@ -14,7 +14,7 @@ import { observeS4Journey } from './s4-journey-observation';
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
-  baseUrl = await startServer('/zh-cn/internal/demo-matrix/');
+  baseUrl = await startServer('/zh-cn/internal/shadow-split/');
   browser = await launchBrowser();
 }, 150_000);
 afterAll(async () => {
@@ -117,7 +117,7 @@ describe.sequential('S4 complete public Dialog settings', () => {
         }
         note('goto', 'begin');
         try {
-          await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s4`);
+          await page.goto(`${baseUrl}/${locale}/internal/shadow-split/#shadow-split-s4`);
           note('goto', 'return');
         } catch (error) {
           note('goto', 'error');

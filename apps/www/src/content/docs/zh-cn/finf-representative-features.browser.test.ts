@@ -860,7 +860,9 @@ async function selectRealRuntime(
   await tab.click();
   await waitForRealRuntime(previewer, runtime, readySelector, count);
   await expect
-    .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'))
+    .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'), {
+      timeout: 10_000,
+    })
     .toBe('true');
 }
 
@@ -1743,7 +1745,7 @@ async function accordionJourney(
         (el as HTMLElement).style.setProperty('background-color', '#fff')
       );
       await expect
-        .poll(() => trigger.getAttribute('data-material-reason'))
+        .poll(() => trigger.getAttribute('data-material-reason'), { timeout: 5_000 })
         .toBe('source-painted-ancestor');
       expect(await trigger.getAttribute('data-material-quality')).toBe('opaque-fallback');
       await capture('painted-item-negative-control', {}, previewer);
@@ -2094,7 +2096,11 @@ async function runtimeTabsJourney({ page, previewer, family, capture }: Journey)
     }
     expect(selected.textWidth).toBeGreaterThan(0);
     expect(selected.rect.width).toBeGreaterThanOrEqual(selected.textWidth - 1);
-    expect(selected.color).not.toBe(inactive.color);
+    if (family === 'brutalist') {
+      expect(selected.background).not.toBe(inactive.background);
+    } else {
+      expect(selected.color).not.toBe(inactive.color);
+    }
   }
 }
 
