@@ -24,7 +24,8 @@ export type GeneratedFindingKind =
   | 'dead-control'
   | 'unobserved-branch'
   | 'dead-store'
-  | 'snapshot-read';
+  | 'snapshot-read'
+  | 'unconnectable-control';
 
 export interface GeneratedFinding {
   readonly kind: GeneratedFindingKind;
@@ -60,9 +61,11 @@ export class GeneratedVerificationError extends Error {
 interface ViewFacts {
   readonly regions: string[];
   readonly activations: ElementView[];
+  /** Buttons rendered without an activation connection, with whether each is the root. */
+  readonly unconnected: { element: ElementView; root: boolean }[];
 }
 
-function collectView(node: ViewNode, facts: ViewFacts): void {
+function collectView(node: ViewNode, facts: ViewFacts, root = true): void {
   if (node.kind === 'text') {
     facts.regions.push(node.value);
   } else if (node.kind === 'child') {
@@ -71,7 +74,8 @@ function collectView(node: ViewNode, facts: ViewFacts): void {
     if (node.style) facts.regions.push(node.style);
     if (node.disabled) facts.regions.push(node.disabled);
     if (node.activate) facts.activations.push(node);
-    for (const child of node.children) collectView(child, facts);
+    else if (node.tag === 'button') facts.unconnected.push({ element: node, root });
+    for (const child of node.children) collectView(child, facts, false);
   }
 }
 
@@ -104,7 +108,7 @@ function successors(block: Block): { label: string; edge: Edge; guard?: Value }[
 class BodyVerifier {
   readonly #body: ComponentBody;
   readonly #fns: ReadonlyMap<string, Behavior>;
-  readonly #view: ViewFacts = { regions: [], activations: [] };
+  readonly #view: ViewFacts = { regions: [], activations: [], unconnected: [] };
   /** Read by a view region, public projection or Context provider: visible to the user or host. */
   readonly #visible = new Set<string>();
   /** Visible values plus values read by effective actions and tasks. */
@@ -359,6 +363,31 @@ class BodyVerifier {
   findings(): GeneratedFinding[] {
     const body = this.#body;
     const found: GeneratedFinding[] = [];
+    for (const { element, root } of this.#view.unconnected) {
+      found.push(
+        root
+          ? {
+              kind: 'dead-control',
+              ruleId: 'generated/dead-control',
+              severity: 'error',
+              component: body.id,
+              source: element.source,
+              message:
+                'The root button has no press connection, so pressing it has no consequence. Connect an action with def.event.on.',
+              witness: ['button has no activation connection'],
+            }
+          : {
+              kind: 'unconnectable-control',
+              ruleId: 'generated/unconnectable-control',
+              severity: 'info',
+              component: body.id,
+              source: element.source,
+              message:
+                'A nested button cannot be connected to an action in IR version 5; parent handling of a child prototype event is not yet defined. This is a compiler-missing capability, not an author error.',
+              witness: ['nested button has no activation connection'],
+            }
+      );
+    }
     for (const element of this.#view.activations) {
       const fn = this.#fns.get(element.activate!);
       if (!fn) continue;

@@ -132,3 +132,22 @@ test('dead stores and creation-time snapshots are reported without rejecting', a
   assert.deepEqual(verification.findings[0].witness, ['press writes clicks']);
   assert.equal(verification.rejected, false);
 });
+
+test('an unconnected root button is dead and a nested button is a compiler gap', async (t) => {
+  const ir = await produce(
+    t,
+    `
+    import { definePrototype, tw } from '@proto.ui/core/authoring';
+    export default definePrototype({ name: 'toolbar', setup(def) {
+      return (renderer) => renderer.el('button', { style: tw('toolbar') }, [
+        renderer.el('button', { style: tw('export') }, ['Export']),
+      ]);
+    } });`
+  );
+  const verification = verifyGenerated(ir);
+  assert.deepEqual(summary(verification), [
+    { kind: 'dead-control', severity: 'error' },
+    { kind: 'unconnectable-control', severity: 'info' },
+  ]);
+  assert.equal(verification.rejected, true);
+});
