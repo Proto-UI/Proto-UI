@@ -113,6 +113,16 @@ type PointerSampleWindow = Window & {
   __cancelPointerSample?: () => void;
 };
 
+type ReopenDiagnosticWindow = Window & {
+  __dialogReopenDiagnostic?: {
+    events: unknown[];
+    dropped: number;
+    initial: unknown;
+    snapshot(): unknown;
+    stop(): void;
+  };
+};
+
 let browser: Browser;
 let baseUrl = '';
 
@@ -416,7 +426,27 @@ describe('Shadcn Dialog native lifecycle', () => {
       width: 1100,
       height: 900,
     });
+    const diagnose = process.env.PROTO_UI_DIALOG_REOPEN_DIAGNOSTIC === '1' && !!evidenceDirectory;
+    const diagnostic: Record<string, unknown> = {
+      diagnosticOnly: true,
+      originalCaseAcceptance: false,
+      sourceSha: null,
+      startedAt: new Date().toISOString(),
+      phase: 'setup',
+      attempt: null,
+      initialInputPoint: null,
+      failure: null,
+    };
     try {
+      if (diagnose) {
+        try {
+          diagnostic.sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], {
+            encoding: 'utf8',
+          }).trim();
+        } catch (error) {
+          diagnostic.metadataError = String(error);
+        }
+      }
       const trigger = page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first();
       await trigger.waitFor();
       const contentId = await trigger.getAttribute('aria-controls');
@@ -428,17 +458,87 @@ describe('Shadcn Dialog native lifecycle', () => {
       if (!owner) throw new Error('Dialog trigger has no projection owner.');
       const contentSelector = `wc-shadcn-dialog-content[id=${JSON.stringify(contentId)}]`;
       const maskSelector = `wc-shadcn-dialog-mask[data-projection-owner=${JSON.stringify(owner)}]`;
-      await trigger.evaluate((element) => {
+      await trigger.evaluate((element, enabled) => {
         element.scrollIntoView({ block: 'start' });
         window.scrollBy(0, -160);
-      });
+        if (!enabled) return;
+        // A diagnostic branch only. Install passive observation inside the
+        // existing scroll evaluation; add no protocol round trip before input.
+        const probe = window as ReopenDiagnosticWindow;
+        const controller = new AbortController();
+        const describe = (node: Element | null) =>
+          node
+            ? {
+                tag: node.tagName,
+                id: node.id,
+                connected: node.isConnected,
+                attributes: Object.fromEntries(
+                  [
+                    'role',
+                    'aria-expanded',
+                    'aria-controls',
+                    'data-transition-state',
+                    'data-open',
+                    'data-pui-view-detached',
+                    'data-projection-owner',
+                    'data-projection-state',
+                    'data-projection-generation-state',
+                    'data-inited',
+                    'data-runtime',
+                  ].map((name) => [name, node.getAttribute(name)])
+                ),
+              }
+            : null;
+        const content = () => document.getElementById(element.getAttribute('aria-controls') ?? '');
+        const snapshot = (event?: MouseEvent) => ({
+          at: Date.now(),
+          event: event?.type ?? null,
+          trusted: event?.isTrusted ?? null,
+          point: event ? { x: event.clientX, y: event.clientY } : null,
+          nativeTargetIsTrigger: event ? event.composedPath().includes(element) : null,
+          target: describe(event?.target instanceof Element ? event.target : null),
+          trigger: describe(element),
+          // Native input handlers only read event identity and attributes.
+          // Geometry is sampled before input and after the case, never during
+          // the original 50ms partial-detachment observer's event dispatch.
+          triggerRect: event ? null : element.getBoundingClientRect().toJSON(),
+          previewer: describe(element.closest('[data-previewer-id]')),
+          projection: describe(element.closest('[data-projection-scope]')),
+          content: describe(content()),
+          active: describe(document.activeElement),
+          scroll: event ? null : { x: window.scrollX, y: window.scrollY },
+          bodyOverflow: document.body.style.overflow,
+        });
+        const recorder = {
+          events: [] as unknown[],
+          dropped: 0,
+          initial: snapshot(),
+          snapshot,
+          stop: () => controller.abort(),
+        };
+        probe.__dialogReopenDiagnostic = recorder;
+        for (const type of ['pointerdown', 'click']) {
+          document.addEventListener(
+            type,
+            (event) => {
+              if (recorder.events.length < 64) recorder.events.push(snapshot(event as MouseEvent));
+              else recorder.dropped++;
+            },
+            { capture: true, passive: true, signal: controller.signal }
+          );
+        }
+      }, diagnose);
       const box = await trigger.boundingBox();
       if (!box) throw new Error('Dialog trigger has no rendered box.');
       const point = { x: box.x + Math.min(15, box.width / 2), y: box.y + box.height / 2 };
+      diagnostic.initialInputPoint = point;
 
       let hitPartialWindow = false;
       for (let attempt = 0; attempt < 5 && !hitPartialWindow; attempt++) {
+        diagnostic.attempt = attempt;
+        diagnostic.phase = 'normal-open-click';
         await page.mouse.click(point.x, point.y);
+        diagnostic.phase = 'normal-open-await-entered';
         await page.waitForFunction(
           (selector) =>
             document.querySelector(selector)?.getAttribute('data-transition-state') === 'entered',
@@ -447,6 +547,7 @@ describe('Shadcn Dialog native lifecycle', () => {
         expect(await page.evaluate(() => document.elementFromPoint(5, 5)?.tagName)).toBe(
           'WC-SHADCN-DIALOG-MASK'
         );
+        diagnostic.phase = 'mask-close-click';
         await page.mouse.click(5, 5);
 
         // Arm the passive native-input observer before waiting for the 50ms
@@ -481,6 +582,7 @@ describe('Shadcn Dialog native lifecycle', () => {
         );
         // The normal 150ms/200ms leave clocks stay intact. A missed window is
         // not evidence of repair: observe the actual next native pointer sample.
+        diagnostic.phase = 'await-partial-detachment';
         try {
           await page.waitForFunction(
             ({ maskSelector: maskSel, contentSelector: contentSel }) => {
@@ -508,6 +610,7 @@ describe('Shadcn Dialog native lifecycle', () => {
           );
           continue;
         }
+        diagnostic.phase = 'partial-reopen-click';
         await page.mouse.click(point.x, point.y);
         const sample = await page.evaluate(async () => {
           const probe = window as PointerSampleWindow;
@@ -519,6 +622,8 @@ describe('Shadcn Dialog native lifecycle', () => {
         });
         expect(sample.trusted).toBe(true);
         hitPartialWindow = sample.partial;
+        diagnostic.partialPointerSample = sample;
+        diagnostic.phase = 'partial-reopen-await-entered';
         await page.waitForFunction(
           (selector) =>
             document.querySelector(selector)?.getAttribute('data-transition-state') === 'entered',
@@ -539,6 +644,7 @@ describe('Shadcn Dialog native lifecycle', () => {
       expect(await page.evaluate(() => document.elementFromPoint(5, 5)?.tagName)).toBe(
         'WC-SHADCN-DIALOG-MASK'
       );
+      diagnostic.phase = 'final-mask-dismissal';
       await page.mouse.click(5, 5);
       await page.waitForFunction(
         (selector) => document.querySelector(selector)?.hasAttribute('data-pui-view-detached'),
@@ -548,6 +654,7 @@ describe('Shadcn Dialog native lifecycle', () => {
       expect(await page.locator(contentSelector).getAttribute('data-open')).toBeNull();
       expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
 
+      diagnostic.phase = 'final-normal-reopen';
       await page.mouse.click(point.x, point.y);
       await page.waitForFunction(
         (selector) =>
@@ -559,7 +666,48 @@ describe('Shadcn Dialog native lifecycle', () => {
         (selector) => document.querySelector(selector)?.hasAttribute('data-pui-view-detached'),
         contentSelector
       );
+      diagnostic.phase = 'passed';
+    } catch (error) {
+      diagnostic.failure = String(error);
+      throw error;
     } finally {
+      if (diagnose) {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          diagnostic.browser = await Promise.race([
+            page.evaluate(() => {
+              const recorder = (window as ReopenDiagnosticWindow).__dialogReopenDiagnostic;
+              if (!recorder) return { unavailable: 'recorder not installed' };
+              recorder.stop();
+              return {
+                initial: recorder.initial,
+                events: recorder.events,
+                dropped: recorder.dropped,
+                final: recorder.snapshot(),
+              };
+            }),
+            new Promise((_, reject) => {
+              timer = setTimeout(
+                () => reject(new Error('Diagnostic snapshot exceeded 1000ms')),
+                1000
+              );
+            }),
+          ]);
+        } catch (error) {
+          diagnostic.snapshotError = String(error);
+        } finally {
+          clearTimeout(timer);
+        }
+        diagnostic.completedAt = new Date().toISOString();
+        try {
+          await writeFile(
+            path.join(evidenceDirectory!, 'partial-reopen-diagnostic.json'),
+            JSON.stringify(diagnostic, null, 2) + '\n'
+          );
+        } catch (error) {
+          console.error('[dialog-reopen-diagnostic] receipt unavailable', String(error));
+        }
+      }
       await context.close();
     }
   }, 120_000);

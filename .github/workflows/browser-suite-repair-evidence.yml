@@ -16,7 +16,7 @@ on:
       scope:
         description: Existing repair controls, Sprint 1, or focused Contents wheel evidence
         type: choice
-        options: [repair, sprint1, contents-wheel]
+        options: [repair, sprint1, contents-wheel, dialog-reopen-diagnostic]
         default: repair
   workflow_call:
     inputs:
@@ -32,8 +32,171 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  dialog-reopen-diagnostic:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'dialog-reopen-diagnostic' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PROTO_UI_DIALOG_REOPEN_DIAGNOSTIC: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the unchanged f595 product and the passive diagnostic delta
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dialog-reopen"
+          git rev-parse HEAD > "$RUNNER_TEMP/dialog-reopen/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/dialog-reopen/source-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/dialog-reopen/status-before.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/dialog-reopen/status-before.txt"
+          git diff --exit-code f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD -- \
+            apps packages package.json pnpm-lock.yaml vitest.config.ts scripts/test/run-runtime-tests.mjs scripts/test/runtime-process-tree.mjs scripts/test/runtime-test-plan.mjs \
+            ':(exclude)apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts' \
+            > "$RUNNER_TEMP/dialog-reopen/product-diff.patch"
+          git diff --binary f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD > "$RUNNER_TEMP/dialog-reopen/diagnostic-source.patch"
+          sha256sum .github/workflows/browser-suite-repair-evidence.yml pnpm-lock.yaml package.json vitest.config.ts \
+            apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/browser-harness.ts \
+            scripts/test/run-runtime-tests.mjs scripts/test/runtime-process-tree.mjs scripts/test/runtime-test-plan.mjs \
+            > "$RUNNER_TEMP/dialog-reopen/source-inputs.sha256"
+      - name: Install the frozen original browser dependency graph
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Record the original harness browser and actual Node selection
+        run: |
+          node --import tsx --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { writeFileSync } from 'node:fs';
+          import { chromeExecutable } from './apps/www/src/content/docs/zh-cn/browser-harness.ts';
+          const executable = await chromeExecutable();
+          const version = execFileSync(executable, ['--version'], { encoding: 'utf8' }).trim();
+          assert.match(process.version, /^v24\./);
+          assert.equal(executable, process.env.CHROME_PATH);
+          assert.match(version, /\b158\./);
+          assert.equal(process.env.PROTO_UI_DIALOG_REOPEN_DIAGNOSTIC, '1');
+          writeFileSync(process.env.RUNNER_TEMP + '/dialog-reopen/environment.json', JSON.stringify({ node: process.version, executable, version, diagnosticFlag: '1' }, null, 2) + '\n');
+          JS
+      - name: Observe the original partial-reopen case with unchanged native input and deadlines
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/dialog-reopen
+        run: |
+          set -euo pipefail
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s \
+            node scripts/test/run-runtime-tests.mjs \
+              apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts \
+              --testNamePattern='keeps native mask dismissal after reopening between the two part detachments$' \
+              --no-file-parallelism --maxWorkers=1 --minWorkers=1 \
+              --reporter=default --reporter=json \
+              --outputFile="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json" \
+              2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
+          results=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${results[0]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/command-exit-code.txt"
+          printf '%s\n' "${results[1]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/log-exit-code.txt"
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/completed-at.txt"
+          if [ "${results[0]}" -ne 0 ]; then exit "${results[0]}"; fi
+          exit "${results[1]}"
+      - name: Verify the source remains unchanged after the first native outcome
+        if: always()
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > "$RUNNER_TEMP/dialog-reopen/source-sha-after.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/dialog-reopen/status-after.txt"
+          sha256sum -c "$RUNNER_TEMP/dialog-reopen/source-inputs.sha256" > "$RUNNER_TEMP/dialog-reopen/source-inputs-after.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/dialog-reopen/status-after.txt"
+      - name: Reconcile one selected case and ten unselected cases without accepting a repair
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const dir = path.join(process.env.RUNNER_TEMP, 'dialog-reopen');
+          const read = (name) => readFileSync(path.join(dir, name), 'utf8');
+          const selectedTitle = 'keeps native mask dismissal after reopening between the two part detachments';
+          const titles = [
+            ...['react', 'vue'].map((runtime) => `starts public Dialog entry on the first visible ${runtime} frame`),
+            ...['wc', 'react', 'vue', 'vue2'].flatMap((runtime) => ['no-preference', 'reduce'].map((motion) => `preserves public modal focus, dismissal and AX for ${runtime} with ${motion}`)),
+            selectedTitle,
+          ];
+          const result = { sourceSha: process.env.CANDIDATE_SHA, diagnosticOnly: true, fullSuiteAcceptance: false, selectedTitle, captureValid: false };
+          try {
+            const report = JSON.parse(read('vitest.json'));
+            assert.equal(report.numTotalTests, 11);
+            assert.equal(report.numPassedTests + report.numFailedTests, 1);
+            assert.equal(report.numPendingTests, 10);
+            assert.equal(report.numTodoTests, 0);
+            assert.equal(report.testResults.length, 1);
+            assert.equal(path.resolve(report.testResults[0].name), path.resolve('apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts'));
+            const tests = report.testResults[0].assertionResults;
+            assert.equal(tests.length, 11);
+            assert.deepEqual(tests.map((test) => test.title).sort(), [...titles].sort());
+            const selected = tests.filter((test) => test.title === selectedTitle);
+            assert.equal(selected.length, 1);
+            assert.ok(['passed', 'failed'].includes(selected[0].status));
+            assert.ok(tests.filter((test) => test.title !== selectedTitle).every((test) => test.status === 'skipped'));
+            result.tests = tests.map(({ title, status }) => ({ title, status }));
+            result.nativeOutcome = selected[0].status;
+            result.nativeExitCode = Number(read('command-exit-code.txt').trim());
+            assert.equal(result.nativeExitCode, selected[0].status === 'passed' ? 0 : 1);
+            assert.equal(report.success, selected[0].status === 'passed');
+            assert.equal(read('log-exit-code.txt').trim(), '0');
+            assert.equal(read('product-diff.patch'), '');
+            for (const name of ['source-sha.txt', 'source-sha-after.txt']) assert.equal(read(name).trim(), result.sourceSha);
+            for (const name of ['status-before.txt', 'status-after.txt']) assert.equal(read(name), '');
+            const inputs = read('source-inputs-after.txt').trim().split('\n');
+            assert.equal(inputs.length, 9);
+            assert.ok(inputs.every((line) => line.endsWith(': OK')));
+            const environment = JSON.parse(read('environment.json'));
+            assert.match(environment.node, /^v24\./);
+            assert.match(environment.version, /\b158\./);
+            assert.equal(environment.diagnosticFlag, '1');
+            const capture = JSON.parse(read('dialog-public-native/partial-reopen-diagnostic.json'));
+            assert.equal(capture.sourceSha, result.sourceSha);
+            assert.equal(capture.diagnosticOnly, true);
+            assert.equal(capture.originalCaseAcceptance, false);
+            assert.equal(capture.failure === null, selected[0].status === 'passed');
+            assert.equal(capture.snapshotError, undefined);
+            assert.equal(capture.metadataError, undefined);
+            assert.equal(capture.browser.dropped, 0);
+            assert.ok(capture.browser.events.length > 0 && capture.browser.events.length <= 64);
+            assert.ok(capture.browser.events.some((event) => event.trusted === true && event.event === 'pointerdown'));
+            assert.ok(capture.browser.events.every((event) => typeof event.trusted === 'boolean' && ['pointerdown', 'click'].includes(event.event)));
+            result.observedPhase = capture.phase;
+            result.attempt = capture.attempt;
+            result.captureValid = true;
+          } catch (error) { result.error = String(error); process.exitCode = 1; }
+          writeFileSync(path.join(dir, 'case-results.json'), JSON.stringify(result, null, 2) + '\n');
+          JS
+      - name: Preserve the first native result and bounded passive pointer observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dialog-reopen-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/dialog-reopen
+          if-no-files-found: error
+          retention-days: 30
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || inputs.scope != 'dialog-reopen-diagnostic') && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
