@@ -8,6 +8,11 @@ on:
         type: boolean
         required: false
         default: false
+      full_inventory:
+        description: Run all 22 layout and 12 disposal cases with diagnostic observation disabled
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 
 permissions:
@@ -23,7 +28,7 @@ env:
 
 jobs:
   production-runtime-profile:
-    if: ${{ inputs.scheduled_regressions != true }}
+    if: ${{ inputs.scheduled_regressions != true && inputs.full_inventory != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -91,7 +96,7 @@ jobs:
   # Explicit diagnostic subset only; the ordinary production profile and the
   # complete layout/disposal inventories remain independent acceptance owners.
   scheduled-regressions:
-    if: ${{ inputs.scheduled_regressions == true }}
+    if: ${{ inputs.scheduled_regressions == true && inputs.full_inventory != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
@@ -196,5 +201,148 @@ jobs:
         with:
           name: scheduled-search-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/scheduled-search
+          if-no-files-found: error
+          retention-days: 14
+
+  full-inventory:
+    if: ${{ inputs.full_inventory == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: layout
+            file: apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts
+            cases: 22
+            case_ms: 90000
+          - suite: disposal
+            file: apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts
+            cases: 12
+            case_ms: 60000
+    env:
+      SEARCH_SUITE: ${{ matrix.suite }}
+      SEARCH_FILE: ${{ matrix.file }}
+      SEARCH_CASES: ${{ matrix.cases }}
+      SEARCH_CASE_MS: ${{ matrix.case_ms }}
+      SUBSET_MODE: ${{ inputs.scheduled_regressions }}
+      PUI_SEARCH_SCHEDULE_DIAGNOSTICS: '0'
+    steps:
+      - name: Prepare evidence retention before setup
+        run: mkdir -p "$RUNNER_TEMP/search-full-$SEARCH_SUITE/runtime"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the locked toolchain and original browser surface
+        run: |
+          set -euo pipefail
+          test "$SUBSET_MODE" != true
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version | tee "$RUNNER_TEMP/search-full-$SEARCH_SUITE/browser.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Bind the complete inventory to the exact source
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest list "$SEARCH_FILE" --json \
+            > "$RUNNER_TEMP/search-full-$SEARCH_SUITE/collected.json"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const directory = process.env.RUNNER_TEMP + '/search-full-' + process.env.SEARCH_SUITE;
+          const collected = JSON.parse(readFileSync(directory + '/collected.json', 'utf8'));
+          assert.equal(git('rev-parse', 'HEAD'), process.env.CANDIDATE_SHA);
+          assert.equal(process.env.PUI_SEARCH_SCHEDULE_DIAGNOSTICS, '0');
+          assert.equal(collected.length, Number(process.env.SEARCH_CASES));
+          assert.equal(new Set(collected.map(test => test.name)).size, collected.length);
+          assert.ok(collected.every(test => test.file === path.resolve(process.env.SEARCH_FILE)));
+          const files = [
+            '.github/workflows/search-runtime-diagnostic.yml', 'pnpm-lock.yaml',
+            'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+            'apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts',
+            'apps/www/src/content/docs/zh-cn/site-search-public-browser.ts',
+            'apps/www/src/content/docs/zh-cn/site-search-evidence.ts',
+            'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+            'apps/www/src/components/site-search-commands.ts',
+            'apps/www/src/components/site-search-composition.ts',
+          ].map(path => ({ path, sha256: createHash('sha256').update(readFileSync(path)).digest('hex') }));
+          writeFileSync(directory + '/source.json', JSON.stringify({
+            sha: git('rev-parse', 'HEAD'), tree: git('rev-parse', 'HEAD^{tree}'),
+            status: git('status', '--porcelain=v1'), node: process.version, files,
+            suite: process.env.SEARCH_SUITE, file: process.env.SEARCH_FILE,
+            expectedCases: Number(process.env.SEARCH_CASES), combinedInventoryCases: 34,
+            originalPredicateMs: 1000, originalCaseMs: Number(process.env.SEARCH_CASE_MS),
+            workerDeadlineMs: 600000, jobDeadlineMinutes: 15,
+            diagnosticsEnabled: false, testNamePattern: null,
+            scope: 'One complete original file per isolated job; both source-identical jobs are required for the full 22+12 inventory. No full CI or release acceptance claim.',
+          }, null, 2) + '\n');
+          JS
+      - name: Prepare the official font input
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/search-full-${{ matrix.suite }}/fonts
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Execute the complete original file without diagnostic observation
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/search-full-${{ matrix.suite }}/runtime
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 600s \
+            corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "$SEARCH_FILE" \
+            --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/search-full-$SEARCH_SUITE/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/search-full-$SEARCH_SUITE/native.log"
+      - name: Require every collected original case and preserve any failure
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const directory = process.env.RUNNER_TEMP + '/search-full-' + process.env.SEARCH_SUITE;
+          const source = JSON.parse(readFileSync(directory + '/source.json', 'utf8'));
+          const collected = JSON.parse(readFileSync(directory + '/collected.json', 'utf8'));
+          const result = JSON.parse(readFileSync(directory + '/vitest.json', 'utf8'));
+          const suites = result.testResults ?? [];
+          const all = suites.flatMap(suite => suite.assertionResults ?? []);
+          const names = all.map(test => [...test.ancestorTitles, test.title].join(' > '));
+          const summary = {
+            source: process.env.CANDIDATE_SHA, suite: process.env.SEARCH_SUITE,
+            expectedCases: Number(process.env.SEARCH_CASES), collected: collected.length,
+            executed: all.filter(test => ['passed', 'failed'].includes(test.status)).length,
+            unexecuted: all.filter(test => !['passed', 'failed'].includes(test.status)).length,
+            diagnosticsEnabled: false,
+            cases: all.map(({ title, fullName, status, failureMessages }) => ({ title, fullName, status, failureMessages })),
+          };
+          writeFileSync(directory + '/inventory-results.json', JSON.stringify(summary, null, 2) + '\n');
+          assert.equal(source.sha, process.env.CANDIDATE_SHA);
+          assert.equal(source.diagnosticsEnabled, false);
+          assert.equal(process.env.PUI_SEARCH_SCHEDULE_DIAGNOSTICS, '0');
+          assert.equal(suites.length, 1);
+          assert.equal(suites[0].name, path.resolve(process.env.SEARCH_FILE));
+          assert.equal(collected.length, Number(process.env.SEARCH_CASES));
+          assert.equal(new Set(collected.map(test => test.name)).size, collected.length);
+          assert.deepEqual(names.sort(), collected.map(test => test.name).sort());
+          assert.equal(all.length, Number(process.env.SEARCH_CASES));
+          assert.equal(summary.unexecuted, 0);
+          assert.ok(all.every(test => test.status === 'passed'));
+          assert.equal(result.success, true);
+          JS
+      - name: Retain complete original inventory and exact-source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-full-${{ matrix.suite }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/search-full-${{ matrix.suite }}
           if-no-files-found: error
           retention-days: 14
