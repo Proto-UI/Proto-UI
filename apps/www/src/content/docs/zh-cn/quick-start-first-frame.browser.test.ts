@@ -49,6 +49,7 @@ const targets = {
   noteTitle: '.starlight-aside--note .starlight-aside__title',
   noteBody: '.starlight-aside--note .starlight-aside__content p',
   following: '[data-doc-flow] > p',
+  stepTitle: '[data-docs-step] > h3.docs-step__title',
 };
 function readPageFrame({
   selectors,
@@ -77,6 +78,7 @@ function readPageFrame({
             fontWeight: css.fontWeight,
             fontFamily: css.fontFamily,
             lineHeight: css.lineHeight,
+            letterSpacing: css.letterSpacing,
             color: css.color,
             fontFaceReady: document.fonts.check(
               `${css.fontStyle} ${css.fontWeight} ${css.fontSize} ${css.fontFamily}`,
@@ -486,6 +488,8 @@ function compare(
         Math.abs(final[coordinate] - initial[coordinate]),
         `${key}.${coordinate}`
       ).toBeLessThanOrEqual(1);
+    if (key === 'stepTitle')
+      expect(final.letterSpacing, `${key}.letterSpacing`).toBe(initial.letterSpacing);
     if (!['release', 'note'].includes(key)) {
       for (const property of [
         'fontSize',
@@ -603,7 +607,16 @@ describe('quick-start first-frame continuity', () => {
       });
       const page = await context.newPage();
       const errors: string[] = [];
+      const consoleErrors: Array<{ at: number; text: string; location: unknown }> = [];
       page.on('pageerror', (error) => errors.push(error.message));
+      page.on('console', (message) => {
+        if (message.type() === 'error' && consoleErrors.length < 32)
+          consoleErrors.push({
+            at: Date.now(),
+            text: message.text(),
+            location: message.location(),
+          });
+      });
       await page.addInitScript(
         ({ runtime, key }) => {
           localStorage.setItem(key, runtime);
@@ -730,6 +743,13 @@ describe('quick-start first-frame continuity', () => {
                 '[data-cli-init-tabs][data-cli-init-tabs-init="1"]'
               );
               await generatedBrowser.waitFor();
+              // The native fallback remains in the DOM after real Tabs publish.
+              // Follow the one accessible file tablist, keeping strict ownership.
+              const generatedFileTabs = generatedBrowser.getByRole('tablist');
+              expect(await generatedFileTabs.count()).toBe(1);
+              expect(await generatedFileTabs.getAttribute('data-code-example-tablist')).toBe(
+                'file'
+              );
               await init.scrollIntoViewIfNeeded();
               await writeFile(
                 path.join(directory, `${prefix}-cli-init.json`),
@@ -770,9 +790,10 @@ describe('quick-start first-frame continuity', () => {
                 ['proto-ui/config.json', 'config'],
                 ['src/styles/proto-ui-style.css', 'style'],
               ] as const) {
-                const item = generatedBrowser.locator(
+                const item = generatedFileTabs.locator(
                   `[role="tab"][data-cli-file-path="${filePath}"]`
                 );
+                expect(await item.count()).toBe(1);
                 await item.click();
                 const detail = generatedBrowser.locator('[data-cli-file-panel]:visible');
                 expect(await detail.locator('[data-code-file-title]').textContent()).toBe(filePath);
@@ -943,6 +964,10 @@ describe('quick-start first-frame continuity', () => {
             try {
               await stopFrameTrace(page, prefix);
             } finally {
+              await writeFile(
+                path.join(directory, `${prefix}-console-errors.json`),
+                JSON.stringify({ source, errors, consoleErrors }, null, 2)
+              );
               await page.unrouteAll({ behavior: 'wait' });
             }
           }
