@@ -68,7 +68,10 @@ export async function activateMatrixPreviews({
   for (const root of roots) rememberOwner(root);
   const remaining = () => {
     const left = deadline - Date.now();
-    if (left <= 0) throw new Error('Matrix activation exhausted the original 60000ms inited phase');
+    if (left <= 0)
+      throw new Error(
+        `Matrix activation exhausted the original ${deadline - startedAt}ms inited phase`
+      );
     return left;
   };
   const inViewport = (root: Root) => {
@@ -102,7 +105,11 @@ export async function activateMatrixPreviews({
       const timer = view.setTimeout(() => {
         view.cancelAnimationFrame(first);
         view.cancelAnimationFrame(second);
-        reject(new Error('Matrix activation exhausted the original 60000ms inited phase'));
+        reject(
+          new Error(
+            `Matrix activation exhausted the original ${deadline - startedAt}ms inited phase`
+          )
+        );
       }, left);
     });
 
@@ -201,10 +208,12 @@ export async function waitForMatrixInitialization(
     if (receipt.status !== 'covered') throw new Error(receipt.error ?? 'Matrix activation failed');
     const remaining = deadline - Date.now();
     if (remaining <= 0)
-      throw new Error('Matrix activation exhausted the original 60000ms inited phase');
+      throw new Error(`Matrix activation exhausted the original ${timeoutMs}ms inited phase`);
     await page.waitForFunction(matrixPreviewersInitialized, runtimeCount, { timeout: remaining });
     if (Date.now() > deadline)
-      throw new Error('Matrix initialization completed after the original 60000ms inited phase');
+      throw new Error(
+        `Matrix initialization completed after the original ${timeoutMs}ms inited phase`
+      );
   })();
   try {
     await Promise.race([
@@ -214,7 +223,7 @@ export async function waitForMatrixInitialization(
           () =>
             reject(
               new Error(
-                'Matrix activation/initialization exceeded the original 60000ms inited phase'
+                `Matrix activation/initialization exceeded the original ${timeoutMs}ms inited phase`
               )
             ),
           Math.max(0, deadline - Date.now())

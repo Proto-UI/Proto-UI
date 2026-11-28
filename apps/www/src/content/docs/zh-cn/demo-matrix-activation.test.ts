@@ -362,43 +362,49 @@ describe('complete Matrix activation keeps the original inited deadline', () => 
     expect(receipt.restoredScroll).toEqual({ x: 0, y: 0 });
   });
 
-  it('uses one deadline across batches, fails at exhausted time and still restores scrolling', async () => {
-    fixture();
-    clock = Date.now();
-    vi.spyOn(Date, 'now').mockImplementation(() => clock!);
-    scrollCost = 30_000;
-    const { page, waitForFunction } = pageFixture();
-    await expect(waitForMatrixInitialization(page, 4)).rejects.toThrow('original 60000ms');
-    const receipt = (window as any).__puiMatrixActivation;
-    expect(receipt.deadline - receipt.startedAt).toBe(60_000);
-    expect(receipt.finishedAt).toBe(receipt.deadline);
-    expect(receipt.status).toBe('failed');
-    expect(receipt.visited).toHaveLength(4);
-    expect(receipt.missingAtTraversalEnd).toHaveLength(4);
-    expect(waitForFunction).not.toHaveBeenCalled();
-    expect(receipt.restoredScroll).toEqual({ x: 0, y: 0 });
-  });
+  for (const timeoutMs of [undefined, 180_000]) {
+    const budget = timeoutMs ?? 60_000;
+    const label = timeoutMs === undefined ? '' : ` (${budget}ms explicit budget)`;
+    it(`uses one deadline across batches, fails at exhausted time and still restores scrolling${label}`, async () => {
+      fixture();
+      clock = Date.now();
+      vi.spyOn(Date, 'now').mockImplementation(() => clock!);
+      scrollCost = budget / 2;
+      const { page, waitForFunction } = pageFixture();
+      await expect(waitForMatrixInitialization(page, 4, timeoutMs)).rejects.toThrow(
+        `original ${budget}ms`
+      );
+      const receipt = (window as any).__puiMatrixActivation;
+      expect(receipt.deadline - receipt.startedAt).toBe(budget);
+      expect(receipt.finishedAt).toBe(receipt.deadline);
+      expect(receipt.status).toBe('failed');
+      expect(receipt.visited).toHaveLength(4);
+      expect(receipt.missingAtTraversalEnd).toHaveLength(4);
+      expect(waitForFunction).not.toHaveBeenCalled();
+      expect(receipt.restoredScroll).toEqual({ x: 0, y: 0 });
+    });
 
-  it('the runner deadline rejects a blocked renderer and a late reply cannot start a renewed wait', async () => {
-    vi.useFakeTimers();
-    let resolve!: (value: unknown) => void;
-    const waitForFunction = vi.fn();
-    const page = {
-      evaluate: () =>
-        new Promise((done) => {
-          resolve = done;
-        }),
-      waitForFunction,
-    } as unknown as Pick<Page, 'evaluate' | 'waitForFunction'>;
-    const waiting = expect(waitForMatrixInitialization(page, 4)).rejects.toThrow(
-      'original 60000ms'
-    );
-    await vi.advanceTimersByTimeAsync(60_000);
-    await waiting;
-    resolve({ status: 'covered' });
-    await vi.advanceTimersByTimeAsync(0);
-    expect(waitForFunction).not.toHaveBeenCalled();
-  });
+    it(`the runner deadline rejects a blocked renderer and a late reply cannot start a renewed wait${label}`, async () => {
+      vi.useFakeTimers();
+      let resolve!: (value: unknown) => void;
+      const waitForFunction = vi.fn();
+      const page = {
+        evaluate: () =>
+          new Promise((done) => {
+            resolve = done;
+          }),
+        waitForFunction,
+      } as unknown as Pick<Page, 'evaluate' | 'waitForFunction'>;
+      const waiting = expect(waitForMatrixInitialization(page, 4, timeoutMs)).rejects.toThrow(
+        `original ${budget}ms`
+      );
+      await vi.advanceTimersByTimeAsync(budget);
+      await waiting;
+      resolve({ status: 'covered' });
+      await vi.advanceTimersByTimeAsync(0);
+      expect(waitForFunction).not.toHaveBeenCalled();
+    });
+  }
 
   it('a non-scrolling control cannot claim viewport coverage and restoration errors preserve the first failure', async () => {
     fixture(true);
