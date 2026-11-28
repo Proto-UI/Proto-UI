@@ -14,12 +14,12 @@ Core package for defining prototypes, handles, template primitives, and protocol
 
 <!-- proto-ui-release-status:start -->
 
-> **Unpublished release preparation:** `0.3.0` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+> **Unpublished release preparation:** `0.3.0-rc.1` has not been published. The command below is an example for use after publication; it is not currently an installable version.
 
 <!-- proto-ui-release-status:end -->
 
 ```bash
-npm install @proto.ui/core@0.3.0
+npm install @proto.ui/core@0.3.0-rc.1
 ```
 
 ## Internal Structure

@@ -28,12 +28,12 @@ Adapter foundation package used to translate Proto UI contracts into concrete ho
 
 <!-- proto-ui-release-status:start -->
 
-> **Unpublished release preparation:** `0.3.0` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+> **Unpublished release preparation:** `0.3.0-rc.1` has not been published. The command below is an example for use after publication; it is not currently an installable version.
 
 <!-- proto-ui-release-status:end -->
 
 ```bash
-npm install @proto.ui/adapter-base@0.3.0
+npm install @proto.ui/adapter-base@0.3.0-rc.1
 ```
 
 ## Internal Structure

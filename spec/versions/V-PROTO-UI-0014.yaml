@@ -1,0 +1,59 @@
+id: V-PROTO-UI-0014
+type: version
+title: Proto UI 0.3.0-rc.1
+status: draft
+since: 0.3.0-rc.1
+summary: First numbered 0.3 release candidate for the frozen Base, Shadcn, Brutalist, Lucide, website and CLI scope, pending final integration checks and protected publication.
+statement:
+  en: Proto UI 0.3.0-rc.1 is one draft ecosystem release candidate shared exactly by all 47 public @proto.ui packages and its future immutable spec snapshot. It prepares the frozen 0.3 scope for final verification and blocker repairs without claiming stable admission or publication.
+  zh-CN: Proto UI 0.3.0-rc.1 是由全部 47 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行候选。它为已冻结的 0.3 范围准备最终验证与 blocker 修复，不声称 stable admission 或发布已经完成。
+release:
+  version: 0.3.0-rc.1
+  channel: prerelease
+  gitTag: v0.3.0-rc.1
+  npmDistTag: next
+  packageVersionPolicy: exact
+  packageScope: public-@proto.ui
+dependsOn:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+    - D-PRERELEASE-STAGE-0001
+criteria:
+  - id: V-PROTO-UI-0014-DRAFT-BOUNDARY
+    text:
+      en: This draft governs candidate manifests, release assets and catalog references only. It does not establish an installable RC, npm or GitHub publication, a Git tag, next-channel activation, a passing rehearsal, immutable snapshot evidence or ordinary-entity stable admission.
+      zh-CN: 本 draft 仅治理候选 manifest、发行物料与 catalog 引用。它不代表 RC 已可安装、npm 或 GitHub 发布、Git tag、next channel 激活、rehearsal 通过、不可变 snapshot 证据或普通实体 stable admission 已经成立。
+  - id: V-PROTO-UI-0014-IDENTITY
+    text:
+      en: VERSION, all 47 public @proto.ui package manifests, staged internal dependencies and the release snapshot must use 0.3.0-rc.1 exactly. Private compiler tooling and private native targets remain outside the public package set.
+      zh-CN: VERSION、全部 47 个公开 @proto.ui package manifest、暂存发布包的内部依赖与发行 snapshot 必须精确使用 0.3.0-rc.1。私有 compiler 工具与私有 native target 不进入公开 package set。
+  - id: V-PROTO-UI-0014-FROZEN-SCOPE
+    text:
+      en: 'The candidate retains the effective 0.3 scope in release-0.3-plan: Base, Shadcn, Brutalist and Lucide, the website, CLI and retained prerequisites. Only final verification and blocker repairs remain eligible; planned architecture rewrites, top-level breaking API changes or new core features require a different stage decision. Bootstrap, Liquid Glass and explicitly deferred Compiler/consumer criteria remain on the 0.4 line.'
+      zh-CN: 候选保留 release-0.3-plan 中的有效 0.3 范围：Base、Shadcn、Brutalist、Lucide、网站、CLI 与保留的前置能力。后续仅允许最终验证与 blocker 修复；计划中的架构重写、顶层 breaking API 变化或新增核心特性需要重新决定阶段。Bootstrap、Liquid Glass 与明确延期的 Compiler/consumer 条件仍属于 0.4 线。
+  - id: V-PROTO-UI-0014-CANDIDATE-EVIDENCE
+    text:
+      en: Publication requires the reviewed integrated source to pass the complete release rehearsal, strict whole-entry package budgets, applicable generated-input freshness checks and retained 0.3 acceptance gates. Historical green jobs, focused local checks, metadata synchronization and lifecycle disposition coverage cannot replace final-source evidence; failed, skipped and unexecuted criteria remain explicit.
+      zh-CN: 发布要求已评审的整合源码通过完整 release rehearsal、strict whole-entry package budgets、适用生成输入 freshness 检查与保留的 0.3 验收门禁。历史绿灯、局部本地检查、metadata 同步与生命周期处置覆盖不能替代最终源码证据；失败、跳过和未执行条件必须显式保留。
+  - id: V-PROTO-UI-0014-REGISTRY-READINESS
+    text:
+      en: Every public package identity must pass the existing registry-readiness policy, and its private Trusted Publisher configuration must authorize the protected release workflow. A public registry pass does not establish private publisher authorization. Preparation creates no npm identity or version and changes no dist-tag.
+      zh-CN: 每个公开 package identity 必须通过现有 registry-readiness policy，且其私有 Trusted Publisher 配置必须授权受保护发行工作流。公开 registry 检查通过不代表私有 publisher 授权已成立。准备过程不创建 npm identity 或版本，也不改变 dist-tag。
+  - id: V-PROTO-UI-0014-PUBLICATION
+    text:
+      en: This entity may become active only after all 47 packages in the reviewed BOM exist at 0.3.0-rc.1 with next pointing to that version, v0.3.0-rc.1 resolves to the protected publication commit, and the GitHub prerelease, immutable snapshot and checksum have been independently verified. The stable 0.3.0 draft and draft 0.4.0 identity remain separate; latest is not this candidate's publication channel.
+      zh-CN: 仅当已评审 BOM 中全部 47 个 package 均存在 0.3.0-rc.1 且 next 指向该版本、v0.3.0-rc.1 解析到受保护发布 commit，并独立核验 GitHub prerelease、不可变 snapshot 与 checksum 后，本实体才可转为 active。Stable 0.3.0 draft 与 draft 0.4.0 身份保持独立；latest 不是该候选的发布 channel。
+sources:
+  - path: internal/releases/0.3.0-rc.1/package-bom.json
+  - path: internal/releases/0.3.0-rc.1/release-notes.md
+  - path: internal/releases/0.3.0-rc.1/release-notes.zh-CN.md
+  - path: internal/releases/0.3.0-rc.1/lifecycle-dispositions.json
+  - path: internal/records/2026-11-28-0.3.0-rc.1-release-prep.zh-CN.md
+  - path: internal/governance/release-0.3-plan.md
+  - path: internal/governance/release-workflow.md
+openQuestions: []
+revisions:
+  - version: 0.3.0-rc.1
+    change: introduced
+    summary: Opened the first numbered RC for the frozen 0.3 scope under the current owner's release-candidate direction, retaining draft lifecycle, next-channel identity and final-source evidence requirements.
+tags: [release, prerelease, release-candidate, global-version]
