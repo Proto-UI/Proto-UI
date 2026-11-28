@@ -1,3 +1,4 @@
+import { runAllSteps as completeCleanup } from '@proto.ui/core/internal';
 import type { RuntimeHost } from '@proto.ui/runtime';
 import {
   withWebComponentCallerDomMove,
@@ -908,21 +909,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
 
 // WC-internal release fanout follows the acquired-owner convention in adapter-base.
 // Track failure separately: JavaScript permits throwing undefined.
-export function completeCleanup(steps: Array<() => void>): void {
-  let failed = false;
-  let firstError: unknown;
-  for (const step of steps) {
-    try {
-      step();
-    } catch (error) {
-      if (!failed) {
-        failed = true;
-        firstError = error;
-      }
-    }
-  }
-  if (failed) throw firstError;
-}
+export { runAllSteps as completeCleanup } from '@proto.ui/core/internal';
 
 function isSlotOnly(children: TemplateChildren): boolean {
   if (children == null) return false;

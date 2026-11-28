@@ -91,7 +91,10 @@ const highlighted = await highlightCode(code, lang, { highlightLines });
 >
   {
     title && (
-      <figcaption class="code-panel__title" data-code-file-header>
+      <figcaption
+        class:list={['code-panel__title', !scrollableTitle && 'code-panel__title--wrap']}
+        data-code-file-header
+      >
         <StaticLucideIcon
           name={titleIcon ?? codeFileIcon(title)}
           size={scrollableTitle ? '16px' : '1rem'}
@@ -307,6 +310,16 @@ const highlighted = await highlightCode(code, lang, { highlightLines });
   .code-panel__title > svg {
     flex: none;
     color: var(--color-muted-foreground);
+  }
+  .code-panel__title--wrap {
+    flex-wrap: wrap;
+  }
+  @media (max-width: 480px) {
+    .code-panel__title--wrap {
+      /* Enlarged text needs a real label row before Copy moves to the next row.
+       * Keep the edge gutter independent of the user's text enlargement. */
+      padding-inline: 12px;
+    }
   }
   [data-site-library-family='brutalist'] .code-panel__title,
   [data-site-library-family='bootstrap-2-3-2'] .code-panel__title {

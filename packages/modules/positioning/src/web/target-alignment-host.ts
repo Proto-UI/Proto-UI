@@ -2,6 +2,7 @@ import { ownStyles } from './owned-style-lease';
 import { observeRootSpace } from './root-space-observer';
 import {
   createBorderBoxSizeLease,
+  type BorderBoxSizeResult,
   hasBorderBoxInlineClipping,
   layoutInlineStart,
   measureBorderBoxInlineGutter,
@@ -155,6 +156,21 @@ export function createTargetAlignmentLease(
       // before delivery; pending layout keeps its identity claims instead.
       sizeLease?.abort(reason);
       report({ status: 'unavailable', reason });
+    };
+    const reportSizeFailure = (
+      result: Extract<BorderBoxSizeResult, { kind: 'pending' | 'unavailable' }>
+    ) => {
+      if (result.kind === 'pending') report({ status: 'pending-target', reason: 'missing-target' });
+      else if (result.reason === 'detached-target')
+        report({ status: 'pending-target', reason: 'detached-target' });
+      else report({ status: 'unavailable', reason: result.reason });
+    };
+    const prepareSize = () => {
+      if (!sizeLease) return true;
+      const result = sizeLease.prepare();
+      if (result.kind === 'prepared') return true;
+      reportSizeFailure(result);
+      return false;
     };
     restore = () => {
       owned.restore();
@@ -341,9 +357,7 @@ export function createTargetAlignmentLease(
       try {
         const unavailable = sizeLease?.checkAvailability();
         if (unavailable) {
-          if (unavailable.reason === 'detached-target')
-            report({ status: 'pending-target', reason: 'detached-target' });
-          else report({ status: 'unavailable', reason: unavailable.reason });
+          reportSizeFailure(unavailable);
           return;
         }
         if (!owned.isCurrent()) {
@@ -373,17 +387,7 @@ export function createTargetAlignmentLease(
           '--proto-ui-anchor-height': `${targets.blockReference.offsetHeight}px`,
         }))
           if (!write(name, value)) return;
-        if (sizeLease) {
-          const sized = sizeLease.prepare();
-          if (sized.kind !== 'prepared') {
-            if (sized.kind === 'pending')
-              report({ status: 'pending-target', reason: 'missing-target' });
-            else if (sized.reason === 'detached-target')
-              report({ status: 'pending-target', reason: 'detached-target' });
-            else report({ status: 'unavailable', reason: sized.reason });
-            return;
-          }
-        }
+        if (!prepareSize()) return;
         // Inline constraints can reflow preceding rows. Never use pre-width block metrics.
         let candidate = readPlan();
         if (!candidate) return;
@@ -395,17 +399,7 @@ export function createTargetAlignmentLease(
             [candidate.inline.edge === 'left' ? 'right' : 'left']: '',
           }))
             if (!write(name, value)) return;
-          if (sizeLease) {
-            const sized = sizeLease.prepare();
-            if (sized.kind !== 'prepared') {
-              if (sized.kind === 'pending')
-                report({ status: 'pending-target', reason: 'missing-target' });
-              else if (sized.reason === 'detached-target')
-                report({ status: 'pending-target', reason: 'detached-target' });
-              else report({ status: 'unavailable', reason: sized.reason });
-              return;
-            }
-          }
+          if (!prepareSize()) return;
           const constrained = readPlan();
           if (!constrained) return;
           plan = constrained;
@@ -435,26 +429,14 @@ export function createTargetAlignmentLease(
             // solve pass; it cannot silently admit a plan for an earlier size.
             const sized = sizeLease?.verify();
             if (sized?.kind === 'reference-changed') {
-              const prepared = sizeLease!.prepare();
-              if (prepared.kind !== 'prepared') {
-                if (prepared.kind === 'pending')
-                  report({ status: 'pending-target', reason: 'missing-target' });
-                else if (prepared.reason === 'detached-target')
-                  report({ status: 'pending-target', reason: 'detached-target' });
-                else report({ status: 'unavailable', reason: prepared.reason });
-                return;
-              }
+              if (!prepareSize()) return;
               const resized = readPlan();
               if (!resized) return;
               candidate = resized;
               continue;
             }
             if (sized?.kind === 'unavailable' || sized?.kind === 'pending') {
-              if (sized.kind === 'pending')
-                report({ status: 'pending-target', reason: 'missing-target' });
-              else if (sized.reason === 'detached-target')
-                report({ status: 'pending-target', reason: 'detached-target' });
-              else report({ status: 'unavailable', reason: sized.reason });
+              reportSizeFailure(sized);
               return;
             }
             for (const target of sizeTargets) {

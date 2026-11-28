@@ -55,6 +55,11 @@ export function createBorderBoxSizeLease(
     // be stolen back on resume. Disposal/terminal failure still restores ours.
     return { kind: 'pending', reason: 'missing-layout' };
   };
+  const extentFailure = (width: number, height: number) => {
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0)
+      return unavailable('invalid-geometry');
+    return width === 0 || height === 0 ? pending() : null;
+  };
   const ownsCurrentFields = () =>
     owners.every(
       ({ target, styles }) =>
@@ -85,9 +90,8 @@ export function createBorderBoxSizeLease(
     // Trigger hover/press or ancestor paint transforms never resize rows.
     const width = reference.offsetWidth,
       height = reference.offsetHeight;
-    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0)
-      return unavailable('invalid-geometry');
-    if (width === 0 || height === 0) return pending();
+    const extent = extentFailure(width, height);
+    if (extent) return extent;
     // Initial pending has no style fields to protect. A later admitted lease
     // still supersedes it, even after that successor restores its own fields.
     // Missing layout or an initial author conflict never claims this generation.
@@ -126,14 +130,8 @@ export function createBorderBoxSizeLease(
     // of fresh row dimensions against a plan computed for the earlier ones.
     const currentWidth = reference.offsetWidth,
       currentHeight = reference.offsetHeight;
-    if (
-      !Number.isFinite(currentWidth) ||
-      !Number.isFinite(currentHeight) ||
-      currentWidth < 0 ||
-      currentHeight < 0
-    )
-      return unavailable('invalid-geometry');
-    if (currentWidth === 0 || currentHeight === 0) return pending();
+    const extent = extentFailure(currentWidth, currentHeight);
+    if (extent) return extent;
     if (currentWidth !== width || currentHeight !== height) return { kind: 'reference-changed' };
     for (const { target } of owners) {
       const beforeRead = availabilityFailure();
@@ -142,14 +140,8 @@ export function createBorderBoxSizeLease(
       // of successful writes. Multi-line callers must choose intrinsic.
       const targetWidth = target.offsetWidth,
         targetHeight = target.offsetHeight;
-      if (
-        !Number.isFinite(targetWidth) ||
-        !Number.isFinite(targetHeight) ||
-        targetWidth < 0 ||
-        targetHeight < 0
-      )
-        return unavailable('invalid-geometry');
-      if (targetWidth === 0 || targetHeight === 0) return pending();
+      const targetExtent = extentFailure(targetWidth, targetHeight);
+      if (targetExtent) return targetExtent;
       if (
         Math.abs(targetWidth - width) > 1 ||
         Math.abs(targetHeight - height) > 1 ||
@@ -164,14 +156,8 @@ export function createBorderBoxSizeLease(
     // certify a disconnected/adopted target or an equal-valued successor claim.
     const afterRead = availabilityFailure();
     if (afterRead) return afterRead;
-    if (
-      !Number.isFinite(finalWidth) ||
-      !Number.isFinite(finalHeight) ||
-      finalWidth < 0 ||
-      finalHeight < 0
-    )
-      return unavailable('invalid-geometry');
-    if (finalWidth === 0 || finalHeight === 0) return pending();
+    const finalExtent = extentFailure(finalWidth, finalHeight);
+    if (finalExtent) return finalExtent;
     if (finalWidth !== width || finalHeight !== height || preparedSize !== prepared)
       return { kind: 'reference-changed' };
     return { kind: 'matched', width, height };

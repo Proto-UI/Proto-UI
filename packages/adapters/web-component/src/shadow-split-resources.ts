@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import {
   createShadowColorSchemeEnvironmentOwner,
   type ShadowColorSchemeEnvironmentOwner,
@@ -76,10 +77,21 @@ export function createShadowSplitResources({
     artifact = resolvedFactories.createArtifact(shell, artifactInput);
     surface = resolvedFactories.createSurface(shell);
   } catch (error) {
-    const rollbackErrors: unknown[] = [];
-    if (surface) disposeInto(rollbackErrors, surface);
-    if (artifact) disposeInto(rollbackErrors, artifact);
-    if (environment) disposeInto(rollbackErrors, environment);
+    try {
+      runAllSteps([
+        () => {
+          if (surface) surface.dispose();
+        },
+        () => {
+          if (artifact) artifact.dispose();
+        },
+        () => {
+          if (environment) environment.dispose();
+        },
+      ]);
+    } catch {
+      // Preserve the initiating construction failure after all three releases.
+    }
     throw error;
   }
 
@@ -98,22 +110,10 @@ export function createShadowSplitResources({
         resourceGenerations.delete(shell.root);
       }
 
-      const errors: unknown[] = [];
-      disposeInto(errors, surface);
-      disposeInto(errors, artifact);
-      disposeInto(errors, environment);
-      if (errors.length > 0) throw errors[0];
+      runAllSteps([() => surface.dispose(), () => artifact.dispose(), () => environment.dispose()]);
     },
   };
 
   resourceGenerations.set(shell.root, resources);
   return resources;
-}
-
-function disposeInto(errors: unknown[], resource: { dispose(): void }): void {
-  try {
-    resource.dispose();
-  } catch (error) {
-    errors.push(error);
-  }
 }
