@@ -48,6 +48,7 @@ jobs:
             apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts \
             apps/www/src/content/docs/zh-cn/demo-matrix-observation.test.ts \
             apps/www/src/content/docs/zh-cn/demo-matrix-entry-cost-diagnostic.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-anatomy-diagnostic.test.ts \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism
       - name: Profile one original Matrix case without changing its assertions or waits
         timeout-minutes: 10
@@ -56,6 +57,7 @@ jobs:
           PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1'
           PROTO_UI_MATRIX_TRACE_BEFORE_INIT: '1'
           PROTO_UI_MATRIX_ENTRY_COST: '1'
+          PROTO_UI_MATRIX_ANATOMY_NOTIFICATIONS: '1'
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/demo-matrix-startup
         run: |
           set -euo pipefail

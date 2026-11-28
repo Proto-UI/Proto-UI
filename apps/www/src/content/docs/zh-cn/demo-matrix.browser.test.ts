@@ -16,6 +16,10 @@ import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
 import { collectMatrixAccessibilityFacts } from './demo-matrix-accessibility';
 import { waitForMatrixInitialization } from './demo-matrix-activation';
 import { installMatrixEntryCostDiagnostic } from './demo-matrix-entry-cost-diagnostic';
+import {
+  createMatrixAnatomyConsoleJournal,
+  installMatrixAnatomyNotificationDiagnostic,
+} from './demo-matrix-anatomy-diagnostic';
 
 const MATRIX_ROUTE = '/zh-cn/internal/demo-matrix/';
 
@@ -192,6 +196,26 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
     pageErrors: [],
   };
   matrixDiagnostics.set(page, state);
+  if (process.env.PROTO_UI_MATRIX_ANATOMY_NOTIFICATIONS === '1') {
+    const directory =
+      process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
+    if (directory) {
+      try {
+        const journal = createMatrixAnatomyConsoleJournal({
+          directory,
+          sourceSha: diagnosticSourceSha,
+          caseName: state.caseName,
+          phase: () => state.phase,
+        });
+        page.on('console', (message) => {
+          if (message.type() === 'info') journal(message.text());
+        });
+        await page.addInitScript(installMatrixAnatomyNotificationDiagnostic, { enabled: true });
+      } catch (error) {
+        console.error('[matrix-anatomy-diagnostic-unavailable]', String(error));
+      }
+    }
+  }
   if (process.env.PROTO_UI_MATRIX_ENTRY_COST === '1') {
     page.on('console', (message) => {
       if (message.type() === 'info' && message.text().startsWith('[matrix-entry-cost] '))

@@ -121,6 +121,13 @@ type OrderNotificationReads = {
   traceIndex: number;
 };
 
+// Diagnostic-branch-only protocol. No public API, host reads or ordering inputs.
+type MatrixNotificationDiagnostic = {
+  enabled: true;
+  begin(family: AnatomyFamily, indexedSubscribers: number): unknown;
+  finish(ticket: unknown, visitedSubscribers: number, completed: boolean): void;
+};
+
 function clearOrderNotificationReads(reads?: OrderNotificationReads): void {
   reads?.comparisons.clear();
   reads?.domains.clear();
@@ -948,10 +955,40 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private static notifyStructuralChange(family: AnatomyFamily): void {
-    let reads: OrderNotificationReads | undefined;
-    for (const impl of this.subscribers(this.orderSubscribers, family)) {
-      reads ??= this.createOrderNotificationReads();
-      impl.emitOrderChangeIfNeeded(family, reads);
+    let diagnostic: MatrixNotificationDiagnostic | undefined;
+    let ticket: unknown;
+    try {
+      const value = Object.getOwnPropertyDescriptor(
+        globalThis,
+        '__puiMatrixAnatomyNotificationDiagnostic'
+      )?.value;
+      if (
+        value?.enabled === true &&
+        typeof value.begin === 'function' &&
+        typeof value.finish === 'function'
+      ) {
+        diagnostic = value;
+        ticket = diagnostic!.begin(family, this.orderSubscribers.get(family)?.length ?? 0);
+      }
+    } catch {
+      // Observation failure never changes the original notification.
+    }
+    let visited = 0;
+    let completed = false;
+    try {
+      let reads: OrderNotificationReads | undefined;
+      for (const impl of this.subscribers(this.orderSubscribers, family)) {
+        visited++;
+        reads ??= this.createOrderNotificationReads();
+        impl.emitOrderChangeIfNeeded(family, reads);
+      }
+      completed = true;
+    } finally {
+      try {
+        if (ticket !== undefined) diagnostic?.finish(ticket, visited, completed);
+      } catch {
+        // In particular, preserve an original throw of undefined during reentry.
+      }
     }
   }
 
