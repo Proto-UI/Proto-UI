@@ -9,10 +9,13 @@ DCO.md
 native/gpui/fixtures/
 # Pinned MIT upstream artifacts; checksums bind their unmodified UTF-8 LF bytes.
 scripts/agent-operations/vendor/modeltrace/
-# Coverage views are generated and checked byte-for-byte by prototype-coverage.mjs.
+# Coverage views are generated and checked byte-for-byte by prototype-coverage.mjs
+# and render-consumer-matrices.mjs.
 internal/coverage-matrices/prototype-coverage-matrix.json
 internal/coverage-matrices/prototype-coverage-matrix.md
 internal/coverage-matrices/finf-delivery-checklist.md
+internal/website/self-hosting-coverage-matrix.md
+internal/agent-harness/dogfood-coverage-matrix.md
 # Exact pre-migration Issue body snapshots retain their original formatting.
 internal/coverage-matrices/snapshots/
 # Compact generated compiler inventory; avoids 238k-line pretty-print bloat.
