@@ -319,6 +319,8 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
     'repair',
     'sprint1',
     'contents-wheel',
+    'website-markup',
+    'website-matrix',
   ]);
   assert.equal(workflow.on.workflow_call.inputs.scope.default, 'repair');
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
@@ -332,7 +334,7 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   }
   assert.equal(
     repair.if,
-    "${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+    "${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'website-markup' && inputs.scope != 'website-matrix')) && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
   );
   assert.ok(repair.steps.some((step) => step.run === 'test "$EVIDENCE_SCOPE" = repair'));
   const original = repair.steps.find(
