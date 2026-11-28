@@ -1601,7 +1601,8 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
     const f = fixture();
     try {
       const options = { preventScroll: true };
-      f.option.focus(options);
+      // The pinned host types omit options; the probe must still forward them unchanged.
+      Reflect.apply(f.option.focus, f.option, [options]);
       expect(f.nativeFocus).toHaveBeenCalledOnce();
       expect(f.nativeFocus).toHaveBeenCalledWith(options);
       expect(f.nativeFocus.mock.contexts[0]).toBe(f.option);
