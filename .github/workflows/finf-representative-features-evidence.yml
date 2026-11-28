@@ -156,6 +156,7 @@ jobs:
         if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.surface.outcome == 'success' }}
         env:
           PUI_FINF_FEATURE_GROUP: ${{ matrix.group }}
+          PUI_FINF_FOCUS_DIAGNOSTICS: ${{ matrix.group == 'calendar' && '1' || '0' }}
           PUI_FINF_PRESET_CHECK: ${{ steps.presets.outcome }}
           PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-feature-evidence
           PUI_FINF_POPOVER_EVIDENCE: ${{ steps.popover_dispatch.outputs.mode }}

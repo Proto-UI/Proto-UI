@@ -173,6 +173,7 @@ function mockedCase(
   const run = execute(`${statements(['captureFailureDiagnostics', 'runCase'])}; runCase;`, {
     browser,
     output: '/test-only',
+    focusDiagnostics: false,
     path,
     createHash,
     writeFile: async (file: string, value: string) => {

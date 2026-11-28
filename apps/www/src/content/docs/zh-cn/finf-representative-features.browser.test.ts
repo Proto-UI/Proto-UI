@@ -43,6 +43,15 @@ const output =
 const revision = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
 const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}']).toString().trim();
 const requestedGroup = process.env.PUI_FINF_FEATURE_GROUP;
+const focusDiagnostics = process.env.PUI_FINF_FOCUS_DIAGNOSTICS === '1';
+type FocusReadDiagnostic = {
+  startedAt: number;
+  settledAt: number | null;
+  status: 'pending' | 'resolved' | 'rejected';
+  observation?: unknown;
+  error?: string;
+};
+const focusReadsByPage = new WeakMap<Page, FocusReadDiagnostic[]>();
 let browser: Browser;
 let baseUrl = '';
 
@@ -701,6 +710,58 @@ async function installPopoverNegativeControl(panel: Locator, control: string | u
 }
 
 async function hasFocus(locator: Locator) {
+  if (focusDiagnostics) {
+    const read: FocusReadDiagnostic = {
+      startedAt: performance.now(),
+      settledAt: null,
+      status: 'pending',
+    };
+    focusReadsByPage.get(locator.page())?.push(read);
+    try {
+      const observation = await locator.evaluate((element) => {
+        const describe = (subject: Element | null) =>
+          subject
+            ? {
+                tag: subject.tagName,
+                text: subject.textContent?.trim().slice(0, 80),
+                connected: subject.isConnected,
+                attributes: Object.fromEntries(
+                  Array.from(subject.attributes, (attribute) => [attribute.name, attribute.value])
+                ),
+              }
+            : null;
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        const activeSubject = active;
+        let focused = false;
+        while (active) {
+          if (element === active || element.contains(active)) {
+            focused = true;
+            break;
+          }
+          const root = active.getRootNode();
+          active = root instanceof ShadowRoot ? root.host : null;
+        }
+        return {
+          focused,
+          observedAt: performance.now(),
+          timeOrigin: performance.timeOrigin,
+          expected: describe(element),
+          active: describe(activeSubject),
+          listbox: describe(element.closest('[role="listbox"]')),
+        };
+      });
+      read.status = 'resolved';
+      read.observation = observation;
+      return observation.focused;
+    } catch (error) {
+      read.status = 'rejected';
+      read.error = String(error);
+      throw error;
+    } finally {
+      read.settledAt = performance.now();
+    }
+  }
   return locator.evaluate((element) => {
     let active = document.activeElement;
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
@@ -886,6 +947,49 @@ async function captureFailureDiagnostics(
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
   const files: Record<string, string> = {};
   const errors: string[] = [];
+  if (focusDiagnostics) {
+    try {
+      const observation = await previewer.evaluate((root) => {
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        return {
+          observedAt: performance.now(),
+          active: active?.outerHTML ?? null,
+          controls: Array.from(root.querySelectorAll('[role="combobox"]'), (trigger) => {
+            const contentId = trigger.getAttribute('aria-controls');
+            const content = contentId ? document.getElementById(contentId) : null;
+            return {
+              trigger: trigger.outerHTML,
+              contentId,
+              content: content?.outerHTML ?? null,
+              style: content
+                ? {
+                    visibility: getComputedStyle(content).visibility,
+                    display: getComputedStyle(content).display,
+                  }
+                : null,
+              scroll: content
+                ? Array.from(content.querySelectorAll('*'))
+                    .filter((element) => element.scrollHeight > element.clientHeight + 1)
+                    .map((element) => ({
+                      tag: element.tagName,
+                      role: element.getAttribute('role'),
+                      scrollTop: element.scrollTop,
+                      scrollHeight: element.scrollHeight,
+                      clientHeight: element.clientHeight,
+                    }))
+                : [],
+            };
+          }),
+        };
+      });
+      const file = `${id}-failed-focus.json`;
+      await writeJson(file, observation);
+      files.focus = file;
+    } catch (error) {
+      errors.push(`focus: ${String(error)}`);
+    }
+  }
   for (const [kind, collect] of [
     ['dom', () => previewer.evaluate((root) => root.outerHTML)],
     ['aria', () => previewer.ariaSnapshot()],
@@ -914,6 +1018,8 @@ async function runCase(testCase: Case) {
     timezoneId: 'UTC',
   });
   const page = await context.newPage();
+  const focusReads: FocusReadDiagnostic[] = [];
+  if (focusDiagnostics) focusReadsByPage.set(page, focusReads);
   page.setDefaultTimeout(15_000);
   const demoId =
     testCase.component === 'drawer'
@@ -1075,6 +1181,15 @@ async function runCase(testCase: Case) {
       screenshots,
       captureErrors,
       failureDiagnostics,
+      ...(focusDiagnostics
+        ? {
+            focusReadDiagnostics: {
+              clock: 'Node performance.now; page observation clock remains separate',
+              timeOrigin: performance.timeOrigin,
+              reads: focusReads.map((read) => ({ ...read })),
+            },
+          }
+        : {}),
       pageErrors,
       blockedRequests,
       acceptance:
