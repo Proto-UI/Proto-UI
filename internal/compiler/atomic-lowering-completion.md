@@ -23,7 +23,7 @@ A static element or readonly Badge alone does not complete M1. The controlled To
 
 ## M2: transactional composition, Context and identity
 
-- [ ] Extend transaction evidence to persistent writable captures, handled/unhandled failures, multi-instance atomicity in one UI execution domain and messages across domains.
+- [ ] Extend transaction evidence to declared state written by several closures, handled/unhandled failures, multi-instance atomicity in one UI execution domain and messages across domains. Persistent writable captures are source-invalid under the revised `CAPTURES` criterion and report `proto/persistent-capture-state`.
 - [ ] Exercise implicit queued reentry independently of ordinary synchronous helper calls; retain the restricted input-response boundary while its complete host path is finished in M3.
 - [ ] Complete declared controlled-mode transition policies beyond the M1 fixed-mode example. Do not infer a policy from incidental JavaScript property presence.
 - [ ] Implement nominal Context keys, nearest logical providers, pure reactive values, equal-valued provider replacement and logical topology changes, including portals.
@@ -73,7 +73,7 @@ All suffixes below refer to `C-COMPILER-FOUNDATION-0001-<suffix>`. The table ass
 | `PHASES` | Declarations, instance initialization, pure derivation, action and owned connections | M2 composition/lifetime phases; M3 task/effect boundaries | Same valid source and phase diagnostics |
 | `IR` | Typed component HIR, CFG, closures and target AST for the first inputs | M2 Context/topology; M3 state machines and all effect classes | Reuse verified IR rather than rescan author text |
 | `COMPLETE` | Fully lower every reached operation in the delivered slice | M2/M3 close the full first-target operation inventory | Complete lowering for each selected target; no fallback |
-| `CAPTURES` | Typed environments, per-instance identity and current-view reads; surviving writable captures obey transactions | M2 shared mutable-capture/rollback cases; M3 retained async environments | No hidden JSON, copied source or foreign VM |
+| `CAPTURES` | Typed environments, per-instance identity and current-view reads; mutable data outliving a segment is declared state | M2 persistent-capture diagnostics and declared-state rollback cases; M3 retained async environments | No hidden JSON, copied source or foreign VM |
 | `DEPENDENCIES` | Automatic props/state/helper dependencies and pure cycle diagnostics | M2 reactive Context/topology; M3 fresh post-await reads | Same invalidation and observed results |
 | `CONTROLLED` | Actual/request split, delayed/rejected input and fixed-instance schema | M2 separately declared transition policies and composition | Owner acceptance remains authoritative |
 | `TRANSACTIONS` | Pending writes, read-own-writes, derived current view and atomic publication | M2 multi-instance/domain cases; M3 every-await segmentation | Same publication order and isolation |

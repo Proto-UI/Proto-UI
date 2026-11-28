@@ -118,6 +118,15 @@ criteria:
       contracts:
         - id: C-COMPILER-FOUNDATION-0001
           anchors: [C-COMPILER-FOUNDATION-0001-LANGUAGE, C-COMPILER-FOUNDATION-0001-VALUES]
+  - id: C-COMPILER-LINT-0001-RULE-PERSISTENT-CAPTURE
+    text: >-
+      proto/persistent-capture-state implements CAPTURES: mutable data that outlives a synchronous segment and is visible to another closure, derivation or later invocation must be declared Proto state. A def.state location written by one action and read by another is positive; a setup-level let that one action reassigns and a later callback or derivation reads is negative. A task body's own local that keeps its value across that task's awaits, and a mutable local shared only within one segment, are not violations. The message identifies the binding, the writing and reading closures, and the migration to an explicit state declaration; no automatic rewrite is claimed unless its preconditions are verified.
+
+
+    references:
+      contracts:
+        - id: C-COMPILER-FOUNDATION-0001
+          anchors: [C-COMPILER-FOUNDATION-0001-CAPTURES]
 dependsOn:
   decisions: [D-COMPILER-FOUNDATION-0001]
   contracts:
@@ -137,4 +146,8 @@ revisions:
   - version: 0.4.0
     change: introduced
     summary: Define shared versioned diagnostics, explicit validity/completeness/compilability states, safe single-source migration and honest coverage gates.
+  - version: 0.4.0
+    change: revised
+    breaking: true
+    summary: Add proto/persistent-capture-state for the revised CAPTURES criterion, which narrows the draft language by requiring declared state for mutable data that outlives a segment.
 tags: [compiler, lint, diagnostics, language, source-compatibility, migration]

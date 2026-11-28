@@ -75,6 +75,13 @@ cases:
       A typed helper forwarding an actually declared capability retains its origin. A source assertion preserving that established origin is not forbidden merely for using as. Casting unrelated data to a capability and invoking it as authority produces proto/no-capability-assertion with LANGUAGE or VALUES and the asserted binding/use. Lack of lowering for a real legal capability remains missing implementation and does not trigger this author-error rule.
 
 
+  - id: T-COMPILER-LINT-0001-CASE-PERSISTENT-CAPTURE
+    title: Require declared state for mutable data that outlives a segment
+    covers: [C-COMPILER-LINT-0001-RULE-PERSISTENT-CAPTURE, C-COMPILER-LINT-0001-DIAGNOSTIC-IDENTITY]
+    expectation: >-
+      A setup-level let reassigned by one action and read by a later callback produces proto/persistent-capture-state with the CAPTURES criterion, the binding and both closures, and sourceValid=false. Replacing it with def.state removes the diagnostic. A task body's own local kept across its awaits and a mutable local shared by helpers within one segment produce no diagnostic. Renaming the binding or moving the writer into an imported helper preserves the result.
+
+
   - id: T-COMPILER-LINT-0001-CASE-NO-INVENTED-RESTRICTION
     title: Attribute limitations to their actual source instead of inventing bans
     covers: [C-COMPILER-LINT-0001-LANGUAGE-AUTHORITY, C-COMPILER-LINT-0001-CATEGORIES]
@@ -123,6 +130,7 @@ implementations:
       - T-COMPILER-LINT-0001-CASE-TEXT
       - T-COMPILER-LINT-0001-CASE-PURITY
       - T-COMPILER-LINT-0001-CASE-CAPABILITY
+      - T-COMPILER-LINT-0001-CASE-PERSISTENT-CAPTURE
       - T-COMPILER-LINT-0001-CASE-NO-INVENTED-RESTRICTION
       - T-COMPILER-LINT-0001-CASE-BOUNDARIES
     notes:
@@ -158,4 +166,7 @@ revisions:
   - version: 0.4.0
     change: introduced
     summary: Add independent diagnostic, rule, migration and denominator cases with absent implementation routes reported honestly.
+  - version: 0.4.0
+    change: revised
+    summary: Add the persistent-capture case for proto/persistent-capture-state.
 tags: [compiler, lint, diagnostics, migration, conformance]

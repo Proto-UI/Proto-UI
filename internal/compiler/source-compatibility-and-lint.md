@@ -37,6 +37,7 @@ The lint contract defines boundaries, positive/negative examples and criterion r
 - `proto/text-api`
 - `proto/pure-derivation`
 - `proto/no-capability-assertion`
+- `proto/persistent-capture-state`
 
 Do not infer new bans from old parser failures. Declarations through legal helpers, defined Context-key lifetimes, admitted equality operations and style expressions require semantic analysis of their actual bindings and contracts. The old parser's rejection or a hard analysis limit does not settle validity.
 
