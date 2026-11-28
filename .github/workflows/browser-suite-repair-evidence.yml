@@ -14,9 +14,9 @@ on:
         required: false
         default: false
       scope:
-        description: Existing repair controls, Sprint 1, Contents wheel, or complete Website markup evidence
+        description: Existing repair controls, Sprint 1, Contents wheel, or complete Website markup/Matrix evidence
         type: choice
-        options: [repair, sprint1, contents-wheel, website-markup]
+        options: [repair, sprint1, contents-wheel, website-markup, website-matrix]
         default: repair
   workflow_call:
     inputs:
@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || inputs.scope != 'website-markup') && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'website-markup' && inputs.scope != 'website-matrix')) && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -217,6 +217,175 @@ jobs:
         with:
           name: website-markup-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/pui834
+          if-no-files-found: error
+          retention-days: 30
+
+  # Ordinary, unprofiled original Matrix oracle on unchanged main f595 product
+  # bytes. The original case, initialization, hook and outer deadlines remain.
+  website-matrix:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'website-matrix' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PROTO_UI_MATRIX_STARTUP_PROFILE: '0'
+      PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '0'
+      PROTO_UI_MATRIX_ENTRY_COST: '0'
+      PROTO_UI_MATRIX_TRACE_BEFORE_INIT: '0'
+      PROTO_UI_MATRIX_TRACE_LATE: '0'
+      PROTO_UI_MATRIX_ANATOMY_NOTIFICATIONS: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 3
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the original Matrix and unchanged f595 product source
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/website-matrix"
+          git rev-parse HEAD > "$RUNNER_TEMP/website-matrix/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/website-matrix/source-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/website-matrix/status-before.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/website-matrix/status-before.txt"
+          git diff --exit-code f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD -- \
+            apps packages pnpm-lock.yaml scripts/test/run-runtime-tests.mjs scripts/test/runtime-process-tree.mjs \
+            > "$RUNNER_TEMP/website-matrix/product-diff.patch"
+          sha256sum .github/workflows/browser-suite-repair-evidence.yml pnpm-lock.yaml \
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/browser-harness.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.ts \
+            scripts/test/run-runtime-tests.mjs scripts/test/runtime-process-tree.mjs \
+            > "$RUNNER_TEMP/website-matrix/source-inputs.sha256"
+      - name: Install the same frozen Node 24 dependency graph
+        run: |
+          set -euo pipefail
+          node -e 'if (process.versions.node.split(".")[0] !== "24") process.exit(1)'
+          node --version > "$RUNNER_TEMP/website-matrix/node-version.txt"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/website-matrix/install.log"
+          corepack pnpm@10.32.1 --version > "$RUNNER_TEMP/website-matrix/pnpm-version.txt"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Prepare the same official CJK font input as full CI
+        timeout-minutes: 3
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/website-matrix/fonts
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Require all diagnostics off and bind the original harness browser selection
+        run: |
+          node --import tsx --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { chromeExecutable } from './apps/www/src/content/docs/zh-cn/browser-harness.ts';
+          const flags = Object.fromEntries(Object.entries(process.env).filter(([key]) => key.startsWith('PROTO_UI_MATRIX_')));
+          assert.equal(Object.keys(flags).length, 6);
+          assert.ok(Object.values(flags).every((value) => value === '0'));
+          const executable = await chromeExecutable();
+          assert.equal(executable, process.env.CHROME_PATH);
+          const version = execFileSync(executable, ['--version'], { encoding: 'utf8' }).trim();
+          assert.match(version, /\b158\./);
+          writeFileSync(process.env.RUNNER_TEMP + '/website-matrix/environment.json', JSON.stringify({
+            node: process.version, executable, version, flags,
+            executableSha256: createHash('sha256').update(readFileSync(executable)).digest('hex'),
+            note: 'The unchanged native suite uses this original chromeExecutable resolver and CHROME_PATH. No browser or page is opened by this preparation.',
+          }, null, 2) + '\n');
+          JS
+      - name: Run the complete original four-case Matrix without profiling or filters
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/website-matrix
+        run: |
+          set -euo pipefail
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s \
+            node scripts/test/run-runtime-tests.mjs \
+              apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+              --no-file-parallelism --maxWorkers=1 --minWorkers=1 \
+              --reporter=default --reporter=json \
+              --outputFile="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json" \
+              2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
+          results=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${results[0]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/command-exit-code.txt"
+          printf '%s\n' "${results[1]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/log-exit-code.txt"
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/completed-at.txt"
+          if [ "${results[0]}" -ne 0 ]; then exit "${results[0]}"; fi
+          exit "${results[1]}"
+      - name: Preserve exact Matrix terminal source even after an original failure
+        if: always()
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > "$RUNNER_TEMP/website-matrix/source-sha-after.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/website-matrix/status-after.txt"
+          sha256sum -c "$RUNNER_TEMP/website-matrix/source-inputs.sha256" > "$RUNNER_TEMP/website-matrix/source-inputs-after.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/website-matrix/status-after.txt"
+      - name: Require all four original Matrix outcomes and the unprofiled source boundary
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const directory = path.join(process.env.RUNNER_TEMP, 'website-matrix');
+          const read = (name) => readFileSync(path.join(directory, name), 'utf8');
+          const titles = [
+            'mounts every demo in every official Web adapter',
+            'keeps the matrix readable at 320px',
+            'keeps the matrix readable at 390px',
+            'moves focus into the Base Dialog content in every runtime',
+          ];
+          const result = { source: process.env.CANDIDATE_SHA, expectedTitles: titles, passed: false };
+          try {
+            const report = JSON.parse(read('vitest.json'));
+            result.tests = report.testResults.flatMap((suite) => suite.assertionResults);
+            result.environment = JSON.parse(read('environment.json'));
+            assert.equal(report.success, true);
+            assert.equal(report.numTotalTests, 4);
+            assert.equal(report.numPassedTests, 4);
+            assert.equal(report.numFailedTests, 0);
+            assert.equal(report.numPendingTests, 0);
+            assert.equal(report.numTodoTests, 0);
+            assert.equal(report.testResults.length, 1);
+            assert.equal(path.resolve(report.testResults[0].name), path.resolve('apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts'));
+            assert.deepEqual(result.tests.map((test) => test.title).sort(), [...titles].sort());
+            assert.ok(result.tests.every((test) => test.status === 'passed'));
+            assert.match(result.environment.node, /^v24\./);
+            assert.match(result.environment.version, /\b158\./);
+            assert.equal(result.environment.executable, process.env.CHROME_PATH);
+            assert.equal(Object.keys(result.environment.flags).length, 6);
+            assert.ok(Object.values(result.environment.flags).every((value) => value === '0'));
+            assert.equal(read('product-diff.patch'), '');
+            for (const name of ['source-sha.txt', 'source-sha-after.txt']) assert.equal(read(name).trim(), result.source);
+            for (const name of ['status-before.txt', 'status-after.txt']) assert.equal(read(name), '');
+            for (const name of ['command-exit-code.txt', 'log-exit-code.txt']) assert.equal(read(name).trim(), '0');
+            const verifiedInputs = read('source-inputs-after.txt').trim().split('\n');
+            assert.equal(verifiedInputs.length, 9);
+            assert.ok(verifiedInputs.every((line) => line.endsWith(': OK')));
+            const files = readdirSync(directory, { recursive: true });
+            assert.ok(files.every((file) => !/(?:^|\/)(?:startup-profile|browser-diagnostic|entry-cost|anatomy-notifications)(?:\/|$)|\.cpuprofile$/.test(file)));
+            result.passed = true;
+          } catch (error) { result.error = String(error); process.exitCode = 1; }
+          writeFileSync(path.join(directory, 'four-case-results.json'), JSON.stringify(result, null, 2) + '\n');
+          JS
+      - name: Retain complete original Matrix results and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-matrix-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/website-matrix
           if-no-files-found: error
           retention-days: 30
 
