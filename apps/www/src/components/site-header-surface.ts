@@ -1,8 +1,20 @@
-import { surfacePrototypeId, panelSurfaceProps, panelSurfaceLayout } from './surface-recipes';
+import {
+  surfacePrototypeId,
+  transitionPrototypeId,
+  panelSurfaceProps,
+  panelSurfaceLayout,
+} from './surface-recipes';
+import {
+  bindSiteHeaderTransition,
+  getSiteHeaderDisclosure,
+  type SiteHeaderTransition,
+  type SiteHeaderTransitionPhase,
+} from './site-header-disclosure';
 import { contentsCommandParticipant } from './site-contents-command';
 import { contentsPanelParticipant } from './site-contents-panel';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
+import type { DemoRuntimeApi } from './PrototypePreviewer/demo-types';
 import {
   createProjectionScopeController,
   type ProjectionScopeCommit,
@@ -16,6 +28,19 @@ import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projectio
 import { resolveSiteLibraryFamily } from './site-library-family';
 import { reserveDocsHeaderPreparation } from './docs-header-preparation';
 
+type HeaderTransitionFact<Value> = {
+  get(): Value;
+  subscribe(
+    listener: (event: { type: 'next'; next: Value } | { type: 'disconnect' }) => void
+  ): () => void;
+};
+
+const HEADER_TRANSITION_TIMING = {
+  shadcn: Object.freeze({ enterDuration: 180, leaveDuration: 140 }),
+  brutalist: Object.freeze({ enterDuration: 130, leaveDuration: 100 }),
+  'bootstrap-2-3-2': Object.freeze({ enterDuration: 150, leaveDuration: 150 }),
+} as const;
+
 const controls = {
   runtime: { label: 'Runtime', options: [], onValueChange() {} },
   family: { label: 'Family', options: [], onValueChange() {} },
@@ -24,7 +49,8 @@ const controls = {
 let serial = 0;
 
 /** The app retains one native navigation subtree. The passive Prototype owns
- * its actual slotted visual surface; it never owns disclosure or activation. */
+ * its actual slotted visual surface and asTransition phase clock; it never owns
+ * disclosure or activation. */
 export function headerSurfaceParticipant(header: HTMLElement) {
   const panel = header.querySelector<HTMLElement>('[data-site-header-panel]');
   const mount = panel?.querySelector<HTMLElement>('[data-site-header-surface-mount]');
@@ -33,7 +59,7 @@ export function headerSurfaceParticipant(header: HTMLElement) {
   const root = panel;
   const document = header.ownerDocument;
   const owner = `site-header-surface-${++serial}`;
-  const slots = new Map<number, HTMLElement>();
+  const views = new Map<number, { slot: HTMLElement; publish(): () => void }>();
   const names = [
     'data-header-surface-runtime',
     'data-header-surface-family',
@@ -78,7 +104,94 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       const family = request.selection.projectionFamilyId;
       if (family !== 'shadcn' && family !== 'brutalist' && family !== 'bootstrap-2-3-2')
         throw new Error('Header surface family is unavailable');
+      const timing = HEADER_TRANSITION_TIMING[family];
+      const existingDisclosure = getSiteHeaderDisclosure(header);
+      const disclosureEnhanced =
+        !!existingDisclosure && header.hasAttribute('data-site-menu-ready');
+      const initialOpen = existingDisclosure ? existingDisclosure.isOpen() : false;
+      const initialSurfaceState: 'closed' | 'entered' =
+        !disclosureEnhanced || initialOpen ? 'entered' : 'closed';
+      const popupSurfaceStyle = (durationMs: number) => ({
+        ...panelSurfaceLayout,
+        padding: 'var(--site-header-popup-padding, 1rem)',
+        display: 'flex',
+        flexDirection: 'column',
+        '--pui-surface-transition-duration': `${durationMs}ms`,
+      });
       let ownedSlot: HTMLElement | undefined;
+      let api: DemoRuntimeApi | undefined;
+      let transitionFact: HeaderTransitionFact<SiteHeaderTransitionPhase> | undefined;
+      let presentFact: HeaderTransitionFact<boolean> | undefined;
+      let releaseInstances: (() => void) | undefined;
+      let releaseFacts: (() => void) | undefined;
+      let unbindTransition: (() => void) | undefined;
+      let live = true;
+      let published = false;
+      let settleTarget: boolean | null = null;
+      let lastSurfacePhase: 'closed' | 'entering' | 'entered' | 'leaving' = initialSurfaceState;
+      let lastSurfaceDuration = timing.enterDuration;
+      const listeners = new Set<() => void>();
+      const syncSurface = (phase: SiteHeaderTransitionPhase) => {
+        if (!live || !api || (!published && !getSiteHeaderDisclosure(header))) return;
+        const duration = phase === 'leaving' ? timing.leaveDuration : timing.enterDuration;
+        if (duration !== lastSurfaceDuration) {
+          lastSurfaceDuration = duration;
+          api.setSurfaceStyle?.('header-surface', popupSurfaceStyle(duration));
+        }
+        const surfacePhase: 'closed' | 'entering' | 'entered' | 'leaving' =
+          phase === 'preparing' ? 'closed' : phase;
+        if (surfacePhase === lastSurfacePhase) return;
+        lastSurfacePhase = surfacePhase;
+        api.setProps('header-surface', { transitionState: surfacePhase });
+      };
+      const notify = () => {
+        if (!live || !transitionFact) return;
+        const phase = transitionFact.get();
+        if (settleTarget !== null) {
+          if ((settleTarget && phase === 'entering') || (!settleTarget && phase === 'leaving')) {
+            settleTarget = null;
+            api?.call('header-transition', 'complete');
+            return;
+          }
+          if ((settleTarget && phase === 'entered') || (!settleTarget && phase === 'closed'))
+            settleTarget = null;
+        }
+        syncSurface(phase);
+        for (const listener of [...listeners]) listener();
+      };
+      const transition: SiteHeaderTransition = {
+        available: () => live && published && !!transitionFact && !!presentFact,
+        phase: () => transitionFact?.get() ?? 'closed',
+        isPresent: () => presentFact?.get() ?? false,
+        timing,
+        setOpen(open, immediate = false) {
+          if (!live || !api || !transitionFact) return;
+          const current = transitionFact.get();
+          if (immediate) {
+            if ((open && current === 'entered') || (!open && current === 'closed')) {
+              settleTarget = null;
+              syncSurface(current);
+              return;
+            }
+            settleTarget = open;
+            api.call('header-transition', open ? 'enter' : 'leave');
+            const after = transitionFact.get();
+            if ((open && after === 'entering') || (!open && after === 'leaving')) {
+              settleTarget = null;
+              api.call('header-transition', 'complete');
+            }
+            return;
+          }
+          settleTarget = null;
+          api.call('header-transition', open ? 'enter' : 'leave');
+        },
+        subscribe(listener) {
+          listeners.add(listener);
+          return () => {
+            listeners.delete(listener);
+          };
+        },
+      };
       const candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId: owner,
@@ -88,39 +201,119 @@ export function headerSurfaceParticipant(header: HTMLElement) {
         content: {
           recipe: {
             id: owner,
-            prototypeIds: [surfacePrototypeId(family)],
+            prototypeIds: [surfacePrototypeId(family), transitionPrototypeId(family)],
             rootPrototypeId: surfacePrototypeId(family),
           },
           demo: {
             type: 'demo',
             root: {
-              kind: 'proto',
-              prototypeId: surfacePrototypeId(family),
-              ref: 'header-surface',
-              className: 'site-header-popup-surface',
-              props: { ...panelSurfaceProps('popup') },
-              surfaceStyle: {
-                ...panelSurfaceLayout,
-                padding: 'var(--site-header-popup-padding, 1rem)',
-                display: 'flex',
-                flexDirection: 'column',
-              },
+              kind: 'box',
+              className: 'site-header-surface-shell',
               children: [
-                { kind: 'box', ref: 'header-native-slot', className: 'site-header-native-slot' },
+                {
+                  kind: 'box',
+                  className: 'site-header-transition-host',
+                  attrs: { 'aria-hidden': 'true', hidden: '' },
+                  children: [
+                    {
+                      kind: 'proto',
+                      prototypeId: transitionPrototypeId(family),
+                      ref: 'header-transition',
+                      props: {
+                        defaultOpen: initialOpen,
+                        appear: false,
+                        enterDuration: timing.enterDuration,
+                        leaveDuration: timing.leaveDuration,
+                        interrupt: 'reverse',
+                      },
+                    },
+                  ],
+                },
+                {
+                  kind: 'proto',
+                  prototypeId: surfacePrototypeId(family),
+                  ref: 'header-surface',
+                  className: 'site-header-popup-surface',
+                  props: {
+                    ...panelSurfaceProps('popup'),
+                    fade: true,
+                    transitionState: initialSurfaceState,
+                  },
+                  surfaceStyle: popupSurfaceStyle(timing.enterDuration),
+                  children: [
+                    {
+                      kind: 'box',
+                      ref: 'header-native-slot',
+                      className: 'site-header-native-slot',
+                    },
+                  ],
+                },
               ],
             },
             setup(context) {
+              api = context.api;
               const slot = context.refs['header-native-slot'];
               if (!slot) throw new Error('Header surface native slot is missing');
               ownedSlot = slot;
-              slots.set(request.generation, slot);
+              if (!api.subscribePublicInstances)
+                throw new Error('Header surface transition requires public instance subscriptions');
+              let viewRetained = false;
+              releaseInstances = api.subscribePublicInstances(['header-transition'], (snapshot) => {
+                releaseFacts?.();
+                releaseFacts = undefined;
+                transitionFact = undefined;
+                presentFact = undefined;
+                const exposes = snapshot['header-transition']?.getExposes();
+                const phase = exposes?.transitionState as
+                  | HeaderTransitionFact<SiteHeaderTransitionPhase>
+                  | undefined;
+                const present = exposes?.isPresent as HeaderTransitionFact<boolean> | undefined;
+                if (!phase?.get || !phase.subscribe || !present?.get || !present.subscribe) return;
+                transitionFact = phase;
+                presentFact = present;
+                const offPhase = phase.subscribe(() => notify());
+                const offPresent = present.subscribe(() => notify());
+                releaseFacts = () => {
+                  offPhase();
+                  offPresent();
+                };
+                if (!viewRetained) {
+                  viewRetained = true;
+                  api?.call('header-transition', 'retainClosedView', true);
+                }
+                if (published) notify();
+              });
+              const view = {
+                slot,
+                publish() {
+                  published = true;
+                  unbindTransition = bindSiteHeaderTransition(header, transition);
+                  return () => {
+                    published = false;
+                    unbindTransition?.();
+                    unbindTransition = undefined;
+                  };
+                },
+              };
+              views.set(request.generation, view);
               return () => {
-                if (slots.get(request.generation) === slot) slots.delete(request.generation);
+                releaseInstances?.();
+                releaseInstances = undefined;
+                releaseFacts?.();
+                releaseFacts = undefined;
+                transitionFact = undefined;
+                presentFact = undefined;
+                api = undefined;
+                if (views.get(request.generation) === view) views.delete(request.generation);
               };
             },
           },
         },
       });
+      if (!transitionFact || !presentFact) {
+        await candidate.dispose();
+        throw new Error('Header surface asTransition exposes are unavailable');
+      }
       const dispose = candidate.dispose.bind(candidate);
       return {
         ...candidate,
@@ -128,6 +321,11 @@ export function headerSurfaceParticipant(header: HTMLElement) {
         // native navigation/preferences subtree inert while the next generation prepares.
         setLocked() {},
         async dispose() {
+          live = false;
+          published = false;
+          unbindTransition?.();
+          unbindTransition = undefined;
+          listeners.clear();
           const slot = ownedSlot;
           // Detach app content before its retired renderer tears down. A stale
           // generation never moves content already owned by its successor.
@@ -137,21 +335,26 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       };
     },
     prepareCommit(commit: ProjectionScopeCommit) {
-      const slot = slots.get(commit.generation);
-      if (!slot) throw new Error('Header surface has no prepared native slot');
+      const view = views.get(commit.generation);
+      if (!view) throw new Error('Header surface has no prepared native slot');
+      const { slot } = view;
       const previousParent = content.parentElement!;
       const previousNext = content.nextSibling;
       const previous = names.map((name) => [name, root.getAttribute(name)] as const);
       const active = document.activeElement as HTMLElement | null;
       const capturedFocus = active && content.contains(active) ? active : null;
+      let releaseTransition: (() => void) | undefined;
       return {
         publish() {
           moveContent(slot, null, capturedFocus);
           root.dataset.headerSurfaceRuntime = commit.selection.runtimeId;
           root.dataset.headerSurfaceFamily = commit.selection.projectionFamilyId;
           root.dataset.headerSurfaceGeneration = String(commit.generation);
+          releaseTransition = view.publish();
         },
         rollback() {
+          releaseTransition?.();
+          releaseTransition = undefined;
           if (slot.contains(content)) moveContent(previousParent, previousNext, capturedFocus);
           for (const [name, value] of previous) {
             if (value === null) root.removeAttribute(name);

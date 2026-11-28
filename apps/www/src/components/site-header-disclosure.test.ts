@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  bindSiteHeaderTransition,
   initSiteContentsNavigation,
   initSiteHeaderDisclosure,
   type SiteHeaderDisclosure,
+  type SiteHeaderTransition,
+  type SiteHeaderTransitionPhase,
 } from './site-header-disclosure';
 
 let disclosure: SiteHeaderDisclosure | undefined;
@@ -1208,5 +1211,91 @@ describe('Header settlement callback ownership', () => {
     owner.button.remove();
     owner.dispatch();
     expect(owner.frames.size).toBe(0);
+  });
+});
+
+describe('Header asTransition bridge coordination', () => {
+  function fakeTransition(initial: SiteHeaderTransitionPhase = 'closed') {
+    let current: SiteHeaderTransitionPhase = initial;
+    let present = initial !== 'closed';
+    let live = true;
+    const listeners = new Set<() => void>();
+    const emit = () => {
+      for (const listener of [...listeners]) listener();
+    };
+    const api: SiteHeaderTransition = {
+      available: () => live,
+      phase: () => current,
+      isPresent: () => present,
+      timing: { enterDuration: 180, leaveDuration: 140 },
+      setOpen(open, immediate = false) {
+        if (!live) return;
+        current = open ? (immediate ? 'entered' : 'entering') : immediate ? 'closed' : 'leaving';
+        present = current !== 'closed';
+        emit();
+      },
+      subscribe(listener) {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      },
+    };
+    return {
+      api,
+      settle() {
+        if (current === 'entering') {
+          current = 'entered';
+          present = true;
+          emit();
+        } else if (current === 'leaving') {
+          current = 'closed';
+          present = false;
+          emit();
+        }
+      },
+      retire() {
+        live = false;
+      },
+    };
+  }
+
+  it('adopts a transition bound before disclosure initialization and cleans up on destroy', () => {
+    document.body.innerHTML = `<header data-site-header><div data-site-header-panel id="p"><div data-site-header-settings><a href="/en/">English</a></div></div><button data-menu>Menu</button></header>`;
+    const root = document.querySelector<HTMLElement>('header')!;
+    const panel = root.querySelector<HTMLElement>('[data-site-header-panel]')!;
+    const button = root.querySelector<HTMLElement>('[data-menu]')!;
+    const t = fakeTransition('closed');
+    const unbind = bindSiteHeaderTransition(root, t.api);
+    disclosure = initSiteHeaderDisclosure(root);
+    disclosure.bindButton(button);
+    disclosure.enhance();
+    expect(root.dataset.siteMenuTransition).toBe('closed');
+    expect(root.style.getPropertyValue('--site-header-menu-enter-duration')).toBe('180ms');
+    expect(root.style.getPropertyValue('--site-header-menu-leave-duration')).toBe('140ms');
+    expect(panel.hidden).toBe(true);
+
+    disclosure.toggle();
+    expect(root.dataset.siteMenuTransition).toBe('entering');
+    expect(panel.hidden).toBe(false);
+    expect(panel.inert).toBe(false);
+    t.settle();
+    expect(root.dataset.siteMenuTransition).toBe('entered');
+
+    disclosure.close(true);
+    expect(document.activeElement).toBe(button);
+    expect(root.dataset.siteMenuTransition).toBe('leaving');
+    expect(panel.hidden).toBe(false);
+    expect(panel.inert).toBe(true);
+
+    // History navigation settles an already-leaving panel immediately.
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    expect(root.dataset.siteMenuTransition).toBe('closed');
+    expect(panel.hidden).toBe(true);
+    expect(panel.inert).toBe(false);
+
+    disclosure.destroy();
+    unbind();
+    expect(root.hasAttribute('data-site-menu-transition')).toBe(false);
+    expect(root.style.getPropertyValue('--site-header-menu-enter-duration')).toBe('');
+    expect(root.style.getPropertyValue('--site-header-menu-leave-duration')).toBe('');
   });
 });

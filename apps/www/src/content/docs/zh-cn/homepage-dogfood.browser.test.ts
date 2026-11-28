@@ -1910,7 +1910,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
             .toBe(true);
           await page.keyboard.press('Escape');
           expect(await menu.evaluate((node) => node === document.activeElement)).toBe(true);
-          expect(await page.locator('[data-site-header-panel]').isVisible()).toBe(false);
+          await expect.poll(() => page.locator('[data-site-header-panel]').isVisible()).toBe(false);
         }
     } finally {
       await context.close();

@@ -1,6 +1,7 @@
 import type { SurfaceRootProps } from '@proto.ui/prototypes-base/surface';
 import type { ProjectionFamilyId } from './PrototypePreviewer/projection-families';
 export const surfacePrototypeId = (family: ProjectionFamilyId) => `${family}-surface-root`;
+export const transitionPrototypeId = (family: ProjectionFamilyId) => `${family}-transition`;
 /** Page composition maps a use case to generic visual facts, not to a private Prototype. */
 export function panelSurfaceProps(
   appearance: 'card' | 'popup' | 'canvas',

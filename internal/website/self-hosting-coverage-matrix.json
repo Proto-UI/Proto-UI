@@ -2345,12 +2345,12 @@
     {
       "source": "apps/www/src/components/site-header-disclosure.ts",
       "owningMatrixRow": "`www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`",
-      "sourceSha256": "d784ea0ba41797e8540f4f582b85e1c04bac1a9995f9b4b01a6807a029f361dd"
+      "sourceSha256": "9d53c0a41564efce6040227fc4befa319c41e69e50b00c2ef16dc2e6320d3de9"
     },
     {
       "source": "apps/www/src/components/site-header-surface.ts",
       "owningMatrixRow": "`www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`",
-      "sourceSha256": "13490829881f28b23df9b9ecde8a1725adc3b860861c7a08a01a36599d3e450e"
+      "sourceSha256": "88a8aeca13ee29bbdcb4f50227a6af1ae3ad587cd3ae5eca028853b8266a6b99"
     },
     {
       "source": "apps/www/src/components/site-link-recipes.ts",
