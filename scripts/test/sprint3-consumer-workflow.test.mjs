@@ -104,7 +104,7 @@ test('registered carrier opts in manually without changing ordinary or reusable 
   assert.equal(carrier.on.workflow_dispatch.inputs.scope.default, 'repair');
   assert.equal(
     carrier.jobs['focused-browser'].if,
-    "${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || inputs.scope != 'dialog-reopen-diagnostic') && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+    "${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'dialog-reopen-diagnostic' && inputs.scope != 'dialog-shard-diagnostic')) && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
   );
   assert.equal(
     carrier.jobs.sprint1.if,

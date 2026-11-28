@@ -16,7 +16,8 @@ on:
       scope:
         description: Existing repair controls, Sprint 1, or focused Contents wheel evidence
         type: choice
-        options: [repair, sprint1, contents-wheel, dialog-reopen-diagnostic]
+        options:
+          [repair, sprint1, contents-wheel, dialog-reopen-diagnostic, dialog-shard-diagnostic]
         default: repair
   workflow_call:
     inputs:
@@ -195,8 +196,346 @@ jobs:
           path: ${{ runner.temp }}/dialog-reopen
           if-no-files-found: error
           retention-days: 30
+  # Diagnostic context comparison only: run the unchanged CI planner's whole
+  # shard, with the already-reviewed passive Dialog observation still enabled.
+  dialog-shard-diagnostic:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'dialog-shard-diagnostic' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PROTO_UI_DIALOG_REOPEN_DIAGNOSTIC: '1'
+      PROTO_UI_RUNTIME_PHASE: browser
+      PROTO_UI_RUNTIME_SHARD: 15/20
+      PROTO_UI_RUNTIME_SLOT: browser-15-of-20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 3
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind f595 product, all six original files and the original runtime planner
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dialog-shard"
+          git rev-parse HEAD > "$RUNNER_TEMP/dialog-shard/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/dialog-shard/source-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/dialog-shard/status-before.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/dialog-shard/status-before.txt"
+          git diff --exit-code f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD -- \
+            apps packages package.json pnpm-lock.yaml vitest.config.ts scripts/test \
+            ':(exclude)apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts' \
+            ':(exclude)scripts/test/sprint1-evidence.test.mjs' \
+            ':(exclude)scripts/test/sprint3-consumer-workflow.test.mjs' \
+            > "$RUNNER_TEMP/dialog-shard/product-diff.patch"
+          git diff --binary f595e1a0662683cc47a3c68e790e87a70f303c13 HEAD > "$RUNNER_TEMP/dialog-shard/diagnostic-source.patch"
+          sha256sum .github/workflows/browser-suite-repair-evidence.yml \
+            pnpm-lock.yaml \
+            package.json \
+            vitest.config.ts \
+            apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts \
+            apps/www/test/color-scheme.browser.test.ts \
+            packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/browser-harness.ts \
+            scripts/test/run-runtime-tests.mjs \
+            scripts/test/runtime-process-tree.mjs \
+            scripts/test/runtime-test-plan.mjs \
+            scripts/test/runtime-ci.mjs \
+            apps/www/scripts/prepare-homepage-composition-fonts.sh \
+            > "$RUNNER_TEMP/dialog-shard/source-inputs.sha256"
+      - name: Install the frozen original browser dependency graph
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Restore the exact browser font package only
+        timeout-minutes: 1
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
+      - name: Install real CJK fallback for typography glyph evidence
+        timeout-minutes: 3
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/dialog-shard/font-preparation
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Disable the development toolbar before public-page browser tests
+        run: |
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Record the original harness browser, Node and shard environment
+        run: |
+          node --import tsx --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { writeFileSync } from 'node:fs';
+          import { chromeExecutable } from './apps/www/src/content/docs/zh-cn/browser-harness.ts';
+          const executable = await chromeExecutable();
+          const version = execFileSync(executable, ['--version'], { encoding: 'utf8' }).trim();
+          const pnpm = execFileSync('corepack', ['pnpm@10.32.1', '--version'], { encoding: 'utf8' }).trim();
+          const runtime = { phase: process.env.PROTO_UI_RUNTIME_PHASE, shard: process.env.PROTO_UI_RUNTIME_SHARD, slot: process.env.PROTO_UI_RUNTIME_SLOT };
+          assert.match(process.version, /^v24\./);
+          assert.equal(pnpm, '10.32.1');
+          assert.equal(executable, process.env.CHROME_PATH);
+          assert.match(version, /\b158\./);
+          assert.equal(process.env.PROTO_UI_DIALOG_REOPEN_DIAGNOSTIC, '1');
+          assert.deepEqual(runtime, { phase: 'browser', shard: '15/20', slot: 'browser-15-of-20' });
+          writeFileSync(process.env.RUNNER_TEMP + '/dialog-shard/environment.json', JSON.stringify({ node: process.version, pnpm, executable, version, diagnosticFlag: '1', runtime }, null, 2) + '\n');
+          JS
+      - name: Observe the original complete shard through its argument-free CI runner
+        run: |
+          set -euo pipefail
+          export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/dialog-shard"
+          export PROTO_UI_TYPOGRAPHY_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/typography"
+          export PROTO_UI_MATERIAL_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/material"
+          export PUI_QUICK_START_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/quick-start-first-frame"
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s \
+            node scripts/test/run-runtime-tests.mjs 2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
+          results=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${results[0]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/command-exit-code.txt"
+          printf '%s\n' "${results[1]}" > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/log-exit-code.txt"
+          date -u +%FT%TZ > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/completed-at.txt"
+          if [ "${results[0]}" -ne 0 ]; then exit "${results[0]}"; fi
+          exit "${results[1]}"
+      - name: Verify the source remains unchanged after the first native outcome
+        if: always()
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > "$RUNNER_TEMP/dialog-shard/source-sha-after.txt"
+          git status --porcelain=v1 --untracked-files=all > "$RUNNER_TEMP/dialog-shard/status-after.txt"
+          sha256sum -c "$RUNNER_TEMP/dialog-shard/source-inputs.sha256" > "$RUNNER_TEMP/dialog-shard/source-inputs-after.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test ! -s "$RUNNER_TEMP/dialog-shard/status-after.txt"
+      - name: Reconcile all six files and 46 cases with original strict runtime gates
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          import { assertRuntimeSource, assertVitestReport, runtimeSelection } from './scripts/test/runtime-ci.mjs';
+          const dir = path.join(process.env.RUNNER_TEMP, 'dialog-shard');
+          const read = (name) => readFileSync(path.join(dir, name), 'utf8');
+          const json = (name) => JSON.parse(read(name));
+          const selectedTitle = 'keeps native mask dismissal after reopening between the two part detachments';
+          // Collected locally from the unchanged planner's six files. These are footer
+          // identities only; the native command remains the argument-free original runner.
+          const expectedTitles = {
+            "apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts": [
+              "'en' Base Select preserves native selection and cleanup through the public 'react' selector",
+              "'en' Base Select preserves native selection and cleanup through the public 'vue' selector",
+              "'en' Base Select preserves native selection and cleanup through the public 'vue2' selector",
+              "'en' Base Select preserves native selection and cleanup through the public 'wc' selector",
+              "'zh-cn' Base Select preserves native selection and cleanup through the public 'react' selector",
+              "'zh-cn' Base Select preserves native selection and cleanup through the public 'vue' selector",
+              "'zh-cn' Base Select preserves native selection and cleanup through the public 'vue2' selector",
+              "'zh-cn' Base Select preserves native selection and cleanup through the public 'wc' selector"
+            ],
+            "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts": [
+              "Shadcn Dialog native lifecycle > keeps native mask dismissal after reopening between the two part detachments",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for react with no-preference",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for react with reduce",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for vue with no-preference",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for vue with reduce",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for vue2 with no-preference",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for vue2 with reduce",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for wc with no-preference",
+              "Shadcn Dialog native lifecycle > preserves public modal focus, dismissal and AX for wc with reduce",
+              "Shadcn Dialog native lifecycle > starts public Dialog entry on the first visible react frame",
+              "Shadcn Dialog native lifecycle > starts public Dialog entry on the first visible vue frame"
+            ],
+            "apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts": [
+              "S2 public Shadow split settings paths > renders all variant/size/theme combinations and exact geometry (en)",
+              "S2 public Shadow split settings paths > renders all variant/size/theme combinations and exact geometry (zh-cn)",
+              "S2 public Shadow split settings paths > retains mixed context, controlled state and slot ownership across move/reconnect without duplicate notifications",
+              "S2 public Shadow split settings paths > routes native pointer, Tab, Space and Enter once, preserves focus paint and suppresses disabled input"
+            ],
+            "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts": [
+              "S3 complete Tabs and settings native acceptance paths > en: Light/split/mixed with keepMounted=false",
+              "S3 complete Tabs and settings native acceptance paths > en: Light/split/mixed with keepMounted=true",
+              "S3 complete Tabs and settings native acceptance paths > en: rejects matched wrong Switch geometry and restores the source recipe",
+              "S3 complete Tabs and settings native acceptance paths > zh-cn: Light/split/mixed with keepMounted=false",
+              "S3 complete Tabs and settings native acceptance paths > zh-cn: Light/split/mixed with keepMounted=true",
+              "S3 complete Tabs and settings native acceptance paths > zh-cn: rejects matched wrong Switch geometry and restores the source recipe"
+            ],
+            "apps/www/test/color-scheme.browser.test.ts": [
+              "default-document colorScheme browser contract > react paints without interaction and preserves the accepted lifetime",
+              "default-document colorScheme browser contract > react reveals the initial dark recipe",
+              "default-document colorScheme browser contract > vue paints without interaction and preserves the accepted lifetime",
+              "default-document colorScheme browser contract > vue reveals the initial dark recipe",
+              "default-document colorScheme browser contract > vue-mounted-recommit reveals the initial dark recipe",
+              "default-document colorScheme browser contract > vue2 paints without interaction and preserves the accepted lifetime",
+              "default-document colorScheme browser contract > vue2 reveals the initial dark recipe",
+              "default-document colorScheme browser contract > wc paints without interaction and preserves the accepted lifetime",
+              "default-document colorScheme browser contract > wc reveals the initial dark recipe"
+            ],
+            "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts": [
+              "required native WC source-view operation obligations > aborted-transport",
+              "required native WC source-view operation obligations > nested-author-remove",
+              "required native WC source-view operation obligations > owned-transport",
+              "required native WC source-view operation obligations > remove-root",
+              "required native WC source-view operation obligations > remove-source",
+              "required native WC source-view operation obligations > second-reconnect",
+              "required native WC source-view operation obligations > terminal-replacement",
+              "required native WC source-view operation obligations > unrelated-reinsert"
+            ]
+          };
+          const result = { sourceSha: process.env.CANDIDATE_SHA, diagnosticOnly: true, fullSuiteAcceptance: false, passed: false, captureValid: false, checks: {}, errors: [] };
+          const check = (name, run) => {
+            try { run(); result.checks[name] = true; }
+            catch (error) { result.checks[name] = false; result.errors.push({ check: name, error: String(error) }); }
+          };
+          let selection, payload, report;
+          check('completeOriginalInventory', () => {
+            selection = runtimeSelection('browser', '15/20');
+            assert.equal(selection.checkoutSha, result.sourceSha);
+            assert.deepEqual(selection.suites, Object.keys(expectedTitles));
+            assert.deepEqual(json('selection-browser-15-of-20.json'), selection);
+            payload = json('result-browser-15-of-20.json');
+            assert.deepEqual(Object.fromEntries(Object.keys(selection).map((key) => [key, payload[key]])), selection);
+            report = json('vitest-browser-15-of-20.json');
+            assert.deepEqual(payload.report, report);
+            assert.equal(report.numTotalTests, 46);
+            assert.equal(report.numPassedTests + report.numFailedTests, 46);
+            assert.equal(report.numPendingTests, 0);
+            assert.equal(report.numTodoTests, 0);
+            assert.equal(report.testResults.length, 6);
+            assert.deepEqual(report.testResults.map((file) => path.relative(process.cwd(), file.name)).sort(), [...selection.suites].sort());
+            result.tests = [];
+            for (const file of report.testResults) {
+              const relative = path.relative(process.cwd(), file.name);
+              assert.deepEqual(file.assertionResults.map((test) => [...test.ancestorTitles, test.title].join(' > ')).sort(), expectedTitles[relative]);
+              for (const test of file.assertionResults) {
+                assert.ok(['passed', 'failed'].includes(test.status));
+                assert.equal(test.retryCount ?? test.meta?.retryCount ?? 0, 0);
+                assert.equal(test.repeatCount ?? test.meta?.repeatCount ?? 0, 0);
+                result.tests.push({ file: relative, title: test.title, status: test.status });
+              }
+            }
+            result.nativeOutcome = report.success ? 'passed' : 'failed';
+            result.counts = { total: report.numTotalTests, passed: report.numPassedTests, failed: report.numFailedTests, pending: report.numPendingTests, todo: report.numTodoTests };
+            result.retryPolicy = 'Original unmodified config/tests and argument-free runner: no Vitest retry or repeated run. The original JSON reporter does not emit absent retry counters.';
+          });
+          check('strictOriginalRuntimeReport', () => assertVitestReport(report, selection));
+          check('runtimeAndCheckoutSource', () => {
+            assertRuntimeSource(payload.source, selection);
+            assert.equal(payload.source.before.treeSha, read('source-tree.txt').trim());
+            assert.equal(read('product-diff.patch'), '');
+            for (const name of ['source-sha.txt', 'source-sha-after.txt']) assert.equal(read(name).trim(), result.sourceSha);
+            for (const name of ['status-before.txt', 'status-after.txt']) assert.equal(read(name), '');
+            const paths = [
+            ".github/workflows/browser-suite-repair-evidence.yml",
+            "pnpm-lock.yaml",
+            "package.json",
+            "vitest.config.ts",
+            "apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts",
+            "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts",
+            "apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts",
+            "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts",
+            "apps/www/test/color-scheme.browser.test.ts",
+            "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts",
+            "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+            "scripts/test/run-runtime-tests.mjs",
+            "scripts/test/runtime-process-tree.mjs",
+            "scripts/test/runtime-test-plan.mjs",
+            "scripts/test/runtime-ci.mjs",
+            "apps/www/scripts/prepare-homepage-composition-fonts.sh"
+          ];
+            const before = read('source-inputs.sha256').trim().split('\n');
+            assert.equal(before.length, paths.length);
+            assert.deepEqual(before.map((line) => { assert.match(line, /^[a-f0-9]{64}  /); return line.slice(66); }), paths);
+            assert.deepEqual(read('source-inputs-after.txt').trim().split('\n'), paths.map((file) => file + ': OK'));
+          });
+          check('nativeExitAndLog', () => {
+            const exit = read('command-exit-code.txt').trim();
+            assert.match(exit, /^(0|1)$/);
+            result.nativeExitCode = Number(exit);
+            assert.equal(result.nativeExitCode, report.success ? 0 : 1);
+            assert.equal(read('log-exit-code.txt').trim(), '0');
+          });
+          check('ownedProcessCleanup', () => {
+            const receipts = json('cleanup-browser-15-of-20.json');
+            assert.deepEqual(receipts.map(({ label }) => label).sort(), ['astro', 'style-generation', 'vitest']);
+            for (const receipt of receipts) {
+              assert.equal(receipt.verified, true);
+              assert.deepEqual(receipt.errors, []);
+              assert.deepEqual(receipt.remaining, []);
+            }
+            const vitest = receipts.find(({ label }) => label === 'vitest');
+            assert.equal(vitest.childExitCode, result.nativeExitCode);
+            assert.equal(vitest.childSignal, null);
+            assert.equal(vitest.childExitObserved, true);
+            assert.equal(vitest.outputDrain.childPipesClosed, true);
+            assert.equal(vitest.outputDrain.forwardedOutputDrained, true);
+            result.cleanupVerified = true;
+          });
+          check('actualEnvironment', () => {
+            const environment = json('environment.json');
+            assert.match(environment.node, /^v24\./);
+            assert.match(environment.version, /\b158\./);
+            assert.equal(environment.pnpm, '10.32.1');
+            assert.equal(environment.executable, process.env.CHROME_PATH);
+            assert.equal(environment.diagnosticFlag, '1');
+            assert.deepEqual(environment.runtime, { phase: 'browser', shard: '15/20', slot: 'browser-15-of-20' });
+          });
+          check('passiveCaptureConsistency', () => {
+            const tests = report.testResults.flatMap((file) => file.assertionResults).filter((test) => test.title === selectedTitle);
+            assert.equal(tests.length, 1);
+            assert.ok(['passed', 'failed'].includes(tests[0].status));
+            const capture = json('dialog-public-native/partial-reopen-diagnostic.json');
+            assert.equal(capture.sourceSha, result.sourceSha);
+            assert.equal(capture.diagnosticOnly, true);
+            assert.equal(capture.originalCaseAcceptance, false);
+            assert.equal(capture.failure === null, tests[0].status === 'passed');
+            assert.equal(capture.snapshotError, undefined);
+            assert.equal(capture.metadataError, undefined);
+            // This is the existing case's partial-window loop, not a Vitest retry.
+            assert.ok(Number.isInteger(capture.attempt) && capture.attempt >= 0 && capture.attempt < 5);
+            assert.equal(capture.browser.dropped, 0);
+            assert.ok(capture.browser.events.length > 0 && capture.browser.events.length <= 64);
+            assert.ok(capture.browser.events.some((event) => event.trusted === true && event.event === 'pointerdown'));
+            assert.ok(capture.browser.events.every((event) => typeof event.trusted === 'boolean' && ['pointerdown', 'click'].includes(event.event)));
+            if (tests[0].status === 'passed') {
+              assert.equal(capture.phase, 'passed');
+              assert.deepEqual(capture.partialPointerSample, { trusted: true, partial: true });
+            }
+            result.observedPhase = capture.phase;
+            result.partialWindowAttempt = capture.attempt;
+            result.captureValid = true;
+          });
+          result.passed = Object.values(result.checks).every(Boolean);
+          if (!result.passed) process.exitCode = 1;
+          writeFileSync(path.join(dir, 'shard-results.json'), JSON.stringify(result, null, 2) + '\n');
+          JS
+      - name: Record the original terminal producer outcome including diagnostic failures
+        if: always()
+        env:
+          RUNTIME_CI_OUTCOME: ${{ job.status }}
+        run: node scripts/test/runtime-ci.mjs finish "$RUNNER_TEMP/dialog-shard"
+      - name: Preserve original shard outcomes and bounded passive Dialog observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dialog-shard-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/dialog-shard
+          if-no-files-found: error
+          retention-days: 30
+
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || inputs.scope != 'dialog-reopen-diagnostic') && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.scope != 'contents-wheel' && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'dialog-reopen-diagnostic' && inputs.scope != 'dialog-shard-diagnostic')) && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
