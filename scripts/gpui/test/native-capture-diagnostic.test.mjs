@@ -71,11 +71,51 @@ test('the reusable schema and original adapter job remain unchanged', () => {
   assert.match(workflow.jobs['reject-unknown-scope'].steps[0].run, /exit 1/);
 });
 
+// GitHub validates job env before assigning a runner. YAML parsing alone cannot
+// detect an expression that names a context unavailable at this exact scope.
+// https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability
+const jobEnvContexts = new Set([
+  'github',
+  'needs',
+  'strategy',
+  'matrix',
+  'vars',
+  'secrets',
+  'inputs',
+]);
+function assertJobEnvContexts(job) {
+  for (const [name, value] of Object.entries(job.env ?? {})) {
+    for (const [, expression] of String(value).matchAll(/\$\{\{([\s\S]*?)\}\}/g)) {
+      for (const [, context] of expression.matchAll(/(?<![\w.])([A-Za-z_]\w*)\s*(?:\.|\[)/g)) {
+        assert.ok(jobEnvContexts.has(context), `job env ${name} cannot use ${context} context`);
+      }
+    }
+  }
+}
+
+test('runner context is rejected in actual job env and admitted only in evidence step scopes', () => {
+  const lane = workflow.jobs['native-capture-macos26'];
+  assertJobEnvContexts(lane);
+  for (const expression of ['${{ runner.temp }}', "${{ runner['temp'] }}"]) {
+    const invalid = structuredClone(lane);
+    invalid.env.GPUI_NATIVE_DIAGNOSTIC_DIR = `${expression}/gpui-native-capture-diagnostic`;
+    assert.throws(() => assertJobEnvContexts(invalid), /cannot use runner context/);
+  }
+  const directory = '${{ runner.temp }}/gpui-native-capture-diagnostic';
+  assert.equal(lane.steps[0].env.GPUI_NATIVE_DIAGNOSTIC_DIR, directory);
+  assert.equal(
+    lane.steps.find((step) => step.run?.includes('native-capture-diagnostic.mjs')).env
+      .GPUI_NATIVE_DIAGNOSTIC_DIR,
+    directory
+  );
+  assert.equal(lane.steps.at(-1).with.path, directory);
+});
+
 test('the new lane preserves the actual CI macOS environment, deadline and commands', () => {
   const lane = workflow.jobs['native-capture-macos26'];
   assert.equal(lane['runs-on'], 'macos-latest');
   assert.equal(lane['timeout-minutes'], 30);
-  assert.deepEqual(Object.keys(lane.env).sort(), ['CANDIDATE_SHA', 'GPUI_NATIVE_DIAGNOSTIC_DIR']);
+  assert.deepEqual(Object.keys(lane.env), ['CANDIDATE_SHA']);
   assert.equal(
     lane.steps.find((step) => step.run?.includes('native-capture-diagnostic.mjs')).if,
     '${{ !cancelled() }}'

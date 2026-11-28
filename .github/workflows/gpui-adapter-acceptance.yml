@@ -152,9 +152,10 @@ jobs:
     timeout-minutes: 30
     env:
       CANDIDATE_SHA: ${{ github.sha }}
-      GPUI_NATIVE_DIAGNOSTIC_DIR: ${{ runner.temp }}/gpui-native-capture-diagnostic
     steps:
       - name: Prepare evidence before checkout and setup
+        env:
+          GPUI_NATIVE_DIAGNOSTIC_DIR: ${{ runner.temp }}/gpui-native-capture-diagnostic
         run: |
           set -euo pipefail
           mkdir -p "$GPUI_NATIVE_DIAGNOSTIC_DIR"
@@ -185,12 +186,13 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           GPUI_NATIVE_PREPARATION_STATUS: ${{ job.status }}
+          GPUI_NATIVE_DIAGNOSTIC_DIR: ${{ runner.temp }}/gpui-native-capture-diagnostic
         run: node scripts/gpui/native-capture-diagnostic.mjs
       - name: Retain the first failure, native pixels and exact source
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gpui-native-capture-macos26-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.GPUI_NATIVE_DIAGNOSTIC_DIR }}
+          path: ${{ runner.temp }}/gpui-native-capture-diagnostic
           if-no-files-found: error
           retention-days: 30
