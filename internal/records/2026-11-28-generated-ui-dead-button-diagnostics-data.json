@@ -1,0 +1,25 @@
+{
+  "kind": "generated-ui-dead-button-diagnostics-data",
+  "record": "internal/records/2026-11-28-generated-ui-dead-button-diagnostics.zh-CN.md",
+  "retrievedAt": "2026-11-28",
+  "evoGenUIBench": {
+    "source": "https://arxiv.org/abs/2608.29387",
+    "venue": "EMNLP 2026 (per arXiv comments field)",
+    "nonPassingCalls": 2750,
+    "mechanisms": [
+      { "name": "affordanceBinding", "count": 460, "relation": "dead-button diagnostic" },
+      { "name": "derivedStatePropagation", "count": 586, "relation": "snapshot hint only" },
+      { "name": "externalStateGrounding", "count": 289, "relation": "not addressed" },
+      { "name": "informationArchitecture", "count": 859, "relation": "not addressed" },
+      { "name": "requirementDecomposition", "count": 410, "relation": "not addressed" },
+      { "name": "domainRepresentation", "count": 146, "relation": "not addressed" }
+    ],
+    "affordanceBindingShare": 0.1673
+  },
+  "interaction2Code": {
+    "source": "https://arxiv.org/abs/2411.03292",
+    "venue": "ASE 2025",
+    "mostFrequentFailures": ["No interaction", "Partial implementation", "Interactive element missing", "Wrong function"],
+    "relation": "'No interaction' corresponds to the dead-button diagnostic; the others compare against a reference design and are not addressed"
+  }
+}
