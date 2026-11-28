@@ -131,8 +131,10 @@ const cases = [
   // internal/records/2026-11-26-retained-owner-package-budget.json
   // The separately measured main-only mount-ticket and cursor delta remains in:
   // internal/records/2026-11-27-mount-ticket-package-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 182_550],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 181_400],
+  // Integrated React/Vue portal subtree focus-readiness & visibility gate (#2002, #2005):
+  // internal/records/2026-11-28-portal-readiness-package-budget.json
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 182_950],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 181_800],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
