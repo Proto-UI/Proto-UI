@@ -2,164 +2,159 @@
 kind: investigation
 status: active
 date: 2026-11-28
-baseline: c85b91e9 (C-COMPILER-FOUNDATION-0001 / C-COMPILER-AUTHORING-0001 / C-COMPILER-LINT-0001, all draft)
+baseline: c85b91e9 (C-COMPILER-FOUNDATION-0001 / C-COMPILER-AUTHORING-0001 / C-COMPILER-LINT-0001, all draft; compiler IR version 5)
 receipts:
   - internal/records/2026-11-28-generative-ui-presentation-soundness-sources.json
 ---
 
-# 生成式 UI 的呈现可靠性：编译期声明检查初稿
+# 生成式 UI 的呈现验证器：初稿
 
-**提议：**把"生成式 UI 要 make sense"中可以客观判定的那一半，定义为一条不变量——**界面可以说得少，但不能说错**（presentation soundness）。
+**一句话：**编译器替界面"对账"。界面上每样东西都在说一句话，每句话都要在程序里找到依据；找不到依据的，编译器把它换成更保守、但一定真实的说法。
 
-0.4 编译器前端在编译期检查这条不变量，并在 HIR 上把证明不了的声明降级为可靠的较弱形式。降级后的产物是普通原生组件，运行时零额外开销。LLM 从不被拒绝，用户从不被骗。
+它是**验证器**，不是 lint：它不列举坏模式，而是要求屏幕上每个元素都给出证明，证明不了的一律降级。整个过程没有人工标注，也没有人工审批，运行时没有额外开销。
 
 ## Scope & Limits
 
-- 本文是非规范记录：不修改 `spec/**`，不新增语言规则，也不产生 `source-invalid`。要晋升为规范，需要单独的 decision 和 contract 实体。
-- 依赖编译器前端尚未完成的 phase/effect/ownership 分析（见 `internal/compiler/README.md` 的 Scope & Limits）。本文不声称任何已实现能力。
-- 只覆盖通过**带类型的 prototype 插槽**做出的声明。自由文本的含义、视觉层级和审美不在保证范围内，归建议层。
-- 文中 API 拼写均为示意，不是 authoring 合同的提案文本。
+- 非规范记录：不修改 `spec/**`，不新增语言规则，不产生 `source-invalid`。晋升为规范需要单独的 decision 和 contract 实体。
+- 依赖编译器尚未完成的 effect/ownership 分析（见 `internal/compiler/README.md`），本文不声称任何已实现能力。
+- 只保证第 4 节定理写明的性质。文字的含义、视觉布局、信息架构、是否符合用户意图都不在保证范围内。
+- 文中所有 API 拼写都是示意。
 
-## 1. 问题与事实
+## 1. 要解决的问题
 
-- 多轮生成式 UI 的 2,750 次失败中，"看似可用但没接线"占 17%，"派生状态不同步"占 21%，"与外部状态矛盾"占 11%，失败转换中 52.7% 含回归（EvoGenUI-Bench，EMNLP 2026）。
-- Interaction2Code（ASE 2025）独立观察到的高频失败是 No interaction、Partial implementation、Interactive element missing、Wrong function。
-- 这几类问题都可以表述为同一件事：**界面展示的声明，强于它实际拥有的证据**。来源与引用数见 receipts。
+LLM 生成的界面经常"说假话"：按钮按了没反应，数字是编的，筛选变了总计不变，还没保存就显示"已保存"。
 
-## 2. 四条设计原则
+在 EvoGenUI-Bench 的 2,750 次失败中，按钮没接线占 17%，派生状态不同步占 21%，与外部状态矛盾占 11%。数据和来源见 receipts。
 
-| 原则 | 含义 |
+## 2. 一个例子
+
+LLM 生成了一个订单看板。编译器对账的结果如下：
+
+| 界面上说的 | 编译器在代码里找到的依据 | 编译器怎么做 |
+|---|---|---|
+| 「本月营收 1200000」是真实数据 | 这个数字是模型写死的字面量 | 加上「AI 生成」标注 |
+| 「导出」按了会发生事情 | 按钮只向父级发点击事件，父级没接 | 用按钮自己的 `disabled` 把它变灰 |
+| 「订单数」随筛选更新 | 值是创建时拷贝的，之后不再跟着变 | 改为派生，或者标「非最新」 |
+| 加载状态（任务结局类型） | 这个值只有 scheduler 能产生 | 通过，原样输出 |
+
+LLM 收到的是同事口吻的提示，它可以改得更好，也可以不改；无论改不改，在第 4 节定理的范围内，用户看到的界面都不说谎。
+
+## 3. 编译器怎么知道每个位置在说什么：推断，不标注
+
+prototype 本身就是代码，IR 会把子组件的定义链接进来，所以编译器能直接从实现里推断，和类型推断一样。
+
+| 在代码里看到的 | 推断出 |
 |---|---|
-| 可靠性强制，精确度温柔 | 不变量由编译器降级保证；如何更精确由 LLM 根据建议性反馈决定 |
-| 对 LLM 宽容，对用户诚实 | 不拒绝、不强制重试；AI 自己的估算合法，只需如实标注来源 |
-| 零运行时开销 | 声明与来源只存在于编译期，像 lifetime 一样被擦除 |
-| 声明写在签名上 | prototype（人写一次）声明每个插槽呈现哪类声明，以及它的诚实较弱形式；组合检查因此是局部的 |
+| 某个值最终流进显示的文本 | 这里在展示数据 |
+| 元素接了 `activate`，动作会改变被显示的值、启动任务或发事件 | 这里在说"按我会发生事情"，且有可观察的后果 |
+| 某个 prop 流进该元素的 `disabled` | 说不准时可以变灰，退路现成 |
+| 值来自 `capture`、初始化读取或跨 `await` 的捕获 | 这是快照，不会自动更新 |
+| 值是代码里写死的字面量 | 这是作者自己写的，不来自系统 |
+| 值的类型只有 scheduler 能产生（任务结局） | 这是有依据的操作结果 |
 
-## 3. 核心演算
+除最后一行的任务结局类型（见第 8 节）外，以上信息在 IR 第 5 版里都已存在。
+
+## 4. 验证器保证什么：一条定理
 
 ```text
-声明 c ::= none                     -- 不对系统状态做任何断言（静态文案、装饰）
-        | fact(v, roots, tense)    -- 显示的值 v 由 roots 计算而来；tense ∈ {now, asOf(r)}
-        | outcome(op, φ)           -- 操作 op 处于阶段 φ（requested/pending/completed/failed/cancelled/…）
-        | capability(e, κ)         -- 现在激活 e 会产生 κ 类效果（action / task start / navigation）
+对在 generated 配置下通过验证的组合，在每一个已提交的视图里：
 
-证据（全部来自 Proto 已有语义）：
-  owner 发布的状态与受控输入 · request 事件 · scheduler 的 task 结局
-  · extern 结果（附声明的证据类别）· 字面量（附作者身份：authored | generated）
+1. 能按的都有反应：每个可激活元素被激活时，一定产生可观察的后果
+   （改变某个被显示的值、启动任务，或发出被父级处理的事件）；否则它显示为不可用。
+2. 数据不冒充：每个显示的非文字值（数字、布尔、枚举、记录），
+   来源中只要含有模型写的字面量，就带「AI 生成」标注。
+3. 快照不装新鲜：每个显示值，如果来源经过对某个可变值的快照，就标为「非最新」。
+4. 结果不提前：类型为任务结局的显示值，一定来自 scheduler 的真实结局。
 
-⟦c⟧ = 使 c 成立的系统状态集合；c₁ ⊑ c₂ ⇔ ⟦c₂⟧ ⊆ ⟦c₁⟧；none 是最弱元素
-
-安全性：对每个可达状态 s、屏幕上每个元素 e，有 s ∈ ⟦claim(e)⟧（以 e 所在视图的 revision 计）
-活性：  每次状态提交后，对应视图最终提交或被 superseded（VIEW-COMMIT）
+可信基：前端绑定解析、IR 生产、目标后端与宿主响应式、extern 声明都是正确的。
+不保证：文字的含义、视觉布局与信息架构、是否符合用户意图。
 ```
 
-**支持关系 ⊢（每类一条）：**
+## 5. 为什么是验证器，不是 lint
 
-- `fact(now)`：值的 lineage 只经过当前一致视图中的读取（props / state / derive / Context）。经过快照边（初始化读取、跨 await 的捕获、单次拉取的 extern 结果）时，只支持 `asOf(r)`。
-- `outcome(op, φ)`：lineage 来自 owner 发布的值或 scheduler 结局。request 事件只能支持 `requested`。
-- `capability(e, κ)`：e 的激活连接解析到一个 action，其 Behavior IR 效果集合非空且包含 κ；e 的 disabled 投影反映该 action 的可用条件。
-- 字面量：`authored` 配置下由作者负责；`generated` 配置下，落在 fact 插槽的字面量只支持来源为模型的声明（如"AI 估算"）。
-
-**组合定理（待证明）：**每个模板节点的声明都被其 lineage 支持，且响应式依赖满足 `C-COMPILER-FOUNDATION-0001-DEPENDENCIES`（不遗漏有效变化）⇒ 在每个已提交视图的 revision 上，安全性成立。
-
-这一步把"所有可达状态"的全局问题，化归为"每个节点"的局部检查，地位相当于 borrow check 的逐函数检查。
-
-## 4. 已有失败都是这一条不变量的实例
-
-| 观察到的失败 | 在演算中 | 编译期降级（prototype 声明的较弱形式） |
+| | lint | 本验证器 |
 |---|---|---|
-| 按钮没有接任何行为 | capability 无支持 | `disabled` + 原因 |
-| 筛选变了，总计不变 | `fact(now)` 只有快照证据（镜像状态） | 改为派生，或显示"截至 r" |
-| 未提交就显示"已保存" | `outcome(completed)` 只有 request 证据 | 绑定该操作的真实阶段；无法关联操作时不显示 |
-| AI 估算被当作事实 | generated 字面量落在 fact 插槽 | 附"AI 估算"来源标注 |
-| 受控 Toggle 按请求显示已开启 | 用 `activeChange` 支持 `active` 的 fact | 读取 owner 发布的 `active` 投影 |
+| 方法 | 列出已知的坏模式 | 要求每个元素都给出证明 |
+| 没想到的错误 | 漏掉 | 证明不了，就降级 |
+| 不确定时 | 放行 | 降级（保守） |
+| 规则之间 | 各自独立，可能有缝 | 只有一条定理；"规则名"只是证明失败的位置 |
+| 能给出的保证 | 没发现已知问题 | 定理在所有可达状态下成立 |
 
-**正例：**`context-owned-async-tabs` 示例显式建模了 `loading / stale / failed / cancelled`，`panelLabel` 的每个分支都有证据支持。它就是"诚实写法"的样子，也说明 Proto 现有语义足以提供所需证据。
+**"规则是否完备"拆成三件事，分别保证：**
 
-这里的 facts / requests 区分，与 `2026-06-29-focus-logical-tree-model.zh-CN.md` 对 focus facts 和 focus requests 的划分同源。
+1. **覆盖完备（可证明）**：IR 中的视图节点、值、指令都是封闭的联合类型。验证器对它们做穷尽匹配，用 TypeScript 的 `never` 检查兜底；IR 新增任何一种节点，验证器不处理就编译不过，不存在漏网的元素。
+2. **判定可靠（可证明）**：在 Lean 里给 IR 核心建模，证明"验证器接受 ⇒ 定理成立"。再用差分测试把证明和 TypeScript 实现连起来：随机生成小 IR，对验证器接受的程序，用参考执行器遍历交互，在每个状态检查定理。
+3. **规格充分（不可证明，可证伪）**：定理是否抓住了"说假话"的全部情形，只能靠经验检验。receipts 里维护一张对照表，把外部 benchmark 的每类失败标为"定理覆盖"或"明确不保证"，并写明原因。出现一个两边都不属于的真实失败，就说明规格有漏洞，要改定理，而不是加一条规则。
 
-## 5. 与 0.4 编译器的结合
+按目前的对照表，定理最多覆盖 EvoGenUI 失败的约 48.5%（affordance binding、derived-state、external grounding 中的一部分）。其余的信息架构、需求拆解、领域建模都需要一份意图规格，这是验证器自己无法凭空得到的。
 
-| 阶段 | 新增工作 | 复用的现有设计 |
-|---|---|---|
-| Prototype 定义 | 在公开接口（props / public events）上声明呈现类别及其较弱形式；作为编译器拥有的带类型声明读取 | intrinsic declarations；`C-COMPILER-AUTHORING-0001-PUBLIC` |
-| 前端分析 | 在同一个 TS Program 上做 lineage 前向数据流：值携带 roots、快照边、作者身份 | 共享 Program/checker；`proto/pure-derivation` 所需的 effect 分析 |
-| Component HIR | 对每个 `renderer.child` / `renderer.el` 节点求声明 c 与支持 ⊢ | HIR 已保留模板、动态区域、依赖、事件 |
-| 降级 | 证明不了时，作为普通 HIR 改写，选择可证明的最强较弱形式 | 发生在 Behavior IR lowering 之前 |
-| Target AST / 发射 | 无改动；目标只看到普通 HIR | `EMISSION`、`SUPPORT`、`COMPLETE` |
-| 报告 | 独立的 `presentation` 结果，不并入 `sourceValid` | lint 合同的诊断身份与版本规则 |
+**取舍：**一个程序是否"说真话"是语义性质，不可能同时做到"绝不漏判"和"绝不误报"。我们选择绝不漏判，代价是有些本来没问题的地方也会被降级，用**降级率**来度量和压低。
 
-**示意（拼写未定）：**
+## 6. 文字含义的边界
 
-```ts
-// prototype 作者（人）声明一次：插槽呈现什么，以及它的诚实较弱形式
-const props = def.props.define({
-  label: { type: 'string', presents: 'none' },
-  value: { type: 'string', presents: 'fact', weaker: ['asOf', 'attributed'] },
-});
-```
+"本月营收"和"已保存"对编译器来说都只是模型写的文字，它们的含义无法形式化，所以定理明确不覆盖。默认处理如下：
 
-**配置由宿主决定：**`presentation profile ∈ {authored, generated}` 由宿主应用或生成管线配置，生成出来的源代码不能自己选择。这与 AGENTS.md 中"仓库文件不能选择执行模式"是同一原则。
+- 模型写的纯文字按文案处理，只给建议性提示。
+- 组件词汇尽量接收带类型的值（数字、日期、任务结局），而不是拼好的字符串。走类型的地方越多，进入定理范围的就越多。这是 agent 编写 prototype 时的设计选择。
+- 可选扩展：生成方 agent 在输出中自行注明哪些文字在陈述数据，验证器核对这些说明与代码是否一致。
 
-**报告：**
+## 7. 零运行时开销
+
+- 依据、来源、证明只存在于编译期，产物里没有任何运行时监控或包装。
+- 降级是 IR 到 IR 的改写：填上 `disabled`、插入一个标注文本节点。产物就是人会手写的普通代码。
+- 新鲜度靠目标原生的响应式；验证器从不插入轮询或订阅。
+- dev 构建可以选择编译断言，作为判定可靠性的执行期检查；release 构建完全剥离。
+
+**验收：**全部可证明时，开关验证器的产物逐字节相同；降级产物按 `C-COMPILER-FOUNDATION-0001-MEASUREMENT` 与同等语义的手写组件比较成本；release 产物中没有任何相关符号。
+
+## 8. 对现有编译器的影响
+
+**可以直接复用（React 与 GPUI 后端不改）：**
+
+| IR 第 5 版已有的信息 | 用途 |
+|---|---|
+| `Behavior.dependencies` | 值的来源 |
+| `Behavior.phase` 与 behavior 指令 | 区分请求与结局 |
+| `ElementView.activate` / `disabled` | 能否激活，以及变灰的退路 |
+| `InitialField` 的 capture | 识别快照 |
+| 字面量与绑定值的区分 | 识别模型写死的数据 |
+
+**需要新增（不改动已有流程）：**
+
+1. 一个只读的验证分析，在 `produceComponentIR` 之后、发射之前运行。
+2. 一个降级改写步骤，输出新的 IR 交给原来的后端。
+3. 一份独立的 presentation 报告，与 lint 的 `sourceValid` 并列。
+4. 一个编译选项：`authored` 或 `generated`，由宿主选择，生成出来的源码不能自选。
+
+**需要先确定的接口：**
+
+- **父组件接子组件事件**：IR 第 5 版的 `ChildView` 只有 props，没有事件连接，定理第 1 条对子组件依赖它。这本来就是组合缺少的能力。
+- **任务结局的读取方式**：定理第 4 条需要一个只有 scheduler 能产生、作者无法伪造的结局类型（`proto/no-capability-assertion` 已经禁止用断言伪造这类来源）。
+
+按 AGENTS.md，编译器与 IR 有现任负责人，以上新增需要与其协调。
+
+## 9. 给 LLM 的提示
+
+只说原因、修法和降级后果，不用"必须"。模型可以回复"这是有意的，因为……"，只记录，不惩罚。
 
 ```text
-presentation: { profile, analysisComplete, widened: [...], findings: [...] }
+提示[presentation/affordance] 「导出」按钮按下去不会发生任何事
+  --> orders.proto.ts:42
+  原因：Button 只向父级发出 click，这里没有处理它
+  修法：处理这个事件，比如接到 exportOrders
+  当前结果：编译为不可用状态（disabled）
 ```
 
-- 分析不完整的节点按最保守的方式降级，并报告原因，绝不静默放过。
-- presentation 结果不影响 `sourceValid`；降级后仍然 `compilable`。
+## 10. 验证计划
 
-## 6. 零开销与擦除
+1. 写出定理的精确版本，以及 IR 核心的 Lean 模型。
+2. 实现只读验证分析，覆盖原生按钮、文本与快照，在现有三个 authoring 示例上运行。
+3. 完成 Lean 证明和差分测试，接上 dev 构建断言。
+4. 维护规格对照表，接入新的 benchmark 失败类别。
+5. 用真实模型做多轮实验，对照四组：基线、规则写进 prompt、本验证器、严格拒绝。指标包括按钮/派生状态失败率、TP@5、降级率和能力保留。
 
-- 产物中不出现 claim 注册表、provenance 包装、运行时监控或 revision 比较。新鲜度依赖目标原生响应式，阶段依赖 scheduler 本来就有的结局。
-- 降级产物就是人会手写的普通代码（disabled 按钮、阶段绑定、来源标签）。
-- 外部数据的新鲜度语义由 extern 声明的证据类别决定；检查器从不插入轮询或订阅。
-- dev / 预览构建可以选择性编译断言，用于发现 extern 证据类别声明错误；release 构建完全剥离。
+## 11. 未决问题
 
-**验收（均可机械判定）：**
-
-1. **擦除测试**：全部声明可证明时，开启与关闭 presentation 检查的目标产物逐字节相同。
-2. **对照测试**：降级产物按 `C-COMPILER-FOUNDATION-0001-MEASUREMENT` 与同等语义的手写组件比较成本。
-3. **符号扫描**：release 产物中没有任何 presentation 相关的符号或支持模块。
-
-## 7. 面向 LLM 的诊断
-
-诊断只讲原因、修法和降级后果，不用 MUST。模型可以回应"这是有意的，因为……"，记录即可，不惩罚。
-
-```text
-提示[presentation/outcome-without-evidence] 状态插槽声称「已完成」，但这里只有一个请求
-  --> settings.proto.ts
-   |
-28 |     run.emit(saveRequested, draft)            —— 证据：requested
-41 |     renderer.child(Status, { props: { phase: 'completed' } })
-   |                                       ^^^^^^^^^^^ 这里声明的是 outcome(completed)
-help: 用 task 的真实阶段 → renderer.child(Status, { props: { of: save } })
-降级：未修改时，此节点编译为不显示阶段（none）
-```
-
-## 8. 验证计划
-
-1. **机械化证明**：用 Lean 证明玩具版核心演算的组合定理（局部支持加依赖完备 ⇒ 安全性）。
-2. **静态检查**：lineage 与 effect 分析，加上逐节点的支持判定。
-3. **有界模型检查**：对生成出的小状态空间验证活性，例如"保存后最终显示完成或失败"。
-4. **实验**（真实模型，多轮任务）：
-   - 对照四组：基线 / 规则写进 prompt（参照 Interaction2Code 的 Failure-aware Prompt）/ 温和诊断加编译期降级 / 严格拒绝。
-   - 指标：affordance 与派生状态失败率、TP@5、降级率、能力保留（ArtifactsBench 或偏好评分）。
-
-## 9. 风险与未决问题
-
-- **自然语言不可形式化**：写着"导出"、实际接删除的按钮，可以通过结构检查。可选缓解：能力插槽的文案默认取自 action 的声明。
-- **平凡可靠**：全部降级为 none 也是可靠的。必须同时盯降级率，它是精确度的客观指标。
-- **信任边界**：保证相对于 extern 证据类别的声明成立，这些声明由人编写，地位相当于 `unsafe`。
-- **组合事件连接未定义**：0.4 authoring 示例里尚无"父级把子级 public event 接到自己的 action"的写法，而 capability 检查依赖这条连接的定义。
-- **定义缺口**：例如 `P-BASE-SWITCH` 没有声明"立即生效"。较弱形式和呈现类别都需要先作为定义补上，不能由 lint 发明。
-- **对话层**：助手文本中的结构化能力声明，以及跨轮承诺，属于第二阶段；需要生成管线输出结构化声明后才能检查。
-
-## 10. 后续工作
-
-1. 用 `pui-brainstorm` 收敛方向，并起草 decision 实体（draft）。
-2. 为 `P-BASE-BUTTON`、`P-BASE-TABS` 补充呈现类别和较弱形式的定义（定义工作，与编译器实现分开）。
-3. 在共享前端上实现 lineage 分析原型，先覆盖现有三个 authoring 示例与少量生成组合。
-4. 实现降级 HIR 改写和擦除测试。
-5. 完成 Lean 玩具证明和实验评测流程。
+- 子组件没有任何变灰途径时，验证结果为"未通过"并反馈给生成方 agent；是否需要一个通用的不可用包装？
+- 「AI 生成」与「非最新」标注的具体外观由哪个组件承担？
+- 意图规格能否从用户的原始请求中由 agent 自动提取，从而把定理扩展到"符合意图"？
