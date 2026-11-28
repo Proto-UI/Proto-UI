@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-28",
+  "scope": "Reconcile the six exact cleanup import owners and existing CodePanel current-source binding after merged RC1 repairs; no product source or acceptance-criterion change.",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "sourceRevision": "8fd3568346fadcb181568b98e844c9acb45ce87f",
+  "authority": [
+    "scripts/coverage-matrices/README.md",
+    "internal/website/self-hosting-coverage-matrix.md#source-scan-bindings",
+    "internal/agent-operations/testing-method.md"
+  ],
+  "officialFailure": {
+    "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/46166565648",
+    "revision": "ada315fa38d83e912f96c5a806754472a6f6fce8",
+    "coverageJob": "https://github.com/Proto-UI/Proto-UI/actions/runs/46166565648/job/141045417287",
+    "coverageIssues": 56,
+    "rawImportIssues": 55,
+    "CodePanelFingerprintIssues": 1,
+    "browserJob": "https://github.com/Proto-UI/Proto-UI/actions/runs/46166565648/job/141045376285",
+    "browserObservation": "The markup-provenance beforeAll rejected the changed CodePanel bytes before browser startup. The whole shard retained 53 passing and 17 skipped cases; it did not supply a new markup browser pass."
+  },
+  "reproduction": {
+    "coverageCommand": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "coverageExitCode": 1,
+    "coverageIssues": 56,
+    "coverageSourceCounts": {
+      "packages/adapters/base/src/material/sink.ts": 21,
+      "packages/adapters/base/src/material/source.ts": 3,
+      "packages/adapters/base/src/host/synchronous-steps.ts": 1,
+      "packages/modules/feedback/src/create.ts": 24,
+      "packages/modules/feedback/src/material/paint-reservation.ts": 3,
+      "packages/modules/feedback/src/presence/controller.ts": 3
+    },
+    "focusedTests": 26,
+    "focusedPass": 21,
+    "focusedFail": 5,
+    "markupCurrentInputs": 32,
+    "markupChangedInputs": ["apps/www/src/components/PrototypePreviewer/CodePanel.astro"]
+  },
+  "reviewedDeltas": [
+    {
+      "path": "packages/adapters/base/src/host/synchronous-steps.ts",
+      "previousRevision": "29df627b12ea5475fa4bfc29a6514a5cdb59386f",
+      "previousGitBlob": "ad0056f2766cc54ee534f1aa196476cc8e709ee3",
+      "previousSHA256": "1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b",
+      "currentGitBlob": "b71f6b38426fca951feb44e2306f96f195553fab",
+      "currentSHA256": "ebfcf79bfb3d09c1644edb81b32e876796f84c75f8831c631b7fcfd3a63262de",
+      "review": "Compatibility path re-exports only runAllSteps from the existing Core internal entry; no new public package export."
+    },
+    {
+      "path": "packages/modules/feedback/src/create.ts",
+      "previousRevision": "29df627b12ea5475fa4bfc29a6514a5cdb59386f",
+      "previousGitBlob": "d6f5ee0ff318eec6404e5a0b44687345f4342b84",
+      "previousSHA256": "c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0",
+      "currentGitBlob": "7e0a62b7b2d850b3bbecdc685a90b2eacb0011d0",
+      "currentSHA256": "0a8b4dfba27b79c691bfd7e255d12a63a9cd325ee52dd434246adf31901cfdf5",
+      "review": "The local completeFeedbackCleanup implementation becomes a named alias of the shared helper; call sites and cleanup ownership remain unchanged."
+    },
+    {
+      "path": "packages/modules/feedback/src/material/paint-reservation.ts",
+      "previousRevision": "29df627b12ea5475fa4bfc29a6514a5cdb59386f",
+      "previousGitBlob": "d7aa2b1b264cba7a7d7148c28c99648731568b37",
+      "previousSHA256": "80ddbe82bafed66ccce9dfb78b3a250836a5b5a57855aaaa6a68e80af9daaf92",
+      "currentGitBlob": "d480bc156eab466268793264c7f5f92b80210e05",
+      "currentSHA256": "969631b1832c82a41be6ac94430e846c92a44a8a049bacd6f2f8717f4f94f610",
+      "review": "The existing ordered release array is passed to runAllSteps after declarations are invalidated; synchronous completion and first failure are preserved."
+    },
+    {
+      "path": "packages/modules/feedback/src/presence/controller.ts",
+      "previousRevision": "29df627b12ea5475fa4bfc29a6514a5cdb59386f",
+      "previousGitBlob": "85c95d0bbca9049cb2d41addff3ccaaeb58fcb55",
+      "previousSHA256": "6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1",
+      "currentGitBlob": "d0ea54a3ae3534399233e53a482f4a9ff5008e37",
+      "currentSHA256": "7d8e24b5ebeff2d96eb18c1df40203b4945d99a9de12a4b3d229350129c8e064",
+      "review": "Disposal captures subscriptions and invalidates ownership before ordered release; finally retains owner/writer clearing even when the helper throws."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
+      "previousRevision": "998991ea5033257e161863ded3b910e4ce6732fb",
+      "previousGitBlob": "3bf86f59bcb95404055775dec154ac86e8bcccbb",
+      "previousSHA256": "ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024",
+      "currentGitBlob": "0a62951106e4c1b43887fa52853c091b2c5a1853",
+      "currentSHA256": "f91f375d3d0b8a0f8e104df7de04a6477f8815d6a4cb228dd587c4fcf7df1d83",
+      "review": "Non-scrollable captions gain flex wrapping and a 12px inline gutter at widths at most 480px. Scrollable file titles, source/Copy/expand ownership, imports and browser assertions are unchanged."
+    }
+  ],
+  "sharedCleanupCompanions": [
+    {
+      "path": "packages/core/src/internal.ts",
+      "gitBlob": "89c9149b8aa6e9658b2fff7c207db660fbed5554",
+      "sha256": "71ad0311d9129fbbaac337b02e30f0136a0d7b1e5a3f1be084db6a186aa74a3c",
+      "review": "The existing internal export receives exactly the runAllSteps re-export. Its complete bytes are required alongside each of the four exact importers."
+    },
+    {
+      "path": "packages/core/src/internal/synchronous-steps.ts",
+      "gitBlob": "71421b86677e7a0268dcdb4239eee58b6b181795",
+      "sha256": "0556bfbc5969b693a6f779b2d7e1f25fa8e34a3882e247212f42a3cd2e2dff54",
+      "review": "No imports. Iterates the actual supplied callback array synchronously, attempts later callbacks after any throw and retains the first thrown value inside a non-falsy envelope, including undefined/null/false/zero/empty-string failures. No awaited callback or global state."
+    }
+  ],
+  "importRepair": {
+    "sourceShaRenewals": 3,
+    "materialSourceBodiesChanged": false,
+    "materialCompanionSHAUpdatedFor": [
+      "packages/adapters/base/src/material/sink.ts",
+      "packages/adapters/base/src/material/source.ts"
+    ],
+    "newExactImportPairs": [
+      {
+        "source": "packages/adapters/base/src/host/synchronous-steps.ts",
+        "specifier": "@proto.ui/core/internal",
+        "selectedMember": "runAllSteps"
+      },
+      {
+        "source": "packages/modules/feedback/src/create.ts",
+        "specifier": "@proto.ui/core/internal",
+        "selectedMember": "runAllSteps"
+      },
+      {
+        "source": "packages/modules/feedback/src/material/paint-reservation.ts",
+        "specifier": "@proto.ui/core/internal",
+        "selectedMember": "runAllSteps"
+      },
+      {
+        "source": "packages/modules/feedback/src/presence/controller.ts",
+        "specifier": "@proto.ui/core/internal",
+        "selectedMember": "runAllSteps"
+      }
+    ],
+    "conjunction": "Each complete source-bound importer additionally requires both exact regular-file companion hashes; the older singular companion constraint remains cumulative.",
+    "unchanged": [
+      "Existing Material sink/source specifier sets and source hashes",
+      "All other raw-import allowances and package/directory/prefix/category policy",
+      "Production module graph guards",
+      "Public Core main entry and package exports",
+      "All Website matrix row states, owner sets and admission records"
+    ]
+  },
+  "markupRepair": {
+    "archivePath": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-9e2d126.json",
+    "archiveSHA256": "cd39812a03814fcbe6907181ffdb39c5569787d0a314f1c80d92bf2f80a5a38d",
+    "sourceCount": 32,
+    "renewedHashes": 1,
+    "unchangedHashes": 31,
+    "sourceAdmission": "unverified",
+    "matrixProjection": "Only the existing CodePanel SHA changes in canonical JSON; Markdown is regenerated by render-consumer-matrices.mjs --write."
+  },
+  "focusedVerification": {
+    "tests": 30,
+    "passed": 30,
+    "failed": 0,
+    "negativeMutation": "Removing only the new companionSources conjunction produces 4/4 failing controls; original checker bytes are restored exactly.",
+    "negativeCases": [
+      "Changed companion entry or implementation",
+      "Missing companion entry or implementation",
+      "Same-byte symlink at either companion path",
+      "Foreign importer with identical bytes",
+      "Additional Core internal named member",
+      "Adjacent Core import path"
+    ]
+  },
+  "remainingAcceptance": [
+    "No new native browser execution is claimed by this source-only repair.",
+    "The unchanged 17 markup browser cases require execution against the renewed source reference.",
+    "Served/transitive source proof, lifecycle admission and final RC/full-CI acceptance remain separate."
+  ],
+  "completeVerification": {
+    "coverageScanner": {
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 0,
+      "matrices": 2,
+      "durationSeconds": 220.2431758470011
+    },
+    "completeControls": {
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+        "scripts/coverage-matrices/test/website-markup-provenance.test.mjs",
+        "scripts/coverage-matrices/test/render-consumer-matrices.test.mjs"
+      ],
+      "tests": 2483,
+      "passed": 2483,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "durationSeconds": 178.5273922359993
+    },
+    "preservedIntermediateFailure": {
+      "tests": 2483,
+      "passed": 2482,
+      "failed": 1,
+      "case": "Finf continuous optical closure: exact",
+      "cause": "The fixture copied the actual host re-export without its two newly required Core companions.",
+      "repair": "Copy both actual companion source files; preserve the exact empty-issue assertion and all three negative controls.",
+      "focusedReplay": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    "unchangedHistoricalProfiles": 26,
+    "originalCurrentArchivedExactly": true
+  }
+}

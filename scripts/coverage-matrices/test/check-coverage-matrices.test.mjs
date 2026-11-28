@@ -18947,6 +18947,89 @@ for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {
   });
 }
 
+const synchronousStepImporters = [
+  'packages/adapters/base/src/host/synchronous-steps.ts',
+  'packages/modules/feedback/src/create.ts',
+  'packages/modules/feedback/src/material/paint-reservation.ts',
+  'packages/modules/feedback/src/presence/controller.ts',
+];
+const synchronousStepCompanions = [
+  'packages/core/src/internal.ts',
+  'packages/core/src/internal/synchronous-steps.ts',
+];
+
+function copySynchronousStepCompanions(root) {
+  for (const relative of synchronousStepCompanions) {
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(new URL(`../../../${relative}`, import.meta.url), target);
+  }
+}
+
+for (const relative of synchronousStepImporters) {
+  test(`shared cleanup import requires both exact companion sources: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    copySynchronousStepCompanions(root);
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const original = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    fs.writeFileSync(target, original);
+    const importer = path.join(root, 'apps/www/src/components/CleanupImportProbe.ts');
+    fs.mkdirSync(path.dirname(importer), { recursive: true });
+    const importFile = (file) =>
+      fs.writeFileSync(
+        importer,
+        `import '${path.relative(path.dirname(importer), file).replaceAll('\\', '/')}';`
+      );
+    importFile(target);
+    const issue = `raw Proto UI import \`@proto.ui/core/internal\` in \`${relative}\``;
+    assert.ok(!validationMessage(root).includes(issue), 'complete reviewed closure is admitted');
+    for (const companion of synchronousStepCompanions) {
+      const file = path.join(root, companion);
+      const bytes = fs.readFileSync(file);
+      fs.appendFileSync(file, '\n// unreviewed companion change\n');
+      assert.ok(validationMessage(root).includes(issue), `${companion}: changed bytes reject`);
+      fs.unlinkSync(file);
+      assert.ok(validationMessage(root).includes(issue), `${companion}: missing bytes reject`);
+      const adjacent = `${file}.adjacent`;
+      fs.writeFileSync(adjacent, bytes);
+      fs.symlinkSync(adjacent, file);
+      assert.ok(validationMessage(root).includes(issue), `${companion}: same-byte symlink rejects`);
+      fs.unlinkSync(file);
+      fs.unlinkSync(adjacent);
+      fs.writeFileSync(file, bytes);
+      assert.ok(!validationMessage(root).includes(issue), `${companion}: original path restores`);
+    }
+    const foreign = relative.replace('.ts', '-foreign.ts');
+    const foreignTarget = path.join(root, foreign);
+    fs.writeFileSync(foreignTarget, original);
+    importFile(foreignTarget);
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/core/internal\` in \`${foreign}\``
+      ),
+      'another importer cannot borrow the exact source permission'
+    );
+    importFile(target);
+    fs.writeFileSync(
+      target,
+      original.replace('{ runAllSteps', '{ getActiveAsHookContext, runAllSteps')
+    );
+    assert.ok(validationMessage(root).includes(issue), 'another Core internal member is rejected');
+    fs.writeFileSync(
+      target,
+      original.replace('@proto.ui/core/internal', '@proto.ui/core/adjacent')
+    );
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/core/adjacent\` in \`${relative}\``
+      ),
+      'an adjacent Core path is rejected'
+    );
+  });
+}
+
 for (const [relative, allowed] of [
   ['packages/modules/feedback/src/create.ts', '@proto.ui/core'],
   ['packages/modules/feedback/src/index.ts', './shader/sink'],
@@ -18968,6 +19051,7 @@ for (const [relative, allowed] of [
   test(`startup Feedback closure remains source-bound: ${relative}`, () => {
     const root = createRoot();
     writeValidMatrices(root);
+    if (synchronousStepImporters.includes(relative)) copySynchronousStepCompanions(root);
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     const original = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
@@ -19210,7 +19294,7 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, source);
     };
-    // Admission binds the real importer and its exact shared host companion.
+    // Admission binds the real importer, host re-export and both Core companions.
     for (const name of [
       'program-pool.ts',
       'contact-carrier.ts',
@@ -19218,6 +19302,7 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
       '../host/synchronous-steps.ts',
     ])
       write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
+    copySynchronousStepCompanions(root);
     write('program.ts', "import './contact-profile'; import './source'; export {};");
     write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
     for (const name of ['image-prepare.ts', 'liquidgl-kernel.generated.ts', 'paint-mutations.ts'])
@@ -19384,6 +19469,7 @@ for (const [relative, allowed] of [
     if (companion) {
       fs.mkdirSync(path.dirname(companion), { recursive: true });
       fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+      copySynchronousStepCompanions(root);
     }
     const importer = path.join(root, 'apps/www/src/components/CardImportProbe.ts');
     fs.mkdirSync(path.dirname(importer), { recursive: true });

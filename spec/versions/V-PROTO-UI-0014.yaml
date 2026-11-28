@@ -54,8 +54,8 @@ sources:
 openQuestions:
   - id: V-PROTO-UI-0014-Q-STAGE-CONVERGENCE
     question:
-      en: How will retained Dropdown submenu and checkbox/radio criteria reach semantic and implementation completion before the existing RC-stage condition is satisfied?
-      zh-CN: 保留的 Dropdown 子菜单与 checkbox/radio 条件将如何先完成语义和实现，再满足现有 RC 阶段条件？
+      en: How will the retained capability gaps in Dropdown, Autocomplete, Combobox, Command, Menubar and ContextMenu reach semantic and implementation completion before the existing RC-stage condition is satisfied?
+      zh-CN: Dropdown、Autocomplete、Combobox、Command、Menubar 与 ContextMenu 中保留的能力缺口将如何先完成语义和实现，再满足现有 RC 阶段条件？
     context:
       en: Their effective 0.3 placement has not been deferred. The preparation audit found missing capabilities, not only unexecuted final verification.
       zh-CN: 这些条件的有效 0.3 归属没有延期。准备审计发现的是能力缺口，而不只是尚未执行的最终验证。

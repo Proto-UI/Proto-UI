@@ -29,6 +29,8 @@ RC 生命周期清单包含在 `0.3.0-rc.1` 可用的 1,322 个普通实体，�
 
 - 保留的 Dropdown 范围并非只差执行证据：`issue.1100.005` 与 `issue.1161.002` 要求子菜单和 checkbox/radio 组。有效的 [0.3 归属](https://github.com/Proto-UI/Proto-UI/issues/1161#issuecomment-6700043691)与[覆盖旧延期的范围决定](https://github.com/Proto-UI/Proto-UI/issues/1100#issuecomment-6700065987)继续保留该要求。
 - 在整合源码 `1cff2e7e73e8b5c3c9c767d4399d521d2605049c` 中，`P-BASE-DROPDOWN-MENU` 将上述变体排除于当前保证之外，Base 导出实现仅有普通菜单项。原有 RC 阶段规则仍构成阻挡；本次准备没有延期该能力，也没有宣称范围已完成。
+- 同一源码审计还确认：Autocomplete 分组（`issue.1095.001`）、Combobox 多选/chips 及对应可访问性组（`issue.1095.002`）、Command 分组与受控 active 状态（`issue.1095.003`）仍有保留的语义或公开接口缺口。这不表示现有普通组件完全没有实现。
+- Menubar 与 ContextMenu 仍分别保留子菜单和 checkbox/radio recipe 要求（`issue.1095.006`、`issue.1095.008`），当前导出没有这些部件。[#1095 的有效范围决定](https://github.com/Proto-UI/Proto-UI/issues/1095#issuecomment-6700063976)同样覆盖了旧的整单 0.4 延期。上述六组共七条原始条件尚未解决；这里没有新增延期。
 - 2026-11-28 的公开 registry 检查找到全部 47 个 package identity，其中 43 个 ready、4 个被现有 bootstrap policy 阻挡。上述每个新模块都同时拥有 `0.0.0-stage` 与已 deprecated 的 `0.0.0-bootstrap.0`，`latest` 指向 bootstrap，且没有 `next`。
 - 因此 bootstrap 不是唯一版本。Registry prerequisite 保留现有门禁，由单独授权的修复处理。私有 Trusted Publisher 授权仍需独立核验。
 - 整合负责人需要合并当前 CI 修复，并在最终源码上重跑完整 release rehearsal、strict package budgets、适用生成输入检查与保留的 0.3 验收门禁。本次准备的局部检查不代表这些检查已经通过。原始失败、跳过和未执行条件在解决前继续保留为证据欠账。

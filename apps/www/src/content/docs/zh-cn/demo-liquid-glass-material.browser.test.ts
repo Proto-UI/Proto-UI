@@ -3018,6 +3018,9 @@ if (includeLiquidWip)
             '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-mode="fixed-family"][data-projection-toolbar="true"]'
           );
           await waitForPreviewRuntime(page, runtime, '[role="button"]', 3);
+          // Header selection can move the viewport away from this quiet scene.
+          // Expose the actual preview before observing its visible optical source.
+          await panel.scrollIntoViewIfNeeded();
           const button = panel.getByRole('button', { name: 'Back', exact: true });
           await expect
             .poll(() => button.getAttribute('data-material-quality'), { timeout: 30000 })
