@@ -147,7 +147,7 @@ function assertNativeSource(source) {
     "if (process.env.PROTO_UI_EXPECTED_HEAD !== revision) throw new Error('Exact source revision mismatch')",
     "if (dirty) throw new Error('Dirty source tree is not exact-head evidence')",
     "await page.locator('[data-language-select-root]').count()).toBe(1)",
-    'page.locator(\'[data-language-select-root][data-language-select-initialized="true"]\').count()).toBe(1)',
+    '.poll(() => page.evaluate(readInitializedLanguageRootCountNow), { timeout: 1000 }).toBe(1)',
     "[['zh-cn', 'pointer'], ['en', 'keyboard']]",
     "writes.filter(row => row.kind === 'storage').map(row => row.value)).toEqual([locale])",
     "writes.filter(row => row.kind === 'cookie')).toHaveLength(1)",
@@ -239,6 +239,18 @@ function assertNativeSource(source) {
     '(report.samples as unknown[]).push({ stage, state, time: Date.now() })',
   ])
     includes(ready, required);
+  const count = functionSource(source, 'readInitializedLanguageRootCountNow');
+  for (const required of [
+    "document.querySelectorAll<HTMLElement>('[data-language-select-root]')",
+    'if (roots.length > 1) throw new Error(',
+    'if (!root?.isConnected) return 0',
+    "document.querySelectorAll('[data-docs-site-header]')",
+    'headers.length !== 1',
+    '!headers[0].isConnected',
+    "root.closest('[data-docs-site-header]') !== headers[0]",
+    "return root.dataset.languageSelectInitialized === 'true' ? 1 : 0",
+  ])
+    includes(count, required);
   const observer = functionSource(source, 'installEventProbe');
   for (const required of [
     'const ids = new WeakMap<Event, number>()',
@@ -454,6 +466,52 @@ describe('production language navigation evidence contract', () => {
     collectSuite(suite));
   it('preserves native input, write transparency, origin isolation and failure evidence', () =>
     assertNativeSource(suite));
+  it('reads native initialization with strict root cardinality and live Header ownership', () => {
+    const header = { isConnected: true };
+    const root = {
+      isConnected: true,
+      dataset: { languageSelectInitialized: 'true' },
+      closest: () => header,
+    };
+    const nodes = { roots: [root], headers: [header] };
+    const compiled = ts.transpileModule(
+      functionSource(suite, 'readInitializedLanguageRootCountNow'),
+      { compilerOptions: { target: ts.ScriptTarget.ES2022 } }
+    ).outputText;
+    const read = runInNewContext(`${compiled}\nreadInitializedLanguageRootCountNow`, {
+      document: {
+        querySelectorAll(selector) {
+          if (selector === '[data-language-select-root]') return nodes.roots;
+          assert.equal(selector, '[data-docs-site-header]');
+          return nodes.headers;
+        },
+      },
+    });
+    assert.equal(read(), 1);
+    root.dataset.languageSelectInitialized = 'false';
+    assert.equal(read(), 0);
+    delete root.dataset.languageSelectInitialized;
+    assert.equal(read(), 0);
+    root.dataset.languageSelectInitialized = 'true';
+    root.isConnected = false;
+    assert.equal(read(), 0);
+    root.isConnected = true;
+    nodes.roots.length = 0;
+    assert.equal(read(), 0);
+    nodes.roots.push(root, { ...root, dataset: {} });
+    assert.throws(read, /language root must be unique/);
+    nodes.roots.pop();
+    nodes.headers.push({ ...header });
+    assert.throws(read, /unique live Docs Header/);
+    nodes.headers.pop();
+    header.isConnected = false;
+    assert.throws(read, /unique live Docs Header/);
+    header.isConnected = true;
+    nodes.headers.length = 0;
+    assert.throws(read, /unique live Docs Header/);
+    nodes.headers.push({ ...header });
+    assert.throws(read, /unique live Docs Header/);
+  });
   it('owns one exact-head built-site workflow without weakening existing execution limits', () =>
     assertWorkflow(workflow));
   it('runs only through the dedicated owner, not unit or shared-dev browser phases', () => {
@@ -522,6 +580,16 @@ for (const [name, before, after] of [
   ['storage write not forwarded', 'return original.call(this, name, value)', 'return undefined'],
   ['cookie write not forwarded', 'descriptor.set!.call(document, value)', 'void value'],
   ['repeated lifecycle removed', 'await repeatPageLoad(page)', 'void page'],
+  [
+    'initialized root deadline widened',
+    '.poll(() => page.evaluate(readInitializedLanguageRootCountNow), { timeout: 1000 }).toBe(1)',
+    '.poll(() => page.evaluate(readInitializedLanguageRootCountNow), { timeout: 2000 }).toBe(1)',
+  ],
+  [
+    'initialized root read fabricated',
+    "return root.dataset.languageSelectInitialized === 'true' ? 1 : 0",
+    'return 1',
+  ],
   [
     'single authored root no longer required',
     "await page.locator('[data-language-select-root]').count()).toBe(1)",

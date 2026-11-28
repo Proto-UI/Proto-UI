@@ -217,6 +217,21 @@ async function waitForLocaleReady(
       roots: [{ initialized: 'true', locale, triggerCount: 1, value: locale }],
     });
 }
+// Immediate browser-local read, transported inside the original 1000ms poll.
+function readInitializedLanguageRootCountNow(): number {
+  const roots = document.querySelectorAll<HTMLElement>('[data-language-select-root]');
+  if (roots.length > 1) throw new Error('Authored language root must be unique');
+  const root = roots[0];
+  if (!root?.isConnected) return 0;
+  const headers = document.querySelectorAll('[data-docs-site-header]');
+  if (
+    headers.length !== 1 ||
+    !headers[0].isConnected ||
+    root.closest('[data-docs-site-header]') !== headers[0]
+  )
+    throw new Error('Language root must belong to the unique live Docs Header');
+  return root.dataset.languageSelectInitialized === 'true' ? 1 : 0;
+}
 async function readWrites(
   page: Page
 ): Promise<Array<{ kind: string; value: string; pathname: string }>> {
@@ -388,11 +403,7 @@ describe.sequential('Production language selector navigation', () => {
             await chooseLocale(page, control, locale, input, expectedPath);
             await waitForLocaleReady(page, locale, report, 'navigated-ready');
             await expect
-              .poll(() =>
-                page
-                  .locator('[data-language-select-root][data-language-select-initialized="true"]')
-                  .count()
-              )
+              .poll(() => page.evaluate(readInitializedLanguageRootCountNow), { timeout: 1000 })
               .toBe(1);
             const writes = (await readWrites(page)).slice(before.length);
             expect(navigations.slice(navigationCount)).toEqual([`${base.origin}${expectedPath}`]);
