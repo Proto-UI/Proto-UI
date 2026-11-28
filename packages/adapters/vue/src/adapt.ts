@@ -959,12 +959,12 @@ export function createVueAdapter(runtime: VueRuntime) {
             // A child of a detached ancestor still mounts and attaches its own
             // view, so readiness has to consult the subtree, not just this host.
             // Keep committed effects/blur/A11y independent of acquisition.
+            // A pending reveal must not withdraw an already committed A11y target.
             isViewReady: () =>
               viewReady &&
               portalIsCommitted() &&
               !viewDisposed &&
-              !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
-              !rootRef.value?.closest(`[${PUI_VIEW_PENDING_ATTR}]`),
+              !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             isEntryAcquisitionReady: (target) => {
               releaseRequestedTargetReady?.();
               releaseRequestedTargetReady = undefined;
