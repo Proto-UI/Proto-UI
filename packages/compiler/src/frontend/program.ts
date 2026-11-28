@@ -15,8 +15,8 @@ import type {
 import { PROTO_TARGETS } from './types.ts';
 
 export const LANGUAGE_VERSION = '0.4' as const;
-export const RULE_SET_VERSION = '0.4.0-draft.1';
-export const COMPILER_VERSION = '0.4.0-frontend.1';
+export const RULE_SET_VERSION = '0.4.0-draft.2';
+export const COMPILER_VERSION = '0.4.0-frontend.2';
 export const PRELUDE_PATH = fileURLToPath(new URL('../../prelude/proto.d.ts', import.meta.url));
 
 interface Snapshot extends Omit<ProtoClosureFile, 'role'> {

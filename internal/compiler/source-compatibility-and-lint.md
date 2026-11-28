@@ -50,6 +50,22 @@ Upstream still owns completing and verifying every required official and registe
 
 Version the language, rules and compiler separately. A published rule-set change that narrows accepted source is breaking and carries migration notes. Implementing an already legal capability improves coverage without redefining the source language. Correcting detection of an existing violation retains that distinction and records newly surfaced diagnostics.
 
+Rule set `0.4.0-draft.2` (compiler `0.4.0-frontend.2`) narrows the draft language with two rules. Migrate as follows:
+
+| Rule | Before | After |
+| --- | --- | --- |
+| `proto/persistent-capture-state` | A setup or module `let` written from an action, task or callback | Declare it with `def.state` and write it through `run.set` or `task.set` |
+| `proto/composite-value-semantics` | `===` between records, lists, `Presence` or `Result` | `equals(left, right)` |
+| `proto/composite-value-semantics` | Assigning, `++`/`--` or `delete` on a member or element | Construct a new value and write it to state |
+
+## Generated-composition verification
+
+For generated compositions, `validateComponent(ir, { verifyGenerated: true })` runs a read-only structural verifier (`targets/validation/generated.ts`). Its `generated/*` findings are separate from language diagnostics and never set `sourceValid`.
+
+- It reports dead controls with a path witness, unexplained consequence-free branches, dead stores and creation-time snapshot reads.
+- It rejects only a control with no consequence on any path, is off by default and never rewrites IR.
+- See the [generated UI record](../records/2026-11-28-generated-ui-checks-by-ir-capability.zh-CN.md) for scope and stages.
+
 ## Inventory and delivery
 
 Keep the entire official-library and registered-consumer destination visible, including missing and unrun entries.
