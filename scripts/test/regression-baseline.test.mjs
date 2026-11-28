@@ -235,8 +235,8 @@ test('new terminal costs reject the interrupted shard allocation without inventi
   );
   assert.equal(evidence.runId, 46161223435);
   assert.equal(evidence.headSha, 'd858406214482b9700e60ca425ef4e9ed8219da8');
-  assert.equal(evidence.capturedJobs.length, 12);
-  assert.equal(evidence.observations.length, 61);
+  assert.equal(evidence.capturedJobs.length, 19);
+  assert.equal(evidence.observations.length, 101);
   for (const row of evidence.observations) {
     assert.ok(BROWSER_SUITES.includes(row.suite));
     assert.ok(evidence.capturedJobs.includes(row.jobId));
@@ -253,7 +253,7 @@ test('new terminal costs reject the interrupted shard allocation without inventi
     evidence.observations.find((row) => row.fileOutcome === 'failed').suite,
     'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts'
   );
-  assert.equal(evidence.selectedWithoutTerminal.length, 10);
+  assert.equal(evidence.selectedWithoutTerminal.length, 12);
   for (const { suite } of evidence.selectedWithoutTerminal) {
     assert.ok(!evidence.observations.some((row) => row.suite === suite));
     assert.ok(browserSuiteWeightSeconds(suite) > 0);
@@ -268,6 +268,29 @@ test('new terminal costs reject the interrupted shard allocation without inventi
   const oldAllocation = [...interrupted.map((row) => row.suite), ...unfinished];
   assert.equal(oldAllocation.length, 6);
   assert.throws(() => assertBrowserShardCapacity([oldAllocation]), /beyond 900s/);
+  const laterInterrupted = evidence.observations.filter((row) => row.jobId === 141028823495);
+  assert.equal(laterInterrupted.length, 4);
+  assert.ok(
+    laterInterrupted.every((row) => row.fileOutcome === 'passed' && !row.jobCompletedVitest)
+  );
+  assert.equal(
+    laterInterrupted.reduce((sum, row) => sum + row.durationMs, 0),
+    750009
+  );
+  const laterUnfinished = evidence.selectedWithoutTerminal
+    .filter((row) => row.jobId === 141028823495)
+    .map((row) => row.suite);
+  assert.deepEqual(laterUnfinished, [
+    'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
+  ]);
+  assert.throws(
+    () =>
+      assertBrowserShardCapacity([
+        [...laterInterrupted.map((row) => row.suite), ...laterUnfinished],
+      ]),
+    /beyond 900s/
+  );
 });
 
 test('the actual new cost floor cannot fit nineteen workers with the original setup reserve', () => {

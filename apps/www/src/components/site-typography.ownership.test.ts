@@ -107,6 +107,52 @@ const request = (runtime: 'wc' | 'react' | 'vue' | 'vue2', generation = 1) => ({
 });
 
 describe('independent typography owner review', () => {
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    '%s: leaves a retained owner untouched and only reacquires changed source',
+    async (runtime) => {
+      document.body.innerHTML =
+        '<main data-site-family-scope><div data-doc-flow><p>Alpha</p><p>Beta</p></div></main>';
+      const root = document.querySelector<HTMLElement>('main')!;
+      const paragraphs = Array.from(root.querySelectorAll('p'));
+      const participant = siteTypographyParticipant(root);
+      const candidate = await participant.materialize(request(runtime));
+      candidates.push(candidate);
+      candidate.activate();
+      const carriers = paragraphs.map((paragraph) => paragraph.firstElementChild!);
+      const slots = paragraphs.map(
+        (paragraph) => paragraph.querySelector('[data-site-typography-slot]')!
+      );
+      const originalSources = slots.map((slot) => slot.firstChild);
+      const readSelection = vi.spyOn(document, 'getSelection');
+      const observer = new MutationObserver(() => {});
+      observer.observe(root, { childList: true, subtree: true });
+      try {
+        // A rollback can reactivate the already restored committed candidate.
+        // Reparenting its text again disturbs native selection/layout for no change.
+        candidate.activate();
+        expect(observer.takeRecords()).toEqual([]);
+        expect(readSelection).not.toHaveBeenCalled();
+
+        const appended = document.createTextNode(' authored addition');
+        paragraphs[1]!.append(appended);
+        observer.takeRecords();
+        candidate.activate();
+        const changed = observer.takeRecords();
+        expect(changed.length).toBeGreaterThan(0);
+        expect(changed.every(({ target }) => !paragraphs[0]!.contains(target))).toBe(true);
+        expect(Array.from(slots[0]!.childNodes)).toEqual([originalSources[0]]);
+        expect(Array.from(slots[1]!.childNodes)).toEqual([originalSources[1], appended]);
+        paragraphs.forEach((paragraph, index) =>
+          expect(Array.from(paragraph.childNodes)).toEqual([carriers[index]])
+        );
+        expect(readSelection).toHaveBeenCalledTimes(1);
+      } finally {
+        observer.disconnect();
+        participant.destroy();
+      }
+    }
+  );
+
   it.each([false, true])(
     'restores the retired carrier order only when needed (reordered=%s)',
     async (reordered) => {

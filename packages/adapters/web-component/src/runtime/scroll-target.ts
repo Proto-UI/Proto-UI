@@ -1,3 +1,5 @@
+import { runAllSteps } from '@proto.ui/core/internal';
+
 /** Acquire both existing physical-target notifications as one all-cleanup lease. */
 export function subscribeScrollTarget(
   subscribeSurface: (listener: () => void) => () => void,
@@ -20,22 +22,6 @@ export function subscribeScrollTarget(
   return () => {
     if (!active) return;
     active = false;
-    let failed = false;
-    let failure: unknown;
-    try {
-      offSurface();
-    } catch (error) {
-      failed = true;
-      failure = error;
-    }
-    try {
-      offReady();
-    } catch (error) {
-      if (!failed) {
-        failed = true;
-        failure = error;
-      }
-    }
-    if (failed) throw failure;
+    runAllSteps([offSurface, offReady]);
   };
 }

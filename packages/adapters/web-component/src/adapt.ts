@@ -964,21 +964,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             // old view first, and retain that failure after all cleanup.
             () => resources.nativeReadiness?.(),
           ];
-          let failed = false;
-          let firstError: unknown;
-          for (const release of releases) {
-            try {
-              release();
-            } catch (error) {
-              if (!failed) {
-                failed = true;
-                firstError = error;
-              }
-            }
+          try {
+            completeCleanup(releases);
+          } finally {
+            if (releaseCurrentView === disposeView) releaseCurrentView = null;
+            if (this._pendingViewCleanup === disposeView) this._pendingViewCleanup = null;
           }
-          if (releaseCurrentView === disposeView) releaseCurrentView = null;
-          if (this._pendingViewCleanup === disposeView) this._pendingViewCleanup = null;
-          if (failed) throw firstError;
         };
         releaseCurrentView = this._pendingViewCleanup = disposeView;
         try {
@@ -1496,19 +1487,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     private [NOTIFY_FOCUS_TARGET_READY](): void {
       if (this._terminalDisposing) return;
-      let failed = false;
-      let firstError: unknown;
-      for (const listener of Array.from(this._focusTargetReadyListeners)) {
-        try {
-          listener();
-        } catch (error) {
-          if (!failed) {
-            failed = true;
-            firstError = error;
-          }
-        }
-      }
-      if (failed) throw firstError;
+      completeCleanup(Array.from(this._focusTargetReadyListeners));
     }
 
     disconnectedCallback() {
@@ -1592,49 +1571,45 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         }
         // Retire the old published owner before awaiting its callback result.
         // Reentrant connects are held until all session cleanup has settled.
-        for (const release of [
-          () => this._portalConceal.cancel(),
-          () => this._globalEventTarget.setTarget(null),
-          () => pendingViewCleanup?.(),
-          () => releaseOwnerResources?.(),
-          () => this._defaultKeyedMetaSources?.dispose(),
-          () => this._releaseSplitResources(),
-          () => {
-            this._slotProjector?.disconnect();
-            this._slotProjector = null;
-          },
-          () => {
-            this._applier?.clear();
-            this._applier = null;
-          },
-          () => {
-            this._hostDisplay?.disconnect();
-            this._hostDisplay = null;
-          },
-          () => {
-            this._focusTargetReadyListeners.clear();
-            this._exposes = {};
-          },
-          () => unbindController(this),
-          () => removeDebugHooks(this),
-          () => unbindProtoInstance(token, this),
-          () => bindLogicalParent(token, null),
-          () => {
-            this._controller = null;
-            this._anatomyPort = null;
-            this._callerProjectionRestoredFor = null;
-            this._mountedOnce = false;
-            this._pendingOwnedTokens = null;
-          },
-        ]) {
-          try {
-            release();
-          } catch (error) {
-            if (!cleanupFailed) {
-              cleanupFailed = true;
-              cleanupError = error;
-            }
-          }
+        try {
+          completeCleanup([
+            () => this._portalConceal.cancel(),
+            () => this._globalEventTarget.setTarget(null),
+            () => pendingViewCleanup?.(),
+            () => releaseOwnerResources?.(),
+            () => this._defaultKeyedMetaSources?.dispose(),
+            () => this._releaseSplitResources(),
+            () => {
+              this._slotProjector?.disconnect();
+              this._slotProjector = null;
+            },
+            () => {
+              this._applier?.clear();
+              this._applier = null;
+            },
+            () => {
+              this._hostDisplay?.disconnect();
+              this._hostDisplay = null;
+            },
+            () => {
+              this._focusTargetReadyListeners.clear();
+              this._exposes = {};
+            },
+            () => unbindController(this),
+            () => removeDebugHooks(this),
+            () => unbindProtoInstance(token, this),
+            () => bindLogicalParent(token, null),
+            () => {
+              this._controller = null;
+              this._anatomyPort = null;
+              this._callerProjectionRestoredFor = null;
+              this._mountedOnce = false;
+              this._pendingOwnedTokens = null;
+            },
+          ]);
+        } catch (error) {
+          cleanupFailed = true;
+          cleanupError = error;
         }
         // Unlock only after both the session tail and this invocation's
         // published-owner cleanup are complete. Normal reconnect stays sync.

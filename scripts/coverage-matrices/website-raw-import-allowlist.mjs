@@ -451,7 +451,7 @@ export const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: 'ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b',
+    sourceSha256: 'ae4733a1ce26a4287119c560ba3dd8bf1454d6a8a2eb8af25a25926e19f946b8',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',

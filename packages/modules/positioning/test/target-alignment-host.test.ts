@@ -156,6 +156,209 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+
+// Injected CSSOM viewport facts distinguish unavailable layout from ownership.
+// Native full-page capture and focus recovery are verified separately.
+describe('recoverable viewport absence', () => {
+  it.each([
+    { width: 1000, height: 0, root: false },
+    { width: 1, height: 1, root: false },
+    { width: 1000, height: 19, root: false },
+    { width: 1000, height: 20, root: false },
+    { width: 0, height: 800, root: false },
+    { width: 1, height: 1, root: true },
+  ])('retains current claims through $width x $height (root CSSOM: $root)', (missing) => {
+    const control = controlledBoxObservers();
+    let width = 1000,
+      height = 800,
+      rootWidth = 0,
+      rootHeight = 0;
+    vi.stubGlobal('innerWidth', width);
+    vi.stubGlobal('innerHeight', height);
+    const root = document.documentElement;
+    const originalRootFields = ['clientWidth', 'clientHeight'].map(
+      (name) => [name, Object.getOwnPropertyDescriptor(root, name)] as const
+    );
+    Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => rootWidth });
+    Object.defineProperty(root, 'clientHeight', { configurable: true, get: () => rootHeight });
+    const f = sizingFixture();
+    f.frame.style.height = '23px';
+    const originalFrame = f.frame.getAttribute('style');
+    const originalRow = f.blockTarget.getAttribute('style');
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+      const frame = f.frame.getAttribute('style'),
+        row = f.blockTarget.getAttribute('style');
+      vi.mocked(window.requestAnimationFrame).mock.calls[0]![0](0);
+      if (missing.root) {
+        rootWidth = missing.width;
+        rootHeight = missing.height;
+      } else {
+        width = missing.width;
+        height = missing.height;
+      }
+      vi.stubGlobal('innerWidth', width);
+      vi.stubGlobal('innerHeight', height);
+      lease.requestUpdate();
+      expect(f.onAlignment).toHaveBeenLastCalledWith({
+        status: 'pending-target',
+        reason: 'missing-target',
+      });
+      f.scrollport.scrollTop = 20;
+      f.scrollport.dispatchEvent(new Event('scroll'));
+      expect(f.frame.getAttribute('style')).toBe(frame);
+      expect(f.blockTarget.getAttribute('style')).toBe(row);
+      expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
+      width = 1000;
+      height = 800;
+      rootWidth = 0;
+      rootHeight = 0;
+      vi.stubGlobal('innerWidth', width);
+      vi.stubGlobal('innerHeight', height);
+      f.resize(208);
+      const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+      reference.getBoundingClientRect = () => rect(260, 180, 208, 44);
+      control.notify(reference, 'border-box');
+      expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+      // The authored Surface border sits outside the target's aligned edge.
+      expect(Number.parseFloat(f.frame.style.left) + f.surface.clientLeft).toBe(260);
+      expect(f.frame.style.minWidth).toBe('218px');
+      expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([208, 44]);
+      expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
+    } finally {
+      lease.dispose();
+      for (const [name, descriptor] of originalRootFields) {
+        if (descriptor) Object.defineProperty(root, name, descriptor);
+        else Reflect.deleteProperty(root, name);
+      }
+    }
+    expect(f.frame.getAttribute('style')).toBe(originalFrame);
+    expect(f.blockTarget.getAttribute('style')).toBe(originalRow);
+  });
+
+  it.each(['frame', 'row'] as const)('still rejects a foreign %s write while pending', (part) => {
+    controlledBoxObservers();
+    let height = 800;
+    vi.stubGlobal('innerHeight', height);
+    const f = sizingFixture();
+    const lease = createTargetAlignmentLease(f.connection);
+    const target = part === 'frame' ? f.frame : f.blockTarget;
+    const field = part === 'frame' ? 'min-width' : 'width';
+    try {
+      height = 1;
+      vi.stubGlobal('innerHeight', height);
+      lease.requestUpdate();
+      expect(f.onAlignment).toHaveBeenLastCalledWith({
+        status: 'pending-target',
+        reason: 'missing-target',
+      });
+      const sameValue = target.style.getPropertyValue(field);
+      target.style.setProperty(field, sameValue, 'important');
+      lease.requestUpdate();
+      expect(f.onAlignment).toHaveBeenLastCalledWith({
+        status: 'unavailable',
+        reason: 'ownership-lost',
+      });
+      height = 800;
+      vi.stubGlobal('innerHeight', height);
+      lease.requestUpdate();
+      expect(f.onAlignment).toHaveBeenLastCalledWith({
+        status: 'unavailable',
+        reason: 'ownership-lost',
+      });
+      expect(target.style.getPropertyValue(field)).toBe(sameValue);
+      expect(target.style.getPropertyPriority(field)).toBe('important');
+    } finally {
+      lease.dispose();
+    }
+    expect(target.style.getPropertyPriority(field)).toBe('important');
+  });
+
+  it('does not let an initially pending generation reclaim a successor frame', () => {
+    controlledBoxObservers();
+    let height = 1;
+    vi.stubGlobal('innerHeight', height);
+    const f = sizingFixture();
+    const priorStatus = vi.fn(),
+      currentStatus = vi.fn();
+    const prior = createTargetAlignmentLease({ ...f.connection, onAlignment: priorStatus });
+    let current: ReturnType<typeof createTargetAlignmentLease> | undefined;
+    try {
+      expect(priorStatus).toHaveBeenLastCalledWith({
+        status: 'pending-target',
+        reason: 'missing-target',
+      });
+      expect(f.frame.style.position).toBe('');
+      expect(f.blockTarget.style.width).toBe('');
+      height = 800;
+      vi.stubGlobal('innerHeight', height);
+      current = createTargetAlignmentLease({ ...f.connection, onAlignment: currentStatus });
+      expect(currentStatus).toHaveBeenLastCalledWith({ status: 'applied' });
+      const frame = f.frame.getAttribute('style'),
+        row = f.blockTarget.getAttribute('style');
+      prior.requestUpdate();
+      expect(priorStatus).toHaveBeenLastCalledWith({
+        status: 'unavailable',
+        reason: 'ownership-lost',
+      });
+      prior.dispose();
+      expect(f.frame.getAttribute('style')).toBe(frame);
+      expect(f.blockTarget.getAttribute('style')).toBe(row);
+      current.requestUpdate();
+      expect(currentStatus).toHaveBeenLastCalledWith({ status: 'applied' });
+    } finally {
+      prior.dispose();
+      current?.dispose();
+    }
+  });
+
+  it('cannot recover a disposed pending viewport lease through queued observations', () => {
+    const control = controlledBoxObservers();
+    let height = 800;
+    vi.stubGlobal('innerHeight', height);
+    const f = sizingFixture();
+    const lease = createTargetAlignmentLease(f.connection);
+    height = 1;
+    vi.stubGlobal('innerHeight', height);
+    lease.requestUpdate();
+    const calls = f.onAlignment.mock.calls.length;
+    lease.dispose();
+    f.frame.style.left = '901px';
+    f.blockTarget.style.height = '73px';
+    height = 800;
+    vi.stubGlobal('innerHeight', height);
+    for (const observer of control.observers) observer.replayQueued();
+    lease.requestUpdate();
+    expect(f.onAlignment).toHaveBeenCalledTimes(calls);
+    expect(f.frame.style.left).toBe('901px');
+    expect(f.blockTarget.style.height).toBe('73px');
+  });
+
+  it.each([
+    { width: -1, height: 1 },
+    { width: 1000, height: -1 },
+    { width: 1000, height: Number.NaN },
+    { width: Number.POSITIVE_INFINITY, height: 1 },
+  ])('keeps invalid viewport $width x $height terminal', ({ width, height }) => {
+    controlledBoxObservers();
+    vi.stubGlobal('innerWidth', width);
+    vi.stubGlobal('innerHeight', height);
+    const f = sizingFixture();
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(f.onAlignment).toHaveBeenLastCalledWith({
+        status: 'unavailable',
+        reason: 'invalid-geometry',
+      });
+      expect(f.onAlignment).not.toHaveBeenCalledWith({ status: 'applied' });
+      expect(f.frame.style.maxHeight).toBe('');
+    } finally {
+      lease.dispose();
+    }
+  });
+});
+
 describe('neutral target geometry host', () => {
   for (const change of ['outer scroll', 'reference resize'] as const) {
     it(`retires expanded end alignment before a new reference plan after ${change}`, () => {

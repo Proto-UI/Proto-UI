@@ -255,6 +255,9 @@ The 2026-11-25 documentation parity review binds the new Calendar date presets, 
 
 The import registry binds the exact preview files to the public Input Shell control binder, Calendar caption binder, Field validation request type, and Virtual List Web attachment and collection type. The current Astro configuration differs from the previously reviewed Retry profile only in sidebar entries and display labels. The same four preview owners use the virtual Retry URLs, with the existing helper fingerprints required.
 
+The 2026-11-28 [RC1 source-binding review](../records/2026-11-28-rc1-website-source-bindings.json) compares four current source bodies on candidate `d858406214482b9700e60ca425ef4e9ed8219da8` against their exact previously bound Git blobs. It renews those four fingerprints and Search’s existing exact importer guard after confirming unchanged import declarations. All matrix rows, owner sets, import edges and outstanding lifecycle and consumer-evidence requirements are preserved.
+
+
 | Interactive or integration source | Owning matrix row | Source SHA-256 |
 | --- | --- | --- |
 | `apps/www/src/content/docs/demo_components/calendar/calendar-examples.shared.ts` | `www.demo.authored-controllers` | `e6d53e3917b81435d36d0f6c15e3332a71d3fbd99c860d4e8ade08e1833189c7` |
@@ -356,7 +359,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/pages/en/test/command-width.astro` | `www.demo.demo-matrix` | `4fed62430112c133942e761b7975198c875b13c8a3d0b1c2ac18bbfa59e30a5a` |
 | `apps/www/src/components/PrototypePreviewer/demo-associations.ts` | `www.demo.prototype-previewer` | `ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365` |
 | `apps/www/src/components/CodeExample.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface` | `c85aba347ae58ec0fecbb493701be1caecf4d43ee6706d3ad9615c294d4d324a` |
-| `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `2402bbbce5176ba5b786780352322711aa3f33f33389e435a100604bb6080a74` |
+| `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `7e981a899d86d365dcb202b33b7cd90b3018d5c96ebee7669dd2fcbe38cdcc00` |
 | `apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts` | `www.demo.authored-controllers` | `dea49f4491b9b4d6cf8e328a73c0fe4fb7b3dc2d5f118ab3a5a9464fef6996d4` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts` | `www.demo.demo-matrix` | `1d40c4e675797928a60d6e3d2e7f09c89996e38d85c3574a63db2409f199ee0d` |
 | `apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts` | `www.shell.mobile-menu-panel` | `c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45` |
@@ -373,7 +376,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/content/docs/zh-cn/site-search-ime-evidence.ts` | `www.search.input-results` | `c84f1c2e125dcebd7d6096b1f5fa7441dcaf40c8110d83015324b7d85350d3ba` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
-| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `c20f9feb33efc247708eeaba3aecbb22405539245860ca140e6aecb64391727e` |
+| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `2dea5284cd8c5067116b3ca604e48de48e0b7743ab34f935dff81c032b5c8147` |
 | `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `ff541d019f1fe2c0c10da5e322f5c8a87ee67b3d6729d3ddb1972f5cfeb5f8b1` |
 | `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `9f1ab8493b9c409449ebad144acfa241b1a0ca268dfad6bc152ed5646eb03cc4` |
 | `apps/www/src/components/InstallCommandCard.astro` | `www.docs.code-panel-scroll`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs` | `027c3e56da086a9affd423aa43aa9278a9c01807a513d237efbbe426db1fb253` |
@@ -451,7 +454,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `65635d210e620c505cb35c419b3a82b314e70f4afb71e99dbffb711a061a346d` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
-| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `ca09a603a4bb717f2f735334f380e8446027647c4eec63045b258f6246a60a1b` |
+| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `ae4733a1ce26a4287119c560ba3dd8bf1454d6a8a2eb8af25a25926e19f946b8` |
 | `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `37e4f54bf7ae1afad9fd7a08417c104304bf7285b0f8ccee3a6b5923f4587ea7` |
 | `apps/www/src/components/site-search-owner.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580` |
 | `apps/www/src/components/site-search-session.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `7e3aea951b4d101f80a560ea482df9082f82289dd8b7f47840eb18c78ce55a4f` |
@@ -462,7 +465,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `0c82ae36d1fa9d81efbceaad25c2e153a52333d3da0087abae9f3aac16315b6b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `d87897eae6f2ad94c5524c9f8a323ef1ff63b2b84b065a97556a1c596f989014` |
 | `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `ecfad806298ef695834f4b046e39bc5f5c179978441ca369a43a61653eacc111` |
-| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `efa045ac360cb01c468b2153315f36d9ecfa4af550f706cb3fb06c64a31c559b` |
+| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `95e3b925c7cbe349723bed3e381d649842a9af7b73a7fb0fa36ee80833e1e75a` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |
 | `apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts` | `www.demo.authored-controllers` | `55f59f12bdab2528f0aa65422010b168d5e6cb5aa3a1e60a614df4ab02e1c7bf` |
 | `apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts` | `www.demo.authored-controllers` | `03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4` |

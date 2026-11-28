@@ -18,6 +18,7 @@ import type {
   readContrastPaintedVisibility,
   readContrastPointerPair,
   readContrastTargetObservation,
+  readContrastTargetPaintPresence,
   readContrastAnatomy,
   readSubjectContrastAnatomy,
 } from '../../../../scripts/contrast-probe.browser';
@@ -41,6 +42,7 @@ declare global {
       readContrastPaintedVisibility: typeof readContrastPaintedVisibility;
       readContrastPointerPair: typeof readContrastPointerPair;
       readContrastTargetObservation: typeof readContrastTargetObservation;
+      readContrastTargetPaintPresence: typeof readContrastTargetPaintPresence;
       readContrastAnatomy: typeof readContrastAnatomy;
       readSubjectContrastAnatomy: typeof readSubjectContrastAnatomy;
     };
@@ -2269,6 +2271,79 @@ describe('contrast probe / real Chromium instrument calibration', () => {
         ratio: 21,
       },
     ]);
+  });
+
+  it('certifies only first-paint presence during an owned positive 2D scale', async () => {
+    const context = await browser.newContext({ viewport: { width: 800, height: 600 } });
+    try {
+      const page = await context.newPage();
+      const observations: unknown[] = [];
+      for (const transform of ['transform:matrix(.95,0,0,.95,0,0)', 'scale:.95']) {
+        await page.setContent(
+          fixture(
+            `<div id="target" data-pui-root style="position:absolute;left:200px;top:200px;width:100px;height:40px;min-height:0;margin:0;background:rgb(255,255,255);${transform}">Scale entrance</div>`
+          )
+        );
+        await page.addScriptTag({ content: bundle });
+        const observed = await page.evaluate(() => {
+          const target = document.querySelector('#target')!;
+          return {
+            settled: window.puiContrastProbe.readContrastTargetObservation(target),
+            presence: window.puiContrastProbe.readContrastTargetPaintPresence(target),
+          };
+        });
+        expect(observed.settled.achieved).toBe(false);
+        expect(observed.settled.visibility.limits).toContain('unsupported-transformed-paint');
+        expect(observed.presence.achieved).toBe(true);
+        expect(observed.presence.rect.width).toBeCloseTo(95, 3);
+        expect(observed.presence.rect.height).toBeCloseTo(38, 3);
+        observations.push({ transform, observed });
+      }
+      await recordPaintWitnessCalibration(
+        'own-scale-first-paint',
+        await page.screenshot(),
+        observations
+      );
+    } finally {
+      await context.close();
+    }
+  });
+
+  it('rejects unsupported or erased scaled first paint with actual native CSS geometry', async () => {
+    const context = await browser.newContext({ viewport: { width: 800, height: 600 } });
+    try {
+      const page = await context.newPage();
+      for (const [name, targetStyle, ancestorStyle] of [
+        ['zero', 'transform:scale(0)', ''],
+        ['negative', 'transform:scale(-.95)', ''],
+        ['rotation', 'transform:rotate(15deg) scale(.95)', ''],
+        ['skew', 'transform:matrix(.95,0,.2,.95,0,0)', ''],
+        ['3d', 'transform:matrix3d(.95,0,0,0,0,.95,0,0,0,0,1,0,0,0,1,1)', ''],
+        ['ancestor-scale', '', 'transform:scale(.95)'],
+        ['filter', 'filter:opacity(0)', ''],
+        ['mask', 'mask-image:linear-gradient(transparent,transparent)', ''],
+        ['opacity', 'opacity:0', ''],
+        ['transparent-fill', 'background:transparent;color:transparent', ''],
+        ['image-fill', 'background-image:linear-gradient(white,white)', ''],
+        ['partial-clip', '', 'width:60px;overflow:hidden'],
+        ['offscreen', 'left:2000px', ''],
+      ]) {
+        await page.setContent(
+          fixture(
+            `<div style="position:absolute;left:150px;top:150px;width:240px;height:160px;${ancestorStyle}"><div id="target" data-pui-root style="position:absolute;left:40px;top:40px;width:100px;height:40px;min-height:0;margin:0;background:white;transform:scale(.95);${targetStyle}">Scale entrance</div></div>`
+          )
+        );
+        await page.addScriptTag({ content: bundle });
+        const observed = await page.evaluate(() =>
+          window.puiContrastProbe.readContrastTargetPaintPresence(
+            document.querySelector('#target')!
+          )
+        );
+        expect(observed.achieved, name).toBe(false);
+      }
+    } finally {
+      await context.close();
+    }
   });
 
   it('keeps transformed visible bounds without inventing rectangular edge or shadow ratios', async () => {

@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import type {
   FinalStyleFrame,
   FinalStyleSink,
@@ -767,9 +768,7 @@ export function createOwnedTextureVisualSink(
     release() {
       if (retired) return;
       retired = true;
-      let failed = false;
-      let firstError: unknown;
-      for (const cleanup of [
+      runAllSteps([
         stopGeometryWatch,
         offSource,
         offPreferences,
@@ -784,17 +783,7 @@ export function createOwnedTextureVisualSink(
         () => {
           last = null;
         },
-      ]) {
-        try {
-          cleanup();
-        } catch (error) {
-          if (!failed) {
-            failed = true;
-            firstError = error;
-          }
-        }
-      }
-      if (failed) throw firstError;
+      ]);
     },
   };
 }

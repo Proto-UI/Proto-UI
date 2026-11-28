@@ -340,8 +340,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 // These estimates are planning admission, never executed acceptance evidence.
 // Adding native focus dependency coverage takes the complete inventory above
 // eighteen workers' capacity, even with a measured local planning estimate.
-// Run 46161223435 then measured 541.603s for native links. The first twelve
-// completed workers raise the retained total to 13,984s, beyond 19 * 720s.
+// Run 46161223435 then measured 541.603s for native links. All nineteen
+// completed workers raise the retained total to 14,094s, beyond 19 * 720s.
 // Add one independent bounded worker; retain every historical maximum, the
 // 180s setup reserve, 900s execution cap and unchanged CI concurrency.
 export const BROWSER_SHARD_COUNT = 20;

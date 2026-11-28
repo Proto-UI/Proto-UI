@@ -1,3 +1,4 @@
+import { runAllSteps as completeFeedbackCleanup } from '@proto.ui/core/internal';
 import { createPresenceController } from './presence/controller';
 import type { AnatomyPort } from '@proto.ui/module-anatomy';
 import {
@@ -52,19 +53,6 @@ import {
 
 /** Invalidate ownership before entering this helper. A host cleanup failure
  * cannot strand the remaining resources or replace the first failure. */
-function completeFeedbackCleanup(actions: readonly (() => void)[]): void {
-  let failed = false;
-  let first: unknown;
-  for (const action of actions) {
-    try {
-      action();
-    } catch (error) {
-      if (!failed) first = error;
-      failed = true;
-    }
-  }
-  if (failed) throw first;
-}
 
 export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
   const { init, caps, deps } = ctx;

@@ -1,3 +1,4 @@
+import { runAllSteps as attemptAllCleanups } from '@proto.ui/core/internal';
 import {
   isControlLabelRef,
   type ControlLabelFacade,
@@ -278,21 +279,7 @@ class ControlLabelModuleImpl extends ModuleBase {
     }
   }
 }
-function attemptAllCleanups(actions: readonly (() => void)[]): void {
-  let failed = false;
-  let firstError: unknown;
-  for (const action of actions) {
-    try {
-      action();
-    } catch (error) {
-      if (!failed) {
-        failed = true;
-        firstError = error;
-      }
-    }
-  }
-  if (failed) throw firstError;
-}
+
 export function createControlLabelModule(ctx: ModuleFactoryArgs) {
   return createModule<'control-label', 'instance', ControlLabelFacade, ControlLabelPort>({
     name: 'control-label',

@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import {
   createInstanceTreeMarkers,
   releaseWebTriggerSurface,
@@ -65,19 +66,7 @@ export function registerNativeFocusReadiness(
   const slot = readinessSlot(instance);
   slot.source = source;
   const notify = () => {
-    let failed = false;
-    let firstError: unknown;
-    for (const listener of Array.from(slot.listeners)) {
-      try {
-        listener();
-      } catch (error) {
-        if (!failed) {
-          failed = true;
-          firstError = error;
-        }
-      }
-    }
-    if (failed) throw firstError;
+    runAllSteps(Array.from(slot.listeners));
   };
   const release = () => {
     if (slot.source !== source) return;
