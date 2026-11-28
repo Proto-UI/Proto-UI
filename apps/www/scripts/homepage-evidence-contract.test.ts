@@ -999,7 +999,7 @@ test('Dialog capture waits on the actual bounded focus owner and disposes its ph
   }
 });
 
-test('native and Copy browser scopes have independent bounded jobs and small evidence bundles', () => {
+test('native, Copy and homepage browser scopes have independent bounded jobs and complete inventory', () => {
   const workflow = parse(
     readFileSync(
       new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
@@ -1036,6 +1036,11 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     },
     { name: 'search-layout', suite: 'site-search-layout' },
     { name: 'search-menu', suite: 'site-search-menu' },
+    { name: 'homepage-dogfood', suite: 'homepage-dogfood' },
+    { name: 'home-demo-runtime', suite: 'home-demo-runtime' },
+    { name: 'prototype-projection-scope', suite: 'prototype-projection-scope' },
+    { name: 'demo-brutalist-checkbox', suite: 'demo-brutalist-checkbox' },
+    { name: 'demo-brutalist-remaining', suite: 'demo-brutalist-remaining' },
   ];
   assert.deepEqual(job.strategy.matrix.include, expectedScopes);
   assert.throws(
@@ -1068,19 +1073,28 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   const focused = workflow.jobs.capture.steps.find((step: { name?: string }) =>
     step.name?.startsWith('Execute focused real-browser')
   );
-  for (const entry of job.strategy.matrix.include)
-    assert.ok(
-      !focused.run.includes(`${entry.suite}.browser.test.ts`),
-      'No duplicated shared-lifetime suite'
-    );
+  assert.equal(focused, undefined, 'No cumulative shared-lifetime regression batch remains');
   for (const suite of [
     'homepage-dogfood',
     'home-demo-runtime',
     'prototype-projection-scope',
     'demo-brutalist-checkbox',
     'demo-brutalist-remaining',
-  ])
-    assert.ok(focused.run.includes(`${suite}.browser.test.ts`), `${suite} still runs`);
+  ]) {
+    const owners = job.strategy.matrix.include.filter(
+      (entry: { suite: string }) => entry.suite === suite
+    );
+    assert.equal(owners.length, 1, `${suite} has exactly one independent owner`);
+    assert.equal(owners[0].pattern, undefined, `${suite} keeps its complete case inventory`);
+    assert.ok(
+      readFileSync(new URL(`../src/content/docs/zh-cn/${suite}.browser.test.ts`, import.meta.url))
+        .length
+    );
+  }
+  assert.equal(
+    run.env.PROTO_UI_RUNTIME_EVIDENCE_DIR,
+    '${{ runner.temp }}/homepage-evidence/runtime'
+  );
   const frames = workflow.jobs.capture.steps.find(
     (step: { name?: string }) => step.name === 'Retain small candidate frame and metadata bundles'
   );
