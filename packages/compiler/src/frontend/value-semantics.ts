@@ -1,16 +1,21 @@
 import ts from 'typescript';
-import type { SourceRule } from './source.ts';
 
 const foundation = (name: string) => `C-COMPILER-FOUNDATION-0001-${name}`;
 
+/** A language rule shared by frontend analysis and producer admission. */
+export interface ValueRule {
+  readonly ruleId: string;
+  readonly criterion: readonly string[];
+}
+
 /** Composite values are immutable and compared through the explicit equals operation. */
-export const COMPOSITE_VALUE_RULE: SourceRule = Object.freeze({
+export const COMPOSITE_VALUE_RULE: ValueRule = Object.freeze({
   ruleId: 'proto/composite-value-semantics',
   criterion: Object.freeze([foundation('VALUES'), foundation('EQUALITY')]),
 });
 
 /** Mutable data that outlives a segment must be declared state. */
-export const PERSISTENT_CAPTURE_RULE: SourceRule = Object.freeze({
+export const PERSISTENT_CAPTURE_RULE: ValueRule = Object.freeze({
   ruleId: 'proto/persistent-capture-state',
   criterion: Object.freeze([foundation('CAPTURES')]),
 });
@@ -32,7 +37,8 @@ export function isAssignmentOperator(kind: ts.SyntaxKind): boolean {
   return ASSIGNMENTS.has(kind);
 }
 
-function written(node: ts.Node): ts.Expression | undefined {
+/** The expression a node assigns, increments or decrements, if any. */
+export function writtenTarget(node: ts.Node): ts.Expression | undefined {
   if (ts.isBinaryExpression(node) && isAssignmentOperator(node.operatorToken.kind))
     return node.left;
   if (
@@ -74,7 +80,7 @@ export function persistentCaptureWrite(
   let found: ts.Node | undefined;
   const visit = (node: ts.Node): void => {
     if (found) return;
-    const target = written(node);
+    const target = writtenTarget(node);
     if (target && ts.isIdentifier(target)) {
       const symbol = checker.getSymbolAtLocation(target);
       if (symbol && symbols.has(symbol) && enclosingFunction(node) !== owner) {
@@ -103,4 +109,33 @@ export function isSetupFunction(fn: ts.Node): boolean {
 /** Composite data types: records, presence and tagged values (not text literals). */
 export function isCompositeKind(kind: string | undefined): boolean {
   return kind === 'record' || kind === 'presence' || kind === 'tagged';
+}
+
+/** A member or element written by assignment, ++/-- or delete. */
+export function mutatedMember(node: ts.Node): ts.Expression | undefined {
+  const target = ts.isDeleteExpression(node) ? node.expression : writtenTarget(node);
+  if (!target) return undefined;
+  let inner = target;
+  while (ts.isParenthesizedExpression(inner)) inner = inner.expression;
+  return ts.isPropertyAccessExpression(inner) || ts.isElementAccessExpression(inner)
+    ? inner
+    : undefined;
+}
+
+/** The scope whose `let` bindings outlive an invocation: the module or a setup function. */
+export function persistentScope(statement: ts.VariableStatement): ts.Node | undefined {
+  const owner = enclosingFunction(statement);
+  if (owner === undefined) return statement.getSourceFile();
+  return isSetupFunction(owner) ? owner : undefined;
+}
+
+/** True when the type is, or may be, an object value other than an authoring handle. */
+export function compositeOperand(
+  type: ts.Type,
+  handle: (constituent: ts.Type) => boolean
+): boolean {
+  const constituents = type.isUnion() ? type.types : [type];
+  return constituents.some(
+    (constituent) => (constituent.flags & ts.TypeFlags.Object) !== 0 && !handle(constituent)
+  );
 }

@@ -1,5 +1,6 @@
 import path from 'node:path';
 import ts from 'typescript';
+import type { ValueRule } from '../frontend/value-semantics.ts';
 import { AUTHORING_DECLARATIONS } from '../frontend/input-profile.ts';
 import { PRELUDE_PATH } from '../frontend/program.ts';
 import type { ProtoDiagnostic } from '../frontend/types.ts';
@@ -24,10 +25,7 @@ export interface SourceContext {
 }
 
 /** A language rule other than the generic producer admission rule. */
-export interface SourceRule {
-  readonly ruleId: string;
-  readonly criterion: readonly string[];
-}
+export type SourceRule = ValueRule;
 
 export class SourceIssue extends Error {
   readonly diagnostic: ProtoDiagnostic;

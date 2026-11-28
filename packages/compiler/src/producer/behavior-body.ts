@@ -2,7 +2,7 @@ import ts from 'typescript';
 import type { Behavior, Binding, DataRef, ExternIR, Value, ValueType } from '../targets/component-ir.ts';
 import { BehaviorFlow, knownText, type Condition, type MatchTest, type Operand, type SwitchDispatch, type TagTest } from './behavior-flow.ts';
 import { memberValue, objectMembers } from './component-syntax.ts';
-import { COMPOSITE_VALUE_RULE, PERSISTENT_CAPTURE_RULE, enclosingFunction, isAssignmentOperator, isCompositeKind, isSetupFunction } from './value-semantics.ts';
+import { COMPOSITE_VALUE_RULE, PERSISTENT_CAPTURE_RULE, enclosingFunction, isAssignmentOperator, isCompositeKind, isSetupFunction, mutatedMember, writtenTarget } from '../frontend/value-semantics.ts';
 import {
   behaviorValueType, checkParameters, literalValue, moduleConstant, moduleLiteral, numberLiteral, requireArity, requireDomain,
   staticCallee, staticReference, unparenthesize,
@@ -414,6 +414,9 @@ export class BehaviorBody {
     if (ts.isConditionalExpression(node)) {
       return this.flow.choose(node, this.condition(node.condition), (arm) => this.expression(arm, expected));
     }
+    if (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node) || ts.isDeleteExpression(node)) {
+      this.checkWrite(node);
+    }
     if (ts.isPrefixUnaryExpression(node)) {
       const operand = this.expression(node.operand);
       if (node.operator === ts.SyntaxKind.ExclamationToken) {
@@ -576,7 +579,7 @@ export class BehaviorBody {
 
   private binary(node: ts.BinaryExpression): Operand {
     const operator = node.operatorToken.kind;
-    if (isAssignmentOperator(operator)) this.checkAssignment(node);
+    if (isAssignmentOperator(operator)) this.checkWrite(node);
     const inequality = operator === ts.SyntaxKind.ExclamationEqualsEqualsToken || operator === ts.SyntaxKind.ExclamationEqualsToken;
     const equality = inequality || operator === ts.SyntaxKind.EqualsEqualsEqualsToken || operator === ts.SyntaxKind.EqualsEqualsToken;
     if (!equality && operator !== ts.SyntaxKind.PlusToken && operator !== ts.SyntaxKind.AsteriskToken) {
@@ -614,14 +617,16 @@ export class BehaviorBody {
     return { type, value: inequality ? { kind: 'not', value } : value };
   }
 
-  private checkAssignment(node: ts.BinaryExpression): void {
-    const target = unparenthesize(node.left);
-    if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
+  /** Assignment, ++/-- and delete share the composite-value and persistent-capture rules. */
+  private checkWrite(node: ts.Node): void {
+    if (mutatedMember(node)) {
       this.source.invalid(node, 'PUI_COMPOSITE_MUTATION',
-        'Composite values are immutable. Construct a new value and write it to declared state instead of assigning to a member or element.',
+        'Composite values are immutable. Construct a new value and write it to declared state instead of changing a member or element.',
         COMPOSITE_VALUE_RULE);
     }
-    if (!ts.isIdentifier(target)) return;
+    const written = writtenTarget(node);
+    const target = written && unparenthesize(written);
+    if (!target || !ts.isIdentifier(target)) return;
     const declaration = this.source.symbol(target).valueDeclaration;
     if (!declaration || !ts.isVariableDeclaration(declaration)) return;
     const owner = enclosingFunction(declaration);

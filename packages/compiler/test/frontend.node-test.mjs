@@ -597,3 +597,45 @@ test('uncontrolled editor Programs must be rebuilt through the Proto factory', (
     /absolute paths/
   );
 });
+
+test('lint reports composite equality and mutation without a producer run', (t) => {
+  const f = fixture(t, {
+    'entry.ts': `type Pair = { left: string };
+      export function same(a: Pair | null, b: Pair): boolean { return a === b; }
+      export function names(a: string, b: string): boolean { return a === b; }
+      export function bump(): number { const pair = { count: 1 }; pair.count++; return pair.count; }
+      export function drop(): void { const bag: { item?: string } = { item: 'x' }; delete bag.item; }`,
+  });
+  const found = errors(f.analyze(), 'proto/composite-value-semantics');
+  assert.deepEqual(
+    found.map((item) => [item.code, item.location.line]),
+    [
+      ['PUI_COMPOSITE_OPERATOR_EQUALITY', 2],
+      ['PUI_COMPOSITE_MUTATION', 4],
+      ['PUI_COMPOSITE_MUTATION', 5],
+    ]
+  );
+});
+
+test('lint reports module and setup bindings written by later invocations only', (t) => {
+  const f = fixture(t, {
+    'entry.ts': `let total = 0;
+      export function add(): void { total = total + 1; }
+      export const definition = { setup() {
+        let hits = 0;
+        const press = () => { hits += 1; };
+        let label = 'ready';
+        label = label + '!';
+        return { press, label };
+      } };
+      export function local(): number { let next = 0; const step = () => { next = next + 1; }; step(); return next; }`,
+  });
+  const found = errors(f.analyze(), 'proto/persistent-capture-state');
+  assert.deepEqual(
+    found.map((item) => [item.code, item.location.line]),
+    [
+      ['PUI_PERSISTENT_CAPTURE', 2],
+      ['PUI_PERSISTENT_CAPTURE', 5],
+    ]
+  );
+});

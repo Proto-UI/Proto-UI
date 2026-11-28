@@ -9,6 +9,14 @@ import {
   getProtoSourceClosure,
 } from './program.ts';
 import { AUTHORING_DECLARATIONS } from './input-profile.ts';
+import {
+  COMPOSITE_VALUE_RULE,
+  PERSISTENT_CAPTURE_RULE,
+  compositeOperand,
+  mutatedMember,
+  persistentCaptureWrite,
+  persistentScope,
+} from './value-semantics.ts';
 import { PROTO_TARGETS } from './types.ts';
 import type {
   ProtoAnalysis,
@@ -307,6 +315,28 @@ export function analyzeProtoProgram(
   };
 
   const visit = (node: ts.Node) => {
+    if (mutatedMember(node)) {
+      invalid(
+        'PUI_COMPOSITE_MUTATION',
+        COMPOSITE_VALUE_RULE.ruleId,
+        [...COMPOSITE_VALUE_RULE.criterion],
+        'Composite values are immutable. Construct a new value and write it to declared state instead of changing a member or element.',
+        node
+      );
+    }
+    if (ts.isVariableStatement(node) && node.declarationList.flags & ts.NodeFlags.Let) {
+      const scope = persistentScope(node);
+      const write = scope && persistentCaptureWrite(checker, node, scope);
+      if (write) {
+        invalid(
+          'PUI_PERSISTENT_CAPTURE',
+          PERSISTENT_CAPTURE_RULE.ruleId,
+          [...PERSISTENT_CAPTURE_RULE.criterion],
+          'This binding outlives the writing invocation and is visible to later invocations. Declare it as Proto state and write it through run.set or task.set.',
+          write
+        );
+      }
+    }
     if (ts.isIfStatement(node) || ts.isWhileStatement(node) || ts.isDoStatement(node))
       booleanCondition(node.expression);
     else if (ts.isForStatement(node) && node.condition) booleanCondition(node.condition);
@@ -399,17 +429,17 @@ export function analyzeProtoProgram(
         // Mixed/structural domain admission needs its own implemented proof;
         // TypeScript's no-overlap heuristic is not that language definition.
         const composite =
-          left.size === 1 &&
-          right.size === 1 &&
-          left.has('object') &&
-          right.has('object') &&
-          !authoringHandle(checker.getTypeAtLocation(node.left), checker) &&
-          !authoringHandle(checker.getTypeAtLocation(node.right), checker);
+          compositeOperand(checker.getTypeAtLocation(node.left), (type) =>
+            authoringHandle(type, checker)
+          ) &&
+          compositeOperand(checker.getTypeAtLocation(node.right), (type) =>
+            authoringHandle(type, checker)
+          );
         if (composite) {
           invalid(
             'PUI_COMPOSITE_OPERATOR_EQUALITY',
-            'proto/composite-value-semantics',
-            [foundation('VALUES'), foundation('EQUALITY')],
+            COMPOSITE_VALUE_RULE.ruleId,
+            [...COMPOSITE_VALUE_RULE.criterion],
             'Operator equality on a record, list, Presence or Result compares identity when the same source runs as JavaScript. Use equals(left, right) for structural comparison.',
             node
           );

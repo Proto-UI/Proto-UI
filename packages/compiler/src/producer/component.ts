@@ -9,7 +9,7 @@ import {
   objectMembers, operand, sourceFunction, sourceLiteral, sourceName, type LinkedType, type Member, type SourceFunction,
 } from './component-syntax.ts';
 import { componentView } from './component-view.ts';
-import { PERSISTENT_CAPTURE_RULE, persistentCaptureWrite } from './value-semantics.ts';
+import { PERSISTENT_CAPTURE_RULE, persistentCaptureWrite } from '../frontend/value-semantics.ts';
 import type { SourceLinks } from './links.ts';
 import type { SourceContext } from './source.ts';
 
