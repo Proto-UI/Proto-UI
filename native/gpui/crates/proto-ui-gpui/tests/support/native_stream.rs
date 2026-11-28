@@ -23,6 +23,12 @@ use super::{
     ObjcOwned, Pending, PreparedCapture, Target,
 };
 
+#[link(name = "proto_ui_capture_protocols", kind = "static")]
+extern "C" {
+    fn proto_ui_capture_output_protocol() -> *const AnyProtocol;
+    fn proto_ui_capture_delegate_protocol() -> *const AnyProtocol;
+}
+
 #[link(name = "ScreenCaptureKit", kind = "framework")]
 extern "C" {
     static SCStreamFrameInfoStatus: *const c_void;
@@ -358,10 +364,31 @@ fn output_class() -> Result<&'static AnyClass, String> {
             let mut class =
                 ClassBuilder::new("ProtoUIEvidenceWindowStreamOutput", class!(NSObject))
                     .ok_or("could not allocate the owned stream output class")?;
-            for name in ["SCStreamOutput", "SCStreamDelegate"] {
-                class.add_protocol(
-                    AnyProtocol::get(name).ok_or("native stream protocol unavailable")?,
-                );
+            let base = AnyProtocol::get("NSObject").ok_or("native NSObject protocol unavailable")?;
+            // SAFETY: each SDK @protocol expression returns a process-lifetime
+            // protocol object, not an owned or borrowed instance. The linked
+            // translation unit uses this runner's actual SDK declarations.
+            let protocols = unsafe {
+                [
+                    ("SCStreamOutput", proto_ui_capture_output_protocol()),
+                    ("SCStreamDelegate", proto_ui_capture_delegate_protocol()),
+                ]
+            };
+            for (name, pointer) in protocols {
+                let protocol = unsafe { pointer.as_ref() }
+                    .ok_or_else(|| format!("SDK witness for {name} returned null"))?;
+                if protocol.name() != name || !protocol.conforms_to(base) {
+                    return Err(format!(
+                        "SDK witness for {name} has invalid name or NSObject inheritance"
+                    ));
+                }
+                if !AnyProtocol::get(name).is_some_and(|actual| ptr::eq(actual, protocol)) {
+                    return Err(format!(
+                        "SDK witness for {name} is not the registered protocol"
+                    ));
+                }
+                class.add_protocol(protocol);
+                eprintln!("native SDK protocol: {name}; NSObject=true; registered=true");
             }
             unsafe {
                 class.add_method(
@@ -403,9 +430,13 @@ struct Resources {
 }
 
 // SAFETY: no AppKit view/window object is retained here. ScreenCaptureKit owns
-// asynchronous stream calls, immutable filter/configuration and a stateless
-// NSObject output. Arc keeps all native owners alive through their callbacks;
-// shared Rust state is locked/atomic, and sample callbacks use one serial queue.
+// asynchronous stream calls and a stateless NSObject output. open consumes the
+// only PreparedCapture owner; after initWithFilter no callback reads or mutates
+// _prepared. It keeps those SDK owners alive until the last Arc drops them;
+// this does not expose shared access to the !Sync PreparedCapture fields.
+// Arc keeps native owners alive through callbacks, shared Rust state is locked
+// or atomic, and sample callbacks use one serial queue. Only the guarded native
+// stream start/stop/output-removal operations access stream/output concurrently.
 unsafe impl Send for Resources {}
 unsafe impl Sync for Resources {}
 

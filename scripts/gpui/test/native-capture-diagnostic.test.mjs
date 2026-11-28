@@ -9,6 +9,7 @@ import YAML from 'yaml';
 import {
   assertCaptureReceipts,
   assertPlatform,
+  assertProtocolLookup,
   assertSource,
   assertTerminal,
   recordFailure,
@@ -146,6 +147,7 @@ test('the new lane preserves the actual CI macOS environment, deadline and comma
     ['capture_frame', 15],
     ['capture_pixels', 7],
     ['capture_state', 3],
+    ['capture_transfer', 4],
   ]) {
     const count = fs
       .readFileSync(path.join(root, `native/gpui/crates/proto-ui-gpui/tests/${name}.rs`), 'utf8')
@@ -154,6 +156,49 @@ test('the new lane preserves the actual CI macOS environment, deadline and comma
     assert.equal(selected.find((stage) => stage.name === name).count, expected);
   }
   assert.equal(selected.find((stage) => stage.name === 'accesskit_macos').count, 23);
+});
+
+test('protocol lookup observes missing metadata and rejects incomplete or failed setup', async () => {
+  const records = [
+    { phase: 'before-framework-load', SCStreamOutput: false, SCStreamDelegate: false },
+    { phase: 'after-framework-load', SCStreamOutput: false, SCStreamDelegate: true },
+    { phase: 'after-stream-class-init', SCStreamOutput: false, SCStreamDelegate: true },
+    { frameworkLoaded: true, streamClassPresent: true },
+  ];
+  const log = records.map((record) => JSON.stringify(record)).join('\n');
+  assert.deepEqual(assertProtocolLookup(log), records);
+  for (const changed of [
+    records.slice(1),
+    records.slice().reverse(),
+    records.map((row, index) => (index === 3 ? { ...row, frameworkLoaded: false } : row)),
+    records.map((row, index) => (index === 1 ? { ...row, SCStreamOutput: 'false' } : row)),
+    [...records, records[0]],
+  ]) {
+    assert.throws(() => assertProtocolLookup(changed.map((row) => JSON.stringify(row)).join('\n')));
+  }
+  const selected = stages('/repo', '/evidence');
+  const compile = selected.find((stage) => stage.name === 'compile-protocol-lookup');
+  const lookup = selected.find((stage) => stage.name === 'protocol-lookup');
+  assert.equal(compile.command, 'xcrun');
+  assert.equal(
+    compile.args.includes('ScreenCaptureKit'),
+    false,
+    'The probe does not link the witness'
+  );
+  assert.equal(lookup.dependency, compile.name);
+  const executed = [];
+  const summary = await runStages(
+    [compile, lookup, { name: 'later-check' }],
+    async (stage) => {
+      executed.push(stage.name);
+      return { exitCode: stage === compile ? 1 : 0, log: '' };
+    },
+    async () => {}
+  );
+  assert.deepEqual(executed, ['compile-protocol-lookup', 'later-check']);
+  assert.equal(summary.firstFailure, compile.name);
+  assert.equal(summary.results[1].status, 'blocked');
+  assert.equal(summary.passed, false);
 });
 
 test('actual platform guard rejects macOS 15, another architecture or overridden toolchain', () => {

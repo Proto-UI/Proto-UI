@@ -149,3 +149,66 @@ test('CI requires both current-phase PNGs and records source plus hashes', () =>
   assert.match(workflow, /test -s evidence\/control-label-action-disabled.png/);
   assert.match(workflow, /shasum -a 256 evidence\/control-label-\*\.png/);
 });
+
+test('only the macOS evidence feature builds and links real SDK protocol declarations', () => {
+  const build = read(`${native}build.rs`);
+  const witness = read(`${native}tests/support/native_protocols.m`);
+  assert.match(build, /env::var\("CARGO_CFG_TARGET_OS"\).as_deref\(\) != Ok\("macos"\)/);
+  assert.match(build, /env::var_os\("CARGO_FEATURE_MACOS_ACCESSIBILITY_TEST"\).is_none\(\)/);
+  assert.ok(build.indexOf('return;') < build.indexOf('Command::new("xcrun")'));
+  assert.match(build, /CARGO_CFG_TARGET_ARCH/);
+  assert.match(build, /"--sdk", "macosx", "--show-sdk-path"/);
+  assert.match(build, /"-fblocks"/);
+  assert.match(build, /env::var_os\("OUT_DIR"\)/);
+  assert.match(build, /cargo:rustc-link-search=native=/);
+  assert.doesNotMatch(build, /cargo:rustc-link-lib|cargo:rustc-link-arg|cfg!\(target_os/);
+  assert.match(witness, /#import <ScreenCaptureKit\/ScreenCaptureKit.h>/);
+  for (const name of ['SCStreamOutput', 'SCStreamDelegate']) {
+    assert.ok(witness.includes(`@protocol(${name})`));
+  }
+  assert.doesNotMatch(
+    witness,
+    /@interface|@implementation|objc_allocateProtocol|objc_registerProtocol/
+  );
+  assert.match(stream, /#\[link\(name = "proto_ui_capture_protocols", kind = "static"\)\]/);
+  assert.match(stream, /protocol.name\(\) != name \|\| !protocol.conforms_to\(base\)/);
+  assert.match(
+    stream,
+    /AnyProtocol::get\(name\).is_some_and\(\|actual\| ptr::eq\(actual, protocol\)\)/
+  );
+  assert.match(stream, /class.add_protocol\(protocol\)/);
+});
+
+test('only the sealed preparation pair can move through the Mutex and its settings precede publication', () => {
+  assert.match(capture, /unsafe impl Send for PreparedCapture \{\}/);
+  assert.doesNotMatch(allCapture, /unsafe impl (?:Send|Sync) for (?:ObjcOwned|CfOwned)/);
+  assert.doesNotMatch(allCapture, /unsafe impl Sync for PreparedCapture|arc_with_non_send_sync/);
+  const structure = capture.match(/^struct PreparedCapture \{[\s\S]*?^\}/m)?.[0];
+  assert.ok(structure, 'The preparation type and its fields stay private');
+  assert.doesNotMatch(structure, /pub |Clone|NSView|NSWindow/);
+  assert.match(capture, /type Pending<T> = Arc<Mutex<CaptureState<T>>>/);
+  const publication = capture.indexOf('Ok(PreparedCapture {');
+  assert.ok(publication > capture.lastIndexOf('msg_send![configuration.0, set'));
+  assert.equal([...capture.matchAll(/Ok\(PreparedCapture \{/g)].length, 1);
+  assert.equal([...stream.matchAll(/prepared\.filter\.0/g)].length, 1);
+  assert.equal([...stream.matchAll(/prepared\.configuration\.0/g)].length, 1);
+  assert.match(stream, /_prepared: prepared/);
+  const transfer = read(`${native}tests/capture_transfer.rs`);
+  assert.match(transfer, /\#\[path = "support\/capture_state.rs"\]/);
+  assert.match(transfer, /thread::spawn/);
+  assert.match(transfer, /impl Drop for Owner/);
+  assert.doesNotMatch(transfer, /unsafe|thread::sleep/);
+});
+
+test('the separate runtime lookup cannot emit the protocols or enumerate capture targets', () => {
+  const probe = read('scripts/gpui/native-protocol-lookup.m');
+  assert.doesNotMatch(
+    probe,
+    /@protocol\s*\(|ScreenCaptureKit\/ScreenCaptureKit.h|SCShareableContent|captureImage|startCapture|NSWindow|CGWindow/
+  );
+  for (const name of ['SCStreamOutput', 'SCStreamDelegate']) {
+    assert.ok(probe.includes(`objc_getProtocol("${name}")`));
+  }
+  assert.match(probe, /dlopen\(/);
+  assert.match(probe, /objc_getClass\("SCStream"\)/);
+});

@@ -216,6 +216,22 @@ struct PreparedCapture {
     configuration: ObjcOwned,
 }
 
+// SAFETY: this private, non-Clone pair is constructed only by the content
+// callback. Both objects own their alloc/init references, every configuration
+// setter completes before publication, and no writable alias is exposed. The
+// filter is built from a ScreenCaptureKit window descriptor; this pair has no
+// NSWindow/NSView owner or borrowed pointer into the content query's collection.
+// CaptureState moves the pair under one Mutex; take transfers it to exactly one
+// stream waiter. Rejected/late results and abandoned states drop their owned
+// pair, rather than leaking it or returning it to another consumer. Thereafter
+// SCStream retains/reads the fully configured objects; our code never mutates
+// them again, and Resources retains the pair through native stop/drain. Release
+// may run on the producer, waiter, or last resource-owner queue. These are
+// non-AppKit NSObject owners with no thread-affine state or exposed aliases.
+// This exclusive transfer does not make ObjcOwned generally Send or permit
+// shared PreparedCapture access: PreparedCapture deliberately remains !Sync.
+unsafe impl Send for PreparedCapture {}
+
 extern "C" {
     fn mach_absolute_time() -> u64;
 }

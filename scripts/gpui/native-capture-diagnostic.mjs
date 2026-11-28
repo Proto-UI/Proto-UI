@@ -12,18 +12,22 @@ const selectedFiles = [
   '.github/workflows/ci.yml',
   '.github/workflows/gpui-adapter-acceptance.yml',
   'scripts/gpui/native-capture-diagnostic.mjs',
+  'scripts/gpui/native-protocol-lookup.m',
   'scripts/gpui/test/native-capture-source.test.mjs',
   'native/gpui/Cargo.toml',
   'native/gpui/Cargo.lock',
   'native/gpui/rust-toolchain.toml',
   'native/gpui/crates/proto-ui-gpui/Cargo.toml',
+  'native/gpui/crates/proto-ui-gpui/build.rs',
   ...[
     'accesskit_macos.rs',
     'capture_frame.rs',
     'capture_pixels.rs',
     'capture_state.rs',
+    'capture_transfer.rs',
     'support/native_capture.rs',
     'support/native_stream.rs',
+    'support/native_protocols.m',
     'support/capture_frame.rs',
     'support/capture_pixels.rs',
     'support/capture_state.rs',
@@ -76,6 +80,7 @@ export function assertSource(before, after, requestedSha) {
 
 export function stages(root, evidence) {
   const cwd = path.join(root, nativeRoot);
+  const lookupBinary = path.join(evidence, 'bin', 'native-protocol-lookup');
   const list = [
     {
       name: 'source-privacy',
@@ -83,11 +88,42 @@ export function stages(root, evidence) {
       args: ['--test', '--test-reporter=tap', 'scripts/gpui/test/native-capture-source.test.mjs'],
       cwd: root,
     },
+    {
+      name: 'compile-protocol-lookup',
+      command: 'xcrun',
+      args: [
+        '--sdk',
+        'macosx',
+        'clang',
+        '-x',
+        'objective-c',
+        '-std=c11',
+        '-fno-objc-arc',
+        '-fblocks',
+        '-Wall',
+        '-Wextra',
+        '-Werror',
+        'scripts/gpui/native-protocol-lookup.m',
+        '-framework',
+        'Foundation',
+        '-o',
+        lookupBinary,
+      ],
+      cwd: root,
+    },
+    {
+      name: 'protocol-lookup',
+      command: lookupBinary,
+      args: [],
+      cwd: root,
+      dependency: 'compile-protocol-lookup',
+    },
   ];
   for (const [name, count] of [
     ['capture_frame', 15],
     ['capture_pixels', 7],
     ['capture_state', 3],
+    ['capture_transfer', 4],
   ]) {
     const binary = path.join(evidence, 'bin', name);
     list.push({
@@ -143,6 +179,27 @@ export function stages(root, evidence) {
   return list;
 }
 
+export function assertProtocolLookup(log) {
+  const records = log
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => JSON.parse(line));
+  assert.equal(records.length, 4, 'Record all three lookup boundaries and the setup result');
+  const phases = ['before-framework-load', 'after-framework-load', 'after-stream-class-init'];
+  for (const [index, phase] of phases.entries()) {
+    const actual = records[index];
+    assert.deepEqual(Object.keys(actual).sort(), ['SCStreamDelegate', 'SCStreamOutput', 'phase']);
+    assert.equal(actual.phase, phase);
+    for (const name of ['SCStreamOutput', 'SCStreamDelegate']) {
+      assert.equal(typeof actual[name], 'boolean', `Record actual ${name} registration`);
+    }
+  }
+  assert.deepEqual(records[3], { frameworkLoaded: true, streamClassPresent: true });
+  // Both present and absent registrations are observations. The original
+  // native capture still has to validate SDK protocols and pass all 23 gates.
+  return records;
+}
+
 export function assertTerminal(stage, result) {
   assert.equal(result.exitCode, 0, `${stage.name} command failed`);
   assert.equal(result.signal ?? null, null, `${stage.name} was terminated`);
@@ -164,9 +221,11 @@ export function assertTerminal(stage, result) {
   } else if (stage.name === 'workspace') {
     assert.match(result.log, /^test result: ok\. [1-9]\d* passed;/m);
   } else if (stage.name === 'source-privacy') {
-    for (const expected of ['# tests 8', '# pass 8', '# fail 0', '# skipped 0']) {
+    for (const expected of ['# tests 11', '# pass 11', '# fail 0', '# skipped 0']) {
       assert.ok(result.log.split(/\r?\n/).includes(expected), expected);
     }
+  } else if (stage.name === 'protocol-lookup') {
+    assertProtocolLookup(result.log);
   }
 }
 
