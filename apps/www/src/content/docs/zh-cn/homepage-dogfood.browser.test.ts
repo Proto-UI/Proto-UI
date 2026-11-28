@@ -2552,7 +2552,13 @@ for (const family of ['shadcn', 'brutalist'] as const) {
           '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
         );
         await expect.poll(() => menu.getAttribute('aria-expanded')).toBe('false');
-        expect(await header.locator('[data-site-header-preferences]').isVisible()).toBe(false);
+        const preferences = header.locator('[data-site-header-preferences]');
+        // Closing makes the retained exit surface inert immediately; removal
+        // follows the admitted Header transition. Both obligations still apply.
+        expect(await preferences.evaluate((node) => !!node.closest('[hidden], [inert]'))).toBe(
+          true
+        );
+        await expect.poll(() => preferences.isVisible(), { timeout: 1000 }).toBe(false);
         expect((await header.boundingBox())!.height).toBeLessThanOrEqual(64);
         await page.setViewportSize({ width: 320, height: 300 });
         await menu.focus();

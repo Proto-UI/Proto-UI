@@ -8,6 +8,7 @@ import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harn
 import { revealHeaderPreferences } from './site-header-browser';
 import {
   headerOptionTextClipping,
+  headerPreferencePaintSettled,
   headerPopupSettled,
   readHeaderPopupPaint,
   readHeaderPopupTextGeometry,
@@ -379,15 +380,7 @@ async function choose(page: Page, control: 'runtime' | 'family', label: string) 
 }
 async function sample(select: Locator) {
   await expect
-    .poll(() =>
-      select.evaluate((element) =>
-        element
-          .getAnimations({ subtree: true })
-          .every(
-            (animation) => animation.playState === 'finished' || animation.playState === 'idle'
-          )
-      )
-    )
+    .poll(() => select.evaluate(headerPreferencePaintSettled), { timeout: 1000 })
     .toBe(true);
   return select.evaluate((element) => {
     const rect = element.getBoundingClientRect();
