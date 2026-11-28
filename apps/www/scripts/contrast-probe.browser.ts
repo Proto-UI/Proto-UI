@@ -1199,7 +1199,9 @@ export const readContrastProjectionBoundary = (
   previewer: HTMLElement,
   expected: ContrastProjectionExpectation
 ) => {
-  const scopes = previewer.querySelectorAll<HTMLElement>('[data-projection-scope]');
+  const scopes = previewer.querySelectorAll<HTMLElement>(
+    '[data-panel="preview"] .host > [data-projection-generation-state="active"] > [data-projection-scope]'
+  );
   const scope = scopes.length === 1 ? scopes[0] : null;
   const contents = scope?.querySelectorAll<HTMLElement>('[data-projection-content]');
   const content = contents?.length === 1 ? contents[0] : null;

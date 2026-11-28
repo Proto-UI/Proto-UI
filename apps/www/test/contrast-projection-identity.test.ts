@@ -332,7 +332,7 @@ async function preview(
   // scope, ownership and physical Prototype markers, rather than this fixture.
   root.dataset.demoId = declaration.recipeId;
   root.dataset.runtimes = JSON.stringify(declaration.runtimes);
-  root.innerHTML = '<div class="host"></div>';
+  root.innerHTML = '<div data-panel="preview"><div class="host"></div></div>';
   document.body.append(root);
   initProjectedPreviewer({
     root,
@@ -388,6 +388,31 @@ for (const declaration of declarations)
       }
     });
   }
+
+it('keeps the authored current subject independent of code chrome and staging projections', async () => {
+  const mounted = await preview('wc', 'tooltip');
+  try {
+    const code = document.createElement('div');
+    code.dataset.panel = 'code';
+    code.innerHTML =
+      '<div data-projection-scope="copy-command" data-projection-state="ready"><div data-projection-content></div></div>';
+    mounted.root.prepend(code);
+    const staging = document.createElement('div');
+    staging.dataset.projectionGenerationState = 'staging';
+    staging.hidden = true;
+    staging.innerHTML =
+      '<div data-projection-scope="preparing-demo" data-projection-state="preparing"><div data-projection-content></div></div>';
+    mounted.scope.parentElement!.before(staging);
+
+    expect(mounted.root.querySelectorAll('[data-projection-scope]')).toHaveLength(3);
+    const observed = await auditor().projectionObservation(mounted.page, item('wc', 'tooltip'));
+    expect(observed.achieved, JSON.stringify(observed)).toBe(true);
+    expect(observed.owner).toBe(mounted.scope.dataset.projectionScope);
+    expect(observed.generation).toBe(mounted.scope.dataset.projectionGeneration);
+  } finally {
+    await mounted.destroy();
+  }
+});
 
 it('preserves every declared primary recipe and page/runtime/theme case, including four Tooltip hosts', () => {
   expect(declarations.map(({ family }) => family)).toEqual(Object.keys(authoredSources));
@@ -520,10 +545,10 @@ const mutations: Mutation[] = [
   ['missing content marker', attribute('content', 'data-projection-content', null)],
   [
     'duplicate scope',
-    ({ root }) => {
+    ({ scope }) => {
       const duplicate = document.createElement('div');
       duplicate.setAttribute('data-projection-scope', 'duplicate');
-      root.append(duplicate);
+      scope.parentElement!.append(duplicate);
       return () => duplicate.remove();
     },
   ],

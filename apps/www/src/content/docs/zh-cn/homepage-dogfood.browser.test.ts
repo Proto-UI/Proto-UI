@@ -509,7 +509,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           .first();
         await preview.scrollIntoViewIfNeeded();
         const scope = preview.locator(
-          '[data-projection-generation-state="active"] [data-projection-scope]'
+          '[data-panel="preview"] .host > [data-projection-generation-state="active"] > [data-projection-scope]'
         );
         await expect
           .poll(() => scope.getAttribute('data-projection-runtime'), { timeout: 30_000 })

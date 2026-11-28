@@ -289,9 +289,8 @@ describe.sequential('Public passive atom documentation previews', () => {
         expect(shellEvidence.events.length).toBeGreaterThan(0);
         expect(shellEvidence.events.every(readyEventHasExpectedOwner)).toBe(true);
         const facts = await preview.evaluate((root) => {
-          const host =
-            root.querySelector<HTMLElement>('[data-projection-content]') ??
-            root.querySelector<HTMLElement>('.host');
+          // Code-copy controls own a separate projection outside the rendered demo.
+          const host = root.querySelector<HTMLElement>('[data-panel="preview"] .host');
           if (!host) throw new Error('Public preview host is missing');
           const slots = [...host.querySelectorAll<HTMLElement>('[data-passive-shell-slot]')];
           const active = slots.filter((slot) => {

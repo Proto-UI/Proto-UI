@@ -374,7 +374,9 @@ describe.sequential('Brutalist passive public consumer evidence', () => {
           await selectRuntime(page, previewer, runtime, '[data-pui-root]', 2);
           const separators = previewer.locator(DEMO_ROOTS);
           const dynamic = previewer.locator('.host [data-demo-ref="dynamic-separator"]');
-          const content = previewer.locator('[data-projection-content]');
+          const content = previewer.locator(
+            '[data-panel="preview"] .host [data-projection-content]'
+          );
           await expect.poll(() => content.getAttribute('data-separator-demo-ready')).toBe('true');
           const originalText = await content.textContent();
           for (const value of PROFILES) {

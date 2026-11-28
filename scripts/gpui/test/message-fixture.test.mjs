@@ -1,5 +1,5 @@
 // Negative evidence for the protocol message fixture gate: a stale or missing
-// fixture must fail the check, run through the CLI the repository runs.
+// fixture must fail the check, run through the generator entry point the repository runs.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -11,10 +11,11 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const SCRIPT = path.join(ROOT, 'scripts/gpui/generate-message-fixture.mts');
 const FIXTURE = path.join(ROOT, 'native/gpui/fixtures/protocol-messages.json');
-const TSX = path.join(ROOT, 'node_modules/.bin/tsx');
 
 function runCheck(fixture = FIXTURE) {
-  return spawnSync(TSX, [SCRIPT, '--check', '--fixture', fixture], {
+  // The generator owns this contract, not tsx's CLI IPC server. Node's tsx
+  // loader runs the same entry point in environments without local sockets.
+  return spawnSync(process.execPath, ['--import', 'tsx', SCRIPT, '--check', '--fixture', fixture], {
     cwd: ROOT,
     encoding: 'utf8',
   });

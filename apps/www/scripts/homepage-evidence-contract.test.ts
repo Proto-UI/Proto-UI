@@ -1379,6 +1379,13 @@ function documentationCaptureFixture(
       : '[data-demo-ref="density-default"]';
   const triggerText = revision === 'candidate' ? 'Account' : 'Hover or focus for details';
   const tooltipText = revision === 'candidate' ? 'View account settings' : 'Portable Base behavior';
+  const tooltipDocument = new Window().document;
+  tooltipDocument.body.innerHTML = `
+    <div data-previewer-id>
+      <div data-panel="preview"><div class="host"><button id="demo-tooltip-trigger">${triggerText}</button></div></div>
+      <div data-panel="code"><pre><code><span>${triggerText}</span></code></pre></div>
+    </div>`;
+  const tooltipPreview = tooltipDocument.querySelector('[data-previewer-id]')!;
   const element = {
     getAttribute(name: string) {
       assert(['aria-checked', 'aria-pressed', 'aria-describedby'].includes(name));
@@ -1397,6 +1404,21 @@ function documentationCaptureFixture(
       if (responds) hovered = true;
     },
   };
+  const tooltipTextControl = (
+    root: typeof tooltipPreview,
+    text: string,
+    options: { exact: boolean }
+  ) => {
+    assert.equal(text, triggerText);
+    assert.equal(options.exact, true);
+    const matches = [...root.querySelectorAll('*')].filter(
+      (node) => node.children.length === 0 && node.textContent === text
+    );
+    assert.equal(matches.length, 1, 'Native input must resolve one rendered target, not code text');
+    assert.equal(matches[0]!.id, 'demo-tooltip-trigger');
+    calls.push(text);
+    return control;
+  };
   const document = {
     querySelector(selector: string) {
       assert.equal(
@@ -1410,6 +1432,14 @@ function documentationCaptureFixture(
   };
   const preview = {
     locator(selector: string) {
+      if (family === 'brutalist') {
+        const scopes = tooltipPreview.querySelectorAll(selector);
+        assert.equal(scopes.length, 1, 'The rendered demo must have one input scope');
+        return {
+          getByText: (text: string, options: { exact: boolean }) =>
+            tooltipTextControl(scopes[0]!, text, options),
+        };
+      }
       assert.equal(selector, radioSelector);
       calls.push(selector);
       return control;
@@ -1421,10 +1451,7 @@ function documentationCaptureFixture(
       return control;
     },
     getByText(text: string, options: { exact: boolean }) {
-      assert.equal(text, triggerText);
-      assert.equal(options.exact, true);
-      calls.push(text);
-      return control;
+      return tooltipTextControl(tooltipPreview, text, options);
     },
   };
   const page = {

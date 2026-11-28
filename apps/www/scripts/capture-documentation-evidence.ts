@@ -70,7 +70,10 @@ async function exerciseDocumentationExample(
     const triggerText = revisionKind === 'candidate' ? 'Account' : 'Hover or focus for details';
     const tooltipText =
       revisionKind === 'candidate' ? 'View account settings' : 'Portable Base behavior';
-    const trigger = preview.getByText(triggerText, { exact: true });
+    // The source panel repeats the trigger label; only the rendered demo owns input.
+    const trigger = preview
+      .locator('[data-panel="preview"] .host')
+      .getByText(triggerText, { exact: true });
     await trigger.hover();
     const tooltip = page.getByRole('tooltip').filter({ hasText: tooltipText });
     await tooltip.waitFor({ state: 'visible' });
