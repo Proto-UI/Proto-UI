@@ -15,6 +15,7 @@ import {
 import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
 import { collectMatrixAccessibilityFacts } from './demo-matrix-accessibility';
 import { waitForMatrixInitialization } from './demo-matrix-activation';
+import { installMatrixEntryCostDiagnostic } from './demo-matrix-entry-cost-diagnostic';
 
 const MATRIX_ROUTE = '/zh-cn/internal/demo-matrix/';
 
@@ -179,6 +180,13 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
     pageErrors: [],
   };
   matrixDiagnostics.set(page, state);
+  if (process.env.PROTO_UI_MATRIX_ENTRY_COST === '1') {
+    page.on('console', (message) => {
+      if (message.type() === 'info' && message.text().startsWith('[matrix-entry-cost] '))
+        console.log(message.text());
+    });
+    await page.addInitScript(installMatrixEntryCostDiagnostic);
+  }
   page.on('pageerror', (error) => {
     const entry = {
       name: error.name,
