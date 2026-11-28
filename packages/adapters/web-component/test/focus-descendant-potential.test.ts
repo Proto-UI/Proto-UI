@@ -30,6 +30,25 @@ function check(value = true) {
 }
 
 describe('WC descendant existence before native style sampling', () => {
+  it('reads fresh ancestor CSS for owned entry projection without a native box-tree flush', () => {
+    const { outside, scope } = fixture('<button>Inside</button>');
+    Object.defineProperty(Element.prototype, 'checkVisibility', {
+      configurable: true,
+      value: () => {
+        throw new Error('entry projection must not force the native box tree');
+      },
+    });
+    expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(true);
+    outside.style.display = 'none';
+    expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(false);
+    outside.style.display = 'contents';
+    expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(true);
+    outside.style.contentVisibility = 'hidden';
+    expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(false);
+    outside.style.contentVisibility = 'visible';
+    expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(true);
+  });
+
   it('projects a text/decorative-only entry without forcing native visibility or style', () => {
     const { scope } = fixture('<span>Label</span><svg><path d="M0 0L1 1" /></svg>');
     const native = check();
@@ -52,7 +71,7 @@ describe('WC descendant existence before native style sampling', () => {
     expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(true);
     button.remove();
     expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(false);
-    expect(native).toHaveBeenCalledTimes(2);
+    expect(native).not.toHaveBeenCalled();
   });
 
   it.each(['hidden', 'inert'] as const)('keeps the external %s barrier', (attribute) => {
@@ -73,7 +92,7 @@ describe('WC descendant existence before native style sampling', () => {
     expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(false);
     outside.style.display = 'block';
     expect(hasWebComponentScopeDescendant(scope, nativeCandidate)).toBe(true);
-    expect(native).toHaveBeenCalledTimes(2);
+    expect(native).not.toHaveBeenCalled();
   });
 
   it('keeps visibility overrides and opacity out of subtree pruning', () => {

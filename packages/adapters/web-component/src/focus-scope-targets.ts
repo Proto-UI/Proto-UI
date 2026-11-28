@@ -47,7 +47,7 @@ export function composedParentElement(el: Element): Element | null {
   return isShadowRootNode(root) ? root.host : null;
 }
 
-function isPrunedByExternalAncestor(el: Element): boolean {
+function isPrunedByExternalAncestor(el: Element, sampleBoxTree = true): boolean {
   const ancestors: Element[] = [];
   let branch = el;
   let ancestor = composedParentElement(el);
@@ -69,7 +69,8 @@ function isPrunedByExternalAncestor(el: Element): boolean {
   // A negative result is not a pruning decision: display:contents can still
   // provide eligible descendants, so it retains the original style fallback.
   const checkVisibility = el.ownerDocument.defaultView?.Element.prototype.checkVisibility;
-  if (typeof checkVisibility === 'function' && checkVisibility.call(el)) return false;
+  if (sampleBoxTree && typeof checkVisibility === 'function' && checkVisibility.call(el))
+    return false;
   return ancestors.some((parent) => {
     const style = getOwnedComputedStyle(parent);
     return style?.display === 'none' || style?.contentVisibility === 'hidden';
@@ -135,7 +136,14 @@ export function sampleWebComponentScopeTargets(
   if (
     container.hidden ||
     container.hasAttribute('inert') ||
-    isPrunedByExternalAncestor(container)
+    // Owned entry projection asks whether a descendant exists, not for its
+    // geometry. Read the same current ancestor CSS without forcing a native
+    // box-tree update between each newly connected entry. Sequential traversal
+    // and arbitrary caller predicates retain their original sampling path.
+    isPrunedByExternalAncestor(
+      container,
+      !stopAtOrdinaryDescendant || isNativelyFocusable !== isWebComponentNativeFocusCandidate
+    )
   ) {
     return { targets: [], activeTarget, recentTarget };
   }
