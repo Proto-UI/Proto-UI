@@ -454,6 +454,9 @@ for (const width of [2048, 390, 430, 320]) {
         await expect.poll(() => value.textContent()).toContain('Web Components');
         const facts = await value.evaluate((e) => {
           const label = e.ownerDocument.createRange();
+          label.selectNodeContents(e);
+          const height = label.getBoundingClientRect().height;
+          const control = e.getBoundingClientRect();
           const walker = e.ownerDocument.createTreeWalker(e, NodeFilter.SHOW_TEXT, {
             acceptNode(node) {
               const parent = node.parentElement;
@@ -466,22 +469,35 @@ for (const width of [2048, 390, 430, 320]) {
               return NodeFilter.FILTER_ACCEPT;
             },
           });
-          const firstText = walker.nextNode();
-          if (firstText) {
-            let lastText = firstText;
-            for (let next = walker.nextNode(); next; next = walker.nextNode()) lastText = next;
-            label.setStartBefore(firstText);
-            label.setEndAfter(lastText);
-          } else {
-            label.selectNodeContents(e);
+          const fragments: DOMRect[] = [];
+          let allTextHasRects = true;
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            label.selectNodeContents(node);
+            const rects = Array.from(label.getClientRects()).filter(
+              (rect) => rect.width > 0 && rect.height > 0
+            );
+            if (rects.length === 0) allTextHasRects = false;
+            fragments.push(...rects);
           }
+          // The whole range includes the tab's nested boxes and owned decorations.
+          // Only visible text fragments establish the label's line height and
+          // whether its ends fit the control.
           return {
             measurement: 'rendered-label-range',
             text: e.textContent,
-            height: label.getBoundingClientRect().height,
-            controlHeight: e.getBoundingClientRect().height,
+            height,
+            textHeight: fragments.length
+              ? Math.max(...fragments.map((r) => r.bottom)) -
+                Math.min(...fragments.map((r) => r.top))
+              : 0,
+            allTextHasRects,
+            fitsInline: fragments.every(
+              (r) => r.left >= control.left - 1 && r.right <= control.right + 1
+            ),
+            controlHeight: control.height,
             lineHeight: Number.parseFloat(getComputedStyle(e).lineHeight),
-            width: e.getBoundingClientRect().width,
+            width: control.width,
             scrollWidth: e.scrollWidth,
             viewport: innerWidth,
           };
@@ -489,7 +505,10 @@ for (const width of [2048, 390, 430, 320]) {
         await capture(page, `button-${width}-runtime-label`, facts);
         expect(facts.height).toBeGreaterThan(0);
         if (!baseline && width !== 320) {
-          expect(facts.height).toBeLessThanOrEqual(facts.lineHeight + 1);
+          expect(facts.allTextHasRects).toBe(true);
+          expect(facts.textHeight).toBeGreaterThan(0);
+          expect(facts.textHeight).toBeLessThanOrEqual(facts.lineHeight + 1);
+          expect(facts.fitsInline).toBe(true);
           expect(facts.scrollWidth).toBeLessThanOrEqual(facts.width + 1);
         }
       } finally {
@@ -698,7 +717,7 @@ for (const width of [2048, 390]) {
               runtime
             );
           } else if (!baseline) {
-            const previewer = page.locator('.proto-previewer[data-previewer-id]').first();
+            const previewer = page.locator('.proto-previewer[data-demo-id="demo-shadcn-dialog"]');
             await expect
               .poll(() => previewer.getAttribute('data-projection-state'), {
                 timeout: 45_000,
@@ -721,16 +740,16 @@ for (const width of [2048, 390]) {
               )
               .toBe(false);
           }
+          // The current docs page hydrates six examples independently. Read and
+          // activate the Trigger in its primary Preview throughout the journey.
           const trigger =
             route === '/zh-cn/'
               ? page.locator('[data-home-showcase] [aria-haspopup="dialog"]').first()
               : baseline
                 ? page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first()
-                : page
-                    .locator('.proto-previewer[data-previewer-id]')
-                    .first()
-                    .locator('[data-projection-generation-state="active"] [aria-haspopup="dialog"]')
-                    .first();
+                : page.locator(
+                    '[data-demo-id="demo-shadcn-dialog"] [data-projection-generation-state="active"] [aria-haspopup="dialog"]'
+                  );
           await trigger.waitFor();
           const contentId = await trigger.getAttribute('aria-controls');
           if (!contentId) throw new Error('The actual Dialog Trigger has no Content identity');
