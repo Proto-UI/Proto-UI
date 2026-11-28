@@ -970,12 +970,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           // Physical/A11y binding and blur use the committed view. Acquisition
           // separately applies the native or entry owner's observation gate;
           // programmatic requests retain their synchronous Module-fact rule.
+          // A pending reveal must not withdraw an already committed A11y target.
           isViewReady: () =>
             projectionReadyRef.current &&
             portalIsCommitted() &&
             !viewDisposed &&
-            !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`) &&
-            !rootRef.current?.closest(`[${PUI_VIEW_PENDING_ATTR}]`),
+            !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
           // Entry does not own descendant facts. Wait for the actual target's
           // event owner without gating the shared physical target getter.
           isEntryAcquisitionReady: (target) => {
