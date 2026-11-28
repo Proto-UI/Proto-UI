@@ -1563,7 +1563,7 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
     document.body.innerHTML =
       '<section data-previewer-id="calendar"><div role="combobox" aria-label="Month" aria-controls="month-options" tabindex="0">10月</div></section><div role="listbox" id="month-options"><div role="option" aria-selected="true" tabindex="0">10月</div></div><button id="foreign">Foreign</button>';
     const root = document.querySelector('[data-previewer-id]')!;
-    const option = document.querySelector<HTMLDivElement>('[role="option"]')!;
+    const option = document.querySelector('[role="option"]') as HTMLDivElement;
     const original = window.HTMLElement.prototype.focus;
     const nativeFocus = vi.fn(function (
       this: InstanceType<typeof window.HTMLElement>,
@@ -1685,7 +1685,7 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
   it('does not attribute an unrelated target to the Calendar owner', () => {
     const f = fixture();
     try {
-      const foreign = f.document.querySelector<HTMLButtonElement>('#foreign')!;
+      const foreign = f.document.getElementById('foreign') as HTMLButtonElement;
       foreign.focus();
       expect(f.document.activeElement).toBe(foreign);
       expect(f.nativeFocus).toHaveBeenCalledOnce();
