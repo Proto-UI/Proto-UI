@@ -8,6 +8,7 @@ const OWNER_LIMIT_MS = 180_000;
 const TRACE_WINDOW_MS = 20_000;
 const TRACE_LIMIT_BYTES = 16 * 1024 * 1024;
 const TRACE_CHUNK_LIMIT = 256;
+const TRACE_CHUNK_TARGET_BYTES = 64 * 1024;
 // The 6ccb receipt hit the chunk cap with timeline events before any profile
 // facts were retained. Keep one CPU-only window; never restart it.
 const TRACE_CATEGORIES = ['disabled-by-default-v8.cpu_profiler'];
@@ -229,6 +230,12 @@ export async function startMatrixBrowserDiagnostic(
     diagnosticOnly: true,
     samplingIsNotPerformanceAcceptance: true,
   });
+  type TracePayload = ReturnType<typeof header> & {
+    partialUntilTerminalReceipt: true;
+    traceEvents: ObjectValue[];
+  };
+  let pendingTrace: TracePayload | undefined;
+  let pendingTraceBytes = 0;
   const persist = (name: string, value: unknown, compact = false) => {
     const data = JSON.stringify(value, null, compact ? undefined : 2);
     writes = writes
@@ -253,6 +260,9 @@ export async function startMatrixBrowserDiagnostic(
         bufferLimitBytes: TRACE_LIMIT_BYTES,
         outputEventLimitBytes: TRACE_LIMIT_BYTES,
         outputChunkLimit: TRACE_CHUNK_LIMIT,
+        outputChunkTargetBytes: TRACE_CHUNK_TARGET_BYTES,
+        bufferedEvents: pendingTrace?.traceEvents.length ?? 0,
+        bufferedBytes: pendingTraceBytes,
         categories: TRACE_CATEGORIES,
         argumentProjection:
           'timing, thread/process names, script frames and CPU profile facts only',
@@ -280,29 +290,54 @@ export async function startMatrixBrowserDiagnostic(
     detachWork.set(session, work);
     return work;
   };
+  const flushTraceChunk = () => {
+    if (!pendingTrace) return;
+    const payload = pendingTrace;
+    pendingTrace = undefined;
+    pendingTraceBytes = 0;
+    persist(`trace-${String(++trace.chunks).padStart(4, '0')}.json`, payload, true);
+  };
   const dataCollected = (event: { value: unknown[] }) => {
     if (!traceAccepting || !Array.isArray(event.value)) return;
     trace.receivedEvents += event.value.length;
-    if (trace.chunks >= TRACE_CHUNK_LIMIT) trace.outputTruncated = true;
-    const events: ObjectValue[] = [];
-    const payload = { ...header(), partialUntilTerminalReceipt: true, traceEvents: events };
-    let chunkBytes = Buffer.byteLength(JSON.stringify(payload));
     for (const value of event.value) {
       if (trace.outputTruncated) break;
       const entry = traceEvent(value, () => (trace.projectionTruncated = true));
       if (!entry) continue;
-      const bytes = Buffer.byteLength(JSON.stringify(entry)) + (events.length ? 1 : 0);
-      if (trace.retainedBytes + chunkBytes + bytes > TRACE_LIMIT_BYTES) {
+      const eventBytes = Buffer.byteLength(JSON.stringify(entry));
+      // CDP delivery boundaries are transport details, not output-file bounds.
+      // Pack ordered, already-sanitized events within the same total byte and
+      // file caps. One indivisible profile event may exceed the chunk target.
+      if (pendingTrace && pendingTraceBytes + eventBytes + 1 > TRACE_CHUNK_TARGET_BYTES)
+        flushTraceChunk();
+      if (!pendingTrace) {
+        const payload: TracePayload = {
+          ...header(),
+          partialUntilTerminalReceipt: true,
+          traceEvents: [],
+        };
+        const headerBytes = Buffer.byteLength(JSON.stringify(payload));
+        if (
+          trace.chunks >= TRACE_CHUNK_LIMIT ||
+          trace.retainedBytes + headerBytes + eventBytes > TRACE_LIMIT_BYTES
+        ) {
+          trace.outputTruncated = true;
+          break;
+        }
+        pendingTrace = payload;
+        pendingTraceBytes = headerBytes;
+        trace.retainedBytes += headerBytes;
+      }
+      const bytes = eventBytes + (pendingTrace.traceEvents.length ? 1 : 0);
+      if (trace.retainedBytes + bytes > TRACE_LIMIT_BYTES) {
         trace.outputTruncated = true;
         break;
       }
-      chunkBytes += bytes;
+      pendingTraceBytes += bytes;
+      trace.retainedBytes += bytes;
       trace.retainedEvents++;
-      events.push(entry);
-    }
-    if (events.length) {
-      trace.retainedBytes += chunkBytes;
-      persist(`trace-${String(++trace.chunks).padStart(4, '0')}.json`, payload, true);
+      pendingTrace.traceEvents.push(entry);
+      if (pendingTraceBytes >= TRACE_CHUNK_TARGET_BYTES) flushTraceChunk();
     }
     snapshot();
   };
@@ -317,6 +352,7 @@ export async function startMatrixBrowserDiagnostic(
   };
   const tracingComplete = (event: { dataLossOccurred: boolean }) => {
     if (!traceAccepting) return;
+    flushTraceChunk();
     trace.completeAt = new Date().toISOString();
     trace.dataLossOccurred = event.dataLossOccurred;
     completeTrace();
@@ -352,6 +388,7 @@ export async function startMatrixBrowserDiagnostic(
         trace.stopError = String(error);
         trace.error ??= trace.stopError;
       });
+      flushTraceChunk();
       traceAccepting = false;
       removeTraceListeners();
       trace.state =
@@ -443,6 +480,7 @@ export async function startMatrixBrowserDiagnostic(
     await bounded(setupTrace(), 'Browser tracing setup').catch((error) => {
       if (finished || traceRetired) return;
       traceRetired = true;
+      flushTraceChunk();
       traceAccepting = false;
       trace.state = 'unavailable';
       trace.setupError = String(error);

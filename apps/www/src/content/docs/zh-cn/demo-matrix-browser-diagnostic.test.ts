@@ -61,6 +61,85 @@ const held = <T>() => {
 };
 
 describe('explicit owned-browser Matrix diagnosis', () => {
+  it('retains small CDP deliveries in order without spending one output chunk per delivery', async () => {
+    const f = fixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, options());
+    for (let index = 0; index < 600; index++) {
+      f.trace.emit('Tracing.dataCollected', {
+        value: [{ name: 'ProfileChunk', ph: 'P', pid: 11, tid: 13, ts: index }],
+      });
+    }
+    await handle.finish();
+    const facts = await result();
+    const files = (await readdir(location('')))
+      .filter((file) => /^trace-\d+\.json$/.test(file))
+      .sort();
+    const contents = await Promise.all(files.map((file) => readFile(location(file), 'utf8')));
+    const events = contents.flatMap((raw) => JSON.parse(raw).traceEvents);
+    expect(facts.trace).toMatchObject({
+      state: 'complete',
+      receivedEvents: 600,
+      retainedEvents: 600,
+      outputTruncated: false,
+      dataLossOccurred: false,
+    });
+    expect(events.map((event) => event.ts)).toEqual(
+      Array.from({ length: 600 }, (_, index) => index)
+    );
+    expect(facts.trace.chunks).toBe(files.length);
+    expect(files.length).toBeLessThan(256);
+    expect(facts.trace.retainedBytes).toBe(
+      contents.reduce((sum, raw) => sum + Buffer.byteLength(raw), 0)
+    );
+    expect(facts.trace.retainedBytes).toBeLessThanOrEqual(16 * 1024 * 1024);
+  });
+
+  it('keeps one indivisible profile event larger than the output chunk target', async () => {
+    const f = fixture();
+    const handle = await startMatrixBrowserDiagnostic(f.browser, options());
+    const nodes = Array.from({ length: 600 }, (_, index) => ({
+      id: index + 1,
+      parent: index || undefined,
+      callFrame: {
+        functionName: `frame-${index}-${'x'.repeat(220)}`,
+        url: 'http://127.0.0.1:4321/source.ts?SYNTHETIC_SECRET=not-retained',
+        lineNumber: index,
+      },
+    }));
+    for (const event of [
+      { name: 'before', ph: 'P', ts: 1 },
+      {
+        name: 'ProfileChunk',
+        ph: 'P',
+        ts: 2,
+        args: { data: { cpuProfile: { nodes, samples: [600] }, timeDeltas: [12] } },
+      },
+      { name: 'after', ph: 'P', ts: 3 },
+    ])
+      f.trace.emit('Tracing.dataCollected', { value: [event] });
+    await handle.finish();
+    const files = (await readdir(location('')))
+      .filter((file) => /^trace-\d+\.json$/.test(file))
+      .sort();
+    const contents = await Promise.all(files.map((file) => readFile(location(file), 'utf8')));
+    const events = contents.flatMap((raw) => JSON.parse(raw).traceEvents);
+    expect(events.map((event) => event.ts)).toEqual([1, 2, 3]);
+    expect(events[1].args.data.cpuProfile.nodes).toHaveLength(600);
+    expect(events[1].args.data.cpuProfile.samples).toEqual([600]);
+    expect(contents.join('')).not.toContain('SYNTHETIC_SECRET');
+    expect(contents.some((raw) => Buffer.byteLength(raw) > 64 * 1024)).toBe(true);
+    expect((await result()).trace).toMatchObject({
+      state: 'complete',
+      receivedEvents: 3,
+      retainedEvents: 3,
+      outputTruncated: false,
+      projectionTruncated: false,
+      retainedBytes: contents.reduce((sum, raw) => sum + Buffer.byteLength(raw), 0),
+      bufferedBytes: 0,
+      bufferedEvents: 0,
+    });
+  });
+
   it('prepares tracing before the exact initialization boundary and still stops after one 20-second window', async () => {
     vi.useFakeTimers();
     const f = fixture();
@@ -772,7 +851,13 @@ describe('explicit owned-browser Matrix diagnosis', () => {
     });
     expect(facts.trace.retainedEvents).toBeLessThan(70_000);
     expect(facts.trace.retainedBytes).toBeLessThanOrEqual(16 * 1024 * 1024);
-    expect((await stat(location('trace-0001.json'))).size).toBe(facts.trace.retainedBytes);
+    const files = (await readdir(location(''))).filter((file) => /^trace-\d+\.json$/.test(file));
+    const sizes = await Promise.all(files.map(async (file) => (await stat(location(file))).size));
+    expect(files.length).toBeLessThanOrEqual(256);
+    expect(files.length).toBe(facts.trace.chunks);
+    expect(sizes.reduce((sum, size) => sum + size, 0)).toBe(facts.trace.retainedBytes);
+    expect(facts.trace.bufferedBytes).toBe(0);
+    expect(facts.trace.bufferedEvents).toBe(0);
   });
 
   it('stops independent sessions at the original owner limit and never polls again', async () => {
