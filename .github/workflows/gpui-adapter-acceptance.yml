@@ -2,6 +2,12 @@ name: GPUI Adapter current-source acceptance
 
 on:
   workflow_dispatch:
+    inputs:
+      scope:
+        description: Existing adapter acceptance or the isolated macOS 26 capture diagnostic
+        type: choice
+        options: [adapter, native-capture-macos26]
+        default: adapter
   workflow_call:
 
 permissions:
@@ -12,7 +18,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  reject-unknown-scope:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope && inputs.scope != 'adapter' && inputs.scope != 'native-capture-macos26' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Reject an unknown manual GPUI acceptance scope
+        run: |
+          echo "Unknown manual GPUI acceptance scope" >&2
+          exit 1
+
   adapter-macos:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.scope || inputs.scope == 'adapter' }}
     # The Adapter's first native profile is macOS. This is independent of the
     # compiler's generated Rust consumers and does not admit GPUI-on-WASM.
     runs-on: macos-15
@@ -126,5 +143,54 @@ jobs:
         with:
           name: gpui-adapter-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/gpui-adapter-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+  native-capture-macos26:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'native-capture-macos26' }}
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      CANDIDATE_SHA: ${{ github.sha }}
+      GPUI_NATIVE_DIAGNOSTIC_DIR: ${{ runner.temp }}/gpui-native-capture-diagnostic
+    steps:
+      - name: Prepare evidence before checkout and setup
+        run: |
+          set -euo pipefail
+          mkdir -p "$GPUI_NATIVE_DIAGNOSTIC_DIR"
+          printf '%s\n' "$CANDIDATE_SHA" > "$GPUI_NATIVE_DIAGNOSTIC_DIR/requested-source-sha.txt"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the original workspace Rust components
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+      - name: Reuse the original macOS Cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: cargo-macos-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: cargo-macos-
+      - name: Run the original native gates and retain every terminal result
+        if: ${{ !cancelled() }}
+        env:
+          GPUI_NATIVE_PREPARATION_STATUS: ${{ job.status }}
+        run: node scripts/gpui/native-capture-diagnostic.mjs
+      - name: Retain the first failure, native pixels and exact source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpui-native-capture-macos26-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.GPUI_NATIVE_DIAGNOSTIC_DIR }}
           if-no-files-found: error
           retention-days: 30
