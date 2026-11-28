@@ -1,0 +1,109 @@
+{
+  "kind": "generative-ui-presentation-soundness-sources",
+  "record": "internal/records/2026-11-28-generative-ui-presentation-soundness.zh-CN.md",
+  "retrievedAt": "2026-11-28",
+  "citationSource": "Semantic Scholar Graph API batch endpoint (citationCount / influentialCitationCount at retrieval time)",
+  "prevalenceEvidence": [
+    {
+      "id": "arXiv:2608.29387",
+      "title": "EvoGenUI-Bench: Evaluating LLMs as Multi-Turn Generative UI Assistants",
+      "venue": "EMNLP 2026 (per arXiv comments field)",
+      "citations": 2,
+      "influentialCitations": 0,
+      "usedFor": "Failure mechanism distribution and multi-turn regression",
+      "facts": {
+        "nonPassingCalls": 2750,
+        "mechanisms": {
+          "informationArchitecture": 859,
+          "derivedStatePropagation": 586,
+          "affordanceBinding": 460,
+          "requirementDecomposition": 410,
+          "externalStateGrounding": 289,
+          "domainRepresentation": 146
+        },
+        "bestTurnPass": 0.749,
+        "bestTP5": 0.373,
+        "attributedFailedTransitions": 110,
+        "priorRegressionContaining": 58
+      },
+      "url": "https://arxiv.org/abs/2608.29387"
+    },
+    {
+      "id": "arXiv:2411.03292",
+      "title": "Interaction2Code: Benchmarking MLLM-based Interactive Webpage Code Generation from Interactive Prototyping",
+      "venue": "ASE 2025",
+      "citations": 72,
+      "influentialCitations": 4,
+      "usedFor": "Independent confirmation of interaction failures; Failure-aware Prompt baseline",
+      "facts": {
+        "mostFrequentFailures": ["No interaction", "Partial implementation", "Interactive element missing", "Wrong function"]
+      },
+      "url": "https://arxiv.org/abs/2411.03292"
+    },
+    {
+      "id": "arXiv:2505.03733",
+      "title": "WebGen-Bench: Evaluating LLMs on Generating Interactive and Functional Websites from Scratch",
+      "venue": "NeurIPS 2025",
+      "citations": 103,
+      "influentialCitations": 22,
+      "usedFor": "Functional testing via UI agent; candidate task source for comparability",
+      "url": "https://arxiv.org/abs/2505.03733"
+    },
+    {
+      "id": "arXiv:2507.04952",
+      "title": "ArtifactsBench: Bridging the Visual-Interactive Gap in LLM Code Generation Evaluation",
+      "venue": "EMNLP 2026 (per Semantic Scholar)",
+      "citations": 51,
+      "influentialCitations": 3,
+      "usedFor": "Capability-retention metric; reported 94.4% ranking consistency with WebDev Arena",
+      "url": "https://arxiv.org/abs/2507.04952"
+    },
+    {
+      "id": "arXiv:2403.03163",
+      "title": "Design2Code: Benchmarking Multimodal Code Generation for Automated Front-End Engineering",
+      "venue": "NAACL 2025",
+      "citations": 250,
+      "influentialCitations": 35,
+      "usedFor": "Context only: measures visual fidelity, not semantic soundness",
+      "url": "https://arxiv.org/abs/2403.03163"
+    }
+  ],
+  "formalFoundations": [
+    {
+      "title": "Dix & Runciman PIE model; Dix, Formal Methods for Interactive Systems (1991)",
+      "usedFor": "Honesty (immediate / eventual), observability vs reachability split",
+      "url": "https://alandix.com/books/formal/pdf/all.pdf"
+    },
+    {
+      "title": "Degani & Heymann, Formal Verification of Human-Automation Interaction (Human Factors, 2002)",
+      "usedFor": "Interface as an abstraction of machine behavior, formally verified",
+      "url": "https://ntrs.nasa.gov/citations/20040088229"
+    },
+    {
+      "title": "PVSio-web and infusion pump UI verification (Masci et al.)",
+      "usedFor": "Precedent for theorem-prover verification of real device interfaces",
+      "url": "https://webarchive.di.uminho.pt/haslab.uminho.pt/masci/files/pvsioweb-cav2015.pdf"
+    }
+  ],
+  "llmFeedbackEvidence": [
+    {
+      "id": "arXiv:2408.02442",
+      "title": "Let Me Speak Freely? A Study on the Impact of Format Restrictions on Performance of Large Language Models",
+      "venue": "EMNLP 2024 Industry",
+      "usedFor": "Stricter format restrictions degrade reasoning; supports post-draft feedback over generation-time constraints",
+      "url": "https://aclanthology.org/2024.emnlp-industry.91"
+    },
+    {
+      "id": "arXiv:2505.10708",
+      "title": "SafeTrans: LLM-assisted Transpilation from C to Rust",
+      "usedFor": "Compiler-error repair can lose intent: across six models (Table 1), repair rate 55.6-93.5% while only 14.1-47.1% of repaired programs pass all tests",
+      "url": "https://arxiv.org/abs/2505.10708"
+    },
+    {
+      "id": "arXiv:2308.05177",
+      "title": "Fixing Rust Compilation Errors using LLMs (RustAssistant)",
+      "usedFor": "Compiler feedback loops are effective for structural errors",
+      "url": "https://arxiv.org/abs/2308.05177"
+    }
+  ]
+}
