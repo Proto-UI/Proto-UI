@@ -1895,7 +1895,7 @@
     {
       "source": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
       "owningMatrixRow": "`www.demo.demo-matrix`",
-      "sourceSha256": "4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5"
+      "sourceSha256": "2402bbbce5176ba5b786780352322711aa3f33f33389e435a100604bb6080a74"
     },
     {
       "source": "apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts",
@@ -1980,7 +1980,7 @@
     {
       "source": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
       "owningMatrixRow": "`www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle`",
-      "sourceSha256": "7bb28f4703b19c02775660e5f890c40bcd384433e15850be5e0e81b60ad84dfc"
+      "sourceSha256": "c20f9feb33efc247708eeaba3aecbb22405539245860ca140e6aecb64391727e"
     },
     {
       "source": "apps/www/src/components/Homepage/homepage-showcase.ts",
@@ -2350,7 +2350,7 @@
     {
       "source": "apps/www/src/components/site-header-surface.ts",
       "owningMatrixRow": "`www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`",
-      "sourceSha256": "88a8aeca13ee29bbdcb4f50227a6af1ae3ad587cd3ae5eca028853b8266a6b99"
+      "sourceSha256": "6f5759be43ec2ae8ad756379d492f6c0c1e3a75056cc9f2449e82ad835696ebd"
     },
     {
       "source": "apps/www/src/components/site-link-recipes.ts",
