@@ -160,6 +160,7 @@ import {
   composedParentElement,
   hasPotentialScopeDescendant,
   hasWebComponentScopeDescendant,
+  logicalSlotNodes,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../focus-scope-targets';
@@ -663,22 +664,27 @@ function relaxEntryHasConditions(selector: string): string {
   return result + selector.slice(start);
 }
 
-function scopedNegatedEntrySubject(selector: string) {
-  const start = selector.indexOf(':not(:has(');
-  // Only scope a single, top-level condition whose relative selector cannot
-  // reach siblings. Complex branches retain the conservative ancestor watch.
+function scopedEntryRelationalSubject(selector: string) {
+  const hasStart = selector.indexOf(':has(');
+  const negativeStart = selector.indexOf(':not(:has(');
+  const negative = negativeStart >= 0 && negativeStart + 5 === hasStart;
+  const start = negative ? negativeStart : hasStart;
+  // A single positive or negative top-level condition observes its actual
+  // subject. Relative sibling selectors and complex branches keep the
+  // conservative ancestor watch because their inputs can leave that subject.
   if (
     start < 0 ||
-    selector.indexOf(':has(') !== start + 5 ||
-    selector.indexOf(':has(', start + 6) !== -1
+    (!negative && selector.slice(0, start).includes('(')) ||
+    selector.indexOf(':has(', hasStart + 1) !== -1
   )
     return null;
   const close = matchingSelectorParen(selector, start + 4);
-  const relativeOpen = start + 9;
+  const relativeOpen = negative ? start + 9 : start + 4;
+  const relativeClose = negative ? close - 1 : close;
   if (
     close < 0 ||
-    matchingSelectorParen(selector, relativeOpen) !== close - 1 ||
-    /[,+~]/.test(selector.slice(relativeOpen + 1, close - 1))
+    matchingSelectorParen(selector, relativeOpen) !== relativeClose ||
+    /[,+~]/.test(selector.slice(relativeOpen + 1, relativeClose))
   )
     return null;
   let depth = 0;
@@ -728,6 +734,28 @@ function scopedNegatedEntrySubject(selector: string) {
   // Simple nth formulas have already been removed. A sibling combinator or
   // selector list elsewhere still needs the conservative ancestor watch.
   return subject === null || /[,+~]/.test(probe) ? null : { subject, probe, positionSubjects };
+}
+
+function staticEntryRelationalProbe(selector: string): string | null {
+  const probe = relaxEntryHasConditions(selector);
+  for (let index = 0; index < probe.length; index += 1) {
+    const character = probe[index]!;
+    const literalEnd = skipSelectorLiteral(probe, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    // Sibling or unresolved nesting conditions can become applicable through
+    // changes outside the entry's observed tree and composed ancestor chain.
+    if (character === '&' || character === '+' || character === '~') return null;
+    if (character !== ':') continue;
+    const predicate = /^:(?:is|where|not)\(/.exec(probe.slice(index));
+    // Dynamic/positional predicates and pseudo-elements (including part and
+    // slotted) cannot be ruled out by an unmatched Element.matches() sample.
+    if (!predicate) return null;
+    index += predicate[0].length - 1;
+  }
+  return probe;
 }
 
 const entryPositionCondition =
@@ -833,8 +861,9 @@ type EntrySelectorSyntax = {
   positional: boolean;
   inputState?: boolean;
   documentRoot?: boolean;
-  scoped?: ReturnType<typeof scopedNegatedEntrySubject>;
+  scoped?: ReturnType<typeof scopedEntryRelationalSubject>;
   probe?: string;
+  staticRootProbe?: string | null;
 };
 
 const entrySelectorSyntax = new WeakMap<CSSStyleRule, EntrySelectorSyntax>();
@@ -869,7 +898,8 @@ function collectEntryStyleDependencies(
   target: HTMLElement,
   ancestors: readonly Element[],
   observesResize: boolean,
-  observedRoots: ReadonlySet<Node>
+  observedRoots: ReadonlySet<Node>,
+  allowRootNarrowing: boolean
 ) {
   const ScopeRule = (
     view as unknown as {
@@ -883,6 +913,7 @@ function collectEntryStyleDependencies(
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
   let inputState = false;
+  let arbitraryEntryAttributes = false;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
@@ -891,20 +922,16 @@ function collectEntryStyleDependencies(
   // Resolve descendants only for a selector that actually consumes them.
   // The snapshot stays local to this synchronous, read-only dependency scan.
   let candidates: Element[] | undefined;
-  const getCandidates = () =>
-    (candidates ??= [...externalSubjects, ...target.querySelectorAll('*')]);
-  let positionalCandidates: Element[] | undefined;
   let unfilteredPositionCandidates: Element[] | undefined;
-  const getPositionalCandidates = () =>
-    (positionalCandidates ??= [
-      ...getCandidates(),
-      ...Array.from(observedRoots)
-        .filter((root) => root !== target)
-        .flatMap((root) => [
-          ...(root.nodeType === 1 ? [root as Element] : []),
-          ...(root as HTMLElement | ShadowRoot).querySelectorAll('*'),
-        ]),
+  const getCandidates = () =>
+    (candidates ??= [
+      ...externalSubjects,
+      ...Array.from(observedRoots).flatMap((root) => [
+        ...(root.nodeType === 1 ? [root as Element] : []),
+        ...(root as HTMLElement | ShadowRoot).querySelectorAll('*'),
+      ]),
     ]);
+  const getPositionalCandidates = getCandidates;
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
     if (query) queries.add(query);
@@ -950,11 +977,30 @@ function collectEntryStyleDependencies(
           if (
             relational !== 2 &&
             (syntax.documentRoot ??= hasDocumentRootRelationalSubject(selector))
-          )
-            relational = 2;
+          ) {
+            if (syntax.staticRootProbe === undefined)
+              syntax.staticRootProbe = staticEntryRelationalProbe(selector);
+            // Image maps and external radio peers can depend on styled nodes
+            // outside the observed composed/portal candidate set.
+            const probe = allowRootNarrowing ? syntax.staticRootProbe : null;
+            // A static rule for another component cannot affect this region.
+            // Keep arbitrary local selector attributes live so a future match
+            // rebuilds the graph; ancestors already observe every attribute.
+            arbitraryEntryAttributes = true;
+            let possible = true;
+            if (probe !== null) {
+              try {
+                possible = getPositionalCandidates().some((candidate) => candidate.matches(probe));
+              } catch {
+                // CSSOM may accept a selector that matches() cannot resolve,
+                // such as a stylesheet namespace prefix. Keep the root watch.
+              }
+            }
+            if (possible) relational = 2;
+          }
           if (relational !== 2) {
             if (syntax.probe === undefined) {
-              syntax.scoped = scopedNegatedEntrySubject(selector);
+              syntax.scoped = scopedEntryRelationalSubject(selector);
               syntax.probe = syntax.scoped?.probe ?? relaxEntryHasConditions(selector);
             }
             const { scoped, probe } = syntax;
@@ -968,7 +1014,10 @@ function collectEntryStyleDependencies(
                 ? getCandidates().filter((candidate) => candidate.matches(scoped.subject))
                 : [];
               if (!matches.length) relational = 1;
-              else for (const candidate of matches) relationalSubjects.add(candidate);
+              else {
+                arbitraryEntryAttributes = true;
+                for (const candidate of matches) relationalSubjects.add(candidate);
+              }
               for (const subject of scoped?.positionSubjects ?? [])
                 for (const candidate of externalSubjects)
                   if (candidate.parentNode && candidate.matches(subject)) {
@@ -1055,6 +1104,7 @@ function collectEntryStyleDependencies(
     positionParents,
     filteredPositionParents,
     inputState,
+    arbitraryEntryAttributes,
   ] as const;
 }
 
@@ -1901,6 +1951,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
             let entryRelationalSubjects = new Set<Element>();
+            let observeLocalSelectorInputs = false;
             let hasExternalStyleInputs = false;
             let dormant = false;
             let pendingEntryRefresh: boolean | undefined;
@@ -1950,6 +2001,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (dormant) {
                 observedRoots.clear();
                 entryRelationalSubjects.clear();
+                observeLocalSelectorInputs = false;
                 hasExternalStyleInputs = false;
                 entryStyleWatch?.dispose();
                 entryStyleWatch = null;
@@ -1988,6 +2040,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 });
               let hasArea = false;
               let hasSlottedEntryContent = false;
+              const entrySlots = new Set<HTMLSlotElement>();
               const radioTrees = new Set<Document | ShadowRoot>();
               const mediaRoots = new Set<Document | ShadowRoot>([target.ownerDocument]);
               const radioNames = new Set<string>();
@@ -2074,12 +2127,22 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (root.nodeType === 11) mediaRoots.add(root as ShadowRoot);
                 entryObserver?.observe(root, options);
                 if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
-                hasArea ||= !!root.querySelector('area');
-                // Assigned slot content can have native state dependencies,
-                // including radio peers, outside these physical observed roots.
-                hasSlottedEntryContent ||=
-                  (root.nodeType === 1 && (root as Element).localName === 'slot') ||
-                  !!root.querySelector('slot');
+                hasArea ||=
+                  (root.nodeType === 1 && (root as Element).localName === 'area') ||
+                  !!root.querySelector('area');
+                const slots = [...root.querySelectorAll<HTMLSlotElement>('slot')];
+                if (root.nodeType === 1 && (root as Element).localName === 'slot')
+                  slots.push(root as HTMLSlotElement);
+                for (const slot of slots) {
+                  if (slot.namespaceURI !== 'http://www.w3.org/1999/xhtml') continue;
+                  hasSlottedEntryContent = true;
+                  entrySlots.add(slot);
+                  // Reuse the resolver's exact logical assignment, including
+                  // owned projections and the first same-name slot. Observe
+                  // assigned branches before proving a static rule unrelated.
+                  for (const node of logicalSlotNodes(slot))
+                    if (node.nodeType === 1) observe(node as HTMLElement);
+                }
                 // A portal stays logically beneath its origin marker while its
                 // physical projection lives elsewhere (normally document.body).
                 // Follow those markers so eligibility mutations in the moved
@@ -2096,9 +2159,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 // Radio-group ownership never crosses a Document/ShadowRoot
                 // boundary. Observe only trees containing a relevant named
                 // radio instead of every document hosting a Focus Entry.
-                for (const radio of root.querySelectorAll<HTMLInputElement>(
-                  'input[type="radio"][name]'
-                )) {
+                const radios = [
+                  ...root.querySelectorAll<HTMLInputElement>('input[type="radio"][name]'),
+                ];
+                if (root.nodeType === 1 && (root as Element).matches('input[type="radio"][name]'))
+                  radios.push(root as HTMLInputElement);
+                for (const radio of radios) {
                   radioNames.add(radio.name);
                   const formId = radio.getAttribute('form') || radio.form?.id;
                   if (formId) radioFormIds.add(formId);
@@ -2121,20 +2187,33 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               entryStyleWatch?.observeInline(hasExternalStyleInputs);
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
+                const unchangedAttribute = (record: MutationRecord) =>
+                  record.type === 'attributes' &&
+                  record.oldValue ===
+                    (record.target as Element).getAttributeNS(
+                      record.attributeNamespace,
+                      record.attributeName!
+                    );
+                // Narrowed selector subjects can gain a new match through an
+                // arbitrary local attribute. Rebuild before relying on the
+                // old subject graph, including when an external record is
+                // earlier in this same observer delivery.
+                if (
+                  observeLocalSelectorInputs &&
+                  records.some(
+                    (record) =>
+                      !unchangedAttribute(record) && belongsToObservedEntryTree(record.target)
+                  )
+                ) {
+                  scheduleEntrySample(true);
+                  return;
+                }
                 if (
                   records.some((record) => {
                     // A same-valued external attribute cannot change selector
                     // eligibility. Keep each record's old value so A -> B -> A
                     // and author-callback mutations still invalidate the entry.
-                    if (
-                      record.type === 'attributes' &&
-                      record.oldValue ===
-                        (record.target as Element).getAttributeNS(
-                          record.attributeNamespace,
-                          record.attributeName!
-                        )
-                    )
-                      return false;
+                    if (unchangedAttribute(record)) return false;
                     if (
                       !belongsToObservedEntryTree(record.target) ||
                       invalidatesEntryStyles(record)
@@ -2153,7 +2232,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // selectors, so observe every attribute on only this bounded
               // composed chain instead of guessing a global allowlist.
               const externalAncestors = ancestors.slice(1);
-              const externalSlots = new Set<HTMLSlotElement>();
+              const externalSlots = new Set<HTMLSlotElement>(entrySlots);
               const externalStyleRoots = new Set<ShadowRoot>();
               const motionTargets = new Set(ancestors);
               const shadowAnimationTargets = new Set<EventTarget>(
@@ -2204,6 +2283,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 positionParents,
                 filteredPositionParents,
                 hasInputStateStyleDependency,
+                observesArbitraryEntryAttributes,
               ] =
                 // CSS can change eligibility, but cannot create a native Tab
                 // candidate in a decorative-only subtree. Keep the DOM,
@@ -2221,7 +2301,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       target,
                       externalAncestors,
                       !!entryResizeObserver && !hasExternalStyleInputs,
-                      observedRoots
+                      observedRoots,
+                      !hasExternalStyleInputs
                     )
                   : ([
                       [],
@@ -2231,7 +2312,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       new Set<Node>(),
                       new Map<Element | ShadowRoot, boolean>(),
                       false,
+                      false,
                     ] as const);
+              observeLocalSelectorInputs = observesArbitraryEntryAttributes;
               entryRelationalSubjects = relationalSubjects;
               for (const parent of positionParents) {
                 const filtered = filteredPositionParents.has(parent as Element | ShadowRoot);
@@ -2272,6 +2355,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 attributes: true,
                 attributeOldValue: true,
               };
+              if (observeLocalSelectorInputs)
+                for (const root of observedRoots)
+                  entryExternalStyleObserver.observe(root, externalStyleOptions);
               for (const subject of entryRelationalSubjects)
                 entryExternalStyleObserver.observe(subject, externalStyleOptions);
               const siblingStateTargets = new Set<EventTarget>();
@@ -2548,10 +2634,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               }
               if (externalSlots.size > 0) {
-                stopEntrySlotWatch = listenToEntryEvents(
-                  externalSlots,
-                  ['slotchange'],
-                  refreshTree
+                stopEntrySlotWatch = listenToEntryEvents(externalSlots, ['slotchange'], () =>
+                  scheduleEntrySample(true)
                 );
               }
               // An already-upgraded descendant can still attach an open root
