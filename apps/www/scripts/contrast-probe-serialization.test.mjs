@@ -359,6 +359,13 @@ const targetObservationFixture = async () => {
     ancestor,
     sandbox,
     observe,
+    // Falling back keeps the preserved old reader red on its actual paint
+    // classification, rather than merely on a newly introduced export name.
+    observePresence: () =>
+      (
+        sandbox.puiContrastProbe.readContrastTargetPaintPresence ??
+        sandbox.puiContrastProbe.readContrastTargetObservation
+      )(element),
     observePair,
     textNode,
     styleByElement,
@@ -366,6 +373,130 @@ const targetObservationFixture = async () => {
     observeWholeBox: () => sandbox.puiContrastProbe.readWholeBoxCalibration(element),
   };
 };
+
+test('own positive scale can witness first paint while the settled contrast target stays unsupported', async () => {
+  const f = await targetObservationFixture();
+  f.style.scale = '0.95';
+  assert.equal(f.observe().achieved, false);
+  assert.equal(f.observePresence().achieved, true);
+  assert.equal(f.observePresence().paintPresenceWitness.kind, 'own-positive-axis-scale-background');
+  assert.equal(f.observe().visibility.classification, 'unsupported');
+});
+
+for (const [name, change] of [
+  [
+    'zero scale',
+    (f) => {
+      f.style.scale = '0';
+    },
+  ],
+  [
+    'negative scale',
+    (f) => {
+      f.style.scale = '-0.95';
+    },
+  ],
+  [
+    'three dimensional scale',
+    (f) => {
+      f.style.scale = '0.95 0.95 1';
+    },
+  ],
+  [
+    'non-finite scale',
+    (f) => {
+      f.style.scale = 'NaN';
+    },
+  ],
+  [
+    'rotation',
+    (f) => {
+      f.style.rotate = '10deg';
+    },
+  ],
+  [
+    'ancestor scale',
+    (f) => {
+      f.ancestorStyle.scale = '0.95';
+    },
+  ],
+  [
+    'target filter',
+    (f) => {
+      f.style.filter = 'opacity(0)';
+    },
+  ],
+  [
+    'ancestor filter',
+    (f) => {
+      f.ancestorStyle.filter = 'blur(2px)';
+    },
+  ],
+  [
+    'mask',
+    (f) => {
+      f.style.maskImage = 'linear-gradient(transparent,transparent)';
+    },
+  ],
+  [
+    'opacity zero',
+    (f) => {
+      f.style.opacity = '0';
+    },
+  ],
+  [
+    'transparent background',
+    (f) => {
+      f.style.backgroundColor = 'rgba(0,0,0,0)';
+    },
+  ],
+  [
+    'background image',
+    (f) => {
+      f.style.backgroundImage = 'linear-gradient(white,white)';
+    },
+  ],
+  [
+    'text-only background clip',
+    (f) => {
+      f.style.backgroundClip = 'text';
+    },
+  ],
+  [
+    'partial ancestor clip',
+    (f) => {
+      f.ancestorStyle.overflowX = 'hidden';
+      f.ancestor.clientWidth = 20;
+    },
+  ],
+  [
+    'offscreen',
+    (f) => {
+      f.sandbox.innerWidth = 5;
+    },
+  ],
+  [
+    'non-finite bounds',
+    (f) => {
+      f.bounds.width = Infinity;
+    },
+  ],
+  [
+    'fragmented boxes',
+    (f) => {
+      f.element.getClientRects = () => [f.bounds, f.bounds];
+    },
+  ],
+]) {
+  test(`scaled first-paint presence rejects ${name}`, async () => {
+    const f = await targetObservationFixture();
+    f.style.scale = '0.95';
+    assert.equal(f.observePresence().achieved, true, 'positive control');
+    change(f);
+    assert.equal(f.observePresence().achieved, false);
+    assert.equal(f.observe().achieved, false);
+  });
+}
 
 for (const fault of [
   'none',

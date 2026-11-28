@@ -651,6 +651,49 @@ describe('Search participates in the existing homepage generation', () => {
     expect(initialDialog.dispose).toHaveBeenCalledOnce();
   });
 
+  it('retires the failed Search Dialog before unlocking the retained generation without waiting for passive cleanup', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { root } = withPublicSearch();
+    handle = initHomepageRuntime(root);
+    await settle();
+    const initialIndex = fakes.materialize.mock.calls.findIndex(
+      ([, options]) => options.content.recipe.id === 'website-search-command-dialog'
+    );
+    const retainedDialog = await fakes.materialize.mock.results[initialIndex]!.value;
+    const dialogRetired = deferred<void>();
+    const passiveRetired = deferred<void>();
+    const failedDialog = candidate();
+    failedDialog.dispose.mockImplementation(() => dialogRetired.promise);
+    const failedPassive = candidate();
+    failedPassive.dispose.mockImplementation(() => passiveRetired.promise);
+    fakes.materialize.mockImplementation(async (_request, options) =>
+      options.content.recipe.id === 'website-search-command-dialog'
+        ? failedDialog
+        : { ...failedPassive, host: document.createElement('div') }
+    );
+    const applyFamily = siteFamily.applySiteLibraryFamily;
+    vi.spyOn(siteFamily, 'applySiteLibraryFamily').mockImplementation((document, family) => {
+      applyFamily(document, family);
+      if (family === 'brutalist') throw new Error('Controlled late page publication failure');
+    });
+    try {
+      fakes.materialize.mock.calls[0]![1].controls.family.onValueChange('brutalist');
+      await vi.waitFor(() => expect(failedDialog.dispose).toHaveBeenCalledOnce());
+      // A failed modal still owns its focus scope until actual disposal ends.
+      // Unlocking the retained generation earlier loses its restoration request.
+      expect(retainedDialog.setLocked).toHaveBeenLastCalledWith(true);
+      expect(failedPassive.dispose).not.toHaveBeenCalled();
+      dialogRetired.resolve();
+      await vi.waitFor(() => expect(root.dataset.runtimeState).toBe('error'));
+      expect(retainedDialog.setLocked).toHaveBeenLastCalledWith(false);
+      expect(root.dataset.runtime).toBe('wc');
+      expect(retainedDialog.dispose).not.toHaveBeenCalled();
+    } finally {
+      dialogRetired.resolve();
+      passiveRetired.resolve();
+    }
+  });
+
   it.each(['website-search-open', 'website-search-command-dialog'])(
     'keeps the committed public Search generation when %s fails to prepare',
     async (failingRecipe) => {

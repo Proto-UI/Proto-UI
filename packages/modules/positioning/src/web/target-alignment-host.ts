@@ -182,9 +182,39 @@ export function createTargetAlignmentLease(
       frame.isConnected &&
       keys.every((key) => targets[key].isConnected && targets[key].ownerDocument === doc) &&
       sizeTargets.every((target) => target.isConnected && target.ownerDocument === doc);
+    const viewportPending = () => {
+      const root = doc.documentElement;
+      const rootWidth = root.clientWidth,
+        rootHeight = root.clientHeight;
+      const width = rootWidth > 0 ? rootWidth : view.innerWidth;
+      const height = rootHeight > 0 ? rootHeight : view.innerHeight;
+      const c = descriptor.constraints;
+      // The numerical plan deliberately preserves a tiny viewport's derived
+      // negative maximum. It is not a CSS length or a lost style claim. Keep
+      // this current lease pending until there is a positive usable block span.
+      // Invalid dimensions/constraints still reach the normal rejection path.
+      return (
+        Number.isFinite(width) &&
+        Number.isFinite(height) &&
+        width >= 0 &&
+        height >= 0 &&
+        Number.isFinite(c.margin * 2) &&
+        c.margin >= 0 &&
+        Number.isFinite(c.minimumTargetSpanCount) &&
+        c.minimumTargetSpanCount > 0 &&
+        c.boundary === 'layout-viewport' &&
+        c.inlineOverflow === 'preserve-start' &&
+        typeof c.expandOnScroll === 'boolean' &&
+        (width === 0 || height <= c.margin * 2)
+      );
+    };
     const readPlan = (): TargetAlignmentPlan | null => {
       if (!live() || !connected()) {
         if (live()) report({ status: 'pending-target', reason: 'detached-target' });
+        return null;
+      }
+      if (viewportPending()) {
+        report({ status: 'pending-target', reason: 'missing-target' });
         return null;
       }
       const reference = targets.blockReference.getBoundingClientRect();
@@ -309,6 +339,22 @@ export function createTargetAlignmentLease(
       let stable = false;
       let nextReferenceBox: readonly number[] = [];
       try {
+        const unavailable = sizeLease?.checkAvailability();
+        if (unavailable) {
+          if (unavailable.reason === 'detached-target')
+            report({ status: 'pending-target', reason: 'detached-target' });
+          else report({ status: 'unavailable', reason: unavailable.reason });
+          return;
+        }
+        if (!owned.isCurrent()) {
+          ownershipLost = true;
+          rejectAdmission('ownership-lost');
+          return;
+        }
+        if (viewportPending()) {
+          report({ status: 'pending-target', reason: 'missing-target' });
+          return;
+        }
         const reference = targets.blockReference.getBoundingClientRect();
         nextReferenceBox = [reference.left, reference.top, reference.width, reference.height];
         const referenceChanged =
@@ -446,7 +492,7 @@ export function createTargetAlignmentLease(
       }
     };
     const onScroll = () => {
-      if (!live() || writing || ownershipLost || !plan) return;
+      if (!live() || writing || ownershipLost || !plan || viewportPending()) return;
       const actualScroll = targets.scrollport.scrollTop;
       const result = reduceScrollExpansion({
         enabled: expand,

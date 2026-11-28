@@ -483,6 +483,26 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         },
       });
       const prepared = candidate;
+      let capturedFocusBeforeLock = false;
+      const rememberDialogFocusBeforeLock = () => {
+        if (!homepage || !activated || !current() || capturedFocusBeforeLock) return;
+        capturedFocusBeforeLock = true;
+        const origin = document.activeElement;
+        const control =
+          origin instanceof view.HTMLElement
+            ? origin.closest<HTMLElement>('[data-demo-ref]')
+            : null;
+        rememberedDialogFocus =
+          search.session.read().open &&
+          control?.dataset.projectionOwner === ownerId &&
+          control.dataset.projectionGeneration === String(request.generation) &&
+          control.dataset.demoRef
+            ? {
+                candidate: prepared,
+                request: { ref: control.dataset.demoRef, origin, epoch: dialogFocusEpoch },
+              }
+            : null;
+      };
       return {
         ...prepared,
         activate() {
@@ -527,29 +547,15 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
             };
           });
         },
+        sealExternalPortals() {
+          // External runtime changes seal native portals before the deferred
+          // controller lock. Inert can already drop focus at this boundary.
+          rememberDialogFocusBeforeLock();
+          prepared.sealExternalPortals?.();
+        },
         setLocked(nextLocked: boolean) {
-          if (homepage && activated) {
-            if (nextLocked && current()) {
-              // The page transaction locks the retained projection before it
-              // prepares the replacement. Read its owned focus before inert
-              // can move focus back to the document.
-              const origin = document.activeElement;
-              const control =
-                origin instanceof view.HTMLElement
-                  ? origin.closest<HTMLElement>('[data-demo-ref]')
-                  : null;
-              rememberedDialogFocus =
-                search.session.read().open &&
-                control?.dataset.projectionOwner === ownerId &&
-                control.dataset.projectionGeneration === String(request.generation) &&
-                control.dataset.demoRef
-                  ? {
-                      candidate: prepared,
-                      request: { ref: control.dataset.demoRef, origin, epoch: dialogFocusEpoch },
-                    }
-                  : null;
-            }
-          }
+          if (nextLocked) rememberDialogFocusBeforeLock();
+          else capturedFocusBeforeLock = false;
           locked = nextLocked;
           const retainedFocus = locked ? null : rememberedDialogFocus;
           const result = prepared.setLocked?.(locked);

@@ -533,9 +533,13 @@ it('keeps newer focus when a replacement Dialog finishes leaving', async () => {
   expect(returned).not.toHaveBeenCalled();
 });
 
-it.each(['query', 'close', 'newer focus'] as const)(
-  'restores the retained Homepage Search after a late publication failure with %s focus',
-  async (focusedRef) => {
+it.each(
+  (['query', 'close', 'newer focus'] as const).flatMap((focusedRef) =>
+    [false, true].map((sealBeforeRequest) => [focusedRef, sealBeforeRequest] as const)
+  )
+)(
+  'restores the retained Homepage Search after a late publication failure with %s focus and early portal seal=%s',
+  async (focusedRef, sealBeforeRequest) => {
     const { owner, root } = mount('shadcn', true);
     const failure = new Error('Controlled failure after replacement Search publication');
     let preparing = false;
@@ -543,6 +547,7 @@ it.each(['query', 'close', 'newer focus'] as const)(
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
+    const retainedCandidates: MaterializedProjectionCandidate[] = [];
     const controller = createProjectionScopeController({
       initialSelection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
       async materialize(request) {
@@ -556,6 +561,7 @@ it.each(['query', 'close', 'newer focus'] as const)(
           request.selection.runtimeId as RuntimeId,
           request.generation
         );
+        if (request.generation === 1) retainedCandidates.push(...prepared);
         return {
           activate() {
             for (const candidate of prepared) candidate.activate();
@@ -603,6 +609,14 @@ it.each(['query', 'close', 'newer focus'] as const)(
       const retainedFocus = focusedRef === 'close' ? surface(1, 'close') : retainedEditor;
       retainedFocus.focus();
       let expectedFocus: HTMLElement = retainedFocus;
+      if (sealBeforeRequest) {
+        // Homepage seals its current native portals in the external preference
+        // event, before the deferred controller request locks the old candidate.
+        // Model the native inert fallback at that earlier public boundary.
+        for (const candidate of retainedCandidates) candidate.sealExternalPortals?.();
+        retainedFocus.blur();
+        expect(document.activeElement).toBe(document.body);
+      }
       const replacement = controller.request({ runtimeId: 'react' }).catch((error) => error);
       await vi.waitFor(() => expect(preparing).toBe(true));
       // Happy DOM does not move focus away from an inert host. Model that

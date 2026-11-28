@@ -177,6 +177,11 @@ export function createBorderBoxSizeLease(
     return { kind: 'matched', width, height };
   };
   return {
+    // Check current identity without projecting a new size. A caller whose
+    // viewport has no usable layout must still reject foreign/successor writes.
+    checkAvailability(): Extract<BorderBoxSizeResult, { kind: 'unavailable' }> | null {
+      return terminal ? { kind: 'unavailable', reason: terminal } : availabilityFailure();
+    },
     prepare,
     verify,
     abort: unavailable,
@@ -229,10 +234,7 @@ export function hasBorderBoxInlineClipping(
     const overflow = style.overflowX || style.overflow;
     if (
       containingBlock === undefined &&
-      (overflow === 'hidden' ||
-        overflow === 'clip' ||
-        overflow === 'scroll' ||
-        overflow === 'auto')
+      (overflow === 'hidden' || overflow === 'clip' || overflow === 'scroll' || overflow === 'auto')
     ) {
       const start = layoutInlineStart(parent) + parent.clientLeft;
       const available = parent.clientWidth;
