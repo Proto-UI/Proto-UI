@@ -751,6 +751,52 @@ describe('Finf representative evidence harness, no native browser', () => {
     expect(fixture.probe.stop(fixture.element)).toMatchObject({ closedAt: 37, expanded: 'true' });
   });
 
+  it('separates Calendar getter execution and lazy style time without altering its value', () => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.mutate(['true'], 'false');
+    let now = 100;
+    fixture.time(now);
+    const nativeStyle = fixture.window.getComputedStyle.bind(fixture.window);
+    const style = vi.spyOn(fixture.window, 'getComputedStyle').mockImplementation((element) => {
+      const computed = nativeStyle(element);
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'display') fixture.time((now += 7));
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    try {
+      expect(fixture.probe.readExpanded()).toBe('false');
+      // stop() also captures post-assertion styles; those must not enter read timing.
+      const observation = fixture.probe.stop(fixture.element);
+      expect(observation.liveReads).toHaveLength(1);
+      expect(observation.liveReads[0]).toMatchObject({
+        startedAt: 100,
+        finishedAt: 128,
+        value: 'false',
+        candidates: 1,
+        styleReads: 4,
+        styleElapsedMs: 28,
+        slowestStyle: { elapsedMs: 7, tag: 'DIV', ref: 'month-trigger' },
+      });
+    } finally {
+      style.mockRestore();
+      fixture.window.happyDOM.abort();
+    }
+  });
+
+  it('bounds live Calendar getter diagnostics without replacing subsequent current reads', () => {
+    const fixture = calendarCloseProbeFixture();
+    for (let index = 0; index < 40; index += 1) expect(fixture.probe.readExpanded()).toBe('true');
+    fixture.mutate(['true'], 'false');
+    expect(fixture.probe.readExpanded()).toBe('false');
+    const observation = fixture.probe.stop(fixture.element);
+    expect(observation.liveReads).toHaveLength(32);
+    expect(observation.droppedReads).toBe(9);
+    fixture.window.happyDOM.abort();
+  });
+
   it.each([
     'detached',
     'replaced',
