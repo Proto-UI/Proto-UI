@@ -58,6 +58,31 @@ test('serialized observer reports controlled hit geometry without changing selec
   window.happyDOM.close();
 });
 
+function assertRuntimeEvidenceOwner(workflow: any) {
+  const owners = Object.values(workflow.jobs).flatMap((job: any) =>
+    (job.strategy?.matrix?.include ?? [])
+      .filter((entry: any) => entry.suite === 'home-demo-runtime')
+      .map((entry: any) => ({ job, entry }))
+  );
+  assert.equal(owners.length, 1, 'The complete Runtime suite has one actual owner');
+  const { job, entry } = owners[0];
+  assert.equal(entry.pattern, undefined, 'The Runtime owner retains every native case');
+  const focused = job.steps.find(
+    (step: any) => step.name === 'Execute the exact isolated browser suite'
+  );
+  assert.ok(focused?.env, 'The Runtime owner must execute its selected suite');
+  assert.equal(focused.env.SUITE, '${{ matrix.suite }}');
+  assert.ok(focused.run.includes('${SUITE}.browser.test.ts'));
+  const uploads = job.steps.filter((step: any) =>
+    step.uses?.startsWith('actions/upload-artifact@')
+  );
+  assert.equal(uploads.length, 1, 'The same Runtime owner uploads its evidence');
+  const upload = uploads[0];
+  assert.equal(upload.if, 'always()');
+  assert.ok(upload.with?.path);
+  assert.equal(focused.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, `${upload.with.path}/runtime`);
+}
+
 test('native drag and strict selection assertion remain; focused artifacts share the uploaded directory', () => {
   const source = readFileSync(
     new URL('../src/content/docs/zh-cn/home-demo-runtime.browser.test.ts', import.meta.url),
@@ -76,16 +101,54 @@ test('native drag and strict selection assertion remain; focused artifacts share
       'utf8'
     )
   );
-  const steps = Object.values(workflow.jobs).flatMap((job: any) => job.steps ?? []);
-  const focused = steps.find(
-    (step: any) => step.name === 'Execute focused real-browser regressions on the exact candidate'
-  ) as any;
-  const upload = steps.find(
-    (step: any) => step.name === 'Retain actual images, measurements and failure output'
-  ) as any;
-  assert.equal(focused.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, `${upload.with.path}/runtime`);
+  assertRuntimeEvidenceOwner(workflow);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
 });
+
+for (const [name, mutate] of [
+  [
+    'missing Runtime owner',
+    (workflow: any) => {
+      const job = workflow.jobs['isolated-controls'];
+      job.strategy.matrix.include = job.strategy.matrix.include.filter(
+        (entry: any) => entry.suite !== 'home-demo-runtime'
+      );
+    },
+  ],
+  [
+    'duplicate Runtime owner',
+    (workflow: any) => {
+      workflow.jobs.duplicate = structuredClone(workflow.jobs['isolated-controls']);
+    },
+  ],
+  [
+    'filtered Runtime inventory',
+    (workflow: any) => {
+      workflow.jobs['isolated-controls'].strategy.matrix.include.find(
+        (entry: any) => entry.suite === 'home-demo-runtime'
+      ).pattern = 'one case only';
+    },
+  ],
+  [
+    'Runtime output outside its uploaded directory',
+    (workflow: any) => {
+      workflow.jobs['isolated-controls'].steps.find(
+        (step: any) => step.name === 'Execute the exact isolated browser suite'
+      ).env.PROTO_UI_RUNTIME_EVIDENCE_DIR = '${{ runner.temp }}/uncollected-runtime';
+    },
+  ],
+] as const) {
+  test(`Runtime evidence ownership rejects ${name}`, () => {
+    const workflow = parse(
+      readFileSync(
+        new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+        'utf8'
+      )
+    );
+    mutate(workflow);
+    assert.throws(() => assertRuntimeEvidenceOwner(workflow), { code: 'ERR_ASSERTION' });
+  });
+}
 
 for (const [family, y] of [
   ['shadcn', 562.5],
