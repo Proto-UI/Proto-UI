@@ -20,6 +20,7 @@ import {
   assertBrowserShardCapacity,
   browserShards,
   browserShardCosts,
+  browserSuiteWeightSeconds,
   BROWSER_SUITES,
   BROWSER_SHARD_COUNT,
   BROWSER_EXECUTION_BUDGET_SECONDS,
@@ -42,16 +43,16 @@ test('Search splitting preserves the complete retained inventory and fixed worke
     'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
     'apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts',
   ]);
-  assert.equal(BROWSER_SHARD_COUNT, 19);
+  assert.equal(BROWSER_SHARD_COUNT, 20);
   assert.equal(BROWSER_EXECUTION_BUDGET_SECONDS, 900);
   assert.equal(BROWSER_SETUP_RESERVE_SECONDS, 180);
   const shards = browserShards();
-  assert.equal(shards.length, 19);
+  assert.equal(shards.length, 20);
   assert.deepEqual([...shards.flat()].sort(), [...BROWSER_SUITES].sort());
   assert.equal(new Set(shards.flat()).size, BROWSER_SUITES.length);
   assert.ok(
     shards.every(
-      (shard) => shard.length > 0 && shard.length <= Math.ceil(BROWSER_SUITES.length / 19)
+      (shard) => shard.length > 0 && shard.length <= Math.ceil(BROWSER_SUITES.length / 20)
     )
   );
   assert.deepEqual(browserShards([...BROWSER_SUITES].reverse()), shards);
@@ -219,7 +220,84 @@ test('the latest official terminal costs retain failures and exclude interrupted
   assert.equal(missing.length, 16);
   assert.deepEqual(missing.sort(), receipt.selectedWithoutTerminal.map((row) => row.suite).sort());
   for (const suite of missing) assert.ok(!observations.includes(suite));
-  assert.equal(BROWSER_SHARD_COUNT, 19);
+  assert.equal(BROWSER_SHARD_COUNT, 20);
+  assert.doesNotThrow(() => assertBrowserShardCapacity());
+});
+
+test('new terminal costs reject the interrupted shard allocation without inventing its remaining results', () => {
+  const evidence = validateBrowserCostEvidence(
+    JSON.parse(
+      readFileSync(
+        new URL('./fixtures/browser-suite-costs-46161223435.json', import.meta.url),
+        'utf8'
+      )
+    )
+  );
+  assert.equal(evidence.runId, 46161223435);
+  assert.equal(evidence.headSha, 'd858406214482b9700e60ca425ef4e9ed8219da8');
+  assert.equal(evidence.capturedJobs.length, 19);
+  assert.equal(evidence.observations.length, 101);
+  for (const row of evidence.observations) {
+    assert.ok(BROWSER_SUITES.includes(row.suite));
+    assert.ok(evidence.capturedJobs.includes(row.jobId));
+    assert.ok(browserSuiteWeightSeconds(row.suite) >= Math.ceil(row.durationMs / 1000), row.suite);
+  }
+  const interrupted = evidence.observations.filter((row) => row.jobId === 141028823358);
+  assert.deepEqual(
+    interrupted.map((row) => row.durationMs),
+    [80459, 38216, 13288, 541603]
+  );
+  assert.ok(interrupted.every((row) => row.fileOutcome === 'passed' && !row.jobCompletedVitest));
+  assert.equal(evidence.observations.filter((row) => row.fileOutcome === 'failed').length, 1);
+  assert.equal(
+    evidence.observations.find((row) => row.fileOutcome === 'failed').suite,
+    'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts'
+  );
+  assert.equal(evidence.selectedWithoutTerminal.length, 12);
+  for (const { suite } of evidence.selectedWithoutTerminal) {
+    assert.ok(!evidence.observations.some((row) => row.suite === suite));
+    assert.ok(browserSuiteWeightSeconds(suite) > 0);
+  }
+  const unfinished = evidence.selectedWithoutTerminal
+    .filter((row) => row.jobId === 141028823358)
+    .map((row) => row.suite);
+  assert.deepEqual(unfinished, [
+    'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts',
+  ]);
+  const oldAllocation = [...interrupted.map((row) => row.suite), ...unfinished];
+  assert.equal(oldAllocation.length, 6);
+  assert.throws(() => assertBrowserShardCapacity([oldAllocation]), /beyond 900s/);
+  const laterInterrupted = evidence.observations.filter((row) => row.jobId === 141028823495);
+  assert.equal(laterInterrupted.length, 4);
+  assert.ok(
+    laterInterrupted.every((row) => row.fileOutcome === 'passed' && !row.jobCompletedVitest)
+  );
+  assert.equal(
+    laterInterrupted.reduce((sum, row) => sum + row.durationMs, 0),
+    750009
+  );
+  const laterUnfinished = evidence.selectedWithoutTerminal
+    .filter((row) => row.jobId === 141028823495)
+    .map((row) => row.suite);
+  assert.deepEqual(laterUnfinished, [
+    'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
+  ]);
+  assert.throws(
+    () =>
+      assertBrowserShardCapacity([
+        [...laterInterrupted.map((row) => row.suite), ...laterUnfinished],
+      ]),
+    /beyond 900s/
+  );
+});
+
+test('the actual new cost floor cannot fit nineteen workers with the original setup reserve', () => {
+  const total = BROWSER_SUITES.reduce((sum, suite) => sum + browserSuiteWeightSeconds(suite), 0);
+  const workerCapacity = BROWSER_EXECUTION_BUDGET_SECONDS - BROWSER_SETUP_RESERVE_SECONDS;
+  assert.ok(total > 19 * workerCapacity);
+  assert.throws(() => assertBrowserShardCapacity(browserShards(BROWSER_SUITES, 19)), /beyond 900s/);
   assert.doesNotThrow(() => assertBrowserShardCapacity());
 });
 

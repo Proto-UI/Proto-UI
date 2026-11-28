@@ -340,9 +340,11 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 // These estimates are planning admission, never executed acceptance evidence.
 // Adding native focus dependency coverage takes the complete inventory above
 // eighteen workers' capacity, even with a measured local planning estimate.
-// Retain every historical cost and the default reserve for the new suite;
-// add one bounded worker while CI's maximum concurrency remains unchanged.
-export const BROWSER_SHARD_COUNT = 19;
+// Run 46161223435 then measured 541.603s for native links. All nineteen
+// completed workers raise the retained total to 14,094s, beyond 19 * 720s.
+// Add one independent bounded worker; retain every historical maximum, the
+// 180s setup reserve, 900s execution cap and unchanged CI concurrency.
+export const BROWSER_SHARD_COUNT = 20;
 export const BROWSER_EXECUTION_BUDGET_SECONDS = 900;
 export const BROWSER_SETUP_RESERVE_SECONDS = 180;
 export const BROWSER_MAX_ESTIMATED_SECONDS =
@@ -485,6 +487,7 @@ for (const file of [
   './fixtures/browser-suite-costs-45029016292.json',
   './fixtures/browser-suite-costs-45537881490.json',
   './fixtures/browser-suite-costs-46120142554.json',
+  './fixtures/browser-suite-costs-46161223435.json',
 ]) {
   const evidence = validateBrowserCostEvidence(
     JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
