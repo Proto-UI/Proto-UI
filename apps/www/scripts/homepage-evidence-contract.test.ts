@@ -1011,7 +1011,16 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   assert.equal(job['timeout-minutes'], 15);
   assert.equal(job.strategy['fail-fast'], false);
   const expectedScopes = [
-    { name: 'native-links', suite: 'site-native-links' },
+    {
+      name: 'native-links',
+      suite: 'site-native-links',
+      pattern: '^native links with app-owned Proto visual surfaces',
+    },
+    {
+      name: 'native-links-reading',
+      suite: 'site-native-links',
+      pattern: '^(?!native links with app-owned Proto visual surfaces)',
+    },
     { name: 'brutalist-action-motion', suite: 'brutalist-action-motion' },
     { name: 'code-surfaces', suite: 'code-surfaces' },
     { name: 'code-surface-grammar', suite: 'code-surface-grammar' },
@@ -1044,6 +1053,10 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   assert.match(run.run, /timeout --signal=TERM --kill-after=10s 600s/);
   assert.match(run.run, /vitest run --no-file-parallelism "\$\{files\[@\]\}"/);
   assert.match(run.run, /files\+=\("\$CONTRACT_FILE"\)/);
+  assert.equal(run.env.TEST_PATTERN, '${{ matrix.pattern }}');
+  assert.match(run.run, /filters=\(\)/);
+  assert.match(run.run, /filters\+=\(--testNamePattern "\$TEST_PATTERN"\)/);
+  assert.match(run.run, /"\$\{files\[@\]\}" "\$\{filters\[@\]\}"/);
   const checkout = job.steps.find((step: { uses?: string }) =>
     step.uses?.startsWith('actions/checkout@')
   );

@@ -30,6 +30,22 @@ const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2:
 const popoverTriggerName = (family: Family) =>
   family === 'bootstrap-2-3-2' ? 'Click to toggle popover' : 'Open popover';
 const HOST_CLOCK = '2026-10-10T12:00:00Z';
+function installFixedHostDate(isoDate: string) {
+  const NativeDate = globalThis.Date;
+  const timestamp = NativeDate.parse(isoDate);
+  if (!Number.isFinite(timestamp)) throw new Error(`Invalid host date: ${isoDate}`);
+  const now = () => timestamp;
+  // Freeze the calendar's civil date only. Playwright's Clock also replaces rAF,
+  // performance and timers, serializing frame callbacks through its timer queue.
+  // Native interaction and animation deadlines must keep their native scheduling.
+  globalThis.Date = new Proxy(NativeDate, {
+    apply: () => new NativeDate(timestamp).toString(),
+    construct: (target, args, newTarget) =>
+      Reflect.construct(target, args.length ? args : [timestamp], newTarget),
+    get: (target, property, receiver) =>
+      property === 'now' ? now : Reflect.get(target, property, receiver),
+  });
+}
 const RECORDS = {
   form: 'internal/records/2026-10-10-finf-form-upstream-paint.md',
   calendar: 'internal/records/2026-10-10-calendar-five-state-reference-correction.md',
@@ -221,6 +237,20 @@ function createCalendarCloseProbe(element: Element, key: string) {
   const ownerId = owner?.getAttribute('data-previewer-id');
   const demoId = owner?.getAttribute('data-demo-id');
   const label = element.getAttribute('aria-label');
+  type LiveRead = {
+    startedAt: number;
+    finishedAt: number | null;
+    expandedAtStart: string | null;
+    connectedAtStart: boolean;
+    value?: string | null;
+    candidates?: number;
+    styleReads: number;
+    styleElapsedMs: number;
+    slowestStyle: { startedAt: number; elapsedMs: number; tag: string; ref: string | null } | null;
+  };
+  const liveReads: LiveRead[] = [];
+  let activeRead: LiveRead | null = null;
+  let droppedReads = 0;
   const exposed = (candidate: Element) => {
     for (let current: Element | null = candidate; current; current = current.parentElement) {
       if (
@@ -229,13 +259,30 @@ function createCalendarCloseProbe(element: Element, key: string) {
         current.getAttribute('aria-hidden') === 'true'
       )
         return false;
-      const style = document.defaultView?.getComputedStyle(current);
-      if (
-        style?.display === 'none' ||
-        style?.visibility === 'hidden' ||
-        style?.visibility === 'collapse'
-      )
-        return false;
+      const startedAt = activeRead ? performance.now() : 0;
+      let hidden = false;
+      try {
+        const style = document.defaultView?.getComputedStyle(current);
+        hidden =
+          style?.display === 'none' ||
+          style?.visibility === 'hidden' ||
+          style?.visibility === 'collapse';
+      } finally {
+        // Include CSS property access: a computed-style object can resolve lazily.
+        if (activeRead) {
+          const elapsedMs = performance.now() - startedAt;
+          activeRead.styleReads += 1;
+          activeRead.styleElapsedMs += elapsedMs;
+          if (!activeRead.slowestStyle || elapsedMs > activeRead.slowestStyle.elapsedMs)
+            activeRead.slowestStyle = {
+              startedAt,
+              elapsedMs,
+              tag: current.tagName,
+              ref: current.getAttribute('data-demo-ref'),
+            };
+        }
+      }
+      if (hidden) return false;
     }
     return true;
   };
@@ -316,6 +363,32 @@ function createCalendarCloseProbe(element: Element, key: string) {
   document.addEventListener('keydown', onKey, true);
   return {
     readExpanded() {
+      const previousRead = activeRead;
+      activeRead =
+        liveReads.length < 32
+          ? {
+              startedAt: performance.now(),
+              finishedAt: null,
+              expandedAtStart: element.getAttribute('aria-expanded'),
+              connectedAtStart: element.isConnected,
+              styleReads: 0,
+              styleElapsedMs: 0,
+              slowestStyle: null,
+            }
+          : null;
+      const read = activeRead;
+      if (read) liveReads.push(read);
+      else droppedReads += 1;
+      try {
+        const value = this.readCurrentExpanded();
+        if (read) read.value = value;
+        return value;
+      } finally {
+        if (read) read.finishedAt = performance.now();
+        activeRead = previousRead;
+      }
+    },
+    readCurrentExpanded() {
       // The role/name locator bound this physical Trigger before input. Read
       // its current attribute inside the unchanged poll deadline, without a
       // fresh accessibility-tree traversal for every protocol round trip.
@@ -330,9 +403,11 @@ function createCalendarCloseProbe(element: Element, key: string) {
         !label
       )
         return null;
-      const candidates = Array.from(
+      const allCandidates = Array.from(
         owner.querySelectorAll('[role="combobox"], select, input[list]')
-      ).filter(exposed);
+      );
+      if (activeRead) activeRead.candidates = allCandidates.length;
+      const candidates = allCandidates.filter(exposed);
       // Calendar caption names are explicit aria-labels. Refuse an unexpected
       // naming source instead of guessing a computed name or missing a duplicate.
       if (
@@ -368,6 +443,8 @@ function createCalendarCloseProbe(element: Element, key: string) {
         currentSubject: inspectSubject(currentElement, true),
         sameCurrentElement: currentElement === null ? null : currentElement === element,
         events,
+        liveReads,
+        droppedReads,
       };
     },
   };
@@ -812,7 +889,11 @@ function createCalendarFocusEventProbe(root: Element) {
   const record = (kind: string, element: Element, detail: Record<string, unknown> = {}) => {
     if (events.length >= 256) {
       dropped += 1;
-      return;
+      // Hydration can fill the buffer before the journey's first input. Prefer
+      // evicting an older attribute delivery so actual input/focus stays visible.
+      const attribute = events.findIndex((event) => event.kind === 'attribute-delivery');
+      if (attribute < 0) return;
+      events.splice(attribute, 1);
     }
     const ancestors: Array<ReturnType<typeof describe>> = [];
     for (
@@ -1333,8 +1414,8 @@ async function runCase(testCase: Case) {
     return request.continue();
   });
   try {
-    // Locale and fixed clock belong to this host fixture, never to the prototype.
-    await page.clock.setFixedTime(HOST_CLOCK);
+    // Locale and fixed civil date belong to this host fixture, never to the prototype.
+    await page.addInitScript(installFixedHostDate, HOST_CLOCK);
     const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
     expect(await previewer.count()).toBe(1);
