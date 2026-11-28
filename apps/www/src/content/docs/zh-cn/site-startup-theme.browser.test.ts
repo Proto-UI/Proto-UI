@@ -419,10 +419,35 @@ for (const width of [2048, 390, 430, 320]) {
             '#home-language [data-projection-generation-state="active"] [role="combobox"]'
           );
           await locale.press('Enter');
-          await page
-            .getByRole('option', { name: 'English', exact: true })
-            .waitFor({ state: 'visible' });
+          await expect.poll(() => locale.getAttribute('aria-expanded')).toBe('true');
+          const popupId = await locale.getAttribute('aria-controls');
+          expect(popupId).toBeTruthy();
+          const popup = page.locator(`[id=${JSON.stringify(popupId)}]`);
+          expect(await popup.count()).toBe(1);
+          await popup.waitFor({ state: 'visible' });
+          // A painted option can precede the Select's native entry focus.
+          // Require the selected option in this controlled popup before Home
+          // so the next key belongs to the option list, not the Trigger.
+          await expect
+            .poll(
+              () =>
+                popup.evaluate(
+                  (element) =>
+                    element.contains(document.activeElement) &&
+                    document.activeElement?.getAttribute('role') === 'option' &&
+                    document.activeElement.getAttribute('aria-selected') === 'true'
+                ),
+              { timeout: 1000 }
+            )
+            .toBe(true);
+          const english = popup.getByRole('option', { name: 'English', exact: true });
+          expect(await english.count()).toBe(1);
           await page.keyboard.press('Home');
+          await expect
+            .poll(() => english.evaluate((element) => element === document.activeElement), {
+              timeout: 1000,
+            })
+            .toBe(true);
           await page.keyboard.press('Enter');
           await page.waitForURL((url) => url.pathname === '/en/');
           await homeReady(page);
