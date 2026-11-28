@@ -2,7 +2,11 @@ import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mountDocumentationImagePreview } from './documentation-image-preview';
 import { setPreviewSurfaceDuration, type PreviewControl } from './documentation-image-controls';
-import { sharedImageHitPoint } from './documentation-image-preview.test-utils';
+import {
+  sharedImageHitPoint,
+  imageSpringMotionFailures,
+  type ImageMotionFrame,
+} from './documentation-image-preview.test-utils';
 import { getElementProps } from '@proto.ui/adapter-web-component';
 let dispose: (() => void) | undefined;
 afterEach(() => {
@@ -53,6 +57,90 @@ describe('documentation image native hit probe', () => {
     expect(sharedImageHitPoint(source, { ...source, y: Number.NaN })).toBeNull();
   });
 });
+describe('documentation image spring observation controls', () => {
+  const origin = { x: 20, y: 500, width: 200, height: 100 };
+  const target = { x: 80, y: 40, width: 800, height: 400 };
+  // A separate finite trajectory exercises the observer's accepted domain. It
+  // is not the CSS stop list and is not native evidence of the actual viewer.
+  const spring = [0, 0.22, 0.57, 0.83, 0.976, 1.028, 1.034, 1.023, 1.013, 1.005, 1, 1];
+  const model = (
+    direction: 'opening' | 'closing',
+    end = target,
+    trajectory = spring
+  ): ImageMotionFrame[] =>
+    trajectory.map((progress, index) => {
+      const clock = Math.min(index / 10, 1);
+      const geometric = direction === 'opening' ? progress : 1 - progress;
+      return {
+        time: index * 42,
+        phase: index < 10 ? (direction === 'opening' ? 'entering' : 'leaving') : 'entered',
+        opacity: direction === 'opening' ? clock : 1 - clock,
+        sourceOpacity: 0,
+        ...Object.fromEntries(
+          Object.keys(origin).map((key) => [
+            key,
+            origin[key as keyof typeof origin] +
+              (end[key as keyof typeof end] - origin[key as keyof typeof origin]) * geometric,
+          ])
+        ),
+      } as ImageMotionFrame;
+    });
+  for (const direction of ['opening', 'closing'] as const) {
+    it(`${direction}: admits a bounded spring with a separate linear scrim clock`, () => {
+      expect(imageSpringMotionFailures(model(direction), origin, target, direction)).toEqual([]);
+    });
+    it(`${direction}: rejects the old linear image trajectory`, () => {
+      const linear = spring.map((_, index) => Math.min(index / 10, 1));
+      expect(
+        imageSpringMotionFailures(model(direction, target, linear), origin, target, direction)
+      ).toContain('The image must exhibit a measurable spring overshoot');
+    });
+  }
+  it('rejects excess overshoot, axis drift, exposed sources, wrong clocks and unsettled endpoints', () => {
+    const excessive = model(
+      'opening',
+      target,
+      spring.map((value, index) => (index === 6 ? 1.08 : value))
+    );
+    expect(imageSpringMotionFailures(excessive, origin, target, 'opening')).toContain(
+      'The spring exceeded its bounded five-percent overshoot'
+    );
+    const drift = model('opening');
+    drift[4].y += 5;
+    expect(imageSpringMotionFailures(drift, origin, target, 'opening')).toContain(
+      'y left the measured source-to-target path'
+    );
+    const exposed = model('opening');
+    exposed[4].sourceOpacity = 1;
+    expect(imageSpringMotionFailures(exposed, origin, target, 'opening')).toContain(
+      'The source must stay hidden throughout the image flight'
+    );
+    const slow = model('opening').map((frame) => ({ ...frame, time: frame.time * 2 }));
+    expect(imageSpringMotionFailures(slow, origin, target, 'opening')).toContain(
+      'The scrim must retain its independent 420ms linear clock'
+    );
+    const unsettled = model('opening');
+    unsettled.at(-1)!.width += 10;
+    expect(imageSpringMotionFailures(unsettled, origin, target, 'opening')).toContain(
+      'The spring must settle at the measured endpoint'
+    );
+  });
+  it('uses another measured axis for equal widths and rejects absent or nonfinite motion', () => {
+    const sameWidth = { ...target, width: origin.width };
+    expect(
+      imageSpringMotionFailures(model('opening', sameWidth), origin, sameWidth, 'opening')
+    ).toEqual([]);
+    expect(
+      imageSpringMotionFailures(model('opening', origin), origin, origin, 'opening')
+    ).toContain('Motion requires a measurable source-to-target path');
+    const invalid = model('opening');
+    invalid[4].height = Number.NaN;
+    expect(imageSpringMotionFailures(invalid, origin, target, 'opening')).toContain(
+      'Motion samples must be finite'
+    );
+  });
+});
+
 describe('documentation image viewer PUI integration', () => {
   it('composes a public Base Button thumbnail without family variants or moving hover feedback', async () => {
     document.documentElement.dataset.siteLibraryFamily = 'brutalist';

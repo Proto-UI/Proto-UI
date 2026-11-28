@@ -1,5 +1,96 @@
 // Test-only geometry for a native pointer probe shared by source and preview.
 type Rect = { x: number; y: number; width: number; height: number };
+
+// The admitted documentation zoom is a 420ms damped spring. These checks use
+// observed geometry and a separate linear scrim clock, never the authored CSS
+// stop list as their expected result.
+export const IMAGE_MOTION_DURATION_MS = 420;
+export const IMAGE_SPRING_MAX_SLOPE = 4;
+export type ImageMotionFrame = Rect & {
+  time: number;
+  phase: string | null;
+  opacity: number;
+  sourceOpacity: number | null;
+};
+const motionAxes = ['x', 'y', 'width', 'height'] as const;
+
+export function imageSpringMotionFailures(
+  frames: ImageMotionFrame[],
+  origin: Rect,
+  target: Rect,
+  direction: 'opening' | 'closing'
+): string[] {
+  const failures: string[] = [];
+  if ([origin, target].some((rect) => motionAxes.some((key) => !Number.isFinite(rect[key]))))
+    return ['Motion endpoints must have finite geometry'];
+  const axis = motionAxes.reduce((best, key) =>
+    Math.abs(target[key] - origin[key]) > Math.abs(target[best] - origin[best]) ? key : best
+  );
+  const distance = target[axis] - origin[axis];
+  if (Math.abs(distance) < 1) return ['Motion requires a measurable source-to-target path'];
+  const phase = direction === 'opening' ? 'entering' : 'leaving';
+  const moving = frames.filter((frame) => frame.phase === phase);
+  const middle = moving.filter((frame) => frame.opacity > 0.1 && frame.opacity < 0.9);
+  if (moving.length < 2 || middle.length < 2)
+    failures.push('Motion must include actual intermediate transition frames');
+  if (moving.some((frame) => frame.sourceOpacity !== 0))
+    failures.push('The source must stay hidden throughout the image flight');
+  const progress = (frame: ImageMotionFrame) => {
+    const geometric = (frame[axis] - origin[axis]) / distance;
+    return direction === 'opening' ? geometric : 1 - geometric;
+  };
+  for (const frame of frames) {
+    if (
+      [frame.time, frame.opacity, ...motionAxes.map((key) => frame[key])].some(
+        (value) => !Number.isFinite(value)
+      )
+    ) {
+      failures.push('Motion samples must be finite');
+      continue;
+    }
+    const geometric = (frame[axis] - origin[axis]) / distance;
+    for (const key of motionAxes)
+      if (Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * geometric)) >= 4)
+        failures.push(`${key} left the measured source-to-target path`);
+    if (progress(frame) < -0.01 || progress(frame) > 1.05)
+      failures.push('The spring exceeded its bounded five-percent overshoot');
+  }
+  const peak = Math.max(...moving.map(progress));
+  if (!(peak > 1.01)) failures.push('The image must exhibit a measurable spring overshoot');
+  const peakIndex = moving.findIndex((frame) => progress(frame) === peak);
+  for (let index = peakIndex + 1; index > 0 && index < moving.length; index++)
+    if (Math.abs(progress(moving[index]) - 1) > Math.abs(progress(moving[index - 1]) - 1) + 0.005)
+      failures.push('The spring must converge after its overshoot');
+  if (
+    !middle.some((frame) => {
+      const clock = direction === 'opening' ? frame.opacity : 1 - frame.opacity;
+      return clock >= 0.15 && clock <= 0.4 && progress(frame) > clock + 0.15;
+    })
+  )
+    failures.push('The spring must advance ahead of the linear scrim during its initial approach');
+  const sign = direction === 'opening' ? 1 : -1;
+  for (let index = 1; index < middle.length; index++) {
+    const first = middle[0];
+    const frame = middle[index];
+    if (
+      frame.time <= middle[index - 1].time ||
+      Math.abs(
+        frame.opacity -
+          first.opacity -
+          (sign * (frame.time - first.time)) / IMAGE_MOTION_DURATION_MS
+      ) >= 0.025
+    )
+      failures.push('The scrim must retain its independent 420ms linear clock');
+  }
+  const last = frames.at(-1);
+  const endpoint = direction === 'opening' ? target : origin;
+  if (!last || motionAxes.some((key) => Math.abs(last[key] - endpoint[key]) >= 4))
+    failures.push('The spring must settle at the measured endpoint');
+  if (last && !(Math.abs(progress(last) - 1) < (peak - 1) / 2))
+    failures.push('The spring must damp its overshoot before finishing');
+  return [...new Set(failures)];
+}
+
 export function sharedImageHitPoint(source: Rect, preview: Rect) {
   if (
     [source, preview].some(
