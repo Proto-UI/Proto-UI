@@ -215,16 +215,16 @@ jobs:
           - suite: layout
             file: apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts
             cases: 22
-            case_ms: 90000
+            case_budgets_ms: '[90000,180000]'
           - suite: disposal
             file: apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts
             cases: 12
-            case_ms: 60000
+            case_budgets_ms: '[60000]'
     env:
       SEARCH_SUITE: ${{ matrix.suite }}
       SEARCH_FILE: ${{ matrix.file }}
       SEARCH_CASES: ${{ matrix.cases }}
-      SEARCH_CASE_MS: ${{ matrix.case_ms }}
+      SEARCH_CASE_BUDGETS_MS: ${{ matrix.case_budgets_ms }}
       SUBSET_MODE: ${{ inputs.scheduled_regressions }}
       PUI_SEARCH_SCHEDULE_DIAGNOSTICS: '0'
     steps:
@@ -282,7 +282,7 @@ jobs:
             status: git('status', '--porcelain=v1'), node: process.version, files,
             suite: process.env.SEARCH_SUITE, file: process.env.SEARCH_FILE,
             expectedCases: Number(process.env.SEARCH_CASES), combinedInventoryCases: 34,
-            originalPredicateMs: 1000, originalCaseMs: Number(process.env.SEARCH_CASE_MS),
+            originalPredicateMs: 1000, originalCaseBudgetsMs: JSON.parse(process.env.SEARCH_CASE_BUDGETS_MS),
             workerDeadlineMs: 600000, jobDeadlineMinutes: 15,
             diagnosticsEnabled: false, testNamePattern: null,
             scope: 'One complete original file per isolated job; both source-identical jobs are required for the full 22+12 inventory. No full CI or release acceptance claim.',
