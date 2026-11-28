@@ -115,7 +115,7 @@ type OrderNotificationReads = {
   comparisons: OrderComparisons;
   domains: Map<AnatomyParentGetter, NotificationDomains>;
   compare: (left: ClaimRecord, right: ClaimRecord) => number;
-  traces: Map<readonly ClaimRecord[], (OrderComparisonStep | undefined)[]>;
+  traces: Map<readonly ClaimRecord[], Map<string | undefined, (OrderComparisonStep | undefined)[]>>;
   comparisonEpoch: number;
   activeTrace?: (OrderComparisonStep | undefined)[];
   traceIndex: number;
@@ -1124,13 +1124,12 @@ export class AnatomyModuleImpl extends ModuleBase {
       role === undefined ? claims.slice() : claims.filter((claim) => claim.role === role);
     if (!reads) return ordered.sort(AnatomyModuleImpl.compareClaims);
 
-    // Reuse the notification's comparator while binding each sort to its
-    // own trace cursor. Scoped sorts have a different comparison path.
-    let trace: OrderNotificationReads['activeTrace'];
-    if (role === undefined) {
-      trace = reads.traces.get(claims);
-      if (!trace) reads.traces.set(claims, (trace = []));
-    }
+    // Keep each role's comparison path separate. Every trace step still
+    // validates both current targets, their current method and the epoch.
+    let traces = reads.traces.get(claims);
+    if (!traces) reads.traces.set(claims, (traces = new Map()));
+    let trace = traces.get(role);
+    if (!trace) traces.set(role, (trace = []));
     const previousTrace = reads.activeTrace;
     const previousIndex = reads.traceIndex;
     reads.activeTrace = trace;
@@ -1138,7 +1137,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     try {
       return ordered.sort(reads.compare);
     } finally {
-      if (trace) trace.length = reads.traceIndex;
+      trace.length = reads.traceIndex;
       reads.activeTrace = previousTrace;
       reads.traceIndex = previousIndex;
     }

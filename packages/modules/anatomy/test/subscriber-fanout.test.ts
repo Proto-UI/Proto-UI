@@ -46,6 +46,106 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
 }
 
 describe('Anatomy family subscriber notification', () => {
+  for (const scopes of [['item'], [undefined, 'item', 'decoration']] as const) {
+    it(`reuses each ${scopes.join('/') || 'whole'} comparison path while retaining every live read`, () => {
+      const measure = (subscribers: number) => {
+        type Target = { rank: number; compareDocumentPosition(other: Target): number };
+        const targets = new Map<unknown, Target>();
+        let targetReads = 0;
+        let comparisons = 0;
+        const f = fixture((instance) => {
+          targetReads++;
+          return targets.get(instance) ?? null;
+        });
+        const parts = Array.from({ length: 64 }, (_, index) =>
+          f.make(index % 3 === 0 ? 'decoration' : 'item')
+        );
+        for (const [index, owner] of [f.root, ...parts].entries()) {
+          targets.set(owner.port.resolveSelfInstance(), {
+            rank: index === 0 ? -1 : ((index - 1) * 37) % 64,
+            compareDocumentPosition(other) {
+              comparisons++;
+              return this.rank < other.rank ? 4 : this.rank > other.rank ? 2 : 0;
+            },
+          });
+        }
+        const listeners = Array.from({ length: subscribers }, () => {
+          const owner = f.make();
+          const changed = vi.fn();
+          for (const role of scopes) owner.port.subscribeOrder(f.family, () => changed(), role);
+          return changed;
+        });
+        f.notify();
+        for (const listener of listeners) listener.mockClear();
+        targetReads = comparisons = 0;
+        const actualTargets = new Set(targets.values());
+        const get = vi.spyOn(Map.prototype, 'get');
+        let lookups: number;
+        try {
+          f.notify();
+          lookups = get.mock.calls.filter(([key]) => actualTargets.has(key)).length;
+        } finally {
+          get.mockRestore();
+        }
+        for (const listener of listeners) expect(listener).not.toHaveBeenCalled();
+        const observation = { lookups, targetReads, comparisons };
+
+        for (const owner of parts) targets.get(owner.port.resolveSelfInstance())!.rank *= -1;
+        f.notify();
+        for (const listener of listeners) expect(listener).toHaveBeenCalledTimes(scopes.length);
+        return observation;
+      };
+      const single = measure(1);
+      const many = measure(16);
+      expect(single.lookups).toBeGreaterThan(0);
+      expect(many.lookups).toBeLessThanOrEqual(single.lookups * 2);
+      expect(many.targetReads).toBe(single.targetReads * 16);
+      expect(many.comparisons).toBe(single.comparisons);
+    });
+  }
+
+  it('invalidates a role trace after an intervening bridge replaces and restores its comparator', () => {
+    let reversed = false;
+    const forward = (): number => (reversed ? 4 : 2);
+    const equivalent = () => 2;
+    const left = { compareDocumentPosition: () => 4 };
+    const right = { compareDocumentPosition: forward };
+    let rightInstance: unknown;
+    let armed = false;
+    let reads = 0;
+    const f = fixture((instance) => {
+      if (instance !== rightInstance) return left;
+      if (armed) {
+        reads++;
+        if (reads === 2) right.compareDocumentPosition = equivalent;
+        if (reads === 3) {
+          right.compareDocumentPosition = forward;
+          reversed = true;
+        }
+      }
+      return right;
+    });
+    f.make('item');
+    rightInstance = f.make('item').port.resolveSelfInstance();
+    const rootInstance = f.root.port.resolveSelfInstance();
+    const first = vi.fn();
+    const intervening = vi.fn();
+    const later = vi.fn();
+    f.make().port.subscribeOrder(f.family, first, 'item');
+    f.make(undefined, (instance) =>
+      instance === rootInstance ? null : rootInstance
+    ).port.subscribeOrder(f.family, intervening, 'item');
+    f.make().port.subscribeOrder(f.family, later, 'item');
+
+    armed = true;
+    f.notify();
+
+    expect(first).not.toHaveBeenCalled();
+    expect(intervening).not.toHaveBeenCalled();
+    expect(later).toHaveBeenCalledOnce();
+    expect(reads).toBe(3);
+  });
+
   it('does not reuse a former comparator result after another bridge replaces and restores it', () => {
     let reverseOrder = false;
     const forward = (): number => (reverseOrder ? 4 : 2);
