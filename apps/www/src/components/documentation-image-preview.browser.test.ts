@@ -1053,7 +1053,9 @@ describe('automatic documentation image preview in real Chromium', () => {
       } finally {
         await capture(page, `spring-${width}-last-observed`);
         await context.close();
-        if (evidence && video) await video.saveAs(path.join(evidence, `spring-${width}.webm`));
+        // Preserve the evidence collector's receipt name, which predates the
+        // admitted spring curve. The test and frame records name that curve.
+        if (evidence && video) await video.saveAs(path.join(evidence, `linear-${width}.webm`));
       }
     }, 90_000);
   }
