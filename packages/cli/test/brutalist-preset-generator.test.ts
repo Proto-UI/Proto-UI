@@ -10,7 +10,10 @@ describe('Brutalist preset generator', () => {
   it('generates and checks both manifests under an escaped native path', () => {
     // Keep dependency resolution in the workspace, but never write its shipped
     // manifests or rely on their checkout newline form. No dependencies copied.
-    const cache = path.join(root, 'node_modules/.cache');
+    // The ignored root .cache (not node_modules/.cache) keeps tsx's workspace
+    // path mapping: runtime-style-closure.ts imports real @proto.ui values, and
+    // tsx does not map paths for importers inside node_modules.
+    const cache = path.join(root, '.cache');
     mkdirSync(cache, { recursive: true });
     const fixture = mkdtempSync(path.join(cache, 'brutalist-generator 空格 # %-'));
     try {

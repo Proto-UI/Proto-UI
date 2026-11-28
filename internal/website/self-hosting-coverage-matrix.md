@@ -356,7 +356,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/pages/en/test/command-width.astro` | `www.demo.demo-matrix` | `4fed62430112c133942e761b7975198c875b13c8a3d0b1c2ac18bbfa59e30a5a` |
 | `apps/www/src/components/PrototypePreviewer/demo-associations.ts` | `www.demo.prototype-previewer` | `ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365` |
 | `apps/www/src/components/CodeExample.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface` | `c85aba347ae58ec0fecbb493701be1caecf4d43ee6706d3ad9615c294d4d324a` |
-| `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5` |
+| `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `2402bbbce5176ba5b786780352322711aa3f33f33389e435a100604bb6080a74` |
 | `apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts` | `www.demo.authored-controllers` | `dea49f4491b9b4d6cf8e328a73c0fe4fb7b3dc2d5f118ab3a5a9464fef6996d4` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts` | `www.demo.demo-matrix` | `1d40c4e675797928a60d6e3d2e7f09c89996e38d85c3574a63db2409f199ee0d` |
 | `apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts` | `www.shell.mobile-menu-panel` | `c2be71f093207be7e3e588940cc9d801dae046e764a2b5b8676d0863cd308c45` |
@@ -373,7 +373,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/content/docs/zh-cn/site-search-ime-evidence.ts` | `www.search.input-results` | `c84f1c2e125dcebd7d6096b1f5fa7441dcaf40c8110d83015324b7d85350d3ba` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
-| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `7bb28f4703b19c02775660e5f890c40bcd384433e15850be5e0e81b60ad84dfc` |
+| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `c20f9feb33efc247708eeaba3aecbb22405539245860ca140e6aecb64391727e` |
 | `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `ff541d019f1fe2c0c10da5e322f5c8a87ee67b3d6729d3ddb1972f5cfeb5f8b1` |
 | `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `9f1ab8493b9c409449ebad144acfa241b1a0ca268dfad6bc152ed5646eb03cc4` |
 | `apps/www/src/components/InstallCommandCard.astro` | `www.docs.code-panel-scroll`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs` | `027c3e56da086a9affd423aa43aa9278a9c01807a513d237efbbe426db1fb253` |
@@ -447,7 +447,7 @@ The import registry binds the exact preview files to the public Input Shell cont
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `710162afb336fa41ab0975a41caab455b45200be09b351760bc4b7918ab9bff9` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
 | `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `9d53c0a41564efce6040227fc4befa319c41e69e50b00c2ef16dc2e6320d3de9` |
-| `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `88a8aeca13ee29bbdcb4f50227a6af1ae3ad587cd3ae5eca028853b8266a6b99` |
+| `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `6f5759be43ec2ae8ad756379d492f6c0c1e3a75056cc9f2449e82ad835696ebd` |
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `65635d210e620c505cb35c419b3a82b314e70f4afb71e99dbffb711a061a346d` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `b3adf001ead0e1cdbf5748a7f8e6a0b2e0d4f10b0c273e5a8d2751708b714451` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
