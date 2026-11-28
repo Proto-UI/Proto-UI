@@ -384,6 +384,7 @@ jobs:
         with:
           node-version: 24
       - name: Prepare the same official browser and fonts for both revisions
+        id: prepare-mobile
         # Two worktrees are installed here. The previous five-minute ceiling
         # left no room for the font package and both locked installs on a
         # loaded runner.
@@ -404,21 +405,29 @@ jobs:
               corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
             )
           done
+          cd candidate
+          node --test --test-concurrency=1 \
+            apps/www/scripts/mobile-prepared-inputs.test.mjs \
+            apps/www/scripts/mobile-capture-owner.test.mjs
+          node --import tsx apps/www/scripts/prepare-mobile-interaction-inputs.ts \
+            --expected-revision "$CANDIDATE_SHA" \
+            --out "$RUNNER_TEMP/mobile-interaction/candidate-inputs.json"
       - name: Capture the first normal-size 390px before view
         if: ${{ !cancelled() }}
         working-directory: baseline
         timeout-minutes: 2
         run: |
-          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-mobile-interaction-evidence.ts" \
+          node "$GITHUB_WORKSPACE/candidate/apps/www/scripts/run-mobile-interaction-evidence.mjs" \
             --revision-kind baseline --expected-revision "$MOBILE_BASELINE_SHA" --quick-preview \
             --out "$RUNNER_TEMP/mobile-interaction/first-pair/baseline"
       - name: Capture the first normal-size 390px after view
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.prepare-mobile.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 2
         run: |
-          node --import tsx apps/www/scripts/capture-mobile-interaction-evidence.ts \
+          node apps/www/scripts/run-mobile-interaction-evidence.mjs \
             --revision-kind candidate --expected-revision "$CANDIDATE_SHA" --quick-preview \
+            --prepared-inputs "$RUNNER_TEMP/mobile-interaction/candidate-inputs.json" \
             --out "$RUNNER_TEMP/mobile-interaction/first-pair/candidate"
       - name: Publish the first actual pair before the full interaction matrix
         if: always()
@@ -434,7 +443,7 @@ jobs:
         timeout-minutes: 6
         run: |
           set -euo pipefail
-          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-mobile-interaction-evidence.ts" \
+          node "$GITHUB_WORKSPACE/candidate/apps/www/scripts/run-mobile-interaction-evidence.mjs" \
             --revision-kind baseline --expected-revision "$MOBILE_BASELINE_SHA" \
             --out "$RUNNER_TEMP/mobile-interaction/baseline" \
             2>&1 | tee "$RUNNER_TEMP/mobile-interaction/baseline.log"
@@ -447,13 +456,14 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Capture and regress the exact candidate mobile interactions
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.prepare-mobile.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 6
         run: |
           set -euo pipefail
-          node --import tsx apps/www/scripts/capture-mobile-interaction-evidence.ts \
+          node apps/www/scripts/run-mobile-interaction-evidence.mjs \
             --revision-kind candidate --expected-revision "$CANDIDATE_SHA" \
+            --prepared-inputs "$RUNNER_TEMP/mobile-interaction/candidate-inputs.json" \
             --out "$RUNNER_TEMP/mobile-interaction/candidate" \
             2>&1 | tee "$RUNNER_TEMP/mobile-interaction/candidate.log"
       - name: Preserve before/after mobile screenshots and all failures
