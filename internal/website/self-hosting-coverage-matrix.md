@@ -386,7 +386,7 @@ The 2026-11-28 [RC1 source-binding review](../records/2026-11-28-rc1-website-sou
 | `apps/www/src/components/PageTitle.astro` | `www.shell.page-title` | `6eb3ef6cf85cc84b4aadff283589a910616cccd31fdcf7286c1df9583c102774` |
 | `apps/www/src/components/PrototypeLoader.astro` | `www.demo.prototype-previewer` | `dc066166d19e7ed7c666f244622b73bba397c89bb33afa659ebfc736b1a71c32` |
 | `apps/www/src/components/PrototypePreviewer/AdapterPanelScript.astro` | `www.demo.runtime-select` | `0c8f333bc2eb5ba182eec693c0b902b881d763bfc770e53cc9015015ec0aa848` |
-| `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024` |
+| `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `f91f375d3d0b8a0f8e104df7de04a6477f8815d6a4cb228dd587c4fcf7df1d83` |
 | `apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro` | `www.docs.code-panel-scroll` | `bfce678e82b0e8b1ef580098575b36d987beb5e74f2afa16217b710dd50b3daf` |
 | `apps/www/src/components/StaticCodeBlock.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface` | `f5f7bc9f5ae84e771c05dfa9f1f67e965736e6e563b513ae40e3516089f75120` |
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |

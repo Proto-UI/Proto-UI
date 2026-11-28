@@ -6,6 +6,8 @@
 // 2026-11-24 reconciliation: recovered prior bytes and reviewed the finite
 // Feedback/Runtime deltas at main 248f8270d. See the source-review record at
 // internal/records/2026-11-24-main-website-boundary-repair.json.
+import { SYNCHRONOUS_STEPS_SOURCE_CLOSURE } from './synchronous-steps-imports.mjs';
+
 export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/site-startup-paint.ts': Object.freeze({
     sourceSha256: 'e55759d20e64e41137c72e3cc8de69e0793ac46e7fbc659bdfe630d4ac224edd',
@@ -127,7 +129,8 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // The build-time style snapshot uses this exact Feedback implementation.
   'packages/modules/feedback/src/create.ts': Object.freeze({
-    sourceSha256: 'c017de5f25e061655cf497eac65d1ea0b8c7cdaaba7e8923bbdcc9a371ec49e0',
+    sourceSha256: '0a8b4dfba27b79c691bfd7e255d12a63a9cd325ee52dd434246adf31901cfdf5',
+    companionSources: SYNCHRONOUS_STEPS_SOURCE_CLOSURE,
     specifiers: Object.freeze([
       './caps',
       './material/declaration-id',
@@ -144,6 +147,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
       './style/owned-decoration-registry',
       './types',
       '@proto.ui/core',
+      '@proto.ui/core/internal',
       '@proto.ui/module-anatomy',
       '@proto.ui/module-base',
       '@proto.ui/module-state',
@@ -183,8 +187,13 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Instance-owned Anatomy association only; no global family or DOM lookup.
   'packages/modules/feedback/src/material/paint-reservation.ts': Object.freeze({
-    sourceSha256: '80ddbe82bafed66ccce9dfb78b3a250836a5b5a57855aaaa6a68e80af9daaf92',
-    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-anatomy']),
+    sourceSha256: '969631b1832c82a41be6ac94430e846c92a44a8a049bacd6f2f8717f4f94f610',
+    companionSources: SYNCHRONOUS_STEPS_SOURCE_CLOSURE,
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/core/internal',
+      '@proto.ui/module-anatomy',
+    ]),
   }),
   'packages/modules/feedback/src/material/runtime-cap.ts': Object.freeze({
     sourceSha256: 'd1b699a04108672de6624bffcb8c4d23316e688312fe094f293764aafb96b5c4',
@@ -223,8 +232,9 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'packages/modules/feedback/src/presence/controller.ts': Object.freeze({
-    sourceSha256: '6b0a20182e495e2113f13aa21d74a4bcb7ef7ea358044241d7c4d20f66072ab1',
-    specifiers: Object.freeze(['./sink', '@proto.ui/core']),
+    sourceSha256: '7d8e24b5ebeff2d96eb18c1df40203b4945d99a9de12a4b3d229350129c8e064',
+    companionSources: SYNCHRONOUS_STEPS_SOURCE_CLOSURE,
+    specifiers: Object.freeze(['./sink', '@proto.ui/core', '@proto.ui/core/internal']),
   }),
   'packages/modules/feedback/src/presence/projector.ts': Object.freeze({
     sourceSha256: 'd9a0ccfd12053e193e2c0a2ff0cd8a435a083c23aa04ae466ae28625ead2b2a4',

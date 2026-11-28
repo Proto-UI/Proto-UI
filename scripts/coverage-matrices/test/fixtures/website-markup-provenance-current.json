@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "9e2d126d9c72e31a0cc5f129ff4c9dcc5ccaf1de",
-  "scope": "Direct source inventory for the sampled website routes on the Compiler 0.4 1925 integration source commit 9e2d126d9c72e31a0cc5f129ff4c9dcc5ccaf1de. All 32 current owners remain; 1 source hashes are renewed from the preceding integrated source reference. That complete reference is preserved byte-for-byte as website-markup-provenance-8434063.json; the original branch reference and earlier retired-panel history also remain archived. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
+  "revision": "8fd3568346fadcb181568b98e844c9acb45ce87f",
+  "scope": "Direct source inventory for the sampled website routes on main 8fd3568346fadcb181568b98e844c9acb45ce87f. All 32 owners remain; only the reviewed CodePanel caption reflow source hash is renewed. The complete preceding reference is preserved byte-for-byte as website-markup-provenance-9e2d126.json. This records source identity only; source admission, browser execution, served/transitive closure and lifecycle/release acceptance remain independently unverified.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -11,7 +11,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "ee717a1537367ad1887b2aa047742e7908c0c1882d6872553161aff6a55de024"
+      "sha256": "f91f375d3d0b8a0f8e104df7de04a6477f8815d6a4cb228dd587c4fcf7df1d83"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-format.ts",
