@@ -156,7 +156,7 @@ test('the serialized mobile source reader observes content and padding separatel
     [code, 48],
     [line, 48],
   ] as const) {
-    element.getBoundingClientRect = () => ({ height, width: 548 }) as DOMRect;
+    element.getBoundingClientRect = () => new window.DOMRect(0, 0, 548, height);
   }
   for (const [element, properties] of [
     [source, { clientHeight: 104 }],

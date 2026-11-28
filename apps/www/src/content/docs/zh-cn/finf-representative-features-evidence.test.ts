@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import vm from 'node:vm';
 import { transformSync } from 'esbuild';
-import { Window, type HTMLDivElement } from 'happy-dom';
+import { Window, type HTMLButtonElement, type HTMLDivElement } from 'happy-dom';
 import ts from 'typescript';
 import { parse } from 'yaml';
 import { describe, expect, it, vi } from 'vitest';
@@ -1563,9 +1563,12 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
     document.body.innerHTML =
       '<section data-previewer-id="calendar"><div role="combobox" aria-label="Month" aria-controls="month-options" tabindex="0">10月</div></section><div role="listbox" id="month-options"><div role="option" aria-selected="true" tabindex="0">10月</div></div><button id="foreign">Foreign</button>';
     const root = document.querySelector('[data-previewer-id]')!;
-    const option = document.querySelector('[role="option"]') as unknown as HTMLElement;
+    const option = document.querySelector('[role="option"]') as HTMLDivElement;
     const original = window.HTMLElement.prototype.focus;
-    const nativeFocus = vi.fn(function (this: HTMLElement, ...args: unknown[]) {
+    const nativeFocus = vi.fn(function (
+      this: InstanceType<typeof window.HTMLElement>,
+      ...args: unknown[]
+    ) {
       if (error) throw error;
       return Reflect.apply(original, this, args);
     });
@@ -1598,7 +1601,8 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
     const f = fixture();
     try {
       const options = { preventScroll: true };
-      f.option.focus(options);
+      // The pinned host types omit options; the probe must still forward them unchanged.
+      Reflect.apply(f.option.focus, f.option, [options]);
       expect(f.nativeFocus).toHaveBeenCalledOnce();
       expect(f.nativeFocus).toHaveBeenCalledWith(options);
       expect(f.nativeFocus.mock.contexts[0]).toBe(f.option);
@@ -1682,7 +1686,7 @@ describe('Calendar optional native focus trace, DOM fixture only', () => {
   it('does not attribute an unrelated target to the Calendar owner', () => {
     const f = fixture();
     try {
-      const foreign = f.document.getElementById('foreign')!;
+      const foreign = f.document.getElementById('foreign') as HTMLButtonElement;
       foreign.focus();
       expect(f.document.activeElement).toBe(foreign);
       expect(f.nativeFocus).toHaveBeenCalledOnce();
