@@ -63,7 +63,7 @@ async function openConsumer(runtime: (typeof RUNTIMES)[number], theme: (typeof T
     await choosePreviewRuntime(page, previewer, runtime);
     await previewer
       .locator(
-        `[data-projection-scope][data-projection-runtime="${runtime}"][data-projection-state="ready"]`
+        `[data-panel="preview"] .host > [data-projection-generation-state="active"] > [data-projection-scope][data-projection-runtime="${runtime}"][data-projection-state="ready"]`
       )
       .waitFor({ state: 'attached' });
     await applyColorScheme(page, theme);

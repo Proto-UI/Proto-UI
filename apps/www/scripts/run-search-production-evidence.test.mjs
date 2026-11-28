@@ -432,7 +432,7 @@ test('required Actions and real cross-path navigation cannot be replaced by skip
   assert.notEqual(step['continue-on-error'], true);
   assert.equal(step['timeout-minutes'], 10);
   assert.match(step.run, /node apps\/www\/scripts\/run-search-production-evidence.mjs/);
-  assert.equal(workflow.jobs.capture['timeout-minutes'], 40);
+  assert.equal(workflow.jobs.capture['timeout-minutes'], 55);
   const suite = readFileSync(
     new URL('../src/content/docs/zh-cn/site-search-production.browser.test.ts', import.meta.url),
     'utf8'
