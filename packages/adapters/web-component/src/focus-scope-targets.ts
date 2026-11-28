@@ -89,7 +89,7 @@ function isInsideOwnedShadowScope(owner: HTMLElement, target: Element | null): b
   return false;
 }
 
-function logicalSlotNodes(slot: HTMLSlotElement): Node[] {
+export function logicalSlotNodes(slot: HTMLSlotElement): Node[] {
   const assigned = slot.assignedNodes();
   const root = slot.getRootNode();
   if (!isShadowRootNode(root)) return assigned.length ? assigned : [...slot.childNodes];

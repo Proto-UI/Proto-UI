@@ -1,5 +1,6 @@
 import path from 'node:path';
-import { expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { collectFamilyStyleClosure } from '../../../../scripts/styles/family-style-closure';
 import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
@@ -11,6 +12,12 @@ import {
 } from '../../../cli/src/services/proto-style-css';
 import { unwrapGeneratedTokenLayer } from '../../../../scripts/release/consumer-smoke-css.mjs';
 import button from '../src/button';
+
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 
 // T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER:
 // Collect the actual source; never seed the generator with an expected new token.

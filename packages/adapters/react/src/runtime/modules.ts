@@ -752,11 +752,14 @@ function projectFocusable(
   enabled: boolean,
   options?: { programmatic?: boolean }
 ): void {
-  if (enabled) {
-    target.setAttribute('tabindex', '0');
-  } else if (options?.programmatic || isNativelyFocusable(target)) {
-    target.setAttribute('tabindex', '-1');
-  } else {
-    target.removeAttribute('tabindex');
-  }
+  const tabIndex = enabled
+    ? '0'
+    : options?.programmatic || isNativelyFocusable(target)
+      ? '-1'
+      : null;
+  // Repeated policy projection must not emit another DOM mutation or author
+  // reaction. Read the current value so a later host write is still repaired.
+  if (target.getAttribute('tabindex') === tabIndex) return;
+  if (tabIndex === null) target.removeAttribute('tabindex');
+  else target.setAttribute('tabindex', tabIndex);
 }

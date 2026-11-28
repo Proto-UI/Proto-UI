@@ -3,10 +3,10 @@ type: version
 title: Proto UI 0.3.0-rc.1
 status: draft
 since: 0.3.0-rc.1
-summary: First numbered 0.3 release candidate for the frozen Base, Shadcn, Brutalist, Lucide, website and CLI scope, pending final integration checks and protected publication.
+summary: Preparation draft for the first numbered 0.3 release candidate, pending convergence of retained capabilities, RC-stage eligibility, final integration checks and protected publication.
 statement:
-  en: Proto UI 0.3.0-rc.1 is one draft ecosystem release candidate shared exactly by all 47 public @proto.ui packages and its future immutable spec snapshot. It prepares the frozen 0.3 scope for final verification and blocker repairs without claiming stable admission or publication.
-  zh-CN: Proto UI 0.3.0-rc.1 是由全部 47 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行候选。它为已冻结的 0.3 范围准备最终验证与 blocker 修复，不声称 stable admission 或发布已经完成。
+  en: Proto UI 0.3.0-rc.1 is a draft ecosystem release identity shared exactly by all 47 public @proto.ui packages and its future immutable spec snapshot. It retains the effective 0.3 scope; unresolved capability work and final-source verification must satisfy the existing stage and evidence requirements before publication. Preparation does not establish RC-stage eligibility or stable admission.
+  zh-CN: Proto UI 0.3.0-rc.1 是由全部 47 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。它保留有效的 0.3 范围；尚未完成的能力与最终源码验证必须在发布前满足现有阶段及证据要求。准备资产不代表 RC 阶段条件或 stable admission 已经成立。
 release:
   version: 0.3.0-rc.1
   channel: prerelease
@@ -51,9 +51,17 @@ sources:
   - path: internal/records/2026-11-28-0.3.0-rc.1-release-prep.zh-CN.md
   - path: internal/governance/release-0.3-plan.md
   - path: internal/governance/release-workflow.md
-openQuestions: []
+openQuestions:
+  - id: V-PROTO-UI-0014-Q-STAGE-CONVERGENCE
+    question:
+      en: How will retained Dropdown submenu and checkbox/radio criteria reach semantic and implementation completion before the existing RC-stage condition is satisfied?
+      zh-CN: 保留的 Dropdown 子菜单与 checkbox/radio 条件将如何先完成语义和实现，再满足现有 RC 阶段条件？
+    context:
+      en: Their effective 0.3 placement has not been deferred. The preparation audit found missing capabilities, not only unexecuted final verification.
+      zh-CN: 这些条件的有效 0.3 归属没有延期。准备审计发现的是能力缺口，而不只是尚未执行的最终验证。
+    blocks: []
 revisions:
   - version: 0.3.0-rc.1
     change: introduced
-    summary: Opened the first numbered RC for the frozen 0.3 scope under the current owner's release-candidate direction, retaining draft lifecycle, next-channel identity and final-source evidence requirements.
+    summary: Prepared the intended first numbered RC identity under the current owner's direction, retaining draft lifecycle, next-channel identity, unresolved stage eligibility and final-source evidence requirements.
 tags: [release, prerelease, release-candidate, global-version]

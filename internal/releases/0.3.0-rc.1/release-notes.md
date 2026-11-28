@@ -2,12 +2,12 @@
 
 > Draft release notes. This candidate has not been published. These preparation assets do not establish an installable RC, a passing final rehearsal or release acceptance.
 
-Proto UI `0.3.0-rc.1` prepares the frozen 0.3 scope for final verification and blocker repairs. All 47 public `@proto.ui/*` packages share this exact candidate version. Its intended npm channel is `next` and its intended Git tag is `v0.3.0-rc.1`.
+Proto UI `0.3.0-rc.1` is a preparation draft for the intended first numbered candidate. The effective 0.3 scope is retained, but the audit has not established eligibility for the RC stage. All 47 public `@proto.ui/*` packages share this exact proposed version. Its intended npm channel is `next` and its intended Git tag is `v0.3.0-rc.1`.
 
 ## Candidate scope
 
 - Base, Shadcn, Brutalist and Lucide, together with the supported website, CLI and retained Web-host prerequisites, remain the committed 0.3 surface. The candidate includes the current package source and the reviewed corrections already merged into the preparation base; the final integrated source still needs its own evidence.
-- This is a maintenance-stage candidate. Final verification, interaction and accessibility repairs, compatibility fixes, packaging and documentation corrections remain eligible. New core features, planned architecture rewrites or top-level breaking API changes would require a new stage decision.
+- The RC stage permits final verification, interaction and accessibility repairs, compatibility fixes, packaging and documentation corrections. Its entry condition is still unmet while committed capabilities require new semantics or interfaces; the existing stage decision governs their resolution before publication.
 - Bootstrap, Liquid Glass and the Compiler/consumer criteria explicitly deferred by the effective 0.3 plan remain 0.4 work. Their source and historical evidence are retained without expanding the RC's admission claims.
 - `@proto.ui/compiler`, GPUI peer/native targets and repository-only tools remain outside the public npm package set. Packaging shared infrastructure does not establish native or compiler acceptance.
 
@@ -27,6 +27,8 @@ Four records introduced at stable `0.3.0` are outside this prerelease's version-
 
 ## Known blockers and evidence still required
 
+- Dropdown criteria `issue.1100.005` and `issue.1161.002` require submenu and checkbox/radio groups. The effective [0.3 placement](https://github.com/Proto-UI/Proto-UI/issues/1161#issuecomment-6700043691) and [superseding scope decision](https://github.com/Proto-UI/Proto-UI/issues/1100#issuecomment-6700065987) retain this requirement.
+- At integrated source `1cff2e7e73e8b5c3c9c767d4399d521d2605049c`, `P-BASE-DROPDOWN-MENU` excludes those variants and the exported Base implementation has only ordinary menu items. This capability gap blocks the RC stage; preparation neither defers it nor declares the scope complete.
 - The 2026-11-28 public registry check found all 47 package identities, with 43 ready and four blocked by the existing bootstrap policy. Each new module above has both `0.0.0-stage` and a deprecated `0.0.0-bootstrap.0`, with `latest` on bootstrap and no `next`.
 - The bootstrap is therefore not the sole version. Registry prerequisites remain subject to the existing gate and separate authorized repair. Private Trusted Publisher authorization requires independent verification.
 - The integration owner must combine the current CI repairs and rerun the complete release rehearsal, strict package budgets, applicable generated-input checks and retained 0.3 acceptance gates on the final source. These focused checks do not establish those results. Original failures and skipped or unexecuted work remain evidence debt until resolved.

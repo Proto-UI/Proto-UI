@@ -340,9 +340,11 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 // These estimates are planning admission, never executed acceptance evidence.
 // Adding native focus dependency coverage takes the complete inventory above
 // eighteen workers' capacity, even with a measured local planning estimate.
-// Retain every historical cost and the default reserve for the new suite;
-// add one bounded worker while CI's maximum concurrency remains unchanged.
-export const BROWSER_SHARD_COUNT = 19;
+// Run 46161223435 then measured 541.603s for native links. All nineteen
+// completed workers raise the retained total to 14,094s, beyond 19 * 720s.
+// Add one independent bounded worker; retain every historical maximum, the
+// 180s setup reserve, 900s execution cap and unchanged CI concurrency.
+export const BROWSER_SHARD_COUNT = 20;
 export const BROWSER_EXECUTION_BUDGET_SECONDS = 900;
 export const BROWSER_SETUP_RESERVE_SECONDS = 180;
 export const BROWSER_MAX_ESTIMATED_SECONDS =
@@ -484,6 +486,8 @@ for (const file of [
   './fixtures/browser-suite-costs-44876125495.json',
   './fixtures/browser-suite-costs-45029016292.json',
   './fixtures/browser-suite-costs-45537881490.json',
+  './fixtures/browser-suite-costs-46120142554.json',
+  './fixtures/browser-suite-costs-46161223435.json',
 ]) {
   const evidence = validateBrowserCostEvidence(
     JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
@@ -515,7 +519,15 @@ const estimatedSuiteReserves = {
   // well within the 900s CI cap; keep planning reserves aligned with 46064929629
   // shard-16 observations where provenance (~250s), sprint2, toast-position, and
   // focus-intent-retries exceeded the old 0s/120s fallbacks when stacked.
-  'apps/www/src/content/docs/zh-cn/header-select-elevation-brutalist.browser.test.ts': 400,
+  // Run 46120142554 shard 7 completed seven of eight cases in 381.388s;
+  // each took 53.562–56.031s before the 900s worker cap interrupted the last.
+  // Eight times the observed maximum is 448.247s: reserve 450s for planning,
+  // not an invented terminal-file observation or a native acceptance result.
+  'apps/www/src/content/docs/zh-cn/header-select-elevation-brutalist.browser.test.ts': 450,
+  // The same run's shard 11 completed five parity cases in 107.913s before
+  // its final case was interrupted. A six-case mean projection is 129.496s.
+  // Keep this explicit 130s planning reserve separate from measured costs.
+  'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts': 130,
   'apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts': 260,
   'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts': 240,
   'apps/www/src/content/docs/zh-cn/demo-shadcn-toast-position.browser.test.ts': 220,

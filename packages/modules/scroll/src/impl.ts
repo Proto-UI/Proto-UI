@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import type {
   AnatomyPartView,
   MountPhase,
@@ -378,19 +379,7 @@ export class ScrollModuleImpl extends ModuleBase {
       const targets = this.offAnatomyTargets;
       this.offAnatomyOrder = null;
       this.offAnatomyTargets = null;
-      let failed = false;
-      let failure: unknown;
-      for (const cleanup of [() => this.disconnect(), () => order?.(), () => targets?.()]) {
-        try {
-          cleanup();
-        } catch (error) {
-          if (!failed) {
-            failed = true;
-            failure = error;
-          }
-        }
-      }
-      if (failed) throw failure;
+      runAllSteps([() => this.disconnect(), () => order?.(), () => targets?.()]);
     }
   }
 

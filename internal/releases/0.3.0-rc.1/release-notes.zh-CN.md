@@ -2,12 +2,12 @@
 
 > Draft release notes。本候选尚未发布。这些准备资产不代表 RC 已可安装、最终 rehearsal 已通过或发行验收已经完成。
 
-Proto UI `0.3.0-rc.1` 为冻结后的 0.3 范围准备最终验证与 blocker 修复。全部 47 个公开 `@proto.ui/*` package 精确共享这一候选版本。预定 npm channel 为 `next`，Git tag 为 `v0.3.0-rc.1`。
+Proto UI `0.3.0-rc.1` 是首个编号候选的准备草案。有效的 0.3 范围继续保留，但本次审计尚未确认已经满足 RC 阶段条件。全部 47 个公开 `@proto.ui/*` package 精确共享这一拟定版本。预定 npm channel 为 `next`，Git tag 为 `v0.3.0-rc.1`。
 
 ## 候选范围
 
 - Base、Shadcn、Brutalist 与 Lucide，以及受支持的网站、CLI 和保留的 Web-host 前置能力，继续构成 0.3 承诺范围。候选包含当前 package 源码及准备基线上已经评审合入的修正；最终整合源码仍需自己的验证证据。
-- 本候选处于维护阶段，后续允许最终验证、交互与可访问性修复、兼容性修复、打包与文档修正。新增核心特性、计划中的架构重写或顶层 breaking API 变化需要重新决定阶段。
+- RC 阶段允许最终验证、交互与可访问性修复、兼容性修复、打包与文档修正。既定能力仍需新增语义或接口时，阶段进入条件尚未满足；新增核心特性、计划中的架构重写或顶层 breaking API 变化必须在发布前按现有阶段决定解决。
 - Bootstrap、Liquid Glass，以及有效 0.3 计划明确顺延的 Compiler/consumer 条件，仍属于 0.4。保留其源码与历史证据，不扩大 RC 的 admission 声明。
 - `@proto.ui/compiler`、GPUI peer/native target 与仓库内部工具不进入公开 npm package 集合。共享基础能力进入包中不代表 native 或 compiler 验收已经成立。
 
@@ -27,6 +27,8 @@ RC 生命周期清单包含在 `0.3.0-rc.1` 可用的 1,322 个普通实体，�
 
 ## 已知 blocker 与待补证据
 
+- 保留的 Dropdown 范围并非只差执行证据：`issue.1100.005` 与 `issue.1161.002` 要求子菜单和 checkbox/radio 组。有效的 [0.3 归属](https://github.com/Proto-UI/Proto-UI/issues/1161#issuecomment-6700043691)与[覆盖旧延期的范围决定](https://github.com/Proto-UI/Proto-UI/issues/1100#issuecomment-6700065987)继续保留该要求。
+- 在整合源码 `1cff2e7e73e8b5c3c9c767d4399d521d2605049c` 中，`P-BASE-DROPDOWN-MENU` 将上述变体排除于当前保证之外，Base 导出实现仅有普通菜单项。原有 RC 阶段规则仍构成阻挡；本次准备没有延期该能力，也没有宣称范围已完成。
 - 2026-11-28 的公开 registry 检查找到全部 47 个 package identity，其中 43 个 ready、4 个被现有 bootstrap policy 阻挡。上述每个新模块都同时拥有 `0.0.0-stage` 与已 deprecated 的 `0.0.0-bootstrap.0`，`latest` 指向 bootstrap，且没有 `next`。
 - 因此 bootstrap 不是唯一版本。Registry prerequisite 保留现有门禁，由单独授权的修复处理。私有 Trusted Publisher 授权仍需独立核验。
 - 整合负责人需要合并当前 CI 修复，并在最终源码上重跑完整 release rehearsal、strict package budgets、适用生成输入检查与保留的 0.3 验收门禁。本次准备的局部检查不代表这些检查已经通过。原始失败、跳过和未执行条件在解决前继续保留为证据欠账。

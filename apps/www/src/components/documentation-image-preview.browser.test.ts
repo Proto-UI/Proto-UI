@@ -8,6 +8,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from '../content/docs/zh-cn/browser-harness';
 import {
   keyboardClosePaintFailures,
+  imageSpringMotionFailures,
+  IMAGE_MOTION_DURATION_MS,
+  IMAGE_SPRING_MAX_SLOPE,
+  type ImageMotionFrame,
   sharedImageHitPoint,
   type KeyboardClosePaint,
 } from './documentation-image-preview.test-utils';
@@ -16,6 +20,11 @@ const MDX = '/en/test/image-preview-mdx/';
 let browser: Browser;
 let baseUrl = '';
 const evidence = process.env.IMAGE_PREVIEW_EVIDENCE_DIR;
+const motionEvidence =
+  evidence ??
+  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'image-preview-motion')
+    : undefined);
 const records: object[] = [];
 const failuresByPage = new WeakMap<Page, string[]>();
 function track(page: Page): Page {
@@ -599,11 +608,9 @@ async function containedWhitepaper(page: Page) {
   expect(facts.returnMode).toBe('origin');
   expect(facts.style.animation).toBe('none');
   expect(facts.style.duration.split(',').map((value) => value.trim())).toContain('0.42s');
-  expect(
-    facts.style.easing
-      .split(',')
-      .some((value) => value.trim().startsWith('linear(') || value.trim() === 'linear')
-  ).toBe(true);
+  expect(facts.style.easing.split(',').some((value) => value.trim().startsWith('linear('))).toBe(
+    true
+  );
   expect(facts.style.border).toBe('0px');
   expect(facts.style.padding).toBe('0px');
   expect(facts.style.radius).toBe('0px');
@@ -669,16 +676,7 @@ async function keyboardCloseFocus(page: Page, entry: 'Tab' | 'Shift+Tab' = 'Tab'
   expect(facts.fitsContent).toBe(true);
   return { ...facts, entry, tabLoops: ['Tab', 'Shift+Tab'] };
 }
-type MotionFrame = {
-  time: number;
-  phase: string | null;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  opacity: number;
-  sourceOpacity: number | null;
-};
+type MotionFrame = ImageMotionFrame;
 type MotionInput = {
   type: string;
   trusted: boolean;
@@ -692,7 +690,7 @@ async function recordNextMotion(
   sourceSelector = '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
 ) {
   // Instrumentation records real frames after the next native input. It neither
-  // changes application state nor slows the requested 220ms motion.
+  // changes application state nor slows the requested 420ms spring motion.
   await page.evaluate(
     ({ input, sourceSelector }) => {
       const record = {
@@ -758,44 +756,26 @@ async function motionFrames(page: Page, name: string): Promise<MotionFrame[]> {
     frames: (window as any).__docsImageMotion.frames,
     input: (window as any).__docsImageMotion.input,
   }))) as { frames: MotionFrame[]; input: MotionInput | null };
-  if (evidence) {
+  if (motionEvidence) {
+    await mkdir(motionEvidence, { recursive: true });
     await writeFile(
-      path.join(evidence, `${name}-frames.json`),
+      path.join(motionEvidence, `${name}-frames.json`),
       JSON.stringify(motion.frames, null, 2)
     );
     await writeFile(
-      path.join(evidence, `${name}-input.json`),
+      path.join(motionEvidence, `${name}-input.json`),
       JSON.stringify(motion.input, null, 2)
     );
   }
   return motion.frames;
 }
-function expectLinearImageMotion(
+function expectSpringImageMotion(
   frames: MotionFrame[],
   origin: MediaBox,
   target: MediaBox,
   direction: 'opening' | 'closing'
 ) {
-  const phase = direction === 'opening' ? 'entering' : 'leaving';
-  const moving = frames.filter((frame) => frame.phase === phase);
-  expect(moving.length, `${direction}: actual transition frames`).toBeGreaterThanOrEqual(2);
-  expect(moving.every((frame) => frame.sourceOpacity === 0)).toBe(true);
-  const middle = moving.filter((frame) => frame.opacity > 0.1 && frame.opacity < 0.9);
-  expect(middle.length, `${direction}: actual intermediate frames`).toBeGreaterThanOrEqual(2);
-  for (const frame of middle)
-    for (const key of ['x', 'y', 'width', 'height'] as const)
-      expect(
-        Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
-      ).toBeLessThan(4);
-  const sign = direction === 'opening' ? 1 : -1;
-  for (let i = 1; i < middle.length; i++)
-    expect(
-      Math.abs(
-        middle[i].opacity -
-          middle[i - 1].opacity -
-          (sign * (middle[i].time - middle[i - 1].time)) / 220
-      )
-    ).toBeLessThan(0.025);
+  expect(imageSpringMotionFailures(frames, origin, target, direction), direction).toEqual([]);
 }
 describe('automatic documentation image preview in real Chromium', () => {
   beforeAll(async () => {
@@ -825,7 +805,7 @@ describe('automatic documentation image preview in real Chromium', () => {
   for (const width of [320, 390, 1280])
     for (const colorScheme of ['light', 'dark'] as const)
       for (const family of ['shadcn', 'brutalist'] as const) {
-        it(`${width}px ${colorScheme} ${family}: borderless raster contain, keyboard, focus and linear motion`, async () => {
+        it(`${width}px ${colorScheme} ${family}: borderless raster contain, keyboard, focus and spring motion`, async () => {
           const context = await browser.newContext({
             viewport: { width, height: 900 },
             colorScheme,
@@ -889,11 +869,7 @@ describe('automatic documentation image preview in real Chromium', () => {
             }));
             expect(style.animation).toBe('none');
             expect(style.duration.split(',').map((s) => s.trim())).toContain('0.42s');
-            expect(
-              style.easing
-                .split(',')
-                .some((s) => s.trim().startsWith('linear(') || s.trim() === 'linear')
-            ).toBe(true);
+            expect(style.easing.split(',').some((s) => s.trim().startsWith('linear('))).toBe(true);
             expect(style.border).toBe('0px');
             expect(style.shadow).toBe('none');
             expect(style.background).toBe('rgba(0, 0, 0, 0)');
@@ -1014,7 +990,7 @@ describe('automatic documentation image preview in real Chromium', () => {
         }, 90_000);
       }
   for (const width of [390, 1280]) {
-    it(`${width}px real intermediate frames follow linear forward/reverse motion`, async () => {
+    it(`${width}px real intermediate frames follow damped spring forward/reverse motion`, async () => {
       if (evidence) await mkdir(path.join(evidence, 'videos'), { recursive: true });
       const context = await browser.newContext({
         viewport: { width, height: 900 },
@@ -1045,26 +1021,12 @@ describe('automatic documentation image preview in real Chromium', () => {
           undefined,
           { polling: 'raf' }
         );
-        await capture(page, `linear-${width}-opening`);
+        await capture(page, `spring-${width}-opening`);
         await entered(page);
         const target = (await page.locator('[data-docs-image-content]').boundingBox())!;
-        const opening = await motionFrames(page, `linear-${width}-opening`);
-        expect(
-          opening.filter((f) => f.phase === 'entering').every((f) => f.sourceOpacity === 0)
-        ).toBe(true);
-        const mid = opening.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
-        expect(mid.length).toBeGreaterThanOrEqual(2);
-        for (const frame of mid) {
-          for (const key of ['x', 'y', 'width', 'height'] as const)
-            expect(
-              Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
-            ).toBeLessThan(4);
-        }
-        for (let i = 1; i < mid.length; i++)
-          expect(
-            Math.abs(mid[i].opacity - mid[i - 1].opacity - (mid[i].time - mid[i - 1].time) / 220)
-          ).toBeLessThan(0.025);
-        await capture(page, `linear-${width}-contained`);
+        const opening = await motionFrames(page, `spring-${width}-opening`);
+        expectSpringImageMotion(opening, origin, target, 'opening');
+        await capture(page, `spring-${width}-contained`);
         await recordNextMotion(page, 'keydown');
         await page.keyboard.press('Escape');
         await page.waitForFunction(
@@ -1078,26 +1040,9 @@ describe('automatic documentation image preview in real Chromium', () => {
           undefined,
           { polling: 'raf' }
         );
-        await capture(page, `linear-${width}-closing`);
-        const closing = await motionFrames(page, `linear-${width}-closing`);
-        expect(
-          closing.filter((f) => f.phase === 'leaving').every((f) => f.sourceOpacity === 0)
-        ).toBe(true);
-        const closingMid = closing.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
-        expect(closingMid.length).toBeGreaterThanOrEqual(2);
-        for (const frame of closingMid)
-          for (const key of ['x', 'y', 'width', 'height'] as const)
-            expect(
-              Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
-            ).toBeLessThan(4);
-        for (let i = 1; i < closingMid.length; i++)
-          expect(
-            Math.abs(
-              closingMid[i].opacity -
-                closingMid[i - 1].opacity +
-                (closingMid[i].time - closingMid[i - 1].time) / 220
-            )
-          ).toBeLessThan(0.025);
+        await capture(page, `spring-${width}-closing`);
+        const closing = await motionFrames(page, `spring-${width}-closing`);
+        expectSpringImageMotion(closing, origin, target, 'closing');
         await closed(page);
         expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
         expect(await trigger.locator('img').evaluate((el) => getComputedStyle(el).visibility)).toBe(
@@ -1106,8 +1051,10 @@ describe('automatic documentation image preview in real Chromium', () => {
         expect(failuresByPage.get(page)).toEqual([]);
         records.push({ motion: width, origin, target, opening, closing });
       } finally {
-        await capture(page, `linear-${width}-last-observed`);
+        await capture(page, `spring-${width}-last-observed`);
         await context.close();
+        // Preserve the evidence collector's receipt name, which predates the
+        // admitted spring curve. The test and frame records name that curve.
         if (evidence && video) await video.saveAs(path.join(evidence, `linear-${width}.webm`));
       }
     }, 90_000);
@@ -1149,8 +1096,9 @@ describe('automatic documentation image preview in real Chromium', () => {
       for (let i = 1; i < interrupted.length; i++)
         expect(Math.abs(interrupted[i].width - interrupted[i - 1].width)).toBeLessThan(
           (Math.abs(initial.width - originWidth) *
+            IMAGE_SPRING_MAX_SLOPE *
             (interrupted[i].time - interrupted[i - 1].time)) /
-            220 +
+            IMAGE_MOTION_DURATION_MS +
             2
         );
       await page.setViewportSize({ width: 390, height: 700 });
@@ -1601,7 +1549,7 @@ describe('automatic documentation image preview in real Chromium', () => {
           expect(Number.isFinite(inputOrigin[key])).toBe(true);
         expect(inputOrigin.width).toBeGreaterThan(0);
         expect(inputOrigin.height).toBeGreaterThan(0);
-        expectLinearImageMotion(opening, inputOrigin, fit.content, 'opening');
+        expectSpringImageMotion(opening, inputOrigin, fit.content, 'opening');
         await capture(page, `${name}-contained`);
         await page.locator('.docs-image-full').click();
         expect(
@@ -1621,7 +1569,7 @@ describe('automatic documentation image preview in real Chromium', () => {
         await recordNextMotion(page, 'keydown', sourceSelector);
         await page.keyboard.press('Escape');
         const closing = await motionFrames(page, `${name}-closing`);
-        expectLinearImageMotion(closing, returnOrigin, fit.content, 'closing');
+        expectSpringImageMotion(closing, returnOrigin, fit.content, 'closing');
         await closed(page);
         expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
         expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
@@ -1671,7 +1619,7 @@ describe('automatic documentation image preview in real Chromium', () => {
         if (width < 640) await page.touchscreen.tap(1, 1);
         else await page.mouse.click(1, 1);
         const backgroundClosing = await motionFrames(page, `${name}-background-closing`);
-        expectLinearImageMotion(backgroundClosing, pointerOrigin, pointerFit.content, 'closing');
+        expectSpringImageMotion(backgroundClosing, pointerOrigin, pointerFit.content, 'closing');
         await closed(page);
         expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
         expect(await page.evaluate(() => document.body.style.overflow)).toBe('');

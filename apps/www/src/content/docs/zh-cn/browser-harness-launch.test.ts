@@ -41,6 +41,24 @@ describe('documentation browser isolation', () => {
     expect(options.args).toContain('--disable-dev-shm-usage');
     expect(options.args).not.toContain('--no-sandbox');
     expect(options.args).not.toContain('--disable-setuid-sandbox');
+    expect(options).not.toHaveProperty('handleSIGTERM');
+    expect(options).not.toHaveProperty('handleSIGINT');
+    expect(options).not.toHaveProperty('handleSIGHUP');
+  });
+
+  it('leaves capture signals to the explicit owner without weakening Chromium isolation', async () => {
+    const browser = { close: vi.fn() };
+    launch.mockResolvedValueOnce(browser);
+
+    expect(await launchBrowser({ captureOwnsSignals: true })).toBe(browser);
+    expect(launch).toHaveBeenCalledOnce();
+    expect(launch.mock.calls[0]![0]).toMatchObject({
+      executablePath: executable,
+      chromiumSandbox: true,
+      handleSIGINT: false,
+      handleSIGTERM: false,
+      handleSIGHUP: false,
+    });
   });
 
   it('preserves a sandbox launch failure without retrying with weaker isolation', async () => {

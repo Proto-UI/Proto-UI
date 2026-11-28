@@ -9,6 +9,11 @@ import { parse } from 'yaml';
 import { Window } from 'happy-dom';
 import { HOMEPAGE_GALLERY_IDS } from '../src/components/Homepage/homepage-layout-evidence';
 import {
+  assertClosedHeaderState,
+  assertNaturalOneLineCode,
+  readCodeReadingGeometry,
+} from './mobile-interaction-evidence-contract';
+import {
   HOMEPAGE_BASELINE,
   HOMEPAGE_KEYBOARD_TRANSITION,
   HOMEPAGE_POINTER_RUNTIME_SEQUENCE,
@@ -56,6 +61,149 @@ test('candidate layout failures distinguish overflow, missing samples and serif 
       [390, 844],
     ]
   );
+});
+
+const oneLineCode = (rootFontSize: number): ReturnType<typeof readCodeReadingGeometry> => ({
+  owner: 'wc-site-code-scroll-viewport',
+  containsSource: true,
+  sourceHeight: 3.25 * rootFontSize,
+  sourceWidth: 548,
+  sourceContentHeight: 1.5 * rootFontSize,
+  paddingTop: 0.875 * rootFontSize,
+  paddingBottom: 0.875 * rootFontSize,
+  codeHeight: 1.5 * rootFontSize,
+  lineHeights: [1.5 * rootFontSize],
+  overflowX: 'auto',
+  overflowY: 'auto',
+  height: 3.25 * rootFontSize,
+  fullHeight: 3.25 * rootFontSize,
+  width: 207,
+  fullWidth: 548,
+  lineHeight: 1.5 * rootFontSize,
+  rootFontSize,
+  viewportHeight: 640,
+  raw: 'npx @proto.ui/cli@latest --help',
+  documentOverflow: 0,
+});
+
+test('mobile short-code geometry keeps one content line and independent authored padding at 100% and 200%', () => {
+  for (const rootFontSize of [16, 32]) {
+    const facts = oneLineCode(rootFontSize);
+    assert.ok(facts.height > facts.lineHeight + 1, 'Preserve the old wrong-plane red comparison');
+    assert.doesNotThrow(() => assertNaturalOneLineCode(facts, 'candidate', 'Short source'));
+  }
+});
+
+test('mobile short-code geometry rejects blank height, clipping, wrapped or missing actual lines', () => {
+  const facts = oneLineCode(32);
+  for (const patch of [
+    { sourceContentHeight: 50, height: 106, fullHeight: 106 },
+    { height: 106, fullHeight: 106 },
+    { height: 102 },
+    { fullHeight: 106 },
+    { codeHeight: 96 },
+    { lineHeights: [96] },
+    { lineHeights: [] },
+    { lineHeights: [48, 48] },
+    { raw: 'first\nsecond' },
+    { raw: null },
+  ]) {
+    assert.throws(() =>
+      assertNaturalOneLineCode({ ...facts, ...patch }, 'candidate', 'Short source')
+    );
+  }
+});
+
+test('mobile short-code padding cannot disappear or move to one side while content remains one line', () => {
+  const facts = oneLineCode(32);
+  assert.throws(
+    () =>
+      assertNaturalOneLineCode(
+        { ...facts, paddingTop: 56, paddingBottom: 0 },
+        'candidate',
+        'Short source'
+      ),
+    /authored 0.875rem/
+  );
+  const noPadding = {
+    ...facts,
+    height: 48,
+    fullHeight: 48,
+    sourceHeight: 48,
+    paddingTop: 0,
+    paddingBottom: 0,
+  };
+  assert.throws(
+    () => assertNaturalOneLineCode(noPadding, 'candidate', 'Short source'),
+    /authored 0.875rem/
+  );
+  assert.doesNotThrow(() => assertNaturalOneLineCode(noPadding, 'baseline', 'Historical source'));
+});
+
+test('the serialized mobile source reader observes content and padding separately', () => {
+  const window = new Window();
+  const document = window.document;
+  document.documentElement.style.fontSize = '32px';
+  document.body.innerHTML =
+    '<div id="viewport"><pre style="padding:28px 32px;line-height:48px"><code data-raw-code="command"><span class="line">command</span></code></pre></div>';
+  const viewport = document.querySelector('#viewport')!;
+  const source = viewport.querySelector('pre')!;
+  const code = source.querySelector('code')!;
+  const line = source.querySelector('.line')!;
+  // Injected geometry isolates the reader; this is not native-browser layout evidence.
+  for (const [element, height] of [
+    [source, 104],
+    [code, 48],
+    [line, 48],
+  ] as const) {
+    element.getBoundingClientRect = () => new window.DOMRect(0, 0, 548, height);
+  }
+  for (const [element, properties] of [
+    [source, { clientHeight: 104 }],
+    [viewport, { clientHeight: 104, scrollHeight: 104, clientWidth: 207, scrollWidth: 548 }],
+  ] as const) {
+    for (const [name, value] of Object.entries(properties))
+      Object.defineProperty(element, name, { value });
+  }
+  const serialized = String(readCodeReadingGeometry);
+  assert.doesNotMatch(serialized, /\b__name\s*\(/);
+  const read = runInNewContext(`(${serialized})`, {
+    document,
+    getComputedStyle: window.getComputedStyle.bind(window),
+    innerHeight: 640,
+    innerWidth: 320,
+  });
+  const facts = read(viewport) as ReturnType<typeof readCodeReadingGeometry>;
+  assert.equal(facts.height, 104);
+  assert.equal(facts.sourceContentHeight, 48);
+  assert.equal(facts.codeHeight, 48);
+  assert.equal(facts.paddingTop, 28);
+  assert.equal(facts.paddingBottom, 28);
+  assert.doesNotThrow(() => assertNaturalOneLineCode(facts, 'candidate', 'Actual sampled owner'));
+  window.happyDOM.abort();
+});
+
+test('Header close accepts a painted inert leave phase and rejects a live or wrong owner', () => {
+  const closed = {
+    menuCount: 1,
+    panelCount: 1,
+    expanded: 'false',
+    hidden: false,
+    inert: true,
+    menuFocused: true,
+  };
+  assert.doesNotThrow(() => assertClosedHeaderState(closed));
+  assert.doesNotThrow(() => assertClosedHeaderState({ ...closed, hidden: true, inert: false }));
+  for (const patch of [
+    { expanded: 'true' },
+    { inert: false },
+    { menuFocused: false },
+    { menuCount: 0 },
+    { menuCount: 2 },
+    { panelCount: 0 },
+    { panelCount: 2 },
+  ])
+    assert.throws(() => assertClosedHeaderState({ ...closed, ...patch }));
 });
 
 test('pointer coverage reaches all four runtimes before strict non-first keyboard navigation', () => {
@@ -851,7 +999,7 @@ test('Dialog capture waits on the actual bounded focus owner and disposes its ph
   }
 });
 
-test('native and Copy browser scopes have independent bounded jobs and small evidence bundles', () => {
+test('native, Copy and homepage browser scopes have independent bounded jobs and complete inventory', () => {
   const workflow = parse(
     readFileSync(
       new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
@@ -863,7 +1011,16 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   assert.equal(job['timeout-minutes'], 15);
   assert.equal(job.strategy['fail-fast'], false);
   const expectedScopes = [
-    { name: 'native-links', suite: 'site-native-links' },
+    {
+      name: 'native-links',
+      suite: 'site-native-links',
+      pattern: '^native links with app-owned Proto visual surfaces',
+    },
+    {
+      name: 'native-links-reading',
+      suite: 'site-native-links',
+      pattern: '^(?!native links with app-owned Proto visual surfaces)',
+    },
     { name: 'brutalist-action-motion', suite: 'brutalist-action-motion' },
     { name: 'code-surfaces', suite: 'code-surfaces' },
     { name: 'code-surface-grammar', suite: 'code-surface-grammar' },
@@ -879,6 +1036,11 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     },
     { name: 'search-layout', suite: 'site-search-layout' },
     { name: 'search-menu', suite: 'site-search-menu' },
+    { name: 'homepage-dogfood', suite: 'homepage-dogfood' },
+    { name: 'home-demo-runtime', suite: 'home-demo-runtime' },
+    { name: 'prototype-projection-scope', suite: 'prototype-projection-scope' },
+    { name: 'demo-brutalist-checkbox', suite: 'demo-brutalist-checkbox' },
+    { name: 'demo-brutalist-remaining', suite: 'demo-brutalist-remaining' },
   ];
   assert.deepEqual(job.strategy.matrix.include, expectedScopes);
   assert.throws(
@@ -896,6 +1058,10 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   assert.match(run.run, /timeout --signal=TERM --kill-after=10s 600s/);
   assert.match(run.run, /vitest run --no-file-parallelism "\$\{files\[@\]\}"/);
   assert.match(run.run, /files\+=\("\$CONTRACT_FILE"\)/);
+  assert.equal(run.env.TEST_PATTERN, '${{ matrix.pattern }}');
+  assert.match(run.run, /filters=\(\)/);
+  assert.match(run.run, /filters\+=\(--testNamePattern "\$TEST_PATTERN"\)/);
+  assert.match(run.run, /"\$\{files\[@\]\}" "\$\{filters\[@\]\}"/);
   const checkout = job.steps.find((step: { uses?: string }) =>
     step.uses?.startsWith('actions/checkout@')
   );
@@ -907,19 +1073,28 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   const focused = workflow.jobs.capture.steps.find((step: { name?: string }) =>
     step.name?.startsWith('Execute focused real-browser')
   );
-  for (const entry of job.strategy.matrix.include)
-    assert.ok(
-      !focused.run.includes(`${entry.suite}.browser.test.ts`),
-      'No duplicated shared-lifetime suite'
-    );
+  assert.equal(focused, undefined, 'No cumulative shared-lifetime regression batch remains');
   for (const suite of [
     'homepage-dogfood',
     'home-demo-runtime',
     'prototype-projection-scope',
     'demo-brutalist-checkbox',
     'demo-brutalist-remaining',
-  ])
-    assert.ok(focused.run.includes(`${suite}.browser.test.ts`), `${suite} still runs`);
+  ]) {
+    const owners = job.strategy.matrix.include.filter(
+      (entry: { suite: string }) => entry.suite === suite
+    );
+    assert.equal(owners.length, 1, `${suite} has exactly one independent owner`);
+    assert.equal(owners[0].pattern, undefined, `${suite} keeps its complete case inventory`);
+    assert.ok(
+      readFileSync(new URL(`../src/content/docs/zh-cn/${suite}.browser.test.ts`, import.meta.url))
+        .length
+    );
+  }
+  assert.equal(
+    run.env.PROTO_UI_RUNTIME_EVIDENCE_DIR,
+    '${{ runner.temp }}/homepage-evidence/runtime'
+  );
   const frames = workflow.jobs.capture.steps.find(
     (step: { name?: string }) => step.name === 'Retain small candidate frame and metadata bundles'
   );

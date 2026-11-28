@@ -24,10 +24,9 @@ const { title, id, class: className = '' } = Astro.props;
   .docs-step__title {
     position: relative;
     margin: 0 0 0.75rem;
-    font-size: 1.0625rem;
-    line-height: 1.5;
+    /* The document H3 scale also owns the pre-module line box. */
     font-weight: 600;
-    letter-spacing: -0.015em;
+    letter-spacing: normal;
     color: var(--color-foreground);
   }
 

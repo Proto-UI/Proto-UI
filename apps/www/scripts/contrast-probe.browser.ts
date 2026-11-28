@@ -508,8 +508,9 @@ const paint = (color: string): SolidPaint => {
 
 // CSSOM keeps individual transforms separate from `transform`. Translations do
 // not change the axis-aligned shape: DOMRects already include their displacement.
-// Reject every other matrix rather than treating its bounding box as its edges.
-const translationOnly = (style: CSSStyleDeclaration): boolean => {
+// Numeric/perimeter readers reject every other matrix. A separate presence
+// reader can admit positive axis-aligned scale of the painted node itself.
+const axisAlignedTransform = (style: CSSStyleDeclaration, positiveScale = false): boolean => {
   if (style.perspective !== 'none' || style.transformStyle === 'preserve-3d') return false;
   if (style.transform !== 'none') {
     if (style.transform.startsWith('matrix3d(')) return false;
@@ -517,10 +518,10 @@ const translationOnly = (style: CSSStyleDeclaration): boolean => {
       const matrix = new DOMMatrixReadOnly(style.transform);
       if (
         !matrix.is2D ||
-        matrix.a !== 1 ||
+        !(positiveScale ? Number.isFinite(matrix.a) && matrix.a > 0 : matrix.a === 1) ||
         matrix.b !== 0 ||
         matrix.c !== 0 ||
-        matrix.d !== 1 ||
+        !(positiveScale ? Number.isFinite(matrix.d) && matrix.d > 0 : matrix.d === 1) ||
         !Number.isFinite(matrix.e) ||
         !Number.isFinite(matrix.f)
       )
@@ -551,12 +552,16 @@ const translationOnly = (style: CSSStyleDeclaration): boolean => {
     const components = style.scale.split(/\s+/);
     if (
       components.length > 2 ||
-      components.some((value) => Number(value.replace('%', '')) !== (value.endsWith('%') ? 100 : 1))
+      components.some((value) => {
+        const scale = Number(value.replace('%', '')) / (value.endsWith('%') ? 100 : 1);
+        return positiveScale ? !Number.isFinite(scale) || scale <= 0 : scale !== 1;
+      })
     )
       return false;
   }
   return true;
 };
+const translationOnly = (style: CSSStyleDeclaration): boolean => axisAlignedTransform(style);
 
 // Only a finite positive-area subset is certified. A stroked bounding box
 // alone does not establish fillable area (notably line and one-segment path).
@@ -589,7 +594,8 @@ const paintedBoxVisibility = (
   element: Element,
   boxes: readonly DOMRect[],
   clipSelf = false,
-  straightBandWitness = false
+  straightBandWitness = false,
+  ownPositiveScale = false
 ) => {
   const limits: string[] = [];
   const roundedOverflowClips: {
@@ -655,7 +661,8 @@ const paintedBoxVisibility = (
     // edges; do not guess at a clip margin or its corner geometry.
     if (straightBandWitness && (style.overflowX === 'clip' || style.overflowY === 'clip'))
       limits.push('unsupported-inset-shadow-overflow-clip');
-    if (!translationOnly(style)) limits.push('unsupported-transformed-paint');
+    if (!axisAlignedTransform(style, ownPositiveScale && current === element))
+      limits.push('unsupported-transformed-paint');
     // The shorthand keywords also imply paint containment; content-visibility
     // auto applies it even while the on-screen content is not skipped.
     if (
@@ -1178,6 +1185,59 @@ export const readContrastTargetObservation = (element: Element) => {
     ariaChecked: element.getAttribute('aria-checked'),
     ariaExpanded: element.getAttribute('aria-expanded'),
     shadow: getComputedStyle(element).boxShadow,
+  };
+};
+
+// First paint and a settled numeric contrast frame are different observations.
+// This narrowly certifies an existing solid background during its own positive
+// 2D scale entrance. Its transformed box must still be wholly inside every
+// supported clip; ancestors retain the translation-only model. It supplies no
+// scaled border/radius/luminance measurements and never changes the settled
+// target reader above.
+export const readContrastTargetPaintPresence = (element: Element) => {
+  const settled = readContrastTargetObservation(element);
+  if (
+    !settled.visibility.visible ||
+    settled.visibility.classification !== 'unsupported' ||
+    settled.visibility.limits.length === 0 ||
+    settled.visibility.limits.some((limit) => limit !== 'unsupported-transformed-paint')
+  )
+    return settled;
+  const style = getComputedStyle(element);
+  if (translationOnly(style) || !axisAlignedTransform(style, true)) return settled;
+  const boxes = [...element.getClientRects()];
+  if (
+    element.namespaceURI !== 'http://www.w3.org/1999/xhtml' ||
+    boxes.length !== 1 ||
+    boxes.some(
+      (box) =>
+        ![box.x, box.y, box.width, box.height].every(Number.isFinite) ||
+        box.width <= 0 ||
+        box.height <= 0
+    ) ||
+    style.backgroundImage !== 'none' ||
+    !nontransparentSourcePaint(style.backgroundColor) ||
+    !(
+      style.backgroundClip === 'border-box' ||
+      (style.backgroundClip === 'padding-box' &&
+        element.clientWidth > 0 &&
+        element.clientHeight > 0)
+    )
+  )
+    return settled;
+  const visibility = paintedBoxVisibility(element, boxes, false, false, true);
+  if (!visibility.visible || visibility.classification !== 'source-model-visible') return settled;
+  return {
+    ...settled,
+    achieved: true,
+    visibility,
+    paintPresenceWitness: {
+      kind: 'own-positive-axis-scale-background',
+      physicalNodeId: stateNodeIdentity(element),
+      transform: style.transform,
+      scale: style.scale,
+      boxes: boxes.map(({ x, y, width, height }) => ({ x, y, width, height })),
+    },
   };
 };
 

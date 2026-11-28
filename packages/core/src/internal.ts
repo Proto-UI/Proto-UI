@@ -59,3 +59,5 @@ export function bindAsHookRuntime(def: object, runtime: AsHookRuntime): void {
 export function getAsHookRuntime(def: object): AsHookRuntime | undefined {
   return asHookRuntimeByDef.get(def);
 }
+
+export { runAllSteps } from './internal/synchronous-steps';

@@ -12,6 +12,13 @@ import { parseArgs } from 'node:util';
 import type { Locator, Page } from 'playwright-core';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import { verifyRevision } from './homepage-evidence-contract';
+import { createMobileCaptureOwner } from './mobile-capture-owner.mjs';
+import { verifyMobileInputs } from './mobile-prepared-inputs.mjs';
+import {
+  assertClosedHeaderState,
+  assertNaturalOneLineCode,
+  readCodeReadingGeometry,
+} from './mobile-interaction-evidence-contract';
 
 const { values } = parseArgs({
   options: {
@@ -19,6 +26,7 @@ const { values } = parseArgs({
     'expected-revision': { type: 'string' },
     out: { type: 'string' },
     'quick-preview': { type: 'boolean', default: false },
+    'prepared-inputs': { type: 'string' },
   },
 });
 const kind = values['revision-kind'];
@@ -50,6 +58,7 @@ const report = {
     .update(await readFile(script))
     .digest('hex'),
   startedAt: new Date().toISOString(),
+  interrupted: null as string | null,
   procedure:
     'Clean exact checkout and actual public family atoms. Pointer/keyboard/wheel journeys include explicitly labelled click-only programmatic Menu activation and authored same-document history fixtures traversed through real browser Back. The labelled stress cases change host text size to 200%.',
   limits:
@@ -58,7 +67,16 @@ const report = {
   failures,
   lifecycle,
 };
-const save = () => writeFile(path.join(out, 'metrics.json'), JSON.stringify(report, null, 2));
+let pendingSave = Promise.resolve();
+const save = () => {
+  const snapshot = JSON.stringify(report, null, 2);
+  // Cancellation closes Chrome and Astro concurrently. Serialize their evidence
+  // writes so one close cannot truncate the other close's JSON snapshot.
+  pendingSave = pendingSave
+    .catch(() => {})
+    .then(() => writeFile(path.join(out, 'metrics.json'), snapshot));
+  return pendingSave;
+};
 const recordLifecycleFailure = (stage: string, error: unknown) => {
   const failure = `lifecycle ${stage}: ${String(error)}`;
   failures.push(failure);
@@ -114,16 +132,40 @@ const readyHome = (page: Page, runtime = 'wc') =>
     const root = document.querySelector<HTMLElement>('[data-homepage-runtime]');
     return root?.dataset.runtimeState === 'ready' && root.dataset.runtime === runtime;
   }, runtime);
-await recordLifecycle('server-start-requested');
-const base = await startServer(['/zh-cn/', '/en/ui-libraries/base/transition/']);
-await recordLifecycle('server-ready');
-const browser = await launchBrowser();
-await recordLifecycle('browser-ready');
-try {
+let browser: Awaited<ReturnType<typeof launchBrowser>> | undefined;
+const preparedInputs = values['prepared-inputs']
+  ? { receiptFile: values['prepared-inputs'], expectedRevision: values['expected-revision'] }
+  : undefined;
+const owner = createMobileCaptureOwner({
+  closeBrowser: async () => {
+    await recordLifecycle('browser-close-started');
+    await browser?.close();
+    await recordLifecycle('browser-close-finished');
+  },
+  stopServer: async () => {
+    await recordLifecycle('server-stop-started');
+    await stopServer();
+    await recordLifecycle('server-stop-finished');
+  },
+  save,
+  record: (signal: string) => {
+    report.interrupted = signal;
+    failures.push(`Mobile capture interrupted by ${signal}`);
+  },
+});
+await owner.run(async () => {
+  await recordLifecycle('server-start-requested');
+  const base = await startServer(['/zh-cn/', '/en/ui-libraries/base/transition/'], preparedInputs);
+  owner.checkpoint();
+  await recordLifecycle('server-ready');
+  browser = await launchBrowser({ captureOwnsSignals: true });
+  owner.checkpoint();
+  await recordLifecycle('browser-ready');
   for (const width of quickPreview ? [390] : [390, 430])
     for (const locale of quickPreview ? ['zh-cn'] : ['zh-cn', 'en'])
       for (const theme of quickPreview ? (['light'] as const) : (['light', 'dark'] as const)) {
         const id = `${locale}-${width}-${theme}`;
+        owner.checkpoint();
         const context = await browser.newContext({
           viewport: { width, height: 844 },
           colorScheme: theme,
@@ -452,21 +494,9 @@ try {
             const shortCopy = shortShell.locator('[data-copy] [data-demo-ref="copy-button"]');
             await shortCopy.waitFor({ state: 'visible' });
             await shortShell.scrollIntoViewIfNeeded();
-            const shortFacts = await shortSource.evaluate((e) => ({
-              height: e.clientHeight,
-              fullHeight: e.scrollHeight,
-              lineHeight: parseFloat(getComputedStyle(e.querySelector('pre') ?? e).lineHeight),
-              text: e.querySelector('code')?.getAttribute('data-raw-code'),
-              documentOverflow: document.documentElement.scrollWidth - innerWidth,
-            }));
-            assert.ok(
-              shortFacts.text && shortFacts.text.split('\n').length === 1,
-              'The real short example is one install command'
-            );
-            assert.ok(
-              shortFacts.height > 0 && shortFacts.height <= shortFacts.lineHeight + 1,
-              'Short code keeps its natural one-line height'
-            );
+            const shortFacts = await shortSource.evaluate(readCodeReadingGeometry);
+            entry.shortCode = { ...shortFacts, text: shortFacts.raw };
+            assertNaturalOneLineCode(shortFacts, kind, 'Short code');
             assert.ok(shortFacts.documentOverflow <= 1);
             entry.shortSourceFraming = await page.evaluate(() => ({
               header: document.querySelector('header')?.getBoundingClientRect().toJSON(),
@@ -491,16 +521,19 @@ try {
                   ?.querySelector('[data-demo-ref="copy-button"]')
                   ?.getAttribute('data-copy-state') === 'success'
             );
-            assert.equal(
-              await page.evaluate(() => navigator.clipboard.readText()),
-              shortFacts.text
-            );
-            entry.shortCode = { ...shortFacts, copy: 'Exact one-line command copied' };
+            assert.equal(await page.evaluate(() => navigator.clipboard.readText()), shortFacts.raw);
+            entry.shortCode = {
+              ...shortFacts,
+              text: shortFacts.raw,
+              copy: 'Exact one-line command copied',
+            };
           }
 
           assert.deepEqual(errors, []);
+          owner.checkpoint();
           entry.outcome = 'passed';
         } catch (error) {
+          owner.checkpoint();
           entry.outcome = 'failed';
           entry.error = error instanceof Error ? error.stack : String(error);
           failures.push(`${id}: ${String(error)}`);
@@ -514,6 +547,7 @@ try {
   // the two stress cases above/below unchanged; neither substitutes for Docs.
   if (kind === 'candidate' && !quickPreview) {
     const id = 'en-500x761-docs-header-escape';
+    owner.checkpoint();
     const route = '/en/start-here/what-you-saw/';
     const context = await browser.newContext({
       viewport: { width: 500, height: 761 },
@@ -608,6 +642,35 @@ try {
       });
       await save();
     };
+    const closeHeaderWithEscape = async (stage: string) => {
+      await page.keyboard.press('Escape');
+      const deadline = performance.now() + 1000;
+      const immediate = await header.evaluate((root) => {
+        const menus = root.querySelectorAll<HTMLElement>('[data-site-menu-button]');
+        const panels = root.querySelectorAll<HTMLElement>('[data-site-header-panel]');
+        return {
+          menuCount: menus.length,
+          panelCount: panels.length,
+          expanded: menus[0]?.getAttribute('aria-expanded') ?? null,
+          hidden: panels[0]?.hidden ?? false,
+          inert: panels[0]?.inert ?? false,
+          menuFocused: menus[0] === document.activeElement,
+        };
+      });
+      observations.push({
+        stage: `${stage}-immediate`,
+        at: new Date().toISOString(),
+        ...immediate,
+      });
+      assertClosedHeaderState(immediate);
+      // Closing keeps the public leave animation, but it cannot accept input.
+      // Physical removal shares the original 1s close budget; capture I/O does
+      // not postpone the deadline or add another waiting period.
+      const remaining = deadline - performance.now();
+      assert.ok(remaining > 0, 'Header close remains inside the original 1000ms budget');
+      await panel.waitFor({ state: 'hidden', timeout: remaining });
+      await capture(stage);
+    };
     try {
       await page.goto(`${base}${route}`, { waitUntil: 'networkidle' });
       await header.locator('site-search[data-search-view="ready"]').waitFor();
@@ -646,8 +709,7 @@ try {
         }
         assert.equal(await menu.getAttribute('aria-expanded'), 'true');
         await capture(`${reopenKey}-before-escape`);
-        await page.keyboard.press('Escape');
-        await capture(`${reopenKey}-after-escape`);
+        await closeHeaderWithEscape(`${reopenKey}-after-escape`);
         assert.equal(await menu.getAttribute('aria-expanded'), 'false');
         assert.equal(await panel.isVisible(), false);
         assert.ok(await menu.evaluate((element) => element === document.activeElement));
@@ -672,8 +734,7 @@ try {
       assert.equal(await runtime.getAttribute('aria-expanded'), 'false');
       assert.equal(await menu.getAttribute('aria-expanded'), 'true');
       assert.ok(await runtime.evaluate((element) => element === document.activeElement));
-      await page.keyboard.press('Escape');
-      await capture('nested-select-second-escape');
+      await closeHeaderWithEscape('nested-select-second-escape');
       assert.equal(await menu.getAttribute('aria-expanded'), 'false');
       assert.equal(await panel.isVisible(), false);
       assert.ok(await menu.evaluate((element) => element === document.activeElement));
@@ -693,8 +754,10 @@ try {
       assert.ok(await contents.evaluate((element) => element === document.activeElement));
       assert.equal(await menu.getAttribute('aria-expanded'), 'false');
       assert.deepEqual(errors, []);
+      owner.checkpoint();
       entry.outcome = 'passed';
     } catch (error) {
+      owner.checkpoint();
       entry.outcome = 'failed';
       entry.error = error instanceof Error ? error.stack : String(error);
       failures.push(`${id}: ${String(error)}`);
@@ -708,6 +771,7 @@ try {
   if (kind === 'candidate' && !quickPreview)
     for (const locale of ['zh-cn', 'en']) {
       const id = `${locale}-320-text200-stress`;
+      owner.checkpoint();
       const context = await browser.newContext({
         viewport: { width: 320, height: 640 },
         reducedMotion: 'reduce',
@@ -832,23 +896,7 @@ try {
           const copy = shell.locator('[data-copy] [data-demo-ref="copy-button"]');
           await copy.waitFor({ state: 'visible' });
           await shell.scrollIntoViewIfNeeded();
-          const facts = await source.evaluate((e) => ({
-            owner: e.localName,
-            containsSource: e.matches('pre') || !!e.querySelector('pre'),
-            sourceHeight: (e.querySelector('pre') ?? e).getBoundingClientRect().height,
-            sourceWidth: (e.querySelector('pre') ?? e).getBoundingClientRect().width,
-            overflowX: getComputedStyle(e).overflowX,
-            overflowY: getComputedStyle(e).overflowY,
-            height: e.clientHeight,
-            fullHeight: e.scrollHeight,
-            width: e.clientWidth,
-            fullWidth: e.scrollWidth,
-            lineHeight: parseFloat(getComputedStyle(e.querySelector('pre') ?? e).lineHeight),
-            rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
-            viewportHeight: innerHeight,
-            raw: e.querySelector('code')?.getAttribute('data-raw-code'),
-            documentOverflow: document.documentElement.scrollWidth - innerWidth,
-          }));
+          const facts = await source.evaluate(readCodeReadingGeometry);
           entry[`code-${sourceKind}`] = facts;
           entry[`code-${sourceKind}-layout`] = await page.evaluate(() => ({
             header: document.querySelector('header')?.getBoundingClientRect().toJSON(),
@@ -868,8 +916,7 @@ try {
           await observe(`code-${sourceKind}-layout`);
           assert.ok(facts.containsSource, 'The reading viewport contains the actual source pre');
           assert.ok(
-            facts.fullHeight + 1 >= facts.sourceHeight &&
-              facts.fullWidth + 1 >= facts.sourceWidth,
+            facts.fullHeight + 1 >= facts.sourceHeight && facts.fullWidth + 1 >= facts.sourceWidth,
             'The complete source remains within the reachable scroll extent'
           );
           assert.ok(
@@ -883,11 +930,7 @@ try {
               facts.height <= Math.min(36 * facts.rootFontSize, 0.65 * facts.viewportHeight) + 1,
             'Enlarged source fits its independent viewport'
           );
-          if (sourceKind === 'short')
-            assert.ok(
-              facts.height <= facts.lineHeight + 1,
-              'Enlarged short source still has natural one-line height'
-            );
+          if (sourceKind === 'short') assertNaturalOneLineCode(facts, kind, 'Enlarged short code');
           entry.stage = `code-${sourceKind}-keyboard-scroll`;
           await source.focus();
           assert.ok(
@@ -926,8 +969,10 @@ try {
           };
           await observe(`code-${sourceKind}-complete`);
         }
+        owner.checkpoint();
         entry.outcome = 'passed';
       } catch (error) {
+        owner.checkpoint();
         entry.outcome = 'failed';
         entry.failedStage = entry.stage;
         entry.error = error instanceof Error ? error.stack : String(error);
@@ -940,15 +985,9 @@ try {
       }
     }
   await recordLifecycle('cases-loop-finished');
-} finally {
-  await recordLifecycle('browser-close-started');
-  await browser.close();
-  await recordLifecycle('browser-close-finished');
-  await recordLifecycle('server-stop-started');
-  await stopServer();
-  await recordLifecycle('server-stop-finished');
-  await save();
-}
+});
+owner.checkpoint();
+if (preparedInputs) await verifyMobileInputs({ root: process.cwd(), ...preparedInputs });
 assert.deepEqual(
   failures,
   [],

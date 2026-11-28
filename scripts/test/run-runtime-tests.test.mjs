@@ -306,7 +306,8 @@ describe('runtime test plan', () => {
       readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
         const file = path.join(directory, entry.name);
         return entry.isDirectory()
-          ? ['node_modules', 'dist', '.astro'].includes(entry.name) || entry.name.startsWith('dist.')
+          ? ['node_modules', 'dist', '.astro'].includes(entry.name) ||
+            entry.name.startsWith('dist.')
             ? []
             : scan(file)
           : file.endsWith('.browser.test.ts')
@@ -1107,6 +1108,13 @@ describe('native navigation precondition evidence', () => {
       const preferences = {
         count: async () => (compact ? 1 : 0),
         isVisible: async () => false,
+        evaluate: async (read) =>
+          read({
+            closest(selector) {
+              assert.equal(selector, '[data-site-header-compact-context]');
+              return compact ? {} : null;
+            },
+          }),
         async waitFor(options) {
           assert.equal(options.state, 'visible');
           order.push('preferences-visible');
@@ -1277,7 +1285,17 @@ describe('bounded CI runtime shards (no browser or server)', () => {
     );
   });
   it('rejects empty shards, unknown phases, ambiguous filters and invalid shard selections', () => {
-    for (const shard of [undefined, '', '0/10', '11/10', '1/7', '1/18', '1/20', '1/99', 'x/10'])
+    for (const shard of [
+      undefined,
+      '',
+      `0/${BROWSER_SHARD_COUNT}`,
+      `${BROWSER_SHARD_COUNT + 1}/${BROWSER_SHARD_COUNT}`,
+      `1/${BROWSER_SHARD_COUNT - 1}`,
+      `1/${BROWSER_SHARD_COUNT + 1}`,
+      '1/7',
+      '1/99',
+      'x/10',
+    ])
       assert.throws(() => selectBrowserShard(shard), /Expected browser shard/);
     assert.throws(() => browserShards([], 10), /nonempty/);
     assert.throws(() => browserShards(['same', 'same'], 2), /unique/);

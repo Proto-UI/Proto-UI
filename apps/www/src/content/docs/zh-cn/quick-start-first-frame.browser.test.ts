@@ -49,6 +49,7 @@ const targets = {
   noteTitle: '.starlight-aside--note .starlight-aside__title',
   noteBody: '.starlight-aside--note .starlight-aside__content p',
   following: '[data-doc-flow] > p',
+  stepTitle: '[data-docs-step] > h3.docs-step__title',
 };
 function readPageFrame({
   selectors,
@@ -57,6 +58,64 @@ function readPageFrame({
   selectors: typeof targets;
   observe?: boolean;
 }) {
+  // quick-start-code-paint-start
+  function readCodeTextPaint(owner: HTMLElement, pre: HTMLElement) {
+    const pres = owner.querySelectorAll('pre');
+    const container = pre.closest<HTMLElement>('[data-code-scroll-root]');
+    if (
+      pres.length !== 1 ||
+      pres[0] !== pre ||
+      pre.closest('[data-code-shell]') !== owner ||
+      container?.closest('[data-code-shell]') !== owner
+    )
+      throw new Error('Quick Start code paint requires its unique owned native pre');
+    let viewport = pre;
+    if (container.hasAttribute('data-code-scroll-ready')) {
+      const viewports = container.querySelectorAll<HTMLElement>('[data-code-scroll-viewport]');
+      if (viewports.length !== 1 || !viewports[0]!.contains(pre))
+        throw new Error('Quick Start code paint requires its unique containing viewport');
+      viewport = viewports[0]!;
+    }
+    const box = (rect: DOMRect) => ({
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+    });
+    const content = box(pre.getBoundingClientRect());
+    const frame = viewport.getBoundingClientRect();
+    const clip = {
+      x: frame.x + viewport.clientLeft,
+      y: frame.y + viewport.clientTop,
+      width: viewport.clientWidth,
+      height: viewport.clientHeight,
+    };
+    const css = getComputedStyle(viewport);
+    const clips = (overflow: string) => ['auto', 'scroll', 'hidden', 'clip'].includes(overflow);
+    const paint = { ...content };
+    for (const [coordinate, size, overflow] of [
+      ['x', 'width', css.overflowX],
+      ['y', 'height', css.overflowY],
+    ] as const) {
+      if (!clips(overflow)) continue;
+      const start = Math.max(content[coordinate], clip[coordinate]);
+      const end = Math.min(content[coordinate] + content[size], clip[coordinate] + clip[size]);
+      paint[coordinate] = start;
+      paint[size] = Math.max(0, end - start);
+    }
+    const code = pre.querySelector('code');
+    if (!code?.textContent?.trim()) throw new Error('Quick Start code text must remain readable');
+    const range = owner.ownerDocument.createRange();
+    range.selectNodeContents(code);
+    return {
+      paint,
+      content,
+      viewport: clip,
+      overflow: { x: css.overflowX, y: css.overflowY },
+      glyphs: box(range.getBoundingClientRect()),
+    };
+  }
+  // quick-start-code-paint-end
   const read = () => {
     const anchor = document.querySelector(selectors.title)!.getBoundingClientRect();
     const values = Object.fromEntries(
@@ -77,6 +136,7 @@ function readPageFrame({
             fontWeight: css.fontWeight,
             fontFamily: css.fontFamily,
             lineHeight: css.lineHeight,
+            letterSpacing: css.letterSpacing,
             color: css.color,
             fontFaceReady: document.fonts.check(
               `${css.fontStyle} ${css.fontWeight} ${css.fontSize} ${css.fontFamily}`,
@@ -210,6 +270,14 @@ function readPageFrame({
       throw new Error('Quick Start help must be the real first docs code frame');
     const caption = code.querySelector<HTMLElement>(':scope > [data-code-file-header]');
     if (!caption) throw new Error('Quick Start help must retain its native docs caption');
+    const nativePre = code.querySelector('pre')!;
+    const codeTextPaint = readCodeTextPaint(code, nativePre);
+    const codeText = sample(nativePre)!;
+    // ScrollArea adopts the same pre as intrinsic-width content. Its visible
+    // paint stays within the native scroll viewport; raw extent is diagnostic.
+    Object.assign(codeText, codeTextPaint.paint, {
+      visible: codeText.visible && codeTextPaint.paint.width > 0 && codeTextPaint.paint.height > 0,
+    });
     const surface = (owner: HTMLElement) => {
       const live = ['ready', 'retained'].includes(owner.dataset.codeSurfaceView ?? '');
       const plane = live
@@ -221,7 +289,7 @@ function readPageFrame({
     const nativeNodes = [
       code,
       caption,
-      code.querySelector('pre')!,
+      nativePre,
       code.querySelector('code')!,
       headerRoot.querySelector('[data-site-header-desktop-navigation] a')!,
     ];
@@ -283,7 +351,8 @@ function readPageFrame({
       searchGlyph: sample(search?.querySelector('svg') ?? null),
       code: surface(code),
       codeCaption: sample(caption),
-      codeText: sample(code.querySelector('pre')),
+      codeText,
+      codeTextPaint,
       searchReady,
       searchDisabled:
         search?.getAttribute('aria-disabled') === 'true' ||
@@ -486,6 +555,8 @@ function compare(
         Math.abs(final[coordinate] - initial[coordinate]),
         `${key}.${coordinate}`
       ).toBeLessThanOrEqual(1);
+    if (key === 'stepTitle')
+      expect(final.letterSpacing, `${key}.letterSpacing`).toBe(initial.letterSpacing);
     if (!['release', 'note'].includes(key)) {
       for (const property of [
         'fontSize',
@@ -503,6 +574,13 @@ function compare(
   ).toEqual([]);
   expect(after.chrome.searchShortcutText).toBe(before.chrome.searchShortcutText);
   expect(after.chrome.searchOverflow).toBeLessThanOrEqual(1);
+  for (const dimension of ['x', 'y', 'width', 'height'] as const)
+    expect(
+      Math.abs(
+        after.chrome.codeTextPaint.glyphs[dimension] - before.chrome.codeTextPaint.glyphs[dimension]
+      ),
+      `code text glyphs.${dimension}`
+    ).toBeLessThanOrEqual(1);
   expect(
     after.chrome.nativeNodesPreserved,
     'native code and navigation nodes survive every frame'
@@ -603,7 +681,16 @@ describe('quick-start first-frame continuity', () => {
       });
       const page = await context.newPage();
       const errors: string[] = [];
+      const consoleErrors: Array<{ at: number; text: string; location: unknown }> = [];
       page.on('pageerror', (error) => errors.push(error.message));
+      page.on('console', (message) => {
+        if (message.type() === 'error' && consoleErrors.length < 32)
+          consoleErrors.push({
+            at: Date.now(),
+            text: message.text(),
+            location: message.location(),
+          });
+      });
       await page.addInitScript(
         ({ runtime, key }) => {
           localStorage.setItem(key, runtime);
@@ -730,6 +817,13 @@ describe('quick-start first-frame continuity', () => {
                 '[data-cli-init-tabs][data-cli-init-tabs-init="1"]'
               );
               await generatedBrowser.waitFor();
+              // The native fallback remains in the DOM after real Tabs publish.
+              // Follow the one accessible file tablist, keeping strict ownership.
+              const generatedFileTabs = generatedBrowser.getByRole('tablist');
+              expect(await generatedFileTabs.count()).toBe(1);
+              expect(await generatedFileTabs.getAttribute('data-code-example-tablist')).toBe(
+                'file'
+              );
               await init.scrollIntoViewIfNeeded();
               await writeFile(
                 path.join(directory, `${prefix}-cli-init.json`),
@@ -770,9 +864,10 @@ describe('quick-start first-frame continuity', () => {
                 ['proto-ui/config.json', 'config'],
                 ['src/styles/proto-ui-style.css', 'style'],
               ] as const) {
-                const item = generatedBrowser.locator(
+                const item = generatedFileTabs.locator(
                   `[role="tab"][data-cli-file-path="${filePath}"]`
                 );
+                expect(await item.count()).toBe(1);
                 await item.click();
                 const detail = generatedBrowser.locator('[data-cli-file-panel]:visible');
                 expect(await detail.locator('[data-code-file-title]').textContent()).toBe(filePath);
@@ -943,6 +1038,10 @@ describe('quick-start first-frame continuity', () => {
             try {
               await stopFrameTrace(page, prefix);
             } finally {
+              await writeFile(
+                path.join(directory, `${prefix}-console-errors.json`),
+                JSON.stringify({ source, errors, consoleErrors }, null, 2)
+              );
               await page.unrouteAll({ behavior: 'wait' });
             }
           }

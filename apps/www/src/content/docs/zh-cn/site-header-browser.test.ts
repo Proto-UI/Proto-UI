@@ -7,10 +7,15 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function fixture({ marker = true, visible = false, expanded = false } = {}) {
+function fixture({ marker = true, visible = false, expanded = false, compact = false } = {}) {
+  const dock = document.createElement('div');
+  if (compact) dock.setAttribute('data-site-header-compact-context', '');
+  const owner = document.createElement('div');
+  dock.append(owner);
   const preferences = {
     count: vi.fn(async () => (marker ? 1 : 0)),
     isVisible: vi.fn(async () => visible),
+    evaluate: vi.fn(async (read: (element: Element) => boolean) => read(owner)),
     waitFor: vi.fn(async () => {}),
   };
   const menu = { getAttribute: vi.fn(async () => String(expanded)), click: vi.fn(async () => {}) };
@@ -45,6 +50,17 @@ describe('native compact Header browser entry', () => {
     expect(await revealHeaderPreferences(baseline.page)).toBe(false);
     expect(baseline.menu.click).not.toHaveBeenCalled();
     expect(baseline.page.waitForFunction).not.toHaveBeenCalled();
+  });
+  it('reopens a still-visible compact panel after outside dismissal starts its exit', async () => {
+    const closing = fixture({ visible: true, expanded: false, compact: true });
+    expect(await revealHeaderPreferences(closing.page)).toBe(true);
+    expect(closing.menu.click).toHaveBeenCalledOnce();
+    expect(closing.preferences.waitFor).toHaveBeenCalledWith({ state: 'visible' });
+  });
+  it('leaves visible, expanded compact preferences open', async () => {
+    const open = fixture({ visible: true, expanded: true, compact: true });
+    expect(await revealHeaderPreferences(open.page)).toBe(false);
+    expect(open.menu.click).not.toHaveBeenCalled();
   });
   it('rejects old visible ownership on both sides of a pending viewport move', () => {
     const media = { matches: true } as MediaQueryList;

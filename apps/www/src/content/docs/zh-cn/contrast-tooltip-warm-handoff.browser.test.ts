@@ -127,18 +127,34 @@ describe('Tooltip contrast warm sibling consumer', () => {
         try {
           const observations: Record<string, unknown>[] = [];
           const record: Record<string, unknown> = {};
-          await fixture.consumer.run(async (state) => {
-            const observation = await fixture.consumer.observe(
-              state === TOOLTIP_WARM_HANDOFF_STATE ? 'warm' : 'cold'
+          try {
+            await fixture.consumer.run(async (state) => {
+              const observation = await fixture.consumer.observe(
+                state === TOOLTIP_WARM_HANDOFF_STATE ? 'warm' : 'cold'
+              );
+              expect(observation.achieved, state).toBe(true);
+              expect(observation.samePhysicalGroup, state).toBe(true);
+              expect(
+                observation.pairs.every(
+                  (pair) => pair.samePhysicalRoot && pair.samePhysicalTrigger
+                ),
+                state
+              ).toBe(true);
+              observations.push({ state, observation });
+            }, record);
+          } catch (error) {
+            console.error(
+              '[Tooltip handoff failure]',
+              JSON.stringify({
+                runtime,
+                theme,
+                stage: record.stage,
+                observation: record.failedNativeObservation,
+                diagnosticsUnavailable: record.diagnosticsUnavailable,
+              })
             );
-            expect(observation.achieved, state).toBe(true);
-            expect(observation.samePhysicalGroup, state).toBe(true);
-            expect(
-              observation.pairs.every((pair) => pair.samePhysicalRoot && pair.samePhysicalTrigger),
-              state
-            ).toBe(true);
-            observations.push({ state, observation });
-          }, record);
+            throw error;
+          }
           const warm = await fixture.consumer.observe('warm');
           expect(warm.pairs[0].closed).toBe(true);
           expect(warm.pairs[0].painted).toBe(false);

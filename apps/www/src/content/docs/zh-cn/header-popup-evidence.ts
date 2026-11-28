@@ -1,4 +1,19 @@
 /** Read-only capture predicates, serialized into the actual browser page. */
+export function headerPreferencePaintSettled(element: Element): boolean {
+  if (!element.isConnected || element.closest('[hidden], [inert]')) return false;
+  const panel = element.closest('[data-site-header-panel]');
+  const phase = panel?.closest('[data-site-header]')?.getAttribute('data-site-menu-transition');
+  if (phase && phase !== 'entered') return false;
+  const animations = element.getAnimations({ subtree: true });
+  // The compact panel moves the Select even when that Select has no own
+  // animation. Inspect only actual ancestors, not unrelated animated siblings.
+  for (let parent = element.parentElement; parent; parent = parent.parentElement)
+    animations.push(...parent.getAnimations());
+  return animations.every(
+    (animation) => animation.playState === 'finished' || animation.playState === 'idle'
+  );
+}
+
 export function headerPopupSettled(element: Element): boolean {
   if (element.getAttribute('data-transition-state') !== 'entered') return false;
   for (let parent: Element | null = element; parent; parent = parent.parentElement) {

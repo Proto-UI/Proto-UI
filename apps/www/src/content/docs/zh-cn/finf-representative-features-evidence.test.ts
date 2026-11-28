@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import vm from 'node:vm';
 import { transformSync } from 'esbuild';
-import { Window, type HTMLDivElement } from 'happy-dom';
+import { Window, type HTMLButtonElement, type HTMLDivElement } from 'happy-dom';
 import ts from 'typescript';
 import { parse } from 'yaml';
 import { describe, expect, it, vi } from 'vitest';
@@ -156,6 +156,7 @@ function mockedCase(
     setDefaultTimeout: vi.fn(),
     on: vi.fn(),
     clock: { setFixedTime: vi.fn() },
+    addInitScript: vi.fn(),
     goto: vi.fn(async () => {
       if (options.navigationFailure) throw options.navigationFailure;
       return { status: () => 200 };
@@ -170,31 +171,35 @@ function mockedCase(
   };
   const context = { newPage: vi.fn(async () => page), route: vi.fn(), close: vi.fn() };
   const browser = { newContext: vi.fn(async () => context), version: () => 'browser fixture only' };
-  const run = execute(`${statements(['captureFailureDiagnostics', 'runCase'])}; runCase;`, {
-    browser,
-    output: '/test-only',
-    path,
-    createHash,
-    writeFile: async (file: string, value: string) => {
-      diagnosticFiles.set(file, value);
-    },
-    readFile: async (file: string) =>
-      options.imageBytes ? options.imageBytes(file) : Buffer.from('not-a-real-screenshot'),
-    revision: 'a'.repeat(40),
-    tree: 'b'.repeat(40),
-    baseUrl: 'http://127.0.0.1:9999',
-    HOST_CLOCK: '2026-10-10T12:00:00Z',
-    RUNTIME_LABELS: { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' },
-    routeFor: manifest.routeFor,
-    references: () => ({ comparison: 'pending' }),
-    process: { env: { PUI_FINF_PRESET_CHECK: 'failure' } },
-    writeJson: async (file: string, value: unknown) => {
-      receipts.set(file, value);
-    },
-    expect,
-    URL,
-    Error,
-  }) as (testCase: unknown) => Promise<void>;
+  const run = execute(
+    `${statements(['installFixedHostDate', 'captureFailureDiagnostics', 'runCase'])}; runCase;`,
+    {
+      browser,
+      output: '/test-only',
+      focusDiagnostics: false,
+      path,
+      createHash,
+      writeFile: async (file: string, value: string) => {
+        diagnosticFiles.set(file, value);
+      },
+      readFile: async (file: string) =>
+        options.imageBytes ? options.imageBytes(file) : Buffer.from('not-a-real-screenshot'),
+      revision: 'a'.repeat(40),
+      tree: 'b'.repeat(40),
+      baseUrl: 'http://127.0.0.1:9999',
+      HOST_CLOCK: '2026-10-10T12:00:00Z',
+      RUNTIME_LABELS: { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' },
+      routeFor: manifest.routeFor,
+      references: () => ({ comparison: 'pending' }),
+      process: { env: { PUI_FINF_PRESET_CHECK: 'failure' } },
+      writeJson: async (file: string, value: unknown) => {
+        receipts.set(file, value);
+      },
+      expect,
+      URL,
+      Error,
+    }
+  ) as (testCase: unknown) => Promise<void>;
   const testCase = {
     id: `shadcn-${options.component ?? 'form'}`,
     group: options.component === 'popover' ? 'disclosure-overlays' : 'forms',
@@ -210,6 +215,100 @@ function mockedCase(
 }
 
 describe('Finf representative evidence harness, no native browser', () => {
+  it('installs the fixed civil date before navigation without replacing native clocks', async () => {
+    const fixture = mockedCase();
+    await fixture.run();
+    expect(fixture.page.clock.setFixedTime).not.toHaveBeenCalled();
+    expect(fixture.page.addInitScript).toHaveBeenCalledOnce();
+    expect(fixture.page.addInitScript.mock.invocationCallOrder[0]).toBeLessThan(
+      fixture.page.goto.mock.invocationCallOrder[0]!
+    );
+    const [install, date] = fixture.page.addInitScript.mock.calls[0]!;
+    expect(date).toBe('2026-10-10T12:00:00Z');
+    const context = vm.createContext({});
+    vm.runInContext(`(${install.toString()})(${JSON.stringify(date)})`, context);
+    expect(vm.runInContext('new Date().toISOString()', context)).toBe('2026-10-10T12:00:00.000Z');
+  });
+
+  it('fixes no-argument Date construction and calls while preserving explicit dates and subclasses', () => {
+    const fixed = Date.parse('2026-10-10T12:00:00Z');
+    const context = vm.createContext({});
+    vm.runInContext('globalThis.NativeDate = Date', context);
+    vm.runInContext(
+      transformSync(
+        `${statements(['installFixedHostDate'])}; installFixedHostDate('2026-10-10T12:00:00Z');`,
+        { loader: 'ts' }
+      ).code,
+      context
+    );
+    expect(vm.runInContext('Date.now()', context)).toBe(fixed);
+    expect(vm.runInContext('new Date().getTime()', context)).toBe(fixed);
+    expect(vm.runInContext('Date()', context)).toBe(new Date(fixed).toString());
+    expect(vm.runInContext('Date(0)', context)).toBe(new Date(fixed).toString());
+    expect(vm.runInContext('new Date(0).getTime()', context)).toBe(0);
+    expect(vm.runInContext('new Date(2024, 1, 29).getTime()', context)).toBe(
+      new Date(2024, 1, 29).getTime()
+    );
+    expect(vm.runInContext('new Date("2024-01-02T03:04:05Z").toISOString()', context)).toBe(
+      '2024-01-02T03:04:05.000Z'
+    );
+    expect(vm.runInContext('Number.isNaN(new Date(undefined).getTime())', context)).toBe(true);
+    expect(
+      vm.runInContext(
+        'Date.parse === NativeDate.parse && Date.UTC === NativeDate.UTC && Date.prototype === NativeDate.prototype',
+        context
+      )
+    ).toBe(true);
+    expect(
+      vm.runInContext(
+        'class ChildDate extends Date {}; const value = new ChildDate(); value instanceof ChildDate && value instanceof Date && value.getTime() === Date.now()',
+        context
+      )
+    ).toBe(true);
+  });
+
+  it('preserves timer, animation frame, performance and locale identities', () => {
+    const native = {
+      setTimeout: vi.fn(),
+      clearTimeout: vi.fn(),
+      setInterval: vi.fn(),
+      clearInterval: vi.fn(),
+      requestAnimationFrame: vi.fn(),
+      cancelAnimationFrame: vi.fn(),
+      requestIdleCallback: vi.fn(),
+      cancelIdleCallback: vi.fn(),
+      performance: { now: vi.fn(() => 41), timeOrigin: 123 },
+      Intl,
+    };
+    const context = vm.createContext({ ...native });
+    vm.runInContext(
+      transformSync(
+        `${statements(['installFixedHostDate'])}; installFixedHostDate('2026-10-10T12:00:00Z');`,
+        { loader: 'ts' }
+      ).code,
+      context
+    );
+    for (const [name, original] of Object.entries(native)) expect(context[name]).toBe(original);
+    expect(context.performance.now()).toBe(41);
+    expect(context.Intl.DateTimeFormat).toBe(Intl.DateTimeFormat);
+    for (const value of Object.values(native))
+      if (typeof value === 'function') expect(value).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid host date without replacing Date', () => {
+    const context = vm.createContext({});
+    vm.runInContext('globalThis.NativeDate = Date', context);
+    expect(() =>
+      vm.runInContext(
+        transformSync(`${statements(['installFixedHostDate'])}; installFixedHostDate('invalid');`, {
+          loader: 'ts',
+        }).code,
+        context
+      )
+    ).toThrow('Invalid host date: invalid');
+    expect(vm.runInContext('Date === NativeDate', context)).toBe(true);
+  });
+
   it('registers the existing suite with one official owner and the original five representative groups plus four reservation cases and separately owned suites', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
     expect(manifest.cases).toHaveLength(42);
@@ -639,11 +738,120 @@ describe('Finf representative evidence harness, no native browser', () => {
     });
   });
 
-  it('records each original Calendar locator read without changing the poll budget or value', async () => {
+  it('reads the current Calendar attribute rather than a previously observed close sample', () => {
+    const fixture = calendarCloseProbeFixture();
+    expect(fixture.probe.readExpanded()).toBe('true');
+    fixture.time(20);
+    fixture.key();
+    fixture.time(37);
+    fixture.mutate(['true'], 'false');
+    expect(fixture.probe.readExpanded()).toBe('false');
+    fixture.mutate(['false'], 'true');
+    expect(fixture.probe.readExpanded()).toBe('true');
+    expect(fixture.probe.stop(fixture.element)).toMatchObject({ closedAt: 37, expanded: 'true' });
+  });
+
+  it('separates Calendar getter execution and lazy style time without altering its value', () => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.mutate(['true'], 'false');
+    let now = 100;
+    fixture.time(now);
+    const nativeStyle = fixture.window.getComputedStyle.bind(fixture.window);
+    const style = vi.spyOn(fixture.window, 'getComputedStyle').mockImplementation((element) => {
+      const computed = nativeStyle(element);
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'display') fixture.time((now += 7));
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    try {
+      expect(fixture.probe.readExpanded()).toBe('false');
+      // stop() also captures post-assertion styles; those must not enter read timing.
+      const observation = fixture.probe.stop(fixture.element);
+      expect(observation.liveReads).toHaveLength(1);
+      expect(observation.liveReads[0]).toMatchObject({
+        startedAt: 100,
+        finishedAt: 128,
+        value: 'false',
+        candidates: 1,
+        styleReads: 4,
+        styleElapsedMs: 28,
+        slowestStyle: { elapsedMs: 7, tag: 'DIV', ref: 'month-trigger' },
+      });
+    } finally {
+      style.mockRestore();
+      fixture.window.happyDOM.abort();
+    }
+  });
+
+  it('bounds live Calendar getter diagnostics without replacing subsequent current reads', () => {
+    const fixture = calendarCloseProbeFixture();
+    for (let index = 0; index < 40; index += 1) expect(fixture.probe.readExpanded()).toBe('true');
+    fixture.mutate(['true'], 'false');
+    expect(fixture.probe.readExpanded()).toBe('false');
+    const observation = fixture.probe.stop(fixture.element);
+    expect(observation.liveReads).toHaveLength(32);
+    expect(observation.droppedReads).toBe(9);
+    fixture.window.happyDOM.abort();
+  });
+
+  it.each([
+    'detached',
+    'replaced',
+    'duplicate',
+    'implicit-select',
+    'implicit-input',
+    'role',
+    'name',
+    'labelled-by',
+    'hidden',
+    'inert',
+    'aria-hidden',
+    'display-none',
+    'visibility-hidden',
+    'owner-id',
+    'owner-demo',
+    'reparented',
+  ])('rejects a closed Calendar attribute on a %s subject', (fault) => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.mutate(['true'], 'false');
+    if (fault === 'detached') fixture.element.remove();
+    if (fault === 'replaced') fixture.element.replaceWith(fixture.element.cloneNode(true));
+    if (fault === 'duplicate') fixture.parent.append(fixture.element.cloneNode(true));
+    if (fault === 'implicit-select' || fault === 'implicit-input') {
+      const duplicate = fixture.window.document.createElement(
+        fault === 'implicit-select' ? 'select' : 'input'
+      );
+      duplicate.setAttribute('aria-label', 'Month');
+      if (fault === 'implicit-input') duplicate.setAttribute('list', 'month-options');
+      fixture.parent.append(duplicate);
+    }
+    if (fault === 'role') fixture.element.setAttribute('role', 'button');
+    if (fault === 'name') fixture.element.setAttribute('aria-label', 'Year');
+    if (fault === 'labelled-by') fixture.element.setAttribute('aria-labelledby', 'other-name');
+    if (fault === 'hidden') fixture.parent.setAttribute('hidden', '');
+    if (fault === 'inert') fixture.parent.setAttribute('inert', '');
+    if (fault === 'aria-hidden') fixture.parent.setAttribute('aria-hidden', 'true');
+    if (fault === 'display-none') fixture.parent.style.display = 'none';
+    if (fault === 'visibility-hidden') fixture.parent.style.visibility = 'hidden';
+    if (fault === 'owner-id') fixture.parent.setAttribute('data-previewer-id', 'replacement');
+    if (fault === 'owner-demo') fixture.parent.setAttribute('data-demo-id', 'replacement');
+    if (fault === 'reparented') {
+      const replacement = fixture.parent.cloneNode(false);
+      fixture.parent.after(replacement);
+      replacement.append(fixture.element);
+    }
+    expect(fixture.probe.readExpanded()).toBeNull();
+    fixture.probe.stop();
+  });
+
+  it('records each live Calendar probe read without changing the poll budget or value', async () => {
     let now = 100;
     const currentElement = { dispose: vi.fn(async () => {}) };
     const getterError = new Error('selector unavailable', { cause: new Error('protocol busy') });
-    const getAttribute = vi
+    const readExpanded = vi
       .fn()
       .mockImplementationOnce(async () => {
         now = 150;
@@ -658,13 +866,15 @@ describe('Finf representative evidence harness, no native browser', () => {
         return 'false';
       });
     const probe = {
-      evaluate: vi.fn(async (read, current) => read({ stop: () => ({ current }) }, current)),
+      evaluate: vi.fn(async (read, current) =>
+        read({ readExpanded, stop: () => ({ current }) }, current)
+      ),
       dispose: vi.fn(async () => {}),
     };
     const trigger = {
       evaluateHandle: vi.fn(async () => probe),
       elementHandle: vi.fn(async () => currentElement),
-      getAttribute,
+      getAttribute: vi.fn(),
     };
     const capture = vi.fn(async () => {});
     const poll = vi.fn((read: () => Promise<unknown>) => ({
@@ -690,7 +900,8 @@ describe('Finf representative evidence harness, no native browser', () => {
     );
     expect(poll).toHaveBeenCalledOnce();
     expect(poll.mock.calls[0]).toHaveLength(1);
-    expect(getAttribute.mock.calls).toEqual(Array.from({ length: 3 }, () => ['aria-expanded']));
+    expect(readExpanded.mock.calls).toEqual([[], [], []]);
+    expect(trigger.getAttribute).not.toHaveBeenCalled();
     const observation = (capture.mock.calls as unknown as Array<[string, any]>)[0][1];
     expect(observation.assertionPassed).toBe(true);
     expect(observation.nodeTrace).toMatchObject({
@@ -719,10 +930,17 @@ describe('Finf representative evidence harness, no native browser', () => {
     const capture = vi.fn(async () => {});
     const probe = {
       evaluate: vi.fn(async (read, current) => {
-        now = 1500;
-        finish('false');
-        await Promise.resolve();
-        return read({ stop: () => ({ expanded: 'false' }) }, current);
+        return read(
+          {
+            readExpanded: () => pending,
+            stop: () => {
+              now = 1500;
+              finish('false');
+              return { expanded: 'false' };
+            },
+          },
+          current
+        );
       }),
       dispose: vi.fn(async () => {}),
     };
@@ -1338,6 +1556,147 @@ describe('Popover same-phase capture and controls, no native browser', () => {
   });
 });
 
+describe('Calendar optional native focus trace, DOM fixture only', () => {
+  function fixture(error?: Error) {
+    const window = new Window();
+    const document = window.document;
+    document.body.innerHTML =
+      '<section data-previewer-id="calendar"><div role="combobox" aria-label="Month" aria-controls="month-options" tabindex="0">10月</div></section><div role="listbox" id="month-options"><div role="option" aria-selected="true" tabindex="0">10月</div></div><button id="foreign">Foreign</button>';
+    const root = document.querySelector('[data-previewer-id]')!;
+    const option = document.querySelector('[role="option"]') as HTMLDivElement;
+    const original = window.HTMLElement.prototype.focus;
+    const nativeFocus = vi.fn(function (
+      this: InstanceType<typeof window.HTMLElement>,
+      ...args: unknown[]
+    ) {
+      if (error) throw error;
+      return Reflect.apply(original, this, args);
+    });
+    window.HTMLElement.prototype.focus = nativeFocus;
+    const createProbe = execute(
+      `${statements(['createCalendarFocusEventProbe'])}; createCalendarFocusEventProbe;`,
+      {
+        HTMLElement: window.HTMLElement,
+        Element: window.Element,
+        MutationObserver: window.MutationObserver,
+        performance: { now: () => 123, timeOrigin: 100_000 },
+      }
+    );
+    const probe = createProbe(root);
+    return {
+      window,
+      document,
+      option,
+      nativeFocus,
+      probe,
+      close() {
+        probe.stop();
+        window.HTMLElement.prototype.focus = original;
+        window.happyDOM.abort();
+      },
+    };
+  }
+
+  it('passes the same native focus target and options through and restores the original function', () => {
+    const f = fixture();
+    try {
+      const options = { preventScroll: true };
+      // The pinned host types omit options; the probe must still forward them unchanged.
+      Reflect.apply(f.option.focus, f.option, [options]);
+      expect(f.nativeFocus).toHaveBeenCalledOnce();
+      expect(f.nativeFocus).toHaveBeenCalledWith(options);
+      expect(f.nativeFocus.mock.contexts[0]).toBe(f.option);
+      expect(f.document.activeElement).toBe(f.option);
+      const trace = f.probe.stop();
+      expect(
+        trace.events
+          .filter((event: any) => event.kind.startsWith('native-focus-'))
+          .map((event: any) => event.kind)
+      ).toEqual(['native-focus-call', 'native-focus-return']);
+      expect(trace.events.some((event: any) => event.kind === 'focusin')).toBe(true);
+      expect(f.window.HTMLElement.prototype.focus).toBe(f.nativeFocus);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('rethrows the exact native focus error and records no successful return', () => {
+    const error = new Error('native focus failed');
+    const f = fixture(error);
+    try {
+      let caught;
+      try {
+        f.option.focus();
+      } catch (value) {
+        caught = value;
+      }
+      expect(caught).toBe(error);
+      const trace = f.probe.stop();
+      expect(trace.events.map((event: any) => event.kind)).toEqual([
+        'native-focus-call',
+        'native-focus-throw',
+      ]);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('caps diagnostic records without suppressing any native focus calls', () => {
+    const f = fixture();
+    try {
+      for (let index = 0; index < 300; index += 1) f.option.focus();
+      const trace = f.probe.stop();
+      expect(f.nativeFocus).toHaveBeenCalledTimes(300);
+      expect(trace.events).toHaveLength(256);
+      expect(trace.dropped).toBeGreaterThan(0);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('retains actual input and focus after hydration exhausts the attribute record capacity', async () => {
+    const f = fixture();
+    try {
+      for (let index = 0; index < 300; index += 1)
+        f.option.setAttribute('data-focused', `before-${index}`);
+      await f.window.happyDOM.waitUntilComplete();
+      f.option.dispatchEvent(
+        new f.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+      );
+      f.option.focus();
+      for (let index = 0; index < 300; index += 1)
+        f.option.setAttribute('data-focused', `after-${index}`);
+      await f.window.happyDOM.waitUntilComplete();
+      const trace = f.probe.stop();
+      expect(f.nativeFocus).toHaveBeenCalledOnce();
+      expect(f.document.activeElement).toBe(f.option);
+      expect(trace.events).toHaveLength(256);
+      expect(trace.dropped).toBeGreaterThan(0);
+      expect(
+        trace.events
+          .filter((event: any) => event.kind !== 'attribute-delivery')
+          .map((event: any) => event.kind)
+      ).toEqual(['keydown', 'native-focus-call', 'focusin', 'native-focus-return']);
+      expect(trace.events.some((event: any) => event.current === 'after-299')).toBe(true);
+    } finally {
+      f.close();
+    }
+  });
+
+  it('does not attribute an unrelated target to the Calendar owner', () => {
+    const f = fixture();
+    try {
+      const foreign = f.document.getElementById('foreign') as HTMLButtonElement;
+      foreign.focus();
+      expect(f.document.activeElement).toBe(foreign);
+      expect(f.nativeFocus).toHaveBeenCalledOnce();
+      expect(f.probe.stop().events).toEqual([]);
+    } finally {
+      f.close();
+    }
+  });
+});
+
 type Runtime = 'wc' | 'react' | 'vue' | 'vue2';
 function runtimeFixture(shell: 'fixed-family' | 'generic', runtime: Runtime = 'react') {
   const window = new Window();
@@ -1353,7 +1712,7 @@ function runtimeFixture(shell: 'fixed-family' | 'generic', runtime: Runtime = 'r
   const demo = `<div class="pui-runtime-preview-surface" data-demo-ref="__website_runtime_preview_surface__" data-pui-root><${tag} data-pui-root data-demo-ref="form"><input></${tag}></div>`;
   document.body.innerHTML =
     shell === 'fixed-family'
-      ? `<section data-previewer-id="test" data-projection-mode="fixed-family"><div class="host"><div data-projection-generation-state="active"><div data-projection-scope data-projection-state="ready" data-projection-runtime="${runtime}" aria-busy="false"><div data-projection-control="runtime" data-runtime-tabs><div role="tablist">${tabs}</div></div><div data-projection-content>${demo}</div></div></div></div></section>`
+      ? `<section data-previewer-id="test" data-projection-mode="fixed-family"><div class="host" data-projection-owner="test"><div data-projection-generation-state="active"><div data-projection-scope="test" data-projection-state="ready" data-projection-runtime="${runtime}" aria-busy="false"><div data-projection-owner="test" data-projection-control="runtime" data-runtime-tabs><div role="tablist">${tabs}</div></div><div data-projection-owner="test" data-projection-content>${demo}</div></div></div></div></section>`
       : `<section data-previewer-id="test"><div data-runtime-tabs-mount><div data-runtime-tabs-root aria-busy="false"><div role="tablist">${tabs}</div><div role="tabpanel"><div class="host">${demo}</div></div></div></div></section>`;
   const root = document.querySelector('[data-previewer-id]')!;
   const host = root.querySelector('.host')!;
@@ -1407,6 +1766,60 @@ describe.each(['fixed-family', 'generic'] as const)(
         fixture.window.happyDOM.abort();
       }
     );
+
+    it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+      'keeps %s readiness on the demo host when code Copy owns another projection scope',
+      (runtime) => {
+        const fixture = runtimeFixture(shell, runtime);
+        const copy = fixture.document.createElement('aside');
+        copy.innerHTML = `<div data-projection-scope="website-copy" data-projection-state="ready" data-projection-runtime="${runtime}"><div data-projection-content data-projection-owner="website-copy"><button data-pui-root>Copy</button></div></div>`;
+        fixture.root.append(copy);
+        expect(fixture.root.querySelectorAll('[data-projection-scope]')).toHaveLength(
+          shell === 'fixed-family' ? 2 : 1
+        );
+        expect(fixture.observe()).toMatchObject({
+          ready: true,
+          shell,
+          framework: runtime,
+          targetCount: 1,
+          surfaceCount: 1,
+        });
+        fixture.window.happyDOM.abort();
+      }
+    );
+
+    if (shell === 'fixed-family') {
+      it.each(['.host', '[data-projection-scope]', '[data-projection-content]'])(
+        'rejects a duplicate %s inside the runtime host boundary',
+        (selector) => {
+          const fixture = runtimeFixture(shell);
+          const element = fixture.root.querySelector(selector)!;
+          element.after(element.cloneNode(true));
+          expect(fixture.observe().ready).toBe(false);
+          fixture.window.happyDOM.abort();
+        }
+      );
+
+      it.each([
+        ['.host', 'data-projection-owner'],
+        ['[data-projection-scope]', 'data-projection-scope'],
+        ['[data-projection-control="runtime"]', 'data-projection-owner'],
+        ['[data-projection-content]', 'data-projection-owner'],
+      ])('rejects another owner on %s', (selector, attribute) => {
+        const fixture = runtimeFixture(shell);
+        fixture.root.querySelector(selector)!.setAttribute(attribute, 'website-copy');
+        expect(fixture.observe().ready).toBe(false);
+        fixture.window.happyDOM.abort();
+      });
+
+      it('rejects a matching scope moved outside its host', () => {
+        const fixture = runtimeFixture(shell);
+        const scope = fixture.root.querySelector('[data-projection-scope]')!;
+        fixture.host.after(scope);
+        expect(fixture.observe().ready).toBe(false);
+        fixture.window.happyDOM.abort();
+      });
+    }
 
     it('uses the matching real Tabs shell and accessible labels, without legacy Select fallback', async () => {
       const fixture = runtimeFixture(shell);

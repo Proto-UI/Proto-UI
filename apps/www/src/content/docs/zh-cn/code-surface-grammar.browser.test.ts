@@ -715,8 +715,24 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                       headerBox!.y + headerBox!.height
                     );
                     expect(sourceBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
-                  } else
-                    expect(sourceBox!.x + sourceBox!.width).toBeLessThanOrEqual(copyBox!.x + 1);
+                  } else {
+                    const viewport = shell.locator(
+                      '[data-code-scroll-ready] [data-code-scroll-viewport]'
+                    );
+                    const viewportBox = await viewport.boundingBox();
+                    expect(viewportBox).not.toBeNull();
+                    // Long source keeps its max-content width inside the real
+                    // ScrollArea. Its clipping viewport must stop before Copy.
+                    expect(viewportBox!.x + viewportBox!.width).toBeLessThanOrEqual(copyBox!.x + 1);
+                    expect(
+                      await viewport.evaluate((node) => ({
+                        overflowX: getComputedStyle(node).overflowX,
+                        ownsSource: node.contains(
+                          node.closest('[data-code-shell]')!.querySelector('pre')
+                        ),
+                      }))
+                    ).toEqual({ overflowX: 'auto', ownsSource: true });
+                  }
                   expect(await source.evaluate((pre) => getComputedStyle(pre).maxHeight)).toBe(
                     'none'
                   );

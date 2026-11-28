@@ -3,6 +3,7 @@ import { transformSync } from 'esbuild';
 import { runInNewContext } from 'node:vm';
 import {
   headerOptionTextClipping,
+  headerPreferencePaintSettled,
   headerPopupSettled,
   popupOptionContrast,
   readHeaderPopupPaint,
@@ -32,7 +33,12 @@ it('rejects entering, faded and running-animation popup frames', () => {
   expect(headerPopupSettled(popup)).toBe(false);
 });
 it('keeps browser capture callbacks self-contained under TSX name preservation', () => {
-  for (const callback of [headerPopupSettled, readHeaderPopupPaint, readHeaderPopupTextGeometry]) {
+  for (const callback of [
+    headerPreferencePaintSettled,
+    headerPopupSettled,
+    readHeaderPopupPaint,
+    readHeaderPopupTextGeometry,
+  ]) {
     const compiled = transformSync(`const probe = ${String(callback)};`, {
       loader: 'ts',
       format: 'cjs',
@@ -41,6 +47,46 @@ it('keeps browser capture callbacks self-contained under TSX name preservation',
     const probe = runInNewContext(`${compiled}\nprobe;`);
     expect(String(probe)).not.toMatch(/\b__name\s*\(/);
   }
+});
+it('rejects compact entry and exit paint without delaying settled desktop preferences', () => {
+  document.body.innerHTML =
+    '<header data-site-header data-site-menu-transition="entering"><div data-site-header-context></div><div data-site-header-panel><button id="preference"></button></div></header>';
+  for (const element of document.querySelectorAll('*'))
+    Object.assign(element, { getAnimations: vi.fn(() => [] as Animation[]) });
+  const preference = document.getElementById('preference')!;
+  const header = document.querySelector('header')!;
+  expect(headerPreferencePaintSettled(preference)).toBe(false);
+  header.dataset.siteMenuTransition = 'entered';
+  expect(headerPreferencePaintSettled(preference)).toBe(true);
+  header.dataset.siteMenuTransition = 'leaving';
+  expect(headerPreferencePaintSettled(preference)).toBe(false);
+  document.querySelector('[data-site-header-context]')!.append(preference);
+  expect(headerPreferencePaintSettled(preference)).toBe(true);
+  preference.setAttribute('inert', '');
+  expect(headerPreferencePaintSettled(preference)).toBe(false);
+  preference.removeAttribute('inert');
+  preference.remove();
+  expect(headerPreferencePaintSettled(preference)).toBe(false);
+});
+it('includes moving ancestors and descendants but excludes unrelated sibling animations', () => {
+  document.body.innerHTML =
+    '<div id="parent"><button id="preference"></button><div id="other"></div></div>';
+  for (const element of document.querySelectorAll('*'))
+    Object.assign(element, { getAnimations: vi.fn(() => [] as Animation[]) });
+  const preference = document.getElementById('preference')!;
+  const parent = document.getElementById('parent')!;
+  const running = [{ playState: 'running' } as Animation];
+  vi.mocked(document.getElementById('other')!.getAnimations).mockReturnValue(running);
+  expect(headerPreferencePaintSettled(preference)).toBe(true);
+  vi.mocked(parent.getAnimations).mockReturnValue(running);
+  expect(headerPreferencePaintSettled(preference)).toBe(false);
+  expect(parent.getAnimations).toHaveBeenCalledWith();
+  vi.mocked(parent.getAnimations).mockReturnValue([{ playState: 'finished' } as Animation]);
+  vi.mocked(preference.getAnimations).mockReturnValue(running);
+  expect(headerPreferencePaintSettled(preference)).toBe(false);
+  expect(preference.getAnimations).toHaveBeenCalledWith({ subtree: true });
+  vi.mocked(preference.getAnimations).mockReturnValue([{ playState: 'idle' } as Animation]);
+  expect(headerPreferencePaintSettled(preference)).toBe(true);
 });
 it('distinguishes readable opaque pairs from dark-on-dark failures', () => {
   expect(

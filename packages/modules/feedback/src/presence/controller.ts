@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import {
   snapshotPresencePresentation,
   snapshotPresentationOwnerFrame,
@@ -343,26 +344,15 @@ export function createPresenceController(options: PresenceControllerOptions) {
     dispose() {
       if (disposed) return;
       disposed = true;
-      let failed = false;
-      let error: unknown;
-      const cleanup = (callback: () => void) => {
-        try {
-          callback();
-        } catch (failure) {
-          if (!failed) {
-            failed = true;
-            error = failure;
-          }
-        }
-      };
       const unsubs = [...subscriptions];
       subscriptions.clear();
       declaration = null;
-      cleanup(release);
-      for (const off of unsubs) cleanup(off);
-      owners.clear();
-      writers.clear();
-      if (failed) throw error;
+      try {
+        runAllSteps([release, ...unsubs]);
+      } finally {
+        owners.clear();
+        writers.clear();
+      }
     },
     diagnostics: () => Object.freeze([...reasons, ...(sink?.diagnostics?.() ?? [])]),
   };

@@ -30,6 +30,22 @@ const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2:
 const popoverTriggerName = (family: Family) =>
   family === 'bootstrap-2-3-2' ? 'Click to toggle popover' : 'Open popover';
 const HOST_CLOCK = '2026-10-10T12:00:00Z';
+function installFixedHostDate(isoDate: string) {
+  const NativeDate = globalThis.Date;
+  const timestamp = NativeDate.parse(isoDate);
+  if (!Number.isFinite(timestamp)) throw new Error(`Invalid host date: ${isoDate}`);
+  const now = () => timestamp;
+  // Freeze the calendar's civil date only. Playwright's Clock also replaces rAF,
+  // performance and timers, serializing frame callbacks through its timer queue.
+  // Native interaction and animation deadlines must keep their native scheduling.
+  globalThis.Date = new Proxy(NativeDate, {
+    apply: () => new NativeDate(timestamp).toString(),
+    construct: (target, args, newTarget) =>
+      Reflect.construct(target, args.length ? args : [timestamp], newTarget),
+    get: (target, property, receiver) =>
+      property === 'now' ? now : Reflect.get(target, property, receiver),
+  });
+}
 const RECORDS = {
   form: 'internal/records/2026-10-10-finf-form-upstream-paint.md',
   calendar: 'internal/records/2026-10-10-calendar-five-state-reference-correction.md',
@@ -43,6 +59,15 @@ const output =
 const revision = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
 const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}']).toString().trim();
 const requestedGroup = process.env.PUI_FINF_FEATURE_GROUP;
+const focusDiagnostics = process.env.PUI_FINF_FOCUS_DIAGNOSTICS === '1';
+type FocusReadDiagnostic = {
+  startedAt: number;
+  settledAt: number | null;
+  status: 'pending' | 'resolved' | 'rejected';
+  observation?: unknown;
+  error?: string;
+};
+const focusReadsByPage = new WeakMap<Page, FocusReadDiagnostic[]>();
 let browser: Browser;
 let baseUrl = '';
 
@@ -208,6 +233,59 @@ async function settledPaint(locator: Locator) {
 
 function createCalendarCloseProbe(element: Element, key: string) {
   const document = element.ownerDocument;
+  const owner = element.closest('[data-previewer-id]');
+  const ownerId = owner?.getAttribute('data-previewer-id');
+  const demoId = owner?.getAttribute('data-demo-id');
+  const label = element.getAttribute('aria-label');
+  type LiveRead = {
+    startedAt: number;
+    finishedAt: number | null;
+    expandedAtStart: string | null;
+    connectedAtStart: boolean;
+    value?: string | null;
+    candidates?: number;
+    styleReads: number;
+    styleElapsedMs: number;
+    slowestStyle: { startedAt: number; elapsedMs: number; tag: string; ref: string | null } | null;
+  };
+  const liveReads: LiveRead[] = [];
+  let activeRead: LiveRead | null = null;
+  let droppedReads = 0;
+  const exposed = (candidate: Element) => {
+    for (let current: Element | null = candidate; current; current = current.parentElement) {
+      if (
+        current.hasAttribute('hidden') ||
+        current.hasAttribute('inert') ||
+        current.getAttribute('aria-hidden') === 'true'
+      )
+        return false;
+      const startedAt = activeRead ? performance.now() : 0;
+      let hidden = false;
+      try {
+        const style = document.defaultView?.getComputedStyle(current);
+        hidden =
+          style?.display === 'none' ||
+          style?.visibility === 'hidden' ||
+          style?.visibility === 'collapse';
+      } finally {
+        // Include CSS property access: a computed-style object can resolve lazily.
+        if (activeRead) {
+          const elapsedMs = performance.now() - startedAt;
+          activeRead.styleReads += 1;
+          activeRead.styleElapsedMs += elapsedMs;
+          if (!activeRead.slowestStyle || elapsedMs > activeRead.slowestStyle.elapsedMs)
+            activeRead.slowestStyle = {
+              startedAt,
+              elapsedMs,
+              tag: current.tagName,
+              ref: current.getAttribute('data-demo-ref'),
+            };
+        }
+      }
+      if (hidden) return false;
+    }
+    return true;
+  };
   const inspectSubject = (subject: Element | null, includeStyle = false) => {
     if (!subject) return null;
     const ancestors = [];
@@ -284,6 +362,67 @@ function createCalendarCloseProbe(element: Element, key: string) {
   });
   document.addEventListener('keydown', onKey, true);
   return {
+    readExpanded() {
+      const previousRead = activeRead;
+      activeRead =
+        liveReads.length < 32
+          ? {
+              startedAt: performance.now(),
+              finishedAt: null,
+              expandedAtStart: element.getAttribute('aria-expanded'),
+              connectedAtStart: element.isConnected,
+              styleReads: 0,
+              styleElapsedMs: 0,
+              slowestStyle: null,
+            }
+          : null;
+      const read = activeRead;
+      if (read) liveReads.push(read);
+      else droppedReads += 1;
+      try {
+        const value = this.readCurrentExpanded();
+        if (read) read.value = value;
+        return value;
+      } finally {
+        if (read) read.finishedAt = performance.now();
+        activeRead = previousRead;
+      }
+    },
+    readCurrentExpanded() {
+      // The role/name locator bound this physical Trigger before input. Read
+      // its current attribute inside the unchanged poll deadline, without a
+      // fresh accessibility-tree traversal for every protocol round trip.
+      // A cached close sample, detached/replaced owner, ambiguous subject or
+      // a changed accessible name cannot satisfy this observation.
+      if (
+        !element.isConnected ||
+        !owner?.isConnected ||
+        element.closest('[data-previewer-id]') !== owner ||
+        owner.getAttribute('data-previewer-id') !== ownerId ||
+        owner.getAttribute('data-demo-id') !== demoId ||
+        !label
+      )
+        return null;
+      const allCandidates = Array.from(
+        owner.querySelectorAll('[role="combobox"], select, input[list]')
+      );
+      if (activeRead) activeRead.candidates = allCandidates.length;
+      const candidates = allCandidates.filter(exposed);
+      // Calendar caption names are explicit aria-labels. Refuse an unexpected
+      // naming source instead of guessing a computed name or missing a duplicate.
+      if (
+        candidates.some(
+          (candidate) =>
+            !candidate.getAttribute('aria-label') || candidate.hasAttribute('aria-labelledby')
+        )
+      )
+        return null;
+      const current = candidates.filter(
+        (candidate) => candidate.getAttribute('aria-label') === label
+      );
+      if (current.length !== 1 || current[0] !== element) return null;
+      return element.getAttribute('aria-expanded');
+    },
     stop(currentElement: Element | null = null) {
       observer.disconnect();
       document.removeEventListener('keydown', onKey, true);
@@ -304,6 +443,8 @@ function createCalendarCloseProbe(element: Element, key: string) {
         currentSubject: inspectSubject(currentElement, true),
         sameCurrentElement: currentElement === null ? null : currentElement === element,
         events,
+        liveReads,
+        droppedReads,
       };
     },
   };
@@ -361,7 +502,7 @@ async function closeCalendarPopup(
         };
         reads.push(read);
         try {
-          const value = await trigger.getAttribute('aria-expanded');
+          const value = await probe.evaluate((current) => current.readExpanded());
           read.value = value;
           read.status = 'resolved';
           return value;
@@ -700,7 +841,205 @@ async function installPopoverNegativeControl(panel: Locator, control: string | u
   }, control);
 }
 
+// Diagnostic-only call-through: preserve each native focus invocation and input.
+function createCalendarFocusEventProbe(root: Element) {
+  const document = root.ownerDocument;
+  const events: Array<Record<string, unknown>> = [];
+  let dropped = 0;
+  const describe = (element: Element | null) => {
+    if (!element) return null;
+    const attributes = [
+      'role',
+      'aria-label',
+      'aria-expanded',
+      'aria-selected',
+      'tabindex',
+      'data-demo-ref',
+      'data-pui-view-pending',
+      'data-pui-view-detached',
+      'data-pui-view-revealing',
+      'data-transition-state',
+      'data-focused',
+    ];
+    return {
+      tag: element.tagName,
+      text: element.textContent?.trim().slice(0, 80),
+      connected: element.isConnected,
+      attributes: Object.fromEntries(
+        attributes
+          .filter((key) => element.hasAttribute(key))
+          .map((key) => [key, element.getAttribute(key)])
+      ),
+    };
+  };
+  const relevant = (element: Element) => {
+    if (
+      root.contains(element) &&
+      ['combobox', 'gridcell'].includes(element.getAttribute('role') ?? '')
+    )
+      return true;
+    const listbox = element.closest('[role="listbox"]');
+    return (
+      !!listbox?.id &&
+      Array.from(root.querySelectorAll('[role="combobox"]')).some(
+        (trigger) => trigger.getAttribute('aria-controls') === listbox.id
+      )
+    );
+  };
+  const record = (kind: string, element: Element, detail: Record<string, unknown> = {}) => {
+    if (events.length >= 256) {
+      dropped += 1;
+      // Hydration can fill the buffer before the journey's first input. Prefer
+      // evicting an older attribute delivery so actual input/focus stays visible.
+      const attribute = events.findIndex((event) => event.kind === 'attribute-delivery');
+      if (attribute < 0) return;
+      events.splice(attribute, 1);
+    }
+    const ancestors: Array<ReturnType<typeof describe>> = [];
+    for (
+      let parent = element.parentElement;
+      parent && ancestors.length < 6;
+      parent = parent.parentElement
+    ) {
+      if (
+        parent.matches(
+          '[data-pui-view-pending], [data-pui-view-detached], [data-pui-view-revealing], [role="listbox"]'
+        )
+      )
+        ancestors.push(describe(parent));
+    }
+    events.push({
+      kind,
+      at: performance.now(),
+      subject: describe(element),
+      active: describe(document.activeElement),
+      ancestors,
+      ...detail,
+    });
+  };
+  const nativeFocus = HTMLElement.prototype.focus;
+  function observedFocus(this: HTMLElement, options?: FocusOptions) {
+    const tracked = relevant(this);
+    if (tracked) record('native-focus-call', this, { preventScroll: options?.preventScroll });
+    try {
+      const result = Reflect.apply(nativeFocus, this, arguments);
+      if (tracked) record('native-focus-return', this);
+      return result;
+    } catch (error) {
+      if (tracked) record('native-focus-throw', this, { error: String(error) });
+      throw error;
+    }
+  }
+  HTMLElement.prototype.focus = observedFocus;
+  const onEvent = (event: Event) => {
+    const element = event.target instanceof Element ? event.target : null;
+    const subject = element?.closest('[role="combobox"], [role="option"], [role="gridcell"]');
+    if (subject && relevant(subject))
+      record(event.type, subject, {
+        isTrusted: event.isTrusted,
+        key: 'key' in event ? event.key : undefined,
+      });
+  };
+  const names = ['keydown', 'pointerdown', 'click', 'focusin', 'focusout'];
+  for (const name of names) document.addEventListener(name, onEvent, true);
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      const target = mutation.target;
+      if (!(target instanceof Element) || !relevant(target)) continue;
+      if (
+        target.getAttribute('role') === 'option' &&
+        target.getAttribute('aria-selected') !== 'true'
+      )
+        continue;
+      record('attribute-delivery', target, {
+        attribute: mutation.attributeName,
+        previous: mutation.oldValue,
+        current: mutation.attributeName ? target.getAttribute(mutation.attributeName) : null,
+      });
+    }
+  });
+  observer.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeOldValue: true,
+    attributeFilter: [
+      'aria-expanded',
+      'aria-selected',
+      'data-focused',
+      'data-pui-view-pending',
+      'data-pui-view-detached',
+      'data-pui-view-revealing',
+      'data-transition-state',
+    ],
+  });
+  return {
+    stop() {
+      observer.disconnect();
+      for (const name of names) document.removeEventListener(name, onEvent, true);
+      if (HTMLElement.prototype.focus === observedFocus) HTMLElement.prototype.focus = nativeFocus;
+      return {
+        clock: 'page performance.now; mutation timestamps are observer delivery, not mutation time',
+        timeOrigin: performance.timeOrigin,
+        events,
+        dropped,
+      };
+    },
+  };
+}
+
 async function hasFocus(locator: Locator) {
+  if (focusDiagnostics) {
+    const read: FocusReadDiagnostic = {
+      startedAt: performance.now(),
+      settledAt: null,
+      status: 'pending',
+    };
+    focusReadsByPage.get(locator.page())?.push(read);
+    try {
+      const observation = await locator.evaluate((element) => {
+        const describe = (subject: Element | null) =>
+          subject
+            ? {
+                tag: subject.tagName,
+                text: subject.textContent?.trim().slice(0, 80),
+                connected: subject.isConnected,
+                attributes: Object.fromEntries(
+                  Array.from(subject.attributes, (attribute) => [attribute.name, attribute.value])
+                ),
+              }
+            : null;
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        const activeSubject = active;
+        let focused = false;
+        while (active) {
+          if (element === active || element.contains(active)) {
+            focused = true;
+            break;
+          }
+          const root = active.getRootNode();
+          active = root instanceof ShadowRoot ? root.host : null;
+        }
+        return {
+          focused,
+          observedAt: performance.now(),
+          timeOrigin: performance.timeOrigin,
+          expected: describe(element),
+          active: describe(activeSubject),
+          listbox: describe(element.closest('[role="listbox"]')),
+        };
+      });
+      read.status = 'resolved';
+      read.observation = observation;
+      return observation.focused;
+    } catch (error) {
+      read.status = 'rejected';
+      read.error = String(error);
+      throw error;
+    } finally {
+      read.settledAt = performance.now();
+    }
+  }
   return locator.evaluate((element) => {
     let active = document.activeElement;
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
@@ -719,7 +1058,7 @@ async function runtimeControls(previewer: Locator) {
   const fixed = (await previewer.getAttribute('data-projection-mode')) === 'fixed-family';
   return previewer.locator(
     fixed
-      ? '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
+      ? '.host [data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
       : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
   );
 }
@@ -738,19 +1077,23 @@ function inspectRuntime(
 ) {
   const { runtime, label, readySelector, count } = request;
   const fixed = root.dataset.projectionMode === 'fixed-family';
-  const scopes = root.querySelectorAll<HTMLElement>('[data-projection-scope]');
-  const scope = scopes.length === 1 ? scopes[0] : null;
   const hosts = root.querySelectorAll<HTMLElement>('.host');
   const host = hosts.length === 1 ? hosts[0] : null;
-  const controls = root.querySelectorAll<HTMLElement>(
-    fixed
-      ? '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
-      : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
-  );
+  // The code Copy command owns a separate projection outside the demo host.
+  // Only this host's unique projection may establish its runtime readiness.
+  const scopes = host?.querySelectorAll<HTMLElement>('[data-projection-scope]') ?? [];
+  const scope = scopes.length === 1 ? scopes[0] : null;
+  const controls =
+    (fixed ? scope : root)?.querySelectorAll<HTMLElement>(
+      fixed
+        ? '[data-projection-control="runtime"][data-runtime-tabs]'
+        : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
+    ) ?? [];
   const control = controls.length === 1 ? controls[0] : null;
   const selected = control?.querySelectorAll<HTMLElement>('[role="tab"][aria-selected="true"]');
   const tab = selected?.length === 1 ? selected[0] : null;
-  const content = fixed ? scope?.querySelector<HTMLElement>('[data-projection-content]') : host;
+  const contents = scope?.querySelectorAll<HTMLElement>('[data-projection-content]') ?? [];
+  const content = fixed ? (contents.length === 1 ? contents[0] : null) : host;
   const committed = fixed
     ? scope?.dataset.projectionRuntime
     : (
@@ -792,6 +1135,15 @@ function inspectRuntime(
   if (!host || !content || controls.length !== 1) problems.push('missing-or-ambiguous-shell');
   if (fixed && (scopes.length !== 1 || scope?.dataset.projectionState !== 'ready'))
     problems.push('projection-not-ready');
+  if (
+    fixed &&
+    (!root.dataset.previewerId ||
+      host?.dataset.projectionOwner !== root.dataset.previewerId ||
+      scope?.dataset.projectionScope !== root.dataset.previewerId ||
+      control?.dataset.projectionOwner !== root.dataset.previewerId ||
+      content?.dataset.projectionOwner !== root.dataset.previewerId)
+  )
+    problems.push('wrong-projection-owner');
   if (!fixed && scopes.length) problems.push('unexpected-fixed-scope');
   if (committed !== runtime) problems.push('runtime-not-committed');
   if (!tab || tab.textContent?.trim() !== label || (!fixed && tab.dataset.runtimeTab !== runtime))
@@ -886,6 +1238,49 @@ async function captureFailureDiagnostics(
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
   const files: Record<string, string> = {};
   const errors: string[] = [];
+  if (focusDiagnostics) {
+    try {
+      const observation = await previewer.evaluate((root) => {
+        let active = document.activeElement;
+        while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+        return {
+          observedAt: performance.now(),
+          active: active?.outerHTML ?? null,
+          controls: Array.from(root.querySelectorAll('[role="combobox"]'), (trigger) => {
+            const contentId = trigger.getAttribute('aria-controls');
+            const content = contentId ? document.getElementById(contentId) : null;
+            return {
+              trigger: trigger.outerHTML,
+              contentId,
+              content: content?.outerHTML ?? null,
+              style: content
+                ? {
+                    visibility: getComputedStyle(content).visibility,
+                    display: getComputedStyle(content).display,
+                  }
+                : null,
+              scroll: content
+                ? Array.from(content.querySelectorAll('*'))
+                    .filter((element) => element.scrollHeight > element.clientHeight + 1)
+                    .map((element) => ({
+                      tag: element.tagName,
+                      role: element.getAttribute('role'),
+                      scrollTop: element.scrollTop,
+                      scrollHeight: element.scrollHeight,
+                      clientHeight: element.clientHeight,
+                    }))
+                : [],
+            };
+          }),
+        };
+      });
+      const file = `${id}-failed-focus.json`;
+      await writeJson(file, observation);
+      files.focus = file;
+    } catch (error) {
+      errors.push(`focus: ${String(error)}`);
+    }
+  }
   for (const [kind, collect] of [
     ['dom', () => previewer.evaluate((root) => root.outerHTML)],
     ['aria', () => previewer.ariaSnapshot()],
@@ -914,6 +1309,9 @@ async function runCase(testCase: Case) {
     timezoneId: 'UTC',
   });
   const page = await context.newPage();
+  const focusReads: FocusReadDiagnostic[] = [];
+  let focusEventProbe: JSHandle<ReturnType<typeof createCalendarFocusEventProbe>> | null = null;
+  if (focusDiagnostics) focusReadsByPage.set(page, focusReads);
   page.setDefaultTimeout(15_000);
   const demoId =
     testCase.component === 'drawer'
@@ -1016,12 +1414,14 @@ async function runCase(testCase: Case) {
     return request.continue();
   });
   try {
-    // Locale and fixed clock belong to this host fixture, never to the prototype.
-    await page.clock.setFixedTime(HOST_CLOCK);
+    // Locale and fixed civil date belong to this host fixture, never to the prototype.
+    await page.addInitScript(installFixedHostDate, HOST_CLOCK);
     const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
     expect(await previewer.count()).toBe(1);
     await previewer.waitFor({ state: 'visible' });
+    if (focusDiagnostics && testCase.component === 'calendar')
+      focusEventProbe = await previewer.evaluateHandle(createCalendarFocusEventProbe);
     await testCase.run({ page, previewer, family: testCase.family, capture });
     expect(pageErrors).toEqual([]);
   } catch (error) {
@@ -1044,6 +1444,14 @@ async function runCase(testCase: Case) {
         font: getComputedStyle(document.body).font,
       }))
       .catch(() => null);
+    const focusEventTrace = focusEventProbe
+      ? await focusEventProbe
+          .evaluate((probe) => probe.stop())
+          .catch((error) => ({ error: String(error) }))
+      : null;
+    await focusEventProbe
+      ?.dispose()
+      .catch((error) => captureErrors.push(`focus trace cleanup: ${String(error)}`));
     await writeJson(`${testCase.id}.json`, {
       revision,
       tree,
@@ -1075,6 +1483,16 @@ async function runCase(testCase: Case) {
       screenshots,
       captureErrors,
       failureDiagnostics,
+      ...(focusDiagnostics
+        ? {
+            focusEventTrace,
+            focusReadDiagnostics: {
+              clock: 'Node performance.now; page observation clock remains separate',
+              timeOrigin: performance.timeOrigin,
+              reads: focusReads.map((read) => ({ ...read })),
+            },
+          }
+        : {}),
       pageErrors,
       blockedRequests,
       acceptance:

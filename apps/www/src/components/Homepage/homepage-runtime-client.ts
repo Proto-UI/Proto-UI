@@ -492,6 +492,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       component: SharedBaseFamilyId;
       typography: MaterializedProjectionCandidate;
       rolledBack: boolean;
+      retainedTypography?: MaterializedProjectionCandidate;
     }
   >();
   const pendingRollbacks = new Set<() => Promise<void>>();
@@ -614,9 +615,13 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       if (headerSurface) work.push(headerSurface.materialize(request));
       // Homepage commits the public Search Dialog and opener in the same generation.
       const searchWork = search?.materialize(request);
+      let preparedSearchDialog: MaterializedProjectionCandidate | undefined;
       const searchDialogWork =
         search?.root.dataset.searchComposition === 'command-dialog'
-          ? search.materializeDialog(request)
+          ? search.materializeDialog(request).then((candidate) => {
+              preparedSearchDialog = candidate;
+              return candidate;
+            })
           : undefined;
       let preparedTypography: MaterializedProjectionCandidate | undefined;
       const typographyWork = typography.materialize(request).then((candidate) => {
@@ -661,18 +666,27 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           const entry = staged.get(request.generation);
           staged.delete(request.generation);
           if (entry?.rolledBack && !destroyed) {
+            // The controller has synchronously reactivated the retained
+            // composite, including its current Typography batch, before this
+            // disposal. Keep a source-ownership fallback in case an earlier
+            // interactive activation threw, still before any batch is retired.
+            restoreRetainedTypography(entry.retainedTypography);
             // The retained generation has already reactivated and hidden/inerted
             // these failed staging hosts. Seal external portals immediately and
-            // release framework roots one per macrotask so late-publication
-            // recovery returns control promptly without leaking any candidate.
+            // release passive framework roots one per macrotask. The failed
+            // Search Dialog must retire its focus scope before the controller
+            // unlocks the retained Dialog and asks it to restore owned focus.
             for (const candidate of candidates) candidate.sealExternalPortals?.();
+            const deferredCandidates = candidates.filter(
+              (candidate) => candidate !== preparedSearchDialog
+            );
             let index = 0;
             let activeDisposal: Promise<unknown> | undefined;
             let flushPromise: Promise<void> | undefined;
             const flushRemaining = (): Promise<void> => {
               if (flushPromise) return flushPromise;
-              const remaining = candidates.slice(index);
-              index = candidates.length;
+              const remaining = deferredCandidates.slice(index);
+              index = deferredCandidates.length;
               flushPromise = Promise.allSettled([
                 ...(activeDisposal ? [activeDisposal] : []),
                 ...remaining.map((candidate) => candidate.dispose()),
@@ -683,20 +697,26 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
             };
             pendingRollbacks.add(flushRemaining);
             const drainNext = () => {
-              if (flushPromise || index >= candidates.length) {
+              if (flushPromise || index >= deferredCandidates.length) {
                 pendingRollbacks.delete(flushRemaining);
                 return;
               }
-              const nextCandidate = candidates[index++]!;
+              const nextCandidate = deferredCandidates[index++]!;
               const current = Promise.resolve(nextCandidate.dispose()).catch(() => undefined);
               activeDisposal = current;
               void current.finally(() => {
                 if (activeDisposal === current) activeDisposal = undefined;
-                if (!flushPromise && index < candidates.length) setTimeout(drainNext, 0);
+                if (!flushPromise && index < deferredCandidates.length) setTimeout(drainNext, 0);
                 else pendingRollbacks.delete(flushRemaining);
               });
             };
-            setTimeout(drainNext, 0);
+            try {
+              await preparedSearchDialog?.dispose();
+            } finally {
+              // Passive disposal must not consume the modal's recovery turn.
+              // It still runs when critical cleanup reports a failure.
+              setTimeout(drainNext, 0);
+            }
             return;
           }
           const results = await Promise.allSettled(
@@ -782,6 +802,12 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         },
         rollback() {
           prepared.rolledBack = true;
+          // This failed generation is terminal; it will never be activated
+          // again. Remove its owned wrappers from layout before restoring the
+          // retained view and native Selection. Ordinary preparing generations
+          // remain fully laid out, and modal disposal still owns focus release.
+          for (const candidate of prepared.candidates)
+            candidate.host.style.setProperty('display', 'none', 'important');
           // The committed generation keeps the typography owner it actually
           // holds now. A published generation replaced that owner with its
           // own candidate; a generation that never published never did.
@@ -805,11 +831,11 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           demoPublication?.rollback();
           headerPublication?.rollback();
           searchPublication?.rollback();
-          // The failed generation's carrier is still in the native content.
-          // Give the committed view its source back before that batch is
-          // revoked, so retiring it cannot strip the source text and let a
-          // passive refresh install a third owner in its place.
-          restoreRetainedTypography(committedTypography);
+          // The controller immediately reactivates the retained composite.
+          // Its last participant restores typography after the interactive
+          // hosts, avoiding a Selection layout flush against the failed view.
+          // Disposal retains a synchronous fallback before source retirement.
+          prepared.retainedTypography = committedTypography;
         },
       };
     },

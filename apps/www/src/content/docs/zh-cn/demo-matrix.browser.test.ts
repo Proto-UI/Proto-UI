@@ -217,8 +217,8 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
     await page.locator('[data-previewer-id]').first().waitFor({ state: 'visible' });
     // The Matrix page owns its demo modules. The development server delivers
     // and transforms them one at a time, which is the page load that precedes
-    // the initialization phase. Delivering them here keeps the original
-    // 60000ms inited phase measuring previewer initialization.
+    // the initialization phase. Delivering them here keeps the inited-count
+    // deadline below measuring previewer initialization, not module delivery.
     // The page-owned bootstrap installs delivery on the current Matrix element;
     // Astro retirement revokes that callback rather than retaining a global API.
     await page.waitForFunction(() => {

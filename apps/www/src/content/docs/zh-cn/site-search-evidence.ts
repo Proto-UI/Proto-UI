@@ -9,6 +9,28 @@ export function searchEvidenceDirectory(runtimeRoot: string | undefined, runnerT
   );
 }
 
+/** Self-contained, immediate DOM read of the authored Docs adapter control. */
+export function readDocsAdapterRoleNow(): string | null {
+  const headers = document.querySelectorAll('[data-docs-site-header]');
+  if (headers.length > 1) throw new Error('Docs Header must be unique');
+  const header = headers[0];
+  if (!header?.isConnected) return null;
+  const owners = header.querySelectorAll('[data-adapter-select]');
+  if (owners.length > 1) throw new Error('Docs adapter owner must be unique');
+  const owner = owners[0];
+  if (!owner?.isConnected || owner.closest('[data-docs-site-header]') !== header) return null;
+  const triggers = owner.querySelectorAll('[data-site-select-trigger]');
+  if (triggers.length > 1) throw new Error('Docs adapter trigger must be unique');
+  const trigger = triggers[0];
+  if (
+    !trigger?.isConnected ||
+    trigger.closest('[data-adapter-select]') !== owner ||
+    trigger.closest('[data-docs-site-header]') !== header
+  )
+    return null;
+  return trigger.getAttribute('role');
+}
+
 /** Self-contained browser callback. Vite's SSR transform must not own this import. */
 export async function readIndependentPagefindQueries(emptyQuery: string) {
   const url = new URL('/pagefind/pagefind.js', location.origin);

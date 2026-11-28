@@ -1,3 +1,4 @@
+import { runAllSteps } from '@proto.ui/core/internal';
 import type { EffectsPort, StyleHandle } from '@proto.ui/core';
 import { assertTwTokenV0 } from '@proto.ui/core';
 import {
@@ -884,30 +885,26 @@ export function createShadowSplitEffectsPort({
       host.removeEventListener('pointerleave', observeHoverExit);
       activeBindings.delete(host);
       splitPaintOwners.delete(surface);
-      const errors: unknown[] = [];
-      const cleanup = (action: () => void) => {
-        try {
-          action();
-        } catch (error) {
-          errors.push(error);
-        }
-      };
-      cleanup(() => applier.clear());
-      cleanup(() => {
-        if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) === applied.root)
-          host.removeAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR);
-      });
-      cleanup(() => {
-        if (applied && surface.getAttribute(SHADOW_SPLIT_SURFACE_ATTR) === '')
-          surface.removeAttribute(SHADOW_SPLIT_SURFACE_ATTR);
-      });
-      cleanup(() => {
-        if (nativeText && applied && host.getAttribute(NATIVE_TEXT_ATTR) === '')
-          host.removeAttribute(NATIVE_TEXT_ATTR);
-      });
-      zeroOpacityTransition = null;
-      applied = latest = null;
-      if (errors.length) throw errors[0];
+      try {
+        runAllSteps([
+          () => applier.clear(),
+          () => {
+            if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) === applied.root)
+              host.removeAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR);
+          },
+          () => {
+            if (applied && surface.getAttribute(SHADOW_SPLIT_SURFACE_ATTR) === '')
+              surface.removeAttribute(SHADOW_SPLIT_SURFACE_ATTR);
+          },
+          () => {
+            if (nativeText && applied && host.getAttribute(NATIVE_TEXT_ATTR) === '')
+              host.removeAttribute(NATIVE_TEXT_ATTR);
+          },
+        ]);
+      } finally {
+        zeroOpacityTransition = null;
+        applied = latest = null;
+      }
     },
   };
 }

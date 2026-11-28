@@ -1,0 +1,1048 @@
+{
+  "schemaVersion": 1,
+  "runId": 46120142554,
+  "headSha": "fbaeed0920a90c2e14df2171e7c358b4e5410b1d",
+  "purpose": "Scheduling costs only, extracted from all 19 official decoded job logs. Passed and failed terminal files are measured costs, never acceptance substitutes. Nine selected files lack a terminal summary and retain their prior weights; no completion or zero duration is inferred. Existing larger observations and authored reserves remain in force. Under the unchanged weight function, a first terminal observation replaces only the formerly unknown 120-second fallback.",
+  "observations": [
+    {
+      "suite": "apps/workspace/test/lifecycle.browser.test.ts",
+      "durationMs": 72643,
+      "summary": "7 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907073,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907073",
+      "logSha256": "b6106cff30d77edbc154902a949a745a92f9a042ff4201385a80c2b6a4d8ec17"
+    },
+    {
+      "suite": "apps/www/src/components/documentation-image-preview.browser.test.ts",
+      "durationMs": 152620,
+      "summary": "34 tests | 9 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907127,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907127",
+      "logSha256": "a0d6cac71cba71243835d87785fe7d01a8a66f4f68e6e26294cb69a6c32380b3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/anchored-positioning-cold-size.browser.test.ts",
+      "durationMs": 2757,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907118,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907118",
+      "logSha256": "b1b82edb8c05f39ea490e5ba63f20e350001c796c3972687806982093bb63c13"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts",
+      "durationMs": 27758,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908236,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908236",
+      "logSha256": "83501fff8b3c2daf2f96cc4f14bd92afc4d2889506f1d161fb0c445fe28e42f5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts",
+      "durationMs": 146536,
+      "summary": "12 tests | 4 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903908214,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908214",
+      "logSha256": "5aa519fb58d464fe3dfc0746b4a1829e146a7c2acfb4daa851a64a1bd35bcebd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts",
+      "durationMs": 83378,
+      "summary": "16 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907127,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907127",
+      "logSha256": "a0d6cac71cba71243835d87785fe7d01a8a66f4f68e6e26294cb69a6c32380b3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+      "durationMs": 82328,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908215,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908215",
+      "logSha256": "f734f6e7ff497fbdf8bcc755ace8b412cd3b27d0275f899604c30e59e5c5d97b"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+      "durationMs": 225836,
+      "summary": "25 tests | 8 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907155,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907155",
+      "logSha256": "ff08fe9834b86721a524dddeb8cda7d87267811f4088b2576142e6ec96472b3d"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+      "durationMs": 58209,
+      "summary": "7 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907118,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907118",
+      "logSha256": "b1b82edb8c05f39ea490e5ba63f20e350001c796c3972687806982093bb63c13"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "durationMs": 815,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907170,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907170",
+      "logSha256": "17c48696eea3c7226374bb88cc7dd6fff4c9c2b068466fbaaa81508d72a555a4"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts",
+      "durationMs": 14438,
+      "summary": "56 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907073,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907073",
+      "logSha256": "b6106cff30d77edbc154902a949a745a92f9a042ff4201385a80c2b6a4d8ec17"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/contrast-tooltip-warm-handoff.browser.test.ts",
+      "durationMs": 108376,
+      "summary": "20 tests | 20 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907104,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907104",
+      "logSha256": "f34c8d2ea4cc7f2405c521b464f81164f658faf1fece09fce34fdbe5d5d8a4e1"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts",
+      "durationMs": 226023,
+      "summary": "28 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907127,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907127",
+      "logSha256": "a0d6cac71cba71243835d87785fe7d01a8a66f4f68e6e26294cb69a6c32380b3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts",
+      "durationMs": 18906,
+      "summary": "5 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907073,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907073",
+      "logSha256": "b6106cff30d77edbc154902a949a745a92f9a042ff4201385a80c2b6a4d8ec17"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts",
+      "durationMs": 21930,
+      "summary": "5 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907102,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907102",
+      "logSha256": "dbee7bc53f48095aed161b3fd3040372f14df0f87b1db68da54a530328121579"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts",
+      "durationMs": 48990,
+      "summary": "17 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907155,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907155",
+      "logSha256": "ff08fe9834b86721a524dddeb8cda7d87267811f4088b2576142e6ec96472b3d"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+      "durationMs": 39089,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907073,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907073",
+      "logSha256": "b6106cff30d77edbc154902a949a745a92f9a042ff4201385a80c2b6a4d8ec17"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts",
+      "durationMs": 58019,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908215,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908215",
+      "logSha256": "f734f6e7ff497fbdf8bcc755ace8b412cd3b27d0275f899604c30e59e5c5d97b"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts",
+      "durationMs": 16152,
+      "summary": "5 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907119,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907119",
+      "logSha256": "5b50903975fbbec858fa1f80d8ead543dcdc185832de5cc4df0518f36ed242e5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts",
+      "durationMs": 41778,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907081,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907081",
+      "logSha256": "13834d66d138c0079d4ac7ceb750bdac971c372cd384fb6f382d9689d188dd27"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts",
+      "durationMs": 17545,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907127,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907127",
+      "logSha256": "a0d6cac71cba71243835d87785fe7d01a8a66f4f68e6e26294cb69a6c32380b3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+      "durationMs": 193197,
+      "summary": "11 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908214,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908214",
+      "logSha256": "5aa519fb58d464fe3dfc0746b4a1829e146a7c2acfb4daa851a64a1bd35bcebd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts",
+      "durationMs": 10502,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903907120,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907120",
+      "logSha256": "538b4284cbf990dc20defadb207bd1a3c7d8b3322904fad599c37038f8b7ced2"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+      "durationMs": 53743,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907102,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907102",
+      "logSha256": "dbee7bc53f48095aed161b3fd3040372f14df0f87b1db68da54a530328121579"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts",
+      "durationMs": 68270,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907089,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907089",
+      "logSha256": "332b72c6e04c7b3d3e9718c6e3b19accc77d0cb0bd908e16effd989ceb490bbd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts",
+      "durationMs": 53060,
+      "summary": "11 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908236,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908236",
+      "logSha256": "83501fff8b3c2daf2f96cc4f14bd92afc4d2889506f1d161fb0c445fe28e42f5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+      "durationMs": 255279,
+      "summary": "36 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908215,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908215",
+      "logSha256": "f734f6e7ff497fbdf8bcc755ace8b412cd3b27d0275f899604c30e59e5c5d97b"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+      "durationMs": 42022,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907119,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907119",
+      "logSha256": "5b50903975fbbec858fa1f80d8ead543dcdc185832de5cc4df0518f36ed242e5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts",
+      "durationMs": 154296,
+      "summary": "12 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907118,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907118",
+      "logSha256": "b1b82edb8c05f39ea490e5ba63f20e350001c796c3972687806982093bb63c13"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+      "durationMs": 281632,
+      "summary": "32 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907100,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907100",
+      "logSha256": "54aafc084c830d03d5a4fd1412ddafca83510ce5f306a39eec739abef1038c2f"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "durationMs": 103852,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903907104,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907104",
+      "logSha256": "f34c8d2ea4cc7f2405c521b464f81164f658faf1fece09fce34fdbe5d5d8a4e1"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+      "durationMs": 213542,
+      "summary": "56 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907170,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907170",
+      "logSha256": "17c48696eea3c7226374bb88cc7dd6fff4c9c2b068466fbaaa81508d72a555a4"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts",
+      "durationMs": 1671,
+      "summary": "5 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907092,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907092",
+      "logSha256": "6576b1c5a5c5495f92199885d3780b05e300b463641012b7100c0198cccc6dc8"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts",
+      "durationMs": 55954,
+      "summary": "16 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907067,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907067",
+      "logSha256": "c122e5dca16afdf887f6b1f7180503a8ff9ef01915cb7056b2d2a3e992bb8e69"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+      "durationMs": 330189,
+      "summary": "80 tests | 8 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907092,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907092",
+      "logSha256": "6576b1c5a5c5495f92199885d3780b05e300b463641012b7100c0198cccc6dc8"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts",
+      "durationMs": 47263,
+      "summary": "10 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907092,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907092",
+      "logSha256": "6576b1c5a5c5495f92199885d3780b05e300b463641012b7100c0198cccc6dc8"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "durationMs": 104644,
+      "summary": "12 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907104,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907104",
+      "logSha256": "f34c8d2ea4cc7f2405c521b464f81164f658faf1fece09fce34fdbe5d5d8a4e1"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts",
+      "durationMs": 23988,
+      "summary": "3 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908214,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908214",
+      "logSha256": "5aa519fb58d464fe3dfc0746b4a1829e146a7c2acfb4daa851a64a1bd35bcebd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+      "durationMs": 84379,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907118,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907118",
+      "logSha256": "b1b82edb8c05f39ea490e5ba63f20e350001c796c3972687806982093bb63c13"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts",
+      "durationMs": 96930,
+      "summary": "11 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907120,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907120",
+      "logSha256": "538b4284cbf990dc20defadb207bd1a3c7d8b3322904fad599c37038f8b7ced2"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+      "durationMs": 63255,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907092,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907092",
+      "logSha256": "6576b1c5a5c5495f92199885d3780b05e300b463641012b7100c0198cccc6dc8"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts",
+      "durationMs": 69659,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907104,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907104",
+      "logSha256": "f34c8d2ea4cc7f2405c521b464f81164f658faf1fece09fce34fdbe5d5d8a4e1"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+      "durationMs": 121370,
+      "summary": "16 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907067,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907067",
+      "logSha256": "c122e5dca16afdf887f6b1f7180503a8ff9ef01915cb7056b2d2a3e992bb8e69"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+      "durationMs": 10846,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903907067,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907067",
+      "logSha256": "c122e5dca16afdf887f6b1f7180503a8ff9ef01915cb7056b2d2a3e992bb8e69"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts",
+      "durationMs": 89357,
+      "summary": "12 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907102,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907102",
+      "logSha256": "dbee7bc53f48095aed161b3fd3040372f14df0f87b1db68da54a530328121579"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadcn-toast-position.browser.test.ts",
+      "durationMs": 173976,
+      "summary": "24 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908215,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908215",
+      "logSha256": "f734f6e7ff497fbdf8bcc755ace8b412cd3b27d0275f899604c30e59e5c5d97b"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts",
+      "durationMs": 47694,
+      "summary": "5 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907119,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907119",
+      "logSha256": "5b50903975fbbec858fa1f80d8ead543dcdc185832de5cc4df0518f36ed242e5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts",
+      "durationMs": 96720,
+      "summary": "4 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908236,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908236",
+      "logSha256": "83501fff8b3c2daf2f96cc4f14bd92afc4d2889506f1d161fb0c445fe28e42f5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts",
+      "durationMs": 285720,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907119,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907119",
+      "logSha256": "5b50903975fbbec858fa1f80d8ead543dcdc185832de5cc4df0518f36ed242e5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+      "durationMs": 57262,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903908214,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908214",
+      "logSha256": "5aa519fb58d464fe3dfc0746b4a1829e146a7c2acfb4daa851a64a1bd35bcebd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+      "durationMs": 118718,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908215,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908215",
+      "logSha256": "f734f6e7ff497fbdf8bcc755ace8b412cd3b27d0275f899604c30e59e5c5d97b"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts",
+      "durationMs": 36629,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907074,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907074",
+      "logSha256": "46ecb76e477191dc132327a8f4ed67dd255bcc173bfbd2adf16ab00019196ea3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts",
+      "durationMs": 76671,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907074,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907074",
+      "logSha256": "46ecb76e477191dc132327a8f4ed67dd255bcc173bfbd2adf16ab00019196ea3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts",
+      "durationMs": 48949,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907089,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907089",
+      "logSha256": "332b72c6e04c7b3d3e9718c6e3b19accc77d0cb0bd908e16effd989ceb490bbd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts",
+      "durationMs": 257922,
+      "summary": "32 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907108,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907108",
+      "logSha256": "1a389a0205d3f924cd5201cde3126f133cab4f9facf66c4eaf0479735cbc02e6"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+      "durationMs": 362379,
+      "summary": "14 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907081,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907081",
+      "logSha256": "13834d66d138c0079d4ac7ceb750bdac971c372cd384fb6f382d9689d188dd27"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts",
+      "durationMs": 332350,
+      "summary": "17 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907100,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907100",
+      "logSha256": "54aafc084c830d03d5a4fd1412ddafca83510ce5f306a39eec739abef1038c2f"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+      "durationMs": 126386,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907102,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907102",
+      "logSha256": "dbee7bc53f48095aed161b3fd3040372f14df0f87b1db68da54a530328121579"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "durationMs": 310053,
+      "summary": "10 tests | 1 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907074,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907074",
+      "logSha256": "46ecb76e477191dc132327a8f4ed67dd255bcc173bfbd2adf16ab00019196ea3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts",
+      "durationMs": 35381,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907155,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907155",
+      "logSha256": "ff08fe9834b86721a524dddeb8cda7d87267811f4088b2576142e6ec96472b3d"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+      "durationMs": 126094,
+      "summary": "16 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907089,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907089",
+      "logSha256": "332b72c6e04c7b3d3e9718c6e3b19accc77d0cb0bd908e16effd989ceb490bbd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts",
+      "durationMs": 64900,
+      "summary": "5 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907120,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907120",
+      "logSha256": "538b4284cbf990dc20defadb207bd1a3c7d8b3322904fad599c37038f8b7ced2"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts",
+      "durationMs": 11934,
+      "summary": "4 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907104,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907104",
+      "logSha256": "f34c8d2ea4cc7f2405c521b464f81164f658faf1fece09fce34fdbe5d5d8a4e1"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts",
+      "durationMs": 100031,
+      "summary": "20 tests | 14 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907089,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907089",
+      "logSha256": "332b72c6e04c7b3d3e9718c6e3b19accc77d0cb0bd908e16effd989ceb490bbd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts",
+      "durationMs": 47672,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907127,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907127",
+      "logSha256": "a0d6cac71cba71243835d87785fe7d01a8a66f4f68e6e26294cb69a6c32380b3"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts",
+      "durationMs": 21623,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907081,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907081",
+      "logSha256": "13834d66d138c0079d4ac7ceb750bdac971c372cd384fb6f382d9689d188dd27"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts",
+      "durationMs": 29778,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907170,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907170",
+      "logSha256": "17c48696eea3c7226374bb88cc7dd6fff4c9c2b068466fbaaa81508d72a555a4"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts",
+      "durationMs": 577,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907155,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907155",
+      "logSha256": "ff08fe9834b86721a524dddeb8cda7d87267811f4088b2576142e6ec96472b3d"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts",
+      "durationMs": 5597,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907104,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907104",
+      "logSha256": "f34c8d2ea4cc7f2405c521b464f81164f658faf1fece09fce34fdbe5d5d8a4e1"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts",
+      "durationMs": 231826,
+      "summary": "15 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907119,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907119",
+      "logSha256": "5b50903975fbbec858fa1f80d8ead543dcdc185832de5cc4df0518f36ed242e5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts",
+      "durationMs": 85295,
+      "summary": "10 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907102,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907102",
+      "logSha256": "dbee7bc53f48095aed161b3fd3040372f14df0f87b1db68da54a530328121579"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+      "durationMs": 441962,
+      "summary": "21 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907073,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907073",
+      "logSha256": "b6106cff30d77edbc154902a949a745a92f9a042ff4201385a80c2b6a4d8ec17"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-search-activation.browser.test.ts",
+      "durationMs": 392734,
+      "summary": "37 tests | 2 failed",
+      "fileOutcome": "failed",
+      "jobId": 140903907120,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907120",
+      "logSha256": "538b4284cbf990dc20defadb207bd1a3c7d8b3322904fad599c37038f8b7ced2"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts",
+      "durationMs": 95973,
+      "summary": "12 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907067,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907067",
+      "logSha256": "c122e5dca16afdf887f6b1f7180503a8ff9ef01915cb7056b2d2a3e992bb8e69"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts",
+      "durationMs": 309716,
+      "summary": "22 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907067,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907067",
+      "logSha256": "c122e5dca16afdf887f6b1f7180503a8ff9ef01915cb7056b2d2a3e992bb8e69"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-search-menu.browser.test.ts",
+      "durationMs": 102040,
+      "summary": "25 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907170,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907170",
+      "logSha256": "17c48696eea3c7226374bb88cc7dd6fff4c9c2b068466fbaaa81508d72a555a4"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts",
+      "durationMs": 72592,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908214,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908214",
+      "logSha256": "5aa519fb58d464fe3dfc0746b4a1829e146a7c2acfb4daa851a64a1bd35bcebd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts",
+      "durationMs": 280859,
+      "summary": "33 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908236,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908236",
+      "logSha256": "83501fff8b3c2daf2f96cc4f14bd92afc4d2889506f1d161fb0c445fe28e42f5"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+      "durationMs": 164366,
+      "summary": "42 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907089,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907089",
+      "logSha256": "332b72c6e04c7b3d3e9718c6e3b19accc77d0cb0bd908e16effd989ceb490bbd"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts",
+      "durationMs": 3609,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903907067,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907067",
+      "logSha256": "c122e5dca16afdf887f6b1f7180503a8ff9ef01915cb7056b2d2a3e992bb8e69"
+    },
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts",
+      "durationMs": 115840,
+      "summary": "17 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907102,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907102",
+      "logSha256": "dbee7bc53f48095aed161b3fd3040372f14df0f87b1db68da54a530328121579"
+    },
+    {
+      "suite": "apps/www/test/button-view-lifetime.browser.test.ts",
+      "durationMs": 17947,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907118,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907118",
+      "logSha256": "b1b82edb8c05f39ea490e5ba63f20e350001c796c3972687806982093bb63c13"
+    },
+    {
+      "suite": "apps/www/test/color-scheme.browser.test.ts",
+      "durationMs": 31310,
+      "summary": "9 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908215,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908215",
+      "logSha256": "f734f6e7ff497fbdf8bcc755ace8b412cd3b27d0275f899604c30e59e5c5d97b"
+    },
+    {
+      "suite": "apps/www/test/component-consumer-repairs.browser.test.ts",
+      "durationMs": 79854,
+      "summary": "84 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907089,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907089",
+      "logSha256": "332b72c6e04c7b3d3e9718c6e3b19accc77d0cb0bd908e16effd989ceb490bbd"
+    },
+    {
+      "suite": "apps/www/test/evidence/brutalist-fonts.browser.test.ts",
+      "durationMs": 27291,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907155,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907155",
+      "logSha256": "ff08fe9834b86721a524dddeb8cda7d87267811f4088b2576142e6ec96472b3d"
+    },
+    {
+      "suite": "apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts",
+      "durationMs": 3074,
+      "summary": "4 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907073,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907073",
+      "logSha256": "b6106cff30d77edbc154902a949a745a92f9a042ff4201385a80c2b6a4d8ec17"
+    },
+    {
+      "suite": "apps/www/test/message-composition.browser.test.ts",
+      "durationMs": 7209,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907120,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907120",
+      "logSha256": "538b4284cbf990dc20defadb207bd1a3c7d8b3322904fad599c37038f8b7ced2"
+    },
+    {
+      "suite": "apps/www/test/preferences.browser.test.ts",
+      "durationMs": 8460,
+      "summary": "4 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907074,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907074",
+      "logSha256": "46ecb76e477191dc132327a8f4ed67dd255bcc173bfbd2adf16ab00019196ea3"
+    },
+    {
+      "suite": "apps/www/test/release-docs-reading.browser.test.ts",
+      "durationMs": 76746,
+      "summary": "24 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907119,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907119",
+      "logSha256": "5b50903975fbbec858fa1f80d8ead543dcdc185832de5cc4df0518f36ed242e5"
+    },
+    {
+      "suite": "apps/www/test/shadow-percentage-translation.browser.test.ts",
+      "durationMs": 81111,
+      "summary": "10 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908236,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908236",
+      "logSha256": "83501fff8b3c2daf2f96cc4f14bd92afc4d2889506f1d161fb0c445fe28e42f5"
+    },
+    {
+      "suite": "apps/www/test/template-style.browser.test.ts",
+      "durationMs": 2288,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903907092,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907092",
+      "logSha256": "6576b1c5a5c5495f92199885d3780b05e300b463641012b7100c0198cccc6dc8"
+    },
+    {
+      "suite": "apps/www/test/tree-navigation.browser.test.ts",
+      "durationMs": 3333,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907127,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907127",
+      "logSha256": "a0d6cac71cba71243835d87785fe7d01a8a66f4f68e6e26294cb69a6c32380b3"
+    },
+    {
+      "suite": "apps/www/test/virtual-list-resize.browser.test.ts",
+      "durationMs": 770,
+      "summary": "1 test",
+      "fileOutcome": "passed",
+      "jobId": 140903907081,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907081",
+      "logSha256": "13834d66d138c0079d4ac7ceb750bdac971c372cd384fb6f382d9689d188dd27"
+    },
+    {
+      "suite": "packages/adapters/base/test/focus-intent-retries.browser.test.ts",
+      "durationMs": 75964,
+      "summary": "90 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907120,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907120",
+      "logSha256": "538b4284cbf990dc20defadb207bd1a3c7d8b3322904fad599c37038f8b7ced2"
+    },
+    {
+      "suite": "packages/adapters/react/test/focus-entry-readiness.browser.test.ts",
+      "durationMs": 4635,
+      "summary": "9 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907155,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907155",
+      "logSha256": "ff08fe9834b86721a524dddeb8cda7d87267811f4088b2576142e6ec96472b3d"
+    },
+    {
+      "suite": "packages/adapters/vue/test/focus-request-readiness.browser.test.ts",
+      "durationMs": 3677,
+      "summary": "9 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907074,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907074",
+      "logSha256": "46ecb76e477191dc132327a8f4ed67dd255bcc173bfbd2adf16ab00019196ea3"
+    },
+    {
+      "suite": "packages/adapters/web-component/test/focus-entry-potential-dependencies.browser.test.ts",
+      "durationMs": 2080,
+      "summary": "4 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908214,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908214",
+      "logSha256": "5aa519fb58d464fe3dfc0746b4a1829e146a7c2acfb4daa851a64a1bd35bcebd"
+    },
+    {
+      "suite": "packages/adapters/web-component/test/native-text-width.browser.test.ts",
+      "durationMs": 89690,
+      "summary": "2 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907170,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907170",
+      "logSha256": "17c48696eea3c7226374bb88cc7dd6fff4c9c2b068466fbaaa81508d72a555a4"
+    },
+    {
+      "suite": "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+      "durationMs": 77351,
+      "summary": "194 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907074,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907074",
+      "logSha256": "46ecb76e477191dc132327a8f4ed67dd255bcc173bfbd2adf16ab00019196ea3"
+    },
+    {
+      "suite": "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts",
+      "durationMs": 1742,
+      "summary": "8 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907081,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907081",
+      "logSha256": "13834d66d138c0079d4ac7ceb750bdac971c372cd384fb6f382d9689d188dd27"
+    },
+    {
+      "suite": "packages/prototypes/base/test/async-region.browser.test.ts",
+      "durationMs": 3569,
+      "summary": "6 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907092,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907092",
+      "logSha256": "6576b1c5a5c5495f92199885d3780b05e300b463641012b7100c0198cccc6dc8"
+    },
+    {
+      "suite": "packages/prototypes/base/test/toast-pointer.browser.test.ts",
+      "durationMs": 3510,
+      "summary": "4 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903908236,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903908236",
+      "logSha256": "83501fff8b3c2daf2f96cc4f14bd92afc4d2889506f1d161fb0c445fe28e42f5"
+    },
+    {
+      "suite": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "durationMs": 15211,
+      "summary": "7 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907170,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907170",
+      "logSha256": "17c48696eea3c7226374bb88cc7dd6fff4c9c2b068466fbaaa81508d72a555a4"
+    },
+    {
+      "suite": "packages/prototypes/shadcn/test/toast-stack.browser.test.ts",
+      "durationMs": 18353,
+      "summary": "11 tests",
+      "fileOutcome": "passed",
+      "jobId": 140903907100,
+      "jobCompletedVitest": false,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/46120142554/job/140903907100",
+      "logSha256": "54aafc084c830d03d5a4fd1412ddafca83510ce5f306a39eec739abef1038c2f"
+    }
+  ]
+}

@@ -9,10 +9,64 @@ import {
   originalSelector,
   subjects,
   createSubjectDirectory,
+  matrixTestPath,
+  readMatrixBudgets,
   validateObservation,
 } from './matrix-docs-selector-experiment.mjs';
 
 const source = readFileSync(columnsPath, 'utf8');
+const matrixSource = readFileSync(matrixTestPath, 'utf8');
+
+test('diagnostic budgets come from the actual initialization call and selected case', () => {
+  assert.deepEqual(readMatrixBudgets(matrixSource), {
+    initializationBudgetMs: 180_000,
+    originalCaseDeadlineMs: 360_000,
+  });
+});
+
+test('changed actual budgets are recorded instead of retaining stale diagnostic numbers', () => {
+  const changed = matrixSource
+    .replace(
+      'waitForMatrixInitialization(page, RUNTIMES.length, 180_000)',
+      'waitForMatrixInitialization(page, RUNTIMES.length, 180_001)'
+    )
+    .replace('}, 360_000);', '}, 360_001);');
+  assert.notEqual(changed, matrixSource);
+  assert.deepEqual(readMatrixBudgets(changed), {
+    initializationBudgetMs: 180_001,
+    originalCaseDeadlineMs: 360_001,
+  });
+});
+
+test('comments and string examples cannot supply a stale Matrix budget', () => {
+  const examples = `
+    // waitForMatrixInitialization(page, 4, 60_000);
+    const example = "it('mounts every demo in every official Web adapter', callback, 180_000)";
+    it();
+  `;
+  assert.deepEqual(readMatrixBudgets(examples + matrixSource), readMatrixBudgets(matrixSource));
+});
+
+test('missing, ambiguous, dynamic or invalid actual Matrix budgets fail instead of inventing metadata', () => {
+  for (const changed of [
+    matrixSource.replace(
+      'waitForMatrixInitialization(page, RUNTIMES.length, 180_000)',
+      'otherWait(page, RUNTIMES.length, 180_000)'
+    ),
+    matrixSource + '\nwaitForMatrixInitialization(page, 4, 60_000);',
+    matrixSource.replace(
+      "it('mounts every demo in every official Web adapter',",
+      "it('a different Matrix case',"
+    ),
+    matrixSource + `\nit('mounts every demo in every official Web adapter', () => {}, 180_000);`,
+    matrixSource.replace('RUNTIMES.length, 180_000', 'RUNTIMES.length, configuredBudget'),
+    matrixSource.replace('RUNTIMES.length, 180_000', 'RUNTIMES.length, 0'),
+    matrixSource.replace('}, 360_000);', '}, -1);'),
+    matrixSource + '\nconst broken = ;',
+  ])
+    assert.throws(() => readMatrixBudgets(changed));
+});
+
 test('both subjects preserve the current full declarations and differ only in two route conditions', () => {
   const { baseline, direct } = subjects(source);
   assert.equal(baseline.split(originalSelector).length - 1, 2);

@@ -196,29 +196,6 @@ jobs:
             ${{ runner.temp }}/homepage-evidence/candidate.log
           if-no-files-found: warn
           retention-days: 30
-      - name: Execute focused real-browser regressions on the exact candidate
-        env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/runtime
-        if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
-        timeout-minutes: 22
-        working-directory: candidate
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/homepage-evidence"
-          suites=(
-            apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts
-            apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts
-            apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts
-            apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts
-            apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
-          )
-          for suite in "${suites[@]}"; do test -f "$suite"; done
-          {
-            git rev-parse HEAD
-            printf 'Selected suite: %s\n' "${suites[@]}"
-            timeout --signal=TERM --kill-after=10s 1200s \
-              corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${suites[@]}"
-          } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/browser-regressions.log"
       - name: Verify built production Search with real Pagefind
         if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         timeout-minutes: 10
@@ -262,6 +239,12 @@ jobs:
         include:
           - name: native-links
             suite: site-native-links
+            pattern: '^native links with app-owned Proto visual surfaces'
+          # Exhaustive complement: reading/layout journeys keep the same per-case
+          # assertions and a separate, unchanged 600s process/server lifetime.
+          - name: native-links-reading
+            suite: site-native-links
+            pattern: '^(?!native links with app-owned Proto visual surfaces)'
           # Dedicated owner: apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts
           - name: brutalist-action-motion
             suite: brutalist-action-motion
@@ -288,6 +271,18 @@ jobs:
             suite: site-search-layout
           - name: search-menu
             suite: site-search-menu
+          # Each retained homepage suite keeps its original assertions and case
+          # deadlines within the existing 600s isolated process/server lifetime.
+          - name: homepage-dogfood
+            suite: homepage-dogfood
+          - name: home-demo-runtime
+            suite: home-demo-runtime
+          - name: prototype-projection-scope
+            suite: prototype-projection-scope
+          - name: demo-brutalist-checkbox
+            suite: demo-brutalist-checkbox
+          - name: demo-brutalist-remaining
+            suite: demo-brutalist-remaining
     steps:
       - uses: actions/checkout@v4
         with:
@@ -326,12 +321,18 @@ jobs:
         env:
           SUITE: ${{ matrix.suite }}
           CONTRACT: ${{ matrix.contract }}
+          TEST_PATTERN: ${{ matrix.pattern }}
           PROTO_UI_CODE_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/code-surfaces
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/runtime
         run: |
           set -euo pipefail
           FILE="apps/www/src/content/docs/zh-cn/${SUITE}.browser.test.ts"
           test -f "$FILE"
           files=("$FILE")
+          filters=()
+          if [[ -n "$TEST_PATTERN" ]]; then
+            filters+=(--testNamePattern "$TEST_PATTERN")
+          fi
           if [[ -n "$CONTRACT" ]]; then
             CONTRACT_FILE="apps/www/src/content/docs/zh-cn/${CONTRACT}.test.ts"
             test -f "$CONTRACT_FILE"
@@ -341,7 +342,7 @@ jobs:
             git rev-parse HEAD
             echo "Selected suite: $FILE"
             timeout --signal=TERM --kill-after=10s 600s \
-              corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}"
+              corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}" "${filters[@]}"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/isolated-regressions.log"
       - name: Save the verified composition font package
         if: ${{ !cancelled() && steps.prepare-isolated-fonts.outcome == 'success' && matrix.name == 'homepage-composition' && steps.isolated-font-cache.outputs.cache-hit != 'true' }}
@@ -383,6 +384,7 @@ jobs:
         with:
           node-version: 24
       - name: Prepare the same official browser and fonts for both revisions
+        id: prepare-mobile
         # Two worktrees are installed here. The previous five-minute ceiling
         # left no room for the font package and both locked installs on a
         # loaded runner.
@@ -403,21 +405,29 @@ jobs:
               corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
             )
           done
+          cd candidate
+          node --test --test-concurrency=1 \
+            apps/www/scripts/mobile-prepared-inputs.test.mjs \
+            apps/www/scripts/mobile-capture-owner.test.mjs
+          node --import tsx apps/www/scripts/prepare-mobile-interaction-inputs.ts \
+            --expected-revision "$CANDIDATE_SHA" \
+            --out "$RUNNER_TEMP/mobile-interaction/candidate-inputs.json"
       - name: Capture the first normal-size 390px before view
         if: ${{ !cancelled() }}
         working-directory: baseline
         timeout-minutes: 2
         run: |
-          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-mobile-interaction-evidence.ts" \
+          node "$GITHUB_WORKSPACE/candidate/apps/www/scripts/run-mobile-interaction-evidence.mjs" \
             --revision-kind baseline --expected-revision "$MOBILE_BASELINE_SHA" --quick-preview \
             --out "$RUNNER_TEMP/mobile-interaction/first-pair/baseline"
       - name: Capture the first normal-size 390px after view
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.prepare-mobile.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 2
         run: |
-          node --import tsx apps/www/scripts/capture-mobile-interaction-evidence.ts \
+          node apps/www/scripts/run-mobile-interaction-evidence.mjs \
             --revision-kind candidate --expected-revision "$CANDIDATE_SHA" --quick-preview \
+            --prepared-inputs "$RUNNER_TEMP/mobile-interaction/candidate-inputs.json" \
             --out "$RUNNER_TEMP/mobile-interaction/first-pair/candidate"
       - name: Publish the first actual pair before the full interaction matrix
         if: always()
@@ -433,7 +443,7 @@ jobs:
         timeout-minutes: 6
         run: |
           set -euo pipefail
-          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-mobile-interaction-evidence.ts" \
+          node "$GITHUB_WORKSPACE/candidate/apps/www/scripts/run-mobile-interaction-evidence.mjs" \
             --revision-kind baseline --expected-revision "$MOBILE_BASELINE_SHA" \
             --out "$RUNNER_TEMP/mobile-interaction/baseline" \
             2>&1 | tee "$RUNNER_TEMP/mobile-interaction/baseline.log"
@@ -446,13 +456,14 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Capture and regress the exact candidate mobile interactions
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.prepare-mobile.outcome == 'success' }}
         working-directory: candidate
         timeout-minutes: 6
         run: |
           set -euo pipefail
-          node --import tsx apps/www/scripts/capture-mobile-interaction-evidence.ts \
+          node apps/www/scripts/run-mobile-interaction-evidence.mjs \
             --revision-kind candidate --expected-revision "$CANDIDATE_SHA" \
+            --prepared-inputs "$RUNNER_TEMP/mobile-interaction/candidate-inputs.json" \
             --out "$RUNNER_TEMP/mobile-interaction/candidate" \
             2>&1 | tee "$RUNNER_TEMP/mobile-interaction/candidate.log"
       - name: Preserve before/after mobile screenshots and all failures

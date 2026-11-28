@@ -1,7 +1,4 @@
-import type {
-  ContrastAuditSubject,
-  readContrastAuditSubject,
-} from './contrast-probe.browser';
+import type { ContrastAuditSubject, readContrastAuditSubject } from './contrast-probe.browser';
 
 interface TooltipPaintObservation {
   achieved: boolean;
@@ -12,11 +9,18 @@ interface TooltipPaintObservation {
 interface Probe {
   readContrastAuditSubject: typeof readContrastAuditSubject;
   readContrastTargetObservation(element: Element): TooltipPaintObservation;
+  readContrastTargetPaintPresence(element: Element): TooltipPaintObservation;
 }
 export interface TooltipHandoffPlan {
   recipeId: string;
   groupPath: string;
-  pairs: { rootPath: string; triggerPath: string; contentPath: string; triggerText: string; contentText: string }[];
+  pairs: {
+    rootPath: string;
+    triggerPath: string;
+    contentPath: string;
+    triggerText: string;
+    contentText: string;
+  }[];
   openDelay: number;
   closeDelay: number;
   skipDelay: number;
@@ -42,7 +46,15 @@ interface PointerObservation {
   enteredAt: number | null;
   firstPaintMs: number | null;
   coldGuardObserved: boolean;
-  samples: { elapsedMs: number; firstPainted: boolean; secondPainted: boolean; firstDescriptions: string[]; secondDescriptions: string[] }[];
+  samples: {
+    elapsedMs: number;
+    firstPainted: boolean;
+    secondPainted: boolean;
+    firstPaintPresent: boolean;
+    secondPaintPresent: boolean;
+    firstDescriptions: string[];
+    secondDescriptions: string[];
+  }[];
   error: string | null;
   frame: number;
   inputDeadline: number;
@@ -81,18 +93,27 @@ const assertLease = (binding: TooltipHandoffBinding, element: HTMLElement) => {
     fail('foreign, ended or replaced projection lease');
 };
 
-function noteTooltipLifetimeMutations(binding: TooltipHandoffBinding, records: MutationRecord[]): void {
+function noteTooltipLifetimeMutations(
+  binding: TooltipHandoffBinding,
+  records: MutationRecord[]
+): void {
   for (const record of records) {
     if (binding.lifetimeError !== null) return;
-    if (record.type === 'childList' && [...record.removedNodes].some((removed) =>
-      binding.lifetimeNodes.some(({ node }) => removed === node || removed.contains(node))
-    )) {
+    if (
+      record.type === 'childList' &&
+      [...record.removedNodes].some((removed) =>
+        binding.lifetimeNodes.some(({ node }) => removed === node || removed.contains(node))
+      )
+    ) {
       binding.lifetimeError = 'original Group/Root/Trigger view retired';
     } else if (record.type === 'attributes' && record.attributeName) {
       const original = binding.lifetimeNodes.find(({ node }) => node === record.target);
       if (!original) continue;
       const expected = original.attributes.get(record.attributeName);
-      if (record.oldValue !== expected || original.node.getAttribute(record.attributeName) !== expected)
+      if (
+        record.oldValue !== expected ||
+        original.node.getAttribute(record.attributeName) !== expected
+      )
         binding.lifetimeError = `original physical lease changed ${record.attributeName}`;
     }
   }
@@ -107,9 +128,14 @@ export function bindTooltipWarmHandoff(
 ): TooltipHandoffBinding {
   const boundary = probe.readContrastAuditSubject(subject);
   if (
-    !boundary.observation.achieved || !boundary.scope || !boundary.retained ||
-    !boundary.owner || !boundary.generation || plan.pairs.length !== 2 ||
-    subject.expected.recipeId !== plan.recipeId || subject.expected.family !== 'tooltip'
+    !boundary.observation.achieved ||
+    !boundary.scope ||
+    !boundary.retained ||
+    !boundary.owner ||
+    !boundary.generation ||
+    plan.pairs.length !== 2 ||
+    subject.expected.recipeId !== plan.recipeId ||
+    subject.expected.family !== 'tooltip'
   )
     fail('selected authored Tooltip subject is not current');
   const groups = [...boundary.retained.querySelectorAll<HTMLElement>(selector('group'))];
@@ -129,26 +155,56 @@ export function bindTooltipWarmHandoff(
     return { root, trigger, originalDescriptions: tokens(trigger), content: null };
   });
   const binding: TooltipHandoffBinding = {
-    subject, probe, plan, scope: boundary.scope, retained: boundary.retained,
-    owner: boundary.owner, generation: boundary.generation, group, pairs, pointer: null,
-    lifetimeObserver: null, lifetimeError: null, lifetimeNodes: [],
+    subject,
+    probe,
+    plan,
+    scope: boundary.scope,
+    retained: boundary.retained,
+    owner: boundary.owner,
+    generation: boundary.generation,
+    group,
+    pairs,
+    pointer: null,
+    lifetimeObserver: null,
+    lifetimeError: null,
+    lifetimeNodes: [],
   };
   const initial = readTooltipHandoffSnapshot(binding);
-  if (initial.pairs.some((pair) => !pair.closed) || initial.paintedContents !== 0 || initial.unclassifiedContents !== 0)
+  if (
+    initial.pairs.some((pair) => !pair.closed) ||
+    initial.paintedContents !== 0 ||
+    initial.unclassifiedContents !== 0
+  )
     fail('cold baseline is already open; no reset is allowed');
-  if (pairs.some((pair) => pair.trigger.matches(':hover') || document.activeElement === pair.trigger))
+  if (
+    pairs.some((pair) => pair.trigger.matches(':hover') || document.activeElement === pair.trigger)
+  )
     fail('cold baseline already has pointer or focus intent');
   const attributes = [
-    'data-previewer-id', 'data-projection-owner', 'data-projection-generation',
-    'data-projection-prototype', 'data-pui-root',
+    'data-previewer-id',
+    'data-projection-owner',
+    'data-projection-generation',
+    'data-projection-prototype',
+    'data-pui-root',
   ];
-  binding.lifetimeNodes = [subject.previewer, binding.scope, binding.retained, group,
-    ...pairs.flatMap(({ root, trigger }) => [root, trigger])].map((node) => ({
-      node, attributes: new Map(attributes.map((name) => [name, node.getAttribute(name)])),
-    }));
-  binding.lifetimeObserver = new MutationObserver((records) => noteTooltipLifetimeMutations(binding, records));
+  binding.lifetimeNodes = [
+    subject.previewer,
+    binding.scope,
+    binding.retained,
+    group,
+    ...pairs.flatMap(({ root, trigger }) => [root, trigger]),
+  ].map((node) => ({
+    node,
+    attributes: new Map(attributes.map((name) => [name, node.getAttribute(name)])),
+  }));
+  binding.lifetimeObserver = new MutationObserver((records) =>
+    noteTooltipLifetimeMutations(binding, records)
+  );
   binding.lifetimeObserver.observe(document.documentElement, {
-    subtree: true, childList: true, attributes: true, attributeOldValue: true,
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeOldValue: true,
     attributeFilter: attributes,
   });
   return binding;
@@ -161,8 +217,10 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
   const { probe, subject, group, plan } = binding;
   const boundary = probe.readContrastAuditSubject(subject);
   if (
-    !boundary.observation.achieved || boundary.scope !== binding.scope ||
-    boundary.retained !== binding.retained || boundary.owner !== binding.owner ||
+    !boundary.observation.achieved ||
+    boundary.scope !== binding.scope ||
+    boundary.retained !== binding.retained ||
+    boundary.owner !== binding.owner ||
     boundary.generation !== binding.generation
   )
     fail('selected subject or lifetime changed');
@@ -173,7 +231,8 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
   if (roots.length !== 2 || roots.some((root, index) => root !== binding.pairs[index].root))
     fail('replaced or reordered authored Root');
   const currentContents = [...document.querySelectorAll<HTMLElement>(selector('content'))].filter(
-    (content) => content.dataset.projectionOwner === binding.owner &&
+    (content) =>
+      content.dataset.projectionOwner === binding.owner &&
       content.dataset.projectionGeneration === binding.generation
   );
   const pairs = binding.pairs.map((pair, index) => {
@@ -181,8 +240,10 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
     assertLease(binding, pair.trigger);
     const triggers = [...pair.root.querySelectorAll<HTMLElement>(selector('trigger'))];
     if (
-      pair.root.closest(selector('group')) !== group || triggers.length !== 1 ||
-      triggers[0] !== pair.trigger || pair.trigger.closest(selector('root')) !== pair.root
+      pair.root.closest(selector('group')) !== group ||
+      triggers.length !== 1 ||
+      triggers[0] !== pair.trigger ||
+      pair.trigger.closest(selector('root')) !== pair.root
     )
       fail('foreign or replaced physical Trigger/Root pair');
     const descriptions = tokens(pair.trigger);
@@ -192,7 +253,9 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
     if (ownedDescriptions.length > 1) fail('ambiguous owned description relation');
     if (ownedDescriptions.length === 1) {
       const id = ownedDescriptions[0];
-      const matches = [...document.querySelectorAll<HTMLElement>('[id]')].filter((node) => node.id === id);
+      const matches = [...document.querySelectorAll<HTMLElement>('[id]')].filter(
+        (node) => node.id === id
+      );
       if (matches.length !== 1) fail('missing, duplicate or replaced Content IDREF target');
       const node = matches[0];
       assertLease(binding, node);
@@ -205,13 +268,18 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
         fail('materialized Content identity was replaced');
     }
     let paint: TooltipPaintObservation | null = null;
+    let paintPresence: TooltipPaintObservation | null = null;
     if (pair.content) {
       const { node, id } = pair.content;
-      const sameId = [...document.querySelectorAll<HTMLElement>('[id]')].filter((candidate) => candidate.id === id);
-      if (sameId.some((candidate) => candidate !== node)) fail('retired Content replaced under the same ID');
+      const sameId = [...document.querySelectorAll<HTMLElement>('[id]')].filter(
+        (candidate) => candidate.id === id
+      );
+      if (sameId.some((candidate) => candidate !== node))
+        fail('retired Content replaced under the same ID');
       if (node.isConnected) {
         assertLease(binding, node);
         paint = probe.readContrastTargetObservation(node);
+        paintPresence = paint.achieved ? paint : probe.readContrastTargetPaintPresence(node);
       }
     }
     return {
@@ -225,16 +293,23 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
       contentId: pair.content?.id ?? null,
       contentConnected: pair.content?.node.isConnected ?? false,
       open: ownedDescriptions.length === 1,
-      closed: ownedDescriptions.length === 0 && (!pair.content?.node.isConnected || paint?.visibility.classification === 'exempt-not-visible'),
+      closed:
+        ownedDescriptions.length === 0 &&
+        (!pair.content?.node.isConnected ||
+          paint?.visibility.classification === 'exempt-not-visible'),
       painted: paint?.achieved === true,
+      paintPresent: paintPresence?.achieved === true,
       trigger: probe.readContrastTargetObservation(pair.trigger),
       content: paint,
+      paintPresence,
     };
   });
   if (binding.pairs[0].content?.node === binding.pairs[1].content?.node && binding.pairs[0].content)
     fail('sibling Roots borrowed one Content');
   let paintedContents = 0;
   let unclassifiedContents = 0;
+  let presentContents = 0;
+  let unclassifiedPresenceContents = 0;
   for (const node of currentContents) {
     const paint = probe.readContrastTargetObservation(node);
     if (paint.achieved) {
@@ -243,6 +318,14 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
         fail('painted Content has no bound authored description owner');
     } else if (paint.visibility.classification !== 'exempt-not-visible') {
       unclassifiedContents++;
+    }
+    const presence = paint.achieved ? paint : probe.readContrastTargetPaintPresence(node);
+    if (presence.achieved) {
+      presentContents++;
+      if (!binding.pairs.some((pair) => pair.content?.node === node))
+        fail('present Content has no bound authored description owner');
+    } else if (presence.visibility.classification !== 'exempt-not-visible') {
+      unclassifiedPresenceContents++;
     }
   }
   return {
@@ -253,7 +336,10 @@ export function readTooltipHandoffSnapshot(binding: TooltipHandoffBinding) {
     pairs,
     paintedContents,
     unclassifiedContents,
-    boundary: 'Published physical Group and two Root/Trigger leases; private controller identity is not certified.',
+    presentContents,
+    unclassifiedPresenceContents,
+    boundary:
+      'Published physical Group and two Root/Trigger leases; private controller identity is not certified.',
   };
 }
 
@@ -263,46 +349,72 @@ export function readTooltipWarmHandoff(binding: TooltipHandoffBinding, phase: To
   const index = phase === 'cold' ? 0 : 1;
   const active = snapshot.pairs[index];
   const closed = snapshot.pairs[1 - index];
-  const achieved = pointer?.phase === phase && pointer.status === 'achieved' &&
-    pointer.nativePointerEnter && active.open && active.painted && active.trigger.achieved &&
-    active.trigger.hovered && closed.closed && snapshot.paintedContents === 1 && snapshot.unclassifiedContents === 0;
+  const achieved =
+    pointer?.phase === phase &&
+    pointer.status === 'achieved' &&
+    pointer.nativePointerEnter &&
+    active.open &&
+    active.painted &&
+    active.trigger.achieved &&
+    active.trigger.hovered &&
+    closed.closed &&
+    snapshot.paintedContents === 1 &&
+    snapshot.unclassifiedContents === 0;
   return {
     achieved: !!achieved,
     phase,
     ...snapshot,
-    timing: pointer ? {
-      nativePointerEnter: pointer.nativePointerEnter,
-      enteredAt: pointer.enteredAt,
-      firstPaintMs: pointer.firstPaintMs,
-      coldGuardObserved: pointer.coldGuardObserved,
-      deadlineMs: phase === 'cold' ? binding.plan.coldDeadlineMs : binding.plan.warmDeadlineMs,
-      authoredOpenDelayMs: binding.plan.openDelay,
-      authoredCloseDelayMs: binding.plan.closeDelay,
-      authoredSkipDelayMs: binding.plan.skipDelay,
-      semanticWarmDelayMs: 0,
-      status: pointer.status,
-      error: pointer.error,
-      samples: pointer.samples,
-    } : null,
+    timing: pointer
+      ? {
+          nativePointerEnter: pointer.nativePointerEnter,
+          enteredAt: pointer.enteredAt,
+          firstPaintMs: pointer.firstPaintMs,
+          coldGuardObserved: pointer.coldGuardObserved,
+          deadlineMs: phase === 'cold' ? binding.plan.coldDeadlineMs : binding.plan.warmDeadlineMs,
+          authoredOpenDelayMs: binding.plan.openDelay,
+          authoredCloseDelayMs: binding.plan.closeDelay,
+          authoredSkipDelayMs: binding.plan.skipDelay,
+          semanticWarmDelayMs: 0,
+          firstPaintModel:
+            'Supported paint presence; settled contrast remains a separate required read.',
+          status: pointer.status,
+          error: pointer.error,
+          samples: pointer.samples,
+        }
+      : null,
   };
 }
 
-export function armTooltipHandoffPointer(binding: TooltipHandoffBinding, phase: TooltipHandoffPhase): void {
+export function armTooltipHandoffPointer(
+  binding: TooltipHandoffBinding,
+  phase: TooltipHandoffPhase
+): void {
   if (binding.pointer && binding.pointer.status !== 'achieved')
     fail('an earlier pointer observation is unfinished or failed');
   const before = readTooltipHandoffSnapshot(binding);
   if (phase === 'cold' && (binding.pointer || before.pairs.some((pair) => !pair.closed)))
     fail('cold opening requires the original untouched baseline');
-  if (phase === 'warm' && (
-    binding.pointer?.phase !== 'cold' || !before.pairs[0].open || !before.pairs[0].painted ||
-    !before.pairs[1].closed
-  ))
+  if (
+    phase === 'warm' &&
+    (binding.pointer?.phase !== 'cold' ||
+      !before.pairs[0].open ||
+      !before.pairs[0].painted ||
+      !before.pairs[1].closed)
+  )
     fail('warm handoff requires the same still-active first Content');
   const trigger = binding.pairs[phase === 'cold' ? 0 : 1].trigger;
   const pointer: PointerObservation = {
-    phase, status: 'armed', nativePointerEnter: false, enteredAt: null,
-    firstPaintMs: null, coldGuardObserved: false, samples: [], error: null,
-    frame: 0, inputDeadline: 0, listener: () => {},
+    phase,
+    status: 'armed',
+    nativePointerEnter: false,
+    enteredAt: null,
+    firstPaintMs: null,
+    coldGuardObserved: false,
+    samples: [],
+    error: null,
+    frame: 0,
+    inputDeadline: 0,
+    listener: () => {},
   };
   const stop = (error: string | null) => {
     pointer.status = error === null ? 'achieved' : 'failed';
@@ -317,34 +429,41 @@ export function armTooltipHandoffPointer(binding: TooltipHandoffBinding, phase: 
       const snapshot = readTooltipHandoffSnapshot(binding);
       const [first, second] = snapshot.pairs;
       pointer.samples.push({
-        elapsedMs, firstPainted: first.painted, secondPainted: second.painted,
-        firstDescriptions: first.descriptions, secondDescriptions: second.descriptions,
+        elapsedMs,
+        firstPainted: first.painted,
+        secondPainted: second.painted,
+        firstPaintPresent: first.paintPresent,
+        secondPaintPresent: second.paintPresent,
+        firstDescriptions: first.descriptions,
+        secondDescriptions: second.descriptions,
       });
       if (phase === 'cold') {
         if (!second.closed) return stop('sibling opened during cold first intent');
         if (first.open && elapsedMs < binding.plan.openDelay)
           return stop('cold openDelay was bypassed');
-        if (elapsedMs >= binding.plan.coldGuardMs && first.closed)
-          pointer.coldGuardObserved = true;
-        if (first.open && first.painted) {
+        if (elapsedMs >= binding.plan.coldGuardMs && first.closed) pointer.coldGuardObserved = true;
+        if (first.open && first.paintPresent) {
           pointer.firstPaintMs = elapsedMs;
           if (!pointer.coldGuardObserved || elapsedMs < binding.plan.openDelay)
             return stop('cold openDelay was bypassed');
-          if (elapsedMs > binding.plan.coldDeadlineMs) return stop('cold opening deadline exceeded');
+          if (elapsedMs > binding.plan.coldDeadlineMs)
+            return stop('cold opening deadline exceeded');
           return stop(null);
         }
         if (elapsedMs >= binding.plan.coldDeadlineMs) return stop('cold opening deadline exceeded');
       } else {
-        if (second.open && second.painted && !first.closed)
+        if (second.open && second.paintPresent && !first.closed)
           return stop('first Content retained during warm sibling handoff');
-        if (second.open && second.painted && first.closed) {
+        if (second.open && second.paintPresent && first.closed) {
           pointer.firstPaintMs = elapsedMs;
-          if (elapsedMs >= binding.plan.warmDeadlineMs) return stop('warm handoff took the cold-delay path');
-          if (snapshot.paintedContents !== 1 || snapshot.unclassifiedContents !== 0)
+          if (elapsedMs >= binding.plan.warmDeadlineMs)
+            return stop('warm handoff took the cold-delay path');
+          if (snapshot.presentContents !== 1 || snapshot.unclassifiedPresenceContents !== 0)
             return stop('warm handoff has an extra or unclassified Content');
           return stop(null);
         }
-        if (elapsedMs >= binding.plan.warmDeadlineMs) return stop('warm handoff took the cold-delay path');
+        if (elapsedMs >= binding.plan.warmDeadlineMs)
+          return stop('warm handoff took the cold-delay path');
       }
       pointer.frame = requestAnimationFrame(sample);
     } catch (error) {
@@ -362,14 +481,21 @@ export function armTooltipHandoffPointer(binding: TooltipHandoffBinding, phase: 
   };
   binding.pointer = pointer;
   trigger.addEventListener('pointerenter', pointer.listener, true);
-  pointer.inputDeadline = window.setTimeout(() => stop('native pointer enter was not observed'), 2000);
+  pointer.inputDeadline = window.setTimeout(
+    () => stop('native pointer enter was not observed'),
+    2000
+  );
 }
 
 export function readTooltipHandoffPointerResult(binding: TooltipHandoffBinding) {
   const pointer = binding.pointer;
   if (!pointer || pointer.status === 'armed' || pointer.status === 'observing') return null;
   if (pointer.status === 'failed') fail(pointer.error ?? 'pointer observation failed');
-  return readTooltipWarmHandoff(binding, pointer.phase);
+  // The original native 300ms clock certifies first paint presence. Captures
+  // still wait for the unchanged strict reader to certify a settled target;
+  // this never extends or restarts that first-paint clock.
+  const settled = readTooltipWarmHandoff(binding, pointer.phase);
+  return settled.achieved ? settled : null;
 }
 
 // Failure diagnostics deliberately report the ended/foreign coordinates too.
@@ -393,16 +519,18 @@ export function readTooltipHandoffDiagnostics(binding: TooltipHandoffBinding) {
       contentId: pair.content?.id ?? null,
       contentConnected: pair.content?.node.isConnected ?? false,
     })),
-    pointer: pointer ? {
-      phase: pointer.phase,
-      status: pointer.status,
-      nativePointerEnter: pointer.nativePointerEnter,
-      enteredAt: pointer.enteredAt,
-      firstPaintMs: pointer.firstPaintMs,
-      coldGuardObserved: pointer.coldGuardObserved,
-      error: pointer.error,
-      samples: pointer.samples,
-    } : null,
+    pointer: pointer
+      ? {
+          phase: pointer.phase,
+          status: pointer.status,
+          nativePointerEnter: pointer.nativePointerEnter,
+          enteredAt: pointer.enteredAt,
+          firstPaintMs: pointer.firstPaintMs,
+          coldGuardObserved: pointer.coldGuardObserved,
+          error: pointer.error,
+          samples: pointer.samples,
+        }
+      : null,
     disposition: 'Failure diagnostics only; no PNG/facts match or achieved target.',
   };
 }
@@ -413,5 +541,9 @@ export function disposeTooltipHandoff(binding: TooltipHandoffBinding): void {
   if (!pointer) return;
   cancelAnimationFrame(pointer.frame);
   clearTimeout(pointer.inputDeadline);
-  binding.pairs[pointer.phase === 'cold' ? 0 : 1].trigger.removeEventListener('pointerenter', pointer.listener, true);
+  binding.pairs[pointer.phase === 'cold' ? 0 : 1].trigger.removeEventListener(
+    'pointerenter',
+    pointer.listener,
+    true
+  );
 }
