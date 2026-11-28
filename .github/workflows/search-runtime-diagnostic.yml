@@ -2,6 +2,12 @@ name: Search runtime diagnostic
 
 on:
   workflow_dispatch:
+    inputs:
+      scheduled_regressions:
+        description: Observe the six original scheduled Search failures with their original assertions
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 
 permissions:
@@ -17,6 +23,7 @@ env:
 
 jobs:
   production-runtime-profile:
+    if: ${{ inputs.scheduled_regressions != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -78,5 +85,115 @@ jobs:
         with:
           name: search-runtime-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/homepage-evidence
+          if-no-files-found: error
+          retention-days: 14
+
+  # Explicit diagnostic subset only; the ordinary production profile and the
+  # complete layout/disposal inventories remain independent acceptance owners.
+  scheduled-regressions:
+    if: ${{ inputs.scheduled_regressions == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/scheduled-search/runtime
+      PUI_SEARCH_SCHEDULE_DIAGNOSTICS: '1'
+    steps:
+      - name: Prepare evidence retention before setup
+        run: mkdir -p "$RUNNER_TEMP/scheduled-search/runtime"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the exact source and the original six-case selection
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const sha = git('rev-parse', 'HEAD');
+          assert.equal(sha, process.env.CANDIDATE_SHA);
+          const files = [
+            '.github/workflows/search-runtime-diagnostic.yml', 'pnpm-lock.yaml',
+            'apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts',
+            'apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts',
+            'apps/www/src/content/docs/zh-cn/site-search-public-browser.ts',
+            'apps/www/src/content/docs/zh-cn/site-search-evidence.ts',
+            'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+            'apps/www/src/components/site-search-commands.ts',
+            'apps/www/src/components/site-search-composition.ts',
+          ].map(path => ({ path, sha256: createHash('sha256').update(readFileSync(path)).digest('hex') }));
+          writeFileSync(process.env.RUNNER_TEMP + '/scheduled-search/source.json', JSON.stringify({
+            sha, tree: git('rev-parse', 'HEAD^{tree}'), status: git('status', '--porcelain=v1'),
+            node: process.version, files, selected: 6, collected: 34, notSelected: 28,
+            originalPredicateMs: 1000, originalLayoutCaseMs: 90000, originalDisposalCaseMs: 60000,
+            diagnosticOnly: true,
+            scope: 'Four original Shadcn layout and two WC disposal cases, without changing their input, oracle or deadline. Not complete 22-case layout, 12-case disposal, or full CI acceptance.',
+          }, null, 2) + '\n');
+          JS
+      - name: Install the locked toolchain and original browser surface
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version | tee "$RUNNER_TEMP/scheduled-search/browser.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Prepare the official font input
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/scheduled-search/fonts
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Execute the original six cases without changing any deadline
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 600s \
+            corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/site-search-layout.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts \
+            --testNamePattern='^(Search shadcn/(wc|react|vue|vue2) keeps nested scrollports and dismissal reachable at 200%|#1488 E native Search controller retirement wc retires (active|pending) Dialog after opener rejection)$' \
+            --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/scheduled-search/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/scheduled-search/native.log"
+      - name: Require exact execution and preserve every original failure
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const directory = process.env.RUNNER_TEMP + '/scheduled-search';
+          const result = JSON.parse(readFileSync(directory + '/vitest.json', 'utf8'));
+          const expected = [
+            ...['wc', 'react', 'vue', 'vue2'].map(runtime => `Search shadcn/${runtime} keeps nested scrollports and dismissal reachable at 200%`),
+            ...['active', 'pending'].map(state => `wc retires ${state} Dialog after opener rejection`),
+          ];
+          const suites = result.testResults ?? [];
+          const all = suites.flatMap(suite => suite.assertionResults ?? []);
+          const executed = all.filter(test => ['passed', 'failed'].includes(test.status));
+          const summary = {
+            source: process.env.CANDIDATE_SHA, diagnosticOnly: true,
+            collected: all.length, executed: executed.length, notSelected: all.length - executed.length,
+            cases: executed.map(({ title, fullName, status, failureMessages }) => ({ title, fullName, status, failureMessages })),
+          };
+          writeFileSync(directory + '/selection-results.json', JSON.stringify(summary, null, 2) + '\n');
+          assert.equal(suites.length, 2);
+          assert.equal(all.length, 34);
+          assert.deepEqual(executed.map(test => test.title).sort(), expected.sort());
+          assert.equal(executed.length, 6);
+          assert.equal(summary.notSelected, 28);
+          assert.ok(executed.every(test => test.status === 'passed'));
+          assert.equal(result.success, true);
+          JS
+      - name: Retain exact-source observations and original verdicts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scheduled-search-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/scheduled-search
           if-no-files-found: error
           retention-days: 14

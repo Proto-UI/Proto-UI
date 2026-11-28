@@ -824,6 +824,9 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       const page = await context.newPage();
       const id = `search-scroll-${family}-${runtime}`;
       const errors: string[] = [];
+      const settleDiagnostics = process.env.PUI_SEARCH_SCHEDULE_DIAGNOSTICS === '1';
+      const settleVerdicts: unknown[] = [];
+      const settleReads: unknown[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       stage(page, id, 'controlled-data-navigation');
       await page.route('**/pagefind/pagefind.js', (route) =>
@@ -945,16 +948,84 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         const status = await searchPart(page, 'status');
         const panel = await searchPart(page, 'panel');
         const revealFrames: unknown[] = [];
-        const settlePanel = async () => {
-          await expect
-            .poll(() =>
-              panel.evaluate((node) =>
-                node
-                  .getAnimations()
-                  .some((animation) => animation.pending || animation.playState === 'running')
+        const settlePanel = async (key: 'End' | 'Home', size: '200%' | '100%') => {
+          if (!settleDiagnostics) {
+            await expect
+              .poll(() =>
+                panel.evaluate((node) =>
+                  node
+                    .getAnimations()
+                    .some((animation) => animation.pending || animation.playState === 'running')
+                )
               )
-            )
-            .toBe(false);
+              .toBe(false);
+            return;
+          }
+          const samples: SearchGetterSample<boolean>[] = [];
+          let passed = false;
+          try {
+            await expect
+              .poll(() => {
+                const read = () =>
+                  panel.evaluate(
+                    (node, observation) => {
+                      const enteredAt = performance.now();
+                      const animations = node.getAnimations();
+                      const active = animations.some(
+                        (animation) => animation.pending || animation.playState === 'running'
+                      );
+                      if (observation.enabled) {
+                        try {
+                          const trace = ((window as any).__puiSearchSettleTrace ??= []);
+                          if (trace.length < 96)
+                            trace.push({
+                              key: observation.key,
+                              size: observation.size,
+                              enteredAt,
+                              predicateCompletedAt: performance.now(),
+                              timeOrigin: performance.timeOrigin,
+                              active,
+                              connected: node.isConnected,
+                              owner: node.getAttribute('data-projection-owner'),
+                              generation: node.getAttribute('data-projection-generation'),
+                              animationCount: animations.length,
+                              animations: animations.slice(0, 16).map((animation) => ({
+                                id: animation.id,
+                                pending: animation.pending,
+                                playState: animation.playState,
+                                currentTime: String(animation.currentTime),
+                              })),
+                            });
+                        } catch {
+                          // A diagnostic read never replaces the native predicate result.
+                        }
+                      }
+                      return active;
+                    },
+                    { enabled: settleDiagnostics, key, size }
+                  );
+                return settleDiagnostics ? traceSearchGetter(samples, read) : read();
+              })
+              .toBe(false);
+            passed = true;
+          } finally {
+            if (settleDiagnostics) {
+              const verdict = {
+                key,
+                size,
+                passed,
+                frozenAt: Date.now(),
+                samples: samples.map((sample) => ({ ...sample })),
+              };
+              settleVerdicts.push(verdict);
+              // These records may settle later; the frozen verdict above never changes.
+              settleReads.push({ key, size, samples });
+              console.log(
+                '[Search original animation verdict]',
+                JSON.stringify({ id, ...verdict })
+              );
+            }
+          }
         };
         const readReveal = (key: 'End' | 'Home') =>
           list.evaluate((node, key) => {
@@ -1034,7 +1105,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
           );
         };
         const checkReveal = async (key: 'End' | 'Home', size: '200%' | '100%') => {
-          await settlePanel();
+          await settlePanel(key, size);
           const before = await readReveal(key);
           await recordReveal({ phase: 'before', key, size, ...before });
           expect(before.clientHeight).toBeGreaterThan(0);
@@ -1216,6 +1287,43 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         await captureFailure(page, error);
         throw error;
       } finally {
+        if (settleDiagnostics) {
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            const trace = await Promise.race([
+              page.evaluate(() => (window as any).__puiSearchSettleTrace ?? []),
+              new Promise((resolve) => {
+                timer = setTimeout(
+                  () => resolve({ unavailable: 'post-verdict 1000ms bound' }),
+                  1000
+                );
+              }),
+            ]);
+            await writeFile(
+              path.join(evidenceDirectory, id + '-animation-settle-diagnostic.json'),
+              JSON.stringify(
+                {
+                  source,
+                  family,
+                  runtime,
+                  scope:
+                    'Original locator, getAnimations predicate and 1000ms deadline; opt-in observations never supply the verdict. Browser trace is read after the original case verdict.',
+                  verdicts: settleVerdicts,
+                  retainedAt: Date.now(),
+                  nativeTraceLimit: 96,
+                  readsAtRetention: settleReads,
+                  trace,
+                },
+                null,
+                2
+              )
+            );
+          } catch {
+            // Observation failure cannot replace the original error or cleanup.
+          } finally {
+            clearTimeout(timer);
+          }
+        }
         try {
           await writeFile(
             path.join(evidenceDirectory, id + '-native-scroll-input.json'),

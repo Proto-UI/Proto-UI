@@ -6,6 +6,7 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
+import { traceSearchGetter, type SearchGetterSample } from './site-search-evidence';
 
 let browser: Browser;
 let baseUrl: string;
@@ -73,6 +74,16 @@ const installProbe = String.raw`(async (options) => {
   const gate = new Promise(done => release = done);
   let calls = 0;
   let dialogCalls = 0;
+  let traceCount = 0;
+  const note = (step) => {
+    if (!options.diagnostics || traceCount++ >= 96) return;
+    try {
+      console.log('[Search disposal native timing] ' + JSON.stringify({
+        step, at: performance.now(), timeOrigin: performance.timeOrigin,
+        calls, dialogCalls, dialogs: dialogs.length,
+      }));
+    } catch { /* Observation must not change controller creation or its error. */ }
+  };
   let outer;
   let reentered;
   let beforeDestroy;
@@ -104,8 +115,11 @@ const installProbe = String.raw`(async (options) => {
   };
   owner.materializeDialog = async (...args) => {
     dialogCalls++;
+    note('materialize-dialog-start');
     const candidate = await materializeDialog(...args);
+    note('materialize-dialog-return');
     const tracked = track(candidate, 'dialog');
+    note('dialog-tracked');
     if (options.state === 'pending') await gate;
     return tracked;
   };
@@ -135,7 +149,7 @@ const installProbe = String.raw`(async (options) => {
   });
   const probe = window.__searchDisposal = {
     root, owner, scope, read, snapshots,
-    open() { owner.open(); },
+    open() { note('open-before'); owner.open(); note('open-return'); },
     begin() {
       [...openers, ...dialogs].forEach(item => retain(item.candidate));
       beforeDestroy = read();
@@ -238,6 +252,23 @@ describe('#1488 E native Search controller retirement', () => {
         const context = await browser.newContext({ viewport: { width: 1280, height: 960 } });
         const page = await context.newPage();
         const observations: unknown[] = [];
+        const diagnostics = process.env.PUI_SEARCH_SCHEDULE_DIAGNOSTICS === '1';
+        let nativeSamples = 0;
+        if (diagnostics)
+          page.on('console', (message) => {
+            const text = message.text();
+            const prefix = '[Search disposal native timing] ';
+            if (!text.startsWith(prefix) || nativeSamples++ >= 96) return;
+            try {
+              observations.push({
+                step: 'diagnostic-native-timing',
+                receivedAt: Date.now(),
+                sample: JSON.parse(text.slice(prefix.length)),
+              });
+            } catch {
+              // Diagnostic transport is independent of the original assertion.
+            }
+          });
         let failure: string | undefined;
         try {
           await page.route('**/pagefind/pagefind.js', (request) =>
@@ -249,7 +280,7 @@ describe('#1488 E native Search controller retirement', () => {
           );
           expect((await page.goto(baseUrl + route, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
           const initial = (await page.evaluate(
-            `${installProbe}(${JSON.stringify({ runtime, state, failure: state === 'active' ? 'undefined' : 'error', reentry: state === 'pending' })})`
+            `${installProbe}(${JSON.stringify({ runtime, state, failure: state === 'active' ? 'undefined' : 'error', reentry: state === 'pending', diagnostics })})`
           )) as Snapshot;
           observations.push({ step: 'ready', state: initial });
           if (
@@ -263,7 +294,32 @@ describe('#1488 E native Search controller retirement', () => {
           expect(initial.scopeListeners).toHaveLength(2);
           if (state !== 'unstarted') {
             await page.evaluate(() => (window as any).__searchDisposal.open());
-            await expect.poll(async () => (await observe(page)).dialogs.length).toBe(1);
+            const samples: SearchGetterSample<number>[] = [];
+            let passed = false;
+            try {
+              await expect
+                .poll(() => {
+                  const read = async () => (await observe(page)).dialogs.length;
+                  return diagnostics ? traceSearchGetter(samples, read) : read();
+                })
+                .toBe(1);
+              passed = true;
+            } finally {
+              if (diagnostics) {
+                const verdict = {
+                  step: 'diagnostic-original-dialog-count-verdict',
+                  passed,
+                  frozenAt: Date.now(),
+                  samples: samples.map((sample) => ({ ...sample })),
+                };
+                observations.push(verdict);
+                observations.push({ step: 'diagnostic-settled-reads', samples });
+                console.log(
+                  '[Search original Dialog verdict]',
+                  JSON.stringify({ runtime, state, ...verdict })
+                );
+              }
+            }
             if (state === 'active')
               await expect.poll(async () => (await observe(page)).panelEntered).toBe(true);
           }
