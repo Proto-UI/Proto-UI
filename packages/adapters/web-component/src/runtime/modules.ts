@@ -663,22 +663,27 @@ function relaxEntryHasConditions(selector: string): string {
   return result + selector.slice(start);
 }
 
-function scopedNegatedEntrySubject(selector: string) {
-  const start = selector.indexOf(':not(:has(');
-  // Only scope a single, top-level condition whose relative selector cannot
-  // reach siblings. Complex branches retain the conservative ancestor watch.
+function scopedEntryRelationalSubject(selector: string) {
+  const hasStart = selector.indexOf(':has(');
+  const negativeStart = selector.indexOf(':not(:has(');
+  const negative = negativeStart >= 0 && negativeStart + 5 === hasStart;
+  const start = negative ? negativeStart : hasStart;
+  // A single positive or negative top-level condition observes its actual
+  // subject. Relative sibling selectors and complex branches keep the
+  // conservative ancestor watch because their inputs can leave that subject.
   if (
     start < 0 ||
-    selector.indexOf(':has(') !== start + 5 ||
-    selector.indexOf(':has(', start + 6) !== -1
+    (!negative && selector.slice(0, start).includes('(')) ||
+    selector.indexOf(':has(', hasStart + 1) !== -1
   )
     return null;
   const close = matchingSelectorParen(selector, start + 4);
-  const relativeOpen = start + 9;
+  const relativeOpen = negative ? start + 9 : start + 4;
+  const relativeClose = negative ? close - 1 : close;
   if (
     close < 0 ||
-    matchingSelectorParen(selector, relativeOpen) !== close - 1 ||
-    /[,+~]/.test(selector.slice(relativeOpen + 1, close - 1))
+    matchingSelectorParen(selector, relativeOpen) !== relativeClose ||
+    /[,+~]/.test(selector.slice(relativeOpen + 1, relativeClose))
   )
     return null;
   let depth = 0;
@@ -728,6 +733,28 @@ function scopedNegatedEntrySubject(selector: string) {
   // Simple nth formulas have already been removed. A sibling combinator or
   // selector list elsewhere still needs the conservative ancestor watch.
   return subject === null || /[,+~]/.test(probe) ? null : { subject, probe, positionSubjects };
+}
+
+function staticEntryRelationalProbe(selector: string): string | null {
+  const probe = relaxEntryHasConditions(selector);
+  for (let index = 0; index < probe.length; index += 1) {
+    const character = probe[index]!;
+    const literalEnd = skipSelectorLiteral(probe, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    // Sibling or unresolved nesting conditions can become applicable through
+    // changes outside the entry's observed tree and composed ancestor chain.
+    if (character === '&' || character === '+' || character === '~') return null;
+    if (character !== ':') continue;
+    const predicate = /^:(?:is|where|not)\(/.exec(probe.slice(index));
+    // Dynamic/positional predicates and pseudo-elements (including part and
+    // slotted) cannot be ruled out by an unmatched Element.matches() sample.
+    if (!predicate) return null;
+    index += predicate[0].length - 1;
+  }
+  return probe;
 }
 
 const entryPositionCondition =
@@ -833,8 +860,9 @@ type EntrySelectorSyntax = {
   positional: boolean;
   inputState?: boolean;
   documentRoot?: boolean;
-  scoped?: ReturnType<typeof scopedNegatedEntrySubject>;
+  scoped?: ReturnType<typeof scopedEntryRelationalSubject>;
   probe?: string;
+  staticRootProbe?: string | null;
 };
 
 const entrySelectorSyntax = new WeakMap<CSSStyleRule, EntrySelectorSyntax>();
@@ -869,7 +897,8 @@ function collectEntryStyleDependencies(
   target: HTMLElement,
   ancestors: readonly Element[],
   observesResize: boolean,
-  observedRoots: ReadonlySet<Node>
+  observedRoots: ReadonlySet<Node>,
+  allowRootNarrowing: boolean
 ) {
   const ScopeRule = (
     view as unknown as {
@@ -883,6 +912,7 @@ function collectEntryStyleDependencies(
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
   let inputState = false;
+  let arbitraryEntryAttributes = false;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
@@ -950,11 +980,30 @@ function collectEntryStyleDependencies(
           if (
             relational !== 2 &&
             (syntax.documentRoot ??= hasDocumentRootRelationalSubject(selector))
-          )
-            relational = 2;
+          ) {
+            if (syntax.staticRootProbe === undefined)
+              syntax.staticRootProbe = staticEntryRelationalProbe(selector);
+            // Assigned slot content, image maps and external radio peers can
+            // depend on styled nodes outside this physical candidate set.
+            const probe = allowRootNarrowing ? syntax.staticRootProbe : null;
+            // A static rule for another component cannot affect this region.
+            // Keep arbitrary local selector attributes live so a future match
+            // rebuilds the graph; ancestors already observe every attribute.
+            arbitraryEntryAttributes = true;
+            let possible = true;
+            if (probe !== null) {
+              try {
+                possible = getPositionalCandidates().some((candidate) => candidate.matches(probe));
+              } catch {
+                // CSSOM may accept a selector that matches() cannot resolve,
+                // such as a stylesheet namespace prefix. Keep the root watch.
+              }
+            }
+            if (possible) relational = 2;
+          }
           if (relational !== 2) {
             if (syntax.probe === undefined) {
-              syntax.scoped = scopedNegatedEntrySubject(selector);
+              syntax.scoped = scopedEntryRelationalSubject(selector);
               syntax.probe = syntax.scoped?.probe ?? relaxEntryHasConditions(selector);
             }
             const { scoped, probe } = syntax;
@@ -968,7 +1017,10 @@ function collectEntryStyleDependencies(
                 ? getCandidates().filter((candidate) => candidate.matches(scoped.subject))
                 : [];
               if (!matches.length) relational = 1;
-              else for (const candidate of matches) relationalSubjects.add(candidate);
+              else {
+                arbitraryEntryAttributes = true;
+                for (const candidate of matches) relationalSubjects.add(candidate);
+              }
               for (const subject of scoped?.positionSubjects ?? [])
                 for (const candidate of externalSubjects)
                   if (candidate.parentNode && candidate.matches(subject)) {
@@ -1055,6 +1107,7 @@ function collectEntryStyleDependencies(
     positionParents,
     filteredPositionParents,
     inputState,
+    arbitraryEntryAttributes,
   ] as const;
 }
 
@@ -1901,6 +1954,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
             let entryRelationalSubjects = new Set<Element>();
+            let observeLocalSelectorInputs = false;
             let hasExternalStyleInputs = false;
             let dormant = false;
             let pendingEntryRefresh: boolean | undefined;
@@ -1950,6 +2004,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (dormant) {
                 observedRoots.clear();
                 entryRelationalSubjects.clear();
+                observeLocalSelectorInputs = false;
                 hasExternalStyleInputs = false;
                 entryStyleWatch?.dispose();
                 entryStyleWatch = null;
@@ -2121,20 +2176,33 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               entryStyleWatch?.observeInline(hasExternalStyleInputs);
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
+                const unchangedAttribute = (record: MutationRecord) =>
+                  record.type === 'attributes' &&
+                  record.oldValue ===
+                    (record.target as Element).getAttributeNS(
+                      record.attributeNamespace,
+                      record.attributeName!
+                    );
+                // Narrowed selector subjects can gain a new match through an
+                // arbitrary local attribute. Rebuild before relying on the
+                // old subject graph, including when an external record is
+                // earlier in this same observer delivery.
+                if (
+                  observeLocalSelectorInputs &&
+                  records.some(
+                    (record) =>
+                      !unchangedAttribute(record) && belongsToObservedEntryTree(record.target)
+                  )
+                ) {
+                  scheduleEntrySample(true);
+                  return;
+                }
                 if (
                   records.some((record) => {
                     // A same-valued external attribute cannot change selector
                     // eligibility. Keep each record's old value so A -> B -> A
                     // and author-callback mutations still invalidate the entry.
-                    if (
-                      record.type === 'attributes' &&
-                      record.oldValue ===
-                        (record.target as Element).getAttributeNS(
-                          record.attributeNamespace,
-                          record.attributeName!
-                        )
-                    )
-                      return false;
+                    if (unchangedAttribute(record)) return false;
                     if (
                       !belongsToObservedEntryTree(record.target) ||
                       invalidatesEntryStyles(record)
@@ -2204,6 +2272,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 positionParents,
                 filteredPositionParents,
                 hasInputStateStyleDependency,
+                observesArbitraryEntryAttributes,
               ] =
                 // CSS can change eligibility, but cannot create a native Tab
                 // candidate in a decorative-only subtree. Keep the DOM,
@@ -2221,7 +2290,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       target,
                       externalAncestors,
                       !!entryResizeObserver && !hasExternalStyleInputs,
-                      observedRoots
+                      observedRoots,
+                      !hasExternalStyleInputs && !hasSlottedEntryContent
                     )
                   : ([
                       [],
@@ -2231,7 +2301,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       new Set<Node>(),
                       new Map<Element | ShadowRoot, boolean>(),
                       false,
+                      false,
                     ] as const);
+              observeLocalSelectorInputs = observesArbitraryEntryAttributes;
               entryRelationalSubjects = relationalSubjects;
               for (const parent of positionParents) {
                 const filtered = filteredPositionParents.has(parent as Element | ShadowRoot);
@@ -2272,6 +2344,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 attributes: true,
                 attributeOldValue: true,
               };
+              if (observeLocalSelectorInputs)
+                for (const root of observedRoots)
+                  entryExternalStyleObserver.observe(root, externalStyleOptions);
               for (const subject of entryRelationalSubjects)
                 entryExternalStyleObserver.observe(subject, externalStyleOptions);
               const siblingStateTargets = new Set<EventTarget>();
